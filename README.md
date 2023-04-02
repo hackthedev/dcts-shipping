@@ -5,6 +5,11 @@ Since you can host the server yourself you're also the one in control of the dat
 
 <br>
 
+## Licensing
+The software will be free for personal use and for non-profit communities. Commercial use will require a license. 
+
+<br>
+
 ## How to install
 Requires node.js to be installed. Afterwards execute the following commands.
 ```

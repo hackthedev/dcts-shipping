@@ -1,0 +1,74 @@
+{
+  "serverinfo": {
+    "name": "Default Server",
+    "description": "Welcome to my server",
+    "setup": 0
+  },
+  "serverroles": {
+    "0": {
+      "info": {
+        "name": "Member",
+        "icon": null,
+        "color": "#FFFFFF",
+        "deletable": 0
+      },
+      "permissions": {
+        "readMessage": 1,
+        "sendMessage": 1
+      },
+      "members": []
+    },
+    "1": {
+      "info": {
+        "name": "Admin",
+        "icon": null,
+        "color": "#FF0000",
+        "deletable": 0
+      },
+      "permissions": {
+        "administrator": 1
+      },
+      "members": [],
+      "token": null
+    }
+  },
+  "groups": {
+    "0": {
+      "info": {
+        "id": 0,
+        "name": "Home",
+        "icon": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQauIGQaSJqWXl_mVxIrBtjsKc9kR9gOoCu7A&usqp=CAU",
+        "banner": "https://media.istockphoto.com/id/1360515688/vector/welcome-text-ribbon-banner-vector-design.jpg?s=612x612&w=0&k=20&c=1eNsW0j5k5O_dGaWdHhyUNl9ea-oJ6KBnLjnWdskTTI=",
+        "isDeletable": 0,
+        "access": [
+          "roleId"
+        ]
+      },
+      "channels": {
+        "categories": {
+          "0000": {
+            "info": {
+              "name": "General"
+            },
+            "channel": {
+              "1525": {
+                "name": "chat",
+                "type": "text",
+                "description": "Default Channel Description",
+                "permissions": {
+                  "0": {
+                    "readMessage": 1,
+                    "sendMessage": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "roles": {}
+    }
+  },
+  "servermembers": {
+  }
+}

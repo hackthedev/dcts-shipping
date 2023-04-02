@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
+            integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
+            crossorigin="anonymous"
+    ></script>
+    <script defer src="chat.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+    <title>Document</title>
+</head>
+<body>
+
+<style>
+
+    /* width */
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #202225;
+        border-radius: 12px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #202225;
+    }
+
+    html, body{
+        margin: 0;
+        padding: 0;
+
+        font-family: 'Roboto', sans-serif;
+
+        width: 100%;
+        height: 100%;
+    }
+
+    #header{
+        height: calc(40px - 16px);
+        width: calc(100% - 16px);
+
+        padding:  8px;
+
+        background-color: #1E2124;
+        color: white;
+
+        position: relative;
+        display: block;
+    }
+
+    #serverlist {
+        height: calc(100% - 16px - 40px);
+        width: calc(80px - 16px);
+
+        padding:  8px;
+        align-content: center;
+        text-align: center;
+
+        background-color: #202225;
+        color: white;
+
+        display: block;
+        float: left;
+
+        overflow-y: auto;
+    }
+
+    #serverbanner-container {
+        height: calc(200px - 40px);
+        width: calc(300px);
+        background-color: transparent;
+        margin: 0 0 16px 0;
+
+        display: block;
+        float: left;
+
+
+        overflow: hidden;
+        box-shadow: 0 8px 8px -2px black;
+    }
+
+    #serverbanner-image {
+        height: calc(200px - 40px);
+        width: calc(300px);
+        -webkit-transition: transform .5s ease;
+
+        object-fit: cover;
+        background-color: transparent;
+        background-position: center center;
+
+        border-radius: 6px;
+
+    }
+
+    #serverbanner-image:hover {
+        -webkit-transform: scale(1.1);
+        -moz-transform: scale(1.1);
+        -o-transform: scale(1.1);
+        transform: scale(1.1);
+
+
+    }
+
+    #serverbanner-image:not(:hover) {
+        -webkit-transform: scale(1);
+        -moz-transform: scale(1);
+        -o-transform: scale(1);
+        transform: scale(1);
+    }
+
+    #channellist {
+        height: calc(100% - 40px - 50px);
+        width: calc(300px);
+
+        background-color: #2F3136;
+        color: white;
+
+        display: block;
+        float: left;
+    }
+
+    #channeltree {
+        display: block;
+        float: left;
+
+        height: calc(100% - 32px - 175px - 32px);
+        width: calc(100% - 32px);
+
+        padding:  16px;
+        overflow-y: auto;
+    }
+
+    #content-container {
+        height: calc(100% - 40px);
+        width: calc(100% - 80px - 200px - 300px);
+
+        background-color: #36393F;
+        color: white;
+
+        display: block;
+        float: left;
+
+        border-top-right-radius: 6px;
+        border-top-left-radius: 6px;
+    }
+
+    #channelname {
+        height: 20px;
+        width: 100%;
+
+        padding: 16px;
+        background-color: #36393F;
+
+        display: block;
+        float: left;
+
+        font-weight: bold;
+        font-size: 20px;
+
+        box-shadow: 0 2px 8px -2px black;
+    }
+
+    #content {
+        height: calc(100% - 40px - 40px - 32px - 32px);
+        width: calc(100% - 16px - 15px);
+        padding: 16px;
+
+        color: white;
+
+        display: block;
+        float: left;
+
+        overflow-y: auto;
+    }
+
+    #messagebox {
+        height: calc(60px - 20px - 20px);
+        width: calc(100% - 16px - 16px);
+
+        padding: 12px 12px 12px 8px;
+        margin: -8px 8px 28px 8px !important;
+
+        background-color: #40444B;
+        color: white;
+
+        display: block;
+        float: left;
+
+        border-radius: 10px;
+    }
+
+    #messagebox-content {
+        background-color: transparent;
+        color: white;
+
+        border: none;
+        padding: 8px;
+
+        line-height: 150%;
+        height: calc(20px - 3px);
+        width: calc(100% - 32px - 40px - 25px);
+
+        outline: none;
+        margin: -20px 8px 0 8px;
+    }
+
+    #messagebox-media {
+        width: 25px;
+        height: 25px;
+        text-align: center;
+
+        float: left;
+        display: block;
+        background-color: transparent;
+    }
+
+    #message-actions {
+        display: block;
+        float: right;
+        width: 40px;
+    }
+
+    #infolist {
+        height: calc(100% - 32px - 40px);
+        width: calc(200px - 32px);
+        padding:  16px;
+
+        background-color: #2F3136;
+        color: white;
+
+        display: block;
+        float: left;
+
+        overflow-y: auto;
+    }
+
+    .server-icon {
+        width: 45px;
+        height: 45px;
+
+        background-color: transparent;
+    }
+
+    .server-entry {
+        margin-bottom: 8px;
+        cursor: pointer;
+    }
+
+
+    .server-icon:hover {
+        border-radius: 10%;
+        transition: all 400ms;
+
+        -webkit-transform: scale(1.1);
+        -moz-transform: scale(1.1);
+        -o-transform: scale(1.1);
+        transform: scale(1.1);
+    }
+
+    .server-icon:not(:hover) {
+        border-radius: 50%;
+        transition: all 400ms;
+
+        -webkit-transform: scale(1);
+        -moz-transform: scale(1);
+        -o-transform: scale(1);
+        transform: scale(1);
+    }
+
+    #profile-qa {
+        height: calc(50px);
+        width: calc(300px - 20px);
+
+        padding: 10px;
+
+        display: block;
+        float: left;
+        bottom: 0;
+        position: fixed;
+
+
+        background-color: #292B2F;
+    }
+
+    #profile-qa-img-container {
+        width: 50px;
+        height: 50px;
+
+        border-radius: 50%;
+        overflow: hidden;
+
+        display: block;
+        float: left;
+
+        -webkit-transition: transform .5s ease;
+    }
+
+    #profile-qa-img {
+        background-size: cover;
+
+        width: 50px;
+        height: 50px;
+
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    #profile-qa-img:hover {
+        -webkit-transform: scale(1.1);
+        -moz-transform: scale(1.1);
+        -o-transform: scale(1.1);
+        transform: scale(1.1);
+
+        transition: all 400ms;
+    }
+
+    #profile-qa-img:not(:hover) {
+        -webkit-transform: scale(1);
+        -moz-transform: scale(1);
+        -o-transform: scale(1);
+        transform: scale(1);
+
+        transition: all 400ms;
+    }
+
+    #profile-qa-info {
+        padding: 10px;
+
+        display: block;
+        float: left;
+
+        overflow: hidden;
+        background-color: transparent;
+
+        width: 100px;
+        height: 28px;
+        cursor: pointer;
+    }
+
+    #profile-qa-info label {
+        width: 150px;
+        height:20px;
+
+        overflow:hidden;
+        background-color: transparent;
+        display:block;
+        float:left;
+    }
+
+    #profile-qa #webrtc-controls {
+        display: block;
+        float: left;
+        background-color: transparent;
+
+        padding: 12px 12px 0 32px;
+
+        height: calc(45px - 24px);
+        width: auto;
+        cursor: pointer;
+    }
+
+    ul {
+        margin: 0 0 16px 0;
+        padding: 0 0 16px 16px;
+
+        /*list-style-image: url("https://cdn-icons-png.flaticon.com/512/32/32213.png"); */
+        list-style-type: disc;
+        cursor: pointer;
+    }
+
+    li {
+        padding: 4px;
+    }
+
+    li:hover {
+        background-color: rgb(0, 0, 0, 0.2);
+        border-radius: 4px;
+    }
+
+    .memberlist-container {
+        display:block;
+        float: left;
+        width: 100%;
+
+        background-color: transparent;
+
+        margin-bottom: 16px;
+        cursor: pointer;
+    }
+
+    .memberlist-img{
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        float: left;
+    }
+
+    .memberlist-member-info{
+        height: 20px;
+        overflow: hidden;
+
+        float: left;
+        margin-left: 8px;
+
+        background-color: transparent;
+        width: 100px;
+    }
+
+    .memberlist-member-info-status {
+        font-size: 12px;
+    }
+
+    .infolist-role {
+        margin-bottom: 8px;
+    }
+
+    .message-container {
+        display: block;
+        float: left;
+        background-color: transparent;
+
+        width: calc(100% - 40px);
+        padding: 20px;
+
+        margin-bottom: 8px;
+    }
+
+    .message-container:hover{
+        background-color: rgb(47, 49, 54, 0.5);
+        border-radius: 5px;
+
+        transition: all 800ms;
+        background-color: rgba(41, 43, 47, 0.5);
+    }
+
+    .message-container:not(:hover){
+        transition: all 800ms;
+        background-color: transparent;
+    }
+
+    .message-profile-content-message-appended, .message-profile-content-message{
+        padding: 4px 8px 4px 8px;
+    }
+
+    .message-profile-content-message-appended:hover{
+        background-color: rgba(41, 43, 47, 0.5);
+    }
+
+    .message-profile-info-name {
+        cursor: pointer;
+    }
+
+    .message-profile-img-container, .message-profile-img {
+        width: 40px;
+        height: 40px;
+
+        display: block;
+        float: left;
+
+        background-color: transparent;
+
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .message-profile-info {
+        width: 150px;
+        height: 30px;
+        overflow: hidden;
+
+        display: block;
+        float: left;
+
+        background-color: transparent;
+        width: calc(100% - 50px - 12px);
+
+        margin: 4px 0 0 8px;
+        font-size: 16px;
+        font-weight: bold;
+
+        word-break: break-all;
+
+        cursor: pointer;
+    }
+
+    .message-profile-content{
+        display: block;
+        float: left;
+        background-color: transparent;
+
+        padding: 0 8px 0 8px;
+        font-size: 14px;
+        width: calc(100% - 50px - 16px);
+
+
+        overflow: hidden;
+    }
+
+    .message-profile-content a {
+        color: white;
+    }
+
+    .message-profile-content p{
+        float: left;
+        display: inline-block;
+        word-wrap: break-word;
+        width: 100%;
+
+
+
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .message-profile-content iframe{
+        float: left;
+        display: block;
+
+        border-radius: 6px;
+    }
+
+    .systemAnnouncementChat {
+        background-color: #2F3136;
+        width: calc(100% - 20px);
+        padding: 4px 4px 4px 16px;
+        font-style: italic;
+
+        border-radius: 10px;
+        margin-bottom: 40px;
+
+        float: left;
+        display: block;
+    }
+
+    .systemAnnouncementChatUsername{
+        color: greenyellow;
+    }
+
+    code.markdown{
+        font-size: 12px;
+        background-color: #2c2d31;
+
+        padding: 4px 8px 4px 8px;
+        border-radius: 4px;
+
+        margin-left: -2px;
+    }
+
+    pre.markdown{
+        font-size: 12px;
+        background-color: #2c2d31;
+
+        padding: 4px 8px 4px 8px;
+        margin-left: 4px;
+
+        border-radius: 4px;
+        float: left;
+        display: block;
+
+        width: calc(100% - 8px);
+        margin-top: -4px;
+    }
+
+    #channeltree details summary a, #channeltree ul a {
+        color: white;
+        text-decoration: none;
+    }
+
+    .iframe-container {
+        display: inline-block;
+        float: left;
+        width: 100%;
+
+        margin: 8px 0 8px 0;
+    }
+
+    .image-embed {
+        max-width: 400px;
+        height: auto;
+        display: inline-block;
+        float:left;
+        margin: 8px 0 8px 0;
+
+        border-radius: 6px;
+    }
+
+    .video-embed {
+        display: block;
+        float:left;
+        margin: 8px 0 8px 0;
+        border-radius: 6px;
+    }
+
+    #context-menu {
+        position: fixed;
+        z-index: 10000;
+        width: 150px;
+        background: #1b1a1a;
+        border-radius: 6px;
+        display: none;
+
+    }
+
+    #context-menu .item {
+        padding: 8px 10px;
+        font-size: 14px;
+        color: #eee;
+        cursor: pointer;
+    }
+
+    #context-menu .item:hover{
+        background: #343434;
+    }
+
+    #context-menu.visible{
+        display: block;
+    }
+
+    #typing-indicator {
+
+        font-style: italic;
+        font-size: 14px;
+        margin-bottom: -4px !important;
+        bottom: -4px !important;
+        display: none;
+    }
+
+    #typing-indicator-container {
+        float: left;
+        display: block;
+
+        margin-top: 8px;
+        margin-bottom: -20px !important;
+        bottom: -20px !important;
+    }
+
+    .message-profile-info .timestamp{
+        margin-left: 20px;
+        font-size: 10px;
+        color: #989898;
+    }
+
+    #modalBox{
+        background-color: #1D2125;
+        border: 1px solid #ABB8BE;
+        border-radius: 6px;
+
+        color: #ABB8BE;
+
+        padding: 16px;
+
+        filter: blur(0) !important;
+        z-index: 1;
+
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+
+        display: none;
+    }
+
+    #modalBoxTitle {
+        font-size: 20px;
+        margin-top: 0;
+    }
+
+    #channeltree h2 {
+        margin-top: -30px;
+        margin-bottom: -0px;
+        font-size: 16px;
+    }
+
+    #channeltree hr {
+        margin-bottom: 40px;
+    }
+
+    #serverlist .selectedGroup {
+        border-radius: 6px;
+    }
+
+    #channeltree details ul li {
+        list-style-position: inside;
+    }
+
+</style>
+
+<div id="header">
+
+    DCTS - EARLY ACCESS
+
+</div>
+
+<div id="modalBox">
+    <h1 id="modalBoxTitle">-</h1>
+    <p id="modalBoxText">-</p>
+    <div id="modalBoxButtons"></div>
+</div>
+
+<div id="context-menu">
+    <!-- <div class="item">Copy ID</div> -->
+</div>
+
+
+<div id="serverlist">
+
+    <!--
+    <div class="server-entry" style="margin-bottom: 16px;">
+        <img title="Home" class="server-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Flat_tick_icon.svg/1024px-Flat_tick_icon.svg.png">
+        <Label>Home</Label>
+    </div><hr> -->
+
+    <!-- Used for adding new servers
+    <div class="server-entry">
+        <img title="Add new Server" class="server-icon" src="https://as1.ftcdn.net/v2/jpg/02/01/58/70/1000_F_201587024_jEB8rsvrFtd0jwBF2A7oUnZ2KGYYddmC.jpg">
+    </div> -->
+
+
+</div>
+
+<div id="channellist">
+    <div id="serverbanner-container">
+        <img id="serverbanner-image" src="/img/loading.gif">
+
+    </div>
+
+    <div id="channeltree">
+
+        <!--
+            <ul>
+                <li>Category 1</li>
+                <ul>
+                    <li>Channel 1</li>
+                    <li>Channel 2</li>
+                </ul>
+                <li>Category 2</li>
+                <ul>
+                    <li>Channel 3</li>
+                    <li>Channel 4</li>
+                </ul>
+            </ul>
+        -->
+    </div>
+
+    <div id="profile-qa">
+
+        <div id="profile-qa-img-container" title="Visit your Profile">
+            <img id="profile-qa-img" onclick="changePFP();">
+        </div>
+
+        <div id="profile-qa-info">
+            <Label title="Edit your username" id="profile-qa-info-username" onclick="changeUsername()">-</Label><br>
+            <Label title="Edit your status" id="profile-qa-info-status" onclick="changeStatus()">-</Label>
+        </div>
+
+        <div id="webrtc-controls">
+            o x *
+        </div>
+
+    </div>
+
+</div>
+
+
+<div id="content-container">
+
+    <div id="channelname">
+        -
+    </div>
+
+    <div id="content">
+
+        <!-- Default Message HMTL
+        <div class="message-container">
+            <div class="message-profile-img-container">
+                <img class="message-profile-img" src="https://avatars.githubusercontent.com/u/40896559?v=4">
+            </div>
+
+            <div class="message-profile-info">Shy Devil dfdshgfdkjghfdkgfdfgdfg</div>
+            <div class="message-profile-content">
+                <p>
+                    im a long as fucking text that no one wants to read
+                    im a long as fucking text that no one wants to read
+                    im a long as fucking text that no one wants to read
+                    im a long as fucking text that no one wants to read
+                    im a long as fucking text that no one wants to readim a long as fucking text that no one wants to read
+                    im a long as fucking text that no one wants to read
+                    im a long as fucking text that no one wants to readim a long as fucking text that no one wants to read
+                    im a long as fucking text that no one wants to read
+
+                </p>
+            </div>
+        </div>
+        -->
+
+        <!-- Default user join message
+        <div class="systemAnnouncementChat">
+            <p>User <label class="systemAnnouncementChat username">Shy Devil</label> joined the chat!</p>
+        </div>
+        -->
+
+    </div>
+
+    <div id="messagebox">
+        <div id="messagebox-media">+</div><input id="messagebox-content" placeholder="Enter your text message here" type="text" onkeydown="sendMessage(this)"><div id="message-actions">~ # *</div>
+        <div id="typing-indicator-container"><label id="typing-indicator">Shy Devil is typing...</label></div>
+    </div>
+
+
+</div>
+
+<div id="infolist">
+
+    <!-- Default role entry
+    <div class="infolist-role" title="Admin">
+        Admin
+        <hr style="margin-bottom: 16px;">
+
+
+    </div>
+    -->
+
+    <!-- Default Member List Code
+    <div class="memberlist-container">
+        <img class="memberlist-img" src="https://avatars.githubusercontent.com/u/40896559?v=4">
+        <div class="memberlist-member-info">
+            Shy Devil
+        </div>
+        <div class="memberlist-member-info">
+            Party Hardy
+        </div>
+    </div>
+    -->
+
+
+</div>
+
+</body>
+</html>

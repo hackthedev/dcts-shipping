@@ -9,7 +9,13 @@
     "cfAccountToken": "",
     "cfHash": "",
     "rateLimit": 128,
-    "dropInterval": 5
+    "dropInterval": 5,
+    "uploadFileTypes": [
+      "image/png",
+      "image/jpeg",
+      "image/gif",
+      "image/webp"
+    ]
   },
   "serverroles": {
     "0": {

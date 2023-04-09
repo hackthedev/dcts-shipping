@@ -21,7 +21,8 @@
       },
       "permissions": {
         "readMessage": 1,
-        "sendMessage": 1
+        "sendMessage": 1,
+        "uploadFiles": 1
       },
       "members": []
     },

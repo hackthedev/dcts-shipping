@@ -1,0 +1,73 @@
+<h2>Your Profile</h2>
+
+<div id="profile_change_container">
+    <h2 class="profile_headline">Settings</h2>
+
+    <div class="profile_input_container">
+        <label>PFP</label><br>
+        <input type="text" id="settings_profile_icon" oninput="updatePreview('settings_profile_icon');">
+        <input type="file" accept="image/jpeg, image/png, image/jpg, image/webp, image/gif" onchange="upload(this.files, 'settings_profile_icon')" />
+    </div>
+
+    <div class="profile_input_container">
+        <label>Banner</label><br>
+        <input type="text" id="settings_profile_banner" oninput="updatePreview('settings_profile_banner');">
+        <input type="file" accept="image/jpeg, image/png, image/jpg, image/webp, image/gif" onchange="upload(this.files, 'settings_profile_banner')" />
+    </div>
+
+
+
+
+    <div class="profile_input_container">
+        <label>Username</label><br>
+        <input type="text" id="settings_profile_username" oninput="updatePreview('settings_profile_username');">
+    </div>
+
+    <div class="profile_input_container">
+        <label>Status</label><br>
+        <input type="text" id="settings_profile_status" oninput="updatePreview('settings_profile_status');">
+    </div>
+
+    <div class="profile_input_container">
+        <label>About me</label><br>
+        <textarea rows="6" cols="22" id="settings_profile_aboutme" oninput="updatePreview('settings_profile_aboutme');"></textarea>
+    </div>
+
+    <div id="settings_profile_save" onclick="saveSettings();" style="display: none;">Save</div>
+</div>
+
+<div id="preview">
+    <h2 class="profile_headline">Preview</h2>
+
+    <div id="profile_container">
+        <div id="profile_banner"></div>
+
+        <div id="profile_pfp_container">
+            <div id="profile_icon"></div>
+        </div>
+
+        <div id="profile_content">
+            <div id="profile_username">
+                <h2>
+
+                </h2>
+            </div>
+
+            <div id="profile_status">
+
+            </div>
+            <hr>
+
+            <h2 class="profile_headline">About Me</h2>
+            <div id="profile_aboutme">
+
+            </div>
+            <hr>
+
+            <h2 class="profile_headline">Roles</h2>
+            <div id="profile_roles">
+                <code class="role"><div class="role_color"></div>Example</code>
+            </div>
+        </div>
+    </div>
+</div>

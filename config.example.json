@@ -2,7 +2,14 @@
   "serverinfo": {
     "name": "Default Server",
     "description": "Welcome to my server",
-    "setup": 0
+    "setup": 0,
+    "maxUploadStorage": "10",
+    "useCloudflareImageCDN": 0,
+    "cfAccountId": "",
+    "cfAccountToken": "",
+    "cfHash": "",
+    "rateLimit": 128,
+    "dropInterval": 5
   },
   "serverroles": {
     "0": {
@@ -33,13 +40,13 @@
     }
   },
   "groups": {
-    "0": {
+    "0000": {
       "info": {
         "id": 0,
         "name": "Home",
-        "icon": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQauIGQaSJqWXl_mVxIrBtjsKc9kR9gOoCu7A&usqp=CAU",
-        "banner": "https://media.istockphoto.com/id/1360515688/vector/welcome-text-ribbon-banner-vector-design.jpg?s=612x612&w=0&k=20&c=1eNsW0j5k5O_dGaWdHhyUNl9ea-oJ6KBnLjnWdskTTI=",
-        "isDeletable": 0,
+        "icon": "/img/default_icon.png",
+        "banner": "/img/default_banner.png",
+        "isDeletable": 1,
         "access": [
           "roleId"
         ]
@@ -51,7 +58,7 @@
               "name": "General"
             },
             "channel": {
-              "1525": {
+              "0000": {
                 "name": "chat",
                 "type": "text",
                 "description": "Default Channel Description",
@@ -70,5 +77,8 @@
     }
   },
   "servermembers": {
-  }
+  },
+  "ipblacklist": [
+
+  ]
 }

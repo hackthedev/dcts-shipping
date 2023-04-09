@@ -11,8 +11,9 @@
             integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
             crossorigin="anonymous"
     ></script>
-    <script defer src="chat.js"></script>
+    <script defer src="chat.js?v=2"></script>
 
+    <link href="/settings/account/page/profile/profile.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
     <title>Document</title>
@@ -315,6 +316,9 @@
     #profile-qa-img {
         background-size: cover;
 
+        object-fit: cover;
+        background-position: center center;
+
         width: 50px;
         height: 50px;
 
@@ -410,6 +414,10 @@
         height: 40px;
         border-radius: 50%;
         float: left;
+
+        background-size: cover;
+        object-fit: cover;
+        background-position: center center;
     }
 
     .memberlist-member-info{
@@ -439,7 +447,7 @@
         width: calc(100% - 40px);
         padding: 20px;
 
-        margin-bottom: 8px;
+        margin-bottom: 0px;
     }
 
     .message-container:hover{
@@ -478,6 +486,10 @@
 
         border-radius: 50%;
         cursor: pointer;
+
+        background-size: cover;
+        object-fit: cover;
+        background-position: center center;
     }
 
     .message-profile-info {
@@ -684,7 +696,7 @@
     }
 
     #channeltree h2 {
-        margin-top: -30px;
+        margin-top: -10px;
         margin-bottom: -0px;
         font-size: 16px;
     }
@@ -701,13 +713,26 @@
         list-style-position: inside;
     }
 
+    #profile-qa-settings {
+        width: 20px;
+        height: 20px;
+
+        margin: 15px 15px 0 0;
+
+        background-color: transparent;
+        float: right;
+
+        background-image: url("/img/settings.png");
+        background-size: cover;
+
+        object-fit: cover;
+        background-color: transparent;
+        background-position: center center;
+    }
+
 </style>
 
-<div id="header">
-
-    DCTS - EARLY ACCESS
-
-</div>
+<div id="header"></div>
 
 <div id="modalBox">
     <h1 id="modalBoxTitle">-</h1>
@@ -717,6 +742,36 @@
 
 <div id="context-menu">
     <!-- <div class="item">Copy ID</div> -->
+</div>
+
+<div id="profile_container" style="display: none;position: fixed;z-index: 10000;">
+    <div id="profile_banner"></div>
+
+    <div id="profile_pfp_container">
+        <div id="profile_pfp"></div>
+    </div>
+
+    <div id="profile_content">
+        <div id="profile_username"><h2>Shy Devil</h2></div>
+        <div id="profile_status">.gg/femboi</div>
+        <hr>
+
+        <h2 class="profile_headline">About Me</h2>
+        <div id="profile_aboutme">
+            sys-admin. programmer.
+            Personality: Mediator (INFP-A)
+
+            Femboy Cartel
+            https://discord.gg/cr82MnSAfT
+        </div>
+        <hr>
+
+        <h2 id="profile_headline">Roles</h2>
+        <div id="profile_roles">
+            <code class="role"><div class="role_color"></div>Admin</code>
+            <code class="role"><div class="role_color"></div>Member</code>
+        </div>
+    </div>
 </div>
 
 
@@ -762,18 +817,18 @@
 
     <div id="profile-qa">
 
-        <div id="profile-qa-img-container" title="Visit your Profile">
-            <img id="profile-qa-img" onclick="changePFP();">
+        <div id="profile-qa-img-container">
+            <img id="profile-qa-img">
         </div>
 
         <div id="profile-qa-info">
-            <Label title="Edit your username" id="profile-qa-info-username" onclick="changeUsername()">-</Label><br>
-            <Label title="Edit your status" id="profile-qa-info-status" onclick="changeStatus()">-</Label>
+            <Label title="Edit your username" id="profile-qa-info-username">-</Label><br>
+            <Label title="Edit your status" id="profile-qa-info-status">-</Label>
         </div>
 
-        <div id="webrtc-controls">
-            o x *
-        </div>
+        <a href="/settings/account">
+            <div id="profile-qa-settings"></div>
+        </a>
 
     </div>
 

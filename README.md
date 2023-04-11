@@ -16,3 +16,10 @@ Requires node.js to be installed (tested with v16.16.0). Afterwards execute the 
 npm install
 node .
 ```
+
+<br>
+
+## Connecting to your server
+Once you've installed the server and its running, you can open your browser and enter the server's ip and add the port 2052.<br>
+Example: localhost:2052
+(setting to change port coming in updates)

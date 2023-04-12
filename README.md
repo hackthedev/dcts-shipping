@@ -27,5 +27,5 @@ Example: localhost:2052
 <br>
 
 ## Tutorial
-(version in video slightly outdated)
-https://www.youtube.com/watch?v=ayeua15ICpM
+(version in video slightly outdated)<br>
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/ayeua15ICpM/0.jpg)](https://www.youtube.com/watch?v=ayeua15ICpM)

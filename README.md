@@ -9,7 +9,7 @@ Since you can host the server yourself you're also the one in control of the dat
 <br>
 
 ## Obfuscated?
-Yes. I just dont want someone to rip my hard work. Until i find a better solution i will manage it like this. If there is someone like "Linus Tech Tips" or "someordinarygamers" who would want to verify this i could send the actual source code for them to approve it or smth. Feel free to ask me about anything.
+Yes. I just dont want someone to rip my hard work. Until i find a better solution i will manage it like this. If there is someone like "someordinarygamers" who would want to verify this i could send the actual source code to them to approve it or smth. Feel free to ask me about anything.
 
 <br>
 

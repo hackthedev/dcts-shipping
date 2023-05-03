@@ -28,6 +28,13 @@ node .
 
 <br>
 
+## Tested NodeJS versions
+v12.12
+v16.16.0
+v19
+
+<br>
+
 ## Connecting to your server
 Once you've installed the server and its running, you can open your browser and enter the server's ip and add the port 2052.<br>
 Example: localhost:2052

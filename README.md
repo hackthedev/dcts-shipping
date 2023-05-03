@@ -29,9 +29,9 @@ node .
 <br>
 
 ## Tested NodeJS versions
-v12.12
-v16.16.0
-v19
+- v12.12
+- v16.16.0
+- v19
 
 <br>
 

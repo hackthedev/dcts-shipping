@@ -1,0 +1,124 @@
+<div id="container">
+
+
+    <div id="rolelist">
+        <h2>Server Roles</h2>
+        <button style="margin-bottom: 4px; background-color: #289b28; color: white; font-weight: bold; border-radius: 4px; border: 1px solid transparent;"
+                onclick="addRole()">
+            Add Role
+        </button>
+
+        <button id="saveSortingButton" style="display: none; margin-bottom: 4px; background-color: #289b28; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="saveChanges()">
+            Save changes
+        </button>
+
+        <button id="cancelSortingButton" style="margin-bottom: 4px; display: none;background-color: white; color: black; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="window.location.reload()">
+            Cancel changes
+        </button>
+
+        <br><br>
+    </div>
+
+
+
+    <div id="permissionlist">
+
+        <h2 id="permheader">Channel Permissions</h2>
+        <button id="removeRole" style="display: none; background-color: indianred; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="removeRole()">
+            Remove Role
+        </button>
+
+        <button id="saveButton" style="display: none; background-color: #289b28; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="savePermissions()">
+            Save updates
+        </button>
+
+        <button id="cancelButton" style="display: none;background-color: white; color: black; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="window.location.reload()">
+            Cancel updates
+        </button>
+        <br><br>
+
+        <hr>
+        <p id="viewChannel" onclick="tickSetting(this);">View Channel
+            <input type="checkbox"><br>
+            <label>
+                Allows the role to see the channel or not.
+            </label>
+        </p>
+
+        <hr>
+        <p id="viewHistory" onclick="tickSetting(this);">View Chat History
+            <input type="checkbox"><br>
+            <label>
+                Allows the role to see the chat history of the channel or not.
+            </label>
+        </p>
+
+        <hr>
+        <p id="bypassSlowmode" onclick="tickSetting(this);">Bypass Slowmode
+            <input type="checkbox"><br>
+            <label>
+                Allows a role to bypass the slowmode chat feature.
+            </label>
+        </p>
+
+        <hr>
+        <p id="readMessages" onclick="tickSetting(this);">Read Messages
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="sendMessages" onclick="tickSetting(this);">Send Messages
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="useVOIP" onclick="tickSetting(this);">Use Voice Chat
+            <input type="checkbox"><br>
+            <label>
+                Will only work if the channel is a Voice Channel.
+            </label>
+        </p>
+
+        <hr>
+        <p id="sendURL" onclick="tickSetting(this);">Send URLs
+            <input type="checkbox"><br>
+            <label>
+                Allows the user in the role to send urls
+            </label>
+        </p>
+
+        <hr>
+        <p id="sendFiles" onclick="tickSetting(this);">Send Files
+            <input type="checkbox">
+            <br>
+            <label>
+                If disabled, messages containing files or links linking to files are being blocked.
+            </label>
+        </p>
+
+        <hr>
+        <p id="uploadLocalFiles" onclick="tickSetting(this);">Upload Files (Local)
+            <input type="checkbox"><br>
+            <label>
+                If disabled, nobody can upload files to the server's local storage. Exception: Pre-Uploaded files like
+                <code>/img/default_pfp.png</code> or image links
+            </label>
+        </p>
+
+        <hr>
+        <p id="uploadCloudFiles" onclick="tickSetting(this);">Upload Files (Cloud)
+            <input type="checkbox"><br>
+            <label>
+                If disabled, nobody can upload files to the Cloud CDN. Exception: Pre-Uploaded files.
+            </label>
+        </p>
+
+        <br><br>
+    </div>
+
+</div>

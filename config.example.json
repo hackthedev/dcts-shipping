@@ -1,91 +1,113 @@
 {
-  "serverinfo": {
-    "name": "Default Server",
-    "description": "Welcome to my server",
-    "setup": 0,
-    "maxUploadStorage": "10",
-    "useCloudflareImageCDN": 0,
-    "cfAccountId": "",
-    "cfAccountToken": "",
-    "cfHash": "",
-    "rateLimit": 128,
-    "dropInterval": 5,
-    "uploadFileTypes": [
-      "image/png",
-      "image/jpeg",
-      "image/gif",
-      "image/webp"
-    ]
-  },
-  "serverroles": {
-    "0": {
-      "info": {
-        "name": "Member",
-        "icon": null,
-        "color": "#FFFFFF",
-        "deletable": 0
-      },
-      "permissions": {
-        "readMessage": 1,
-        "sendMessage": 1,
-        "uploadFiles": 1
-      },
-      "members": []
-    },
-    "1": {
-      "info": {
-        "name": "Admin",
-        "icon": null,
-        "color": "#FF0000",
-        "deletable": 0
-      },
-      "permissions": {
-        "administrator": 1
-      },
-      "members": [],
-      "token": null
-    }
-  },
-  "groups": {
-    "0000": {
-      "info": {
-        "id": 0,
-        "name": "Home",
-        "icon": "/img/default_icon.png",
-        "banner": "/img/default_banner.png",
-        "isDeletable": 1,
-        "access": [
-          "roleId"
-        ]
-      },
-      "channels": {
-        "categories": {
-          "0000": {
-            "info": {
-              "name": "General"
-            },
-            "channel": {
-              "0000": {
-                "name": "chat",
-                "type": "text",
-                "description": "Default Channel Description",
-                "permissions": {
-                  "0": {
-                    "readMessage": 1,
-                    "sendMessage": 1
-                  }
-                }
-              }
-            }
-          }
+    "serverinfo": {
+        "name": "Default Server",
+        "description": "Welcome to my server",
+        "port": 2052,
+        "setup": 0,
+        "maxUploadStorage": "10",
+        "useCloudflareImageCDN": 0,
+        "cfAccountId": "",
+        "cfAccountToken": "",
+        "cfHash": "",
+        "rateLimit": "256",
+        "dropInterval": "5",
+        "uploadFileTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/gif",
+            "image/webp"
+        ],
+        "ssl": {
+            "key": "/etc/letsencrypt/live/EXAMPLE.COM/privkey.pem",
+            "cert": "/etc/letsencrypt/live/EXAMPLE.COM/cert.pem",
+            "chain": "/etc/letsencrypt/live/EXAMPLE.com/chain.pem",
+            "enabled": 0
         }
-      },
-      "roles": {}
-    }
-  },
-  "servermembers": {
-  },
-  "ipblacklist": [
+    },
+    "serverroles": {
+        "0": {
+            "info": {
+                "id": 0,
+                "name": "Member",
+                "icon": null,
+                "color": "#FFFFFF",
+                "deletable": 0,
+                "sortId": 0,
+                "displaySeperate": 1
+            },
+            "permissions": {
+                "readMessages": 1,
+                "sendMessages": 1,
+                "uploadLocalFiles": 1,
+                "redeemKey": 1
+            },
+            "members": [
 
-  ]
+            ]
+        },
+        "1111": {
+            "info": {
+                "id": 1111,
+                "name": "Admin",
+                "icon": null,
+                "color": "#ff0000",
+                "deletable": 0,
+                "sortId": 1,
+                "displaySeperate": 1
+            },
+            "permissions": {
+                "administrator": 1
+            },
+            "members": [
+
+            ],
+            "token": null
+        }
+    },
+    "groups": {
+        "0": {
+            "info": {
+                "id": 0,
+                "name": "Home",
+                "icon": "/img/default_icon.png",
+                "banner": "/img/default_banner.png",
+                "isDeletable": 1,
+                "sortId": 0,
+                "access": []
+            },
+            "channels": {
+                "categories": {
+                    "0": {
+                        "info": {
+                            "name": "General"
+                        },
+                        "channel": {
+                            "0": {
+                                "name": "chat",
+                                "type": "text",
+                                "description": "Default Channel Description",
+                                "sortId": 0,
+                                "permissions": {
+                                    "0": {
+                                        "readMessages": 1,
+                                        "sendMessages": 1,
+                                        "viewChannel": 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "permissions": {
+                "0": {
+                    "viewGroup": 1
+                }
+            }
+        }
+    },
+    "servermembers": {
+    },
+    "ipblacklist": [
+    ]
 }

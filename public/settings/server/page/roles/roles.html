@@ -1,0 +1,212 @@
+<div id="container">
+
+
+    <div id="rolelist">
+        <h2>Server Roles</h2>
+        <button style="margin-bottom: 4px; background-color: #289b28; color: white; font-weight: bold; border-radius: 4px; border: 1px solid transparent;"
+                onclick="createRole()">
+            Add Role
+        </button>
+
+        <button id="saveSortingButton" style="display: none; margin-bottom: 4px; background-color: #289b28; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="saveSorting()">
+            Save updates
+        </button>
+
+        <button id="cancelSortingButton" style="margin-bottom: 4px; display: none;background-color: white; color: black; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="window.location.reload()">
+            Cancel updates
+        </button>
+
+        <br><br>
+    </div>
+
+    <div id="permissionlist" style="display: none;">
+
+        <div id="appearance">
+            <h2>Appearance</h2>
+            <button id="deleteRole" style="display: none; background-color: indianred; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                    onclick="deleteRole()">
+                Delete Role
+            </button><br><br>
+
+            <button id="saveAppearanceButton" style="display: none; margin-bottom: 4px; background-color: #289b28; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                    onclick="saveAppearance()">
+                Save updates
+            </button>
+
+            <button id="cancelAppearanceButton" style="margin-bottom: 4px; display: none;background-color: white; color: black; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                    onclick="window.location.reload()">
+                Cancel updates
+            </button>
+
+            <p>
+                Role Name
+                <input onkeydown="appearanceChanged()" style="display: inline-block;margin-top: -4px; float: right;" id="roleName" type="text">
+            </p>
+
+            <p>
+                Role Color
+                <input onchange="appearanceChanged()" style="display: inline-block;margin-top: -4px; float: right;" id="roleColor" type="color">
+            </p>
+
+            <p>
+                Display Seperate
+                <input onchange="appearanceChanged()" style="float: right;" id="displaySeperate" type="checkbox">
+            </p>
+
+        </div>
+
+        <br><br>
+        <h2 id="permheader">Permissions</h2>
+
+        <button id="saveButton" style="display: none; background-color: #289b28; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="savePermissions()">
+            Save updates
+        </button>
+
+        <button id="cancelButton" style="display: none;background-color: white; color: black; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="window.location.reload()">
+            Cancel updates
+        </button>
+
+        <br><br>
+
+        <hr>
+        <p id="readMessages" onclick="tickSetting(this);">Read Messages
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="sendMessages" onclick="tickSetting(this);">Send Messages
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="kickUsers" onclick="tickSetting(this);">Kick users
+            <input type="checkbox"><br>
+            <label>Profiles of kicked members will be deleted</label>
+        </p>
+
+        <hr>
+        <p id="administrator" onclick="tickSetting(this);">Administrator
+            <input type="checkbox"><br>
+            <label>Will grand all permissions</label>
+        </p>
+
+        <hr>
+        <p id="manageServerInfo" onclick="tickSetting(this);">Change Server Info
+            <input type="checkbox"><br>
+            <label>
+                Includes Server Name and Description
+            </label>
+        </p>
+
+        <hr>
+        <p id="createCategory" onclick="tickSetting(this);">Create new Channel Categories
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="updateGroupBanner" onclick="tickSetting(this);">Change Group Banner
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="updateGroupIcon" onclick="tickSetting(this);">Change Group Icon
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="createChannel" onclick="tickSetting(this);">Create Channels
+            <input type="checkbox">
+        </p>
+
+
+        <hr>
+        <p id="manageChannels" onclick="tickSetting(this);">Manage Channels
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="createGroup" onclick="tickSetting(this);">Create Groups
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="deleteGroups" onclick="tickSetting(this);">Delete Groups
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="deleteChannel" onclick="tickSetting(this);">Delete Channels
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="deleteCategory" onclick="tickSetting(this);">Delete Categories
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="deleteMessageOthers" onclick="tickSetting(this);">Manage Messages
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="uploadFiles" onclick="tickSetting(this);">Upload Files
+            <input type="checkbox"><br>
+            <label>
+                Without this permission nobody can change their profile picture and banner or upload files. Exception: Pre-Uploaded files like
+                <code>/img/default_pfp.png</code> or image links
+            </label>
+        </p>
+
+        <hr>
+        <p id="manageRoles" onclick="tickSetting(this);">Manage Roles
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="manageMemberRoles" onclick="tickSetting(this);">Manage Member Roles
+            <input type="checkbox"><br>
+            <label>
+                Users with this permission can assign and remove roles of other users that are below them.
+            </label>
+        </p>
+
+        <hr>
+        <p id="manageUploadSettings" onclick="tickSetting(this);">Edit Upload Settings
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="manageRateSettings" onclick="tickSetting(this);">Edit Rate Limit Settings
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="redeemKey" onclick="tickSetting(this);">Redeem Keys
+            <input type="checkbox"><br>
+            <label>
+                Allows a user to redeem a key in order to gain a role.
+            </label>
+        </p>
+
+        <br><br>
+        <div id="members">
+            <h2>Role Members</h2>
+            <button id="addMemberToRoleButtom" style="margin-bottom: 4px;background-color: #289b28; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                    onclick="addToRole()">
+                Add Member
+            </button><br><br>
+
+            <div id="memberlist">
+
+            </div>
+        </div>
+
+        <br><br>
+    </div>
+
+</div>

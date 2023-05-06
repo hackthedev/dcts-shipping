@@ -1,0 +1,164 @@
+#container {
+
+}
+
+#rolelist{
+    display: block;
+    float: left;
+
+    width: 25%;
+
+    overflow-x: hidden;
+
+    border-right: 2px solid #3c3f44;
+
+    /*
+    border-right: 2px solid #292B2F;
+     */
+}
+
+#rolelist p:hover {
+    cursor: pointer;
+}
+
+#permissionlist {
+    float: left;
+    margin: 0 0 0 32px;
+    width: 80%;
+    max-width: 500px;
+}
+
+#permissionlist hr {
+    border: 1px solid #3c3f44;
+}
+
+#permissionlist p {
+    font-weight: bold;
+}
+
+#permissionlist label {
+    font-style: italic;
+    font-size: 12px;
+
+    color: #828a8d;
+}
+
+#permissionlist input[type=checkbox]{
+    float: right;
+}
+
+.role-entry {
+    width: calc(100% - 60px);
+}
+
+.role-entry, #permissionlist p {
+    display: block;
+    padding: 8px;
+    margin: 2px;
+
+    border-radius: 6px;
+}
+
+.role-entry:hover, #permissionlist p:hover{
+    background-color: #292B2F;
+}
+
+code {
+    background-color: #292B2F;
+    border: 2px solid #3c3f44;
+
+    padding: 1px 4px 1px 4px;
+    margin: 0px 4px 0px 4px;
+    border-radius: 6px;
+}
+
+.sortable-list {
+    padding: 0;
+    list-style-type: none;
+}
+
+.sortable-list .item {
+    list-style: none;
+    display: flex;
+    cursor: move;
+}
+input[type=text]{
+    color: #ABB8BE;
+    background-color: #292B2F;
+    border: 2px solid #3c3f44;
+
+    outline: none;
+    padding: 4px 8px 4px 8px;
+
+    margin: 4px 0 0 0;
+
+    border-radius: 6px;
+    resize: none;
+}
+
+.memberlist-container{
+    background-color: #292B2F;
+    width: 100%;
+
+    overflow: hidden;
+
+    padding: 8px;
+    margin-bottom: 25px;
+}
+
+.memberlist-banner{
+    margin: -6px -12px -6px -12px;
+    height: 100px;
+
+    background-size: cover;
+    object-fit: cover;
+    background-position: center center;
+}
+
+.memberlist-pfp{
+
+    height: 50px;
+    width: 50px;
+
+    background-color: #292B2F;
+    border-radius: 50%;
+    border: 2px solid #292B2F;
+
+    margin: -30px 0 0 25px;
+    padding: 8px;
+
+    background-size: cover;
+
+    object-fit: cover;
+    background-position: center center;
+
+    float: left;
+}
+
+.memberlist-username{
+    float: left;
+
+    color: white;
+    background-color: #292B2F;
+
+
+    border-radius: 8px;
+
+    padding: 4px 8px 4px 8px;
+    margin: -12px 0 0 25px;
+
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.memberlist-actions input{
+    float: right;
+    margin: 18px 0 -25px 0;
+
+    background-color: indianred;
+    color: white;
+    font-weight: bold;
+    border: 1px solid transparent;
+
+    border-radius: 2px;
+}

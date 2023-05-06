@@ -1,0 +1,126 @@
+<h2>What's new</h2>
+
+<style>
+
+    s{
+        color: grey;
+        font-style: italic;
+    }
+
+
+    @keyframes rotate {
+        to {
+            --angle: 360deg;
+        }
+    }
+
+    @property --angle {
+        syntax: '<angle>';
+        initial-value: 0deg;
+        inherits: false;
+    }
+</style>
+
+<div id="profile_change_container">
+
+    <!-- <h2 class="profile_headline">Features that </h2> -->
+
+    <div class="profile_input_container" >
+
+        
+        <ul class="update current">
+            <ul class="content">
+
+                <div class="head">
+                    <h2>Role Update</h2><label class="update">May 4th, 2023</label>
+                </div>
+
+                <ul>
+                    <li class="feature">Role Editor</li>
+                    <ul>
+                        <li class="detail">Edit Roles</li>
+                        <li class="detail">Create Roles</li>
+                        <li class="detail">Delete Roles</li>
+                        <li class="detail">Change Role Color</li>
+                        <li class="detail">Change Role Name</li>
+                        <li class="detail">Change Role Display Setting (show in member list)</li>
+                        <li class="detail">Change Role Permissions</li>
+                        <li class="detail">Change Role hierarchy (role sorting)</li>
+                    </ul>
+                </ul>
+
+
+
+
+                <div class="head">
+                    <h2>Channel Update</h2>
+                </div>
+                <ul>
+                    <li class="feature">Edit Channel</li>
+                    <ul>
+                        <li class="desc">
+                            Its now possible to edit a channel by right clicking it and selecting "Edit Channel". There you can change the channel name and the
+                            permissions for roles.
+                        </li>
+                    </ul>
+                </ul>
+
+
+
+
+
+                <div class="head">
+                    <h2>Server Update</h2>
+                </div>
+                <ul>
+                    <li class="feature">SSL Support</li>
+                    <ul>
+                        <li class="desc">
+                            SSL is required if you host your server on a maschine and access it from another device. Otherwise
+                            some features like the "Copy User ID" will not work as browsers like Chrome will block it on "unsecure sources".
+                            Also SSL will encrypt the Traffic which is another big plus. A few new settings have been added to the config file.
+                        </li>
+                    </ul>
+                </ul>
+
+
+
+
+                <div class="head">
+                    <h2>General Changes</h2>
+                </div>
+                <ul>
+                    <li class="feature">Member List Update</li>
+                    <ul>
+                        <li class="desc">The Member list will only show members that are allowed to view the current channel.</li>
+                    </ul>
+
+                    <li class="feature">Channel List Update</li>
+                    <ul>
+                        <li class="desc">
+                            If a category doesnt have any channel a member/role is allowed to see, the entire category is hidden from the channel tree
+                        </li>
+                        <li class="desc">
+                            If a category doesnt contain any channel, it is hidden from members that dont have the <code>Manage Channels</code> permissions
+                        </li>
+                    </ul>
+
+                    <li class="feature">Group List Update</li>
+                    <ul>
+                        <li class="desc">
+                            <u>It is</u> possible to hide groups from users now, tho i didnt fully implement this feature. This means while you
+                            can edit the <code>config.json</code> file to hide certain groups for certain roles, its not possible to do this using
+                            the web client/ui. This will be implemented in a feature update.
+                        </li>
+                    </ul>
+                </ul>
+            </ul>
+        </ul>
+
+    </div>
+
+
+
+
+    <div id="settings_profile_save" onclick="saveSettings();" style="display: none;">Save</div>
+</div>

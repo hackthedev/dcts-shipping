@@ -1,3 +1,3 @@
-git clone git@github.com:hackthedev/dcts.git
-cp -rf $PWD/dcts/* $PWD
-rm -rf $PWD/dcts
+git clone git@github.com:hackthedev/dcts-shipping.git
+cp -rf $PWD/dcts-shipping/* $PWD
+rm -rf $PWD/dcts-shipping

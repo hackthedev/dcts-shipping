@@ -84,13 +84,8 @@
 
 #profile_roles code.role{
     background-color: #36393F;
-    padding: 0px 6px 4px 6px;
+    padding: 2px 6px 2px 6px;
     border-radius: 6px;
-    margin-left: 6px;
-
-    margin: 4px;
-
-    display: inline-block;
 }
 
 #profile_roles .role_color{
@@ -145,14 +140,4 @@
     color: black;
     text-align: center;
     width: 100%;
-}
-
-code.joined{
-    background-color: #3c3f44;
-
-    font-size: 12px;
-
-    border: 2px solid #3c3f44;
-    border-radius: 6px;
-    padding: 2px 4px 2px 4px;
 }

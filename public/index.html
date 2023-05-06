@@ -353,7 +353,7 @@
         overflow: hidden;
         background-color: transparent;
 
-        width: 100px;
+        width: 60%;
         height: 28px;
         cursor: pointer;
     }
@@ -431,8 +431,14 @@
         width: 100px;
     }
 
-    .memberlist-member-info-status {
+    .memberlist-member-info.status {
         font-size: 12px;
+        width: 120px;
+        width: calc(100% - 48px);
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .infolist-role {
@@ -472,6 +478,7 @@
     }
 
     .message-profile-info-name {
+        font-weight: normal;
         cursor: pointer;
     }
 
@@ -600,7 +607,7 @@
         float: left;
         width: 100%;
 
-        margin: 8px 0 8px 0;
+        /* margin: 8px 0 8px 0; */
     }
 
     .image-embed {
@@ -639,6 +646,7 @@
 
     #context-menu .item:hover{
         background: #343434;
+        border-radius: 6px;
     }
 
     #context-menu.visible{
@@ -728,6 +736,11 @@
         object-fit: cover;
         background-color: transparent;
         background-position: center center;
+    }
+
+    #profile-qa-info-status{
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
 </style>

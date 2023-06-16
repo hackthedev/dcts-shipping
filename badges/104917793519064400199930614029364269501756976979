@@ -5,7 +5,7 @@
 	},
 	"platform_developer": {
 		"display": "Platform Developer",
-		"icon": "https://i0.wp.com/www.followchain.org/wp-content/uploads/2022/11/icons8-source-code-350.png?fit=350%2C350&ssl=1"
+		"icon": "dev"
 	},
 	"platform_staff": {
 		"display": "Staff",

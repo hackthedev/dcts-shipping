@@ -20,7 +20,7 @@ The software will be free for personal use and for non-profit communities. Comme
 <br>
 
 ## How to install
-Requires node.js to be installed (tested with v16.16.0). Afterwards execute the following commands.
+Requires node.js to be installed (tested with v16.16.0). Afterwards execute the following commands inside the app's directory.
 ```
 npm install
 node .

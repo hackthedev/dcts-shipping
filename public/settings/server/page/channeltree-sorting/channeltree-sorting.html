@@ -1,0 +1,66 @@
+<div id="container">
+
+
+    <div id="rolelist">
+        <h2>Channel Sorting</h2>
+        <h3>Groups</h3>
+
+        <button id="saveSortingButton1" style="display: block; margin-bottom: 4px; background-color: #289b28; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="saveSorting()">
+            Save updates
+        </button>
+
+        <button id="cancelSortingButton" style="margin-bottom: 4px; display: block;background-color: white; color: black; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="window.location.reload()">
+            Cancel updates
+        </button>
+
+        <br><br>
+    </div>
+
+    <div id="permissionlist" style="display: none;">
+
+        <div id="appearance">
+            <h2>Group Info</h2>
+            <button id="deleteRole" style="display: none; background-color: indianred; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                    onclick="deleteRole()">
+                Delete Role
+            </button><br><br>
+
+
+            <button id="saveAppearanceButton" style="display: block; margin-bottom: 4px; background-color: #289b28; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                    onclick="saveSorting()">
+                Save updates
+            </button>
+
+            <button id="cancelAppearanceButton" style="margin-bottom: 4px; display: none;background-color: white; color: black; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                    onclick="window.location.reload()">
+                Cancel updates
+            </button>
+
+        </div>
+
+        <br><br>
+        <h2 id="permheader">Channels</h2>
+
+        <button id="saveButton" style="display: none; background-color: #289b28; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="savePermissions()">
+            Save updates
+        </button>
+
+        <button id="cancelButton" style="display: none;background-color: white; color: black; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="window.location.reload()">
+            Cancel updates
+        </button>
+
+        <br><br>
+
+        <div id="channeltree_list">
+
+        </div>
+
+
+        <br><br>
+    </div>
+
+</div>

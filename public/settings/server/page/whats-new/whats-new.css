@@ -35,12 +35,14 @@ code {
     border-radius: 4px;
 
     margin: -2px 4px 2px 4px;
+    word-break: break-word;
 }
 
 .update{
     padding: 12px 32px 12px 12px;
     background-color: #333539;
 
+    margin-bottom: 60px !important;
     border-radius: 6px;
 }
 
@@ -58,7 +60,6 @@ label.update {
     width: calc(100%);
 
     color: #5d7fe3;
-    margin-bottom: 0px;
 }
 
 .update .head label{
@@ -67,6 +68,8 @@ label.update {
 
     border-radius: 6px;
     color: white;
+
+    margin-bottom: 0px !important;
 }
 
 .update .content {

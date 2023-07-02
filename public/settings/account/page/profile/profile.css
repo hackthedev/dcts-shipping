@@ -52,6 +52,30 @@
     background-position: center center;
 }
 
+#profile_badge_container{
+
+    height: calc(40px - 16px);
+    width: calc(100% - 75px - 28px - 16px);
+    padding: 8px;
+
+    background-color: transparent;
+    display: block;
+    float: left;
+
+    overflow: hidden;
+}
+
+.profile_badge {
+    width: 25px;
+    height: 25px;
+
+    border-radius: 50%;
+    margin: 0 4px 8px 4px;
+
+    float: right;
+    display: block;
+}
+
 #profile_content{
     padding: 24px;
 }

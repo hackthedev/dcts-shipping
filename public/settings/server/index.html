@@ -12,6 +12,7 @@
             crossorigin="anonymous"
     ></script>
     <script defer src="settings.js"></script>
+    <script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
@@ -146,32 +147,45 @@
     <div id="navigation">
 
         <div id="nav_settings">
-            <h2>General Settings</h2>
-            <a href='?page=server-info'>Server Info</a><br>
-            <a href='?page=rate-limit'>Rate Limit</a>
-            <hr>
 
-            <h2>User Management</h2>
-            <a href='?page=roles'>Server Roles</a><br>
-            <hr>
 
-            <h2>Media Settings</h2>
-            <a href='?page=file-uploads'>File Uploads</a>
-            <hr>
+            <div id="general">
+                <h2>General Settings</h2>
+                <a href='?page=server-info' id="manageServerInfo">Server Info</a><br id="manageServerInfo-br">
+                <a href='?page=rate-limit' id="manageRateLimit">Rate Limit</a><br id="manageRateLimit-br">
+                <a href='?page=channeltree-sorting' id="manageChannels">Channel Sorting</a><br id="manageChannels-br">
+                <hr id="general-hr">
+            </div>
 
-            <h2>Information</h2>
-            <a href='?page=whats-new'>What's new!</a><br>
-            <a href='?page=planned-features'>Planned Features</a><br>
-            <a href='?page=about'>About</a><br>
-            <a href='?page=support' style="color: #e55a72;">Support <3</a><br>
-            <hr>
+            <div id="users">
+                <h2>User Management</h2>
+                <a href='?page=roles' id="manageRoles">Server Roles</a><br id="manageRoles-br">
+                <hr id="users-hr">
+            </div>
+
+            <div id="media">
+                <h2>Media Settings</h2>
+                <a href='?page=file-uploads' id="manageUploads">File Uploads</a><br id="manageUploads-br">
+                <hr id="media-hr">
+            <div>
+
+
+            <div id="info">
+                <h2>Information</h2>
+                <a href='?page=whats-new'>What's new!</a><br>
+                <a href='?page=planned-features'>Planned Features</a><br>
+                <a href='?page=about'>About</a><br>
+                <a href='?page=support' style="color: #e55a72;">Support <3</a><br>
+                <hr>
+            </div>
         </div>
 
+    </div>
+        </div>
     </div>
 
     <a href="/"><div id="back"></div></a>
     <div id="content">
-
 
     </div>
 </div>

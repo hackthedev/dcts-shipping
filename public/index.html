@@ -256,6 +256,7 @@
         width: 45px;
         height: 45px;
 
+        filter: grayscale(100%);
         background-color: transparent;
     }
 
@@ -273,6 +274,7 @@
         -moz-transform: scale(1.1);
         -o-transform: scale(1.1);
         transform: scale(1.1);
+        filter: grayscale(0%);
     }
 
     .server-icon:not(:hover) {
@@ -283,6 +285,7 @@
         -moz-transform: scale(1);
         -o-transform: scale(1);
         transform: scale(1);
+        filter: grayscale(100%);
     }
 
     #profile-qa {
@@ -715,6 +718,7 @@
 
     #serverlist .selectedGroup {
         border-radius: 6px;
+        filter: grayscale(0%);
     }
 
     #channeltree details ul li {
@@ -742,6 +746,26 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+
+    /* Details Markers */
+    /*
+    summary {list-style: none}
+    summary::-webkit-details-marker {display: none; }
+
+    details summary::before {
+        margin-right: 4px;
+          🡒🡑↓
+        content:"🡒";
+        color: #ABB8BE;
+    }
+
+    details[open] summary::before {
+        margin-right: 4px;
+        content:"↓  " ;
+        color: #ABB8BE;
+    }
+    */
+
 
 </style>
 

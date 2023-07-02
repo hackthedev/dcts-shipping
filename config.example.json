@@ -1,7 +1,7 @@
 {
     "serverinfo": {
         "name": "Default Server",
-        "description": "Welcome to my server",
+        "description": "powered by dcts.chat",
         "port": 2052,
         "setup": 0,
         "maxUploadStorage": "10",
@@ -27,7 +27,7 @@
     "serverroles": {
         "0": {
             "info": {
-                "id": 0,
+                "id": "0",
                 "name": "Member",
                 "icon": null,
                 "color": "#FFFFFF",
@@ -38,7 +38,7 @@
             "permissions": {
                 "readMessages": 1,
                 "sendMessages": 1,
-                "uploadLocalFiles": 1,
+                "uploadFiles": 1,
                 "redeemKey": 1
             },
             "members": [
@@ -69,24 +69,27 @@
             "info": {
                 "id": 0,
                 "name": "Home",
-                "icon": "/img/default_icon.png",
+                "icon": "img/default_icon.png",
                 "banner": "/img/default_banner.png",
                 "isDeletable": 1,
-                "sortId": 0,
+                "sortId": 2,
                 "access": []
             },
             "channels": {
                 "categories": {
                     "0": {
                         "info": {
-                            "name": "General"
+                            "id": 0,
+                            "name": "General",
+                            "sortId": 1
                         },
                         "channel": {
                             "0": {
+                                "id": 0,
                                 "name": "chat",
                                 "type": "text",
                                 "description": "Default Channel Description",
-                                "sortId": 0,
+                                "sortId": 1,
                                 "permissions": {
                                     "0": {
                                         "readMessages": 1,
@@ -107,7 +110,7 @@
         }
     },
     "servermembers": {
+
     },
-    "ipblacklist": [
-    ]
+    "ipblacklist": []
 }

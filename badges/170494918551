@@ -1,0 +1,10 @@
+{
+	"platform_developer": {
+		"display": "Platform Developer",
+		"icon": "dev"
+	},
+	"platform_staff": {
+		"display": "Staff",
+		"icon": "staff"
+	}
+}

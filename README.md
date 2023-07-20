@@ -26,6 +26,10 @@ npm install
 node .
 ```
 
+## Tested Versions
+- ✔️ v16.16.0 
+- 🚫 v12.22.9 
+
 <br>
 
 ## Connecting to your server

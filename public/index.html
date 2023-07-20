@@ -11,7 +11,8 @@
             integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
             crossorigin="anonymous"
     ></script>
-    <script defer src="chat.js?v=2"></script>
+    <script defer src="chat.js?v=4"></script>
+    <script src="notify.js?v=3"></script>
 
     <link href="/settings/account/page/profile/profile.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
@@ -255,6 +256,7 @@
     .server-icon {
         width: 45px;
         height: 45px;
+
 
         filter: grayscale(100%);
         background-color: transparent;
@@ -767,9 +769,134 @@
     */
 
 
+    .inline-text-emoji{
+        width: 25px;
+        height: 25px;
+        display: inline-block;
+
+        margin: 0px 0px -8px 0px;
+    }
+
+    .inline-text-emoji.big{
+        width: 50px;
+        height: 50px;
+        display: inline-block;
+
+        margin: 0px 0px 2px 0px;
+    }
+
+    #emoji-box-container {
+        /*background-color: #40444B; */
+        background-color: #2F3136;
+
+
+        width: 20%;
+        height: 30%;
+        position: fixed;
+
+        padding: 8px;
+        border-radius: 8px;
+        border: 2px solid #202225;
+
+        box-shadow: 4px 4px 14px 0.5px rgb(30, 28, 28);
+
+        overflow-y: auto;
+    }
+
+    #emoji-box-container h2{
+        margin-top: 0;
+        font-size: 18px;
+    }
+
+    #emoji-box-container .emoji-entry{
+        float: left;
+        display: block;
+    }
+
+    #emoji-box-container .emoji-entry .emoji-img img{
+        float: left;
+        width: 35px;
+        height: 35px;
+        display: block;
+        margin: 4px;
+    }
+
+    .rainbow-border {
+        --angle: 0deg;
+        border: 1px solid;
+        border-image: conic-gradient(from var(--angle), red, yellow, lime, aqua, blue, magenta, red) 1;
+        animation: 10s rotate linear infinite;
+    }
+
+    @keyframes rotate {
+        to {
+            --angle: 360deg;
+        }
+    }
+
+    @property --angle {
+        syntax: '<angle>';
+        initial-value: 0deg;
+        inherits: false;
+    }
+
+    #emoji-box-header {
+        width: calc(100% - 8px);
+        background-color: green;
+
+        margin: -8px;
+        display: block;
+        float: left;
+
+        margin-bottom: 12px;
+
+        background-color: #40444B;
+
+        padding: 12px;
+        padding-bottom: 0;
+    }
+
+    label.mention{
+        /*background-color: rgba(255, 174, 0, 0.12);*/
+        color: skyblue;
+
+        padding: 2px 4px 2px 4px !important;
+        margin: 0px 2px 0px 2px;
+
+        border-radius: 4px;
+        /*width: calc(100% - 16px) !important;*/
+
+        display: inline-block !important;
+    }
+
+    .group-entry-marker{
+
+        float: left;
+        display: none;
+        position: relative;
+
+        margin-top: 28%;
+        margin-left: -8px;
+
+        background-color: white;
+        border-radius: 50%;
+
+        width: 6px;
+        height: 6px;
+
+
+    }
+
 </style>
 
 <div id="header"></div>
+
+<!--
+<div id="emoji-box-container">
+
+</div>
+-->
+
 
 <div id="modalBox">
     <h1 id="modalBoxTitle">-</h1>
@@ -834,23 +961,7 @@
 
     </div>
 
-    <div id="channeltree">
-
-        <!--
-            <ul>
-                <li>Category 1</li>
-                <ul>
-                    <li>Channel 1</li>
-                    <li>Channel 2</li>
-                </ul>
-                <li>Category 2</li>
-                <ul>
-                    <li>Channel 3</li>
-                    <li>Channel 4</li>
-                </ul>
-            </ul>
-        -->
-    </div>
+    <div id="channeltree"></div>
 
     <div id="profile-qa">
 
@@ -880,39 +991,23 @@
 
     <div id="content">
 
-        <!-- Default Message HMTL
-        <div class="message-container">
-            <div class="message-profile-img-container">
-                <img class="message-profile-img" src="https://avatars.githubusercontent.com/u/40896559?v=4">
-            </div>
-
-            <div class="message-profile-info">Shy Devil dfdshgfdkjghfdkgfdfgdfg</div>
-            <div class="message-profile-content">
-                <p>
-                    im a long as fucking text that no one wants to read
-                    im a long as fucking text that no one wants to read
-                    im a long as fucking text that no one wants to read
-                    im a long as fucking text that no one wants to read
-                    im a long as fucking text that no one wants to readim a long as fucking text that no one wants to read
-                    im a long as fucking text that no one wants to read
-                    im a long as fucking text that no one wants to readim a long as fucking text that no one wants to read
-                    im a long as fucking text that no one wants to read
-
-                </p>
-            </div>
-        </div>
-        -->
-
-        <!-- Default user join message
-        <div class="systemAnnouncementChat">
-            <p>User <label class="systemAnnouncementChat username">Shy Devil</label> joined the chat!</p>
-        </div>
-        -->
-
     </div>
 
     <div id="messagebox">
-        <div id="messagebox-media">+</div><input id="messagebox-content" placeholder="Enter your text message here" type="text" onkeydown="sendMessage(this)"><div id="message-actions">~ # *</div>
+        <div id="messagebox-media">+</div>
+        <input id="messagebox-content" placeholder="Enter your text message here"
+               onclick="document.getElementById('emoji-box-container').style.display= 'none';"
+               type="text" onkeydown="sendMessage(this)">
+
+        <div id="message-actions">
+
+            <div id="emoji-box-container" style="display: none;">
+
+            </div>
+            <img id="message-actions-image" src="/img/emoji.png" style="width: 40px; height: 40px;margin-top: -10px;background-color: transparent;border-radius: 50%;">
+        </div>
+
+
         <div id="typing-indicator-container"><label id="typing-indicator">Shy Devil is typing...</label></div>
     </div>
 

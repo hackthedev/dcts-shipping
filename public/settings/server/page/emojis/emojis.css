@@ -1,0 +1,97 @@
+#profile_container{
+    padding: 4px;
+
+    width: calc(300px - 8px);
+    height: auto;
+    border-radius: 8px;
+
+    background-color: #202225;
+    color: #ABB8BE;
+}
+
+.profile_headline{
+    text-transform: uppercase;
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+#profile_change_container {
+    float: left;
+    display: block;
+
+    margin: 0 60px 0 0;
+}
+
+
+.profile_input_container {
+    margin: 0 0 20px 0;
+}
+
+
+#settings_profile_save {
+    margin: 20px 0 0 0;
+    padding: 2px 4px 2px 4px;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    background-color: #ABB8BE;
+    color: black;
+    text-align: center;
+    width: 100%;
+}
+
+.emoji-entry {
+    float: left;
+    display: block;
+    margin: 24px 0 0 0;
+    width: 100%;
+}
+
+.emoji-img {
+    float: left;
+    margin: 0px 4px 0px 0px;
+}
+
+.emoji-img img{
+    width: 50px;
+    height: 50px;
+}
+
+.emoji-actions {
+    margin: 0 0 0 15px;
+    float: left;
+    display: inline;
+}
+
+.emoji-action-icon {
+    margin: 8px 0 0 0 ;
+    width: 35px;
+    height: 35px;
+    float: left;
+}
+
+.emoji-name input[type=text]{
+    margin: 15px 0 0 20px;
+
+    width: calc(20%);
+
+    float: left;
+    display: inline-block;
+    vertical-align: center;
+
+    background-color: #292B2F;
+    color: #ABB8BE;
+    outline: none;
+
+    border: 1px solid #70787b;
+    border-radius: 4px;
+
+    padding: 4px 8px 4px 8px;
+}
+
+#emoji-container {
+    margin-bottom: 64px !important;
+}

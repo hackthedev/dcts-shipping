@@ -1,0 +1,8 @@
+[program:dcts]
+directory=/home/example
+command=sh check_dcts.sh
+autostart=true
+autorestart=true
+stderr_logfile=/home/example/err.log
+stdout_logfile=/home/example/out.log
+stopsignal=QUIT

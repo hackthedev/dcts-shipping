@@ -112,5 +112,6 @@
     "servermembers": {
 
     },
-    "ipblacklist": []
+    "ipblacklist": [],
+    "banlist": {}
 }

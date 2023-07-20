@@ -12,6 +12,8 @@
             crossorigin="anonymous"
     ></script>
     <script defer src="settings.js"></script>
+    <script defer src="../../notify.js"></script>
+
     <script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
@@ -160,11 +162,13 @@
             <div id="users">
                 <h2>User Management</h2>
                 <a href='?page=roles' id="manageRoles">Server Roles</a><br id="manageRoles-br">
+                <a href='?page=banlist' id="manageBans">Banned Members</a><br id="manageBans-br">
                 <hr id="users-hr">
             </div>
 
             <div id="media">
                 <h2>Media Settings</h2>
+                <a href='?page=emojis' id="manageEmojis">Emojis</a><br id="manageEmojis-br">
                 <a href='?page=file-uploads' id="manageUploads">File Uploads</a><br id="manageUploads-br">
                 <hr id="media-hr">
             <div>

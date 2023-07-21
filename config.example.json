@@ -22,6 +22,12 @@
             "cert": "/etc/letsencrypt/live/EXAMPLE.COM/cert.pem",
             "chain": "/etc/letsencrypt/live/EXAMPLE.com/chain.pem",
             "enabled": 0
+        },
+        "tenor": {
+            "enabled": 0,
+            "api_key": "verylongrandomid",
+            "client_key": "project-name",
+            "limit": 50
         }
     },
     "serverroles": {

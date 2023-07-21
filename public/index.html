@@ -790,8 +790,8 @@
         background-color: #2F3136;
 
 
-        width: 20%;
-        height: 30%;
+        width: 30%;
+        height: 40%;
         position: fixed;
 
         padding: 8px;
@@ -840,20 +840,52 @@
         inherits: false;
     }
 
-    #emoji-box-header {
-        width: calc(100% - 8px);
-        background-color: green;
-
+    #emoji-box-header-container{
+        background-color: #40444B;
         margin: -8px;
+        margin-bottom: 8px;
+
         display: block;
         float: left;
 
-        margin-bottom: 12px;
+        width: calc(100% + 2.9%);
+        height: 12%;
 
+        padding: 4px;
+        padding-bottom: -2px;
+    }
+
+    #emoji-entry-container {
+        display: block;
+        float: left;
+        background-color: transparent;
+
+        width: calc(100% - 0%);
+        height: calc(100% - 18%);
+
+        overflow-y: auto;
+    }
+
+    .emoji-box-header {
+        background-color: green;
+
+        display: block;
+        float: left;
         background-color: #40444B;
 
-        padding: 12px;
-        padding-bottom: 0;
+        padding: 12px 12px 0px 12px;
+        margin-right: 8px;
+    }
+
+    .emoji-box-header:hover{
+        cursor: pointer;
+        background-color: #2F3136;
+        border-radius: 8px;
+    }
+
+    .SelectedTab{
+        background-color: #2F3136;
+        border-radius: 8px;
     }
 
     label.mention{
@@ -867,6 +899,8 @@
         /*width: calc(100% - 16px) !important;*/
 
         display: inline-block !important;
+
+        cursor: pointer;
     }
 
     .group-entry-marker{
@@ -885,6 +919,29 @@
         height: 6px;
 
 
+    }
+
+    #gif-searchbar {
+
+        width: 100%;
+        float: left;
+        margin-bottom: 6px;
+        display: none;
+    }
+
+    #gif-searchbar-input {
+
+        width: calc(100% - 2.9%);
+        float: left;
+
+        outline: none;
+        background-color: #40444B;
+        border: 1px solid #40444B;
+        padding: 4px;
+
+        color: white;
+
+        border-radius: 4px;
     }
 
 </style>
@@ -966,7 +1023,7 @@
     <div id="profile-qa">
 
         <div id="profile-qa-img-container">
-            <img id="profile-qa-img">
+            <img id="profile-qa-img" onerror="this.src = '/img/default_pfp.png';">
         </div>
 
         <div id="profile-qa-info">
@@ -1003,7 +1060,35 @@
 
             <div id="emoji-box-container" style="display: none;">
 
+                <div id="emoji-box-header-container">
+                    <div class='emoji-box-header' onclick="getEmojis(); selectEmojiTab(this);"><h2>Emojis</h2></div>
+                    <div class='emoji-box-header' onclick="getGifs(); selectEmojiTab(this);"><h2>GIFs</h2></div>
+                </div>
+                <div id="gif-searchbar"><input autocomplete="off" type="text" id="gif-searchbar-input"></div>
+
+                <div id="emoji-entry-container"></div>
+
+
+                <!--
+                <div id="emoji-box-header-container">
+                    <div class='emoji-box-header'><h2>Emojis</h2></div>
+                    <div class='emoji-box-header'><h2>GIFs</h2></div>
+                </div>
+
+                <div id="emoji-entry-container">-->
+
+                    <!--<div class="emoji-entry" title="${emojiName}" onclick="
+                                                      document.getElementById('messagebox-content').value += ' :${emojiName}: ';
+                                                      document.getElementById('emoji-box-container').style.display = 'none';
+                                                      document.getElementById('messagebox-content').focus();">
+                        <div class="emoji-img">
+                            <img class="emoji" src="/emojis/${emoji}">
+                        </div>
+                    </div>-
+                </div>-->
+
             </div>
+
             <img id="message-actions-image" src="/img/emoji.png" style="width: 40px; height: 40px;margin-top: -10px;background-color: transparent;border-radius: 50%;">
         </div>
 

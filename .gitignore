@@ -1,3 +1,7 @@
-public/uploads
-public/emojis
-README.md
+/logs
+/node_modules
+/config_backups
+/chats
+config.json
+/public/uploads/
+/public/emojis

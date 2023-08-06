@@ -25,7 +25,7 @@
         var channelId = getUrlParams('id');
     }
     catch(e){
-        if(channelId == null || isNaN(channelId) || channelId.length != 4){
+        if(channelId == null || isNaN(channelId)){
             console.log("The channel was not found.");
         }
     }

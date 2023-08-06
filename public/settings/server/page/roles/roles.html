@@ -89,6 +89,11 @@
         </p>
 
         <hr>
+        <p id="muteUsers" onclick="tickSetting(this);">Mute users
+            <input type="checkbox"><br>
+        </p>
+
+        <hr>
         <p id="administrator" onclick="tickSetting(this);">Administrator
             <input type="checkbox"><br>
             <label>Will grand all permissions</label>
@@ -103,7 +108,7 @@
         </p>
 
         <hr>
-        <p id="createCategory" onclick="tickSetting(this);">Create new Channel Categories
+        <p id="createCategory" onclick="tickSetting(this);">Create new Categories
             <input type="checkbox">
         </p>
 
@@ -118,38 +123,27 @@
         </p>
 
         <hr>
-        <p id="createChannel" onclick="tickSetting(this);">Create Channels
-            <input type="checkbox">
-        </p>
-
-
-        <hr>
         <p id="manageChannels" onclick="tickSetting(this);">Manage Channels
             <input type="checkbox">
         </p>
 
         <hr>
-        <p id="createGroup" onclick="tickSetting(this);">Create Groups
+        <p id="manageEmojis" onclick="tickSetting(this);">Manage Emojis
             <input type="checkbox">
         </p>
 
         <hr>
-        <p id="deleteGroups" onclick="tickSetting(this);">Delete Groups
+        <p id="manageBans" onclick="tickSetting(this);">Manage Bans
             <input type="checkbox">
         </p>
 
         <hr>
-        <p id="deleteChannel" onclick="tickSetting(this);">Delete Channels
+        <p id="manageGroups" onclick="tickSetting(this);">Manage Groups
             <input type="checkbox">
         </p>
 
         <hr>
-        <p id="deleteCategory" onclick="tickSetting(this);">Delete Categories
-            <input type="checkbox">
-        </p>
-
-        <hr>
-        <p id="deleteMessageOthers" onclick="tickSetting(this);">Manage Messages
+        <p id="manageMessages" onclick="tickSetting(this);">Manage Messages
             <input type="checkbox">
         </p>
 
@@ -163,25 +157,41 @@
         </p>
 
         <hr>
+        <p id="maxUpload-container" >max. Upload File Size
+            <input type="number" id="maxUpload" onchange="saveNumber(this);"><br>
+            <label>
+                max. allowed file size users can upload in this role
+            </label>
+        </p>
+
+        <hr>
         <p id="manageRoles" onclick="tickSetting(this);">Manage Roles
             <input type="checkbox">
+            <label>
+                Users with this permission can edit roles that are lower than their own role
+            </label>
         </p>
 
         <hr>
         <p id="manageMemberRoles" onclick="tickSetting(this);">Manage Member Roles
             <input type="checkbox"><br>
             <label>
-                Users with this permission can assign and remove roles of other users that are below them.
+                Users with this permission can assign and remove roles of other users that are below them but cant edit roles.
             </label>
         </p>
 
         <hr>
-        <p id="manageUploadSettings" onclick="tickSetting(this);">Edit Upload Settings
+        <p id="manageUploads" onclick="tickSetting(this);">Manage Upload Settings
             <input type="checkbox">
         </p>
 
         <hr>
-        <p id="manageRateSettings" onclick="tickSetting(this);">Edit Rate Limit Settings
+        <p id="manageRateSettings" onclick="tickSetting(this);">Manage Rate Limit
+            <input type="checkbox">
+        </p>
+
+        <hr>
+        <p id="bypassRateSettings" onclick="tickSetting(this);">Bypass Rate Limits
             <input type="checkbox">
         </p>
 

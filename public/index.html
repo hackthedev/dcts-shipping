@@ -8,7 +8,6 @@
 
     <script
             src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
-            integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
             crossorigin="anonymous"
     ></script>
     <script defer src="chat.js?v=4"></script>
@@ -85,10 +84,10 @@
     }
 
     #serverbanner-container {
-        height: calc(200px - 40px);
-        width: calc(300px);
+        height: calc(20% - 40px);
+        width: calc(100%);
         background-color: transparent;
-        margin: 0 0 16px 0;
+        margin: 0 0 20px 0;
 
         display: block;
         float: left;
@@ -99,8 +98,8 @@
     }
 
     #serverbanner-image {
-        height: calc(200px - 40px);
-        width: calc(300px);
+        height: calc(100%);
+        width: calc(100%);
         -webkit-transition: transform .5s ease;
 
         object-fit: cover;
@@ -848,11 +847,12 @@
         display: block;
         float: left;
 
-        width: calc(100% + 2.9%);
+        width: calc(100% + 2.7%);
         height: 12%;
 
         padding: 4px;
         padding-bottom: -2px;
+        padding-top: 12px;
     }
 
     #emoji-entry-container {
@@ -861,9 +861,13 @@
         background-color: transparent;
 
         width: calc(100% - 0%);
-        height: calc(100% - 18%);
+        height: calc(100% - 18% - 0%);
 
         overflow-y: auto;
+    }
+
+    .emoji-box-header h2{
+        margin: 0;
     }
 
     .emoji-box-header {
@@ -873,7 +877,7 @@
         float: left;
         background-color: #40444B;
 
-        padding: 12px 12px 0px 12px;
+        padding: 6px 12px 6px 12px;
         margin-right: 8px;
     }
 
@@ -944,6 +948,28 @@
         border-radius: 4px;
     }
 
+    .offline_pfp {
+        filter: grayscale(100%);
+    }
+
+    @keyframes start-change-color {
+        from {
+            background-color: #ed7e07;
+        }
+        to {
+            background-color: #ddb787;
+        }
+    }
+
+    @keyframes stop-change-color {
+        from {
+            background-color: #ed7e07;
+        }
+        to {
+            background-color: #ddb787;
+        }
+    }
+
 </style>
 
 <div id="header"></div>
@@ -980,7 +1006,6 @@
         <h2 class="profile_headline">About Me</h2>
         <div id="profile_aboutme">
             sys-admin. programmer.
-            Personality: Mediator (INFP-A)
 
             Femboy Cartel
             https://discord.gg/cr82MnSAfT
@@ -990,7 +1015,6 @@
         <h2 id="profile_headline">Roles</h2>
         <div id="profile_roles">
             <code class="role"><div class="role_color"></div>Admin</code>
-            <code class="role"><div class="role_color"></div>Member</code>
         </div>
     </div>
 </div>
@@ -1015,7 +1039,6 @@
 <div id="channellist">
     <div id="serverbanner-container">
         <img id="serverbanner-image" src="/img/loading.gif">
-
     </div>
 
     <div id="channeltree"></div>
@@ -1052,8 +1075,8 @@
 
     <div id="messagebox">
         <div id="messagebox-media">+</div>
-        <input id="messagebox-content" placeholder="Enter your text message here"
-               onclick="document.getElementById('emoji-box-container').style.display= 'none';"
+        <input id="messagebox-content" autocomplete="off" placeholder="Enter your text message here"
+               onclick="closeEmojiBox()"
                type="text" onkeydown="sendMessage(this)">
 
         <div id="message-actions">
@@ -1061,8 +1084,8 @@
             <div id="emoji-box-container" style="display: none;">
 
                 <div id="emoji-box-header-container">
-                    <div class='emoji-box-header' onclick="getEmojis(); selectEmojiTab(this);"><h2>Emojis</h2></div>
-                    <div class='emoji-box-header' onclick="getGifs(); selectEmojiTab(this);"><h2>GIFs</h2></div>
+                    <div class='emoji-box-header' id="emoji-box-emojis" onclick="getEmojis(); selectEmojiTab(this);"><h2>Emojis</h2></div>
+                    <div class='emoji-box-header' id="emoji-box-gifs" onclick="getGifs(); selectEmojiTab(this);"><h2>GIFs</h2></div>
                 </div>
                 <div id="gif-searchbar"><input autocomplete="off" type="text" id="gif-searchbar-input"></div>
 

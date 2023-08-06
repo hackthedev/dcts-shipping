@@ -4,7 +4,8 @@
         "description": "powered by dcts.chat",
         "port": 2052,
         "setup": 0,
-        "maxUploadStorage": "10",
+        "maxUploadStorage": 10,
+        "maxUserUpload":  2,
         "useCloudflareImageCDN": 0,
         "cfAccountId": "",
         "cfAccountToken": "",
@@ -45,11 +46,25 @@
                 "readMessages": 1,
                 "sendMessages": 1,
                 "uploadFiles": 1,
-                "redeemKey": 1
+                "redeemKey": 1,
+                "maxUpload": 2
             },
             "members": [
 
             ]
+        },
+        "1": {
+            "info": {
+                "id": "1",
+                "name": "Offline",
+                "icon": null,
+                "color": "#7C808A",
+                "deletable": 0,
+                "sortId": 0,
+                "displaySeperate": 1
+            },
+            "permissions": {},
+            "members": []
         },
         "1111": {
             "info": {

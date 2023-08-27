@@ -10,10 +10,13 @@
             src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
             crossorigin="anonymous"
     ></script>
-    <script defer src="chat.js?v=4"></script>
-    <script src="notify.js?v=3"></script>
+
+    <script src="notify.js?v=5"></script>
+    <script src="prompt.js?v=5"></script>
+    <script defer src="chat.js?v=6"></script>
 
     <link href="/settings/account/page/profile/profile.css" rel="stylesheet">
+    <link href="prompt.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
     <title>Document</title>
@@ -84,7 +87,7 @@
     }
 
     #serverbanner-container {
-        height: calc(20% - 40px);
+        height: calc(200px - 40px);
         width: calc(100%);
         background-color: transparent;
         margin: 0 0 20px 0;
@@ -475,6 +478,7 @@
 
     .message-profile-content-message-appended, .message-profile-content-message{
         padding: 4px 8px 4px 8px;
+        text-align: left;
     }
 
     .message-profile-content-message-appended:hover{
@@ -812,6 +816,17 @@
         display: block;
     }
 
+    .emoji-entry img.emoji:hover{
+        cursor: pointer;
+        border-radius: 10%;
+        transition: all 200ms;
+    }
+
+    .emoji-entry img.emoji:not(:hover){
+        border-radius: 0;
+        transition: all 200ms;
+    }
+
     #emoji-box-container .emoji-entry .emoji-img img{
         float: left;
         width: 35px;
@@ -851,8 +866,11 @@
         height: 12%;
 
         padding: 4px;
-        padding-bottom: -2px;
-        padding-top: 12px;
+        padding-left: 8px;
+        padding-bottom: -4px;
+        padding-top: 16px;
+
+        overflow: hidden;
     }
 
     #emoji-entry-container {
@@ -897,7 +915,7 @@
         color: skyblue;
 
         padding: 2px 4px 2px 4px !important;
-        margin: 0px 2px 0px 2px;
+        margin: 0px 2px 0px 0px;
 
         border-radius: 4px;
         /*width: calc(100% - 16px) !important;*/

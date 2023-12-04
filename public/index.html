@@ -50,10 +50,14 @@
         margin: 0;
         padding: 0;
 
-        font-family: 'Roboto', sans-serif;
+
 
         width: 100%;
         height: 100%;
+    }
+
+    * {
+        font-family: 'Roboto', sans-serif;
     }
 
     #header{
@@ -206,7 +210,6 @@
 
         display: block;
         float: left;
-
         border-radius: 10px;
     }
 
@@ -218,10 +221,11 @@
         padding: 8px;
 
         line-height: 150%;
-        height: calc(20px - 3px);
-        width: calc(100% - 32px - 40px - 25px);
+        height: calc(100% - 3px);
+        width: calc(100% - 32px - 40px - 25px - 5px);
 
         outline: none;
+        resize: none !important;
         margin: -20px 8px 0 8px;
     }
 
@@ -863,12 +867,12 @@
         float: left;
 
         width: calc(100% + 2.7%);
-        height: 12%;
+        /* height: 12%; */
 
         padding: 4px;
         padding-left: 8px;
-        padding-bottom: -4px;
-        padding-top: 16px;
+        padding-bottom: 10px;
+        padding-top: 10px;
 
         overflow: hidden;
     }
@@ -1009,6 +1013,132 @@
     <!-- <div class="item">Copy ID</div> -->
 </div>
 
+
+
+
+
+
+
+
+<style>
+    #profile-role-menu{
+        position: fixed;
+        z-index: 100000;
+        width: calc(208px - 16px + 8px);
+        height: 150px;
+
+        padding: 8px;
+        background: #2F3136;
+        color: white;
+        border-radius: 6px;
+        border: 1px solid gray;
+
+        text-overflow: ellipsis;
+        overflow-y: auto;
+        display: none;
+        /*display: none;*/
+    }
+
+    #role-menu-header, #role-menu-search-input{
+        display: inline-block;
+        float: left;
+    }
+
+    #role-menu-header{
+        width: 100%;
+        float: left;
+        position: sticky;
+    }
+
+    #role-menu-search-input {
+        outline: none !important;
+     }
+
+    #role-menu-search-icon {
+        margin-left: 8px;
+    }
+
+    #role-menu-search-icon {
+        background-color: transparent;
+        width: 22px;
+        height: 22px;
+
+        display: block;
+        float: left;
+    }
+
+    #role-menu-list{
+        height: 120px;
+        width: 100%;
+
+        margin-top: 8px;
+
+        display: block;
+        float: left;
+
+        overflow-y: auto;
+    }
+
+    .role-menu-entry {
+        padding: 10px 0 10px 0;
+        border-radius: 4px;
+    }
+
+    .role-menu-entry:hover{
+        background: #484545;
+    }
+
+    #role-menu-search-input:hover, .role-menu-entry:hover, .role-menu-entry label:hover{
+        cursor: pointer;
+    }
+
+    .role-menu-entry-roleName{
+        -webkit-user-select: none;
+        user-select: none;
+    }
+</style>
+
+<div id="profile-role-menu">
+
+    <div id="role-menu-header">
+        <input type="text" id="role-menu-search-input" placeholder="Search Role" oninput="searchForRoleInList(this.value)"><div id="role-menu-search-icon"></div>
+    </div>
+    <div id="role-menu-list">
+
+        <!--
+        <div class="role-menu-entry" id="role-menu-entry-ROLEID" onclick="this.querySelector('input').checked = !this.querySelector('input').checked;">
+            <input type="checkbox" class="role-menu-entry-checkbox" onchange="getParentCheckCheckedAddOrRemoveRole()">
+            <label class="role-menu-entry-roleName">Administrator</label>
+        </div>
+        -->
+
+    </div>
+</div>
+
+<script>
+    function searchForRoleInList(search){
+        var roles = document.getElementById("role-menu-list").querySelectorAll(".role-menu-entry")
+
+
+        roles.forEach(role =>{
+            var roleName = role.querySelector("label").innerText.toLowerCase();
+
+            if(roleName.includes(search.toLowerCase())){
+                console.log("Found " + roleName)
+                role.style.display = "block";
+            }
+            else{
+                console.log("Didnt find " + roleName)
+                role.style.display = "none"
+            }
+        })
+    }
+</script>
+
+
+
+
+
 <div id="profile_container" style="display: none;position: fixed;z-index: 10000;">
     <div id="profile_banner"></div>
 
@@ -1032,7 +1162,7 @@
 
         <h2 id="profile_headline">Roles</h2>
         <div id="profile_roles">
-            <code class="role"><div class="role_color"></div>Admin</code>
+            <code class="role"><div class="role_color"></div>+</code>
         </div>
     </div>
 </div>
@@ -1093,9 +1223,18 @@
 
     <div id="messagebox">
         <div id="messagebox-media">+</div>
+
+        <textarea id="messagebox-content" style="margin-top: -8px;" autocomplete="off" placeholder="Enter your text message here"
+               onclick="closeEmojiBox()"
+               type="text" onkeydown="sendMessage(this)"></textarea>
+
+        <!--
+
         <input id="messagebox-content" autocomplete="off" placeholder="Enter your text message here"
                onclick="closeEmojiBox()"
                type="text" onkeydown="sendMessage(this)">
+
+               -->
 
         <div id="message-actions">
 
@@ -1105,7 +1244,7 @@
                     <div class='emoji-box-header' id="emoji-box-emojis" onclick="getEmojis(); selectEmojiTab(this);"><h2>Emojis</h2></div>
                     <div class='emoji-box-header' id="emoji-box-gifs" onclick="getGifs(); selectEmojiTab(this);"><h2>GIFs</h2></div>
                 </div>
-                <div id="gif-searchbar"><input autocomplete="off" type="text" id="gif-searchbar-input"></div>
+                <div id="gif-searchbar"><input autocomplete="off" placeholder="Search anything, then press enter" type="text" id="gif-searchbar-input"></div>
 
                 <div id="emoji-entry-container"></div>
 

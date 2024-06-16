@@ -1,1 +1,183 @@
-var a0_0x4386eb=a0_0x32bb;(function(_0x45a419,_0x529345){var _0x224324=a0_0x32bb,_0x61744f=_0x45a419();while(!![]){try{var _0x4814e7=parseInt(_0x224324(0x9e))/0x1*(-parseInt(_0x224324(0x94))/0x2)+-parseInt(_0x224324(0x98))/0x3*(parseInt(_0x224324(0xbb))/0x4)+parseInt(_0x224324(0xd0))/0x5*(-parseInt(_0x224324(0xa6))/0x6)+parseInt(_0x224324(0xa5))/0x7+-parseInt(_0x224324(0x95))/0x8*(-parseInt(_0x224324(0xac))/0x9)+-parseInt(_0x224324(0x99))/0xa+-parseInt(_0x224324(0xaf))/0xb*(-parseInt(_0x224324(0xca))/0xc);if(_0x4814e7===_0x529345)break;else _0x61744f['push'](_0x61744f['shift']());}catch(_0x3bf9ab){_0x61744f['push'](_0x61744f['shift']());}}}(a0_0x1442,0x7f2a1),console[a0_0x4386eb(0xb4)]('%c'+a0_0x4386eb(0xa7),a0_0x4386eb(0xb9)),console[a0_0x4386eb(0xb4)]('%c'+'People\x20can\x20use\x20the\x20console\x20to\x20steal\x20your\x20account\x20xo\x20!',a0_0x4386eb(0xce)));var socket=io[a0_0x4386eb(0xad)]();socket['emit']('checkPermission',{'id':getID(),'token':getToken(),'permission':'manageChannels'},function(_0x17b56b){var _0x4059d9=a0_0x4386eb;_0x17b56b[_0x4059d9(0x9c)]==_0x4059d9(0xc9)?window[_0x4059d9(0x9a)][_0x4059d9(0xa9)]=window[_0x4059d9(0x9a)][_0x4059d9(0xb5)]:document['getElementById']('pagebody')[_0x4059d9(0x9b)][_0x4059d9(0xbd)]=_0x4059d9(0xcc);});var page=getUrlParams(a0_0x4386eb(0xc6));function a0_0x1442(){var _0x5f0192=['2101DRNfMv','getElementsByTagName','split','cookie','aboutme','log','origin','appendChild','src','banner','color:\x20#FF0000;\x20-webkit-text-stroke:\x202px\x20black;\x20font-size:\x2072px;\x20font-weight:\x20bold;','page/channel-info/channel-info.html','734768ihjPvg','all','display','.html','then','createElement','text/css','history','script','rel',';\x20expires=','page','page/channel-info/channel-info.js','getTime','denied','78084JdKjzc','page/','block','text','color:\x20#FF0000;\x20-webkit-text-stroke:\x200px\x20black;\x20font-size:\x2020px;\x20font-weight:\x20bold;','replaceState','240pzNcsW','toUTCString','content','charAt','setTime','username','page/channel-info/channel-info.css','pfp','substring','status','media','2abvUBU','39552ezdUjt','innerHTML','type','15KyzAJO','9210580QYJTDk','location','style','permission','.css','249447oEIGPk','Hey\x20im\x20new!','=;\x20Path=/;\x20Expires=Thu,\x2001\x20Jan\x201970\x2000:00:01\x20GMT;','search','head','getElementById','token','6626599TarffR','9876UCzFuG','WAIT!','length','href','get',';\x20path=/','909rWYRdi','connect','stylesheet'];a0_0x1442=function(){return _0x5f0192;};return a0_0x1442();}if(page==null){fetch(a0_0x4386eb(0xba))[a0_0x4386eb(0xbf)](_0x881f86=>_0x881f86[a0_0x4386eb(0xcd)]())[a0_0x4386eb(0xbf)](_0x5eef79=>document['getElementById'](a0_0x4386eb(0xd2))[a0_0x4386eb(0x96)]=_0x5eef79);var head=document[a0_0x4386eb(0xb0)](a0_0x4386eb(0xa2))[0x0],link=document[a0_0x4386eb(0xc0)]('link');link[a0_0x4386eb(0xc4)]=a0_0x4386eb(0xae),link[a0_0x4386eb(0x97)]='text/css',link['href']=a0_0x4386eb(0xd6),link[a0_0x4386eb(0xda)]=a0_0x4386eb(0xbc),head['appendChild'](link);var jsc=document['createElement'](a0_0x4386eb(0xc3));jsc['src']=a0_0x4386eb(0xc7);;head[a0_0x4386eb(0xb6)](jsc);}else{fetch(a0_0x4386eb(0xcb)+getUrlParams(a0_0x4386eb(0xc6))+'/'+getUrlParams(a0_0x4386eb(0xc6))+a0_0x4386eb(0xbe))[a0_0x4386eb(0xbf)](_0x1aa447=>_0x1aa447['text']())[a0_0x4386eb(0xbf)](_0x72dc7c=>document[a0_0x4386eb(0xa3)](a0_0x4386eb(0xd2))['innerHTML']=_0x72dc7c);var head=document['getElementsByTagName'](a0_0x4386eb(0xa2))[0x0],link=document[a0_0x4386eb(0xc0)]('link');link[a0_0x4386eb(0xc4)]='stylesheet',link[a0_0x4386eb(0x97)]=a0_0x4386eb(0xc1),link[a0_0x4386eb(0xa9)]=a0_0x4386eb(0xcb)+page+'/'+page+a0_0x4386eb(0x9d),link[a0_0x4386eb(0xda)]=a0_0x4386eb(0xbc),head[a0_0x4386eb(0xb6)](link);var jsc=document[a0_0x4386eb(0xc0)](a0_0x4386eb(0xc3));jsc[a0_0x4386eb(0xb7)]='page/'+page+'/'+page+'.js',head[a0_0x4386eb(0xb6)](jsc);}function a0_0x32bb(_0x35a221,_0x57df52){var _0x1442fd=a0_0x1442();return a0_0x32bb=function(_0x32bba3,_0x307392){_0x32bba3=_0x32bba3-0x94;var _0x3147b4=_0x1442fd[_0x32bba3];return _0x3147b4;},a0_0x32bb(_0x35a221,_0x57df52);}function setCookie(_0x140a95,_0x1f27b9,_0x38cf22){var _0x1b3a28=a0_0x4386eb,_0x187b56='';if(_0x38cf22){var _0x14b1e7=new Date();_0x14b1e7[_0x1b3a28(0xd4)](_0x14b1e7[_0x1b3a28(0xc8)]()+_0x38cf22*0x18*0x3c*0x3c*0x3e8),_0x187b56=_0x1b3a28(0xc5)+_0x14b1e7[_0x1b3a28(0xd1)]();}document[_0x1b3a28(0xb2)]=_0x140a95+'='+(_0x1f27b9||'')+_0x187b56+_0x1b3a28(0xab);}function getCookie(_0x27cbef){var _0x3c4c45=a0_0x4386eb,_0x4125b8=_0x27cbef+'=',_0x48733f=document[_0x3c4c45(0xb2)][_0x3c4c45(0xb1)](';');for(var _0x2cd91d=0x0;_0x2cd91d<_0x48733f[_0x3c4c45(0xa8)];_0x2cd91d++){var _0x3e06d2=_0x48733f[_0x2cd91d];while(_0x3e06d2[_0x3c4c45(0xd3)](0x0)=='\x20')_0x3e06d2=_0x3e06d2[_0x3c4c45(0xd8)](0x1,_0x3e06d2[_0x3c4c45(0xa8)]);if(_0x3e06d2['indexOf'](_0x4125b8)==0x0)return _0x3e06d2[_0x3c4c45(0xd8)](_0x4125b8[_0x3c4c45(0xa8)],_0x3e06d2['length']);}return null;}function eraseCookie(_0x1dede0){var _0xecf069=a0_0x4386eb;document[_0xecf069(0xb2)]=_0x1dede0+_0xecf069(0xa0);}function setUrl(_0x2dc101){var _0x2d1269=a0_0x4386eb;window[_0x2d1269(0xc2)][_0x2d1269(0xcf)](null,null,_0x2dc101);}function getUrlParams(_0x2df845){var _0x293219=a0_0x4386eb,_0x3fa224=window[_0x293219(0x9a)][_0x293219(0xa1)],_0x1cead4=new URLSearchParams(_0x3fa224),_0x55eb11=_0x1cead4[_0x293219(0xaa)](_0x2df845);return _0x55eb11;}function getToken(){var _0x81847d=a0_0x4386eb,_0x54227c=getCookie(_0x81847d(0xa4));return _0x54227c==null||_0x54227c[_0x81847d(0xa8)]<=0x0?null:_0x54227c;}function getAboutme(){var _0x4a18f5=a0_0x4386eb,_0x4c2cf2=getCookie(_0x4a18f5(0xb3));return _0x4c2cf2==null||_0x4c2cf2[_0x4a18f5(0xa8)]<=0x0?'':_0x4c2cf2;}function getBanner(){var _0xa5c89d=a0_0x4386eb,_0x3d88ea=getCookie(_0xa5c89d(0xb8));return _0x3d88ea==null||_0x3d88ea[_0xa5c89d(0xa8)]<=0x0?'':_0x3d88ea;}function getID(){var _0x195288=a0_0x4386eb,_0x2e7292=getCookie('id');return _0x2e7292==null||_0x2e7292[_0x195288(0xa8)]!=0xc?(_0x2e7292=generateId(0xc),setCookie('id',_0x2e7292,0x168),_0x2e7292):_0x2e7292;}function getPFP(){var _0x2c0241=a0_0x4386eb,_0x433097=getCookie(_0x2c0241(0xd7));if(_0x433097==null||_0x433097[_0x2c0241(0xa8)]<=0x0)return _0x433097[_0x2c0241(0xa8)]<=0x0&&(_0x433097='https://wallpapers-clan.com/wp-content/uploads/2022/05/cute-pfp-25.jpg'),setCookie(_0x2c0241(0xd7),_0x433097,0x168),_0x433097;return _0x433097;}function getStatus(){var _0x41d9a8=a0_0x4386eb,_0x2de236=getCookie(_0x41d9a8(0xd9));return _0x2de236==null||_0x2de236[_0x41d9a8(0xa8)]<=0x0?(setCookie(_0x41d9a8(0xd9),_0x41d9a8(0x9f),0x168),_0x2de236):_0x2de236;}function getUsername(){var _0x3eba04=a0_0x4386eb,_0x4fdd3d=getCookie(_0x3eba04(0xd5));if(_0x4fdd3d==null||_0x4fdd3d[_0x3eba04(0xa8)]<=0x0){_0x4fdd3d=prompt('Whats\x20your\x20username?');if(_0x4fdd3d[_0x3eba04(0xa8)]>0x0)return setCookie(_0x3eba04(0xd5),_0x4fdd3d,0x168),_0x4fdd3d;}else return _0x4fdd3d;}
+console.log("%c" + "WAIT!", "color: #FF0000; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold;");
+console.log("%c" + "People can use the console to steal your account xo !", "color: #FF0000; -webkit-text-stroke: 0px black; font-size: 20px; font-weight: bold;");
+
+// IMPORTANT! By default, socket.io() connects to the host that
+// served the page, so we dont have to pass the server url
+var socket = io.connect();
+
+socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageChannels" }, function (response) {
+    if(response.permission == "denied"){
+        window.location.href = window.location.origin;
+    }
+    else{
+        document.getElementById("pagebody").style.display = "block";
+    }
+});
+
+
+var page = getUrlParams("page");
+
+if(page == null){
+
+    fetch(`page/channel-info/channel-info.html`)
+        .then(response=> response.text())
+        .then(text=> document.getElementById('content').innerHTML = text);
+
+    var head  = document.getElementsByTagName('head')[0];
+    var link  = document.createElement('link');
+    link.rel  = 'stylesheet';
+    link.type = 'text/css';
+    link.href = `page/channel-info/channel-info.css`;
+    link.media = 'all';
+    head.appendChild(link);
+
+    var jsc  = document.createElement('script');
+    jsc.src = "page/channel-info/channel-info.js";;
+    head.appendChild(jsc);
+}
+else{
+    fetch(`page/${getUrlParams("page")}/${getUrlParams("page")}.html`)
+        .then(response=> response.text())
+        .then(text=> document.getElementById('content').innerHTML = text);
+
+    var head  = document.getElementsByTagName('head')[0];
+    var link  = document.createElement('link');
+    link.rel  = 'stylesheet';
+    link.type = 'text/css';
+    link.href = `page/${page}/${page}.css`;
+    link.media = 'all';
+    head.appendChild(link);
+
+    var jsc  = document.createElement('script');
+    jsc.src = `page/${page}/${page}.js`;
+
+    head.appendChild(jsc);
+}
+
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+function eraseCookie(name) {
+    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+
+function setUrl(param){
+    window.history.replaceState(null, null, param); // or pushState
+}
+
+function getUrlParams(param){
+    var url = window.location.search;
+    var urlParams = new URLSearchParams(url);
+    var urlChannel = urlParams.get(param);
+
+    return urlChannel;
+}
+
+function getToken(){
+    var token = getCookie("token");
+
+    if(token == null || token.length <= 0){
+        return null;
+    }
+    else{
+        return token;
+    }
+}
+
+function getAboutme(){
+    var aboutme = getCookie("aboutme");
+
+    if(aboutme == null || aboutme.length <= 0){
+
+        return "";
+    }
+    else{
+        //updateUsernameOnUI(aboutme);
+        return aboutme;
+    }
+}
+
+function getBanner(){
+    var banner = getCookie("banner");
+
+    if(banner == null || banner.length <= 0){
+        return "";
+    }
+    else{
+        //updateUsernameOnUI(aboutme);
+        return banner;
+    }
+}
+
+function getID(){
+    var id = getCookie("id");
+
+    if(id == null || id.length != 12){
+        id = generateId(12);
+        setCookie("id", id, 360);
+        return id;
+    }
+    else{
+        return id;
+    }
+}
+
+function getPFP(){
+    var pfp = getCookie("pfp");
+
+    if(pfp == null || pfp.length <= 0){
+
+        if(pfp.length <= 0){
+            pfp = "https://wallpapers-clan.com/wp-content/uploads/2022/05/cute-pfp-25.jpg";
+        }
+        setCookie("pfp", pfp, 360);
+        return pfp;
+    }
+
+    return pfp;
+}
+
+function getStatus(){
+    var status = getCookie("status");
+
+    if(status == null || status.length <= 0){
+        setCookie("status", "Hey im new!", 360);
+        return status;
+    }
+    else{
+        return status;
+    }
+}
+
+function getUsername(){
+    var username = getCookie("username");
+
+    if(username == null || username.length <= 0){
+        username = prompt("Whats your username?");
+
+        if(username.length > 0){
+            setCookie("username", username, 360);
+            return username;
+        }
+    }
+    else{
+        return username;
+    }
+}

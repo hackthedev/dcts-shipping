@@ -1,1 +1,183 @@
-var a0_0x488c40=a0_0x58c9;(function(_0x3a6e4b,_0x51bc07){var _0x8a554b=a0_0x58c9,_0x4a3898=_0x3a6e4b();while(!![]){try{var _0x2c1878=-parseInt(_0x8a554b(0xea))/0x1*(parseInt(_0x8a554b(0xd4))/0x2)+parseInt(_0x8a554b(0xd5))/0x3+-parseInt(_0x8a554b(0xeb))/0x4+-parseInt(_0x8a554b(0xc1))/0x5*(-parseInt(_0x8a554b(0xd9))/0x6)+parseInt(_0x8a554b(0xe6))/0x7+-parseInt(_0x8a554b(0xdc))/0x8+parseInt(_0x8a554b(0xed))/0x9*(-parseInt(_0x8a554b(0xd1))/0xa);if(_0x2c1878===_0x51bc07)break;else _0x4a3898['push'](_0x4a3898['shift']());}catch(_0x2db99c){_0x4a3898['push'](_0x4a3898['shift']());}}}(a0_0x1831,0xc14ec),console[a0_0x488c40(0xb5)]('%c'+a0_0x488c40(0xbc),a0_0x488c40(0xba)),console['log']('%c'+a0_0x488c40(0xf9),a0_0x488c40(0xd3)));var socket=io[a0_0x488c40(0xd2)]();socket[a0_0x488c40(0xc7)](a0_0x488c40(0xf0),{'id':getID(),'token':getToken(),'permission':a0_0x488c40(0xc8)},function(_0x1f89db){var _0x517934=a0_0x488c40;_0x1f89db[_0x517934(0xe9)]==_0x517934(0xcd)?window[_0x517934(0xe0)]['href']=window[_0x517934(0xe0)][_0x517934(0xc9)]:document[_0x517934(0xcb)]('pagebody')[_0x517934(0xbb)]['display']=_0x517934(0xce);});var page=getUrlParams(a0_0x488c40(0xc4));if(page==null){fetch('page/group-info/group-info.html')[a0_0x488c40(0xe5)](_0x44de9d=>_0x44de9d[a0_0x488c40(0xe4)]())['then'](_0x23cf44=>document[a0_0x488c40(0xcb)]('content')[a0_0x488c40(0xd0)]=_0x23cf44);var head=document[a0_0x488c40(0xcc)](a0_0x488c40(0xf7))[0x0],link=document['createElement'](a0_0x488c40(0xf8));link[a0_0x488c40(0xb9)]=a0_0x488c40(0xbd),link[a0_0x488c40(0xc5)]=a0_0x488c40(0xcf),link['href']=a0_0x488c40(0xd8),link[a0_0x488c40(0xda)]=a0_0x488c40(0xe1),head[a0_0x488c40(0xc0)](link);var jsc=document[a0_0x488c40(0xd7)](a0_0x488c40(0xf1));jsc[a0_0x488c40(0xc3)]='page/group-info/group-info.js';;head['appendChild'](jsc);}else{fetch(a0_0x488c40(0xfa)+getUrlParams(a0_0x488c40(0xc4))+'/'+getUrlParams('page')+'.html')[a0_0x488c40(0xe5)](_0x1e04a3=>_0x1e04a3['text']())[a0_0x488c40(0xe5)](_0x50cf53=>document[a0_0x488c40(0xcb)]('content')[a0_0x488c40(0xd0)]=_0x50cf53);var head=document[a0_0x488c40(0xcc)](a0_0x488c40(0xf7))[0x0],link=document[a0_0x488c40(0xd7)](a0_0x488c40(0xf8));link[a0_0x488c40(0xb9)]=a0_0x488c40(0xbd),link['type']='text/css',link['href']='page/'+page+'/'+page+a0_0x488c40(0xf6),link[a0_0x488c40(0xda)]=a0_0x488c40(0xe1),head['appendChild'](link);var jsc=document[a0_0x488c40(0xd7)](a0_0x488c40(0xf1));jsc['src']=a0_0x488c40(0xfa)+page+'/'+page+a0_0x488c40(0xe3),head['appendChild'](jsc);}function setCookie(_0x12e74a,_0x5b973e,_0x3fb201){var _0x3f3415=a0_0x488c40,_0xb71a8='';if(_0x3fb201){var _0x17d6b4=new Date();_0x17d6b4[_0x3f3415(0xdd)](_0x17d6b4[_0x3f3415(0xbe)]()+_0x3fb201*0x18*0x3c*0x3c*0x3e8),_0xb71a8=_0x3f3415(0xec)+_0x17d6b4[_0x3f3415(0xb7)]();}document['cookie']=_0x12e74a+'='+(_0x5b973e||'')+_0xb71a8+_0x3f3415(0xc2);}function a0_0x58c9(_0x4d2e1e,_0x285751){var _0x1831cc=a0_0x1831();return a0_0x58c9=function(_0x58c9ba,_0x212221){_0x58c9ba=_0x58c9ba-0xb5;var _0x5836cd=_0x1831cc[_0x58c9ba];return _0x5836cd;},a0_0x58c9(_0x4d2e1e,_0x285751);}function getCookie(_0x1b228c){var _0x59898c=a0_0x488c40,_0x15674c=_0x1b228c+'=',_0xcca27c=document[_0x59898c(0xd6)][_0x59898c(0xb8)](';');for(var _0x16c9fd=0x0;_0x16c9fd<_0xcca27c[_0x59898c(0xf2)];_0x16c9fd++){var _0xbcc385=_0xcca27c[_0x16c9fd];while(_0xbcc385[_0x59898c(0xee)](0x0)=='\x20')_0xbcc385=_0xbcc385[_0x59898c(0xdb)](0x1,_0xbcc385['length']);if(_0xbcc385[_0x59898c(0xf4)](_0x15674c)==0x0)return _0xbcc385['substring'](_0x15674c[_0x59898c(0xf2)],_0xbcc385[_0x59898c(0xf2)]);}return null;}function eraseCookie(_0x13bf5c){var _0x3a0b73=a0_0x488c40;document[_0x3a0b73(0xd6)]=_0x13bf5c+'=;\x20Path=/;\x20Expires=Thu,\x2001\x20Jan\x201970\x2000:00:01\x20GMT;';}function setUrl(_0x3dedbe){var _0x56a7df=a0_0x488c40;window[_0x56a7df(0xde)][_0x56a7df(0xfb)](null,null,_0x3dedbe);}function a0_0x1831(){var _0x220526=['pfp','checkPermission','script','length','/img/default_pfp.png','indexOf','status','.css','head','link','People\x20can\x20use\x20the\x20console\x20to\x20steal\x20your\x20account\x20xo\x20!','page/','replaceState','log','get','toUTCString','split','rel','color:\x20#FF0000;\x20-webkit-text-stroke:\x202px\x20black;\x20font-size:\x2072px;\x20font-weight:\x20bold;','style','WAIT!','stylesheet','getTime','Whats\x20your\x20username?','appendChild','645IsUqkV',';\x20path=/','src','page','type','Hey\x20im\x20new!','emit','manageGRoups','origin','banner','getElementById','getElementsByTagName','denied','block','text/css','innerHTML','814730uluURs','connect','color:\x20#FF0000;\x20-webkit-text-stroke:\x200px\x20black;\x20font-size:\x2020px;\x20font-weight:\x20bold;','12982nYwyxq','2248344MdQcFI','cookie','createElement','page/group-info/group-info.css','43992QLNrGo','media','substring','2045552jxqfFu','setTime','history','aboutme','location','all','token','.js','text','then','8197707NLTbvD','search','username','permission','163sLlUFa','1739880pFCTbE',';\x20expires=','36MuoIGr','charAt'];a0_0x1831=function(){return _0x220526;};return a0_0x1831();}function getUrlParams(_0xf16124){var _0x3eb237=a0_0x488c40,_0x358314=window[_0x3eb237(0xe0)][_0x3eb237(0xe7)],_0x230465=new URLSearchParams(_0x358314),_0x56950d=_0x230465[_0x3eb237(0xb6)](_0xf16124);return _0x56950d;}function getToken(){var _0x1302c0=a0_0x488c40,_0x7cdeeb=getCookie(_0x1302c0(0xe2));return _0x7cdeeb==null||_0x7cdeeb[_0x1302c0(0xf2)]<=0x0?null:_0x7cdeeb;}function getAboutme(){var _0x56b58f=a0_0x488c40,_0x4d0472=getCookie(_0x56b58f(0xdf));return _0x4d0472==null||_0x4d0472[_0x56b58f(0xf2)]<=0x0?'':_0x4d0472;}function getBanner(){var _0xa6f66d=a0_0x488c40,_0x5edff0=getCookie(_0xa6f66d(0xca));return _0x5edff0==null||_0x5edff0['length']<=0x0?'':_0x5edff0;}function getID(){var _0x682b94=a0_0x488c40,_0x91fd3d=getCookie('id');return _0x91fd3d==null||_0x91fd3d[_0x682b94(0xf2)]!=0xc?(_0x91fd3d=generateId(0xc),setCookie('id',_0x91fd3d,0x168),_0x91fd3d):_0x91fd3d;}function getPFP(){var _0x3b494c=a0_0x488c40,_0xc0376c=getCookie(_0x3b494c(0xef));if(_0xc0376c==null||_0xc0376c[_0x3b494c(0xf2)]<=0x0)return _0xc0376c[_0x3b494c(0xf2)]<=0x0&&(_0xc0376c=_0x3b494c(0xf3)),setCookie(_0x3b494c(0xef),_0xc0376c,0x168),_0xc0376c;return _0xc0376c;}function getStatus(){var _0x1a4297=a0_0x488c40,_0x213ece=getCookie(_0x1a4297(0xf5));return _0x213ece==null||_0x213ece[_0x1a4297(0xf2)]<=0x0?(setCookie(_0x1a4297(0xf5),_0x1a4297(0xc6),0x168),_0x213ece):_0x213ece;}function getUsername(){var _0x4b505a=a0_0x488c40,_0x539382=getCookie(_0x4b505a(0xe8));if(_0x539382==null||_0x539382[_0x4b505a(0xf2)]<=0x0){_0x539382=prompt(_0x4b505a(0xbf));if(_0x539382[_0x4b505a(0xf2)]>0x0)return setCookie(_0x4b505a(0xe8),_0x539382,0x168),_0x539382;}else return _0x539382;}
+console.log("%c" + "WAIT!", "color: #FF0000; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold;");
+console.log("%c" + "People can use the console to steal your account xo !", "color: #FF0000; -webkit-text-stroke: 0px black; font-size: 20px; font-weight: bold;");
+
+// IMPORTANT! By default, socket.io() connects to the host that
+// served the page, so we dont have to pass the server url
+var socket = io.connect();
+
+socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageGRoups" }, function (response) {
+    if(response.permission == "denied"){
+        window.location.href = window.location.origin;
+    }
+    else{
+        document.getElementById("pagebody").style.display = "block";
+    }
+});
+
+
+var page = getUrlParams("page");
+
+if(page == null){
+
+    fetch(`page/group-info/group-info.html`)
+        .then(response=> response.text())
+        .then(text=> document.getElementById('content').innerHTML = text);
+
+    var head  = document.getElementsByTagName('head')[0];
+    var link  = document.createElement('link');
+    link.rel  = 'stylesheet';
+    link.type = 'text/css';
+    link.href = `page/group-info/group-info.css`;
+    link.media = 'all';
+    head.appendChild(link);
+
+    var jsc  = document.createElement('script');
+    jsc.src = "page/group-info/group-info.js";;
+    head.appendChild(jsc);
+}
+else{
+    fetch(`page/${getUrlParams("page")}/${getUrlParams("page")}.html`)
+        .then(response=> response.text())
+        .then(text=> document.getElementById('content').innerHTML = text);
+
+    var head  = document.getElementsByTagName('head')[0];
+    var link  = document.createElement('link');
+    link.rel  = 'stylesheet';
+    link.type = 'text/css';
+    link.href = `page/${page}/${page}.css`;
+    link.media = 'all';
+    head.appendChild(link);
+
+    var jsc  = document.createElement('script');
+    jsc.src = `page/${page}/${page}.js`;
+
+    head.appendChild(jsc);
+}
+
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+function eraseCookie(name) {
+    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+
+function setUrl(param){
+    window.history.replaceState(null, null, param); // or pushState
+}
+
+function getUrlParams(param){
+    var url = window.location.search;
+    var urlParams = new URLSearchParams(url);
+    var urlChannel = urlParams.get(param);
+
+    return urlChannel;
+}
+
+function getToken(){
+    var token = getCookie("token");
+
+    if(token == null || token.length <= 0){
+        return null;
+    }
+    else{
+        return token;
+    }
+}
+
+function getAboutme(){
+    var aboutme = getCookie("aboutme");
+
+    if(aboutme == null || aboutme.length <= 0){
+
+        return "";
+    }
+    else{
+        //updateUsernameOnUI(aboutme);
+        return aboutme;
+    }
+}
+
+function getBanner(){
+    var banner = getCookie("banner");
+
+    if(banner == null || banner.length <= 0){
+        return "";
+    }
+    else{
+        //updateUsernameOnUI(aboutme);
+        return banner;
+    }
+}
+
+function getID(){
+    var id = getCookie("id");
+
+    if(id == null || id.length != 12){
+        id = generateId(12);
+        setCookie("id", id, 360);
+        return id;
+    }
+    else{
+        return id;
+    }
+}
+
+function getPFP(){
+    var pfp = getCookie("pfp");
+
+    if(pfp == null || pfp.length <= 0){
+
+        if(pfp.length <= 0){
+            pfp = "/img/default_pfp.png";
+        }
+        setCookie("pfp", pfp, 360);
+        return pfp;
+    }
+
+    return pfp;
+}
+
+function getStatus(){
+    var status = getCookie("status");
+
+    if(status == null || status.length <= 0){
+        setCookie("status", "Hey im new!", 360);
+        return status;
+    }
+    else{
+        return status;
+    }
+}
+
+function getUsername(){
+    var username = getCookie("username");
+
+    if(username == null || username.length <= 0){
+        username = prompt("Whats your username?");
+
+        if(username.length > 0){
+            setCookie("username", username, 360);
+            return username;
+        }
+    }
+    else{
+        return username;
+    }
+}

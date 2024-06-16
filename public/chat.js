@@ -1,1 +1,2621 @@
-var a0_0x2644ce=a0_0x5626;(function(_0x1165e7,_0x252694){var _0x11f20c=a0_0x5626,_0x1bac11=_0x1165e7();while(!![]){try{var _0xa8d7bd=-parseInt(_0x11f20c(0x370))/0x1+parseInt(_0x11f20c(0x2a0))/0x2+-parseInt(_0x11f20c(0x279))/0x3+parseInt(_0x11f20c(0x2c7))/0x4+parseInt(_0x11f20c(0x1dc))/0x5+parseInt(_0x11f20c(0x2c2))/0x6+parseInt(_0x11f20c(0x332))/0x7*(-parseInt(_0x11f20c(0x346))/0x8);if(_0xa8d7bd===_0x252694)break;else _0x1bac11['push'](_0x1bac11['shift']());}catch(_0x2ab1a5){_0x1bac11['push'](_0x1bac11['shift']());}}}(a0_0x37a1,0x8be32),console[a0_0x2644ce(0x285)]('%c'+a0_0x2644ce(0x24e),a0_0x2644ce(0x20a)),console[a0_0x2644ce(0x285)]('%c'+'People\x20can\x20use\x20the\x20console\x20to\x20steal\x20your\x20account\x20xo\x20!',a0_0x2644ce(0x1d0)));var socket=io[a0_0x2644ce(0x1fe)](),chatlog=document[a0_0x2644ce(0x30b)](a0_0x2644ce(0x314)),channeltree=document['getElementById'](a0_0x2644ce(0x202)),serverlist=document[a0_0x2644ce(0x30b)](a0_0x2644ce(0x239)),groupbanner=document[a0_0x2644ce(0x30b)](a0_0x2644ce(0x256)),memberlist=document['getElementById']('infolist'),typingIndicator=document['getElementById'](a0_0x2644ce(0x2ca)),messageInputBox=document[a0_0x2644ce(0x30b)](a0_0x2644ce(0x2ec)),typetimeout;setupNotify(),setupPrompt(),userJoined();var blockedData=[],blockedDataCounter=[],bypassElement=[],bypassCounter=[];function updateMarkdownLinks(_0x4954bc){var _0x16c111=a0_0x2644ce,_0xc57f3f=document[_0x16c111(0x220)](_0x16c111(0x1bb)),_0x21830b=0x0;_0xc57f3f[_0x16c111(0x355)]<=0x32?_0x21830b=_0xc57f3f[_0x16c111(0x355)]:_0x21830b=0x32;for(var _0x353e7d=_0xc57f3f[_0x16c111(0x355)];_0x353e7d>_0xc57f3f[_0x16c111(0x355)]-_0x21830b;_0x353e7d--){try{if(_0xc57f3f[_0x353e7d]!=null&&_0xc57f3f[_0x353e7d][_0x16c111(0x1ba)]['length']>0x0){var _0xdb6a41=markdown(_0xc57f3f[_0x353e7d][_0x16c111(0x1ba)],_0xc57f3f[_0x353e7d]['id']);_0xdb6a41!=null&&_0xdb6a41!=_0xc57f3f[_0x353e7d][_0x16c111(0x1ba)]&&(bypassCounter[_0xc57f3f[_0x353e7d]['id']]==null?bypassCounter[_0xc57f3f[_0x353e7d]['id']]=0x0:(bypassCounter[_0xc57f3f[_0x353e7d]['id']]>=0x1&&(bypassElement[_0xc57f3f[_0x353e7d]['id']]=0x1),bypassCounter[_0xc57f3f[_0x353e7d]['id']]++),bypassElement[_0xc57f3f[_0x353e7d]['id']]==null&&(_0xc57f3f[_0x353e7d][_0x16c111(0x2bf)]=_0xdb6a41,setTimeout(()=>scrollDown(),0xa)));}}catch(_0x7be467){console[_0x16c111(0x285)](_0x7be467);}}setTimeout(()=>updateMarkdownLinks(_0x4954bc),_0x4954bc);}updateMarkdownLinks(0x7d0);function markdown(_0x496ac0,_0x402c55){var _0x5b719c=a0_0x2644ce;try{if(_0x496ac0==null)return _0x496ac0;try{var _0x56d65b=getUrlFromText(_0x496ac0);_0x56d65b[_0x5b719c(0x2a3)](_0x2e8150=>{var _0x36b35f=_0x5b719c;if(isURL(_0x2e8150)){if(isAudio(_0x496ac0))_0x496ac0=_0x496ac0['replace'](_0x2e8150,_0x36b35f(0x1f0)+_0x402c55+_0x36b35f(0x287)+_0x2e8150[_0x36b35f(0x250)]('/')['pop']()[_0x36b35f(0x250)]('_')[_0x36b35f(0x231)]()+_0x36b35f(0x272)+_0x2e8150+'\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</audio>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20');else{if(isImage(_0x2e8150)==!![])_0x496ac0=_0x496ac0[_0x36b35f(0x349)](_0x2e8150,_0x36b35f(0x29d)+_0x402c55[_0x36b35f(0x349)]('msg-','')+_0x36b35f(0x337)+_0x2e8150+'\x22\x20src=\x22'+_0x2e8150+_0x36b35f(0x36d));else{if(isVideo(_0x496ac0)==!![]){var _0x5ec9d4='<!--<p\x20id=\x22msg-'+_0x402c55+_0x36b35f(0x2a6)+_0x402c55+_0x36b35f(0x252)+_0x2e8150+'\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</video></div><!--</p>-->';_0x496ac0=_0x496ac0[_0x36b35f(0x349)](_0x2e8150,_0x36b35f(0x215)+_0x2e8150+'\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</video></div>');}else _0x2e8150[_0x36b35f(0x241)]()[_0x36b35f(0x1d6)](_0x36b35f(0x1d3))||_0x2e8150[_0x36b35f(0x241)]()['includes'](_0x36b35f(0x1f2))?_0x496ac0=_0x496ac0[_0x36b35f(0x349)](_0x2e8150,createYouTubeEmbed(_0x2e8150,_0x402c55)):_0x496ac0=_0x496ac0[_0x36b35f(0x349)](_0x2e8150,'<a\x20href=\x22'+_0x2e8150+_0x36b35f(0x254)+_0x2e8150+_0x36b35f(0x2bd));}}}});}catch(_0x1ffe46){}return _0x496ac0;}catch(_0x5699b8){}}var disconnected=![],initConnectionCheck=![];async function checkConnection(_0x441106){var _0x2e35d4=a0_0x2644ce;if(initConnectionCheck==![])notify(_0x2e35d4(0x2e4),'info',0x3e8),socket[_0x2e35d4(0x1b7)]==!![]&&(notify(_0x2e35d4(0x261),'success',0x3e8),initConnectionCheck=!![]);else{if(socket['connected']==![]&&initConnectionCheck==!![])disconnected=!![],notify(_0x2e35d4(0x31c),_0x2e35d4(0x213),0x3e8);else socket[_0x2e35d4(0x1b7)]==!![]&&initConnectionCheck==!![]&&disconnected==!![]&&(disconnected=![],notify(_0x2e35d4(0x1ce),_0x2e35d4(0x319)),setTimeout(()=>window['location'][_0x2e35d4(0x34f)](),0x7d0));}setTimeout(()=>checkConnection(_0x441106),_0x441106);}checkConnection(0x7d0);function mictest(){var _0x22d80e=a0_0x2644ce,_0x1779a3={'audio':!![]};navigator[_0x22d80e(0x281)][_0x22d80e(0x2da)](_0x1779a3)['then'](function(_0x25cd59){var _0x139178=_0x22d80e,_0x5557ac=new MediaRecorder(_0x25cd59);_0x5557ac[_0x139178(0x24a)](),_0x5557ac[_0x139178(0x21e)]=function(_0x25c14e){},_0x5557ac[_0x139178(0x278)]=async function(_0x3b76fc){var _0x15f182=_0x139178,_0x1d4fa2=new Blob([_0x3b76fc[_0x15f182(0x2ff)]],{'type':_0x15f182(0x2b0)});socket[_0x15f182(0x2b1)](_0x15f182(0x2f3),{'id':getID(),'token':getToken(),'voice':_0x1d4fa2},function(_0x424202){});},_0x5557ac[_0x139178(0x22b)]=function(_0x46c01e){},setTimeout(function(){_0x5557ac['stop']();},0xa);});}async function getMedia(_0x1bc686){var _0x1d3959=a0_0x2644ce;try{let _0x1b678d=null;_0x1b678d=await navigator[_0x1d3959(0x281)][_0x1d3959(0x2da)](_0x1bc686);var _0x57bb51=new Blob([_0x1b678d],{'type':_0x1d3959(0x2b0)});socket[_0x1d3959(0x2b1)](_0x1d3959(0x2f3),{'id':getID(),'token':getToken(),'voice':_0x57bb51},function(_0x405bb8){}),console['log'](_0x57bb51);let _0x10f08b=new Audio();_0x10f08b[_0x1d3959(0x257)]=_0x1b678d,_0x10f08b[_0x1d3959(0x23a)]();}catch(_0x27ebe4){document[_0x1d3959(0x301)](_0x27ebe4);}}socket['on'](a0_0x2644ce(0x298),function(_0x135d69){var _0x228924=a0_0x2644ce;console[_0x228924(0x285)]('RE');var _0x50d1e2=new Blob([_0x135d69],{'type':'audio/ogg;\x20codecs=opus'});console[_0x228924(0x285)](_0x50d1e2);var _0x4fdc3b=document[_0x228924(0x35a)](_0x228924(0x22e));_0x4fdc3b[_0x228924(0x341)]=window[_0x228924(0x235)][_0x228924(0x327)](_0x50d1e2),_0x4fdc3b[_0x228924(0x23a)]();});const ContextMenu=document[a0_0x2644ce(0x30b)](a0_0x2644ce(0x340)),profile=document[a0_0x2644ce(0x30b)](a0_0x2644ce(0x340));var ContextMenuSelectedMessage;const scope=document[a0_0x2644ce(0x1da)]('body');scope['addEventListener'](a0_0x2644ce(0x2c0),_0x4a01c3=>{var _0x9b8240=a0_0x2644ce;const {clientX:_0xa44731,clientY:_0x63f9a8}=_0x4a01c3;var _0x3961c5=document[_0x9b8240(0x237)](_0xa44731,_0x63f9a8),_0x3ae37a=document[_0x9b8240(0x30b)]('profile_container');if(_0x3961c5['className']==_0x9b8240(0x357)||_0x3961c5[_0x9b8240(0x1ea)][_0x9b8240(0x2d7)](_0x9b8240(0x330))||_0x3961c5[_0x9b8240(0x255)]==_0x9b8240(0x1cd)||_0x3961c5['className']=='message-profile-img'||_0x3961c5[_0x9b8240(0x255)]=='message-profile-info-name'||_0x3961c5[_0x9b8240(0x255)]=='memberlist-member-info\x20name'||_0x3961c5[_0x9b8240(0x255)]=='memberlist-member-info\x20status'||_0x3961c5[_0x9b8240(0x255)]==_0x9b8240(0x32b)){var _0x58080c=_0x3961c5['id'];_0x3961c5['className']==_0x9b8240(0x32b)&&(_0x58080c=_0x58080c[_0x9b8240(0x349)]('mention-','')),getMemberProfile(_0x58080c,_0xa44731,_0x63f9a8);}else{if(_0x3961c5[_0x9b8240(0x255)][_0x9b8240(0x1d6)]('role')&&_0x3961c5['id'][_0x9b8240(0x250)]('-')[0x0]==_0x9b8240(0x2e3))socket[_0x9b8240(0x2b1)](_0x9b8240(0x1d8),{'id':getID(),'token':getToken(),'permission':_0x9b8240(0x268)},function(_0x147acc){var _0x404bd2=_0x9b8240;_0x147acc[_0x404bd2(0x333)]==_0x404bd2(0x356)&&(showRoleMenu(_0xa44731,_0x63f9a8),addRoleFromProfile(_0x3961c5['id'][_0x404bd2(0x250)]('-')[0x1]));});else{if(_0x3961c5[_0x9b8240(0x255)][_0x9b8240(0x1d6)](_0x9b8240(0x275))){}else{if(_0x3961c5['id']==_0x9b8240(0x296)||_0x3961c5['id']==_0x9b8240(0x25e)||_0x3961c5['id']==_0x9b8240(0x30e)||_0x3961c5['id']=='role-menu-search-input'||_0x3961c5['id']==_0x9b8240(0x315)||_0x3961c5[_0x9b8240(0x255)]==_0x9b8240(0x248)||_0x3961c5[_0x9b8240(0x255)]==_0x9b8240(0x1f6))return;_0x3ae37a[_0x9b8240(0x28b)]['display']=_0x9b8240(0x316),_0x3ae37a[_0x9b8240(0x2bf)]='',hideRoleMenu();}}}});function showRoleMenu(_0xeb1a7c,_0x53c5b2){var _0x19419b=a0_0x2644ce,_0x2efa45=document[_0x19419b(0x30b)](_0x19419b(0x296));_0x2efa45[_0x19419b(0x28b)]['display']=_0x19419b(0x234),_0x2efa45['style'][_0x19419b(0x369)]=_0x53c5b2-_0x2efa45[_0x19419b(0x29a)]+'px',_0x2efa45[_0x19419b(0x28b)][_0x19419b(0x21f)]=_0xeb1a7c-_0x2efa45['offsetWidth']-0x14+'px';}function hideRoleMenu(){var _0x4027a9=a0_0x2644ce,_0x5a2a31=document[_0x4027a9(0x30b)]('profile-role-menu');_0x5a2a31[_0x4027a9(0x28b)][_0x4027a9(0x328)]=_0x4027a9(0x316);}scope[a0_0x2644ce(0x210)](a0_0x2644ce(0x306),_0x3c11cc=>{var _0x4e4692=a0_0x2644ce;_0x3c11cc['preventDefault']();const {clientX:_0xea11e6,clientY:_0x5a7039}=_0x3c11cc;var _0xfa5549=document[_0x4e4692(0x237)](_0xea11e6,_0x5a7039);ContextMenuSelectedMessage=_0xfa5549;var _0x2d2e78='onMouseOver=\x22this.style.backgroundColor=\x27#eb5055\x27;\x20this.style.color=\x27white\x27;\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onMouseOut=\x22this.style.backgroundColor=\x27transparent\x27;\x20this.style.color=\x27#eb5055\x27;\x22\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22color:\x20#eb5055;\x22',_0x4c9182='onMouseOver=\x22this.style.backgroundColor=\x27#4ba135\x27;\x20this.style.color=\x27white\x27;\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onMouseOut=\x22this.style.backgroundColor=\x27transparent\x27;\x20this.style.color=\x27#87de54\x27;\x22\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22color:\x20#87de54;\x22',_0x4f699a='onMouseOver=\x22this.style.backgroundColor=\x27#5d7fe3\x27;\x20this.style.color=\x27white\x27;\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onMouseOut=\x22this.style.backgroundColor=\x27transparent\x27;\x20this.style.color=\x27#5d7fe3\x27;\x22\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22color:\x20#5d7fe3;\x22',_0x1cad4b=_0x4e4692(0x2cb);if(_0xfa5549[_0x4e4692(0x255)]==_0x4e4692(0x32a)){var _0xd26e9d=getMessageId(_0xfa5549);resetContextMenuItem(ContextMenu),addContextMenuItem(ContextMenu,_0x4e4692(0x33e),_0x4e4692(0x1cc)+_0xfa5549['id']+_0x4e4692(0x28c));}else{if(_0xfa5549['className']=='memberlist-member-info'||_0xfa5549[_0x4e4692(0x1ea)][_0x4e4692(0x2d7)](_0x4e4692(0x330))||_0xfa5549[_0x4e4692(0x255)]==_0x4e4692(0x1cd)||_0xfa5549['className']=='message-profile-img'||_0xfa5549[_0x4e4692(0x255)]=='memberlist-member-info\x20status'||_0xfa5549['className']==_0x4e4692(0x25f)||_0xfa5549[_0x4e4692(0x255)]=='message-profile-info-name')try{var _0x359a4d=_0xfa5549['id'];console['log'](_0x4e4692(0x2a2)+_0x359a4d),resetContextMenuItem(ContextMenu),socket[_0x4e4692(0x2b1)](_0x4e4692(0x1d8),{'id':getID(),'token':getToken(),'permission':_0x4e4692(0x25a)},function(_0x2da8d5){var _0x4c06f9=_0x4e4692;_0x2da8d5['permission']==_0x4c06f9(0x356)&&addContextMenuItem(ContextMenu,'Ban\x20User','onclick=\x22banUser(\x27'+_0x359a4d+_0x4c06f9(0x290));}),socket[_0x4e4692(0x2b1)](_0x4e4692(0x1d8),{'id':getID(),'token':getToken(),'permission':'kickUsers'},function(_0x5dc888){var _0x478206=_0x4e4692;_0x5dc888[_0x478206(0x333)]==_0x478206(0x356)&&addContextMenuItem(ContextMenu,_0x478206(0x2e6),_0x478206(0x249)+_0x359a4d+_0x478206(0x290));}),addContextMenuItem(ContextMenu,_0x4e4692(0x352),_0x4f699a+(_0x4e4692(0x1c4)+_0x359a4d+_0x4e4692(0x32f))),addContextMenuItem(ContextMenu,'Copy\x20User\x20ID',_0x4e4692(0x1f4)+_0x359a4d+_0x4e4692(0x28c));}catch(_0x44eb2d){console[_0x4e4692(0x285)]('Could\x20get\x20user\x20id\x20from\x20context\x20menu:'),console[_0x4e4692(0x285)](_0x44eb2d);}else{if(_0xfa5549[_0x4e4692(0x255)]==_0x4e4692(0x205))resetContextMenuItem(ContextMenu),addContextMenuItem(ContextMenu,_0x4e4692(0x2e1),_0x4e4692(0x2d5)+_0xfa5549['src']+_0x4e4692(0x28c)),addContextMenuItem(ContextMenu,_0x4e4692(0x21a),_0x4e4692(0x351)+_0xfa5549[_0x4e4692(0x341)]+_0x4e4692(0x28c)),addContextMenuItem(ContextMenu,'Delete\x20Embed',_0x2d2e78+('onclick=\x22deleteMessageFromChat(\x27'+_0xfa5549['id']+'\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22'));else{if(_0xfa5549['id']==_0x4e4692(0x32d)||_0xfa5549['id']==_0x4e4692(0x202))resetContextMenuItem(ContextMenu),socket[_0x4e4692(0x2b1)](_0x4e4692(0x1d8),{'id':getID(),'token':getToken(),'permission':'manageChannels'},function(_0x506f24){var _0x1a736b=_0x4e4692;if(_0x506f24[_0x1a736b(0x333)]==_0x1a736b(0x1e5)){console[_0x1a736b(0x285)](_0x506f24);return;}addContextMenuItem(ContextMenu,'Create\x20Category','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20createCategory();\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22'),addContextMenuItem(ContextMenu,_0x1a736b(0x25d),_0x4f699a+_0x1a736b(0x2f0));});else{if(_0xfa5549['className']=='categoryTrigger')resetContextMenuItem(ContextMenu),socket[_0x4e4692(0x2b1)]('checkPermission',{'id':getID(),'token':getToken(),'permission':_0x4e4692(0x1ef)},function(_0x52d497){var _0x3b1381=_0x4e4692;if(_0x52d497['permission']==_0x3b1381(0x1e5))return;addContextMenuItem(ContextMenu,_0x3b1381(0x358),_0x3b1381(0x2fa)+_0xfa5549['id']+_0x3b1381(0x288));}),socket[_0x4e4692(0x2b1)](_0x4e4692(0x1d8),{'id':getID(),'token':getToken(),'permission':_0x4e4692(0x1ef)},function(_0x467f42){var _0x857e47=_0x4e4692;if(_0x467f42[_0x857e47(0x333)]==_0x857e47(0x1e5))return;addContextMenuItem(ContextMenu,_0x857e47(0x310),'onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20createCategory();\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22');}),socket[_0x4e4692(0x2b1)]('checkPermission',{'id':getID(),'token':getToken(),'permission':'manageChannels'},function(_0x1864c6){var _0x136b84=_0x4e4692;if(_0x1864c6[_0x136b84(0x333)]=='denied')return;addContextMenuItem(ContextMenu,_0x136b84(0x359),_0x2d2e78+(_0x136b84(0x236)+_0xfa5549['id']+_0x136b84(0x28c)));});else{if(_0xfa5549['className']==_0x4e4692(0x206))resetContextMenuItem(ContextMenu),socket[_0x4e4692(0x2b1)](_0x4e4692(0x1d8),{'id':getID(),'token':getToken(),'permission':_0x4e4692(0x1ef)},function(_0x327acd){var _0x1e3c99=_0x4e4692;if(_0x327acd[_0x1e3c99(0x333)]==_0x1e3c99(0x1e5))return;addContextMenuItem(ContextMenu,'Create\x20Channel',_0x1e3c99(0x2fa)+_0xfa5549['id']+_0x1e3c99(0x288));}),socket[_0x4e4692(0x2b1)](_0x4e4692(0x1d8),{'id':getID(),'token':getToken(),'permission':'manageChannels'},function(_0x4e2aa7){var _0x2ab056=_0x4e4692;if(_0x4e2aa7[_0x2ab056(0x333)]=='denied')return;addContextMenuItem(ContextMenu,_0x2ab056(0x26e),_0x4f699a+(_0x2ab056(0x223)+_0xfa5549['id']+'\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22'));}),socket[_0x4e4692(0x2b1)](_0x4e4692(0x1d8),{'id':getID(),'token':getToken(),'permission':'manageChannels'},function(_0xf895d4){var _0x46e0f1=_0x4e4692;if(_0xf895d4[_0x46e0f1(0x333)]==_0x46e0f1(0x1e5))return;addContextMenuItem(ContextMenu,_0x46e0f1(0x2aa),_0x2d2e78+(_0x46e0f1(0x334)+_0xfa5549['id']+'\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22'));});else{if(_0xfa5549['id']==_0x4e4692(0x239))resetContextMenuItem(ContextMenu),socket[_0x4e4692(0x2b1)]('checkPermission',{'id':getID(),'token':getToken(),'permission':'createGroup'},function(_0x3a5bfd){var _0x2907db=_0x4e4692;if(_0x3a5bfd[_0x2907db(0x333)]==_0x2907db(0x1e5))return;addContextMenuItem(ContextMenu,_0x2907db(0x322),_0x2907db(0x33b));});else{if(_0xfa5549[_0x4e4692(0x1ea)]['contains'](_0x4e4692(0x34d)))resetContextMenuItem(ContextMenu),socket[_0x4e4692(0x2b1)](_0x4e4692(0x1d8),{'id':getID(),'token':getToken(),'permission':[_0x4e4692(0x36e),_0x4e4692(0x2b3),_0x4e4692(0x1ef),_0x4e4692(0x2ab),_0x4e4692(0x2b3),_0x4e4692(0x2ac),_0x4e4692(0x22c),_0x4e4692(0x31f),_0x4e4692(0x1c3),'manageRateSettings']},function(_0x5eb7fe){var _0xe68ec6=_0x4e4692;if(_0x5eb7fe[_0xe68ec6(0x333)]=='denied')return;addContextMenuItem(ContextMenu,_0xe68ec6(0x27c),_0x4f699a+_0xe68ec6(0x1fa)),addContextMenuItem(ContextMenu,_0xe68ec6(0x216),_0x4f699a+(_0xe68ec6(0x27f)+_0xfa5549['id']+_0xe68ec6(0x28c)));if(_0x5eb7fe[_0xe68ec6(0x333)]==_0xe68ec6(0x1e5))return;addContextMenuItem(ContextMenu,_0xe68ec6(0x2bc),_0x2d2e78+(_0xe68ec6(0x2d3)+_0xfa5549['id']+_0xe68ec6(0x28c))),addContextMenuItem(ContextMenu,_0xe68ec6(0x1b3),_0xe68ec6(0x309)+_0xfa5549['id']+'\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22');}),socket[_0x4e4692(0x2b1)](_0x4e4692(0x1d8),{'id':getID(),'token':getToken(),'permission':_0x4e4692(0x30c)},function(_0x40616e){var _0x58d6f9=_0x4e4692;if(_0x40616e[_0x58d6f9(0x333)]==_0x58d6f9(0x1e5))return;addContextMenuItem(ContextMenu,_0x58d6f9(0x218),_0x58d6f9(0x232));});else _0xfa5549['id']==_0x4e4692(0x256)?(resetContextMenuItem(ContextMenu),socket[_0x4e4692(0x2b1)](_0x4e4692(0x1d8),{'id':getID(),'token':getToken(),'permission':_0x4e4692(0x36e)},function(_0x46cca7){var _0x5d3990=_0x4e4692;if(_0x46cca7[_0x5d3990(0x333)]==_0x5d3990(0x1e5))return;addContextMenuItem(ContextMenu,_0x5d3990(0x2df),_0x5d3990(0x1fa));}),socket['emit'](_0x4e4692(0x1d8),{'id':getID(),'token':getToken(),'permission':_0x4e4692(0x31e)},function(_0x32478b){var _0xb17db7=_0x4e4692;if(_0x32478b[_0xb17db7(0x333)]==_0xb17db7(0x1e5))return;addContextMenuItem(ContextMenu,'Change\x20Banner',_0xb17db7(0x1c9));})):resetContextMenuItem(ContextMenu);}}}}}}}ContextMenu[_0x4e4692(0x28b)][_0x4e4692(0x369)]=_0x5a7039+'px',ContextMenu[_0x4e4692(0x28b)][_0x4e4692(0x21f)]=_0xea11e6+'px',ContextMenu[_0x4e4692(0x1ea)]['add'](_0x4e4692(0x2e7));}),scope['addEventListener'](a0_0x2644ce(0x2c0),_0x278583=>{var _0x2da675=a0_0x2644ce;_0x278583[_0x2da675(0x1df)][_0x2da675(0x1e9)]!=ContextMenu&&ContextMenu[_0x2da675(0x1ea)]['remove'](_0x2da675(0x2e7));});function editGroup(_0x1d0f18){var _0x5b1edb=a0_0x2644ce;window[_0x5b1edb(0x265)][_0x5b1edb(0x20f)]=_0x5b1edb(0x36a)+_0x1d0f18;}function mentionUser(_0x3213ad){var _0x363b25=a0_0x2644ce;messageInputBox[_0x363b25(0x2d2)]+='\x20<@'+_0x3213ad+'>\x20',messageInputBox[_0x363b25(0x344)]();}function editChannel(_0x254ebf){var _0x13bea7=a0_0x2644ce;window[_0x13bea7(0x265)]['href']=_0x13bea7(0x1ee)+_0x254ebf;}function getMemberProfile(_0x14cb20,_0x36a47b,_0x53cc08){var _0x3e9535=a0_0x2644ce;socket['emit'](_0x3e9535(0x246),{'id':getID(),'token':getToken(),'target':_0x14cb20,'posX':_0x36a47b,'posY':_0x53cc08});}function editServer(){var _0x391f72=a0_0x2644ce;window[_0x391f72(0x265)][_0x391f72(0x20f)]=_0x391f72(0x1d9);}function sortChannels(){var _0x520a6c=a0_0x2644ce;window[_0x520a6c(0x265)]['href']=_0x520a6c(0x289);}function redeemKey(){var _0x3aff57=a0_0x2644ce,_0x5cc3af=prompt(_0x3aff57(0x348));if(_0x5cc3af==null||_0x5cc3af[_0x3aff57(0x355)]<=0x0)return;else socket[_0x3aff57(0x2b1)](_0x3aff57(0x30c),{'id':getID(),'value':_0x5cc3af,'token':getToken()});}function changeGroupIcon(_0x4ccfc9){var _0x512da1=a0_0x2644ce,_0x2aa3f9=prompt(_0x512da1(0x262));if(_0x2aa3f9==null||_0x2aa3f9['length']<=0x0)return;else socket[_0x512da1(0x2b1)](_0x512da1(0x228),{'id':getID(),'value':_0x2aa3f9,'token':getToken(),'group':_0x4ccfc9});}function changeGroupBanner(){var _0x45ac1d=a0_0x2644ce,_0x4e54f9=prompt(_0x45ac1d(0x331));if(_0x4e54f9==null||_0x4e54f9[_0x45ac1d(0x355)]<=0x0)return;else socket[_0x45ac1d(0x2b1)]('updateGroupBanner',{'id':getID(),'value':_0x4e54f9,'token':getToken(),'group':getGroup()});}function createGroup(){var _0x31e9de=a0_0x2644ce,_0x2d57ba=prompt(_0x31e9de(0x1dd));if(_0x2d57ba==null||_0x2d57ba[_0x31e9de(0x355)]<=0x0)return;else socket['emit'](_0x31e9de(0x324),{'id':getID(),'value':_0x2d57ba,'token':getToken()});}function openNewTab(_0x3f77c9){var _0x2cc99e=a0_0x2644ce;window[_0x2cc99e(0x29b)](_0x3f77c9,'_blank');}function createCategory(){var _0x191e38=a0_0x2644ce,_0x571552=prompt(_0x191e38(0x2c5));if(_0x571552==null||_0x571552[_0x191e38(0x355)]<=0x0){console[_0x191e38(0x285)](_0x191e38(0x2a7));return;}else socket[_0x191e38(0x2b1)](_0x191e38(0x2d1),{'id':getID(),'value':_0x571552,'token':getToken(),'group':getGroup()});}function createChannel(_0x25e368){var _0x5e5d42=a0_0x2644ce,_0x469c45=prompt(_0x5e5d42(0x360));if(_0x469c45==null||_0x469c45[_0x5e5d42(0x355)]<=0x0)return;else socket['emit'](_0x5e5d42(0x1e8),{'id':getID(),'value':_0x469c45,'token':getToken(),'group':getGroup()[_0x5e5d42(0x349)](_0x5e5d42(0x2d4),''),'category':_0x25e368[_0x5e5d42(0x349)](_0x5e5d42(0x2cd),'')});}function deleteChannel(_0x1b0f7d){var _0x3c79ba=a0_0x2644ce;console[_0x3c79ba(0x285)](_0x1b0f7d),socket[_0x3c79ba(0x2b1)]('deleteChannel',{'id':getID(),'token':getToken(),'channelId':_0x1b0f7d,'group':getGroup()[_0x3c79ba(0x349)](_0x3c79ba(0x2d4),'')});}function deleteGroup(_0x5bf570){var _0x1123bf=a0_0x2644ce;socket['emit'](_0x1123bf(0x2b2),{'id':getID(),'token':getToken(),'group':_0x5bf570});}function deleteCategory(_0x58b5cc){var _0x19d3cd=a0_0x2644ce;socket['emit'](_0x19d3cd(0x280),{'id':getID(),'token':getToken(),'group':getGroup(),'category':_0x58b5cc});}function getMessageId(_0x596ec2){var _0x1dddf4=a0_0x2644ce;if(_0x596ec2['className']!=_0x1dddf4(0x2e5)){var _0x5482ef=null;return _0x596ec2=_0x596ec2[_0x1dddf4(0x2d8)](_0x1dddf4(0x362)),_0x596ec2['id'];}else return _0x596ec2['id'];}function resetContextMenuItem(_0x1db28){var _0x854fd=a0_0x2644ce;_0x1db28[_0x854fd(0x2bf)]='';}function addContextMenuItem(_0x2d8660,_0x5892fb,_0x200cee=''){var _0x4899fb=a0_0x2644ce,_0x37f4db=_0x4899fb(0x24b)+_0x200cee+'>'+_0x5892fb+_0x4899fb(0x313);_0x2d8660[_0x4899fb(0x2bf)]+=_0x37f4db;}function kickUser(_0xae06e5){var _0x4228ff=a0_0x2644ce,_0x25bbaa=prompt(_0x4228ff(0x336));socket[_0x4228ff(0x2b1)](_0x4228ff(0x22d),{'id':getID(),'token':getToken(),'target':_0xae06e5,'reason':_0x25bbaa});}function banUser(_0x43c2ef){var _0x1489bc=a0_0x2644ce,_0xd29f11=prompt(_0x1489bc(0x336)),_0x2e7d57=prompt(_0x1489bc(0x347));socket['emit']('banUser',{'id':getID(),'token':getToken(),'target':_0x43c2ef,'reason':_0xd29f11,'time':_0x2e7d57});}function getChannelTreeSocket(){var _0x5e613b=a0_0x2644ce;socket[_0x5e613b(0x2b1)]('getChannelTree',{'id':getID(),'token':getToken(),'username':getUsername(),'icon':getPFP(),'group':getGroup()},function(_0x53c87e){var _0x58ae90=_0x5e613b;channeltree[_0x58ae90(0x2bf)]=_0x53c87e[_0x58ae90(0x2ff)],console[_0x58ae90(0x285)](_0x53c87e[_0x58ae90(0x2ff)]);try{document[_0x58ae90(0x1da)](_0x58ae90(0x20e)+getChannel())[_0x58ae90(0x28b)]['color']=_0x58ae90(0x201),document[_0x58ae90(0x1da)]('div\x20#channeltree\x20#category-'+getCategory())['style'][_0x58ae90(0x312)]=_0x58ae90(0x201);var _0x17056e=[];_0x17056e=getCookie('unmarkedMessages');}catch(_0x37528a){}});}function userJoined(){var _0x56346b=a0_0x2644ce;if(getUsername()!=null){var _0x476094=getUsername();socket[_0x56346b(0x2b1)](_0x56346b(0x283),{'id':getID(),'name':_0x476094,'icon':getPFP(),'status':getStatus(),'token':getToken(),'aboutme':getAboutme(),'banner':getBanner()}),socket['emit'](_0x56346b(0x208),{'id':getID(),'room':getRoom(),'token':getToken()}),socket[_0x56346b(0x2b1)]('getGroupBanner',{'id':getID(),'token':getToken(),'username':getUsername(),'icon':getPFP(),'group':getGroup()}),socket[_0x56346b(0x2b1)](_0x56346b(0x1cb),{'id':getID(),'group':getGroup(),'token':getToken(),'username':getUsername(),'icon':getPFP()}),socket[_0x56346b(0x2b1)](_0x56346b(0x299),{'id':getID(),'token':getToken(),'channel':getChannel(),'group':getGroup(),'username':getUsername(),'icon':getPFP()}),getChannelTreeSocket(),socket[_0x56346b(0x2b1)]('getCurrentChannel',{'id':getID(),'token':getToken(),'username':getUsername(),'icon':getPFP(),'group':getGroup(),'category':getCategory(),'channel':getChannel()}),socket['emit'](_0x56346b(0x208),{'id':getID(),'room':getRoom(),'token':getToken()}),getServerInfo(),getChatlog();}else console[_0x56346b(0x285)](_0x56346b(0x276));}window[a0_0x2644ce(0x1de)]=_0x4879b6=>{var _0x580884=a0_0x2644ce;socket[_0x580884(0x2b1)](_0x580884(0x1e0),{'id':getID(),'time':new Date()[_0x580884(0x23c)]()});};function setTyping(){var _0x3ff818=a0_0x2644ce;socket[_0x3ff818(0x2b1)]('isTyping',{'id':getID(),'token':getToken(),'room':getRoom()}),clearTimeout(typetimeout),typetimeout=setTimeout(()=>{var _0x27f3c1=_0x3ff818;socket[_0x27f3c1(0x2b1)](_0x27f3c1(0x34c),{'id':getID(),'token':getToken(),'room':getRoom()});},0x2*0x3e8);}function getRoom(){var _0x3959c0=a0_0x2644ce;return getUrlParams(_0x3959c0(0x28e))+'-'+getUrlParams('category')+'-'+getUrlParams('channel');}function getUrlParams(_0xfafa72){var _0x437d19=a0_0x2644ce,_0x226822=window[_0x437d19(0x265)][_0x437d19(0x214)],_0x3b434d=new URLSearchParams(_0x226822),_0x473417=_0x3b434d[_0x437d19(0x354)](_0xfafa72);return _0x473417;}function changeUsername(){var _0x39b498=a0_0x2644ce,_0x98e565=prompt(_0x39b498(0x2c4),getUsername());_0x98e565[_0x39b498(0x355)]>0x0?(setCookie(_0x39b498(0x1d7),_0x98e565,0x168),updateUsernameOnUI(_0x98e565,!![])):alert(_0x39b498(0x2fc));}function changeStatus(){var _0x1377c5=a0_0x2644ce,_0x40b20b=prompt('What\x20should\x20your\x20new\x20status\x20be?',getStatus());_0x40b20b[_0x1377c5(0x355)]>0x0?(setCookie(_0x1377c5(0x2f5),_0x40b20b,0x168),updateStatusOnUI(_0x40b20b,!![])):alert(_0x1377c5(0x361));}function changePFP(){var _0x222d03=a0_0x2644ce,_0x9b902a=prompt(_0x222d03(0x2de),getPFP());if(_0x9b902a[_0x222d03(0x355)]>0x0)setCookie(_0x222d03(0x1e3),_0x9b902a,0x168),updatePFPOnUI(_0x9b902a,!![]),console[_0x222d03(0x285)](_0x222d03(0x2d6));else{var _0x569e93=confirm(_0x222d03(0x2dc));if(_0x569e93)_0x9b902a='/img/default_pfp.png',setPFP(_0x9b902a);else return;}(_0x9b902a==null||isImage(_0x9b902a)==![])&&(_0x9b902a=_0x222d03(0x291)),setCookie(_0x222d03(0x1e3),_0x9b902a,0x168),updatePFPOnUI(_0x9b902a,!![]);}function updateUsernameOnUI(_0x806e47,_0x16b004=![]){var _0x113f0a=a0_0x2644ce;document[_0x113f0a(0x30b)](_0x113f0a(0x212))[_0x113f0a(0x1ba)]=_0x806e47,_0x16b004==!![]&&socket[_0x113f0a(0x2b1)](_0x113f0a(0x1f8),{'id':getID(),'username':getUsername(),'icon':getPFP()});}function updateStatusOnUI(_0x93abba,_0x1efc13=![]){var _0x3fbe1e=a0_0x2644ce;document[_0x3fbe1e(0x30b)](_0x3fbe1e(0x1f9))['innerText']=_0x93abba,_0x1efc13==!![]&&socket['emit'](_0x3fbe1e(0x2f8),{'id':getID(),'username':getUsername(),'icon':getPFP(),'status':getStatus()});}function updatePFPOnUI(_0x3bb9dd,_0x123f21=![]){var _0x3495de=a0_0x2644ce;document['getElementById'](_0x3495de(0x2f2))['src']=_0x3bb9dd,_0x123f21==!![]&&socket[_0x3495de(0x2b1)](_0x3495de(0x269),{'id':getID(),'username':getUsername(),'icon':getPFP()});}function getChatlog(){var _0x5ade13=a0_0x2644ce;socket['emit'](_0x5ade13(0x284),{'id':getID(),'token':getToken(),'group':getGroup(),'category':getCategory(),'channel':getChannel()});}function createYouTubeEmbed(_0x25b177,_0x167d79){var _0x2ca328=a0_0x2644ce,_0x3e52d9=_0x25b177[_0x2ca328(0x349)]('https://www.youtube.com/watch?v=','')[_0x2ca328(0x211)]('\x20','');if(_0x25b177[_0x2ca328(0x241)]()['includes'](_0x2ca328(0x1d3)))_0x3e52d9=_0x25b177[_0x2ca328(0x349)](_0x2ca328(0x33c),'')[_0x2ca328(0x211)]('\x20','');else _0x25b177['toLowerCase']()['includes']('youtu.be')&&(_0x3e52d9=_0x25b177['replace'](_0x2ca328(0x2d9),'')['replaceAll']('\x20',''));var _0x4386b7='<p\x20id=\x22msg-'+_0x167d79+_0x2ca328(0x33f)+_0x167d79+_0x2ca328(0x304)+_0x3e52d9+_0x2ca328(0x266);return _0x4386b7;}function a0_0x37a1(){var _0x4aa674=['match','\x22\x20>\x20--><video\x20width=\x22560\x22\x20height=\x22315\x22\x20class=\x22video-embed\x22\x20controls>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<source\x20src=\x22','drop','\x22\x20target=\x22_blank\x22>','className','serverbanner-image','srcObject','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:\x20calc(22px);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x20calc(100%\x20-\x2016px\x20-\x2016px);\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20',';\x22\x20class=\x22role-menu-entry-roleName\x22>','banMember','children','dragenter','Sort\x20Channels','role-menu-header','memberlist-member-info\x20name','\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onmouseover=\x22changeGIFSrc(\x27','Connected!','Group\x20Icon\x20URL:','getElementsByTagName','Whats\x20your\x20username?','location','\x22\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20title=\x22YouTube\x20video\x20player\x22\x20frameborder=\x220\x22\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20allow=\x22accelerometer;\x20autoplay;\x20clipboard-write;\x20encrypted-media;\x20gyroscope;\x20picture-in-picture;\x20web-share\x22\x20allowfullscreen></iframe></div></p>','zIndex','manageMembers','setPFP','\x20users\x20are\x20typing','<div\x20class=\x22message-container\x22\x20id=\x22msg-','getEmojis','\x20is\x20typing...','Edit\x20Channel','Your\x20account\x20has\x20been\x20reset.\x20Please\x20refresh\x20the\x20page\x20if\x20you\x20want\x20to\x20continue','innerHeight','clientX','</label>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22audio-embed-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<audio\x20controls>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<source\x20src=\x22','charAt','substring','role_color','gay','receiveChannelTree','ondataavailable','2150250IKOSyu','RequestRoles','/img/default_pfp.png','Server\x20Settings','keys','emoji-box-container','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20editGroup(\x27','deleteCategory','mediaDevices','updateMemberList','userConnected','getChatlog','log','preview','\x22\x20>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<label>','\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22','/settings/server/?page=channeltree-sorting','selectedGroup','style','\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22','<div\x20class=\x22systemAnnouncementChat\x22>','group','(^|[\x20\x09\x0d\x0a])((ftp|http|https|mailto|file):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))','\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22','https://wallpapers-clan.com/wp-content/uploads/2022/05/cute-pfp-25.jpg','Trying\x20to\x20get\x20parentnode.','receiveGroupBanner','</label>\x20is\x20now\x20online!</p>','parse','profile-role-menu','\x20\x20\x20\x20\x20\x20\x20\x20</div>','receiveVoiceData','getMemberList','offsetHeight','open','fixed','<div\x20class=\x22image-embed-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20class=\x22image-embed\x22\x20id=\x22msg-','setTime','</label>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>','761830EHgeUE','keyCode','Found\x20userid\x20','forEach','\x22\x20id=\x22','</label>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22message-profile-content\x22\x20id=\x22','\x22><div\x20class=\x22iframe-container\x22\x20id=\x22','No\x20name?','\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p>User\x20<label\x20class=\x22systemAnnouncementChatUsername\x22>','message-actions-image','Delete\x20Channel','manageUploads','viewLogs','removeAttribute','parentNode','gif-searchbar-input','audio/ogg;\x20codecs=opus','emit','deleteGroup','manageGroup','Enter','checked','<img\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onclick=\x22sendGif(\x27','protocol','indexOf','\x27,\x20this);\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22padding:\x201%;border-radius:\x2020px;float:\x20left;width:\x2048%;\x20height:\x20fit-content;\x22>','Please\x20select\x20a\x20channel\x20first','aboutme','Delete\x20Group','</a>','DIV','innerHTML','click','key','6109188cgCTCA','channel','What\x20should\x20your\x20new\x20username\x20be?','Category\x20Name:','removeUserFromRole','3951720aYFuuC','getCurrentChannel','unmarkedMessages','typing-indicator','onMouseOver=\x22this.style.backgroundColor=\x27#e38a5d\x27;\x20this.style.color=\x27white\x27;\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onMouseOut=\x22this.style.backgroundColor=\x27transparent\x27;\x20this.style.color=\x27#e38a5d\x27;\x22\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22color:\x20#e38a5d;\x22','toUTCString','category-','lastElementChild','message-profile-content','call','createCategory','value','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20deleteGroup(\x27','group-','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20openNewTab(\x27','Letting\x20Server\x20know\x20pfp\x20changed','contains','closest','https://youtu.be/','getUserMedia','receiveCurrentChannel','Your\x20pfp\x20url\x20was\x20too\x20short.\x20Want\x20to\x20reset\x20your\x20pfp?','<p\x20class=\x27message-profile-content-message\x27\x20id=\x22msg-','Enter\x20the\x20url\x20of\x20your\x20new\x20pfp','Edit\x20Server',';\x20expires=','Open\x20in\x20new\x20Tab','fileUpload','addRole','Connecting...','message-profile-content-message-appended','Kick\x20User','visible',':\x20\x27;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20document.getElementById(\x27emoji-box-container\x27).style.display\x20=\x20\x27none\x27;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20document.getElementById(\x27messagebox-content\x27).focus();\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22emoji-img\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20class=\x22emoji\x22\x20src=\x22/emojis/','cookie','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22message-profile-content-message\x22\x20id=\x22msg-','memberTyping','messagebox-content','floor','modalMessage','Trying\x20fallback\x20parentnode','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20sortChannels();\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22','emoji-box-emojis','profile-qa-img','sendVoiceData','modalBoxButtons','status','filter','banner','setStatus','.message-profile-content-message','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20createChannel(\x27','div\x20#channeltree\x20#category-','Your\x20username\x20was\x20too\x20short','</label>\x20joined\x20the\x20server!</p>','data:','data','dataTransfer','write','gif-searchbar','scrollTop','\x22\x20><iframe\x20width=\x22560\x22\x20height=\x22315\x22\x20src=\x22https://www.youtube.com/embed/','width','contextmenu','innerWidth','#role-menu-list','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20changeGroupIcon(\x27','offsetWidth','getElementById','redeemKey','getServerInfo','role-menu-search-icon','toLocaleString','Create\x20Category','insertAdjacentHTML','color','</div>','content','role-menu-list','none','https:','normal','success','scrollHeight','onclick','Connection\x20Lost...','setAttribute','manageGroups','manageBans','then','searchTenorGif','Create\x20Group','<button\x20','createGroup','backgroundColor','message-profile-info','createObjectURL','display',';\x22>','message-profile-content-message','mention','timestamp','channellist','parseFromString','\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22','memberlist-img','Group\x20Banner\x20URL:','9138346OyXxiH','permission','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20deleteChannel(\x27','http:','Reason:\x20(empty\x20for\x20none)','\x22\x20alt=\x22','msg','markChannelMessage','receiveGroupList','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20createGroup();\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22','https://www.youtube.com/watch?v=','parent:\x20','Delete\x20Message','\x22><div\x20class=\x22iframe-container\x22\x20id=\x22msg-','context-menu','src','</label>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<label\x20class=\x22timestamp\x22>','createMessageEmbed','focus','name','8DttzPG','Duration\x20in\x20days:\x20(empty\x20for\x20permanent)','Enter\x20the\x20key\x20you\x20want\x20to\x20redeem','replace','dragleave','keypress','stoppedTyping','server-icon','hasRole','reload','Deleting\x20from\x20chat\x20#msg-','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20navigator.clipboard.writeText(\x27','Mention\x20user','channelname','get','length','granted','memberlist-member-info','Create\x20Channel','Delete\x20Category','createElement','showUserJoinMessage','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>','rgba(255,\x20174,\x200,\x200.12)','channel-','px\x20-\x204px)\x20!important;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20margin-top:\x20-','Channel\x20Name:','Your\x20status\x20was\x20too\x20short','.message-container','info','configUpdate','</label>\x20joined\x20the\x20server!</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22message-profile-img-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20class=\x22message-profile-img\x22\x20src=\x22','</button>','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22emoji-entry\x22\x20title=\x22','top','/settings/group?id=','Message\x20is:','memberOnline','\x22\x20onerror=\x22this.src\x20=\x20\x27/img/error.png\x27;\x22\x20>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>','manageServer','SelectedTab','813492EPpzSR','random','prototype','Change\x20Icon','label.mention','createMessageLink','text','connected','Size:\x20','Data\x20was\x20null\x20history','innerText','.message-profile-content\x20p','preventDefault','modalBoxTitle','resize','\x27,\x20this);\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onmouseleave=\x22changeGIFSrc(\x27','\x22\x20\x20id=\x22','files','getElementsByClassName','manageServerInfo','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20mentionUser(\x27','type','receiveMemberList','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:\x20calc(','Escape','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20changeGroupBanner();\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22','height','getGroupList','onclick=\x22deleteMessageFromChat(\x27','memberlist-container','Successfully\x20reconnected!\x20Reloading...','</label>\x20joined\x20the\x20chat!</p>','color:\x20#FF0000;\x20-webkit-text-stroke:\x200px\x20black;\x20font-size:\x2020px;\x20font-weight:\x20bold;','\x22\x20onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20document.getElementById(\x27messagebox-content\x27).value\x20+=\x20\x27\x20:','profile_container','youtube','description','</p>','includes','username','checkPermission','settings/server/','querySelector','position','5108275QEICbH','Group\x20Name:','onunload','target','userDisconnected','\x22\x20onclick=\x22checkCheckedRoleMenu(this)\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<label\x20style=\x22color:\x20','deleteMessage','pfp','<div\x20class=\x22message-container\x22\x20id=\x22','denied','<br>','remove','createChannel','offsetParent','classList','mention-',';\x20path=/','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','/settings/channel?id=','manageChannels','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22iframe-container\x22\x20id=\x22msg-','\x20and\x20','youtu.be','receiveToken','onclick=\x22navigator.clipboard.writeText(\x27','gif','role-menu-entry-roleName','title','setUsername','profile-qa-info-status','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20editServer();\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22','Scanning\x20for\x20#msg-','modalBoxText','buttons','connect','#36393F','round','white','channeltree','<div\x20class=\x22role-menu-entry\x22\x20onclick=\x22checkCheckedRoleMenu(this.querySelector(\x27input\x27))\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20type=\x22checkbox\x22\x20','receiveMemberProfile','image-embed','channelTrigger','receiveChatlog','setRoom','Token\x20successfully\x20set!\x0aPlease\x20save\x20it\x20if\x20you\x20havent\x20already','color:\x20#FF0000;\x20-webkit-text-stroke:\x202px\x20black;\x20font-size:\x2072px;\x20font-weight:\x20bold;','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<label\x20class=\x22message-profile-info-name\x22\x20id=\x22','0123456789','nodeName','div\x20#channeltree\x20#channel-','href','addEventListener','replaceAll','profile-qa-info-username','error','search','<video\x20width=\x22560\x22\x20height=\x22315\x22\x20class=\x22video-embed\x22\x20controls>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<source\x20src=\x22','Edit\x20Group','messageId','Redeem\x20Key','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<label\x20class=\x22message-profile-info-name\x22\x20\x20id=\x22','Copy\x20URL','label','modalBox','test','onstart','left','querySelectorAll','messageCreate','beforeend','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20editChannel(\x27','addUserToRole','messagebox','\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p><label\x20class=\x22systemAnnouncementChatUsername\x22>','#msg-','updateGroupIcon','Tenor\x20Response','token','onstop','manageEmojis','kickUser','audio','\x20MB','message','pop','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20redeemKey();\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20ContextMenu.classList.remove(\x27visible\x27);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22','calc(100%\x20-\x208px)','block','URL','onclick=\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20deleteCategory(\x27','elementFromPoint','\x20-\x20','serverlist','play','toFixed','getTime','code','narrow','category','emoji-entry-container','toLowerCase','origin','push','receiveGifImage','replaceState','getMemberProfile','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:\x20calc(100%\x20-\x204px)!important;\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20margin-top:\x200.01px\x20!important;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding-bottom:\x204px\x20!important;\x0a\x20\x20\x20\x20\x20\x20\x20\x20','role-menu-entry','onclick=\x22kickUser(\x27','start','<div\x20class=\x22item\x22\x20','msg-','<p\x20class=\x22message-profile-content-message\x22\x20id=\x22msg-','WAIT!','add','split'];a0_0x37a1=function(){return _0x4aa674;};return a0_0x37a1();}var notAImage=[],notAImageCount=[],validImage=[];const img=new Image();function a0_0x5626(_0x26e56f,_0x2fb194){var _0x37a1f8=a0_0x37a1();return a0_0x5626=function(_0x5626c0,_0x2a6ca8){_0x5626c0=_0x5626c0-0x1b2;var _0x430067=_0x37a1f8[_0x5626c0];return _0x430067;},a0_0x5626(_0x26e56f,_0x2fb194);}function isImage(_0xd205be){var _0x462eb1=a0_0x2644ce;return img['src']=_0xd205be,img[_0x462eb1(0x1ca)]>0x0&&img[_0x462eb1(0x305)]>0x0?(validImage[_0x462eb1(0x1d6)](_0xd205be)==![]&&validImage['push'](_0xd205be),!![]):(notAImage[_0x462eb1(0x1d6)](_0xd205be)==![]&&notAImageCount[_0xd205be]>0x6&&notAImage[_0x462eb1(0x243)](_0xd205be),notAImageCount[_0xd205be]++,![]);}function isAudio(_0x829937){return/\.(mp3|wav|ogg)$/['test'](_0x829937);}function isVideo(_0x85f594){var _0x2162da=a0_0x2644ce;return/\.(mp4|webp)$/[_0x2162da(0x21d)](_0x85f594);}function getUrlFromText(_0x4c0ca3){var _0x3f4796=a0_0x2644ce,_0x4789d2=new RegExp(_0x3f4796(0x28f),'g');return _0x4c0ca3[_0x3f4796(0x251)](_0x4789d2);}var isValidUrl=[];function isURL(_0x1aea6f){var _0x3a7f81=a0_0x2644ce;try{const _0x182f33=new URL(_0x1aea6f);return _0x182f33[_0x3a7f81(0x2b7)]===_0x3a7f81(0x335)||_0x182f33[_0x3a7f81(0x2b7)]===_0x3a7f81(0x317)||_0x182f33[_0x3a7f81(0x2b7)]==_0x3a7f81(0x2fe);}catch(_0x2d7e4a){return![];}}function getGroup(){var _0x51c10a=a0_0x2644ce,_0xf9b6c0=window[_0x51c10a(0x265)][_0x51c10a(0x214)],_0xef99f9=new URLSearchParams(_0xf9b6c0),_0x31d810=_0xef99f9[_0x51c10a(0x354)](_0x51c10a(0x28e));return _0x31d810==null?'0':_0x31d810;}function getCategory(){var _0x3d75e0=a0_0x2644ce,_0x46d772=window[_0x3d75e0(0x265)][_0x3d75e0(0x214)],_0x4cf5a7=new URLSearchParams(_0x46d772),_0x5adf9b=_0x4cf5a7['get'](_0x3d75e0(0x23f));return _0x5adf9b==null?null:_0x5adf9b;}function getChannel(){var _0x39ba3a=a0_0x2644ce,_0x55d66c=window[_0x39ba3a(0x265)][_0x39ba3a(0x214)],_0x41b5b4=new URLSearchParams(_0x55d66c),_0xbcee2b=_0x41b5b4[_0x39ba3a(0x354)](_0x39ba3a(0x2c3));return _0xbcee2b==null?null:_0xbcee2b;}function getToken(){var _0x207356=a0_0x2644ce,_0x24a4c5=getCookie(_0x207356(0x22a));return _0x24a4c5==null||_0x24a4c5['length']<=0x0?null:_0x24a4c5;}function getID(){var _0x51db1e=a0_0x2644ce,_0x29079a=getCookie('id');return _0x29079a==null||_0x29079a[_0x51db1e(0x355)]!=0xc?(_0x29079a=generateId(0xc),setCookie('id',_0x29079a,0x168),_0x29079a):_0x29079a;}function getPFP(){var _0x3af5a5=a0_0x2644ce,_0xcabf80=getCookie('pfp');if(_0xcabf80==null||_0xcabf80[_0x3af5a5(0x355)]<=0x0)return _0xcabf80=prompt('Please\x20enter\x20the\x20url\x20to\x20your\x20profile\x20picture.'),_0xcabf80['length']<=0x0&&(_0xcabf80=_0x3af5a5(0x27b)),setCookie('pfp',_0xcabf80,0x168),updatePFPOnUI(_0xcabf80),_0xcabf80;return updatePFPOnUI(_0xcabf80),_0xcabf80;}function getStatus(){var _0x32678e=a0_0x2644ce,_0x390e2e=getCookie(_0x32678e(0x2f5));return _0x390e2e==null||_0x390e2e['length']<=0x0?(setCookie(_0x32678e(0x2f5),'Hey\x20im\x20new!',0x168),updateStatusOnUI(_0x390e2e),_0x390e2e):(updateStatusOnUI(_0x390e2e),_0x390e2e);}function getUsername(){var _0x37df1c=a0_0x2644ce,_0xcde8a1=getCookie(_0x37df1c(0x1d7));if(_0xcde8a1==null||_0xcde8a1[_0x37df1c(0x355)]<=0x0){_0xcde8a1=prompt(_0x37df1c(0x264));if(_0xcde8a1[_0x37df1c(0x355)]>0x0)return setCookie(_0x37df1c(0x1d7),_0xcde8a1,0x168),updateUsernameOnUI(_0xcde8a1),_0xcde8a1;}else return updateUsernameOnUI(_0xcde8a1),_0xcde8a1;}function getAboutme(){var _0x5f0b66=a0_0x2644ce,_0x1d389a=getCookie(_0x5f0b66(0x2bb));return _0x1d389a==null||_0x1d389a['length']<=0x0?'':_0x1d389a;}function getBanner(){var _0xdb2cf5=a0_0x2644ce,_0x3609d6=getCookie(_0xdb2cf5(0x2f7));return _0x3609d6==null||_0x3609d6[_0xdb2cf5(0x355)]<=0x0?'':_0x3609d6;}var lastKey='',test=0x0,testrun=0x0;function sendMessage(_0x1cc8e5){var _0x4b2543=a0_0x2644ce;event[_0x4b2543(0x2a1)]!=0xd&&(lastKey=event[_0x4b2543(0x2a1)]);if(event[_0x4b2543(0x2a1)]==0x8){}event[_0x4b2543(0x2a1)]==0xd&&lastKey==0x10&&testrun<0x6&&(test==0x0?test=0x2c:test+=0x16,testrun++,document[_0x4b2543(0x30b)](_0x4b2543(0x225))[_0x4b2543(0x31d)]('style',_0x4b2543(0x1c7)+test+_0x4b2543(0x35f)+test+'px\x20!important;\x0a\x20\x20\x20\x20\x20\x20\x20\x20'),messageInputBox[_0x4b2543(0x31d)](_0x4b2543(0x28b),_0x4b2543(0x247)));if(event[_0x4b2543(0x2a1)]==0x25||event[_0x4b2543(0x2a1)]==0x26||event[_0x4b2543(0x2a1)]==0x27||event['keyCode']==0x28)return;event[_0x4b2543(0x2a1)]==0xd&&lastKey!=0x10&&(sendMessageToServer(getID(),getUsername(),getPFP(),_0x1cc8e5[_0x4b2543(0x2d2)]),_0x1cc8e5[_0x4b2543(0x2d2)]='',messageInputBox['setAttribute'](_0x4b2543(0x28b),'\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding:\x208px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:\x20calc(20px\x20-\x203px);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x20calc(100%\x20-\x2032px\x20-\x2040px\x20-\x2025px\x20-\x205px);\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20margin:\x20-12px\x208px\x200\x208px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20'),document[_0x4b2543(0x30b)]('messagebox')['setAttribute']('style',_0x4b2543(0x258)),test=0x0,testrun=0x0,socket[_0x4b2543(0x2b1)](_0x4b2543(0x34c),{'id':getID(),'token':getToken(),'room':getRoom()})),_0x1cc8e5['value']!=''&&setTyping();}function sendMessageToServer(_0x120004,_0x39eb4a,_0x3e40ee,_0x666ec7){var _0x255987=a0_0x2644ce;if(getGroup()==null||getGroup()[_0x255987(0x355)]<=0x0||getCategory()==null||getCategory()[_0x255987(0x355)]<=0x0||getChannel()==null||getChannel()[_0x255987(0x355)]<=0x0){notify(_0x255987(0x2ba),'warning',null,_0x255987(0x318));return;}socket[_0x255987(0x2b1)]('messageSend',{'id':_0x120004,'name':_0x39eb4a,'icon':_0x3e40ee,'token':getToken(),'message':_0x666ec7,'group':getGroup(),'category':getCategory(),'channel':getChannel(),'room':getRoom()});}function resolveMentions(){var _0x120b79=a0_0x2644ce,_0x459519=document[_0x120b79(0x220)](_0x120b79(0x1b4));if(_0x459519[_0x120b79(0x355)]<=0x0)return;_0x459519[_0x120b79(0x2a3)](_0x1b7eeb=>{var _0x419f3c=_0x120b79,_0x475c04=getID();_0x1b7eeb['id']['replace']('mention-','')==_0x475c04?(_0x1b7eeb[_0x419f3c(0x2ae)][_0x419f3c(0x28b)][_0x419f3c(0x325)]=_0x419f3c(0x35d),_0x1b7eeb[_0x419f3c(0x2ae)][_0x419f3c(0x28b)]['borderLeft']='3px\x20solid\x20rgba(255,\x20174,\x200,\x200.52)',_0x1b7eeb[_0x419f3c(0x2ae)][_0x419f3c(0x28b)]['marginTop']='0px',_0x1b7eeb['parentNode']['style']['width']=_0x419f3c(0x233)):_0x1b7eeb[_0x419f3c(0x28b)][_0x419f3c(0x325)]='transparent';});}function convertMention(_0x262dd6,_0x3b4315=![]){var _0x27c549=a0_0x2644ce;try{var _0x47aa7d=new DOMParser()[_0x27c549(0x32e)](_0x262dd6[_0x27c549(0x230)],'text/html')[_0x27c549(0x1da)](_0x27c549(0x21b)),_0xcbf670=getID();_0x47aa7d['id'][_0x27c549(0x349)](_0x27c549(0x1eb),'')==_0xcbf670&&(_0x3b4315==!![]&&playSound(_0x27c549(0x230),0.5));}catch(_0x31419a){}}socket['on'](a0_0x2644ce(0x221),function(_0x5d3c01){var _0x420aaa=a0_0x2644ce;_0x5d3c01['message']=markdown(_0x5d3c01[_0x420aaa(0x230)],_0x5d3c01[_0x420aaa(0x217)]);var _0x5d54e1=_0x420aaa(0x1e4)+_0x5d3c01['messageId']+_0x420aaa(0x366)+_0x5d3c01['icon']+_0x420aaa(0x1c0)+_0x5d3c01['id']+'\x22\x20onerror=\x22this.src\x20=\x20\x27/img/default_pfp.png\x27;\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22message-profile-info\x22\x20id=\x22'+_0x5d3c01['id']+_0x420aaa(0x219)+_0x5d3c01['id']+'\x22\x20style=\x22color:\x20'+_0x5d3c01[_0x420aaa(0x312)]+';\x22>'+_0x5d3c01[_0x420aaa(0x345)]+_0x420aaa(0x342)+new Date(_0x5d3c01[_0x420aaa(0x32c)])['toLocaleString'](_0x420aaa(0x23e))+_0x420aaa(0x2a5)+_0x5d3c01[_0x420aaa(0x32c)]+_0x420aaa(0x2ea)+_0x5d3c01['messageId']+'\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x5d3c01[_0x420aaa(0x230)]['replaceAll']('\x0a',_0x420aaa(0x1e6))+'\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>',_0x3b9518=document[_0x420aaa(0x30b)](_0x420aaa(0x314))[_0x420aaa(0x2ce)];if(_0x3b9518!=null){const _0x3b6cf1=_0x3b9518[_0x420aaa(0x1c2)](_0x420aaa(0x2cf)),_0x23e476=_0x3b9518[_0x420aaa(0x1c2)](_0x420aaa(0x326)),_0x483b17=Array['prototype'][_0x420aaa(0x2f6)]['call'](_0x3b6cf1,_0x4a007a=>_0x4a007a[_0x420aaa(0x20d)]===_0x420aaa(0x2be)),_0x3053ad=Array[_0x420aaa(0x1b2)]['filter']['call'](_0x23e476,_0x1075e9=>_0x1075e9['nodeName']===_0x420aaa(0x2be));if(_0x3b6cf1[0x0]==null){addToChatLog(chatlog,_0x5d54e1);return;}var _0x2cf291=_0x3b6cf1[0x0]['id']/0x3e8,_0x430d90=new Date()['getTime']()/0x3e8,_0x4a87f1=_0x430d90-_0x2cf291,_0x30f504=Math[_0x420aaa(0x200)](_0x4a87f1/0x3c);_0x3053ad[0x0]['id']==_0x5d3c01['id']&&_0x30f504<0x5?_0x3b6cf1[0x0][_0x420aaa(0x311)](_0x420aaa(0x222),_0x420aaa(0x24d)+_0x5d3c01[_0x420aaa(0x217)]+'\x22>'+_0x5d3c01[_0x420aaa(0x230)][_0x420aaa(0x211)]('\x0a',_0x420aaa(0x1e6))+_0x420aaa(0x1d5)):addToChatLog(chatlog,_0x5d54e1);}else addToChatLog(chatlog,_0x5d54e1);convertMention(_0x5d3c01,!![]),resolveMentions(),scrollDown();});function getLastMessage(_0xce4702=![]){var _0x28e62a=a0_0x2644ce,_0x126a35=document[_0x28e62a(0x30b)](_0x28e62a(0x314))[_0x28e62a(0x2ce)];if(_0x126a35!=null){var _0x47201d=_0x126a35[_0x28e62a(0x1c2)](_0x28e62a(0x2cf)),_0x38f00b=_0x126a35['getElementsByClassName'](_0x28e62a(0x326)),_0x547acc=Array[_0x28e62a(0x1b2)]['filter'][_0x28e62a(0x2d0)](_0x47201d,_0x329c49=>_0x329c49['nodeName']===_0x28e62a(0x2be));const _0x5c5686=Array[_0x28e62a(0x1b2)][_0x28e62a(0x2f6)][_0x28e62a(0x2d0)](_0x38f00b,_0x244b6d=>_0x244b6d[_0x28e62a(0x20d)]===_0x28e62a(0x2be));if(_0x47201d[0x0]==null)return;var _0x21a0f1=_0x47201d[0x0]['id']/0x3e8,_0x433d7e=new Date()['getTime']()/0x3e8,_0x15ed6a=_0x433d7e-_0x21a0f1,_0x20f8fa=Math['round'](_0x15ed6a/0x3c);return _0xce4702==!![]?_0x47201d[0x0]['id']:_0x47201d[0x0];}}function compareTimestamps(_0x277514,_0x473ddc){var _0x4acddd=_0x277514/0x3e8,_0x228dac=_0x473ddc/0x3e8,_0x3ee023=_0x4acddd-_0x228dac,_0x9982ff=Math['round'](_0x3ee023/0x3c);return _0x9982ff;}socket['on'](a0_0x2644ce(0x35b),function(_0xb5bed){var _0x231f61=a0_0x2644ce,_0x24c30a=_0x231f61(0x28d)+_0x231f61(0x2a8)+_0xb5bed[_0x231f61(0x1d7)]+_0x231f61(0x1cf)+_0x231f61(0x297);addToChatLog(chatlog,_0x24c30a),scrollDown();});function deleteMessageFromChat(_0x31ae61){var _0x4ccf44=a0_0x2644ce;socket['emit'](_0x4ccf44(0x1e2),{'id':getID(),'token':getToken(),'messageId':_0x31ae61[_0x4ccf44(0x349)](_0x4ccf44(0x24c),''),'group':getGroup(),'category':getCategory(),'channel':getChannel()});}function bulkDeleteMessageFromChat(_0x5d9f16){var _0x1a71ea=a0_0x2644ce,_0x2c310e=null;try{console[_0x1a71ea(0x285)](_0x1a71ea(0x292)),_0x2c310e=document['querySelector']('#'+_0x5d9f16+'\x20p')[_0x1a71ea(0x2ae)];}catch{console[_0x1a71ea(0x285)](_0x1a71ea(0x2ef)),_0x2c310e=document[_0x1a71ea(0x1da)]('#'+_0x5d9f16)['parentNode'];}_0x2c310e=_0x2c310e[_0x1a71ea(0x1da)]('p'),console['log'](_0x2c310e);for(var _0x534158=0x0;_0x534158<_0x2c310e[_0x1a71ea(0x355)];_0x534158++){socket[_0x1a71ea(0x2b1)]('deleteMessage',{'id':getID(),'token':getToken(),'messageId':_0x2c310e[_0x534158]['id'][_0x1a71ea(0x349)](_0x1a71ea(0x24c),''),'group':getGroup()[_0x1a71ea(0x349)](_0x1a71ea(0x2d4),''),'category':getCategory()[_0x1a71ea(0x349)]('category-',''),'channel':getChannel()[_0x1a71ea(0x349)](_0x1a71ea(0x35e),'')});}}socket['on']('receiveDeleteMessage',function(_0xa064f0){var _0x10ea46=a0_0x2644ce;console['clear'](),console[_0x10ea46(0x285)](_0x10ea46(0x350)+_0xa064f0),console[_0x10ea46(0x285)](_0x10ea46(0x1fb)+_0xa064f0);var _0x23145d=document[_0x10ea46(0x220)]('div\x20.message-profile-content\x20#msg-'+_0xa064f0),_0x2d5102=_0x23145d[0x0][_0x10ea46(0x2ae)]['parentNode'],_0xdc49fe=_0x23145d[0x0][_0x10ea46(0x2ae)];console[_0x10ea46(0x285)](_0x10ea46(0x36b)),console['log'](_0x23145d),_0x23145d[_0x10ea46(0x2a3)](_0x4a61db=>{var _0x4e289f=_0x10ea46;_0x4a61db[_0x4e289f(0x1e7)]();}),console[_0x10ea46(0x285)](_0x10ea46(0x33d)),console[_0x10ea46(0x285)](_0xdc49fe),console[_0x10ea46(0x285)](_0xdc49fe[_0x10ea46(0x25b)][_0x10ea46(0x355)]),_0x2d5102[_0x10ea46(0x1da)](_0x10ea46(0x2f9))==null&&_0x2d5102[_0x10ea46(0x1e7)]();}),socket['on'](a0_0x2644ce(0x2eb),function(_0x3e7b4a){var _0x4b7f49=a0_0x2644ce,_0x2d57aa=0x0,_0x41fa6a='';if(_0x3e7b4a[_0x4b7f49(0x355)]<=0x0){typingIndicator['innerText']='',typingIndicator['style'][_0x4b7f49(0x328)]=_0x4b7f49(0x316);return;}if(_0x3e7b4a[_0x4b7f49(0x355)]==0x1)_0x41fa6a+=_0x3e7b4a[0x0]+_0x4b7f49(0x26d);else _0x3e7b4a[_0x4b7f49(0x355)]==0x2?_0x41fa6a+=_0x3e7b4a[0x0]+_0x4b7f49(0x1f1)+_0x3e7b4a[0x1]+'\x20are\x20typing...':_0x3e7b4a[_0x4b7f49(0x2a3)](_0x30679a=>{_0x2d57aa<=0x2&&(_0x41fa6a+=_0x30679a+',\x20'),_0x2d57aa++;});_0x2d57aa>0x2&&(_0x41fa6a+=_0x4b7f49(0x1f1)+_0x3e7b4a[_0x4b7f49(0x355)]-0x2+_0x4b7f49(0x26a)),typingIndicator[_0x4b7f49(0x1ba)]=_0x41fa6a,typingIndicator['style'][_0x4b7f49(0x328)]=_0x4b7f49(0x234);}),socket['on'](a0_0x2644ce(0x277),function(_0x1fe84d){var _0x1c901c=a0_0x2644ce;getChannelTreeSocket();return;channeltree[_0x1c901c(0x2bf)]=_0x1fe84d;try{document['querySelector'](_0x1c901c(0x20e)+getChannel())['style'][_0x1c901c(0x312)]=_0x1c901c(0x201),document[_0x1c901c(0x1da)](_0x1c901c(0x2fb)+getCategory())['style'][_0x1c901c(0x312)]=_0x1c901c(0x201);var _0x1a265b=[];_0x1a265b=getCookie(_0x1c901c(0x2c9)),console[_0x1c901c(0x285)](_0x1a265b);}catch(_0x4fea9d){}}),socket['on'](a0_0x2644ce(0x339),function(_0x259b68){}),socket['on'](a0_0x2644ce(0x207),function(_0x2bad84){var _0xade316=a0_0x2644ce;if(_0x2bad84==null){console['log'](_0xade316(0x1b9));return;}var _0x5bc545=0x0;_0x2bad84[_0xade316(0x2a3)](_0x52761d=>{var _0x483cbf=_0xade316;if(_0x52761d['id']=='0'){var _0x52761d='<div\x20class=\x22systemAnnouncementChat\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p><label\x20class=\x22systemAnnouncementChatUsername\x22>'+_0x52761d['name']+_0x483cbf(0x365);document[_0x483cbf(0x30b)](_0x483cbf(0x314))['insertAdjacentHTML']('beforeend',_0x52761d),scrollDown();}else compareTimestamps(_0x52761d[_0x483cbf(0x32c)],getLastMessage(!![]))<=0x5&&_0x5bc545==_0x52761d['id']?(_0x52761d[_0x483cbf(0x230)]=markdown(_0x52761d[_0x483cbf(0x230)],_0x52761d['messageId']),getLastMessage()['insertAdjacentHTML']('beforeend',_0x483cbf(0x2dd)+_0x52761d[_0x483cbf(0x217)]+'\x22>'+_0x52761d[_0x483cbf(0x230)]+_0x483cbf(0x1d5)),_0x5bc545=_0x52761d['id']):(_0x52761d[_0x483cbf(0x230)]=markdown(_0x52761d[_0x483cbf(0x230)],_0x52761d[_0x483cbf(0x217)]),showMessageInChat(_0x52761d),_0x5bc545=_0x52761d['id']);}),scrollDown(),resolveMentions();}),socket['on'](a0_0x2644ce(0x343),function(_0x10387e){var _0x44a304=a0_0x2644ce;document[_0x44a304(0x1da)](_0x44a304(0x227)+_0x10387e[_0x44a304(0x217)])[_0x44a304(0x2bf)]=_0x10387e[_0x44a304(0x23d)],scrollDown();}),socket['on'](a0_0x2644ce(0x1b5),function(_0x19ca9d){var _0x5d4dde=a0_0x2644ce;document[_0x5d4dde(0x1da)](_0x5d4dde(0x227)+_0x19ca9d[_0x5d4dde(0x217)])['innerHTML']=_0x19ca9d[_0x5d4dde(0x23d)],scrollDown();}),socket['on'](a0_0x2644ce(0x2db),function(_0x3d18ce){var _0x37e4d5=a0_0x2644ce;try{_0x3d18ce[_0x37e4d5(0x345)]==null&&(_0x3d18ce['name']=''),setChannelName(_0x3d18ce[_0x37e4d5(0x345)]);}catch{setChannelName('\x20');}}),socket['on'](a0_0x2644ce(0x204),function(_0x472c6d){var _0x40d037=a0_0x2644ce,_0x432f94=document['getElementById'](_0x40d037(0x1d2));_0x432f94[_0x40d037(0x2bf)]=_0x472c6d[_0x40d037(0x23d)],_0x432f94[_0x40d037(0x28b)]['display']=_0x40d037(0x234),_0x432f94[_0x40d037(0x28b)][_0x40d037(0x1db)]=_0x40d037(0x29c),_0x432f94[_0x40d037(0x28b)][_0x40d037(0x267)]='10000';var _0x47cc30=window[_0x40d037(0x307)],_0xea898b=window[_0x40d037(0x270)];_0x472c6d[_0x40d037(0x369)]+_0x432f94[_0x40d037(0x29a)]<=_0xea898b?_0x432f94[_0x40d037(0x28b)][_0x40d037(0x369)]=_0x472c6d['top']+'px':_0x472c6d[_0x40d037(0x369)]+_0x432f94['offsetHeight']>_0xea898b?_0x432f94[_0x40d037(0x28b)]['top']=_0x472c6d[_0x40d037(0x369)]-(_0x472c6d[_0x40d037(0x369)]+_0x432f94['offsetHeight']-_0xea898b)-0x14+'px':_0x432f94['style'][_0x40d037(0x369)]=_0x472c6d[_0x40d037(0x369)]-(_0xea898b-_0x432f94['offsetHeight'])+'px',_0x472c6d[_0x40d037(0x21f)]+_0x432f94[_0x40d037(0x30a)]<_0x47cc30?_0x432f94[_0x40d037(0x28b)]['left']=_0x472c6d[_0x40d037(0x21f)]+0x14+'px':_0x432f94[_0x40d037(0x28b)]['left']=_0x472c6d[_0x40d037(0x21f)]-0x14-_0x432f94['offsetWidth']+'px';}),socket['on'](a0_0x2644ce(0x1c6),function(_0x25e2d4){memberlist['innerHTML']=_0x25e2d4;}),socket['on'](a0_0x2644ce(0x282),function(_0x771b71){var _0x37539c=a0_0x2644ce;socket[_0x37539c(0x2b1)](_0x37539c(0x299),{'id':getID(),'username':getUsername(),'icon':getPFP(),'token':getToken(),'channel':getChannel()});}),socket['on']('updateGroupList',function(_0x1f41a6){var _0x13eb74=a0_0x2644ce;socket[_0x13eb74(0x2b1)](_0x13eb74(0x1cb),{'id':getID(),'group':getGroup(),'username':getUsername,'icon':getPFP(),'token':getToken()});}),socket['on'](a0_0x2644ce(0x33a),function(_0x455abe){var _0xb53de9=a0_0x2644ce;serverlist[_0xb53de9(0x2bf)]='',serverlist[_0xb53de9(0x2bf)]=_0x455abe,setActiveGroup(getGroup());}),socket['on'](a0_0x2644ce(0x293),function(_0x4125bf){var _0x18aff3=a0_0x2644ce;groupbanner[_0x18aff3(0x341)]=_0x4125bf;}),socket['on']('newMemberJoined',function(_0xf9c3cf){var _0xe4fc65=a0_0x2644ce,_0xdc794d='<div\x20class=\x22systemAnnouncementChat\x22>'+_0xe4fc65(0x226)+_0xf9c3cf[_0xe4fc65(0x345)]+_0xe4fc65(0x2fd)+'\x20\x20\x20\x20\x20\x20\x20\x20</div>';addToChatLog(chatlog,_0xdc794d),scrollDown();}),socket['on'](a0_0x2644ce(0x36c),function(_0x119014){var _0x337581=a0_0x2644ce,_0x3448d8=_0x337581(0x28d)+_0x337581(0x226)+_0x119014[_0x337581(0x1d7)]+_0x337581(0x294)+_0x337581(0x297);addToChatLog(chatlog,_0x3448d8),scrollDown();}),socket['on']('memberPresent',function(_0x160ab1){}),socket['on'](a0_0x2644ce(0x244),function(_0xe52da2){var _0x2bef0c=a0_0x2644ce;document[_0x2bef0c(0x30b)]('emoji-entry-container')[_0x2bef0c(0x311)](_0x2bef0c(0x222),_0x2bef0c(0x2b6)+_0xe52da2[_0x2bef0c(0x1f5)]+'\x27)\x22\x20src=\x22'+_0xe52da2[_0x2bef0c(0x286)]+_0x2bef0c(0x260)+_0xe52da2[_0x2bef0c(0x1f5)]+_0x2bef0c(0x1bf)+_0xe52da2[_0x2bef0c(0x286)]+_0x2bef0c(0x2b9));}),socket['on']('memberOffline',function(_0x2d4657){var _0x4e369f=a0_0x2644ce,_0x41b9d1=_0x4e369f(0x28d)+_0x4e369f(0x226)+_0x2d4657+'</label>\x20is\x20now\x20offline!</p>'+_0x4e369f(0x297);addToChatLog(chatlog,_0x41b9d1),scrollDown();}),socket['on'](a0_0x2644ce(0x364),function(){getChannelTreeSocket();}),socket['on'](a0_0x2644ce(0x1f3),function(_0x1b87d1){var _0x357c59=a0_0x2644ce;setCookie(_0x357c59(0x22a),_0x1b87d1,0x16d);}),socket['on'](a0_0x2644ce(0x2ee),function(_0x193e5b){var _0x3c3b98=a0_0x2644ce;console[_0x3c3b98(0x285)](_0x193e5b);var _0x36494f=[];Object[_0x3c3b98(0x27d)](_0x193e5b[_0x3c3b98(0x1fd)])['forEach'](function(_0x4f7699){var _0x2f3cb3=_0x3c3b98,_0x5223e3=_0x193e5b['buttons'][_0x4f7699][_0x2f3cb3(0x1b6)],_0x5dae67=_0x193e5b[_0x2f3cb3(0x1fd)][_0x4f7699]['events'];_0x36494f['push']([_0x5223e3[_0x2f3cb3(0x241)](),_0x5dae67]);});for(let _0x1b9e5d=0x0;_0x1b9e5d<_0x193e5b[_0x3c3b98(0x1fd)][_0x3c3b98(0x355)];_0x1b9e5d++){console[_0x3c3b98(0x285)]('button\x20:\x20'+_0x193e5b['buttons'][_0x1b9e5d]);}console[_0x3c3b98(0x285)](_0x36494f),Confirm(_0x193e5b['title'],_0x193e5b[_0x3c3b98(0x230)],_0x3c3b98(0x363),_0x36494f,'confirm')[_0x3c3b98(0x320)](_0xe6c5c2=>{var _0x6dd0b4=_0x3c3b98;console[_0x6dd0b4(0x285)](_0xe6c5c2);});});function setActiveGroup(_0x18eb7b){var _0x110f47=a0_0x2644ce;if(_0x18eb7b==null)return;document[_0x110f47(0x30b)](_0x18eb7b)['classList'][_0x110f47(0x24f)](_0x110f47(0x28a));}function addRoleFromProfile(_0x1a8d8b){var _0x543d01=a0_0x2644ce;socket[_0x543d01(0x2b1)]('getAllRoles',{'id':getID(),'token':getToken(),'group':getGroup(),'targetUser':_0x1a8d8b},function(_0x30a37f){var _0xddd2d5=_0x543d01;console[_0xddd2d5(0x285)](_0x30a37f);var _0x183ce5=document[_0xddd2d5(0x30b)]('profile-role-menu')['querySelector'](_0xddd2d5(0x308));_0x183ce5[_0xddd2d5(0x2bf)]='';var _0x59e6ec=_0x30a37f['data'];Object['keys'](_0x59e6ec)['forEach'](function(_0x56a0b1){var _0x4bddb8=_0xddd2d5,_0x2281b9=_0x59e6ec[_0x56a0b1];console[_0x4bddb8(0x285)](_0x2281b9);var _0x33bd1b=_0x2281b9[_0x4bddb8(0x363)]['id'],_0x55ece7=_0x2281b9[_0x4bddb8(0x363)][_0x4bddb8(0x345)],_0x413e4f=_0x2281b9[_0x4bddb8(0x363)][_0x4bddb8(0x312)],_0x38a34c=_0x2281b9['info'][_0x4bddb8(0x34e)],_0x15f0e2='';_0x38a34c==0x1?_0x15f0e2=_0x4bddb8(0x2b5):_0x15f0e2='',_0x183ce5[_0x4bddb8(0x311)](_0x4bddb8(0x222),_0x4bddb8(0x203)+_0x15f0e2+'\x20class=\x22role-menu-entry-checkbox\x22\x20id=\x22role-menu-entry_'+_0x33bd1b+'_'+_0x1a8d8b+_0x4bddb8(0x1e1)+_0x413e4f+_0x4bddb8(0x259)+_0x55ece7+_0x4bddb8(0x29f));});});}function checkCheckedRoleMenu(_0x500c05){var _0x1d8a7e=a0_0x2644ce;socket[_0x1d8a7e(0x2b1)](_0x1d8a7e(0x1d8),{'id':getID(),'token':getToken(),'permission':_0x1d8a7e(0x268)},function(_0x45f20b){var _0x1572dc=_0x1d8a7e;if(_0x45f20b[_0x1572dc(0x333)]=='granted'){_0x500c05[_0x1572dc(0x2b5)]=!_0x500c05['checked'];var _0x5e3638=_0x500c05['id'][_0x1572dc(0x250)]('_')[0x1],_0x2082af=_0x500c05['id']['split']('_')[0x2];_0x500c05[_0x1572dc(0x2b5)]==!![]?socket['emit'](_0x1572dc(0x224),{'id':getID(),'token':getToken(),'role':_0x5e3638,'target':_0x2082af},function(_0x26e9be){var _0x40d439=_0x1572dc;_0x26e9be[_0x40d439(0x1c5)]!=_0x40d439(0x319)&&notify(_0x26e9be['type'],_0x26e9be[_0x40d439(0x338)]);}):socket['emit'](_0x1572dc(0x2c6),{'id':getID(),'token':getToken(),'role':_0x5e3638,'target':_0x2082af},function(_0x12f956){var _0x38adad=_0x1572dc;_0x12f956[_0x38adad(0x1c5)]!='success'&&notify(_0x12f956[_0x38adad(0x1c5)],_0x12f956[_0x38adad(0x338)]);});}});}function showModal(_0x59b8bd){var _0xdf0245=a0_0x2644ce,_0x5943fd=document[_0xdf0245(0x30b)](_0xdf0245(0x21c)),_0x2ce100=document[_0xdf0245(0x30b)](_0xdf0245(0x1bd)),_0x19c739=document[_0xdf0245(0x30b)](_0xdf0245(0x1fc)),_0x883989=document[_0xdf0245(0x30b)](_0xdf0245(0x2f4)),_0x24a72c=document[_0xdf0245(0x263)]('BODY')[0x0];;_0x5943fd[_0xdf0245(0x2ad)](_0xdf0245(0x2f6)),_0x2ce100[_0xdf0245(0x2ad)]('filter'),_0x19c739[_0xdf0245(0x2ad)](_0xdf0245(0x2f6)),_0x5943fd[_0xdf0245(0x28b)]['display']=_0xdf0245(0x234),_0x883989[_0xdf0245(0x2bf)]='',_0x2ce100[_0xdf0245(0x1ba)]=_0x59b8bd[_0xdf0245(0x1f7)][_0xdf0245(0x211)]('#','\x0a'),_0x19c739[_0xdf0245(0x1ba)]=_0x59b8bd[_0xdf0245(0x230)]['replaceAll']('#','\x0a'),_0x59b8bd[_0xdf0245(0x1fd)]!=null&&Object['keys'](_0x59b8bd[_0xdf0245(0x1fd)])[_0xdf0245(0x2a3)](function(_0xbf9375){var _0x141fa1=_0xdf0245,_0x2f860c=_0x59b8bd[_0x141fa1(0x1fd)][_0xbf9375][_0x141fa1(0x1b6)],_0x5a1990=_0x59b8bd['buttons'][_0xbf9375]['events'];_0x883989[_0x141fa1(0x311)](_0x141fa1(0x222),_0x141fa1(0x323)+_0x5a1990+'>'+_0x2f860c+_0x141fa1(0x367));}),_0x59b8bd[_0xdf0245(0x22a)]!=null&&setCookie(_0xdf0245(0x22a),_0x59b8bd[_0xdf0245(0x22a)],0x16d);}function closeModal(){var _0x22b30d=a0_0x2644ce,_0x52c1fd=document[_0x22b30d(0x30b)]('modalBox'),_0x415e4a=document[_0x22b30d(0x30b)](_0x22b30d(0x1bd)),_0x4ae52a=document[_0x22b30d(0x30b)](_0x22b30d(0x1fc));_0x52c1fd[_0x22b30d(0x28b)][_0x22b30d(0x328)]='none',_0x415e4a[_0x22b30d(0x1ba)]='',_0x4ae52a[_0x22b30d(0x1ba)]='';}function importToken(){var _0x295ef1=a0_0x2644ce,_0x443189=prompt('Please\x20paste\x20your\x20exported\x20token\x20here.');if(_0x443189[_0x295ef1(0x355)]!=0x30){alert('This\x20token\x20was\x20invalid.\x20If\x20you\x20forgot\x20your\x20token\x20please\x20contact\x20the\x20server\x20admin');return;}else alert(_0x295ef1(0x209)),setCookie(_0x295ef1(0x22a),_0x443189,0x16d);}function resetAccount(){var _0x1537e9=a0_0x2644ce,_0x53fa21=confirm('Do\x20you\x20really\x20want\x20to\x20reset\x20your\x20account?\x20EVERYTHING\x20will\x20be\x20reset.');_0x53fa21&&(setCookie('id',null,0x16d),setCookie(_0x1537e9(0x1d7),null,0x16d),setCookie(_0x1537e9(0x2f5),null,0x16d),setCookie(_0x1537e9(0x1e3),null,0x16d),setCookie(_0x1537e9(0x22a),null,0x16d),setCookie(_0x1537e9(0x2f7),null,0x16d),alert(_0x1537e9(0x26f)));}document[a0_0x2644ce(0x30b)]('message-actions')[a0_0x2644ce(0x31b)]=function(_0x1caabb){var _0x488185=a0_0x2644ce,_0x3863dc=_0x1caabb[_0x488185(0x271)],_0x1eb033=_0x1caabb['clientY'],_0x315b75=document[_0x488185(0x30b)](_0x488185(0x27e)),_0xaad41b=document[_0x488185(0x237)](_0x3863dc,_0x1eb033);if(_0xaad41b['id']!='message-actions-image')return;if(_0x315b75[_0x488185(0x28b)][_0x488185(0x328)]==_0x488185(0x234))closeEmojiBox();else{_0x315b75[_0x488185(0x28b)][_0x488185(0x328)]='block',selectEmojiTab(document['getElementById'](_0x488185(0x2f1))),getEmojis();var _0x3c63fd=document[_0x488185(0x30b)](_0x488185(0x2a9));_0x315b75[_0x488185(0x28b)]['top']=_0x1eb033-_0x315b75['offsetHeight']-0x28+'px',_0x315b75[_0x488185(0x28b)]['left']=_0x3863dc-_0x315b75[_0x488185(0x30a)]+'px';}},window[a0_0x2644ce(0x210)](a0_0x2644ce(0x1be),function(_0x57b707){var _0x52f6a9=a0_0x2644ce,_0x29a36a=document[_0x52f6a9(0x30b)](_0x52f6a9(0x27e)),_0x469497=document['getElementById'](_0x52f6a9(0x1d2));_0x29a36a[_0x52f6a9(0x28b)][_0x52f6a9(0x328)]==_0x52f6a9(0x234)&&closeEmojiBox(),_0x469497['style'][_0x52f6a9(0x328)]==_0x52f6a9(0x234)&&(_0x469497[_0x52f6a9(0x28b)][_0x52f6a9(0x328)]=_0x52f6a9(0x316));}),document[a0_0x2644ce(0x210)]('keydown',_0x163f47=>{var _0x5a862c=a0_0x2644ce,_0x2d12ec=document['getElementById'](_0x5a862c(0x27e)),_0x55cae2=document[_0x5a862c(0x30b)](_0x5a862c(0x1d2));_0x163f47[_0x5a862c(0x2c1)]==_0x5a862c(0x1c8)&&(_0x2d12ec[_0x5a862c(0x28b)][_0x5a862c(0x328)]==_0x5a862c(0x234)&&closeEmojiBox(),_0x55cae2[_0x5a862c(0x28b)][_0x5a862c(0x328)]==_0x5a862c(0x234)&&(_0x55cae2[_0x5a862c(0x28b)][_0x5a862c(0x328)]='none'));});var gifSearchbarInput=document['getElementById'](a0_0x2644ce(0x2af));gifSearchbarInput['addEventListener'](a0_0x2644ce(0x34b),function(_0xf91afd){var _0x100ae3=a0_0x2644ce;if(_0xf91afd[_0x100ae3(0x2c1)]===_0x100ae3(0x2b4)){var _0x412af0=document[_0x100ae3(0x30b)](_0x100ae3(0x240));_0x412af0['innerHTML']='',socket[_0x100ae3(0x2b1)](_0x100ae3(0x321),{'id':getID(),'token':getToken(),'search':gifSearchbarInput[_0x100ae3(0x2d2)]},function(_0x46ce46){var _0x1e7958=_0x100ae3;_0x46ce46['type']=='success'?(console['log'](_0x1e7958(0x229)),console[_0x1e7958(0x285)](_0x46ce46)):notify(_0x46ce46[_0x1e7958(0x338)],'error');});}});function selectEmojiTab(_0x108931){var _0x11c1f8=a0_0x2644ce,_0xdd2b60=_0x108931['parentNode'][_0x11c1f8(0x25b)];console[_0x11c1f8(0x285)](_0xdd2b60);for(let _0x4edcd4=0x0;_0x4edcd4<_0xdd2b60[_0x11c1f8(0x355)];_0x4edcd4++){_0xdd2b60[_0x4edcd4][_0x11c1f8(0x1ea)]['contains']('SelectedTab')&&_0xdd2b60[_0x4edcd4]['classList']['remove']('SelectedTab');}_0x108931[_0x11c1f8(0x1ea)][_0x11c1f8(0x24f)](_0x11c1f8(0x36f));}function sendGif(_0x736757){var _0xbc5986=a0_0x2644ce;document[_0xbc5986(0x30b)](_0xbc5986(0x2ec))[_0xbc5986(0x2d2)][_0xbc5986(0x211)]('\x20','')[_0xbc5986(0x355)]>=0x1&&sendMessageToServer(getID(),getUsername(),getPFP(),document[_0xbc5986(0x30b)](_0xbc5986(0x2ec))[_0xbc5986(0x2d2)]),sendMessageToServer(getID(),getUsername(),getPFP(),_0x736757),closeEmojiBox();}function closeEmojiBox(){var _0x27a586=a0_0x2644ce,_0x59cd81=document[_0x27a586(0x30b)](_0x27a586(0x27e));_0x59cd81['style']['display']='none';var _0x414114=document[_0x27a586(0x30b)](_0x27a586(0x2af));_0x414114[_0x27a586(0x2d2)]='';var _0x3f7bfb=document['getElementById'](_0x27a586(0x240));_0x3f7bfb['innerHTML']='';var _0x87ede0=document[_0x27a586(0x30b)](_0x27a586(0x2f1)),_0x3f821f=document[_0x27a586(0x30b)]('emoji-box-gifs');try{_0x87ede0['classList'][_0x27a586(0x24f)](_0x27a586(0x36f)),_0x3f821f['classList']['remove'](_0x27a586(0x36f));}catch(_0x20bc01){console[_0x27a586(0x285)](_0x20bc01);}}function changeGIFSrc(_0x23d7a3,_0x2e7678){var _0x36ab79=a0_0x2644ce;_0x2e7678[_0x36ab79(0x341)]=_0x23d7a3;}function getGifs(){var _0x1d3ff9=a0_0x2644ce,_0x33c34d=document[_0x1d3ff9(0x30b)]('emoji-box-container'),_0x16e70c=document[_0x1d3ff9(0x30b)](_0x1d3ff9(0x240)),_0x2a0416=document['getElementById'](_0x1d3ff9(0x302)),_0x35ebfb=document[_0x1d3ff9(0x30b)](_0x1d3ff9(0x2af));_0x2a0416[_0x1d3ff9(0x28b)][_0x1d3ff9(0x328)]=_0x1d3ff9(0x234),_0x35ebfb[_0x1d3ff9(0x28b)][_0x1d3ff9(0x328)]='block',_0x16e70c[_0x1d3ff9(0x28b)]['height']='calc(100%\x20-\x2018%\x20-\x208.1%)',_0x16e70c[_0x1d3ff9(0x2bf)]='',_0x35ebfb[_0x1d3ff9(0x344)]();}function getEmojis(){var _0x4df247=a0_0x2644ce,_0x3b9765=document['getElementById'](_0x4df247(0x27e)),_0x4c5efc=document['getElementById'](_0x4df247(0x240));gifSearchbarInput[_0x4df247(0x28b)][_0x4df247(0x328)]=_0x4df247(0x316),socket[_0x4df247(0x2b1)](_0x4df247(0x26c),{'id':getID(),'token':getToken()},function(_0x2274e1){var _0x4f3763=_0x4df247;_0x2274e1[_0x4f3763(0x1c5)]==_0x4f3763(0x319)?(_0x4c5efc[_0x4f3763(0x2bf)]='',_0x2274e1['data'][_0x4f3763(0x2a3)](_0x558ffe=>{var _0x22caf4=_0x4f3763,_0x5efe31=_0x558ffe['split']('_')[0x1],_0x24c79a=_0x558ffe[_0x22caf4(0x250)]('_')[0x2][_0x22caf4(0x250)]('.')[0x0],_0x15c8d1=_0x22caf4(0x368)+_0x24c79a+_0x22caf4(0x1d1)+_0x24c79a+_0x22caf4(0x2e8)+_0x558ffe+'\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>';_0x4c5efc[_0x22caf4(0x311)](_0x22caf4(0x222),_0x15c8d1);})):notify(_0x2274e1[_0x4f3763(0x338)],_0x4f3763(0x213));});}function exportCookies(){var _0x3bb650=a0_0x2644ce,_0x53dec6=document['cookie'][_0x3bb650(0x250)](';')['map'](function(_0x762fc){var _0x209508=_0x3bb650,_0x51646f=_0x762fc[_0x209508(0x2b8)]('=');return[_0x762fc[_0x209508(0x274)](0x0,_0x51646f),_0x762fc[_0x209508(0x274)](_0x51646f+0x1)];});copy(JSON['stringify'](JSON['stringify'](_0x53dec6)));}function importCookies(_0x3e2dca){var _0xaed111=a0_0x2644ce,_0x20680e=JSON[_0xaed111(0x295)](_0x3e2dca);_0x20680e['forEach'](function(_0x10a763){var _0x177f3e=_0xaed111;document[_0x177f3e(0x2e9)]=_0x10a763[0x0]+'='+_0x10a763[0x1];});}function setUser(_0x4a8768){var _0x470870=a0_0x2644ce;setCookie(_0x470870(0x1d7),_0x4a8768,0x168),updateUsernameOnUI(_0x4a8768);}function setBanner(_0xc1e78){var _0x4f503d=a0_0x2644ce;setCookie(_0x4f503d(0x2f7),_0xc1e78,0x168);}function setStatus(_0x37aac3){var _0x261808=a0_0x2644ce;setCookie(_0x261808(0x2f5),_0x37aac3,0x168),updateUsernameOnUI(_0x37aac3);}function setPFP(_0x1bc878){var _0x4e2d1f=a0_0x2644ce;setCookie(_0x4e2d1f(0x1e3),_0x1bc878,0x168),updateUsernameOnUI(_0x1bc878);}function setAboutme(_0x42b7a2){var _0x207885=a0_0x2644ce;setCookie(_0x207885(0x2bb),_0x42b7a2,0x168),updateUsernameOnUI(_0x42b7a2);}function refreshValues(){var _0x577e9a=a0_0x2644ce,_0x321a72=getUsername();getID(),getPFP(),getStatus(),getGroup(),getChannel(),getCategory(),getRoles(),getToken(),userJoined(),getServerInfo(),socket[_0x577e9a(0x2b1)]('setRoom',{'id':getID(),'username':getUsername(),'icon':getPFP(),'room':getRoom(),'token':getToken()}),socket[_0x577e9a(0x2b1)]('getGroupBanner',{'id':getID(),'username':_0x321a72,'icon':getPFP(),'group':getGroup(),'token':getToken()}),socket['emit']('getGroupList',{'id':getID(),'group':getGroup(),'username':_0x321a72,'icon':getPFP(),'token':getToken()}),socket['emit'](_0x577e9a(0x299),{'id':getID(),'username':_0x321a72,'icon':getPFP(),'token':getToken(),'channel':getChannel()}),getChannelTreeSocket(),socket['emit'](_0x577e9a(0x2c8),{'id':getID(),'username':_0x321a72,'icon':getPFP(),'group':getGroup(),'category':getCategory(),'channel':getChannel(),'token':getToken()});}function getServerInfo(){var _0x35582e=a0_0x2644ce;socket[_0x35582e(0x2b1)](_0x35582e(0x30d),{'id':getID(),'token':getToken()},function(_0x3bb5f0){var _0x820e06=_0x35582e,_0x75a83c=document[_0x820e06(0x30b)]('header'),_0x269067=_0x3bb5f0['name'],_0x3515fc=_0x3bb5f0[_0x820e06(0x1d4)];_0x75a83c['innerHTML']=_0x269067+_0x820e06(0x238)+_0x3515fc;});}function setUrl(_0x244240){var _0x217b6e=a0_0x2644ce;window['history'][_0x217b6e(0x245)](null,null,_0x244240),chatlog['innerHTML']='',document[_0x217b6e(0x30b)](_0x217b6e(0x2ec))[_0x217b6e(0x344)](),refreshValues();}function setChannelName(_0xd1e498){var _0x2a15e5=a0_0x2644ce;document['getElementById'](_0x2a15e5(0x353))['innerText']=_0xd1e498;}function getRoles(){var _0x323b8f=a0_0x2644ce;socket[_0x323b8f(0x2b1)](_0x323b8f(0x27a),{'id':getID(),'username':getUsername(),'pfp':getPFP()});}function generateId(_0x1b9147){var _0x72dc4c=a0_0x2644ce;let _0x445e63='1';const _0x12fbf1=_0x72dc4c(0x20c),_0x217e96=_0x12fbf1['length'];let _0x306e7a=0x0;while(_0x306e7a<_0x1b9147-0x1){_0x445e63+=_0x12fbf1[_0x72dc4c(0x273)](Math[_0x72dc4c(0x2ed)](Math[_0x72dc4c(0x371)]()*_0x217e96)),_0x306e7a+=0x1;}return _0x445e63;}function addToChatLog(_0x26b8ac,_0x425b4b){var _0x579ee0=a0_0x2644ce;_0x26b8ac[_0x579ee0(0x311)](_0x579ee0(0x222),_0x425b4b),scrollDown();}function scrollDown(){var _0x467561=a0_0x2644ce,_0x53a56c=document[_0x467561(0x30b)](_0x467561(0x314));_0x53a56c[_0x467561(0x303)]=_0x53a56c[_0x467561(0x31a)];}function upload(_0x35d235){var _0x4ce6f4=a0_0x2644ce;socket[_0x4ce6f4(0x2b1)](_0x4ce6f4(0x2e2),{'file':_0x35d235,'filename':_0x35d235['name'],'id':getID(),'token':getToken()},function(_0x146c06){var _0x44de44=_0x4ce6f4;_0x146c06[_0x44de44(0x1c5)]=='success'?(console['log'](_0x146c06),sendMessageToServer(getID(),getUsername(),getPFP(),window[_0x44de44(0x265)][_0x44de44(0x242)]+_0x146c06[_0x44de44(0x338)])):notify(_0x146c06[_0x44de44(0x338)],'error',null,'normal');});}var uploadObject=document[a0_0x2644ce(0x30b)](a0_0x2644ce(0x314));uploadObject[a0_0x2644ce(0x210)](a0_0x2644ce(0x253),function(_0x143e26){var _0x407cbe=a0_0x2644ce;_0x143e26[_0x407cbe(0x1bc)](),uploadObject[_0x407cbe(0x28b)][_0x407cbe(0x325)]=_0x407cbe(0x1ff);var _0x228cc3=_0x143e26[_0x407cbe(0x300)][_0x407cbe(0x1c1)][0x0],_0x361165=_0x228cc3['size']/0x400/0x400;console[_0x407cbe(0x285)](_0x407cbe(0x1b8)+_0x361165[_0x407cbe(0x23b)](0x2)+_0x407cbe(0x22f)),upload(_0x228cc3);},![]),uploadObject[a0_0x2644ce(0x210)](a0_0x2644ce(0x25c),function(_0x1f3ea2){var _0x30770a=a0_0x2644ce;_0x1f3ea2[_0x30770a(0x1bc)](),uploadObject[_0x30770a(0x28b)][_0x30770a(0x325)]='gray';},![]),uploadObject[a0_0x2644ce(0x210)]('dragover',function(_0x493188){var _0x432ffb=a0_0x2644ce;_0x493188[_0x432ffb(0x1bc)](),uploadObject['style'][_0x432ffb(0x325)]='gray';},![]),uploadObject[a0_0x2644ce(0x210)](a0_0x2644ce(0x34a),function(_0x4ff9cc){var _0x2201e6=a0_0x2644ce;_0x4ff9cc['preventDefault'](),uploadObject[_0x2201e6(0x28b)][_0x2201e6(0x325)]=_0x2201e6(0x1ff);},![]);function showMessageInChat(_0x37815d){var _0x4245d6=a0_0x2644ce;_0x37815d[_0x4245d6(0x230)]=markdown(_0x37815d[_0x4245d6(0x230)],_0x37815d['messageId']);var _0x311f48=_0x4245d6(0x26b)+_0x37815d['messageId']+'\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22message-profile-img-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20class=\x22message-profile-img\x22\x20src=\x22'+_0x37815d['icon']+_0x4245d6(0x2a4)+_0x37815d['id']+'\x22\x20onerror=\x22this.src\x20=\x20\x27/img/default_pfp.png\x27;\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22message-profile-info\x22\x20id=\x22'+_0x37815d['id']+_0x4245d6(0x20b)+_0x37815d['id']+'\x22\x20style=\x22color:\x20'+_0x37815d[_0x4245d6(0x312)]+_0x4245d6(0x329)+_0x37815d[_0x4245d6(0x345)]+_0x4245d6(0x342)+new Date(_0x37815d[_0x4245d6(0x32c)])[_0x4245d6(0x30f)](_0x4245d6(0x23e))+_0x4245d6(0x2a5)+_0x37815d[_0x4245d6(0x32c)]+'\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22message-profile-content-message\x22\x20id=\x22msg-'+_0x37815d[_0x4245d6(0x217)]+_0x4245d6(0x1ed)+_0x37815d['message']+_0x4245d6(0x35c);addToChatLog(chatlog,_0x311f48),convertMention(_0x37815d,![]),scrollDown();}function setCookie(_0x460e2f,_0x33f240,_0x39a825){var _0x33f927=a0_0x2644ce,_0x132618='';if(_0x39a825){var _0x48ef3e=new Date();_0x48ef3e[_0x33f927(0x29e)](_0x48ef3e[_0x33f927(0x23c)]()+_0x39a825*0x18*0x3c*0x3c*0x3e8),_0x132618=_0x33f927(0x2e0)+_0x48ef3e[_0x33f927(0x2cc)]();}document['cookie']=_0x460e2f+'='+(_0x33f240||'')+_0x132618+_0x33f927(0x1ec);}function getCookie(_0x1f49a6){var _0x47f5f1=a0_0x2644ce,_0x41d590=_0x1f49a6+'=',_0x36c17b=document[_0x47f5f1(0x2e9)][_0x47f5f1(0x250)](';');for(var _0x3cef7f=0x0;_0x3cef7f<_0x36c17b[_0x47f5f1(0x355)];_0x3cef7f++){var _0x718188=_0x36c17b[_0x3cef7f];while(_0x718188[_0x47f5f1(0x273)](0x0)=='\x20')_0x718188=_0x718188[_0x47f5f1(0x274)](0x1,_0x718188['length']);if(_0x718188[_0x47f5f1(0x2b8)](_0x41d590)==0x0)return _0x718188[_0x47f5f1(0x274)](_0x41d590[_0x47f5f1(0x355)],_0x718188[_0x47f5f1(0x355)]);}return null;}function eraseCookie(_0x2c2591){var _0x3bee7e=a0_0x2644ce;document[_0x3bee7e(0x2e9)]=_0x2c2591+'=;\x20Path=/;\x20Expires=Thu,\x2001\x20Jan\x201970\x2000:00:01\x20GMT;';}
+console.log("%c" + "WAIT!", "color: #FF0000; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold;");
+console.log("%c" + "People can use the console to steal your account xo !", "color: #FF0000; -webkit-text-stroke: 0px black; font-size: 20px; font-weight: bold;");
+
+// IMPORTANT! By default, socket.io() connects to the host that
+// served the page, so we dont have to pass the server url
+var socket = io.connect()
+
+
+var chatlog = document.getElementById("content");
+var channeltree = document.getElementById("channeltree");
+var serverlist = document.getElementById("serverlist");
+var groupbanner = document.getElementById("serverbanner-image");
+var memberlist = document.getElementById("infolist");
+var typingIndicator = document.getElementById("typing-indicator");
+var messageInputBox = document.getElementById("messagebox-content");
+
+var typetimeout;
+
+setupNotify();
+setupPrompt();
+
+/*
+console.log("Current Username: " + getUsername());
+console.log("Current Status: " + getStatus());
+console.log("Current About Me: " + getAboutme());
+console.log("Current ID: " + getID());
+console.log("Current PFP: " + getPFP());
+console.log("Current Banner: " + getBanner());
+console.log("Current Group: " + getGroup());
+console.log("Current Channel: " + getChannel());
+console.log("Current Category: " + getCategory());
+console.log("Current Room: " + getRoom());
+
+ */
+//console.log("Current Token: " + getToken());
+
+
+userJoined();
+
+var blockedData = [];
+var blockedDataCounter = [];
+var bypassElement = [];
+var bypassCounter = [];
+
+// If markdown didnt get converted, this will
+function updateMarkdownLinks(delay) {
+    // await ...
+    var elements = document.querySelectorAll(".message-profile-content p");
+
+    var lengthi = 0;
+    if(elements.length <= 50){
+        lengthi = elements.length;
+    }
+    else{
+        lengthi = 50;
+    }
+
+    for(var i = elements.length; i > (elements.length - lengthi); i--){
+
+        try{
+
+            if(elements[i] != null && elements[i].innerText.length > 0) {
+
+
+                var marked = markdown(elements[i].innerText, elements[i].id);
+
+                if(marked != null && marked != elements[i].innerText){
+
+                    if(bypassCounter[elements[i].id] == null){
+                        bypassCounter[elements[i].id] = 0;
+                    }
+                    else{
+
+                        if(bypassCounter[elements[i].id] >= 1){
+                            bypassElement[elements[i].id] = 1;
+                        }
+                        bypassCounter[elements[i].id]++;
+                    }
+
+                    if(bypassElement[elements[i].id] == null){
+                        elements[i].innerHTML = marked;
+                        setTimeout(() => scrollDown(), 10)
+                    }
+                }
+            }
+        }
+        catch (err){
+            console.log(err)
+        }
+
+    }
+
+
+
+    setTimeout(() => updateMarkdownLinks(delay), delay)
+}
+updateMarkdownLinks(2000)// If markdown didnt get converted, this will
+
+function markdown(msg, msgid){
+
+    try{
+
+
+        //msg = msg
+        //    //.replace(/\*(.*?)*/gim, '<i>$1</i>')
+        //    .replace(/__(.*?)__/gim, '<u>$1</u>')
+        //    .replace(/`(.*?)`/gim, '<code class="markdown">$1</code>')
+        //    .replace(/´´´(.*?)´´´/gim, '<pre class="markdown">$1</pre>')
+        //    .replace(/~~(.*)~~/gim, '<del>$1</del>')
+        //    .replace(/-(.*)/gim, '<li>$1</li>')
+        //    .replace(/**(.*)**/gim, '<b>$1</b>')
+        //    //.replace(/\*(.*)\*/gim, '<i>$1</i>');
+
+        if(msg == null){
+            return msg;
+        }
+
+        try{
+
+            var msgUrls = getUrlFromText(msg);
+
+            msgUrls.forEach(url => {
+                if(isURL(url)) {
+                    if (isAudio(msg)) {
+                        //setTimeout(() => scrollDown(), 10)
+                        msg = msg.replace(url, `
+                                <div class="iframe-container" id="msg-${msgid}" >
+                                    <label>${url.split("/").pop().split("_").pop()}</label>
+                                    <div class="audio-embed-container">
+                                        <audio controls>
+                                            <source src="${url}">
+                                        </audio>
+                                    </div>
+                                </div>
+                           `);
+                    }
+                    else if (isImage(url) == true) {
+
+                        console.log("is image")
+                        //setTimeout(() => scrollDown(), 10)
+                        msg = msg.replace(url, `<div class="image-embed-container">
+                                                    <img class="image-embed" id="msg-${msgid.replace("msg-", "")}" alt="${url}" src="${url}" onerror="this.src = '/img/error.png';" >
+                                                </div>`);
+
+                    } else if (isVideo(msg) == true) {
+                        console.log("Is video")
+                        var code = `<!--<p id="msg-${msgid}"><div class="iframe-container" id="${msgid}" > --><video width="560" height="315" class="video-embed" controls>
+                                    <source src="${url}">
+                                    </video></div><!--</p>-->`;
+
+                        //setTimeout(() => scrollDown(), 10)
+
+                        msg = msg.replace(url, `<video width="560" height="315" class="video-embed" controls>
+                                                    <source src="${url}">
+                                                </video></div>`)
+
+                    } else {
+                        if (url.toLowerCase().includes("youtube") || url.toLowerCase().includes("youtu.be")) {
+                            //setTimeout(() => scrollDown(), 10)
+
+                            console.log("Is yt video")
+                            msg = msg.replace(url, createYouTubeEmbed(url, msgid))
+                        } else {
+                            msg = msg.replace(url, `<a href="${url}" target="_blank">${url}</a>`)
+                            //return msg.replaceAll(url, `<a href="${url}" target="_blank">${url}</a>`)
+                        }
+
+                    }
+                }
+            });
+
+
+        }
+        catch (Exce){
+            //console.log(Exce)
+        }
+
+        return msg;
+    }
+    catch (Exception){
+        //console.log(Exception);
+    }
+}
+
+// Check if client disconnected
+var disconnected = false;
+var initConnectionCheck = false;
+async function checkConnection(delay) {
+
+    //console.log(socket.connected)
+
+    if(initConnectionCheck == false){
+        notify("Connecting...", "info", 1000);
+
+        if(socket.connected == true){
+            notify("Connected!", "success", 1000);
+            initConnectionCheck = true;
+        }
+    }
+    else{
+        if(socket.connected == false && initConnectionCheck == true){
+            disconnected = true;
+            notify("Connection Lost...", "error", 1000);
+        }
+        else if(socket.connected == true && initConnectionCheck == true && disconnected == true){
+            disconnected = false;
+            notify("Successfully reconnected! Reloading...", "success");
+            setTimeout(() => window.location.reload(), 2000)
+        }
+    }
+
+
+
+    setTimeout(() => checkConnection(delay), delay)
+}
+checkConnection(2000)
+
+
+
+
+function mictest(){
+    var constraints = { audio: true };
+    navigator.mediaDevices.getUserMedia(constraints).then(function(mediaStream) {
+        var mediaRecorder = new MediaRecorder(mediaStream);
+
+        mediaRecorder.start();
+
+        mediaRecorder.onstart = function(e) {
+            //
+        };
+
+        mediaRecorder.ondataavailable = async function(e) {
+            var blob = new Blob([e.data], { 'type' : 'audio/ogg; codecs=opus' });
+            socket.emit("sendVoiceData", {id:getID(), token: getToken(), voice: blob }, function (response) {
+                // response
+            });
+        };
+
+
+        mediaRecorder.onstop = function(e) {
+            //
+        };
+
+        // Start recording
+
+
+        // Stop recording after 5 seconds and broadcast it to server
+        setTimeout(function() {
+            mediaRecorder.stop()
+        }, 10);
+    });
+}
+
+
+async function getMedia(constraints) {
+
+    try {
+        let stream = null;
+
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+        var blob = new Blob([stream], { 'type' : 'audio/ogg; codecs=opus' });
+        socket.emit("sendVoiceData", {id:getID(), token: getToken(), voice: blob }, function (response) {
+            // response
+        });
+
+        console.log(blob);
+        let audio = new Audio();
+        audio.srcObject = stream;
+        audio.play();
+
+
+    } catch(err) {
+        document.write(err)
+    }
+}
+
+//getMedia({ audio: true, video: false })
+
+
+socket.on('receiveVoiceData', function (data) {
+
+    console.log("RE")
+
+    var blob = new Blob([data], { 'type' : 'audio/ogg; codecs=opus' });
+    console.log(blob);
+    var audio = document.createElement('audio');    // document.createElement('audio')
+    audio.src = window.URL.createObjectURL(blob);
+    audio.play();
+
+    //data.play();
+
+    /*
+    let audio = new Audio();
+    audio.srcObject = data;
+    audio.play();
+
+     */
+
+});
+
+
+
+
+// Context Menu Stuff
+const ContextMenu = document.getElementById("context-menu");
+const profile = document.getElementById("context-menu");
+var ContextMenuSelectedMessage;
+
+const scope = document.querySelector("body");
+
+scope.addEventListener("click", (event) => {
+
+    const {clientX: mouseX, clientY: mouseY} = event;
+    var clickedElement = document.elementFromPoint(mouseX, mouseY);
+    var profileContent = document.getElementById("profile_container");
+
+
+
+    if(clickedElement.className == "memberlist-member-info" ||
+        clickedElement.classList.contains("memberlist-img") ||
+        clickedElement.className == "memberlist-container" ||
+        clickedElement.className == "message-profile-img" ||
+        clickedElement.className == "message-profile-info-name" ||
+        clickedElement.className == "memberlist-member-info name" ||
+        clickedElement.className == "memberlist-member-info status" ||
+        clickedElement.className == "mention"
+    ){
+        var userid = clickedElement.id;
+
+        if(clickedElement.className == "mention") { userid = userid.replace("mention-", "")}
+        getMemberProfile(userid, mouseX, mouseY);
+    }
+    else if(clickedElement.className.includes("role") && clickedElement.id.split("-")[0] == "addRole"){
+        // Open Role Menu
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageMembers" }, function (response) {
+            if(response.permission == "granted"){
+                showRoleMenu(mouseX, mouseY);
+                addRoleFromProfile(clickedElement.id.split("-")[1])
+            }
+        });
+    }
+    else if(clickedElement.className.includes("role_color")){
+        // Remove role code
+
+    }
+    else{
+
+        if(clickedElement.id == "profile-role-menu" ||
+            clickedElement.id == "role-menu-header" ||
+            clickedElement.id == "role-menu-search-icon" ||
+            clickedElement.id == "role-menu-search-input" ||
+            clickedElement.id == "role-menu-list" ||
+            clickedElement.className == "role-menu-entry" ||
+            clickedElement.className == "role-menu-entry-roleName"
+        ){
+            return;
+        }
+
+        profileContent.style.display = "none";
+        profileContent.innerHTML = "";
+
+        hideRoleMenu()
+    }
+
+
+});
+
+function showRoleMenu(mouseX, mouseY){
+    var roleMenu = document.getElementById("profile-role-menu");
+    roleMenu.style.display = "block"
+    roleMenu.style.top = `${mouseY - roleMenu.offsetHeight}px`
+    roleMenu.style.left = `${mouseX - roleMenu.offsetWidth - 20}px`;
+}
+
+function hideRoleMenu(){
+    var roleMenu = document.getElementById("profile-role-menu");
+    roleMenu.style.display = "none"
+}
+
+scope.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+
+    const {clientX: mouseX, clientY: mouseY} = event;
+    var clickedElement = document.elementFromPoint(mouseX, mouseY);
+
+    //console.log(clickedElement)
+    //console.log(clickedElement.className)
+
+    ContextMenuSelectedMessage = clickedElement;
+
+
+    var ErrorButtonCode = `onMouseOver="this.style.backgroundColor='#eb5055'; this.style.color='white';"
+                onMouseOut="this.style.backgroundColor='transparent'; this.style.color='#eb5055';" 
+                style="color: #eb5055;"`;
+
+    var SuccessButtonCode = `onMouseOver="this.style.backgroundColor='#4ba135'; this.style.color='white';"
+                onMouseOut="this.style.backgroundColor='transparent'; this.style.color='#87de54';" 
+                style="color: #87de54;"`;
+
+    var OkButtonCode = `onMouseOver="this.style.backgroundColor='#5d7fe3'; this.style.color='white';"
+                onMouseOut="this.style.backgroundColor='transparent'; this.style.color='#5d7fe3';" 
+                style="color: #5d7fe3;"`;
+
+    var WarningButtonCode = `onMouseOver="this.style.backgroundColor='#e38a5d'; this.style.color='white';"
+                onMouseOut="this.style.backgroundColor='transparent'; this.style.color='#e38a5d';" 
+                style="color: #e38a5d;"`;
+
+
+    // Entire Message: message-profile-content-message
+    // Single Message: message-profile-content-message
+
+    if(//clickedElement.className == "message-profile-content" ||
+        clickedElement.className == "message-profile-content-message" ){
+
+        var messageid = getMessageId(clickedElement);
+
+        resetContextMenuItem(ContextMenu);
+        /*
+        addContextMenuItem(ContextMenu, "Delete All <i>(Buggy)</i>",
+            ErrorButtonCode + `onclick="bulkDeleteMessageFromChat('${clickedElement.id}');
+            ContextMenu.classList.remove('visible');
+            "`);
+
+         */
+
+        addContextMenuItem(ContextMenu, "Delete Message",
+            `onclick="deleteMessageFromChat('${clickedElement.id}');
+            ContextMenu.classList.remove('visible');
+            "`);
+    }
+    /*
+    else if(clickedElement.className == "message-profile-content-message-appended" ||
+        clickedElement.className == "iframe-container"){
+
+        var messageid = getMessageId(clickedElement);
+
+        resetContextMenuItem(ContextMenu);
+        addContextMenuItem(ContextMenu, "Delete",
+            `onclick="deleteMessageFromChat('${messageid}');
+            ContextMenu.classList.remove('visible');
+            "`);
+    }
+     */
+    else if(clickedElement.className == "memberlist-member-info" ||
+        clickedElement.classList.contains("memberlist-img") ||
+        clickedElement.className == "memberlist-container" ||
+        clickedElement.className == "message-profile-img" ||
+        clickedElement.className == "memberlist-member-info status" ||
+        clickedElement.className == "memberlist-member-info name" ||
+        clickedElement.className == "message-profile-info-name"
+    ){
+
+        try{
+            var userid = clickedElement.id;
+            console.log("Found userid " + userid);
+
+            resetContextMenuItem(ContextMenu);
+
+            socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "banMember" }, function (response) {
+                if(response.permission == "granted"){
+                    addContextMenuItem(ContextMenu, "Ban User",
+                        ErrorButtonCode + `onclick="banUser('${userid}');
+                        ContextMenu.classList.remove('visible');
+                        "`);
+                }
+            });
+
+            socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "kickUsers" }, function (response) {
+                if(response.permission == "granted"){
+                    addContextMenuItem(ContextMenu, "Kick User",
+                        ErrorButtonCode + `onclick="kickUser('${userid}');
+                        ContextMenu.classList.remove('visible');
+                        "`);
+                }
+            });
+
+            socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "muteUsers" }, function (response) {
+                if(response.permission == "granted"){
+
+                    // check if target user is muted
+                    socket.emit("getUserFromId", {id:getID(), token: getToken(), target: userid }, function (response2) {
+
+                        console.log(response2)
+
+                        if(response2.user.isMuted == 1){
+                            addContextMenuItem(ContextMenu, "Unmute User",
+                                ErrorButtonCode + `onclick="unmuteUser('${userid}');
+                            ContextMenu.classList.remove('visible');
+                            "`);
+                        }
+                        else{
+                            addContextMenuItem(ContextMenu, "Mute User",
+                                ErrorButtonCode + `onclick="muteUser('${userid}');
+                            ContextMenu.classList.remove('visible');
+                            "`);
+                        }
+                    });
+
+                }
+            });
+
+            addContextMenuItem(ContextMenu, "Mention user",
+                OkButtonCode + `onclick="
+                mentionUser('${userid}');
+                ContextMenu.classList.remove('visible');
+                ;
+            "`);
+
+            addContextMenuItem(ContextMenu, "Copy User ID",
+                `onclick="navigator.clipboard.writeText('${userid}');
+            ContextMenu.classList.remove('visible');
+            "`);
+        }
+        catch (e){
+            console.log("Could get user id from context menu:");
+            console.log(e);
+        }
+    }
+    else if(clickedElement.className == "image-embed"){
+
+        resetContextMenuItem(ContextMenu);
+
+        addContextMenuItem(ContextMenu, "Open in new Tab",
+            `onclick="
+            openNewTab('${clickedElement.src}');
+            ContextMenu.classList.remove('visible');
+            "`);
+
+        addContextMenuItem(ContextMenu, "Copy URL",
+            `onclick="
+            navigator.clipboard.writeText('${clickedElement.src}');
+            ContextMenu.classList.remove('visible');
+            "`);
+
+        addContextMenuItem(ContextMenu, "Delete Embed",
+            ErrorButtonCode + `onclick="deleteMessageFromChat('${clickedElement.id}');
+            ContextMenu.classList.remove('visible');
+            "`);
+    }
+    else if(clickedElement.id == "channellist" ||
+        clickedElement.id == "channeltree"
+    ){
+
+        resetContextMenuItem(ContextMenu);
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageChannels" }, function (response) {
+            if(response.permission == "denied") { console.log(response); return; }
+            addContextMenuItem(ContextMenu, "Create Category",
+                `onclick="
+                createCategory();
+                ContextMenu.classList.remove('visible');
+                "`);
+
+            addContextMenuItem(ContextMenu, "Sort Channels",
+                OkButtonCode +    `onclick="
+            sortChannels();
+            ContextMenu.classList.remove('visible');
+            "`);
+        });
+    }
+    else if(clickedElement.className == "categoryTrigger"){
+
+        resetContextMenuItem(ContextMenu);
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageChannels" }, function (response) {
+            if(response.permission == "denied") { return; }
+            addContextMenuItem(ContextMenu, "Create Channel",
+                `onclick="
+                createChannel('${clickedElement.id}');
+                ContextMenu.classList.remove('visible');
+                "`);
+        });
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageChannels" }, function (response) {
+            if(response.permission == "denied") { return; }
+            addContextMenuItem(ContextMenu, "Create Category",
+                `onclick="
+            createCategory();
+            ContextMenu.classList.remove('visible');
+            "`);
+
+        });
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageChannels" }, function (response) {
+            if(response.permission == "denied") { return; }
+            addContextMenuItem(ContextMenu, "Delete Category",
+                ErrorButtonCode + `onclick="
+            deleteCategory('${clickedElement.id}');
+            ContextMenu.classList.remove('visible');
+            "`);
+        });
+    }
+    else if(clickedElement.className == "channelTrigger"){
+        resetContextMenuItem(ContextMenu);
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageChannels" }, function (response) {
+            if(response.permission == "denied") { return; }
+            addContextMenuItem(ContextMenu, "Create Channel",
+                `onclick="
+                createChannel('${clickedElement.id}');
+                ContextMenu.classList.remove('visible');
+                "`);
+        });
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageChannels" }, function (response) {
+            if(response.permission == "denied") { return; }
+
+            addContextMenuItem(ContextMenu, "Edit Channel",
+                OkButtonCode + `onclick="
+                editChannel('${clickedElement.id}');
+                ContextMenu.classList.remove('visible');
+                "`);
+        });
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageChannels" }, function (response) {
+            if(response.permission == "denied") { return; }
+
+            addContextMenuItem(ContextMenu, "Delete Channel",
+                ErrorButtonCode +`onclick="
+                deleteChannel('${clickedElement.id}');
+                ContextMenu.classList.remove('visible');
+                "`);
+        });
+    }
+    else if(clickedElement.id == "serverlist"){
+
+        resetContextMenuItem(ContextMenu);
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "createGroup" }, function (response) {
+            if(response.permission == "denied") { return; }
+            addContextMenuItem(ContextMenu, "Create Group",
+                `onclick="
+                createGroup();
+                ContextMenu.classList.remove('visible');
+                "`);
+        });
+    }
+    else if(clickedElement.classList.contains("server-icon")){
+
+        resetContextMenuItem(ContextMenu);
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: ["manageServer",
+                "manageGroup",
+                "manageChannels",
+                "manageUploads",
+                "manageGroup",
+                "viewLogs",
+                "manageEmojis",
+                "manageBans",
+                "manageServerInfo",
+                "manageRateSettings"]
+        }, function (response) {
+            if(response.permission == "denied") { return; }
+            addContextMenuItem(ContextMenu, "Server Settings",
+                OkButtonCode + `onclick="
+                editServer();
+                ContextMenu.classList.remove('visible');
+                "`);
+
+            addContextMenuItem(ContextMenu, "Edit Group",
+                OkButtonCode + `onclick="
+            editGroup('${clickedElement.id}');
+            ContextMenu.classList.remove('visible');
+            "`);
+
+            if(response.permission == "denied") { return; }
+            addContextMenuItem(ContextMenu, "Delete Group",
+                ErrorButtonCode + `onclick="
+            deleteGroup('${clickedElement.id}');
+            ContextMenu.classList.remove('visible');
+            "`);
+
+            addContextMenuItem(ContextMenu, "Change Icon",
+                `onclick="
+            changeGroupIcon('${clickedElement.id}');
+            ContextMenu.classList.remove('visible');
+            "`);
+        });
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "redeemKey" }, function (response) {
+            if(response.permission == "denied") { return; }
+
+            addContextMenuItem(ContextMenu, "Redeem Key",
+                `onclick="
+            redeemKey();
+            ContextMenu.classList.remove('visible');
+            "`);
+
+        });
+    }
+    else if(clickedElement.id == "serverbanner-image"){
+
+        resetContextMenuItem(ContextMenu);
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageServer" }, function (response) {
+            if(response.permission == "denied") { return; }
+            addContextMenuItem(ContextMenu, "Edit Server",
+                `onclick="
+                editServer();
+                ContextMenu.classList.remove('visible');
+                "`);
+        });
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageGroups" }, function (response) {
+            if(response.permission == "denied") { return; }
+            addContextMenuItem(ContextMenu, "Change Banner",
+                `onclick="
+                changeGroupBanner();
+                ContextMenu.classList.remove('visible');
+                "`);
+        });
+    }
+    else{
+        resetContextMenuItem(ContextMenu);
+    }
+
+    if((ContextMenu.offsetHeight*4) + mouseY > document.body.offsetHeight){
+        ContextMenu.style.top = `${mouseY - ContextMenu.offsetHeight}px`;
+        ContextMenu.style.left = `${mouseX}px`;
+        console.log("is out of bounds")
+    }
+    else{
+        ContextMenu.style.top = `${mouseY}px`;
+        ContextMenu.style.left = `${mouseX}px`;
+        console.log("is not out of bounds")
+    }
+
+
+    ContextMenu.classList.add("visible");
+
+});
+
+scope.addEventListener("click", (e) => {
+
+    if (e.target.offsetParent != ContextMenu) {
+        ContextMenu.classList.remove("visible");
+    }
+});
+
+function editGroup(id){
+    window.location.href = "/settings/group?id=" + id;
+}
+
+function mentionUser(id){
+    messageInputBox.value += ` <@${id}> `;
+    messageInputBox.focus();
+}
+
+function editChannel(channelId){
+    window.location.href = "/settings/channel?id=" + channelId;
+}
+
+function getMemberProfile(id, x, y){
+    //console.log("Requesting profile")
+    socket.emit("getMemberProfile", { id: getID(), token: getToken(), target: id, posX: x, posY: y });
+}
+
+function editServer(){
+    window.location.href = "settings/server/";
+}
+function sortChannels(){
+    window.location.href = "/settings/server/?page=channeltree-sorting";
+}
+
+function redeemKey(){
+    var catname = prompt("Enter the key you want to redeem");
+
+    if(catname == null ||catname.length <= 0){
+        return;
+    }
+    else{
+        socket.emit("redeemKey", { id: getID(), value: catname, token: getToken() });
+    }
+}
+
+function changeGroupIcon(id){
+    var catname = prompt("Group Icon URL:");
+
+    if(catname == null ||catname.length <= 0){
+        return;
+    }
+    else{
+        socket.emit("updateGroupIcon", { id: getID(), value: catname, token: getToken(), group: id  });
+    }
+}
+
+function changeGroupBanner(){
+    var catname = prompt("Group Banner URL:");
+
+    if(catname == null ||catname.length <= 0){
+        return;
+    }
+    else{
+        socket.emit("updateGroupBanner", { id: getID(), value: catname, token: getToken(), group: getGroup()  });
+    }
+}
+
+function createGroup(){
+    var catname = prompt("Group Name:");
+
+    if(catname == null ||catname.length <= 0){
+        return;
+    }
+    else{
+        socket.emit("createGroup", { id: getID(), value: catname, token: getToken() });
+    }
+}
+
+function openNewTab(url){
+    window.open(url, '_blank');
+}
+
+function createCategory(){
+    var catname = prompt("Category Name:");
+
+    if(catname == null ||catname.length <= 0){
+        console.log("No name?")
+        return;
+    }
+    else{
+        socket.emit("createCategory", { id: getID(), value: catname, token: getToken(), group: getGroup() });
+    }
+}
+
+
+function createChannel(category){
+    var catname = prompt("Channel Name:");
+
+    if(catname == null ||catname.length <= 0){
+        return;
+    }
+    else{
+        socket.emit("createChannel", { id: getID(), value: catname, token: getToken(), group: getGroup().replace("group-", ""), category: category.replace("category-", "")});
+    }
+}
+
+function deleteChannel(id){
+    console.log(id);
+    socket.emit("deleteChannel", { id: getID(), token: getToken(), channelId: id, group: getGroup().replace("group-", "")});
+}
+
+function deleteGroup(groupid){
+    socket.emit("deleteGroup", { id: getID(), token: getToken(), group: groupid });
+}
+
+
+function deleteCategory(id){
+    socket.emit("deleteCategory", { id: getID(), token: getToken(), group: getGroup(), category: id});
+}
+
+function getMessageId(element){
+
+    if(element.className != "message-profile-content-message-appended"){
+        var entireElement = null;
+        element = element.closest(".message-container");
+        return element.id;
+    }
+    else{
+        return element.id;
+    }
+
+
+}
+
+function resetContextMenuItem(element){
+    element.innerHTML = "";
+}
+
+function addContextMenuItem(element, displayname, onclick = ""){
+    var code = `<div class="item" ${onclick}>${displayname}</div>`;
+    element.innerHTML += code;
+}
+
+
+
+function kickUser(id){
+    var reason = prompt("Reason: (empty for none)");
+    socket.emit("kickUser", { id: getID(), token: getToken(), target: id, reason: reason });
+}
+
+function banUser(id){
+    var reason = prompt("Reason: (empty for none)");
+    var duration = prompt("Duration in days: (empty for permanent)");
+    socket.emit("banUser", { id: getID(), token: getToken(), target: id, reason: reason, time: duration });
+}
+
+function muteUser(id){
+    var reason = prompt("Reason: (empty for none)");
+    var duration = prompt("Duration in minutes: (empty for permanent until unmuted)");
+    socket.emit("muteUser", { id: getID(), token: getToken(), target: id, reason: reason, time: duration });
+}
+
+function unmuteUser(id){
+    socket.emit("unmuteUser", { id: getID(), token: getToken(), target: id });
+}
+
+function getChannelTreeSocket(){
+    socket.emit("getChannelTree", { id: getID() , token: getToken(), username: getUsername(), icon: getPFP(), group: getGroup() }, function (response) {
+        channeltree.innerHTML = response.data;
+
+        try{
+            document.querySelector("div #channeltree #channel-" + getChannel()).style.color = "white";
+            document.querySelector("div #channeltree #category-" + getCategory()).style.color = "white";
+
+            var markedMessage3 = [];
+            markedMessage3= getCookie("unmarkedMessages");
+
+            //console.log(markedMessage3);
+        }
+        catch(Ex){
+            //console.log(Ex)
+        }
+    });
+}
+
+function userJoined(){
+    if(getUsername() != null) {
+        var username = getUsername();
+
+        socket.emit("userConnected", { id: getID(), name: username, icon: getPFP(), status: getStatus(), token: getToken(),
+            aboutme: getAboutme(), banner: getBanner()});
+
+        socket.emit("setRoom", { id: getID(), room: getRoom(), token: getToken()});
+        socket.emit("getGroupBanner", { id: getID(), token: getToken() , username: getUsername(), icon: getPFP(), group: getGroup() });
+        socket.emit("getGroupList", { id: getID() , group: getGroup(), token: getToken(), username: getUsername(), icon: getPFP() });
+        socket.emit("getMemberList", { id: getID() , token: getToken(), channel: getChannel(), group: getGroup(), username: getUsername(), icon: getPFP() });
+        getChannelTreeSocket()
+        socket.emit("getCurrentChannel", { id: getID() , token: getToken(), username: getUsername(), icon: getPFP(), group: getGroup(), category: getCategory(), channel: getChannel() });
+        socket.emit("setRoom", { id: getID(), room: getRoom(), token: getToken()});
+
+        getServerInfo();
+
+        getChatlog();
+
+        /*
+        try{
+            var url = window.location.search;
+            var urlParams = new URLSearchParams(url);
+            console.log(url);
+
+            var currentGroup = urlParams.get("group");
+            var currentChannel = urlParams.get("channel");
+            var currentCategory = urlParams.get("category");
+        }
+
+         */
+    }
+    else{
+        console.log("gay")
+    }
+}
+
+window.onunload = (event) => {
+    socket.emit("userDisconnected", { id: getID(), time: new Date().getTime() });
+};
+
+function setTyping(){
+    socket.emit("isTyping", { id: getID(), token: getToken(), room: getRoom() });
+
+
+    clearTimeout(typetimeout);
+    typetimeout = setTimeout(() => {
+
+        socket.emit("stoppedTyping", { id: getID(), token: getToken(), room: getRoom() });
+
+    }, 2 * 1000);
+
+
+}
+
+function getRoom(){
+    return getUrlParams("group") + "-" + getUrlParams("category") + "-" + getUrlParams("channel");
+}
+
+function getUrlParams(param){
+    var url = window.location.search;
+    var urlParams = new URLSearchParams(url);
+    var urlChannel = urlParams.get(param);
+
+    return urlChannel;
+}
+
+function changeUsername(){
+    var username = prompt("What should your new username be?", getUsername());
+
+    if(username.length > 0){
+        setCookie("username", username, 360);
+        updateUsernameOnUI(username, true);
+    }
+    else{
+        alert("Your username was too short");
+    }
+}
+
+function changeStatus(){
+    var status = prompt("What should your new status be?", getStatus());
+
+    if(status.length > 0){
+        setCookie("status", status, 360);
+        updateStatusOnUI(status, true);
+    }
+    else{
+        alert("Your status was too short");
+    }
+}
+
+function changePFP(){
+    var pfp = prompt("Enter the url of your new pfp", getPFP());
+
+    if(pfp.length > 0){
+        setCookie("pfp", pfp, 360);
+        updatePFPOnUI(pfp, true);
+
+        console.log("Letting Server know pfp changed");
+    }
+    else{
+
+        var reset = confirm("Your pfp url was too short. Want to reset your pfp?");
+
+        if(reset){
+            pfp = "/img/default_pfp.png";
+            setPFP(pfp);
+        }
+        else{
+            return;
+        }
+    }
+
+    if(pfp == null || isImage(pfp) == false){
+        pfp = "https://wallpapers-clan.com/wp-content/uploads/2022/05/cute-pfp-25.jpg";
+    }
+
+    setCookie("pfp", pfp, 360);
+    updatePFPOnUI(pfp, true);
+}
+
+function updateUsernameOnUI(username, sync = false){
+    document.getElementById("profile-qa-info-username").innerText = username;
+
+    if(sync == true){
+        socket.emit("setUsername", { id: getID() , username: getUsername(), icon: getPFP() });
+    }
+
+}
+
+function updateStatusOnUI(status, sync = false){
+    document.getElementById("profile-qa-info-status").innerText = status;
+
+    if(sync == true){
+        socket.emit("setStatus", { id: getID() , username: getUsername(), icon: getPFP(), status: getStatus() });
+    }
+}
+
+function updatePFPOnUI(url, sync = false){
+    document.getElementById("profile-qa-img").src = url;
+
+    if(sync == true){
+        socket.emit("setPFP", { id: getID() , username: getUsername(), icon: getPFP() });
+    }
+}
+
+function getChatlog(){
+    socket.emit("getChatlog", { id: getID(), token: getToken(), group: getGroup(), category: getCategory(), channel: getChannel()});
+}
+
+function createYouTubeEmbed(url, messageid){
+
+    var videocode = url.replace("https://www.youtube.com/watch?v=", "").replaceAll(" ", "");
+    if (url.toLowerCase().includes("youtube")) {
+        videocode = url.replace("https://www.youtube.com/watch?v=", "").replaceAll(" ", "");
+    }
+    else if(url.toLowerCase().includes("youtu.be")){
+        videocode = url.replace("https://youtu.be/", "").replaceAll(" ", "");
+    }
+
+    var code = `<p id="msg-${messageid}"><div class="iframe-container" id="msg-${messageid}" ><iframe width="560" height="315" src="https://www.youtube.com/embed/${videocode}" 
+                title="YouTube video player" frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div></p>`;
+
+    /*
+    console.log("Resolving YouTube URL " + url);
+    console.log("Resolved: " + videocode);
+    console.log("Resolved URL: " + "https://www.youtube.com/embed/" + videocode);
+
+     */
+    return code;
+
+}
+
+
+var notAImage = []
+var notAImageCount = []
+var validImage = []
+function isImage(url){
+
+    const img = new Image();
+
+    /*
+    if(notAImage.includes(url)){
+        console.log("Not a Image")
+        return false;
+    }
+
+    if(validImage.includes(url)){
+        return true;
+    }
+
+     */
+
+    //console.log("checking link " + url)
+
+    img.src = url;
+
+
+    if(img.height > 0 && img.width > 0){
+        if(validImage.includes(url) == false){
+            validImage.push(url);
+        }
+
+
+        return true;
+    }
+    else{
+
+        // Try to load a image 6 times
+        if(notAImage.includes(url) == false && notAImageCount[url] > 6){
+            notAImage.push(url);
+        }
+
+        notAImageCount[url]++;
+        return false;
+    }
+}
+
+function isAudio(url) {
+    return /\.(mp3|wav|ogg)$/.test(url);
+}
+
+function isVideo(url) {
+
+
+    return /\.(mp4|webp)$/.test(url);
+    /*
+    const vid = new HTMLVideoElement();
+    vid.src = url;
+    vid.load();
+
+
+    if(vid.height > 0 && vid.width > 0){
+        return true;
+    }
+    else{
+        return false;
+    }
+
+     */
+}
+
+function getUrlFromText(text){
+    var geturl = new RegExp(
+        "(^|[ \t\r\n])((ftp|http|https|mailto|file):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))"
+        ,"g"
+    );
+    return text.match(geturl)
+}
+
+var isValidUrl = []
+function isURL(text){
+    try {
+
+        const url = new URL(text);
+        return url.protocol === 'http:' || url.protocol === 'https:' || url.protocol == "data:";
+
+
+    } catch (err) {
+        return false;
+    }
+}
+
+function generateMetaTags(){
+    getServerInfo();
+
+    if(getGroup() != null && getCategory() != null && getChannel() != null){
+        return `<meta http-equiv="content-Type" content="text/html; utf-8" />
+                <meta http-equiv="Pragma" content="cache" />
+                <meta name="robots" content="INDEX,FOLLOW" />
+                <meta http-equiv="content-Language" content="en" />
+                <meta name="description" content="You have been invited to chat in ${getChannel()} ! Join the discussion on ${serverName} !" />
+                <meta name="keywords" content="" />
+                <meta name="author" content="Default Server" />
+                <meta name="publisher" content="" />
+                <meta name="copyright" content="" />
+                <meta name="audience" content="Alle" />
+                <meta name="page-type" content="Anleitung" />
+                <meta name="page-topic" content="Bauen Wohnen" />
+                <meta http-equiv="Reply-to" content="" />
+                <meta name="expires" content="" />
+                <meta name="revisit-after" content="2 days" />
+                <title>Chat in General » chat</title>`
+    }
+}
+
+function getGroup(){
+
+    var url = window.location.search;
+    var urlParams = new URLSearchParams(url);
+    var urlChannel = urlParams.get("group");
+
+    if(urlChannel == null){
+        return "0";
+    }
+    else{
+        return urlChannel;
+    }
+}
+
+function getCategory(){
+
+    var url = window.location.search;
+    var urlParams = new URLSearchParams(url);
+    var urlChannel = urlParams.get("category");
+
+    if(urlChannel == null){
+        return null;
+    }
+    else{
+        return urlChannel;
+    }
+}
+
+function getChannel(){
+
+    var url = window.location.search;
+    var urlParams = new URLSearchParams(url);
+    var urlChannel = urlParams.get("channel");
+
+    if(urlChannel == null){
+        return null;
+    }
+    else{
+        return urlChannel;
+    }
+}
+
+function getToken(){
+    var token = getCookie("token");
+
+    if(token == null || token.length <= 0){
+        return null;
+    }
+    else{
+        return token;
+    }
+}
+
+function getID(){
+    var id = getCookie("id");
+
+    if(id == null || id.length != 12){
+        id = generateId(12);
+        setCookie("id", id, 360);
+        return id;
+    }
+    else{
+        return id;
+    }
+}
+
+function getPFP(){
+    var pfp = getCookie("pfp");
+
+    if(pfp == null || pfp.length <= 0){
+        pfp = prompt("Please enter the url to your profile picture.");
+
+        if(pfp.length <= 0){
+            pfp = "/img/default_pfp.png";
+        }
+        setCookie("pfp", pfp, 360);
+        updatePFPOnUI(pfp);
+        return pfp;
+    }
+
+    updatePFPOnUI(pfp);
+    return pfp;
+}
+
+function getStatus(){
+    var status = getCookie("status");
+
+    if(status == null || status.length <= 0){
+        setCookie("status", "Hey im new!", 360);
+        updateStatusOnUI(status);
+        return status;
+    }
+    else{
+        updateStatusOnUI(status);
+        return status;
+    }
+}
+
+function getUsername(){
+    var username = getCookie("username");
+
+    if(username == null || username.length <= 0){
+        username = prompt("Whats your username?");
+
+        if(username.length > 0){
+            setCookie("username", username, 360);
+            updateUsernameOnUI(username);
+            return username;
+        }
+    }
+    else{
+        updateUsernameOnUI(username);
+        return username;
+    }
+}
+
+function getAboutme(){
+    var aboutme = getCookie("aboutme");
+
+    if(aboutme == null || aboutme.length <= 0){
+
+        return "";
+    }
+    else{
+        //updateUsernameOnUI(aboutme);
+        return aboutme;
+    }
+}
+
+function getBanner(){
+    var banner = getCookie("banner");
+
+    if(banner == null || banner.length <= 0){
+        return "";
+    }
+    else{
+        //updateUsernameOnUI(aboutme);
+        return banner;
+    }
+}
+
+var lastKey = "";
+var test = 0;
+var testrun = 0;
+function sendMessage(messagebox) {
+
+    //console.log(event.keyCode)
+
+
+    if(event.keyCode != 13){
+        lastKey = event.keyCode;
+    }
+
+    /*
+    if(event.keyCode == 8){
+
+    }
+    */
+
+    // Adding new line
+    if(event.keyCode == 13 && lastKey == 16 && testrun < 6){
+        //document.getElementById("messagebox").style.height = `calc(${document.getElementById("messagebox").offsetHeight}px + 5px) !important;`
+
+        /*document.getElementById("messagebox").offsetHeight +*/
+
+        if(test == 0){
+            test = 44;
+        }
+        else{
+            test += 22;
+        }
+
+        testrun++;
+
+        // Resize message box container
+        document.getElementById('messagebox').setAttribute("style",
+            `
+            height: calc(${test}px - 4px) !important;
+            margin-top: -${test}px !important;
+        `);
+
+
+        // Resize message box input
+        // height: calc(${messageInputBox.offsetHeight}px + 10px) !important;
+        messageInputBox.setAttribute("style",
+            `
+               height: calc(100% - 4px)!important;                   
+               margin-top: 0.01px !important;
+               padding-bottom: 4px !important;               
+               overflow-y: auto;
+        `);
+        /*
+            height: calc(${messageInputBox.offsetHeight}px + 2px ) !important;
+            margin-top: -16px !important;
+            margin-bottom: -6px !important;
+            padding: 0 !important;
+         */
+
+
+        //document.getElementById("messagebox").style.marginTop = `-40px !important`;
+    }
+
+    if(event.keyCode == 37 || event.keyCode == 38 ||
+        event.keyCode == 39 || event.keyCode == 40){
+        return;
+    }
+
+    if(event.keyCode == 13 && lastKey != 16) {
+        sendMessageToServer(getID(), getUsername(), getPFP(), messagebox.value);
+        messagebox.value = "";
+
+        messageInputBox.setAttribute("style",
+            `
+                padding: 8px;
+                height: calc(20px - 3px);
+                width: calc(100% - 32px - 40px - 25px - 5px);        
+                margin: -6px 8px 0 8px;
+                overflow-y: hidden;
+        `);
+
+
+        // Resize message box container
+        document.getElementById('messagebox').setAttribute("style",
+            `
+            height: calc(22px);
+            width: calc(100% - 16px - 16px);
+    
+        `);
+
+        setTimeout(() => {
+            messageInputBox.value = ""
+        }, 10);
+
+        test = 0;
+        testrun = 0;
+
+        socket.emit("stoppedTyping", { id: getID(), token: getToken(), room: getRoom() });
+    }
+
+
+    if(messagebox.value != ""){
+        setTyping();
+    }
+
+}
+
+function sendMessageToServer(authorId, authorUsername, pfp, message){
+
+    if(getGroup() == null || getGroup().length <= 0 || getCategory() == null || getCategory().length <= 0 || getChannel() == null || getChannel().length <= 0){
+        notify("Please select a channel first", "warning", null, "normal");
+        //alert("Please select any channel first");
+        return;
+    }
+
+    socket.emit("messageSend", { id: authorId, name: authorUsername, icon: pfp, token: getToken(),
+        message: message, group: getGroup(), category: getCategory(),
+        channel: getChannel(), room: getRoom()  });
+}
+
+function resolveMentions(){
+    var mentions = document.querySelectorAll("label.mention")
+
+    if(mentions.length <= 0){
+        return;
+    }
+
+    mentions.forEach(mention => {
+        var userId = getID();
+
+        if(mention.id.replace("mention-", "") == userId){
+            mention.parentNode.style.backgroundColor = "rgba(255, 174, 0, 0.12)";
+            //mention.parentNode.style.borderRadius = "6px";
+            mention.parentNode.style.borderLeft = "3px solid rgba(255, 174, 0, 0.52)";
+            mention.parentNode.style.marginTop = "0px";
+            mention.parentNode.style.width =  "calc(100% - 8px)";
+        }
+        else{
+            mention.style.backgroundColor = "transparent";
+        }
+
+    })
+}
+
+function convertMention(text, playSoundOnMention = false){
+
+    try{
+        var doc = new DOMParser().parseFromString(text.message, "text/html").querySelector("label")
+        var userId = getID();
+
+        if(doc.id.replace("mention-", "") == (userId)){
+
+            if(playSoundOnMention == true)
+            {
+                //console.log("PLayed message sound");
+                //console.log(playSoundOnMention)
+                playSound("message", 0.5);
+            }
+        }
+
+    }
+    catch (exe){
+        //console.log(exe)
+    }
+}
+
+socket.on('messageCreate', function (message) {
+    message.message = markdown(message.message, message.messageId);
+
+    // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
+    var messagecode = `<div class="message-container" id="${message.messageId}">
+            <div class="message-profile-img-container">
+                <img class="message-profile-img" src="${message.icon}"  id="${message.id}" onerror="this.src = '/img/default_pfp.png';">
+            </div>
+
+            <div class="message-profile-info" id="${message.id}">
+                <label class="message-profile-info-name"  id="${message.id}" style="color: ${message.color};">${message.name}</label>
+                <label class="timestamp">${new Date(message.timestamp).toLocaleString("narrow")}</label>
+           </div>
+            <div class="message-profile-content" id="${message.timestamp}">
+                <p class="message-profile-content-message" id="msg-${message.messageId}">
+                    ${message.message.replaceAll("\n", "<br>")}
+                </p>
+            </div>
+        </div>`;
+
+
+    var childDivs = document.getElementById("content").lastElementChild;
+
+    if(childDivs != null){
+
+        // Get Elements
+        const messagecontent = childDivs.getElementsByClassName("message-profile-content");
+        const userid = childDivs.getElementsByClassName("message-profile-info");
+
+        const messageDivs = Array.prototype.filter.call(
+            messagecontent,
+            (messagecontent) => messagecontent.nodeName === "DIV"
+        );
+
+        const authorDivs = Array.prototype.filter.call(
+            userid,
+            (userid) => userid.nodeName === "DIV"
+        );
+
+        if(messagecontent[0] == null){
+            addToChatLog(chatlog, messagecode);
+            return;
+        }
+
+        // Calculate time passed
+        var lastMessage = messagecontent[0].id / 1000;
+
+        var today = new Date().getTime() / 1000;
+        var diff = today - lastMessage;
+        var minutesPassed = Math.round(diff / 60);
+
+        //console.log("Past: " + minutesPassed + " minutes");
+
+        if(authorDivs[0].id == message.id && minutesPassed < 5){
+            messagecontent[0].insertAdjacentHTML("beforeend",
+                `<p class="message-profile-content-message" id="msg-${message.messageId}">${message.message.replaceAll("\n", "<br>")}</p>`
+                //`<p class="message-profile-content-message-appended" id="msg-${message.messageId}">${message.message}</p>`
+            );
+        }
+        else{
+            addToChatLog(chatlog, messagecode);
+        }
+    }
+    else{
+        addToChatLog(chatlog, messagecode);
+    }
+
+    convertMention(message, true)
+    resolveMentions();
+    scrollDown();
+});
+
+
+function getLastMessage(time = false){
+    var childDivs = document.getElementById("content").lastElementChild;
+
+    if(childDivs != null) {
+
+
+        // Get Elements
+        var messagecontent = childDivs.getElementsByClassName("message-profile-content");
+        var userid = childDivs.getElementsByClassName("message-profile-info");
+
+
+        var messageDivs = Array.prototype.filter.call(
+            messagecontent,
+            (messagecontent) => messagecontent.nodeName === "DIV"
+        );
+
+        const authorDivs = Array.prototype.filter.call(
+            userid,
+            (userid) => userid.nodeName === "DIV"
+        );
+
+        if(messagecontent[0] == null){
+            return;
+        }
+
+        // Calculate time passed
+        var lastMessage = messagecontent[0].id / 1000;
+
+        var today = new Date().getTime() / 1000;
+        var diff = today - lastMessage;
+        var minutesPassed = Math.round(diff / 60);
+
+        if(time == true){
+            return messagecontent[0].id;
+        }
+        else{
+            return messagecontent[0];
+        }
+    }
+}
+
+function compareTimestamps(stamp1, stamp2){
+    // Calculate time passed
+    var firstdate = stamp1 / 1000;
+
+    var seconddate = stamp2 / 1000;
+    var diff = firstdate - seconddate;
+    var minutesPassed = Math.round(diff / 60);
+
+    return minutesPassed;
+}
+
+
+socket.on('showUserJoinMessage', function (author) {
+
+    // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
+    var message = '<div class="systemAnnouncementChat">' +
+        '            <p>User <label class="systemAnnouncementChatUsername">' + author.username + '</label> joined the chat!</p>' +
+        '        </div>';
+
+    addToChatLog(chatlog, message);
+    scrollDown();
+});
+
+socket.on('updateGroupList', function (author) {
+
+    getGroupList();
+});
+
+function deleteMessageFromChat(id){
+
+    socket.emit("deleteMessage", { id: getID(), token: getToken(), messageId: id.replace("msg-", ""),
+        group: getGroup(), category: getCategory(), channel: getChannel() });
+}
+
+function bulkDeleteMessageFromChat(id){
+
+
+    //var children = [].slice.call(document.getElementById(id));
+    var children = null;
+
+    try{
+        console.log("Trying to get parentnode.")
+        children = document.querySelector(`#${id} p`).parentNode;
+    }
+    catch{
+        console.log("Trying fallback parentnode")
+        children = document.querySelector(`#${id}`).parentNode;
+    }
+
+    //console.log("Child")
+    //console.log(children)
+    children = children.querySelector("p");
+    console.log(children)
+
+    for (var i = 0; i < children.length; i++) {
+        //console.log(children[i]); //second console output
+
+        socket.emit("deleteMessage", { id: getID(), token: getToken(), messageId: children[i].id.replace("msg-", ""),
+            group: getGroup().replace("group-", ""), category: getCategory().replace("category-", ""), channel: getChannel().replace("channel-", "") });
+
+    }
+}
+
+socket.on('receiveDeleteMessage', function (id) {
+
+    console.clear();
+
+    //var parent = document.querySelector(`#msg-${CSS.escape(id)}`);
+    //parent.remove();
+    //var container = document.querySelector(`.message-container #${id}`).parentNode.parentNode;
+    //console.log(container)
+
+    console.log(`Deleting from chat #msg-${id}`)
+    console.log(`Scanning for #msg-${id}`)
+    //var parent = document.querySelector(`#msg-${id} p`).parentNode.parentNode;
+
+
+    // document.querySelector(`#msg-152598637369 p`).parentNode;
+    var message = document.querySelectorAll(`div .message-profile-content #msg-${id}`);
+    var parentContainer = message[0].parentNode.parentNode;
+    var parent = message[0].parentNode;
+
+
+    console.log("Message is:")
+    console.log(message)
+    message.forEach(msg => {
+        msg.remove();
+    });
+
+    console.log("parent: ")
+    console.log(parent)
+    console.log(parent.children.length)
+
+    if(parentContainer.querySelector(".message-profile-content-message") == null){
+        parentContainer.remove();
+    }
+
+
+});
+
+socket.on('memberTyping', function (members) {
+
+    var runner = 0;
+    var displayUsersText = "";
+
+    if(members.length <= 0){
+        typingIndicator.innerText = "";
+        typingIndicator.style.display = "none";
+        return;
+    }
+
+    if(members.length == 1){
+        displayUsersText += members[0] + " is typing...";
+    }
+    else if(members.length == 2){
+        displayUsersText += members[0] + " and " + members[1] + " are typing...";
+    }
+    else{
+        members.forEach(member => {
+
+            // Show multiple typing
+            if(runner <= 2){
+                displayUsersText += member + ", ";
+            }
+            runner++;
+        });
+    }
+
+    if(runner > 2){
+        displayUsersText += " and " + members.length - 2 + " users are typing";
+    }
+
+    typingIndicator.innerText = displayUsersText;
+    typingIndicator.style.display = "block";
+});
+
+socket.on('receiveChannelTree', function (data) {
+
+    getChannelTreeSocket();
+    return;
+
+    channeltree.innerHTML = data;
+    try{
+        document.querySelector("div #channeltree #channel-" + getChannel()).style.color = "white";
+        document.querySelector("div #channeltree #category-" + getCategory()).style.color = "white";
+
+        var markedMessage3 = [];
+        markedMessage3 = getCookie("unmarkedMessages");
+
+        console.log(markedMessage3);
+    }
+    catch(Ex){
+        //console.log(Ex)
+    }
+
+
+});
+
+socket.on('markChannelMessage', function (data) {
+
+    /*
+    console.log("A new message has been created");
+    console.log(data);
+
+    var group = data.group;
+    var cat = data.category;
+    var chan = data.channel;
+
+    var groupMarkerElement = document.querySelector(`#group-marker-${group}`);
+    groupMarkerElement.style.display = "block";
+
+    var catElement = document.querySelector(`#category-${cat}`);
+    catElement.style.color = "orange";
+
+    var chanElement = document.querySelector(`#channel-${chan}`);
+    chanElement.style.color = "orange";
+
+     */
+
+});
+
+socket.on('receiveChatlog', function (data) {
+
+
+    if(data == null){
+        console.log("Data was null history")
+        return;
+    }
+
+    var previousMessageID = 0;
+    data.forEach(message => {
+
+        if(message.id == "0"){
+            var message = `<div class="systemAnnouncementChat">
+                                <p><label class="systemAnnouncementChatUsername">${message.name}</label> joined the server!</p>
+                                </div>`;
+
+            document.getElementById("content").insertAdjacentHTML("beforeend", message);
+            scrollDown();
+        }
+        else{
+            if(compareTimestamps(message.timestamp, getLastMessage(true)) <= 5
+                && previousMessageID == message.id
+            ){
+                message.message = markdown(message.message, message.messageId);
+
+                getLastMessage().insertAdjacentHTML("beforeend", `<p class='message-profile-content-message' id="msg-${message.messageId}">${message.message}</p>`);
+                //getLastMessage().insertAdjacentHTML("beforeend", `<p class='message-profile-content-message-appended' id="msg-${message.messageId}">${message.message}</p>`);
+                previousMessageID = message.id;
+
+            }
+            else{
+                message.message = markdown(message.message, message.messageId);
+                showMessageInChat(message)
+                previousMessageID = message.id;
+            }
+        }
+
+
+    });
+
+    scrollDown();
+    resolveMentions();
+});
+
+socket.on('createMessageEmbed', function (data) {
+    document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
+    scrollDown();
+});
+
+socket.on('createMessageLink', function (data) {
+    document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
+    scrollDown();
+});
+
+socket.on('receiveCurrentChannel', function (channel) {
+    try{
+        if(channel.name == null){
+            channel.name = "";
+        }
+        setChannelName(channel.name);
+    }
+    catch{
+        setChannelName(" ");
+    }
+});
+
+socket.on('receiveMemberProfile', function (data) {
+    var profileContent = document.getElementById("profile_container");
+    profileContent.innerHTML = data.code;
+
+    profileContent.style.display = "block";
+    profileContent.style.position = "fixed";
+    profileContent.style.zIndex = "10000";
+
+    var winWidth = window.innerWidth;
+    var winHeight= window.innerHeight;
+
+    // If is out of bounds
+
+    /*
+    console.log(winHeight)
+    console.log(data.top);
+    console.log(profileContent.offsetHeight);
+    console.log((profileContent.offsetHeight - data.top));
+
+     */
+
+    if((data.top + profileContent.offsetHeight) <= winHeight){
+        profileContent.style.top = `${data.top}px`;
+        //console.log("first");
+    }
+    else{
+        if(data.top + profileContent.offsetHeight > winHeight){
+            profileContent.style.top = `${data.top - ((data.top + profileContent.offsetHeight) - winHeight) - 20}px`;
+            //console.log("second");
+        }
+        else{
+            profileContent.style.top = `${data.top - (winHeight - profileContent.offsetHeight)}px`;
+            //console.log("second");
+        }
+
+    }
+
+    // If X out of bounds
+    if((data.left + profileContent.offsetWidth) < winWidth){
+        profileContent.style.left =  `${data.left + 20}px`;
+    }
+    else{
+        profileContent.style.left =  `${data.left - 20 - profileContent.offsetWidth}px`;
+    }
+
+
+
+});
+
+socket.on('receiveMemberList', function (data) {
+    memberlist.innerHTML = data;
+});
+
+socket.on('updateMemberList', function (data) {
+    getMemberList();
+});
+
+socket.on('updateGroupList', function (data) {
+    getGroupList();
+});
+
+socket.on('receiveGroupList', function (data) {
+    serverlist.innerHTML = "";
+    serverlist.innerHTML = data;
+    setActiveGroup(getGroup());
+});
+
+
+socket.on('newMemberJoined', function (author) {
+
+    // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
+    var message = '<div class="systemAnnouncementChat">' +
+        '            <p><label class="systemAnnouncementChatUsername">' + author.name + '</label> joined the server!</p>' +
+        '        </div>';
+
+    addToChatLog(chatlog, message);
+    scrollDown();
+
+    //socket.emit("getChannelTree", { id: getID(), token: getToken(), username: getUsername(), icon: getPFP(), room: getRoom(), group: getGroup() });
+});
+
+socket.on('memberOnline', function (member) {
+
+    // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
+    var message = '<div class="systemAnnouncementChat">' +
+        '            <p><label class="systemAnnouncementChatUsername">' + member.username + '</label> is now online!</p>' +
+        '        </div>';
+
+    addToChatLog(chatlog, message);
+    scrollDown();
+
+    //socket.emit("getChannelTree", { id: getID(), token: getToken(), username: getUsername(), icon: getPFP(), room: getRoom(), group: getGroup() });
+});
+
+socket.on('memberPresent', function (member) {
+    //socket.emit("getChannelTree", { id: member.id, username: member.username, icon: member.pfp });
+    //socket.emit("getChannelTree", { id: getID(), token: getToken(), username: getUsername(), icon: getPFP(), room: getRoom(), group: getGroup() });
+});
+
+socket.on('receiveGifImage', function (response) {
+
+
+    document.getElementById("emoji-entry-container").insertAdjacentHTML("beforeend",
+        `<img 
+                    onclick="sendGif('${response.gif}')" src="${response.preview}"
+                    onmouseover="changeGIFSrc('${response.gif}', this);"
+                    onmouseleave="changeGIFSrc('${response.preview}', this);"
+                    style="padding: 1%;border-radius: 20px;float: left;width: 48%; height: fit-content;">`
+    ) ;
+});
+
+socket.on('memberOffline', function (member) {
+    var message = '<div class="systemAnnouncementChat">' +
+        '            <p><label class="systemAnnouncementChatUsername">' + member + '</label> is now offline!</p>' +
+        '        </div>';
+
+    addToChatLog(chatlog, message);
+    scrollDown();
+});
+
+socket.on('configUpdate', function () {
+    getChannelTreeSocket()
+});
+
+socket.on('receiveToken', function (data) {
+    setCookie("token", data, 365);
+});
+
+socket.on('modalMessage', function (data) {
+
+    console.log(data);
+
+    var buttonArray = [];
+    Object.keys(data.buttons).forEach(function(button) {
+
+        var buttonText = data.buttons[button].text;
+        var buttonEvents = data.buttons[button].events;
+
+        buttonArray.push([buttonText.toLowerCase(), buttonEvents])
+    });
+
+    for(let i = 0; i < data.buttons.length; i++){
+        console.log("button : " + data.buttons[i])
+    }
+
+    console.log(buttonArray);
+
+    Confirm(data.title, data.message, "info", buttonArray, "confirm").then(result => {
+
+        console.log(result);
+    })
+});
+
+function setActiveGroup(group){
+    if(group == null){
+        return;
+    }
+    document.getElementById(group).classList.add('selectedGroup');
+}
+
+function addRoleFromProfile(userId){
+    socket.emit("getAllRoles", {id:getID(), token: getToken(), group: getGroup(), targetUser: userId }, function (response) {
+        console.log(response)
+
+        var roleList = document.getElementById("profile-role-menu").querySelector("#role-menu-list");
+        roleList.innerHTML = "";
+
+        var roles = response.data
+        Object.keys(roles).forEach(function (role) {
+
+            var roleObj = roles[role]
+
+            console.log(roleObj)
+            var roleId = roleObj.info.id;
+            var roleName = roleObj.info.name;
+            var roleColor = roleObj.info.color;
+            var hasRole = roleObj.info.hasRole;
+
+            var displayChecked = "";
+            if(hasRole == 1){
+                displayChecked = "checked";
+            }
+            else{
+                displayChecked = "";
+            }
+
+            roleList.insertAdjacentHTML("beforeend", `<div class="role-menu-entry" onclick="checkCheckedRoleMenu(this.querySelector('input'))">
+                        <input type="checkbox" ${displayChecked} class="role-menu-entry-checkbox" id="role-menu-entry_${roleId}_${userId}" onclick="checkCheckedRoleMenu(this)">
+                        <label style="color: ${roleColor};" class="role-menu-entry-roleName">${roleName}</label>
+                    </div>`)
+        });
+
+    });
+}
+
+function checkCheckedRoleMenu(element){
+    socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageMembers" }, function (response) {
+        if(response.permission == "granted"){
+            element.checked = !element.checked;
+            var roleId = element.id.split("_")[1];
+            var userId = element.id.split("_")[2];
+
+            if(element.checked == true){
+                // Assign role
+                socket.emit("addUserToRole", {id:getID(), token: getToken(), role: roleId, target: userId }, function (response) {
+
+                    if(response.type != "success"){
+                        notify(response.type, response.msg)
+                    }
+                });
+            }
+            else{
+                // Remove role
+                socket.emit("removeUserFromRole", {id:getID(), token: getToken(), role: roleId, target: userId }, function (response) {
+                    if(response.type != "success"){
+                        notify(response.type, response.msg)
+                    }
+                });
+            }
+        }
+    });
+}
+
+function showModal(data){
+    var modalBox = document.getElementById("modalBox");
+    var modalBoxTitle = document.getElementById("modalBoxTitle");
+    var modalBoxText = document.getElementById("modalBoxText");
+    var modalBoxButtons = document.getElementById("modalBoxButtons");
+
+    var BodyBlur = document.getElementsByTagName('BODY')[0];;
+    // filter: blur(3px);
+    // transform: translateZ(0);
+
+    //BodyBlur.style.filter = "blur(4px)";
+    //BodyBlur.style.transform = "translateZ(0)";
+
+
+    modalBox.removeAttribute("filter");
+    modalBoxTitle.removeAttribute("filter");
+    modalBoxText.removeAttribute("filter");
+
+    modalBox.style.display = "block";
+    modalBoxButtons.innerHTML = "";
+    modalBoxTitle.innerText = data.title.replaceAll("#", "\n");
+    modalBoxText.innerText = data.message.replaceAll("#", "\n");
+
+
+    if(data.buttons != null){
+
+        Object.keys(data.buttons).forEach(function(button) {
+
+            var buttonText = data.buttons[button].text;
+            var buttonEvent = data.buttons[button].events;
+
+            modalBoxButtons.insertAdjacentHTML("beforeend", `<button ${buttonEvent}>${buttonText}</button>`)
+        });
+    }
+
+    if(data.token != null){
+        setCookie("token", data.token, 365);
+    }
+}
+
+function closeModal(){
+    var modalBox = document.getElementById("modalBox");
+    var modalBoxTitle = document.getElementById("modalBoxTitle");
+    var modalBoxText = document.getElementById("modalBoxText");
+
+    modalBox.style.display = "none";
+    modalBoxTitle.innerText = "";
+    modalBoxText.innerText = "";
+}
+
+function importToken(){
+    var token = prompt("Please paste your exported token here.")
+
+    if(token.length != 48){
+        alert("This token was invalid. If you forgot your token please contact the server admin");
+        return;
+    }
+
+    else{
+        alert("Token successfully set!\nPlease save it if you havent already");
+        setCookie("token", token, 365);
+    }
+}
+
+function resetAccount(){
+    var reset = confirm("Do you really want to reset your account? EVERYTHING will be reset.")
+
+    if(reset){
+        setCookie("id", null, 365);
+        setCookie("username", null, 365);
+        setCookie("status", null, 365);
+        setCookie("pfp", null, 365);
+        setCookie("token", null, 365);
+        setCookie("banner", null, 365);
+
+        alert("Your account has been reset. Please refresh the page if you want to continue");
+    }
+}
+
+
+
+document.getElementById("message-actions").onclick = function(e) {
+    // e = Mouse click event.
+    //var rect = e.target.getBoundingClientRect();
+    //var x = e.clientX - rect.left; //x position within the element.
+    //var y = e.clientY - rect.top;  //y position within the element.
+    //console.log("Left? : " + x + " ; Top? : " + y + ".");
+
+    var x = e.clientX;
+    var y = e.clientY;
+
+    var emojiBox = document.getElementById("emoji-box-container");
+
+    var clickedElement = document.elementFromPoint(x, y)
+
+    if(clickedElement.id != "message-actions-image" ){
+        return;
+    }
+
+    if(emojiBox.style.display == "block"){
+        closeEmojiBox();
+    }
+    else{
+        emojiBox.style.display = "block";
+        selectEmojiTab(document.getElementById("emoji-box-emojis"))
+        getEmojis()
+
+        var test = document.getElementById("message-actions-image");
+
+
+
+        /*
+        console.log(emojiBox.offsetHeight)
+        emojiBox.style.top = ((test.style.top + (emojiBox.offsetHeight * 2)) - 60) + "px";
+        emojiBox.style.left = ((test.style.left + emojiBox.offsetWidth * 3.1) + "px");
+
+         */
+
+
+        emojiBox.style.top = (y - emojiBox.offsetHeight - 40) + "px";
+        emojiBox.style.left = x -  emojiBox.offsetWidth +"px";
+    }
+}
+
+window.addEventListener('resize', function(event){
+    // do stuff here
+
+    var emojiContainer = document.getElementById("emoji-box-container");
+    var profileContainer = document.getElementById("profile_container");
+
+    if(emojiContainer.style.display == "block"){
+        //emojiContainer.style.display = "none";
+        closeEmojiBox()
+    }
+    if(profileContainer.style.display == "block"){
+        profileContainer.style.display = "none";
+    }
+});
+
+document.addEventListener("keydown", (event) => {
+    var emojiContainer = document.getElementById("emoji-box-container");
+    var profileContainer = document.getElementById("profile_container");
+
+    if(event.key == "Escape"){
+        if(emojiContainer.style.display == "block"){
+            //emojiContainer.style.display = "none";
+            closeEmojiBox();
+        }
+        if(profileContainer.style.display == "block"){
+            profileContainer.style.display = "none";
+        }
+    }
+
+
+});
+
+var gifSearchbarInput = document.getElementById("gif-searchbar-input");
+// Execute a function when the user presses a key on the keyboard
+gifSearchbarInput.addEventListener("keypress", function(event) {
+    // If the user presses the "Enter" key on the keyboard
+
+    if (event.key === "Enter") {
+
+        var emojiEntryContainer = document.getElementById("emoji-entry-container");
+        emojiEntryContainer.innerHTML = "";
+
+        // socket.emit
+
+        socket.emit("searchTenorGif", { id:getID(), token: getToken(), search: gifSearchbarInput.value }, function (response) {
+
+            if(response.type == "success") {
+                console.log("Tenor Response");
+                console.log(response)
+            }
+            else{
+                notify(response.msg, "error")
+            }
+        });
+
+        //searchTenor(gifSearchbarInput.value);
+    }
+});
+
+function selectEmojiTab(element){
+    var parentnode = element.parentNode.children;
+    console.log(parentnode)
+
+    for(let i = 0; i < parentnode.length; i++){
+        if(parentnode[i].classList.contains("SelectedTab")){
+            parentnode[i].classList.remove("SelectedTab");
+        }
+    }
+
+    element.classList.add("SelectedTab");
+}
+
+function sendGif(url){
+
+    if(document.getElementById("messagebox-content").value.replaceAll(" ", "").length >= 1){
+        sendMessageToServer(getID(), getUsername(), getPFP(), document.getElementById("messagebox-content").value);
+    }
+
+    sendMessageToServer(getID(), getUsername(), getPFP(), url);
+
+    closeEmojiBox();
+}
+
+function closeEmojiBox(){
+    var emojiContainer = document.getElementById("emoji-box-container");
+    emojiContainer.style.display = "none";
+
+    var gifSearchbarInput = document.getElementById("gif-searchbar-input");
+    gifSearchbarInput.value = "";
+
+    var emojiEntryContainer = document.getElementById("emoji-entry-container");
+    emojiEntryContainer.innerHTML = "";
+
+    var emojiTab = document.getElementById("emoji-box-emojis");
+    var gifTab = document.getElementById("emoji-box-gifs");
+
+    try{
+        emojiTab.classList.add("SelectedTab");
+        gifTab.classList.remove("SelectedTab");
+    }
+    catch(e){ console.log(e) }
+}
+
+
+function changeGIFSrc(url, element){
+    element.src = url;
+}
+
+
+function getGifs(){
+
+    var emojiContainer = document.getElementById("emoji-box-container");
+    var emojiEntryContainer = document.getElementById("emoji-entry-container");
+    var gifSearchbar = document.getElementById("gif-searchbar");
+    var gifSearchbarInput = document.getElementById("gif-searchbar-input");
+
+    gifSearchbar.style.display = "block";
+    gifSearchbarInput.style.display = "block";
+    emojiEntryContainer.style.height = "calc(100% - 18% - 8.1%)";
+    emojiEntryContainer.innerHTML = "";
+    gifSearchbarInput.focus();
+
+}
+
+function getEmojis() {
+    var emojiContainer = document.getElementById("emoji-box-container");
+    var emojiEntryContainer = document.getElementById("emoji-entry-container");
+
+    gifSearchbarInput.style.display = "none";
+
+    socket.emit("getEmojis", { id:getID(), token: getToken() }, function (response) {
+
+        if(response.type == "success"){
+            //settings_icon.value = response.msg;
+            //emojiContainer.innerHTML = "<div id='emoji-box-header'><h2>Emojis</h2></div>";
+
+
+
+            emojiEntryContainer.innerHTML = "";
+            response.data.forEach(emoji =>{
+
+                var emojiId = emoji.split("_")[1];
+                var emojiName = emoji.split("_")[2].split(".")[0];
+
+
+                var code = `
+                    <div class="emoji-entry" title="${emojiName}" onclick="
+                              document.getElementById('messagebox-content').value += ' :${emojiName}: ';
+                              document.getElementById('emoji-box-container').style.display = 'none';
+                              document.getElementById('messagebox-content').focus();">
+                        <div class="emoji-img">
+                            <img class="emoji" src="/emojis/${emoji}">
+                        </div>
+                    </div>`
+
+
+                emojiEntryContainer.insertAdjacentHTML("beforeend", code);
+            })
+
+            //notify(response.msg)
+        }
+        else{
+            notify(response.msg, "error")
+        }
+
+        //console.log(response);
+    });
+}
+
+
+function exportCookies(){
+    var cookieData = document.cookie.split(';').map(function(c) {
+        var i = c.indexOf('=');
+        return [c.substring(0, i), c.substring(i + 1)];
+    });
+
+    copy(JSON.stringify(JSON.stringify(cookieData)));
+}
+
+function importCookies(data){
+    var cookieData = JSON.parse(data);
+    cookieData.forEach(function (arr) {
+        document.cookie = arr[0] + '=' + arr[1];
+    });
+}
+
+function setUser(username){
+    setCookie("username", username, 360);
+    updateUsernameOnUI(username);
+}
+
+function setBanner(banner){
+    setCookie("banner", banner, 360);
+}
+
+function setStatus(status){
+    setCookie("status", status, 360);
+    updateUsernameOnUI(status);
+}
+
+function setPFP(pfp){
+    setCookie("pfp", pfp, 360);
+    updateUsernameOnUI(pfp);
+}
+
+function setAboutme(aboutme){
+    setCookie("aboutme", aboutme, 360);
+    updateUsernameOnUI(aboutme);
+}
+
+socket.on('receiveGroupBanner', function (data) {
+    groupbanner.src = data;
+});
+
+
+function refreshValues(){
+    var username = getUsername();
+    getID();
+    getPFP();
+    getStatus();
+    getGroup();
+    getChannel();
+    getCategory();
+    getRoles();
+    getToken();
+    userJoined();
+    getServerInfo();
+
+    socket.emit("setRoom", { id: getID() , username: getUsername(), icon: getPFP(), room: getRoom(), token: getToken() });
+    getGroupList();
+    getMemberList();
+    getChannelTreeSocket()
+    socket.emit("getCurrentChannel", { id: getID() , username: username, icon: getPFP(), group: getGroup(), category: getCategory(), channel: getChannel(), token: getToken() });
+}
+
+function getMemberList(){
+    socket.emit("getMemberList", { id: getID() , username: getUsername(), icon: getPFP(), token: getToken(), channel: getChannel() });
+}
+
+function getGroupList(){
+    socket.emit("getGroupList", { id: getID() , group: getGroup(), username: getUsername(), icon: getPFP(), token: getToken() });
+    getGroupBanner();
+}
+
+function getGroupBanner(){
+    socket.emit("getGroupBanner", { id: getID() , username: getUsername(), icon: getPFP(), group: getGroup(), token: getToken() });
+}
+
+var serverName;
+var serverDesc;
+function getServerInfo(returnData = false){
+    socket.emit("getServerInfo", {id:getID(), token: getToken() }, function (response) {
+
+        var headline = document.getElementById("header");
+
+        servername = response.name;
+        serverdesc = response.description;
+
+        headline.innerHTML = `${servername} - ${serverdesc}`;
+    });
+}
+
+function setUrl(param){
+
+    window.history.replaceState(null, null, param); // or pushState
+    chatlog.innerHTML = "";
+
+    document.getElementById("messagebox-content").focus();
+
+    refreshValues();
+}
+
+function setChannelName(name){
+    document.getElementById("channelname").innerText = name;
+}
+
+function getRoles(){
+    socket.emit("RequestRoles", { id: getID(), username: getUsername(), pfp: getPFP() });
+}
+
+function generateId(length) {
+    let result = '1';
+    const characters = '0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length-1) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        counter += 1;
+    }
+    return result;
+}
+
+function addToChatLog(element, text){
+    //text = markdown(text, null);
+    element.insertAdjacentHTML('beforeend', text);
+    scrollDown();
+}
+
+function scrollDown(){
+    var objDiv = document.getElementById("content");
+    objDiv.scrollTop = objDiv.scrollHeight;
+}
+
+
+
+function upload(files) {
+    socket.emit("fileUpload", {file: files, filename: files.name, id:getID(), token: getToken() }, function (response) {
+
+        if(response.type == "success"){
+            //notify(response.msg, "success")
+            console.log(response);
+
+            //console.log(`sending  ${window.location.origin + response.msg}`)
+            sendMessageToServer(getID(), getUsername(), getPFP(), window.location.origin + response.msg);
+        }
+        else{
+            notify(response.msg, "error", null, "normal")
+        }
+    });
+}
+
+
+var uploadObject = document.getElementById('content');
+uploadObject.addEventListener('drop', function (e) {
+    // Code for upload file here
+    e.preventDefault()
+    uploadObject.style.backgroundColor = '#36393F';
+
+    var file = e.dataTransfer.files[0]
+    var fileSize = file.size / 1024 / 1024;
+    console.log(`Size: ${fileSize.toFixed(2)} MB`);
+
+    upload(file);
+
+}, false);
+
+uploadObject.addEventListener('dragenter', function (e) {
+    e.preventDefault();
+
+    uploadObject.style.backgroundColor = 'gray';
+}, false);
+
+uploadObject.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    uploadObject.style.backgroundColor = 'gray';
+}, false);
+
+uploadObject.addEventListener('dragleave', function (e) {
+    e.preventDefault();
+    uploadObject.style.backgroundColor = '#36393F';
+}, false);
+
+
+
+
+
+
+
+function showMessageInChat(message) {
+
+
+    message.message = markdown(message.message, message.messageId)
+
+    var messagecode = `<div class="message-container" id="msg-${message.messageId}">
+            <div class="message-profile-img-container">
+                <img class="message-profile-img" src="${message.icon}" id="${message.id}" onerror="this.src = '/img/default_pfp.png';">
+            </div>
+
+            <div class="message-profile-info" id="${message.id}">
+                <label class="message-profile-info-name" id="${message.id}" style="color: ${message.color};">${message.name}</label>
+                <label class="timestamp">${new Date(message.timestamp).toLocaleString("narrow")}</label>
+           </div>
+            <div class="message-profile-content" id="${message.timestamp}">
+                <p class="message-profile-content-message" id="msg-${message.messageId}">
+                    ${message.message}
+                </p>
+            </div>
+        </div>`;
+
+    addToChatLog(chatlog, messagecode);
+    convertMention(message, false)
+    scrollDown();
+}
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+function eraseCookie(name) {
+    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}

@@ -1,1 +1,272 @@
-var a0_0x4a230=a0_0x3b32;function a0_0x3b32(_0x3cdeac,_0x4ae619){var _0xd8c9b9=a0_0xd8c9();return a0_0x3b32=function(_0x3b32c3,_0x4b5da9){_0x3b32c3=_0x3b32c3-0x1c9;var _0x46920f=_0xd8c9b9[_0x3b32c3];return _0x46920f;},a0_0x3b32(_0x3cdeac,_0x4ae619);}(function(_0xeac2c8,_0xa8389){var _0x1bb0cb=a0_0x3b32,_0x4f63a2=_0xeac2c8();while(!![]){try{var _0xbe18be=parseInt(_0x1bb0cb(0x1db))/0x1+parseInt(_0x1bb0cb(0x1ed))/0x2*(parseInt(_0x1bb0cb(0x1cf))/0x3)+-parseInt(_0x1bb0cb(0x206))/0x4*(-parseInt(_0x1bb0cb(0x1ec))/0x5)+parseInt(_0x1bb0cb(0x1de))/0x6*(parseInt(_0x1bb0cb(0x1e0))/0x7)+-parseInt(_0x1bb0cb(0x1f7))/0x8*(-parseInt(_0x1bb0cb(0x1d2))/0x9)+parseInt(_0x1bb0cb(0x1fb))/0xa*(parseInt(_0x1bb0cb(0x1cd))/0xb)+-parseInt(_0x1bb0cb(0x201))/0xc;if(_0xbe18be===_0xa8389)break;else _0x4f63a2['push'](_0x4f63a2['shift']());}catch(_0x5266f1){_0x4f63a2['push'](_0x4f63a2['shift']());}}}(a0_0xd8c9,0xb9336));var rolelist=document[a0_0x4a230(0x1ef)]('rolelist'),roleColor=document['getElementById'](a0_0x4a230(0x212)),roleName=document[a0_0x4a230(0x1ef)]('roleName'),serverGroupResponse='',editedServerGroupResponse=[],editedPermissions={},currentRoleId='',selectedgroup=null;function getUrlParams(_0x425e0d){var _0x43f593=a0_0x4a230,_0xb569ef=window[_0x43f593(0x20d)][_0x43f593(0x1f4)],_0x16072f=new URLSearchParams(_0xb569ef),_0x1e3747=_0x16072f['get'](_0x425e0d);return _0x1e3747;}function a0_0xd8c9(){var _0x4b85e6=['error','sortId','roleColor','groupName',';\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','insertAdjacentHTML','userConnected','denied','channel','180609jXfhHA','channels','3whTfwf','call','.group-tree-entry','12195RRaVNx','getGroupChannels','push','\x0a\x20\x20\x20\x20\x20<h2>Channel\x20Sorting</h2>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<h3>Groups</h3>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20<button\x20id=\x22saveSortingButton\x22\x20style=\x22display:\x20block;\x20margin-bottom:\x204px;\x20background-color:\x20#289b28;\x20color:\x20white;\x20font-weight:\x20normal;\x20border-radius:\x204px;\x20border:\x201px\x20solid\x20transparent;\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onclick=\x22saveSorting()\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20Save\x20updates\x0a\x20\x20\x20\x20\x20\x20\x20\x20</button>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20<button\x20id=\x22cancelSortingButton\x22\x20style=\x22margin-bottom:\x204px;\x20display:\x20block;background-color:\x20white;\x20color:\x20black;\x20font-weight:\x20normal;\x20border-radius:\x204px;\x20border:\x201px\x20solid\x20transparent;\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onclick=\x22window.location.reload()\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20Cancel\x20updates\x0a\x20\x20\x20\x20\x20\x20\x20\x20</button>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20<br><br>\x0a\x20\x20\x20\x20','pagebody','length','-channel-tree-entry','keys','-channel-tree-entry\x22\x20id=\x22','717656GQzFGv','value','manageChannels','1872kKxGfe','map','19586mpXIVF','</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','sortable-ghost','info','categories','slice','display','success','style','name','\x20on\x20','permission','2276165GfXjBG','2185522GspWWX','beforeend','getElementById','\x22\x20style=\x22display:\x20inline-block;color:\x20','emit','updateChannelHierarchy','checkPermission','search','.tmp-',')\x22\x20style=\x22background-image:\x20url(\x27/img/down.png\x27);background-size:\x20cover;object-fit:\x20cover;background-position:\x20center\x20center;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x2010px;\x20height:\x2010px;display:\x20inline-block;\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22role-entry\x20group-tree-entry\x22\x20onclick=\x22loadSingleGroupChannels(\x27','7480sZjZAB','manageGroups','sort','groupId','810jpWMEX','.category-tree-entry','group','</p>','innerHTML','forEach','59722896yiaJnL','\x27)\x22\x20id=\x22','prototype','channeltree_list','\x20\x20\x20\x20-\x20','4LkOEna','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20onclick=\x22moveRoleUp(','roleName','color','log','msg','permissionlist','location','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22category\x20category-tree-entry\x22\x20id=\x22','querySelectorAll'];a0_0xd8c9=function(){return _0x4b85e6;};return a0_0xd8c9();}setupNotify(),socket[a0_0x4a230(0x1f1)](a0_0x4a230(0x1ca),{'id':getID(),'name':getUsername(),'icon':getPFP(),'status':getStatus(),'token':getToken(),'aboutme':getAboutme(),'banner':getBanner()}),socket[a0_0x4a230(0x1f1)](a0_0x4a230(0x1f3),{'id':getID(),'token':getToken(),'permission':[a0_0x4a230(0x1dd),'manageChannelSorting',a0_0x4a230(0x1f8)]},function(_0x48f317){var _0x5308b7=a0_0x4a230;_0x48f317[_0x5308b7(0x1eb)]==_0x5308b7(0x1cb)?window['location']['href']=window[_0x5308b7(0x20d)]['origin']+'/settings/server':document[_0x5308b7(0x1ef)](_0x5308b7(0x1d6))[_0x5308b7(0x1e8)][_0x5308b7(0x1e6)]='block';}),socket[a0_0x4a230(0x1f1)](a0_0x4a230(0x1d3),{'id':getID(),'token':getToken(),'group':getUrlParams(a0_0x4a230(0x1fd))},function(_0x22e8a2){var _0x108a6a=a0_0x4a230;rolelist=document[_0x108a6a(0x1ef)]('rolelist'),roleColor=document['getElementById'](_0x108a6a(0x212)),roleName=document['getElementById'](_0x108a6a(0x208)),console['log'](_0x22e8a2),serverGroupResponse=_0x22e8a2,editedServerGroupResponse=_0x22e8a2,loadGroupChannels(0x1);});function appearanceChanged(_0x55fdd6){var _0x3177ef=a0_0x4a230,_0x226ba9=document[_0x3177ef(0x1ef)]('groupId')[_0x3177ef(0x1dc)];editedServerGroupResponse[_0x226ba9][_0x3177ef(0x1e3)][_0x3177ef(0x1e9)]=document[_0x3177ef(0x1ef)](_0x3177ef(0x213))[_0x3177ef(0x1dc)];}function saveSorting(){var _0x171462=a0_0x4a230,_0x2c9b07=document[_0x171462(0x20f)](_0x171462(0x1d1)),_0x519701=document[_0x171462(0x20f)](_0x171462(0x1fc)),_0x2fc644=[],_0x14f49c=_0x2c9b07[_0x171462(0x1d7)];_0x2c9b07[_0x171462(0x200)](_0x3c1579=>{var _0x3dd524=_0x171462;_0x2fc644[_0x3dd524(0x1d4)](_0x3c1579['id']),console[_0x3dd524(0x20a)]('Setting\x20Group\x20Index\x20to\x20'+_0x14f49c+_0x3dd524(0x1ea)+_0x3c1579['id']),console['log'](editedServerGroupResponse),editedServerGroupResponse[_0x3c1579['id']][_0x3dd524(0x1e3)][_0x3dd524(0x211)]=_0x14f49c,_0x14f49c--;});var _0x27846e=[],_0x2cbbe4=_0x519701[_0x171462(0x1d7)],_0x348b0f=[],_0x64aa16=0x0,_0x477d1d=0x0;_0x519701=Array[_0x171462(0x203)][_0x171462(0x1e5)][_0x171462(0x1d0)](_0x519701),_0x519701[_0x171462(0x200)](_0x537a31=>{var _0x149f9c=_0x171462;console[_0x149f9c(0x20a)]('Setting\x20Category\x20Index\x20to\x20'+_0x2cbbe4+'\x20on\x20'+_0x537a31['id']),editedServerGroupResponse[selectedgroup][_0x149f9c(0x1ce)][_0x149f9c(0x1e4)][_0x537a31['id']][_0x149f9c(0x1e3)]['sortId']=_0x2cbbe4,console[_0x149f9c(0x20a)]('-\x20'+editedServerGroupResponse[selectedgroup][_0x149f9c(0x1ce)][_0x149f9c(0x1e4)][_0x537a31['id']]['info'][_0x149f9c(0x1e9)]+('\x20('+editedServerGroupResponse[selectedgroup][_0x149f9c(0x1ce)]['categories'][_0x537a31['id']][_0x149f9c(0x1e3)][_0x149f9c(0x211)]+')')),_0x477d1d=document[_0x149f9c(0x20f)](_0x149f9c(0x1f5)+_0x537a31['id']+_0x149f9c(0x1d8)),_0x477d1d=Array[_0x149f9c(0x203)][_0x149f9c(0x1e5)]['call'](_0x477d1d),_0x348b0f=[],_0x64aa16=_0x477d1d[_0x149f9c(0x1d7)],_0x477d1d[_0x149f9c(0x200)](_0xe03e9f=>{var _0x18cbfe=_0x149f9c;editedServerGroupResponse[selectedgroup][_0x18cbfe(0x1ce)][_0x18cbfe(0x1e4)][_0x537a31['id']][_0x18cbfe(0x1cc)][_0xe03e9f['id']][_0x18cbfe(0x211)]=_0x64aa16,console[_0x18cbfe(0x20a)](_0x18cbfe(0x205)+editedServerGroupResponse[selectedgroup][_0x18cbfe(0x1ce)][_0x18cbfe(0x1e4)][_0x537a31['id']][_0x18cbfe(0x1cc)][_0xe03e9f['id']][_0x18cbfe(0x1e9)]+('\x20('+editedServerGroupResponse[selectedgroup][_0x18cbfe(0x1ce)][_0x18cbfe(0x1e4)][_0x537a31['id']][_0x18cbfe(0x1cc)][_0xe03e9f['id']]['sortId']+')')),_0x64aa16--;}),_0x2cbbe4--;}),socket[_0x171462(0x1f1)](_0x171462(0x1f2),{'id':getID(),'token':getToken(),'sorted':editedServerGroupResponse,'group':0x0},function(_0x459e41){var _0x4c9f88=_0x171462;_0x459e41['type']==_0x4c9f88(0x1e7)?notify(_0x459e41[_0x4c9f88(0x20b)],_0x4c9f88(0x1e7),null,null,!![]):notify(_0x459e41[_0x4c9f88(0x20b)],_0x4c9f88(0x210));});}function savePermissions(){}new Sortable(rolelist,{'animation':0x96,'ghostClass':a0_0x4a230(0x1e2)}),new Sortable(channeltree_list,{'animation':0x96,'ghostClass':a0_0x4a230(0x1e2)});function loadSingleGroupChannels(_0x4c2ae6){var _0x35c3d8=a0_0x4a230;selectedgroup=_0x4c2ae6,document[_0x35c3d8(0x1ef)](_0x35c3d8(0x1fa))['value']=_0x4c2ae6,document[_0x35c3d8(0x1ef)](_0x35c3d8(0x213))[_0x35c3d8(0x1dc)]=serverGroupResponse[_0x4c2ae6]['info'][_0x35c3d8(0x1e9)],channeltree_list[_0x35c3d8(0x1ff)]='';const _0x42a06b=serverGroupResponse[_0x4c2ae6][_0x35c3d8(0x1ce)][_0x35c3d8(0x1e4)];let _0x457f92=Object[_0x35c3d8(0x1d9)](_0x42a06b)[_0x35c3d8(0x1f9)]((_0x591a0a,_0x41fe12)=>{var _0x12edf5=_0x35c3d8;return _0x42a06b[_0x41fe12][_0x12edf5(0x1e3)]['sortId']-_0x42a06b[_0x591a0a][_0x12edf5(0x1e3)][_0x12edf5(0x211)];});_0x457f92=_0x457f92[_0x35c3d8(0x1df)](_0x44dc2b=>_0x42a06b[_0x44dc2b]),_0x457f92[_0x35c3d8(0x200)](_0x139d3d=>{var _0x2c6675=_0x35c3d8;channeltree_list[_0x2c6675(0x1c9)](_0x2c6675(0x1ee),_0x2c6675(0x20e)+_0x139d3d[_0x2c6675(0x1e3)]['id']+'\x22>'+_0x139d3d[_0x2c6675(0x1e3)][_0x2c6675(0x1e9)]+_0x2c6675(0x1fe));const _0x490546=_0x139d3d[_0x2c6675(0x1cc)];let _0x5b0a55=Object[_0x2c6675(0x1d9)](_0x490546)[_0x2c6675(0x1f9)]((_0x349170,_0x53eebd)=>{var _0x458a23=_0x2c6675;return _0x490546[_0x53eebd][_0x458a23(0x211)]-_0x490546[_0x349170]['sortId'];});_0x5b0a55=_0x5b0a55['map'](_0x4c6fa5=>_0x490546[_0x4c6fa5]),_0x5b0a55['forEach'](_0x12c5af=>{var _0x457a1b=_0x2c6675;channeltree_list['insertAdjacentHTML'](_0x457a1b(0x1ee),'\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22channel\x20tmp-'+_0x139d3d[_0x457a1b(0x1e3)]['id']+_0x457a1b(0x1da)+_0x12c5af['id']+'\x22>'+_0x12c5af[_0x457a1b(0x1e9)]+_0x457a1b(0x1e1));});});}function loadGroupChannels(_0xca8dfe){var _0x4b1382=a0_0x4a230,_0x4ccd59=document[_0x4b1382(0x1ef)](_0x4b1382(0x204));rolelist['innerHTML']=_0x4b1382(0x1d5),document[_0x4b1382(0x1ef)](_0x4b1382(0x20c))['style'][_0x4b1382(0x1e6)]='block',currentRoleId=_0xca8dfe,rolelist=document[_0x4b1382(0x1ef)]('rolelist');const _0xc9a963=serverGroupResponse;let _0x59d3d5=Object[_0x4b1382(0x1d9)](_0xc9a963)[_0x4b1382(0x1f9)]((_0x7fe7af,_0x379ba3)=>{var _0xe354a6=_0x4b1382;return _0xc9a963[_0x379ba3][_0xe354a6(0x1e3)][_0xe354a6(0x211)]-_0xc9a963[_0x7fe7af]['info'][_0xe354a6(0x211)];});_0x59d3d5=_0x59d3d5['map'](_0x235e4e=>_0xc9a963[_0x235e4e]),_0x59d3d5[_0x4b1382(0x200)](_0x2f3ef9=>{var _0x1a7724=_0x4b1382;rolelist['insertAdjacentHTML']('beforeend','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22role-entry-container\x22\x20id=\x22'+_0x2f3ef9[_0x1a7724(0x1e3)]['id']+_0x1a7724(0x207)+_0x2f3ef9[_0x1a7724(0x1e3)]['id']+')\x22\x20style=\x22background-image:\x20url(\x27/img/up.png\x27);background-size:\x20cover;object-fit:\x20cover;background-position:\x20center\x20center;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x2010px;\x20height:\x2010px;display:\x20inline-block;\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20onclick=\x22moveRoleDown('+_0x2f3ef9[_0x1a7724(0x1e3)]['id']+_0x1a7724(0x1f6)+_0x2f3ef9[_0x1a7724(0x1e3)]['id']+_0x1a7724(0x202)+_0x2f3ef9[_0x1a7724(0x1e3)]['id']+_0x1a7724(0x1f0)+_0x2f3ef9[_0x1a7724(0x1e3)][_0x1a7724(0x209)]+_0x1a7724(0x214)+_0x2f3ef9[_0x1a7724(0x1e3)][_0x1a7724(0x1e9)]+'\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20');});}
+var rolelist = document.getElementById("rolelist");
+var roleColor = document.getElementById("roleColor");
+var roleName = document.getElementById("roleName");
+var serverGroupResponse = "";
+var editedServerGroupResponse = [];
+var editedPermissions = {};
+var currentRoleId = "";
+var selectedgroup = null;
+
+function getUrlParams(param){
+    var url = window.location.search;
+    var urlParams = new URLSearchParams(url);
+    var urlChannel = urlParams.get(param);
+
+    return urlChannel;
+}
+
+setupNotify();
+
+socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
+    aboutme: getAboutme(), banner: getBanner()});
+
+socket.emit("checkPermission", {id:getID(), token: getToken(), permission: ["manageChannels", "manageChannelSorting", "manageGroups"] }, function (response) {
+
+    if(response.permission == "denied"){
+        window.location.href = window.location.origin + "/settings/server";
+    }
+    else{
+        document.getElementById("pagebody").style.display = "block";
+    }
+});
+
+
+
+socket.emit("getGroupChannels", {id:getID(), token: getToken(), group: getUrlParams("group") }, function (response) {
+
+    rolelist = document.getElementById("rolelist");
+    roleColor = document.getElementById("roleColor");
+    roleName = document.getElementById("roleName");
+
+    console.log(response);
+    serverGroupResponse = response;
+    editedServerGroupResponse = response;
+
+    loadGroupChannels(1);
+});
+
+function appearanceChanged(element){
+    var groupId = document.getElementById("groupId").value;
+    editedServerGroupResponse[groupId].info.name = document.getElementById("groupName").value;
+}
+
+function saveSorting(){
+    var sortedGroups = document.querySelectorAll(`.group-tree-entry`);
+    var sortedCategories = document.querySelectorAll(`.category-tree-entry`);
+    //var sortedChannels = document.querySelectorAll(`.channel-tree-entry`);
+
+    var sortGroupArray = [];
+    var groupSortIndex = sortedGroups.length;
+    sortedGroups.forEach(group =>{
+        sortGroupArray.push(group.id);
+
+        console.log(`Setting Group Index to ${groupSortIndex} on ${group.id}`)
+        console.log(editedServerGroupResponse);
+
+        editedServerGroupResponse[group.id].info.sortId = groupSortIndex;
+
+        // Actually do it
+        groupSortIndex--;
+
+        //console.log("Group: " + group.id)
+    })
+
+    // Category Sorting
+    var sortCategoryArray = [];
+
+    // The biggest index (sortId) is always top, therefore we
+    // index it backwards
+    var catSortIndex = sortedCategories.length;
+
+    // Channel Sorting
+    var sortChannelArray = [];
+    var chanSortIndex = 0;
+    var sortedChannels = 0;
+
+    // Makes it possible to use .reverse()
+    sortedCategories = Array.prototype.slice.call(sortedCategories);
+
+    // Foreach Sorted Category
+    sortedCategories.forEach(cat =>{
+
+        console.log(`Setting Category Index to ${catSortIndex} on ${cat.id}`)
+        editedServerGroupResponse[selectedgroup].channels.categories[cat.id].info.sortId = catSortIndex;
+        // Actually do it
+
+        console.log("- " + editedServerGroupResponse[selectedgroup].channels.categories[cat.id].info.name + ` (${editedServerGroupResponse[selectedgroup].channels.categories[cat.id].info.sortId})`);
+
+        sortedChannels = document.querySelectorAll(`.tmp-${cat.id}-channel-tree-entry`);
+        sortedChannels = Array.prototype.slice.call(sortedChannels);
+
+        sortChannelArray = [];
+        chanSortIndex = sortedChannels.length;
+
+        sortedChannels.forEach(chan =>{
+
+            //console.log(`Setting Channel Index to ${chanSortIndex} on channel ${chan.id} in cat ${cat.id}`)
+            editedServerGroupResponse[selectedgroup].channels.categories[cat.id].channel[chan.id].sortId = chanSortIndex;
+
+            console.log("    - " + editedServerGroupResponse[selectedgroup].channels.categories[cat.id].channel[chan.id].name + ` (${editedServerGroupResponse[selectedgroup].channels.categories[cat.id].channel[chan.id].sortId})`);
+            // Actually do it
+
+            chanSortIndex--;
+        })
+
+        catSortIndex--;
+    })
+
+    //console.log("Changes:")
+    //console.log(serverGroupResponse[selectedgroup].channels);
+    //console.log(editedServerGroupResponse[selectedgroup].channels);
+
+    socket.emit("updateChannelHierarchy", {id:getID(), token: getToken(), sorted: editedServerGroupResponse, group: 0 }, function (response) {
+
+        if(response.type == "success"){
+            notify(response.msg, "success", null, null, true);
+        }
+        else{
+            notify(response.msg, "error");
+        }
+    });
+
+
+}
+
+function savePermissions(){
+    /*
+    socket.emit("saveRolePermissions", {id:getID(), token: getToken(), role: currentRoleId, permissions: editedPermissions }, function (response) {
+
+        alert(response.msg);
+        window.location.reload();
+    });
+
+     */
+}
+
+
+new Sortable(rolelist, {
+    animation: 150,
+    ghostClass: 'sortable-ghost'
+});
+
+new Sortable(channeltree_list, {
+    animation: 150,
+    ghostClass: 'sortable-ghost'
+});
+
+function loadSingleGroupChannels(groupId){
+
+    selectedgroup = groupId;
+
+    document.getElementById("groupId").value = groupId;
+    document.getElementById("groupName").value = serverGroupResponse[groupId].info.name;
+
+    channeltree_list.innerHTML = "";
+    // Sort all Categories
+    const catCollection = serverGroupResponse[groupId].channels.categories;
+    let sortedCats = Object.keys(catCollection).sort((a, b) => {
+        return catCollection[b].info.sortId - catCollection[a].info.sortId
+    });
+
+    // For each Category, sort the category's channels
+    sortedCats = sortedCats.map((key) => catCollection[key]);
+
+
+    sortedCats.forEach(cat => {
+
+        // Display the Category name on the web page
+        channeltree_list.insertAdjacentHTML("beforeend", `
+            <p class="category category-tree-entry" id="${cat.info.id}">${cat.info.name}</p>`
+        );
+
+        // Sort all the Channels inside the current category
+        const catChannelCollection = cat.channel;
+        let sortedCatChannels = Object.keys(catChannelCollection).sort((a, b) => {
+            return catChannelCollection[b].sortId - catChannelCollection[a].sortId
+        });
+
+        // Foreach channel in the category, display it on the web page
+        sortedCatChannels = sortedCatChannels.map((key) => catChannelCollection[key]);
+        sortedCatChannels.forEach(chan => {
+            channeltree_list.insertAdjacentHTML("beforeend", `
+                <p class="channel tmp-${cat.info.id}-channel-tree-entry" id="${chan.id}">${chan.name}</p>
+            `);
+        })
+    });
+}
+
+function loadGroupChannels(groupId){
+
+    /*
+    // Mark the current role that is being edited
+    var currentRole = document.querySelectorAll(`.role-entry`);
+    currentRole.forEach(role =>{
+
+        if(role.id == roleId){
+            role.style.backgroundColor = "#292B2F";
+        }
+        else{
+            role.style.backgroundColor = "transparent";
+        }
+    })
+
+     */
+
+    //document.getElementById("permheader").innerText = "Channels - " + serverGroupResponse[groupId].info.name;
+
+    // Show Role Delete Button
+    var channeltree_list = document.getElementById("channeltree_list");
+
+    rolelist.innerHTML = `
+     <h2>Channel Sorting</h2>
+        <h3>Groups</h3>
+
+        <button id="saveSortingButton" style="display: block; margin-bottom: 4px; background-color: #289b28; color: white; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="saveSorting()">
+            Save updates
+        </button>
+
+        <button id="cancelSortingButton" style="margin-bottom: 4px; display: block;background-color: white; color: black; font-weight: normal; border-radius: 4px; border: 1px solid transparent;"
+                onclick="window.location.reload()">
+            Cancel updates
+        </button>
+
+        <br><br>
+    `;
+
+    document.getElementById("permissionlist").style.display = "block";
+
+    currentRoleId = groupId;
+    rolelist = document.getElementById("rolelist");
+
+
+
+    // Sort all the Channels inside the current category
+    const groupCollection = serverGroupResponse;
+    let sortedGroups = Object.keys(groupCollection).sort((a, b) => {
+        return groupCollection[b].info.sortId - groupCollection[a].info.sortId
+    });
+
+    // Foreach channel in the category, display it on the web page
+    sortedGroups = sortedGroups.map((key) => groupCollection[key]);
+
+    sortedGroups.forEach(group => {
+
+        rolelist.insertAdjacentHTML("beforeend", `
+                <div class="role-entry-container" id="${group.info.id}">
+                       <div onclick="moveRoleUp(${group.info.id})" style="background-image: url('/img/up.png');background-size: cover;object-fit: cover;background-position: center center;
+                       width: 10px; height: 10px;display: inline-block;"></div>
+                       
+                       <div onclick="moveRoleDown(${group.info.id})" style="background-image: url('/img/down.png');background-size: cover;object-fit: cover;background-position: center center;
+                       width: 10px; height: 10px;display: inline-block;"></div>
+                       
+                        <p class="role-entry group-tree-entry" onclick="loadSingleGroupChannels('${group.info.id}')" id="${group.info.id}" style="display: inline-block;color: ${group.info.color};">
+                            ${group.info.name}
+                        </p>
+                   </div>
+        `);
+
+    })
+
+
+}

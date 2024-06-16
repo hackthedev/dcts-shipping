@@ -4,19 +4,19 @@
         "description": "powered by dcts.chat",
         "port": 2052,
         "setup": 0,
-        "maxUploadStorage": 10,
-        "maxUserUpload":  2,
+        "maxUploadStorage": 50,
         "useCloudflareImageCDN": 0,
         "cfAccountId": "",
         "cfAccountToken": "",
         "cfHash": "",
-        "rateLimit": "256",
+        "rateLimit": "128",
         "dropInterval": "5",
         "uploadFileTypes": [
             "image/png",
             "image/jpeg",
             "image/gif",
-            "image/webp"
+            "image/webp",
+            "audio/mpeg"
         ],
         "ssl": {
             "key": "/etc/letsencrypt/live/EXAMPLE.COM/privkey.pem",
@@ -26,8 +26,8 @@
         },
         "tenor": {
             "enabled": 0,
-            "api_key": "verylongrandomid",
-            "client_key": "project-name",
+            "api_key": "KEY_HERE",
+            "client_key": "VALUE_HERE",
             "limit": 50
         }
     },
@@ -39,19 +39,22 @@
                 "icon": null,
                 "color": "#FFFFFF",
                 "deletable": 0,
-                "sortId": 0,
-                "displaySeperate": 1
+                "sortId": 1,
+                "displaySeperate": 1,
+                "hasRole": 1
             },
             "permissions": {
                 "readMessages": 1,
                 "sendMessages": 1,
                 "uploadFiles": 1,
                 "redeemKey": 1,
-                "maxUpload": 2
+                "maxUpload": "7",
+                "manageChannels": 0
             },
             "members": [
 
-            ]
+            ],
+            "token": []
         },
         "1": {
             "info": {
@@ -61,28 +64,35 @@
                 "color": "#7C808A",
                 "deletable": 0,
                 "sortId": 0,
-                "displaySeperate": 1
+                "displaySeperate": 1,
+                "hasRole": 0
             },
             "permissions": {},
-            "members": []
+            "members": [],
+            "token": []
         },
         "1111": {
             "info": {
                 "id": 1111,
-                "name": "Admin",
+                "name": "Admininistrator",
                 "icon": null,
                 "color": "#ff0000",
                 "deletable": 0,
-                "sortId": 1,
-                "displaySeperate": 1
+                "sortId": 3,
+                "displaySeperate": 1,
+                "hasRole": 1
             },
             "permissions": {
-                "administrator": 1
+                "readMessages": 1,
+                "administrator": 1,
+                "manageChannels": 0
             },
             "members": [
 
             ],
-            "token": null
+            "token": [
+
+            ]
         }
     },
     "groups": {
@@ -102,15 +112,15 @@
                         "info": {
                             "id": 0,
                             "name": "General",
-                            "sortId": 1
+                            "sortId": 2
                         },
                         "channel": {
-                            "0": {
-                                "id": 0,
+                            "1039": {
+                                "id": 1039,
                                 "name": "chat",
                                 "type": "text",
                                 "description": "Default Channel Description",
-                                "sortId": 1,
+                                "sortId": 0,
                                 "permissions": {
                                     "0": {
                                         "readMessages": 1,
@@ -125,7 +135,9 @@
             },
             "permissions": {
                 "0": {
-                    "viewGroup": 1
+                    "viewGroup": 1,
+                    "sendMessages": 1,
+                    "readMessages": 1
                 }
             }
         }
@@ -134,5 +146,6 @@
 
     },
     "ipblacklist": [],
-    "banlist": {}
+    "banlist": {},
+    "mutelist": {}
 }

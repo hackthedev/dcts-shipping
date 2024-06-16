@@ -1,1 +1,221 @@
-function a0_0x19fd(){var _0x2b2206=['innerHTML','1559526RNgDmY','1863890RgZcFr','730544LwZTgr','2417064BnpsUs','onclick','isArray','replaceAll','prompt-container','body','147243bBynOd','284695dYMQfq','none','then','prompt-input-number','7VXtjDu','<button\x20id=\x22','beforeend','onerror','yes','style','log','300','src','forEach','/img/','prompt-input-text','prompt-button-yes','70xyKmZT','block','number','prompt-input-container','500','fadeout\x200.5s','getElementById','\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22prompt-container\x22\x20style=\x22display:\x20none;\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22prompt-content-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22prompt-img-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20id=\x22prompt-icon\x22\x20onerror=\x22this.src=\x27/img/error.png\x27;\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20src=\x22\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22prompt-text-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h1\x20id=\x22prompt-title\x22>Oh\x20yikes!</h1><br>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20id=\x22prompt-text\x22\x20style=\x22margin-top:\x200;padding-top:\x200;\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20You\x27ve\x20found\x20a\x20easter\x20egg\x20:0\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</p><br>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22prompt-input-container\x22\x20style=\x22display:\x20none;\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20id=\x22prompt-input-text\x22\x20style=\x22display:\x20none;\x22\x20type=\x22text\x22/>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20id=\x22prompt-input-number\x22\x20style=\x22display:\x20none;\x22\x20type=\x22number\x22/>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20id=\x22prompt-button-ok\x22\x20style=\x22display:\x20none;\x22>Ok</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20id=\x22prompt-button-cancel\x22\x20style=\x22display:\x20none;\x22>Cancel</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20id=\x22prompt-button-yes\x22\x20style=\x22display:\x20none;\x22>Yes</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20id=\x22prompt-button-no\x22\x20style=\x22display:\x20none;\x22>No</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20','text','Button\x20Result\x20was\x20','animation','6XcdUhW','display','</button>','1827kYoxAY','prompt-text','.png','Couldnt\x20show\x20confirmation\x20box\x20because\x20the\x20type\x20was\x20null','prompt-button-cancel','cancel','<br>'];a0_0x19fd=function(){return _0x2b2206;};return a0_0x19fd();}(function(_0x2bb62e,_0x8b251a){var _0x11ff60=a0_0x5194,_0x1a8adb=_0x2bb62e();while(!![]){try{var _0x724afc=parseInt(_0x11ff60(0x13b))/0x1+-parseInt(_0x11ff60(0x126))/0x2*(parseInt(_0x11ff60(0x13a))/0x3)+-parseInt(_0x11ff60(0x133))/0x4+parseInt(_0x11ff60(0x132))/0x5+parseInt(_0x11ff60(0x131))/0x6*(parseInt(_0x11ff60(0x13f))/0x7)+-parseInt(_0x11ff60(0x134))/0x8+parseInt(_0x11ff60(0x129))/0x9*(-parseInt(_0x11ff60(0x11b))/0xa);if(_0x724afc===_0x8b251a)break;else _0x1a8adb['push'](_0x1a8adb['shift']());}catch(_0x1fd3db){_0x1a8adb['push'](_0x1a8adb['shift']());}}}(a0_0x19fd,0x45539));var promptBox,promptIcon,promptTitle,promptText,promptInputText,promptInputNumber,promptInputs,promptInputYes,promptInputNo,promptInputCancel,promptInputOk;function closePrompt(){var _0x5197f2=a0_0x5194;promptBox[_0x5197f2(0x144)][_0x5197f2(0x125)]=_0x5197f2(0x120),setTimeout(()=>{var _0x5b09ab=_0x5197f2;promptBox[_0x5b09ab(0x144)][_0x5b09ab(0x127)]=_0x5b09ab(0x13c);},_0x5197f2(0x146)),setTimeout(()=>{var _0x1fe5c9=_0x5197f2;promptInputs['style'][_0x1fe5c9(0x127)]=_0x1fe5c9(0x13c),promptInputYes[_0x1fe5c9(0x144)]['display']=_0x1fe5c9(0x13c),promptInputNo[_0x1fe5c9(0x144)][_0x1fe5c9(0x127)]=_0x1fe5c9(0x13c),promptInputCancel['style'][_0x1fe5c9(0x127)]=_0x1fe5c9(0x13c),promptInputOk['style']['display']='none',promptInputText[_0x1fe5c9(0x144)][_0x1fe5c9(0x127)]='none',promptInputNumber[_0x1fe5c9(0x144)][_0x1fe5c9(0x127)]=_0x1fe5c9(0x13c);},_0x5197f2(0x11f));}function getElements(){var _0x16bc21=a0_0x5194;promptBox=document[_0x16bc21(0x121)](_0x16bc21(0x138)),promptIcon=document[_0x16bc21(0x121)]('prompt-icon'),promptTitle=document['getElementById']('prompt-title'),promptText=document['getElementById'](_0x16bc21(0x12a)),promptInputText=document[_0x16bc21(0x121)](_0x16bc21(0x119)),promptInputNumber=document['getElementById'](_0x16bc21(0x13e)),promptInputs=document[_0x16bc21(0x121)](_0x16bc21(0x11e)),promptInputYes=document[_0x16bc21(0x121)](_0x16bc21(0x11a)),promptInputNo=document[_0x16bc21(0x121)]('prompt-button-no'),promptInputCancel=document[_0x16bc21(0x121)](_0x16bc21(0x12d)),promptInputOk=document[_0x16bc21(0x121)]('prompt-button-ok');}function a0_0x5194(_0x521178,_0x1a1510){var _0x19fd1a=a0_0x19fd();return a0_0x5194=function(_0x519418,_0x3f63fb){_0x519418=_0x519418-0x119;var _0x12d959=_0x19fd1a[_0x519418];return _0x12d959;},a0_0x5194(_0x521178,_0x1a1510);}function setupPrompt(){var _0x5cd31f=a0_0x5194,_0xbbfb08=_0x5cd31f(0x122);document[_0x5cd31f(0x139)]['insertAdjacentHTML'](_0x5cd31f(0x141),_0xbbfb08),getElements();}var promptPromise;async function Confirm(_0x2b1930,_0x4a255f,_0x103a0d,_0x3df11a,_0x1946b3){var _0xe79e69=a0_0x5194;getElements(),promptBox[_0xe79e69(0x144)][_0xe79e69(0x127)]=_0xe79e69(0x11c),promptBox[_0xe79e69(0x144)][_0xe79e69(0x125)]='fadein\x200.5s',promptTitle[_0xe79e69(0x130)]=_0x2b1930[_0xe79e69(0x137)]('#',_0xe79e69(0x12f));;promptText[_0xe79e69(0x130)]=_0x4a255f[_0xe79e69(0x137)]('#','<br>'),promptButtonClick=null;var _0x2b9596=![],_0x27140c=![],_0x160e57=![];_0x1946b3==null&&console['log'](_0xe79e69(0x12c));promptIcon[_0xe79e69(0x147)]=_0xe79e69(0x149)+_0x103a0d+_0xe79e69(0x12b),promptIcon[_0xe79e69(0x142)]=()=>{var _0x6ef756=_0xe79e69;promptIcon[_0x6ef756(0x147)]='/img/error.png';};if(Array['isArray'](_0x1946b3)==!![])_0x1946b3[_0xe79e69(0x148)](_0x4984e8=>{var _0x394195=_0xe79e69;_0x4984e8==_0x394195(0x123)&&(promptInputText[_0x394195(0x144)][_0x394195(0x127)]=_0x394195(0x11c),_0x27140c=!![]),_0x4984e8==_0x394195(0x11d)&&(_0x27140c=!![],promptInputNumber['style'][_0x394195(0x127)]=_0x394195(0x11c)),_0x4984e8=='confirm'&&(_0x160e57=!![]);});else{if(_0x1946b3=='text')_0x2b9596=!![],promptInputText[_0xe79e69(0x144)][_0xe79e69(0x127)]=_0xe79e69(0x11c);else{if(_0x1946b3==_0xe79e69(0x11d))_0x27140c=!![],promptInputNumber[_0xe79e69(0x144)]['display']=_0xe79e69(0x11c);else _0x1946b3=='confirm'&&(_0x160e57=!![]);}}var _0x4d5bf8='';if(Array[_0xe79e69(0x136)](_0x3df11a)==!![]){var _0x234a41=!![];_0x3df11a[_0xe79e69(0x148)](_0x51553f=>{var _0x37c52b=_0xe79e69;(_0x51553f[0x1]==null||_0x51553f[0x1]['length']==0x0)&&(_0x51553f[0x1]='closePrompt();');if(_0x51553f[0x0]==_0x37c52b(0x143))promptInputs[_0x37c52b(0x144)]['display']=_0x37c52b(0x11c),promptInputYes['style'][_0x37c52b(0x127)]='block',promptInputYes[_0x37c52b(0x135)]=function(){var _0x1c3e3f=_0x37c52b;promptPromise(_0x1c3e3f(0x143)),eval(_0x51553f[0x1]);};else{if(_0x51553f[0x0]=='no')promptInputs[_0x37c52b(0x144)]['display']=_0x37c52b(0x11c),promptInputNo[_0x37c52b(0x144)]['display']=_0x37c52b(0x11c),promptInputNo['onclick']=function(){promptPromise('no'),eval(_0x51553f[0x1]);};else{if(_0x51553f[0x0]==_0x37c52b(0x12e))promptInputs[_0x37c52b(0x144)][_0x37c52b(0x127)]=_0x37c52b(0x11c),promptInputCancel[_0x37c52b(0x144)][_0x37c52b(0x127)]='block',promptInputCancel[_0x37c52b(0x135)]=function(){var _0x2737d8=_0x37c52b;promptPromise(_0x2737d8(0x12e)),eval(_0x51553f[0x1]);};else{if(_0x51553f[0x0]=='ok')promptInputs[_0x37c52b(0x144)]['display']=_0x37c52b(0x11c),promptInputOk[_0x37c52b(0x144)][_0x37c52b(0x127)]=_0x37c52b(0x11c),promptInputOk[_0x37c52b(0x135)]=function(){promptPromise('ok'),eval(_0x51553f[0x1]);};else{_0x234a41==!![]&&(promptInputs['innerHTML']='',_0x234a41=![]);var _0x18a673='B'+generateId(0x8);promptInputs[_0x37c52b(0x130)]+=_0x37c52b(0x140)+_0x18a673+'\x22>'+_0x51553f[0x0]+_0x37c52b(0x128),promptInputs['style'][_0x37c52b(0x127)]=_0x37c52b(0x11c),document['getElementById'](_0x18a673)[_0x37c52b(0x135)]=function(){promptPromise('ok'),eval(_0x51553f[0x1]);};}}}}console[_0x37c52b(0x145)](_0x51553f);});}else{console[_0xe79e69(0x145)]('Button\x20has\x20to\x20be\x202\x20dimentional\x20array');return;}var _0x27f765=new Promise(_0x5f1d4c=>{promptPromise=_0x5f1d4c;});await _0x27f765[_0xe79e69(0x13d)](_0x3395e6=>{btnRes=_0x3395e6;}),console[_0xe79e69(0x145)](_0xe79e69(0x124)+btnRes),closePrompt();if(_0x160e57==!![]){if(btnRes==_0xe79e69(0x143))return!![];else{if(btnRes=='no')return![];else{if(btnRes=='ok')return!![];else{if(btnRes==_0xe79e69(0x12e))return null;}}}}}
+var promptBox;
+var promptIcon;
+var promptTitle;
+var promptText;
+
+var promptInputText;
+var promptInputNumber;
+
+var promptInputs;
+var promptInputYes;
+var promptInputNo;
+var promptInputCancel;
+var promptInputOk;
+
+function closePrompt(){
+    //promptBox.style.display = "none";
+
+
+    promptBox.style.animation = "fadeout 0.5s";
+    setTimeout(() => {
+        promptBox.style.display = "none";
+    }, "300");
+
+    setTimeout(() => {
+        promptInputs.style.display = "none";
+        promptInputYes.style.display = "none";
+        promptInputNo.style.display = "none";
+        promptInputCancel.style.display = "none";
+        promptInputOk.style.display = "none";
+        promptInputText.style.display = "none";
+        promptInputNumber.style.display = "none";
+    }, "500");
+}
+
+function getElements(){
+    promptBox = document.getElementById("prompt-container");
+    promptIcon = document.getElementById("prompt-icon");
+    promptTitle = document.getElementById("prompt-title");
+    promptText = document.getElementById("prompt-text");
+
+    promptInputText = document.getElementById("prompt-input-text");
+    promptInputNumber = document.getElementById("prompt-input-number");
+
+    promptInputs = document.getElementById("prompt-input-container");
+    promptInputYes = document.getElementById("prompt-button-yes");
+    promptInputNo = document.getElementById("prompt-button-no");
+    promptInputCancel = document.getElementById("prompt-button-cancel");
+    promptInputOk = document.getElementById("prompt-button-ok");
+}
+
+function setupPrompt(){
+    var code =
+        `
+        <div id="prompt-container" style="display: none;">
+            <div id="prompt-content-container">
+                <div id="prompt-img-container">
+                    <img id="prompt-icon" onerror="this.src='/img/error.png';"
+                         src="">
+                </div>
+        
+        
+                <div id="prompt-text-container">
+                    <h1 id="prompt-title">Oh yikes!</h1><br>
+                    <p id="prompt-text" style="margin-top: 0;padding-top: 0;">
+                        You've found a easter egg :0
+                    </p><br>
+        
+                    <div id="prompt-input-container" style="display: none;">
+                        <input id="prompt-input-text" style="display: none;" type="text"/>
+                        <input id="prompt-input-number" style="display: none;" type="number"/>
+                        <button id="prompt-button-ok" style="display: none;">Ok</button>
+                        <button id="prompt-button-cancel" style="display: none;">Cancel</button>
+                        <button id="prompt-button-yes" style="display: none;">Yes</button>
+                        <button id="prompt-button-no" style="display: none;">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+    document.body.insertAdjacentHTML("beforeend", code);
+
+    getElements();
+}
+
+var promptPromise;
+async function Confirm(title, text, icon, button, type) {
+    getElements();
+
+    promptBox.style.display = "block";
+    promptBox.style.animation = "fadein 0.5s";
+
+    promptTitle.innerHTML = title.replaceAll("#", "<br>");;
+    promptText.innerHTML = text.replaceAll("#", "<br>");
+    promptButtonClick = null;
+
+    var withText = false;
+    var withNumber = false;
+    var confirming = false;
+
+    if(type == null){
+        console.log("Couldnt show confirmation box because the type was null");
+    }
+
+    promptIcon.src = "/img/" + icon + ".png";
+    promptIcon.onerror = () => {
+        promptIcon.src = "/img/error.png";
+    }
+
+    if (Array.isArray(type) == true) {
+        type.forEach(input => {
+            if (input == "text") {
+                promptInputText.style.display = "block";
+                withNumber = true;
+            }
+            if (input == "number") {
+                withNumber = true;
+                promptInputNumber.style.display = "block";
+            }
+            if (input == "confirm") {
+                confirming = true;
+            }
+        });
+    } else {
+        if (type == "text") {
+            withText = true;
+            promptInputText.style.display = "block";
+        } else if (type == "number") {
+            withNumber = true;
+            promptInputNumber.style.display = "block";
+        }
+        else if (type == "confirm") {
+            confirming = true;
+        }
+    }
+
+    var executionCode = "";
+    if (Array.isArray(button) == true) {
+
+        var firstRun = true;
+        button.forEach(key => {
+
+            if(key[1] == null || key[1].length == 0){
+                key[1] = "closePrompt();";
+            }
+
+            if (key[0] == "yes") {
+                promptInputs.style.display = "block";
+                promptInputYes.style.display = "block";
+
+                promptInputYes.onclick = function(){ promptPromise("yes"); eval(key[1]) };
+
+            }
+            else if (key[0] == "no") {
+                promptInputs.style.display = "block";
+                promptInputNo.style.display = "block";
+                promptInputNo.onclick = function(){ promptPromise("no"); eval(key[1]) };
+            }
+            else if (key[0] == "cancel") {
+                promptInputs.style.display = "block";
+                promptInputCancel.style.display = "block";
+                promptInputCancel.onclick = function(){ promptPromise("cancel"); eval(key[1]) };
+            }
+            else if (key[0] == "ok") {
+                promptInputs.style.display = "block";
+                promptInputOk.style.display = "block";
+
+                promptInputOk.onclick = function(){ promptPromise("ok"); eval(key[1]) };
+            }
+            else {
+
+                if(firstRun == true){
+                    promptInputs.innerHTML = "";
+                    firstRun = false;
+                }
+
+                var token = "B" + generateId(8);
+                promptInputs.innerHTML += `<button id="${token}">${key[0]}</button>`;
+                promptInputs.style.display = "block";
+
+                document.getElementById(token).onclick = function(){ promptPromise("ok"); eval(key[1]) };
+
+                /*
+                promptInputs.style.display = "block";
+                promptInputOk.style.display = "block";
+                promptInputOk.innerText = key[0];
+
+                promptInputOk.onclick = function(){ promptPromise("ok"); eval(key[1]) };
+
+                 */
+            }
+            console.log(key);
+        });
+    }
+    else{
+        console.log("Button has to be 2 dimentional array")
+        return;
+    }
+
+    // Magic
+    // Waits for button press or until promptPromise() is called with value.
+    var promise = new Promise((resolve) => { promptPromise = resolve });
+    await promise.then((result) => { btnRes = result });
+
+    console.log("Button Result was " + btnRes)
+    closePrompt();
+
+    if(confirming == true){
+        if(btnRes == "yes"){
+            return true;
+        }
+        else if(btnRes == "no"){
+            return false;
+        }
+        else if(btnRes == "ok"){
+            return true;
+        }
+        else if(btnRes == "cancel"){
+            return null
+        }
+    }
+}

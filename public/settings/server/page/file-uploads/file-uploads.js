@@ -1,1 +1,134 @@
-var a0_0x1098f1=a0_0x139d;(function(_0x30c47e,_0x41e2fa){var _0x11276c=a0_0x139d,_0x2e7915=_0x30c47e();while(!![]){try{var _0x4616f7=parseInt(_0x11276c(0xdd))/0x1+-parseInt(_0x11276c(0xce))/0x2+-parseInt(_0x11276c(0xcc))/0x3+parseInt(_0x11276c(0xe3))/0x4*(parseInt(_0x11276c(0xe0))/0x5)+-parseInt(_0x11276c(0xed))/0x6*(-parseInt(_0x11276c(0xd0))/0x7)+-parseInt(_0x11276c(0xcf))/0x8+parseInt(_0x11276c(0xcb))/0x9;if(_0x4616f7===_0x41e2fa)break;else _0x2e7915['push'](_0x2e7915['shift']());}catch(_0xc1696d){_0x2e7915['push'](_0x2e7915['shift']());}}}(a0_0x706f,0xc6a94));var setting_useLocalFs=document['getElementById'](a0_0x1098f1(0xd4)),setting_localFsLimit=document[a0_0x1098f1(0xd6)](a0_0x1098f1(0xcd)),setting_cfAccountId=document[a0_0x1098f1(0xd6)](a0_0x1098f1(0xc9)),setting_cfAccountToken=document['getElementById']('cfAccountToken'),setting_cfAccountHash=document[a0_0x1098f1(0xd6)](a0_0x1098f1(0xc5)),saveButton=document[a0_0x1098f1(0xd6)](a0_0x1098f1(0xe7)),useCf,cfAccountId,cfAccountToken,cfHash,localUploadLimit,serverconfigName,serverconfigDesc;socket['emit'](a0_0x1098f1(0xe8),{'id':getID(),'name':getUsername(),'icon':getPFP(),'status':getStatus(),'token':getToken(),'aboutme':getAboutme(),'banner':getBanner()}),socket[a0_0x1098f1(0xc3)](a0_0x1098f1(0xd5),{'id':getID(),'token':getToken(),'permission':a0_0x1098f1(0xc7)},function(_0x436eeb){var _0x53101d=a0_0x1098f1;_0x436eeb[_0x53101d(0xca)]=='denied'?window[_0x53101d(0xdf)][_0x53101d(0xda)]=window[_0x53101d(0xdf)]['origin']+_0x53101d(0xc6):document[_0x53101d(0xd6)](_0x53101d(0xe5))[_0x53101d(0xe1)][_0x53101d(0xd8)]='block';}),socket[a0_0x1098f1(0xc3)](a0_0x1098f1(0xea),{'id':getID(),'token':getToken()},function(_0x32329b){var _0x466c8c=a0_0x1098f1;console['log'](_0x32329b),useCf=_0x32329b[_0x466c8c(0xc8)],cfAccountId=_0x32329b['cfAccountId'],cfAccountToken=_0x32329b['cfAccountToken'],cfHash=_0x32329b[_0x466c8c(0xdb)],localUploadLimit=_0x32329b['maxUploadStorage'],setting_useLocalFs=document[_0x466c8c(0xd6)](_0x466c8c(0xd4)),setting_localFsLimit=document[_0x466c8c(0xd6)]('localUploadLimit'),setting_cfAccountId=document[_0x466c8c(0xd6)](_0x466c8c(0xc9)),setting_cfAccountToken=document[_0x466c8c(0xd6)](_0x466c8c(0xd9)),setting_cfAccountHash=document['getElementById'](_0x466c8c(0xc5)),saveButton=document[_0x466c8c(0xd6)]('settings_profile_save'),useCf==0x1?setting_useLocalFs['checked']=!![]:setting_useLocalFs[_0x466c8c(0xc4)]=![],setting_localFsLimit['value']=localUploadLimit,setting_cfAccountId[_0x466c8c(0xe2)]=cfAccountId,setting_cfAccountToken['value']=cfAccountToken,setting_cfAccountHash[_0x466c8c(0xe2)]=cfHash;});function isChecked(_0x41c98c){var _0x1a4c60=a0_0x1098f1;return _0x41c98c[_0x1a4c60(0xc4)]?0x1:0x0;}function updatePreview(){var _0x296da1=a0_0x1098f1;try{isChecked(setting_useLocalFs)!=useCf||setting_cfAccountId['value']!=cfAccountId||setting_cfAccountHash[_0x296da1(0xe2)]!=cfHash||setting_cfAccountToken[_0x296da1(0xe2)]!=cfAccountToken||setting_localFsLimit[_0x296da1(0xe2)]!=localUploadLimit?(console[_0x296da1(0xd7)](_0x296da1(0xec)),saveButton[_0x296da1(0xe1)]['display']=_0x296da1(0xe6)):(console[_0x296da1(0xd7)](_0x296da1(0xdc)),saveButton[_0x296da1(0xe1)][_0x296da1(0xd8)]=_0x296da1(0xee));}catch(_0x3472b3){console[_0x296da1(0xd7)](_0x3472b3);}}function saveSettings(){var _0xcc3fc2=a0_0x1098f1;try{socket[_0xcc3fc2(0xc3)](_0xcc3fc2(0xe4),{'id':getID(),'token':getToken(),'useCloudflare':isChecked(setting_useLocalFs),'cloudflareAccountId':setting_cfAccountId[_0xcc3fc2(0xe2)],'cloudflareAccountToken':setting_cfAccountToken[_0xcc3fc2(0xe2)],'cloudflareHash':setting_cfAccountHash['value'],'maxLocalUpload':setting_localFsLimit[_0xcc3fc2(0xe2)]},function(_0x126dd7){var _0x353010=_0xcc3fc2;alert(_0x126dd7['msg']),console[_0x353010(0xd7)](_0x126dd7);});}catch(_0x11c198){alert(_0xcc3fc2(0xe9)+_0x11c198);return;}}function setUser(_0x24de1e){var _0x252943=a0_0x1098f1;setCookie(_0x252943(0xd2),_0x24de1e,0x168);}function a0_0x139d(_0x781a2e,_0x3545a4){var _0x706f05=a0_0x706f();return a0_0x139d=function(_0x139d46,_0x50198f){_0x139d46=_0x139d46-0xc3;var _0x16abbe=_0x706f05[_0x139d46];return _0x16abbe;},a0_0x139d(_0x781a2e,_0x3545a4);}function setBanner(_0x33cc68){var _0x7e18b=a0_0x1098f1;setCookie(_0x7e18b(0xeb),_0x33cc68,0x168);}function a0_0x706f(){var _0x404cc0=['1662368ZiYruX','823640grZCcf','147PmdfWq','aboutme','username','status','saveToLocalFileSystem','checkPermission','getElementById','log','display','cfAccountToken','href','cfHash','same','680078BdODtV','pfp','location','20bvCWQk','style','value','293884tFOjwD','saveMediaSettings','pagebody','block','settings_profile_save','userConnected','Error\x20while\x20trying\x20to\x20save\x20settings:\x20','getServerInfo','banner','NOt\x20same','20496pqiaap','none','emit','checked','cfAccountHash','/settings/server','manageUploads','useCloudflareImageCDN','cfAccountId','permission','10161144MWFCky','1280577JSrBgy','localUploadLimit'];a0_0x706f=function(){return _0x404cc0;};return a0_0x706f();}function setStatus(_0x4002fb){var _0x32b09a=a0_0x1098f1;setCookie(_0x32b09a(0xd3),_0x4002fb,0x168);}function setPFP(_0x1f66bb){var _0xf322fa=a0_0x1098f1;setCookie(_0xf322fa(0xde),_0x1f66bb,0x168);}function setAboutme(_0x10a970){var _0x1ed2bc=a0_0x1098f1;setCookie(_0x1ed2bc(0xd1),_0x10a970,0x168);}
+var setting_useLocalFs = document.getElementById("saveToLocalFileSystem");
+var setting_localFsLimit = document.getElementById("localUploadLimit");
+var setting_cfAccountId = document.getElementById("cfAccountId");
+var setting_cfAccountToken = document.getElementById("cfAccountToken");
+var setting_cfAccountHash = document.getElementById("cfAccountHash");
+var saveButton = document.getElementById("settings_profile_save");
+
+var useCf;
+var cfAccountId;
+var cfAccountToken;
+var cfHash;
+var localUploadLimit;
+
+var serverconfigName;
+var serverconfigDesc;
+
+socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
+    aboutme: getAboutme(), banner: getBanner()});
+
+socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageUploads" }, function (response) {
+
+    if(response.permission == "denied"){
+        window.location.href = window.location.origin + "/settings/server";
+    }
+    else{
+        document.getElementById("pagebody").style.display = "block";
+    }
+});
+
+
+socket.emit("getServerInfo", {id:getID(), token: getToken() }, function (response) {
+
+    console.log(response);
+
+    useCf = response.useCloudflareImageCDN;
+    cfAccountId = response.cfAccountId;
+    cfAccountToken = response.cfAccountToken;
+    cfHash = response.cfHash;
+    localUploadLimit = response.maxUploadStorage;
+
+    setting_useLocalFs = document.getElementById("saveToLocalFileSystem");
+    setting_localFsLimit = document.getElementById("localUploadLimit");
+    setting_cfAccountId = document.getElementById("cfAccountId");
+    setting_cfAccountToken = document.getElementById("cfAccountToken");
+    setting_cfAccountHash = document.getElementById("cfAccountHash");
+    saveButton = document.getElementById("settings_profile_save");
+
+    // Use CDN?
+    if(useCf == 1){
+        setting_useLocalFs.checked = true;
+    }
+    else{
+        setting_useLocalFs.checked = false;
+    }
+
+    // Max Local Storage in MB
+    setting_localFsLimit.value = localUploadLimit;
+
+    setting_cfAccountId.value = cfAccountId;
+    setting_cfAccountToken.value = cfAccountToken;
+    setting_cfAccountHash.value = cfHash;
+});
+
+function isChecked(element){
+    return element.checked ? 1 : 0;
+}
+
+function updatePreview(){
+
+    try{
+
+        // Username
+        if(isChecked(setting_useLocalFs) != useCf ||
+            setting_cfAccountId.value != cfAccountId ||
+            setting_cfAccountHash.value != cfHash ||
+            setting_cfAccountToken.value != cfAccountToken ||
+            setting_localFsLimit.value != localUploadLimit
+
+        ){
+            console.log("NOt same");
+            saveButton.style.display = "block";
+        }
+        else{
+            console.log("same");
+            saveButton.style.display = "none";
+        }
+
+    }
+    catch(e){
+        console.log(e);
+    }
+
+}
+
+
+function saveSettings(){
+    try{
+
+        socket.emit("saveMediaSettings", { id: getID(), token: getToken(), useCloudflare: isChecked(setting_useLocalFs),
+                                        cloudflareAccountId: setting_cfAccountId.value,
+                                        cloudflareAccountToken: setting_cfAccountToken.value,
+                                        cloudflareHash: setting_cfAccountHash.value,
+                                        maxLocalUpload: setting_localFsLimit.value
+        }, function (response) {
+
+            alert(response.msg);
+            console.log(response);
+        });
+    }
+    catch(error){
+        alert("Error while trying to save settings: " + error);
+        return;
+    }
+}
+
+function setUser(username){
+    setCookie("username", username, 360);
+}
+
+function setBanner(banner){
+    setCookie("banner", banner, 360);
+}
+
+function setStatus(status){
+    setCookie("status", status, 360);
+}
+
+function setPFP(pfp){
+    setCookie("pfp", pfp, 360);
+}
+
+function setAboutme(aboutme){
+    setCookie("aboutme", aboutme, 360);
+}

@@ -1,1 +1,321 @@
-var a0_0x1f3f5e=a0_0x5343;(function(_0x431f49,_0x32fa45){var _0x24a973=a0_0x5343,_0xec959a=_0x431f49();while(!![]){try{var _0x178936=-parseInt(_0x24a973(0x13d))/0x1*(-parseInt(_0x24a973(0x162))/0x2)+-parseInt(_0x24a973(0x136))/0x3*(-parseInt(_0x24a973(0x144))/0x4)+-parseInt(_0x24a973(0x161))/0x5+-parseInt(_0x24a973(0x141))/0x6+-parseInt(_0x24a973(0x14d))/0x7*(parseInt(_0x24a973(0x142))/0x8)+-parseInt(_0x24a973(0x121))/0x9*(parseInt(_0x24a973(0x112))/0xa)+parseInt(_0x24a973(0x111))/0xb;if(_0x178936===_0x32fa45)break;else _0xec959a['push'](_0xec959a['shift']());}catch(_0xd65377){_0xec959a['push'](_0xec959a['shift']());}}}(a0_0x32c8,0xaf28b));function a0_0x5343(_0x4d5243,_0x5e0b8c){var _0x32c8d4=a0_0x32c8();return a0_0x5343=function(_0x53432c,_0x1b89ef){_0x53432c=_0x53432c-0x109;var _0x239994=_0x32c8d4[_0x53432c];return _0x239994;},a0_0x5343(_0x4d5243,_0x5e0b8c);}var rolelist=document['getElementById'](a0_0x1f3f5e(0x10c)),roleColor=document[a0_0x1f3f5e(0x122)]('roleColor'),roleName=document['getElementById'](a0_0x1f3f5e(0x126)),serverRoleResponse='',editedServerRoleResponse=[],editedPermissions={},currentRoleId='';socket[a0_0x1f3f5e(0x12b)](a0_0x1f3f5e(0x10e),{'id':getID(),'name':getUsername(),'icon':getPFP(),'status':getStatus(),'token':getToken(),'aboutme':getAboutme(),'banner':getBanner()}),socket[a0_0x1f3f5e(0x12b)]('checkPermission',{'id':getID(),'token':getToken(),'permission':['manageRoles',a0_0x1f3f5e(0x14c)]},function(_0x3ab27d){var _0x4d4f3e=a0_0x1f3f5e;_0x3ab27d[_0x4d4f3e(0x134)]==_0x4d4f3e(0x12c)?window[_0x4d4f3e(0x11e)]['href']=window[_0x4d4f3e(0x11e)][_0x4d4f3e(0x135)]+_0x4d4f3e(0x137):document[_0x4d4f3e(0x122)](_0x4d4f3e(0x11c))[_0x4d4f3e(0x13b)]['display']='block';});function a0_0x32c8(){var _0x2cf8c5=['23401PghKPE','\x27)\x22\x20id=\x22','color','updateRoleHierarchy','backgroundColor','keys','#permissionlist\x20p\x20input','member:','data','saveSortingButton','querySelectorAll','inline-block','info','resolveMember','transparent','checked','permheader','length','cancelSortingButton','getServerRoles','5821105BubuVa','26WODLZo','value','saveRolePermissions','deleteRole','rolelist','createRole','userConnected','beforeend','reverse','41930075OkJJsz','430KeuAqn','banner','saveAppearanceButton','before','display','reload','addUserToRole','\x27);\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22memberlist-username\x22>','updateRoleAppearance','saveButton','pagebody','permissions','location','<div\x20class=\x22memberlist-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22memberlist-banner\x22\x20style=\x22background-image:\x20url(\x27','type','271287WCNlik','getElementById','block','members',')\x22\x20style=\x22background-image:\x20url(\x27/img/up.png\x27);background-size:\x20cover;object-fit:\x20cover;background-position:\x20center\x20center;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x2010px;\x20height:\x2010px;display:\x20inline-block;\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20onclick=\x22moveRoleDown(','roleName','log','number','checked\x20element','name','emit','denied','Removing\x20user\x20','\x20input','removeUserFromRole',')\x22\x20type=\x22button\x22\x20value=\x22Remove\x20from\x20Role\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>','innerHTML','.role-entry-container','after','permission','origin','417yIknag','/settings/server','innerText','permissionlist','cancelAppearanceButton','style','roleColor','22363jZNKvA','Permissions\x20-\x20',')\x22\x20style=\x22background-image:\x20url(\x27/img/down.png\x27);background-size:\x20cover;object-fit:\x20cover;background-position:\x20center\x20center;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x2010px;\x20height:\x2010px;display:\x20inline-block;\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22role-entry\x22\x20onclick=\x22loadRolePerms(\x27','insertAdjacentHTML','4849788FrlCwm','3112AraoXe','forEach','34072jGtDPg','Please\x20enter\x20the\x20user\x20id\x20of\x20the\x20account\x20you\x20want\x20to\x20add','#292B2F','displaySeperate','msg','push','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20','memberlist','manageGroup'];a0_0x32c8=function(){return _0x2cf8c5;};return a0_0x32c8();}function saveNumber(_0x4ee319){var _0x38d0c4=a0_0x1f3f5e;editedServerRoleResponse[currentRoleId]['permissions'][_0x4ee319['id']]=_0x4ee319[_0x38d0c4(0x109)],console['log'](editedServerRoleResponse[currentRoleId]['permissions']),document[_0x38d0c4(0x122)](_0x38d0c4(0x11b))[_0x38d0c4(0x13b)][_0x38d0c4(0x116)]='inline-block',document[_0x38d0c4(0x122)]('cancelButton')['style']['display']=_0x38d0c4(0x158);}socket['emit'](a0_0x1f3f5e(0x160),{'id':getID(),'token':getToken()},function(_0x2816ca){var _0x577840=a0_0x1f3f5e;rolelist=document['getElementById'](_0x577840(0x10c)),roleColor=document[_0x577840(0x122)](_0x577840(0x13c)),roleName=document[_0x577840(0x122)](_0x577840(0x126)),console[_0x577840(0x127)](_0x2816ca),serverRoleResponse=_0x2816ca,editedServerRoleResponse=_0x2816ca;var _0x4d9e50=[];Object[_0x577840(0x152)](_0x2816ca)[_0x577840(0x110)]()[_0x577840(0x143)](function(_0x1d6811){var _0xeec3b3=_0x577840;console['log'](_0x2816ca);var _0x49d227=_0x2816ca[_0x1d6811][_0xeec3b3(0x159)][_0xeec3b3(0x14f)],_0x119ebc=_0x2816ca[_0x1d6811][_0xeec3b3(0x159)][_0xeec3b3(0x12a)];_0x4d9e50[_0x2816ca[_0x1d6811][_0xeec3b3(0x159)]['sortId']]=_0x2816ca[_0x1d6811];});var _0x5a1b1e='';_0x4d9e50=_0x4d9e50[_0x577840(0x110)](),console['log'](_0x4d9e50),_0x4d9e50[_0x577840(0x143)](_0x37f4db=>{var _0xe4adb9=_0x577840;_0x5a1b1e+='\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22role-entry-container\x22\x20id=\x22'+_0x37f4db[_0xe4adb9(0x159)]['id']+'\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20onclick=\x22moveRoleUp('+_0x37f4db[_0xe4adb9(0x159)]['id']+_0xe4adb9(0x125)+_0x37f4db[_0xe4adb9(0x159)]['id']+_0xe4adb9(0x13f)+_0x37f4db[_0xe4adb9(0x159)]['id']+_0xe4adb9(0x14e)+_0x37f4db['info']['id']+'\x22\x20style=\x22display:\x20inline-block;color:\x20'+_0x37f4db['info']['color']+';\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x37f4db[_0xe4adb9(0x159)]['name']+_0xe4adb9(0x14a);}),rolelist['insertAdjacentHTML'](_0x577840(0x10f),_0x5a1b1e);});function saveAppearance(){var _0x33a88a=a0_0x1f3f5e;serverRoleResponse[currentRoleId][_0x33a88a(0x159)][_0x33a88a(0x12a)]=roleName[_0x33a88a(0x109)],serverRoleResponse[currentRoleId]['info'][_0x33a88a(0x14f)]=roleColor[_0x33a88a(0x109)],document[_0x33a88a(0x122)](_0x33a88a(0x147))[_0x33a88a(0x15c)]==!![]?serverRoleResponse[currentRoleId][_0x33a88a(0x159)][_0x33a88a(0x147)]=0x1:serverRoleResponse[currentRoleId][_0x33a88a(0x159)][_0x33a88a(0x147)]=0x0,socket[_0x33a88a(0x12b)](_0x33a88a(0x11a),{'id':getID(),'token':getToken(),'roleId':currentRoleId,'data':serverRoleResponse[currentRoleId]},function(_0x2e096c){var _0x6c6f2d=_0x33a88a;alert(_0x2e096c[_0x6c6f2d(0x148)]),window[_0x6c6f2d(0x11e)][_0x6c6f2d(0x117)]();});}function appearanceChanged(){var _0xcfaeaf=a0_0x1f3f5e;document[_0xcfaeaf(0x122)](_0xcfaeaf(0x114))[_0xcfaeaf(0x13b)][_0xcfaeaf(0x116)]='inline-block',document[_0xcfaeaf(0x122)](_0xcfaeaf(0x13a))[_0xcfaeaf(0x13b)][_0xcfaeaf(0x116)]=_0xcfaeaf(0x158);}function saveSorting(){var _0x510d8e=a0_0x1f3f5e,_0x10ce2a=document['querySelectorAll']('.role-entry-container'),_0x23da4a=[];_0x10ce2a[_0x510d8e(0x143)](_0x495f10=>{var _0x5927cd=_0x510d8e;_0x23da4a[_0x5927cd(0x149)](_0x495f10['id']);}),socket[_0x510d8e(0x12b)](_0x510d8e(0x150),{'id':getID(),'token':getToken(),'sorted':_0x23da4a},function(_0x195510){var _0x158419=_0x510d8e;alert(_0x195510[_0x158419(0x148)]),window[_0x158419(0x11e)][_0x158419(0x117)]();});}function removeFromRole(_0x4ab22a,_0x5ed9a9){var _0x5d5007=a0_0x1f3f5e;console[_0x5d5007(0x127)](_0x5d5007(0x12d)+_0x5ed9a9+'\x20from\x20role\x20'),socket[_0x5d5007(0x12b)](_0x5d5007(0x12f),{'id':getID(),'token':getToken(),'role':_0x4ab22a,'target':_0x5ed9a9},function(_0x33cd2f){var _0x5980f7=_0x5d5007;alert(_0x33cd2f[_0x5980f7(0x148)]),window[_0x5980f7(0x11e)][_0x5980f7(0x117)]();});}function savePermissions(){var _0x37b15d=a0_0x1f3f5e;console['log']('Saviong'),console[_0x37b15d(0x127)](editedServerRoleResponse[currentRoleId][_0x37b15d(0x11d)]),socket[_0x37b15d(0x12b)](_0x37b15d(0x10a),{'id':getID(),'token':getToken(),'role':currentRoleId,'permissions':editedServerRoleResponse[currentRoleId][_0x37b15d(0x11d)]},function(_0x4fb8b9){var _0x5ae40d=_0x37b15d;alert(_0x4fb8b9[_0x5ae40d(0x148)]),window[_0x5ae40d(0x11e)][_0x5ae40d(0x117)]();});}function addToRole(){var _0xba8340=a0_0x1f3f5e,_0x2f45c5=prompt(_0xba8340(0x145));if(_0x2f45c5['length']!=0xc||isNaN(_0x2f45c5)==!![]){alert('The\x20user\x20id\x20(12\x20character\x20long\x20number)\x20you\x27ve\x20entered\x20is\x20incorrect.');return;}socket[_0xba8340(0x12b)](_0xba8340(0x118),{'id':getID(),'token':getToken(),'role':currentRoleId,'target':_0x2f45c5},function(_0x52a094){var _0x455b3b=_0xba8340;alert(_0x52a094[_0x455b3b(0x148)]),window[_0x455b3b(0x11e)][_0x455b3b(0x117)]();});}function createRole(){var _0x42e4cf=a0_0x1f3f5e;socket[_0x42e4cf(0x12b)](_0x42e4cf(0x10d),{'id':getID(),'token':getToken()},function(_0x41780b){var _0x5512c9=_0x42e4cf;alert(_0x41780b[_0x5512c9(0x148)]),window[_0x5512c9(0x11e)][_0x5512c9(0x117)]();});}function moveRoleUp(_0x565aab){var _0x2892c7=a0_0x1f3f5e;document[_0x2892c7(0x122)]('saveSortingButton')['style'][_0x2892c7(0x116)]=_0x2892c7(0x158),document['getElementById'](_0x2892c7(0x15f))[_0x2892c7(0x13b)][_0x2892c7(0x116)]=_0x2892c7(0x158);var _0xa6ab94=document[_0x2892c7(0x157)]('.role-entry-container');for(let _0x507608=0x0;_0x507608<_0xa6ab94[_0x2892c7(0x15e)];_0x507608++){_0xa6ab94[_0x507608]['id']==_0x565aab&&_0xa6ab94[_0x507608-0x1][_0x2892c7(0x115)](_0xa6ab94[_0x507608]);}}function moveRoleDown(_0x437912){var _0x464603=a0_0x1f3f5e;document['getElementById'](_0x464603(0x156))[_0x464603(0x13b)][_0x464603(0x116)]='inline-block',document['getElementById'](_0x464603(0x15f))['style'][_0x464603(0x116)]=_0x464603(0x158);var _0x4d78e3=document[_0x464603(0x157)](_0x464603(0x132));for(let _0x3fc1a5=0x0;_0x3fc1a5<_0x4d78e3[_0x464603(0x15e)];_0x3fc1a5++){_0x4d78e3[_0x3fc1a5]['id']==_0x437912&&_0x4d78e3[_0x3fc1a5+0x1][_0x464603(0x133)](_0x4d78e3[_0x3fc1a5]);}}function tickSetting(_0xebb8a5){var _0x195352=a0_0x1f3f5e;document[_0x195352(0x122)]('saveButton')[_0x195352(0x13b)][_0x195352(0x116)]='inline-block',document[_0x195352(0x122)]('cancelButton')[_0x195352(0x13b)][_0x195352(0x116)]=_0x195352(0x158);var _0x1f1054=document['querySelectorAll']('#'+_0xebb8a5['id']+_0x195352(0x12e));_0x1f1054[0x0][_0x195352(0x15c)]=!_0x1f1054[0x0][_0x195352(0x15c)],Object['keys'](serverRoleResponse[currentRoleId][_0x195352(0x11d)])['forEach'](function(_0x2d1a13){var _0x3756c9=_0x195352;editedPermissions[_0x2d1a13]=serverRoleResponse[currentRoleId][_0x3756c9(0x11d)][_0x2d1a13],console[_0x3756c9(0x127)](_0x2d1a13);}),console[_0x195352(0x127)]('\x20'),_0x1f1054[0x0]['checked']==!![]?editedServerRoleResponse[currentRoleId][_0x195352(0x11d)][_0xebb8a5['id']]=0x1:editedServerRoleResponse[currentRoleId][_0x195352(0x11d)][_0xebb8a5['id']]=0x0,console[_0x195352(0x127)](serverRoleResponse[currentRoleId][_0x195352(0x11d)]);}function deleteRole(){socket['emit']('deleteRole',{'id':getID(),'token':getToken(),'roleId':currentRoleId},function(_0x21afc8){var _0x220cae=a0_0x5343;alert(_0x21afc8['msg']),window[_0x220cae(0x11e)]['reload']();});}function loadRolePerms(_0x1a9dfe){var _0x218691=a0_0x1f3f5e,_0x36a83c=document['querySelectorAll']('.role-entry');_0x36a83c[_0x218691(0x143)](_0x19ff73=>{var _0x29ea3b=_0x218691;_0x19ff73['id']==_0x1a9dfe?_0x19ff73[_0x29ea3b(0x13b)][_0x29ea3b(0x151)]=_0x29ea3b(0x146):_0x19ff73['style'][_0x29ea3b(0x151)]=_0x29ea3b(0x15b);});var _0x11f6bd=serverRoleResponse[_0x1a9dfe]['permissions'];document[_0x218691(0x122)](_0x218691(0x15d))[_0x218691(0x138)]=_0x218691(0x13e)+serverRoleResponse[_0x1a9dfe][_0x218691(0x159)][_0x218691(0x12a)],document[_0x218691(0x122)](_0x218691(0x139))[_0x218691(0x13b)][_0x218691(0x116)]=_0x218691(0x123),document['getElementById'](_0x218691(0x10b))['style'][_0x218691(0x116)]=_0x218691(0x123),currentRoleId=_0x1a9dfe,roleColor[_0x218691(0x109)]=serverRoleResponse[_0x1a9dfe]['info'][_0x218691(0x14f)],roleName[_0x218691(0x109)]=serverRoleResponse[_0x1a9dfe][_0x218691(0x159)][_0x218691(0x12a)],permListPage=document[_0x218691(0x157)](_0x218691(0x153)),permListPage[_0x218691(0x143)](_0x938b7d=>{var _0x483625=_0x218691;_0x938b7d[_0x483625(0x15c)]=![];}),Object[_0x218691(0x152)](_0x11f6bd)[_0x218691(0x143)](function(_0x5e5057){var _0x2c58ef=_0x218691;children=document[_0x2c58ef(0x157)]('#'+_0x5e5057+'\x20input'),console[_0x2c58ef(0x127)]('#'+_0x5e5057+_0x2c58ef(0x12e)),console[_0x2c58ef(0x127)](children[0x0]),console[_0x2c58ef(0x127)](children),_0x11f6bd[_0x5e5057]==0x1?children[0x0][_0x2c58ef(0x15c)]=!![]:children[0x0][_0x2c58ef(0x120)]==_0x2c58ef(0x128)?children[0x0]['value']=_0x11f6bd[_0x5e5057]:children[0x0]['checked']=![];});serverRoleResponse[_0x1a9dfe][_0x218691(0x159)][_0x218691(0x147)]==0x1?(console['log'](_0x218691(0x129)),document['getElementById'](_0x218691(0x147))[_0x218691(0x15c)]=!![]):document[_0x218691(0x122)](_0x218691(0x147))[_0x218691(0x15c)]=![];var _0x3926e5=document[_0x218691(0x122)](_0x218691(0x14b));_0x3926e5[_0x218691(0x131)]='',console[_0x218691(0x127)](serverRoleResponse[currentRoleId]['members']),Object[_0x218691(0x152)](serverRoleResponse[currentRoleId][_0x218691(0x124)])[_0x218691(0x110)]()[_0x218691(0x143)](function(_0x3a6c7b){var _0x3bb0c=_0x218691;console[_0x3bb0c(0x127)](_0x3bb0c(0x154)),console['log'](_0x3a6c7b),console[_0x3bb0c(0x127)](serverRoleResponse[currentRoleId][_0x3bb0c(0x124)][_0x3a6c7b]),socket[_0x3bb0c(0x12b)](_0x3bb0c(0x15a),{'id':getID(),'token':getToken(),'target':serverRoleResponse[currentRoleId]['members'][_0x3a6c7b]},function(_0x5bfe58){var _0x1146ed=_0x3bb0c,_0x113e9d=_0x1146ed(0x11f)+_0x5bfe58[_0x1146ed(0x155)][_0x1146ed(0x113)]+'\x27);\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22memberlist-pfp\x22\x20style=\x22background-image:\x20url(\x27'+_0x5bfe58[_0x1146ed(0x155)]['icon']+_0x1146ed(0x119)+_0x5bfe58[_0x1146ed(0x155)][_0x1146ed(0x12a)]+'</div>\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22memberlist-actions\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20onclick=\x22removeFromRole('+currentRoleId+',\x20'+_0x5bfe58['data']['id']+_0x1146ed(0x130);_0x3926e5[_0x1146ed(0x140)](_0x1146ed(0x10f),_0x113e9d);});});}
+var rolelist = document.getElementById("rolelist");
+var roleColor = document.getElementById("roleColor");
+var roleName = document.getElementById("roleName");
+var serverRoleResponse = "";
+var editedServerRoleResponse = [];
+var editedPermissions = {};
+var currentRoleId = "";
+
+socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
+    aboutme: getAboutme(), banner: getBanner()});
+
+socket.emit("checkPermission", {id:getID(), token: getToken(), permission: ["manageRoles", "manageGroup"] }, function (response) {
+
+    if(response.permission == "denied"){
+        window.location.href = window.location.origin + "/settings/server";
+    }
+    else{
+        document.getElementById("pagebody").style.display = "block";
+    }
+});
+
+function saveNumber(el){
+    editedServerRoleResponse[currentRoleId].permissions[el.id] = el.value;
+    console.log(editedServerRoleResponse[currentRoleId].permissions)
+
+    document.getElementById("saveButton").style.display = "inline-block";
+    document.getElementById("cancelButton").style.display = "inline-block";
+}
+
+
+socket.emit("getServerRoles", {id:getID(), token: getToken() }, function (response) {
+
+    rolelist = document.getElementById("rolelist");
+    roleColor = document.getElementById("roleColor");
+    roleName = document.getElementById("roleName");
+
+    console.log(response);
+    serverRoleResponse = response;
+    editedServerRoleResponse = response;
+
+    var roleArraySorted = [];
+
+    Object.keys(response).reverse().forEach(function(role) {
+
+        console.log(response);
+        var rolecolor = response[role].info.color;
+        var roleName = response[role].info.name;
+
+        roleArraySorted[response[role].info.sortId] = response[role];
+    });
+
+    var code = "";
+
+    roleArraySorted = roleArraySorted.reverse();
+    console.log(roleArraySorted)
+
+    //var code = '<ul class="sortable-list">';
+    roleArraySorted.forEach(role =>{
+        code += `
+                   <div class="role-entry-container" id="${role.info.id}">
+                       <div onclick="moveRoleUp(${role.info.id})" style="background-image: url('/img/up.png');background-size: cover;object-fit: cover;background-position: center center;
+                       width: 10px; height: 10px;display: inline-block;"></div>
+                       
+                       <div onclick="moveRoleDown(${role.info.id})" style="background-image: url('/img/down.png');background-size: cover;object-fit: cover;background-position: center center;
+                       width: 10px; height: 10px;display: inline-block;"></div>
+                       
+                        <p class="role-entry" onclick="loadRolePerms('${role.info.id}')" id="${role.info.id}" style="display: inline-block;color: ${role.info.color};">
+                            ${role.info.name}
+                        </p>
+                   </div>
+        `;
+    })
+    //code += '</ul>';
+
+    rolelist.insertAdjacentHTML("beforeend", code);
+});
+
+function saveAppearance(){
+
+    serverRoleResponse[currentRoleId].info.name = roleName.value;
+    serverRoleResponse[currentRoleId].info.color = roleColor.value;
+
+    if(document.getElementById("displaySeperate").checked == true){
+        serverRoleResponse[currentRoleId].info.displaySeperate = 1;
+    }
+    else{
+        serverRoleResponse[currentRoleId].info.displaySeperate = 0;
+    }
+
+    socket.emit("updateRoleAppearance", {id:getID(), token: getToken(), roleId: currentRoleId, data: serverRoleResponse[currentRoleId] }, function (response) {
+        alert(response.msg);
+        window.location.reload();
+    });
+}
+
+function appearanceChanged(){
+    document.getElementById("saveAppearanceButton").style.display = "inline-block";
+    document.getElementById("cancelAppearanceButton").style.display = "inline-block";
+}
+
+function saveSorting(){
+    var sortedRoles = document.querySelectorAll(`.role-entry-container`);
+
+    var sortArray = [];
+    sortedRoles.forEach(role =>{
+        sortArray.push(role.id);
+    })
+
+    socket.emit("updateRoleHierarchy", {id:getID(), token: getToken(), sorted: sortArray }, function (response) {
+
+        alert(response.msg);
+        window.location.reload();
+    });
+}
+
+function removeFromRole(roleId, userId){
+
+    console.log(`Removing user ${userId} from role `);
+    socket.emit("removeUserFromRole", {id:getID(), token: getToken(), role: roleId, target: userId }, function (response) {
+        alert(response.msg);
+        window.location.reload();
+    });
+}
+
+function savePermissions(){
+
+    console.log("Saviong")
+    console.log(editedServerRoleResponse[currentRoleId].permissions)
+
+    socket.emit("saveRolePermissions", {id:getID(), token: getToken(), role: currentRoleId, permissions: editedServerRoleResponse[currentRoleId].permissions }, function (response) {
+        alert(response.msg);
+        window.location.reload();
+    });
+}
+
+function addToRole(){
+
+    var userId = prompt("Please enter the user id of the account you want to add");
+
+    if(userId.length != 12 || isNaN(userId) == true){
+        alert("The user id (12 character long number) you've entered is incorrect.");
+        return;
+    }
+
+    socket.emit("addUserToRole", {id:getID(), token: getToken(), role: currentRoleId, target: userId }, function (response) {
+        alert(response.msg);
+        window.location.reload();
+    });
+}
+
+function createRole(){
+    socket.emit("createRole", {id:getID(), token: getToken() }, function (response) {
+        alert(response.msg);
+        window.location.reload();
+    });
+}
+
+function moveRoleUp(id){
+    document.getElementById("saveSortingButton").style.display = "inline-block";
+    document.getElementById("cancelSortingButton").style.display = "inline-block";
+
+    var roles = document.querySelectorAll(`.role-entry-container`);
+
+    for(let i = 0; i < roles.length; i++){
+
+        if(roles[i].id == id){
+            roles[i-1].before(roles[i]);
+        }
+    }
+}
+
+function moveRoleDown(id){
+    document.getElementById("saveSortingButton").style.display = "inline-block";
+    document.getElementById("cancelSortingButton").style.display = "inline-block";
+
+    var roles = document.querySelectorAll(`.role-entry-container`);
+
+    for(let i = 0; i < roles.length; i++){
+
+        if(roles[i].id == id){
+            roles[i+1].after(roles[i]);
+        }
+    }
+}
+
+function tickSetting(element){
+    document.getElementById("saveButton").style.display = "inline-block";
+    document.getElementById("cancelButton").style.display = "inline-block";
+
+    var childInput = document.querySelectorAll(`#${element.id} input`);
+    childInput[0].checked = !childInput[0].checked;
+
+    // Load current permissions too
+    Object.keys(serverRoleResponse[currentRoleId].permissions).forEach(function(perm) {
+
+        editedPermissions[perm] = serverRoleResponse[currentRoleId].permissions[perm];
+        console.log(perm);
+    });
+
+    console.log(" ")
+
+    if(childInput[0].checked == true){
+        editedServerRoleResponse[currentRoleId].permissions[element.id] = 1;
+    }
+    else{
+        editedServerRoleResponse[currentRoleId].permissions[element.id] = 0;
+    }
+
+    console.log(serverRoleResponse[currentRoleId].permissions);
+
+    // Update that tomorrow
+    //console.log(editedPermissions);
+}
+
+
+function deleteRole() {
+    socket.emit("deleteRole", {id: getID(), token: getToken(), roleId: currentRoleId}, function (response) {
+        alert(response.msg);
+        window.location.reload();
+    });
+}
+
+function loadRolePerms(roleId){
+
+    // Mark the current role that is being edited
+    var currentRole = document.querySelectorAll(`.role-entry`);
+    currentRole.forEach(role =>{
+
+        if(role.id == roleId){
+            role.style.backgroundColor = "#292B2F";
+        }
+        else{
+            role.style.backgroundColor = "transparent";
+        }
+    })
+
+
+
+    // Get Permissions
+    var roleperms = serverRoleResponse[roleId].permissions;
+    document.getElementById("permheader").innerText = "Permissions - " + serverRoleResponse[roleId].info.name;
+
+    // Show Role Delete Button
+    document.getElementById("permissionlist").style.display = "block";
+    document.getElementById("deleteRole").style.display = "block";
+    currentRoleId = roleId;
+
+    // Color and Name
+    roleColor.value = serverRoleResponse[roleId].info.color;
+    roleName.value = serverRoleResponse[roleId].info.name;
+
+    // Uncheck everything before checking the permissions for the specific role
+    permListPage = document.querySelectorAll(`#permissionlist p input`);
+    permListPage.forEach(perm =>{
+        perm.checked = false;
+    })
+
+
+    // Set the permissions in the view
+    Object.keys(roleperms).forEach(function(perm) {
+
+        children = document.querySelectorAll(`#${perm} input`);
+        console.log(`#${perm} input`);
+        console.log(children[0])
+        console.log(children)
+
+        if (roleperms[perm] == 1){
+            children[0].checked = true;
+        }
+        else{
+            if(children[0].type == "number"){
+                children[0].value = roleperms[perm];
+            }
+            else{
+                children[0].checked = false;
+            }
+
+        }
+    });
+
+    // Set appearance checkbox down here, otherwise always unchecked
+    if(serverRoleResponse[roleId].info.displaySeperate == 1){
+        console.log("checked element")
+        document.getElementById("displaySeperate").checked = true;
+    }
+    else{
+        document.getElementById("displaySeperate").checked = false;
+    }
+
+    // get members of the role
+    var memberlist = document.getElementById("memberlist");
+    memberlist.innerHTML = "";
+
+    console.log(serverRoleResponse[currentRoleId].members);
+
+    Object.keys(serverRoleResponse[currentRoleId].members).reverse().forEach(function(member) {
+
+        // resolve member
+
+        console.log("member:")
+        console.log(member)
+        console.log(serverRoleResponse[currentRoleId].members[member])
+
+        socket.emit("resolveMember", {id:getID(), token: getToken(), target: serverRoleResponse[currentRoleId].members[member] }, function (response) {
+
+            var code = `<div class="memberlist-container">
+                        <div class="memberlist-banner" style="background-image: url('${response.data.banner}');"></div>
+                        <div class="memberlist-pfp" style="background-image: url('${response.data.icon}');"></div>
+                        <div class="memberlist-username">${response.data.name}</div>
+    
+                        <div class="memberlist-actions">
+                            <input onclick="removeFromRole(${currentRoleId}, ${response.data.id})" type="button" value="Remove from Role">
+                        </div>
+                    </div>`;
+
+            memberlist.insertAdjacentHTML("beforeend", code);
+
+        });
+    });
+
+}

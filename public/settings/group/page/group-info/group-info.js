@@ -1,1 +1,104 @@
-var a0_0x483442=a0_0x2829;function a0_0x2829(_0x5a1e60,_0x188004){var _0x53bc49=a0_0x53bc();return a0_0x2829=function(_0x2829a5,_0x2a8912){_0x2829a5=_0x2829a5-0xb6;var _0x29880d=_0x53bc49[_0x2829a5];return _0x29880d;},a0_0x2829(_0x5a1e60,_0x188004);}(function(_0x1ed413,_0x5efc5f){var _0x48e7dc=a0_0x2829,_0x62b515=_0x1ed413();while(!![]){try{var _0x3cebfd=-parseInt(_0x48e7dc(0xd9))/0x1*(-parseInt(_0x48e7dc(0xc1))/0x2)+parseInt(_0x48e7dc(0xc9))/0x3+parseInt(_0x48e7dc(0xbb))/0x4*(-parseInt(_0x48e7dc(0xd8))/0x5)+parseInt(_0x48e7dc(0xb8))/0x6*(-parseInt(_0x48e7dc(0xc8))/0x7)+-parseInt(_0x48e7dc(0xce))/0x8*(parseInt(_0x48e7dc(0xbf))/0x9)+parseInt(_0x48e7dc(0xb7))/0xa*(-parseInt(_0x48e7dc(0xd4))/0xb)+parseInt(_0x48e7dc(0xd2))/0xc;if(_0x3cebfd===_0x5efc5f)break;else _0x62b515['push'](_0x62b515['shift']());}catch(_0x1bf093){_0x62b515['push'](_0x62b515['shift']());}}}(a0_0x53bc,0xc5875));var channelname=document[a0_0x483442(0xba)](a0_0x483442(0xd7)),saveButton=document[a0_0x483442(0xba)](a0_0x483442(0xb9)),serverconfigName,editGroup={};setupNotify(),socket[a0_0x483442(0xd1)](a0_0x483442(0xd3),{'id':getID(),'name':getUsername(),'icon':getPFP(),'status':getStatus(),'token':getToken(),'aboutme':getAboutme(),'banner':getBanner()}),socket[a0_0x483442(0xd1)](a0_0x483442(0xc4),{'id':getID(),'token':getToken(),'group':getUrlParams('id')[a0_0x483442(0xbd)](a0_0x483442(0xc0),'')},function(_0x48b518){var _0x1197c0=a0_0x483442;try{console[_0x1197c0(0xcf)](_0x48b518),channelname=document['getElementById'](_0x1197c0(0xd7)),saveButton=document['getElementById'](_0x1197c0(0xb9)),serverconfigName=_0x48b518[_0x1197c0(0xc6)][_0x1197c0(0xc7)][_0x1197c0(0xd5)],channelname['value']=serverconfigName,editGroup=_0x48b518,console['log'](_0x48b518);}catch(_0x146ad4){console[_0x1197c0(0xcf)](_0x1197c0(0xd6)),console['log'](_0x146ad4),alert('Unable\x20to\x20get\x20channel\x20info.\x20Please\x20try\x20to\x20reload\x20slowly\x20until\x20it\x20works.\x20Known\x20bug!');}});function getToken(){var _0x156511=a0_0x483442,_0x33029c=getCookie(_0x156511(0xbe));return _0x33029c==null||_0x33029c[_0x156511(0xb6)]<=0x0?null:_0x33029c;}function getID(){var _0x12f641=a0_0x483442,_0x278cff=getCookie('id');return _0x278cff==null||_0x278cff[_0x12f641(0xb6)]!=0xc?(_0x278cff=generateId(0xc),setCookie('id',_0x278cff,0x168),_0x278cff):_0x278cff;}function updatePreview(){var _0xd4444e=a0_0x483442;try{channel_name[_0xd4444e(0xcd)]!=serverconfigName?(console[_0xd4444e(0xcf)](_0xd4444e(0xcb)),saveButton['style']['display']=_0xd4444e(0xcc)):(console[_0xd4444e(0xcf)]('same'),saveButton[_0xd4444e(0xc3)][_0xd4444e(0xca)]='none');}catch(_0x5bd2a7){console[_0xd4444e(0xcf)](_0x5bd2a7);}}function a0_0x53bc(){var _0x57543b=['getGroupInfo','none','data','info','39025foHSsO','1102002iqmKMh','display','NOt\x20same','block','value','2072vyADnw','log','type','emit','35761092YZficC','userConnected','23914WZjAoj','name','Unable\x20to\x20get\x20Group\x20Information','channel_name','723505cfRpIY','871622jJvYFs','msg','length','5470BkkVqk','1266LjnMkN','settings_channel_save','getElementById','4wmquZJ','error','replace','token','31266vwECLx','group-','2zWflqw','success','style'];a0_0x53bc=function(){return _0x57543b;};return a0_0x53bc();}function saveSettings(){var _0x58c866=a0_0x483442;try{channelname[_0x58c866(0xcd)]!=null&&channelname[_0x58c866(0xcd)][_0x58c866(0xb6)]>0x0&&channelname[_0x58c866(0xcd)]!=serverconfigName&&socket[_0x58c866(0xd1)]('updateGroupName',{'id':getID(),'token':getToken(),'groupId':getUrlParams('id'),'groupName':channelname[_0x58c866(0xcd)]},function(_0x442f07){var _0x5799ad=_0x58c866;_0x442f07[_0x5799ad(0xd0)]==_0x5799ad(0xc2)?notify(_0x442f07[_0x5799ad(0xda)],_0x5799ad(0xc2),null,!![]):notify(_0x442f07['msg'],_0x5799ad(0xbc),null,!![]),console[_0x5799ad(0xcf)](_0x442f07);}),saveButton[_0x58c866(0xc3)][_0x58c866(0xca)]=_0x58c866(0xc5);}catch(_0x427afa){alert('Error\x20while\x20trying\x20to\x20save\x20settings:\x20'+_0x427afa);return;}}
+var channelname = document.getElementById("channel_name");
+var saveButton = document.getElementById("settings_channel_save");
+
+var serverconfigName;
+var editGroup = {};
+setupNotify()
+
+socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
+    aboutme: getAboutme(), banner: getBanner()});
+
+
+socket.emit("getGroupInfo", {id: getID(), token: getToken(), group: getUrlParams("id").replace("group-", "")}, function (response) {
+    try{
+
+        console.log(response)
+        channelname = document.getElementById("channel_name");
+        saveButton = document.getElementById("settings_channel_save");
+
+        serverconfigName = response.data.info.name;
+        channelname.value = serverconfigName;
+        editGroup = response;
+
+        console.log(response);
+    }
+    catch(err){
+        console.log("Unable to get Group Information");
+        console.log(err);
+
+        alert("Unable to get channel info. Please try to reload slowly until it works. Known bug!");
+    }
+
+});
+
+
+function getToken(){
+    var token = getCookie("token");
+
+    if(token == null || token.length <= 0){
+        return null;
+    }
+    else{
+        return token;
+    }
+}
+
+function getID(){
+    var id = getCookie("id");
+
+    if(id == null || id.length != 12){
+        id = generateId(12);
+        setCookie("id", id, 360);
+        return id;
+    }
+    else{
+        return id;
+    }
+}
+function updatePreview(){
+
+    try{
+
+        // Username
+        if(channel_name.value != serverconfigName
+        ){
+            console.log("NOt same");
+            saveButton.style.display = "block";
+        }
+        else{
+            console.log("same");
+            saveButton.style.display = "none";
+        }
+    }
+    catch(e){
+        console.log(e);
+    }
+
+}
+
+
+function saveSettings(){
+    try{
+        if(channelname.value != null && channelname.value.length > 0 && channelname.value != serverconfigName){
+
+            socket.emit("updateGroupName", {id:getID(), token: getToken(), groupId: getUrlParams("id"), groupName: channelname.value }, function (response) {
+
+                if(response.type== "success"){
+                    notify(response.msg, "success", null, true);
+                }
+                else{
+                    notify(response.msg, "error", null, true);
+                }
+                console.log(response);
+
+
+            });
+        }
+
+        saveButton.style.display = "none";
+    }
+    catch(error){
+        alert("Error while trying to save settings: " + error);
+        return;
+    }
+}

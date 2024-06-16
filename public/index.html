@@ -13,9 +13,9 @@
 
     <script src="notify.js?v=5"></script>
     <script src="prompt.js?v=5"></script>
-    <script defer src="chat.js?v=6"></script>
+    <script defer src="chat.js?v=7"></script>
 
-    <link href="/settings/account/page/profile/profile.css" rel="stylesheet">
+    <link href="/settings/account/page/profile/profile.css?v=1" rel="stylesheet">
     <link href="prompt.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
@@ -78,7 +78,7 @@
         width: calc(80px - 16px);
 
         padding:  8px;
-        align-content: center;
+        /*align-content: center;*/
         text-align: center;
 
         background-color: #202225;
@@ -182,7 +182,7 @@
         font-weight: bold;
         font-size: 20px;
 
-        box-shadow: 0 2px 8px -2px black;
+        box-shadow: 0 4px 8px -2px black;
     }
 
     #content {
@@ -227,6 +227,7 @@
         outline: none;
         resize: none !important;
         margin: -20px 8px 0 8px;
+        overflow-y: hidden;
     }
 
     #messagebox-media {
@@ -732,6 +733,7 @@
 
     #channeltree details ul li {
         list-style-position: inside;
+        /*  list-style-image: url("img/hashtag.png"); */
     }
 
     #profile-qa-settings {

@@ -1,1 +1,5026 @@
-var a0_0x320c35=a0_0x102e;(function(_0x473ec4,_0x484bda){var _0x41b714=a0_0x102e,_0x2af913=_0x473ec4();while(!![]){try{var _0x557748=parseInt(_0x41b714(0x2c6))/0x1+parseInt(_0x41b714(0x18f))/0x2+-parseInt(_0x41b714(0x288))/0x3*(parseInt(_0x41b714(0x2dd))/0x4)+-parseInt(_0x41b714(0x1cf))/0x5+-parseInt(_0x41b714(0x2b4))/0x6+parseInt(_0x41b714(0x19f))/0x7+parseInt(_0x41b714(0x189))/0x8*(parseInt(_0x41b714(0x2c2))/0x9);if(_0x557748===_0x484bda)break;else _0x2af913['push'](_0x2af913['shift']());}catch(_0x16e282){_0x2af913['push'](_0x2af913['shift']());}}}(a0_0x35cf,0x4c8b1));import{createRequire}from'module';const require=createRequire(import.meta[a0_0x320c35(0xda)]);var express=require(a0_0x320c35(0x1f3)),app=express(),https=require(a0_0x320c35(0x86));const fs=require('fs');var server,FormData=require(a0_0x320c35(0x257));const fetch=require(a0_0x320c35(0x261)),getSize=require('get-folder-size');import{fileTypeFromBuffer}from'file-type';import{channel}from'diagnostics_channel';const colors=require(a0_0x320c35(0xf2));var request=require(a0_0x320c35(0x23d)),usersocket=[],showedOfflineMessage=[],typingMembers=[],typingMembersTimeout=[],ratelimit=[],socketToIP=[],debugmode=![],versionCode=0x285;async function consolas(_0x5532e7,_0x1478c3=null){return new Promise((_0x278b18,_0x2dea93)=>{var _0x2058a1=a0_0x102e,_0x236672=new Date(),_0xec951e=_0x236672['getFullYear']()+'-'+(_0x236672['getMonth']()+0x1)+'-'+_0x236672[_0x2058a1(0x9c)](),_0xc42a59=_0x236672[_0x2058a1(0x175)]()+':'+_0x236672[_0x2058a1(0x23e)]()+':'+_0x236672['getSeconds'](),_0x9d62c=_0xec951e+'\x20'+_0xc42a59,_0x13ce71='['+_0x9d62c+']\x20',_0x76fd4c=_0x13ce71;_0x1478c3==null?console[_0x2058a1(0x28f)](_0x76fd4c+_0x5532e7):_0x1478c3==_0x2058a1(0xb3)?debugmode==!![]&&(_0x5532e7[_0x2058a1(0x1cc)]==0x0&&(_0x76fd4c=''),console['log'](_0x76fd4c+_0x5532e7)):_0x5532e7[_0x2058a1(0x1cc)]<=0x0||_0x5532e7==null?console[_0x2058a1(0x28f)]('\x20'):console['log'](_0x76fd4c+('['+_0x1478c3+']\x20')+_0x5532e7),_0x278b18(!![]);});}async function checkVersionUpdate(){return new Promise((_0x64f7d2,_0x32edc4)=>{var _0x36526=a0_0x102e,_0x44a2be=_0x36526(0x1c4);(async function(){var _0x3e61fa=_0x36526;const _0x3d0170=await fetch(_0x44a2be);if(_0x3d0170[_0x3e61fa(0x271)]==0x194)return _0x64f7d2(null),null;else{if(_0x3d0170[_0x3e61fa(0x271)]==0xc8){const _0x53fde1=await _0x3d0170['text']();return _0x53fde1>versionCode?(_0x64f7d2(_0x53fde1[_0x3e61fa(0x128)]('\x0a\x0d','')['replaceAll']('\x0a','')),_0x53fde1[_0x3e61fa(0x128)]('\x0a\x0d','')[_0x3e61fa(0x128)]('\x0a','')):(_0x64f7d2(null),null);_0x64f7d2(html);return html;}else return _0x64f7d2(null),null;}}());});return prom;}console[a0_0x320c35(0x24b)]();!fs[a0_0x320c35(0x12c)](a0_0x320c35(0x26b))&&fs['mkdirSync']('./logs');!fs[a0_0x320c35(0x12c)](a0_0x320c35(0x2d0))&&fs['mkdirSync'](a0_0x320c35(0x2d0));!fs['existsSync'](a0_0x320c35(0x2df))&&fs['mkdirSync'](a0_0x320c35(0x2df));!fs[a0_0x320c35(0x12c)](a0_0x320c35(0x177))&&fs[a0_0x320c35(0xea)](a0_0x320c35(0x177));!fs[a0_0x320c35(0x12c)]('./public/uploads')&&fs[a0_0x320c35(0xea)](a0_0x320c35(0x1aa));try{if(fs['existsSync'](a0_0x320c35(0x112)))consolas(a0_0x320c35(0x1c2)[a0_0x320c35(0x114)],a0_0x320c35(0xb3));else{consolas(a0_0x320c35(0xe2)[a0_0x320c35(0x114)],'Debug'),consolas(a0_0x320c35(0x233)[a0_0x320c35(0x114)],a0_0x320c35(0xb3));if(fs[a0_0x320c35(0x12c)]('./config.example.json')){consolas(a0_0x320c35(0x21e)[a0_0x320c35(0x114)],a0_0x320c35(0xb3));try{fs[a0_0x320c35(0x169)](a0_0x320c35(0x245),a0_0x320c35(0x112)),consolas('\x20','Debug'),consolas(a0_0x320c35(0x1cd)[a0_0x320c35(0x17e)],'Debug');}catch(a0_0x40f05e){consolas(a0_0x320c35(0x109)['red']+colors[a0_0x320c35(0x162)](a0_0x40f05e),'Debug');}}else consolas(a0_0x320c35(0x1f2)['red'],a0_0x320c35(0xb3)),consolas(a0_0x320c35(0x17b)[a0_0x320c35(0x162)],a0_0x320c35(0xb3)),process['exit']();}}catch(a0_0x790236){console[a0_0x320c35(0xd9)](a0_0x790236),exit();}consolas('\x20',a0_0x320c35(0xb3)),consolas('\x20',a0_0x320c35(0xb3)),consolas('\x20',a0_0x320c35(0xb3)),consolas('\x20',a0_0x320c35(0xb3)),consolas(colors[a0_0x320c35(0x16e)]('Welcome\x20to\x20DCTS')),consolas(colors[a0_0x320c35(0x16e)]('Stay\x20up-to-date\x20at\x20https://dcts.chat')),consolas('\x20'),consolas(colors[a0_0x320c35(0x1b6)](a0_0x320c35(0x246)+versionCode));var checkVer=await checkVersionUpdate();checkVer!=null&&(consolas(colors[a0_0x320c35(0x1b6)]['underline'](a0_0x320c35(0x27a)+checkVer+a0_0x320c35(0x291))),consolas('\x20'),consolas(colors[a0_0x320c35(0x1b6)](a0_0x320c35(0xce))));consolas('\x20'),consolas('\x20');var serverconfig=JSON['parse'](fs[a0_0x320c35(0x228)]('./config.json',{'encoding':a0_0x320c35(0x197)}));serverconfig[a0_0x320c35(0x209)][a0_0x320c35(0x12e)]['enabled']==0x1?(console[a0_0x320c35(0x28f)]('Yes'),server=https[a0_0x320c35(0x204)]({'key':fs[a0_0x320c35(0x228)](serverconfig[a0_0x320c35(0x209)][a0_0x320c35(0x12e)]['key']),'cert':fs[a0_0x320c35(0x228)](serverconfig[a0_0x320c35(0x209)][a0_0x320c35(0x12e)]['cert']),'ca':fs['readFileSync'](serverconfig[a0_0x320c35(0x209)][a0_0x320c35(0x12e)]['chain']),'requestCert':![],'rejectUnauthorized':![]},app),consolas(a0_0x320c35(0x141)[a0_0x320c35(0x17e)]),consolas('\x20')):(consolas(a0_0x320c35(0x18b)[a0_0x320c35(0x114)]),consolas(a0_0x320c35(0x286)[a0_0x320c35(0x114)]),consolas('\x20'),server=require('http')[a0_0x320c35(0x204)](app));process['on'](a0_0x320c35(0x29b),function(_0x354b96){var _0x57f2b0=a0_0x320c35;consolas(''),consolas(''),consolas(_0x57f2b0(0xf1)['red']),consolas('\x20'),consolas(colors[_0x57f2b0(0x162)](_0x354b96['message'])),console[_0x57f2b0(0x28f)]('\x20'),console[_0x57f2b0(0x28f)](_0x57f2b0(0x2cc)[_0x57f2b0(0x162)]),console['log'](colors['grey'](_0x354b96)[_0x57f2b0(0x188)]);var _0xd311b5=new Date()['toLocaleString']();_0xd311b5=_0xd311b5[_0x57f2b0(0x10c)](',\x20','_'),_0xd311b5=_0xd311b5[_0x57f2b0(0x128)](':','-'),_0xd311b5=_0xd311b5[_0x57f2b0(0x128)]('.','-'),fs['writeFile'](_0x57f2b0(0x108)+_0xd311b5+'.txt',_0x354b96['message']+'\x0a'+_0x354b96['stack'],function(_0x19c104){var _0x53186a=_0x57f2b0;if(_0x19c104)return console[_0x53186a(0x28f)](_0x19c104);consolas(_0x53186a(0x1dc)[_0x53186a(0x1b6)]+colors[_0x53186a(0x276)](_0x53186a(0x108)+_0xd311b5+_0x53186a(0x158))+_0x53186a(0x240)[_0x53186a(0x1b6)],_0x53186a(0xb3));}),fs[_0x57f2b0(0x9e)](_0x57f2b0(0x2b2)+_0xd311b5+'.txt',JSON[_0x57f2b0(0x225)](serverconfig,![],0x4),function(_0x2b0699){var _0x25152b=_0x57f2b0;if(_0x2b0699)return console['log'](_0x2b0699);consolas(_0x25152b(0x184)[_0x25152b(0x1b6)]+colors[_0x25152b(0x276)](_0x25152b(0x108)+_0xd311b5+_0x25152b(0x158))+_0x25152b(0x240)[_0x25152b(0x1b6)],_0x25152b(0xb3));});}),process[a0_0x320c35(0xdd)][a0_0x320c35(0x111)](),process[a0_0x320c35(0xdd)][a0_0x320c35(0x1bf)](a0_0x320c35(0x17a)),process[a0_0x320c35(0xdd)]['on'](a0_0x320c35(0x299),function(_0x4a4916){var _0x20ee2c=a0_0x320c35,_0x1b1c9f=_0x4a4916[_0x20ee2c(0x2a9)](),_0x253e11=_0x1b1c9f['split']('\x20'),_0x3ec66f=_0x253e11[0x0];try{_0x3ec66f=='reload'&&(serverconfig=JSON[_0x20ee2c(0x22c)](fs[_0x20ee2c(0x228)]('./config.json',{'encoding':_0x20ee2c(0x197)})),consolas(_0x20ee2c(0x1a0)[_0x20ee2c(0x1b6)]));if(_0x3ec66f==_0x20ee2c(0x1c8))debugmode=!debugmode,consolas(('Debug\x20Mode\x20set\x20to\x20'+debugmode)[_0x20ee2c(0x1b6)]);else{if(_0x3ec66f==_0x20ee2c(0x132)){var _0x5e1629=serverconfig[_0x20ee2c(0x21c)],_0x4d4087=[];console[_0x20ee2c(0x28f)](''),console[_0x20ee2c(0x28f)]('Server\x20Roles:'[_0x20ee2c(0x1b6)]),Object[_0x20ee2c(0x10b)](_0x5e1629)['forEach'](function(_0x24128f){var _0xb61929=_0x20ee2c;_0x4d4087[_0xb61929(0xdf)](serverconfig[_0xb61929(0x21c)][_0x24128f]);}),_0x4d4087=_0x4d4087[_0x20ee2c(0xc1)]((_0x4f714d,_0x4f6447)=>{var _0x4c9c3d=_0x20ee2c;if(_0x4f714d[_0x4c9c3d(0x2ce)]['sortId']>_0x4f6447[_0x4c9c3d(0x2ce)]['sortId'])return-0x1;}),_0x4d4087[_0x20ee2c(0x264)](_0x577a8f=>{var _0x2c3ca1=_0x20ee2c;console[_0x2c3ca1(0x28f)](colors[_0x2c3ca1(0x114)]('-\x20'+_0x577a8f[_0x2c3ca1(0x2ce)]['id'])),console['log'](_0x2c3ca1(0x139)+_0x577a8f['info'][_0x2c3ca1(0x14c)]),console['log']('');});}else{if(_0x3ec66f==_0x20ee2c(0x156)){if(_0x253e11['length']==0x2){var _0xeb33ad=_0x253e11[0x1];if(isNaN(_0xeb33ad)==![])try{var _0x4f929d=generateId(0x40);serverconfig[_0x20ee2c(0x21c)][_0xeb33ad][_0x20ee2c(0x156)]['push'](_0x4f929d),saveConfig(),consolas(colors[_0x20ee2c(0x1b6)]('Redeem\x20key\x20generated\x20for\x20role\x20'+serverconfig[_0x20ee2c(0x21c)][_0xeb33ad][_0x20ee2c(0x2ce)][_0x20ee2c(0x14c)])),consolas(colors['cyan'](_0x4f929d));}catch(_0x7a9992){consolas(_0x20ee2c(0xc4)[_0x20ee2c(0x114)]),consolas(colors[_0x20ee2c(0x162)](_0x7a9992));}}else consolas(colors[_0x20ee2c(0x114)]('Missing\x20Argument:\x20Role\x20ID'));}else _0x3ec66f==_0x20ee2c(0x2af)?_0x253e11['length']==0x3?_0x253e11[0x1]==_0x20ee2c(0x1d2)&&(_0x253e11[0x2]['length']==0xc?serverconfig[_0x20ee2c(0xd8)][_0x253e11[0x2]]!=null?(delete serverconfig[_0x20ee2c(0xd8)][_0x253e11[0x2]],consolas((_0x20ee2c(0x14d)+_0x253e11[0x2])[_0x20ee2c(0x1b6)]),saveConfig()):consolas((_0x20ee2c(0xc9)+_0x253e11[0x2])[_0x20ee2c(0x114)]):consolas((_0x253e11[0x2]+_0x20ee2c(0x254))[_0x20ee2c(0x114)])):consolas(_0x20ee2c(0x20b)[_0x20ee2c(0x1b6)]+_0x3ec66f):consolas(_0x20ee2c(0x148)[_0x20ee2c(0x1b6)]+_0x3ec66f);}}}catch(_0x194282){consolas('Couldnt\x20handle\x20command\x20input'[_0x20ee2c(0x162)]),consolas(colors['red'](_0x194282));}});var io=require(a0_0x320c35(0x265))(server,{'maxHttpBufferSize':0x5f5e100,'secure':!![]}),port=process[a0_0x320c35(0x92)][a0_0x320c35(0x215)]||serverconfig[a0_0x320c35(0x209)]['port'];server[a0_0x320c35(0x122)](port,function(){var _0x16110d=a0_0x320c35;consolas(colors[_0x16110d(0x16e)](_0x16110d(0x106)+port));if(serverconfig['serverinfo'][_0x16110d(0x243)]==0x0){var _0x1924b9=generateId(0x40);serverconfig[_0x16110d(0x209)]['setup']=0x1,serverconfig[_0x16110d(0x21c)][_0x16110d(0x2da)][_0x16110d(0x156)][_0x16110d(0xdf)](_0x1924b9),saveConfig(),consolas(colors[_0x16110d(0x16e)]('To\x20obtain\x20the\x20admin\x20role\x20in\x20your\x20server,\x20copy\x20the\x20following\x20token.')),consolas(colors[_0x16110d(0x16e)]('You\x20can\x20use\x20it\x20if\x20prompted\x20or\x20if\x20you\x20right\x20click\x20on\x20the\x20server\x20icon\x20and\x20press\x20\x22Redeem\x20Key\x22')),consolas(colors[_0x16110d(0x16e)]('\x20')),consolas(colors[_0x16110d(0x16e)](_0x16110d(0xa0))),consolas(colors[_0x16110d(0x16e)](_0x1924b9)),consolas(colors['brightGreen']('\x20')),consolas(colors[_0x16110d(0x16e)]('\x20'));}else serverconfig[_0x16110d(0x21c)][_0x16110d(0x2da)][_0x16110d(0x156)]['length']>0x0&&(consolas(colors['brightGreen']('\x20')),consolas(colors[_0x16110d(0x16e)]('\x20')),consolas(colors[_0x16110d(0x16e)](_0x16110d(0xba))),consolas(colors[_0x16110d(0x16e)](_0x16110d(0xaa))),consolas(colors[_0x16110d(0x16e)]('You\x20can\x20use\x20it\x20if\x20prompted\x20or\x20if\x20you\x20right\x20click\x20on\x20the\x20server\x20icon\x20and\x20press\x20\x22Redeem\x20Key\x22')),consolas(colors[_0x16110d(0x16e)]('\x20')),console['log'](colors['cyan'](_0x16110d(0x27b))),console[_0x16110d(0x28f)](colors[_0x16110d(0x1b6)](serverconfig[_0x16110d(0x21c)][_0x16110d(0x2da)][_0x16110d(0x156)])),consolas(colors[_0x16110d(0x16e)]('\x20')),consolas(colors[_0x16110d(0x16e)]('\x20')));});function getMemberLastOnlineTime(_0x35ff9b){var _0x17882b=a0_0x320c35,_0x18fc40=serverconfig[_0x17882b(0xd8)][_0x35ff9b]['lastOnline']/0x3e8,_0x2683c4=new Date()[_0x17882b(0x2c4)]()/0x3e8,_0xfd1db2=_0x2683c4-_0x18fc40,_0x48fe6b=Math['round'](_0xfd1db2/0x3c);return _0x48fe6b;}app[a0_0x320c35(0x1c9)](express[a0_0x320c35(0x1d3)]('./public')),io['on'](a0_0x320c35(0x14a),function(_0x40336d){var _0x5308b9=a0_0x320c35,_0x1e04fd=_0x40336d[_0x5308b9(0x1b4)][_0x5308b9(0xfe)];serverconfig[_0x5308b9(0x2e2)]['includes'](_0x1e04fd)&&(sendMessageToUser(_0x40336d['id'],JSON[_0x5308b9(0x22c)](_0x5308b9(0x1df)+_0x1e04fd+'\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22Your\x20IP\x20Address\x20was\x20blacklisted.\x20Reach\x20out\x20to\x20the\x20server\x20admin\x20if\x20you\x20think\x20this\x20is\x20an\x20error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22onclick=\x27closeModal()\x27\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}')),_0x40336d[_0x5308b9(0x1fb)](),consolas(_0x5308b9(0x202),_0x5308b9(0xb3)));function _0x58de92(_0x2a870a,_0x7a2018,_0x46341e=null){var _0x43c316=_0x2a870a-_0x7a2018,_0x5ede10=Math['round'](_0x43c316/0x3e8/0x3c/0x3c/0x18);return _0x5ede10;}_0x40336d['on'](_0x5308b9(0xf8),function(_0x26fdb0){var _0x434528=_0x5308b9;try{if(serverconfig['banlist'][_0x26fdb0['id']]!=null){var _0x4fefea=serverconfig[_0x434528(0x1f4)][_0x26fdb0['id']]['until'],_0x5b4b72=serverconfig[_0x434528(0x1f4)][_0x26fdb0['id']]['reason'],_0x1edcc3='',_0x1f4b8f=_0x4fefea,_0x1ab2f5=new Date()[_0x434528(0x2c4)](),_0xca1312='';if(_0x4fefea==null||_0x4fefea<=0x0)_0xca1312=_0x434528(0xa5);else{if(_0x1ab2f5>_0x1f4b8f){serverconfig[_0x434528(0xd8)][_0x26fdb0['id']][_0x434528(0x237)]=0x0,delete serverconfig[_0x434528(0x1f4)][_0x26fdb0['id']],saveConfig(),sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x434528(0x2ba))),consolas(colors['yellow']('Automatically\x20unbanned\x20user\x20'+_0x26fdb0[_0x434528(0x14c)]+('\x20('+_0x26fdb0['id']+')')));return;}else{_0x1edcc3=_0x58de92(_0x4fefea,_0x1ab2f5);var _0x550f3f=_0x4fefea-_0x1ab2f5,_0x45eb6a=_0x550f3f/0x3e8,_0x2bf552=_0x45eb6a/0x3c,_0x50c0cb=_0x2bf552/0x18,_0x3eb3a1=_0x50c0cb/0x1e,_0x32c9b6=_0x3eb3a1/0x1e,_0x1b3a43=_0x32c9b6/0xc;_0xca1312=_0x434528(0x25e)+_0x1edcc3+_0x434528(0xb1),_0x5b4b72[_0x434528(0x1cc)]>0x0&&(_0xca1312+=_0x434528(0xcc)+_0x5b4b72);}}_0xca1312=_0xca1312[_0x434528(0x128)]('\x0a',''),sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x434528(0xc3)+_0xca1312+_0x434528(0xd5))),checkRateLimit(_0x40336d),_0x40336d[_0x434528(0x1fb)]();return;}}catch{}consolas(_0x434528(0x2d6)+_0x26fdb0[_0x434528(0x14c)]+'\x20('+_0x26fdb0['id']+')',_0x434528(0xb3));if(_0x26fdb0['id'][_0x434528(0x1cc)]==0xc&&isNaN(_0x26fdb0['id'])==![]){consolas('Setting\x20user\x20'+_0x26fdb0['id'],'Debug'),usersocket[_0x26fdb0['id']]=_0x40336d['id'];if(serverconfig[_0x434528(0xd8)][_0x26fdb0['id']]==null){var _0x22ab71=generateId(0x30);io['to'](usersocket[_0x26fdb0['id']])[_0x434528(0x1e0)](_0x434528(0x1e6),_0x22ab71),consolas('The\x20member\x20connected\x20for\x20the\x20first\x20time',_0x434528(0xb3)),serverconfig[_0x434528(0xd8)][_0x26fdb0['id']]=JSON[_0x434528(0x22c)](_0x434528(0x27f)+_0x26fdb0['id']+_0x434528(0x253)+_0x22ab71+_0x434528(0x268)+_0x26fdb0['name']+_0x434528(0xc8)+_0x26fdb0['status']+_0x434528(0x154)+_0x26fdb0[_0x434528(0x26e)]+'\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22icon\x22:\x20\x22'+_0x26fdb0['icon']+_0x434528(0x95)+_0x26fdb0[_0x434528(0x15d)]+_0x434528(0x280)+new Date()[_0x434528(0x2c4)]()+',\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22isOnline\x22:\x201,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22lastOnline\x22:\x20'+new Date()[_0x434528(0x2c4)]()+_0x434528(0x1f0)),saveConfig();serverconfig[_0x434528(0x21c)]['0'][_0x434528(0x17c)][_0x434528(0x98)](_0x26fdb0['id'])==![]&&(consolas('Assigning\x20new\x20user\x20default\x20role',_0x434528(0xb3)),serverconfig[_0x434528(0x21c)]['0'][_0x434528(0x17c)][_0x434528(0xdf)](_0x26fdb0['id']),saveConfig());try{sendMessageToUser(_0x40336d['id'],JSON[_0x434528(0x22c)](_0x434528(0x2a1)+serverconfig[_0x434528(0xd8)][_0x26fdb0['id']][_0x434528(0x156)]+_0x434528(0xac)+serverconfig[_0x434528(0xd8)][_0x26fdb0['id']]['token']+'\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}'));}catch(_0x54f260){consolas(_0x434528(0x17f)['red'],'Debug'),consolas(_0x54f260,_0x434528(0xb3));}var _0x4ba32f=_0x26fdb0[_0x434528(0x156)];_0x26fdb0[_0x434528(0x156)]=null,io['emit'](_0x434528(0x87)),io['emit'](_0x434528(0x120),_0x26fdb0);var _0x2fd338=_0x434528(0x13e)+_0x26fdb0[_0x434528(0x14c)]+_0x434528(0x219)+_0x26fdb0[_0x434528(0x14c)]+_0x434528(0x1ff)+new Date()[_0x434528(0x2c4)]()+_0x434528(0xab)+generateId(0xc)+_0x434528(0x1d0);saveChatMessage(JSON[_0x434528(0x22c)](_0x2fd338)),_0x26fdb0[_0x434528(0x156)]=_0x4ba32f;}else{if(_0x26fdb0[_0x434528(0x156)]==null||_0x26fdb0['token'][_0x434528(0x1cc)]!=0x30||serverconfig['servermembers'][_0x26fdb0['id']]['token']==null||serverconfig[_0x434528(0xd8)][_0x26fdb0['id']][_0x434528(0x156)]!=_0x26fdb0[_0x434528(0x156)]){try{sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x434528(0x1a5)));}catch(_0x579f4a){consolas(_0x434528(0x104)['red'],_0x434528(0xb3)),consolas(_0x579f4a,_0x434528(0xb3));}consolas(_0x434528(0x20f),_0x434528(0xb3)),_0x40336d['disconnect']();return;}usersocket[_0x26fdb0['id']]=_0x40336d['id'],serverconfig[_0x434528(0xd8)][_0x26fdb0['id']]['name']=escapeHtml(_0x26fdb0[_0x434528(0x14c)]),serverconfig[_0x434528(0xd8)][_0x26fdb0['id']][_0x434528(0x271)]=escapeHtml(_0x26fdb0[_0x434528(0x271)]),serverconfig['servermembers'][_0x26fdb0['id']]['aboutme']=escapeHtml(_0x26fdb0['aboutme']),serverconfig['servermembers'][_0x26fdb0['id']]['icon']=escapeHtml(_0x26fdb0[_0x434528(0x176)]),serverconfig['servermembers'][_0x26fdb0['id']]['banner']=escapeHtml(_0x26fdb0[_0x434528(0x15d)]),serverconfig[_0x434528(0xd8)][_0x26fdb0['id']][_0x434528(0x242)]=new Date()[_0x434528(0x2c4)](),saveConfig(),consolas(_0x434528(0x88),_0x434528(0xb3));if(serverconfig['servermembers'][_0x26fdb0['id']]['isOnline']==0x0){serverconfig[_0x434528(0xd8)][_0x26fdb0['id']]['isOnline']=0x1;var _0x281576=serverconfig['servermembers'][_0x26fdb0['id']]['lastOnline']/0x3e8,_0x28089c=new Date()[_0x434528(0x2c4)]()/0x3e8,_0x10771a=_0x28089c-_0x281576,_0x2a1da2=Math[_0x434528(0xe8)](_0x10771a/0x3c);_0x2a1da2>0x5&&(io['emit']('updateMemberList'),io[_0x434528(0x1e0)](_0x434528(0x1b8),_0x26fdb0));}else io[_0x434528(0x1e0)]('updateMemberList'),io[_0x434528(0x1e0)](_0x434528(0x22e),_0x26fdb0);}}else _0x40336d[_0x434528(0x1fb)](),consolas(_0x434528(0x283)[_0x434528(0x162)]+_0x26fdb0['id'],_0x434528(0xb3));}),_0x40336d['on']('redeemKey',function(_0x1338b1){var _0x2d26fd=_0x5308b9;if(validateMemberId(_0x1338b1['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x1338b1['id']][_0x2d26fd(0x156)]==_0x1338b1[_0x2d26fd(0x156)]){var _0x410c24=serverconfig[_0x2d26fd(0x21c)];Object[_0x2d26fd(0x10b)](_0x410c24)['forEach'](function(_0x260666){var _0x38183b=_0x2d26fd,_0x54f6e2=_0x410c24[_0x260666];if(_0x54f6e2[_0x38183b(0x156)][_0x38183b(0x98)](_0x1338b1[_0x38183b(0x16a)]))try{_0x54f6e2[_0x38183b(0x17c)][_0x38183b(0xdf)](_0x1338b1['id']),_0x54f6e2[_0x38183b(0x156)]['pop'](_0x1338b1['value']),saveConfig(),sendMessageToUser(_0x40336d['id'],JSON[_0x38183b(0x22c)](_0x38183b(0xc3)+_0x54f6e2[_0x38183b(0x2ce)][_0x38183b(0x14c)]+_0x38183b(0x18c))),io[_0x38183b(0x1e0)](_0x38183b(0x87));}catch(_0x1fdcbe){console[_0x38183b(0x28f)]('Couldnt\x20redeem\x20key'[_0x38183b(0x162)]),console[_0x38183b(0x28f)](colors[_0x38183b(0x162)](_0x1fdcbe)),sendMessageToUser(_0x40336d['id'],JSON[_0x38183b(0x22c)](_0x38183b(0x200)));}else sendMessageToUser(_0x40336d['id'],JSON['parse']('{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Wrong\x20key!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22The\x20key\x20you\x27ve\x20entered\x20was\x20wrong\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}'));});}}),_0x40336d['on'](_0x5308b9(0x166),function(_0x4641c0){var _0x576d3a=_0x5308b9;checkRateLimit(_0x40336d);if(validateMemberId(_0x4641c0['id'],_0x40336d)==!![]&&serverconfig[_0x576d3a(0xd8)][_0x4641c0['id']][_0x576d3a(0x156)]==_0x4641c0[_0x576d3a(0x156)]){if(isNaN(_0x4641c0[_0x576d3a(0x11f)])==!![]){consolas(_0x576d3a(0x1a1),_0x576d3a(0xb3));return;}if(isNaN(_0x4641c0[_0x576d3a(0x123)])==!![]){consolas(_0x576d3a(0x211),_0x576d3a(0xb3));return;}if(isNaN(_0x4641c0[_0x576d3a(0x1de)])==!![]){consolas('Category\x20was\x20not\x20a\x20number',_0x576d3a(0xb3));return;}if(_0x4641c0[_0x576d3a(0x2d7)][_0x576d3a(0x1cc)]<=0x0){consolas('Message\x20is\x20shorter\x20than\x201\x20charachter',_0x576d3a(0xb3));return;}if(!hasPermission(_0x4641c0['id'],_0x576d3a(0x1ea))){sendMessageToUser(_0x40336d['id'],JSON[_0x576d3a(0x22c)](_0x576d3a(0x212)));return;}try{if(serverconfig['groups'][_0x4641c0[_0x576d3a(0x11f)]][_0x576d3a(0x232)][_0x576d3a(0x16b)][_0x4641c0[_0x576d3a(0x1de)]][_0x576d3a(0x123)][_0x4641c0[_0x576d3a(0x123)]]!=null){if(!checkUserChannelPermission(_0x4641c0[_0x576d3a(0x123)],_0x4641c0['id'],_0x576d3a(0x1ea))){sendMessageToUser(_0x40336d['id'],JSON[_0x576d3a(0x22c)](_0x576d3a(0x212)));return;}if(!checkUserChannelPermission(_0x4641c0[_0x576d3a(0x123)],_0x4641c0['id'],_0x576d3a(0x173))){sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x576d3a(0x212)));return;}var _0xf2534e=generateId(0xc);_0x4641c0[_0x576d3a(0x213)]=new Date()['getTime'](),_0x4641c0[_0x576d3a(0x270)]=_0xf2534e,_0x4641c0[_0x576d3a(0x176)]=escapeHtml(_0x4641c0['icon']),_0x4641c0['name']=escapeHtml(_0x4641c0[_0x576d3a(0x14c)]),_0x4641c0[_0x576d3a(0x2d7)]=escapeHtml(_0x4641c0[_0x576d3a(0x2d7)]),_0x4641c0['message']=convertMention(_0x4641c0);if(_0x4641c0[_0x576d3a(0x2d7)][_0x576d3a(0x128)]('\x20','')==null){consolas(colors[_0x576d3a(0x162)]('Message\x20was\x20null'));return;}var _0x415c61=/(:)\w+/ig,_0x41448b='';_0x4641c0[_0x576d3a(0x2d7)][_0x576d3a(0x10c)](_0x415c61,function(_0x3bdca5){var _0x19c357=_0x576d3a;try{var _0x4da507=_0x4641c0['message']['replaceAll'](_0x3bdca5+':','')['replaceAll']('\x20','');_0x4da507['length']==0x0&&(_0x41448b=_0x19c357(0x23f));}catch(_0x5bb28f){consolas(colors[_0x19c357(0x162)](_0x19c357(0x198)));}}),_0x4641c0[_0x576d3a(0x2d7)][_0x576d3a(0x10c)](_0x415c61,function(_0x2e0bc0){var _0x156b79=_0x576d3a;try{var _0x2a20fb=findEmojiByID(_0x2e0bc0[_0x156b79(0x128)](':',''))[_0x156b79(0x1ed)]('_')[0x2][_0x156b79(0x1ed)]('.')[0x0];_0x4641c0[_0x156b79(0x2d7)]=_0x4641c0[_0x156b79(0x2d7)][_0x156b79(0x128)](_0x2e0bc0+':','<span><img\x20title=\x22'+_0x2a20fb+_0x156b79(0x2ac)+_0x41448b+_0x156b79(0x2bf)+findEmojiByID(_0x2e0bc0['replaceAll'](':',''))+_0x156b79(0x157));}catch{}}),_0x4641c0['token']=null;var _0x22a7fc=[];Object[_0x576d3a(0x10b)](serverconfig[_0x576d3a(0x21c)])['forEach'](function(_0x2462ef){var _0x40789c=_0x576d3a;serverconfig['serverroles'][_0x2462ef][_0x40789c(0x17c)][_0x40789c(0x98)](_0x4641c0['id'])&&serverconfig[_0x40789c(0x21c)][_0x2462ef]['info'][_0x40789c(0xe1)]==0x1&&_0x22a7fc[_0x40789c(0xdf)](serverconfig[_0x40789c(0x21c)][_0x2462ef]);}),_0x22a7fc=_0x22a7fc[_0x576d3a(0xc1)]((_0x2b0999,_0x2a5fbd)=>{var _0x567394=_0x576d3a;if(_0x2b0999['info']['sortId']>_0x2a5fbd[_0x567394(0x2ce)][_0x567394(0x239)])return-0x1;}),_0x4641c0['color']=_0x22a7fc[0x0][_0x576d3a(0x2ce)][_0x576d3a(0x164)],saveChatMessage(_0x4641c0);var _0x1f1fc0=serverconfig[_0x576d3a(0xd8)][_0x4641c0['id']][_0x576d3a(0x14c)];typingMembers[_0x576d3a(0x98)](_0x1f1fc0)==!![]&&typingMembers[_0x576d3a(0x1b2)](_0x1f1fc0),io['in'](_0x4641c0['room'])[_0x576d3a(0x1e0)]('memberTyping',typingMembers),io['in'](_0x4641c0[_0x576d3a(0x15a)])['emit'](_0x576d3a(0x183),_0x4641c0),io['emit']('markChannelMessage',{'group':_0x4641c0[_0x576d3a(0x11f)],'category':_0x4641c0[_0x576d3a(0x1de)],'channel':_0x4641c0[_0x576d3a(0x123)]});}else{consolas(_0x576d3a(0x121),_0x576d3a(0xb3));var _0x8bace8=_0x576d3a(0x293)[_0x576d3a(0x128)]('\x0a','');sendMessageToUser(usersocket[_0x4641c0['id']],JSON[_0x576d3a(0x22c)](_0x576d3a(0x20d)+_0x8bace8+'\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}'));}}catch(_0x16895c){consolas('Couldnt\x20send\x20message\x20because\x20room\x20didnt\x20exist'['yellow'],_0x576d3a(0xb3)),consolas((_0x576d3a(0x223)+_0x4641c0[_0x576d3a(0x11f)])['yellow'],_0x576d3a(0xb3)),consolas((_0x576d3a(0x2a6)+_0x4641c0[_0x576d3a(0x1de)])[_0x576d3a(0x114)],_0x576d3a(0xb3)),consolas((_0x576d3a(0x244)+_0x4641c0[_0x576d3a(0x123)])[_0x576d3a(0x114)],_0x576d3a(0xb3)),consolas('Error'),console[_0x576d3a(0x28f)](_0x16895c);var _0x8bace8='We\x20were\x20unable\x20to\x20send\x20the\x20message\x20because\x20the\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20channel\x20wasnt\x20found.\x20Maybe\x20it\x20was\x20deleted?\x20Reselect\x20a\x20channel\x20from\x20the\x20channel\x20list'[_0x576d3a(0x128)]('\x0a','');sendMessageToUser(usersocket[_0x4641c0['id']],JSON['parse']('{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Channel\x20not\x20found\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22'+_0x8bace8+'\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}'));return;}}else consolas(_0x576d3a(0xed)[_0x576d3a(0x162)],'Debug'),consolas('ID:\x20'+_0x4641c0['id'],_0x576d3a(0xb3));}),_0x40336d['on'](_0x5308b9(0x26a),function(_0x1fbe14,_0x3c96a2){var _0x4050ab=_0x5308b9;if(validateMemberId(_0x1fbe14['id'],_0x40336d)==!![]){if(!hasPermission(_0x1fbe14['id'],'viewGroup',_0x1fbe14[_0x4050ab(0x11f)]))return;_0x3c96a2({'type':_0x4050ab(0x110),'data':getChannelTree(_0x1fbe14)});}}),_0x40336d['on']('getAllRoles',function(_0x219476,_0x2e3a60){var _0x295bf6=_0x5308b9;if(validateMemberId(_0x219476['id'],_0x40336d)==!![]){if(!hasPermission(_0x219476['id'],_0x295bf6(0xe7),_0x219476['group']))return;var _0x532047=getMemberHighestRole(_0x219476['id']),_0x1dd878=serverconfig[_0x295bf6(0x21c)],_0x4b809d=0x0,_0x1f1740=[];let _0x498ee1=Object[_0x295bf6(0x10b)](_0x1dd878)[_0x295bf6(0xc1)]((_0x5e437f,_0x4b39e7)=>{var _0x25a55c=_0x295bf6;return _0x1dd878[_0x4b39e7][_0x25a55c(0x2ce)]['sortId']-_0x1dd878[_0x5e437f][_0x25a55c(0x2ce)][_0x25a55c(0x239)];});_0x498ee1=_0x498ee1[_0x295bf6(0x12a)]()['map'](_0x23d12f=>_0x1dd878[_0x23d12f]),Object[_0x295bf6(0x10b)](_0x498ee1)[_0x295bf6(0x12a)]()[_0x295bf6(0x264)](function(_0x1ffa5c){var _0x2e705f=_0x295bf6;(_0x498ee1[_0x1ffa5c][_0x2e705f(0x2ce)][_0x2e705f(0x239)]<_0x532047['info']['sortId']||hasPermission(_0x219476['id'],_0x2e705f(0x125),_0x219476['group']))&&(_0x4b809d=_0x498ee1[_0x1ffa5c][_0x2e705f(0x2ce)][_0x2e705f(0x239)],_0x498ee1[_0x1ffa5c][_0x2e705f(0x17c)][_0x2e705f(0x98)](_0x219476[_0x2e705f(0x235)])?_0x498ee1[_0x1ffa5c][_0x2e705f(0x2ce)]['hasRole']=0x1:_0x498ee1[_0x1ffa5c][_0x2e705f(0x2ce)][_0x2e705f(0x145)]=0x0,_0x1f1740[_0x2e705f(0xdf)](_0x498ee1[_0x1ffa5c]));}),io[_0x295bf6(0x1e0)](_0x295bf6(0x87)),_0x2e3a60({'type':'success','data':_0x1f1740});}});function _0x49c7fe(_0x3e631c,_0x2f80f1,_0x237e2b){var _0xfaaf7c=_0x5308b9,_0x15a32f=require(_0xfaaf7c(0x196)),_0x5eb5e2=new _0x15a32f();_0x5eb5e2[_0xfaaf7c(0x275)]=function(){var _0x34f44e=_0xfaaf7c;_0x5eb5e2[_0x34f44e(0x9d)]==0x4&&_0x5eb5e2[_0x34f44e(0x271)]==0xc8&&_0x2f80f1(_0x5eb5e2['responseText'],_0x237e2b);},_0x5eb5e2[_0xfaaf7c(0x2a7)]('GET',_0x3e631c,!![]),_0x5eb5e2[_0xfaaf7c(0xa3)](null);return;}function _0x284961(_0x551cf1,_0x1b035d){var _0x23b1d3=_0x5308b9,_0x28e264=JSON['parse'](_0x551cf1),_0x50f450=_0x28e264[_0x23b1d3(0x144)];_0x50f450[_0x23b1d3(0x264)](_0x32e4a3=>{var _0x113efb=_0x23b1d3;io['to'](usersocket[_0x1b035d])[_0x113efb(0x1e0)](_0x113efb(0x1f8),{'gif':_0x32e4a3[_0x113efb(0xa6)][_0x113efb(0x241)]['url'],'preview':_0x32e4a3[_0x113efb(0xa6)]['gifpreview']['url']});});return;}function _0x25a62f(_0xf0ae71,_0x1f1eea){var _0x4b5058=_0x5308b9,_0x10a303=serverconfig[_0x4b5058(0x209)][_0x4b5058(0x28a)]['api_key'],_0x4f9de3=serverconfig[_0x4b5058(0x209)][_0x4b5058(0x28a)][_0x4b5058(0x1da)],_0x3e0fb1=serverconfig[_0x4b5058(0x209)][_0x4b5058(0x28a)]['limit'],_0x557a5c=_0xf0ae71,_0x1ee383='https://tenor.googleapis.com/v2/search?q='+_0x557a5c+_0x4b5058(0x2cd)+_0x10a303+_0x4b5058(0x2aa)+_0x4f9de3+_0x4b5058(0x201)+_0x3e0fb1;_0x49c7fe(_0x1ee383,_0x284961,_0x1f1eea);return;}_0x40336d['on'](_0x5308b9(0x28b),function(_0x5d5225,_0x2d83ec){var _0x26aeb1=_0x5308b9;validateMemberId(_0x5d5225['id'],_0x40336d)==!![]&&(serverconfig[_0x26aeb1(0x209)][_0x26aeb1(0x28a)][_0x26aeb1(0x1b5)]!=0x1?_0x2d83ec({'type':'error','msg':_0x26aeb1(0x13f)}):_0x2d83ec({'type':_0x26aeb1(0x110),'msg':_0x26aeb1(0x1ba)}),_0x25a62f(_0x5d5225[_0x26aeb1(0x8f)],_0x5d5225['id']),consolas(_0x26aeb1(0x269)+_0x5d5225[_0x26aeb1(0x8f)]));}),_0x40336d['on'](_0x5308b9(0x290),function(_0xead759,_0x41bf7d){var _0x44333b=_0x5308b9;checkRateLimit(_0x40336d);if(validateMemberId(_0xead759['id'],_0x40336d)==!![]){if(hasPermission(_0xead759['id'],_0x44333b(0x12d)))try{try{fs[_0x44333b(0x161)](_0x44333b(0xd3)+_0xead759['emoji']),console[_0x44333b(0x28f)](_0x44333b(0x2ad)),_0x41bf7d({'type':'success','msg':'Emoji\x20deleted\x20successfully'});}catch(_0x1e722c){consolas('Coudlnt\x20delete\x20emoji',_0x44333b(0xb3)),consolas(_0x1e722c,_0x44333b(0xb3)),_0x41bf7d({'type':_0x44333b(0xd9),'msg':_0x44333b(0x2cf),'error':_0x1e722c});}}catch(_0x332f37){consolas(_0x44333b(0xa4)[_0x44333b(0x162)]),console[_0x44333b(0x28f)](_0x332f37);}else _0x41bf7d({'type':'error','msg':_0x44333b(0x2d1)});}}),_0x40336d['on'](_0x5308b9(0x17d),function(_0x5ab2bc,_0x5ef330){var _0x47d200=_0x5308b9;if(validateMemberId(_0x5ab2bc['id'],_0x40336d)==!![]&&serverconfig[_0x47d200(0xd8)][_0x5ab2bc['id']]['token']==_0x5ab2bc[_0x47d200(0x156)]){if(hasPermission(_0x5ab2bc['id'],'resolveMembers'))try{var _0x61467d=serverconfig['servermembers'][_0x5ab2bc[_0x47d200(0x19e)]],_0x5cdfea=_0x61467d[_0x47d200(0x156)];_0x61467d[_0x47d200(0x156)]=null,_0x5ef330({'type':'success','msg':_0x47d200(0xb7),'data':_0x61467d}),_0x61467d[_0x47d200(0x156)]=_0x5cdfea;}catch(_0x392963){consolas('Unable\x20to\x20resolve\x20member'[_0x47d200(0x162)]),console[_0x47d200(0x28f)](_0x392963);}else _0x5ef330({'type':_0x47d200(0xd9),'msg':_0x47d200(0xa9)});}}),_0x40336d['on'](_0x5308b9(0x25d),function(_0x3fb33c,_0x2216f0){var _0x36f0ac=_0x5308b9;if(validateMemberId(_0x3fb33c['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x3fb33c['id']][_0x36f0ac(0x156)]==_0x3fb33c[_0x36f0ac(0x156)]){if(hasPermission(_0x3fb33c['id'],_0x36f0ac(0x113)))try{serverconfig[_0x36f0ac(0xd8)][_0x3fb33c[_0x36f0ac(0x19e)]][_0x36f0ac(0x237)]=0x0,delete serverconfig[_0x36f0ac(0x1f4)][_0x3fb33c[_0x36f0ac(0x19e)]],saveConfig(),_0x2216f0({'type':'success','msg':_0x36f0ac(0x2d8)+serverconfig[_0x36f0ac(0xd8)][_0x3fb33c['target']][_0x36f0ac(0x14c)]+_0x36f0ac(0x1e3)});}catch(_0x3d12a8){_0x2216f0({'type':_0x36f0ac(0xd9),'msg':_0x36f0ac(0xf3),'data':_0x3d12a8}),consolas(_0x36f0ac(0xa4)[_0x36f0ac(0x162)]),console['log'](_0x3d12a8);}else _0x2216f0({'type':_0x36f0ac(0xd9),'msg':'denied'});}}),_0x40336d['on']('addUserToRole',function(_0xbbd120,_0x25a77e){var _0x33b1=_0x5308b9;if(validateMemberId(_0xbbd120['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0xbbd120['id']][_0x33b1(0x156)]==_0xbbd120['token']){if(hasPermission(_0xbbd120['id'],_0x33b1(0x93)))try{var _0x17fc76=getMemberHighestRole(_0xbbd120['id']);if(!hasPermission(_0xbbd120['id'],_0x33b1(0x125))){if(serverconfig[_0x33b1(0x21c)][_0xbbd120[_0x33b1(0x2c8)]][_0x33b1(0x2ce)][_0x33b1(0x239)]>=_0x17fc76[_0x33b1(0x2ce)]['sortId']){_0x25a77e({'type':_0x33b1(0xd9),'msg':_0x33b1(0x10f)});return;}}serverconfig[_0x33b1(0x21c)][_0xbbd120['role']][_0x33b1(0x17c)][_0x33b1(0xdf)](_0xbbd120['target']),saveConfig(),io[_0x33b1(0x1e0)](_0x33b1(0x87)),io['to'](usersocket[_0xbbd120['target']])[_0x33b1(0x1e0)]('updateMemberList'),_0x25a77e({'type':_0x33b1(0x110),'msg':'Role\x20assigned'});}catch(_0x59537b){consolas(_0x33b1(0x165)['red']),console[_0x33b1(0x28f)](colors[_0x33b1(0x162)](_0x59537b));}else _0x25a77e({'type':'error','msg':'denied'});}}),_0x40336d['on']('removeUserFromRole',function(_0xcec610,_0x33a243){var _0x56f3ca=_0x5308b9;if(validateMemberId(_0xcec610['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0xcec610['id']][_0x56f3ca(0x156)]==_0xcec610[_0x56f3ca(0x156)]){if(hasPermission(_0xcec610['id'],'manageMembers'))try{if(!hasPermission(_0xcec610['id'],_0x56f3ca(0x125))){if(serverconfig[_0x56f3ca(0x21c)][_0xcec610[_0x56f3ca(0x2c8)]][_0x56f3ca(0x2ce)][_0x56f3ca(0x239)]>=highestUserRole[_0x56f3ca(0x2ce)]['sortId']){_0x33a243({'type':_0x56f3ca(0xd9),'msg':_0x56f3ca(0x26d)});return;}}serverconfig[_0x56f3ca(0x21c)][_0xcec610['role']][_0x56f3ca(0x17c)][_0x56f3ca(0x1b2)](_0xcec610[_0x56f3ca(0x19e)]),saveConfig(),io[_0x56f3ca(0x1e0)](_0x56f3ca(0x87)),io['to'](usersocket[_0xcec610[_0x56f3ca(0x19e)]])['emit'](_0x56f3ca(0x87)),_0x33a243({'type':_0x56f3ca(0x110),'msg':_0x56f3ca(0xe9)});}catch(_0x6bfa6){consolas('Unable\x20to\x20remove\x20member\x20from\x20group'[_0x56f3ca(0x162)]),console['log'](colors['red'](_0x6bfa6));}else _0x33a243({'type':_0x56f3ca(0xd9),'msg':_0x56f3ca(0xa9)});}}),_0x40336d['on'](_0x5308b9(0x21a),function(_0x159823,_0x2c9094){var _0x541b21=_0x5308b9;if(validateMemberId(_0x159823['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x159823['id']][_0x541b21(0x156)]==_0x159823[_0x541b21(0x156)]){if(hasPermission(_0x159823['id'],'manageRoles'))try{serverconfig[_0x541b21(0x21c)][_0x159823[_0x541b21(0x2c8)]][_0x541b21(0x179)]=_0x159823[_0x541b21(0x179)],saveConfig(),io[_0x541b21(0x1e0)]('updateMemberList'),_0x2c9094({'type':_0x541b21(0x110),'msg':_0x541b21(0x152)});}catch(_0x4670c2){consolas(_0x541b21(0x227)[_0x541b21(0x162)]),console[_0x541b21(0x28f)](colors['red'](_0x4670c2));}else _0x2c9094({'type':_0x541b21(0xd9),'msg':_0x541b21(0xa9)});}}),_0x40336d['on'](_0x5308b9(0x190),function(_0x47263e,_0x93cc51){var _0x43b5b4=_0x5308b9;if(validateMemberId(_0x47263e['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x47263e['id']]['token']==_0x47263e[_0x43b5b4(0x156)]){if(hasPermission(_0x47263e['id'],'manageChannels'))try{console[_0x43b5b4(0x28f)](_0x47263e[_0x43b5b4(0x179)]);var _0xeed88b=_0x47263e[_0x43b5b4(0x123)]['replace']('channel-',''),_0x50d0fb=resolveGroupByChannelId(_0xeed88b),_0x179195=resolveCategoryByChannelId(_0xeed88b);serverconfig['groups'][_0x50d0fb][_0x43b5b4(0x232)][_0x43b5b4(0x16b)][_0x179195][_0x43b5b4(0x123)][_0xeed88b]['permissions'][_0x47263e[_0x43b5b4(0x2c8)]]=_0x47263e['permissions'],saveConfig(),io[_0x43b5b4(0x1e0)](_0x43b5b4(0x29f)),_0x93cc51({'type':_0x43b5b4(0x110),'msg':_0x43b5b4(0x234)});}catch(_0x20fc61){consolas(_0x43b5b4(0x182)[_0x43b5b4(0x162)]),console[_0x43b5b4(0x28f)](colors[_0x43b5b4(0x162)](_0x20fc61));}else _0x93cc51({'type':'error','msg':'denied'});}}),_0x40336d['on'](_0x5308b9(0xd2),function(_0x795bb2,_0x1e1647){var _0x343bfc=_0x5308b9;if(validateMemberId(_0x795bb2['id'],_0x40336d)==!![]&&serverconfig[_0x343bfc(0xd8)][_0x795bb2['id']]['token']==_0x795bb2[_0x343bfc(0x156)]){if(hasPermission(_0x795bb2['id'],_0x343bfc(0x1bc)))try{var _0x344241=_0x795bb2[_0x343bfc(0x123)][_0x343bfc(0x10c)](_0x343bfc(0x13b),''),_0x20a002=resolveGroupByChannelId(_0x344241),_0x425fed=resolveCategoryByChannelId(_0x344241);console[_0x343bfc(0x24b)](),delete serverconfig[_0x343bfc(0x27c)][_0x20a002][_0x343bfc(0x232)][_0x343bfc(0x16b)][_0x425fed][_0x343bfc(0x123)][_0x344241][_0x343bfc(0x179)][_0x795bb2[_0x343bfc(0x2c8)]],saveConfig(),_0x1e1647({'type':'success','msg':_0x343bfc(0xb6)});}catch(_0x468fea){consolas('Unable\x20to\x20remove\x20role\x20from\x20channel'[_0x343bfc(0x162)]),console['log'](colors['red'](_0x468fea));}else _0x1e1647({'type':_0x343bfc(0xd9),'msg':'denied'});}}),_0x40336d['on'](_0x5308b9(0x146),function(_0x47591f,_0x4bbb64){var _0x389b0b=_0x5308b9;if(validateMemberId(_0x47591f['id'],_0x40336d)==!![]&&serverconfig[_0x389b0b(0xd8)][_0x47591f['id']]['token']==_0x47591f['token']){if(hasPermission(_0x47591f['id'],_0x389b0b(0x1bc)))try{var _0x4e1c03=_0x47591f[_0x389b0b(0x123)][_0x389b0b(0x10c)]('channel-',''),_0x40695e=resolveGroupByChannelId(_0x4e1c03),_0x41e6ba=resolveCategoryByChannelId(_0x4e1c03);serverconfig[_0x389b0b(0x27c)][_0x40695e][_0x389b0b(0x232)][_0x389b0b(0x16b)][_0x41e6ba]['channel'][_0x4e1c03][_0x389b0b(0x179)][_0x47591f[_0x389b0b(0x2c8)]]=JSON['parse'](_0x389b0b(0x1ab)),saveConfig(),_0x4bbb64({'type':'success','msg':_0x389b0b(0xb6)});}catch(_0x4beade){consolas(_0x389b0b(0x259)[_0x389b0b(0x162)]),console[_0x389b0b(0x28f)](colors[_0x389b0b(0x162)](_0x4beade));}else _0x4bbb64({'type':'error','msg':_0x389b0b(0xa9)});}}),_0x40336d['on'](_0x5308b9(0x2bd),function(_0x1865bf,_0x5cd10a){var _0x4e2a85=_0x5308b9;if(validateMemberId(_0x1865bf['id'],_0x40336d)==!![]&&serverconfig[_0x4e2a85(0xd8)][_0x1865bf['id']][_0x4e2a85(0x156)]==_0x1865bf[_0x4e2a85(0x156)]){if(hasPermission(_0x1865bf['id'],'manageGroups'))try{serverconfig[_0x4e2a85(0x27c)][_0x1865bf[_0x4e2a85(0x11f)]][_0x4e2a85(0x179)][_0x1865bf['role']]=JSON['parse'](_0x4e2a85(0x248)),saveConfig(),_0x5cd10a({'type':_0x4e2a85(0x110),'msg':'Role\x20was\x20successfully\x20added\x20to\x20the\x20group'});}catch(_0x5f41c3){consolas(_0x4e2a85(0x1e7)[_0x4e2a85(0x162)]),console[_0x4e2a85(0x28f)](colors[_0x4e2a85(0x162)](_0x5f41c3));}else _0x5cd10a({'type':_0x4e2a85(0xd9),'msg':_0x4e2a85(0xa9)});}}),_0x40336d['on'](_0x5308b9(0x140),function(_0x2da0d4,_0x53c55c){var _0x18475d=_0x5308b9;if(validateMemberId(_0x2da0d4['id'],_0x40336d)==!![]&&serverconfig[_0x18475d(0xd8)][_0x2da0d4['id']][_0x18475d(0x156)]==_0x2da0d4[_0x18475d(0x156)]){if(hasPermission(_0x2da0d4['id'],'manageGroups'))try{delete serverconfig[_0x18475d(0x27c)][_0x2da0d4[_0x18475d(0x11f)]]['permissions'][_0x2da0d4[_0x18475d(0x2c8)]],saveConfig(),_0x53c55c({'type':_0x18475d(0x110),'msg':_0x18475d(0x11b)});}catch(_0x2612c0){consolas(_0x18475d(0xf6)[_0x18475d(0x162)]),console[_0x18475d(0x28f)](colors[_0x18475d(0x162)](_0x2612c0));}else _0x53c55c({'type':_0x18475d(0xd9),'msg':'denied'});}}),_0x40336d['on'](_0x5308b9(0x168),function(_0x205e31,_0xaf42){var _0x57ae32=_0x5308b9;if(validateMemberId(_0x205e31['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x205e31['id']][_0x57ae32(0x156)]==_0x205e31[_0x57ae32(0x156)]){if(hasPermission(_0x205e31['id'],_0x57ae32(0xe7)))try{var _0x424290=_0x205e31[_0x57ae32(0x26c)][_0x57ae32(0x12a)]();for(let _0x2ccd07=0x0;_0x2ccd07<_0x424290[_0x57ae32(0x1cc)];_0x2ccd07++){var _0x18e377=_0x424290[_0x2ccd07];serverconfig[_0x57ae32(0x21c)][_0x18e377]['info'][_0x57ae32(0x239)]=_0x2ccd07;}saveConfig(),_0xaf42({'type':_0x57ae32(0x110),'msg':_0x57ae32(0x116)});}catch(_0x362df7){consolas(_0x57ae32(0x195)[_0x57ae32(0x162)]),console[_0x57ae32(0x28f)](_0x362df7);}else _0xaf42({'type':_0x57ae32(0xd9),'msg':'denied'});}}),_0x40336d['on'](_0x5308b9(0xbe),function(_0x54fe0e,_0x2ce0b6){var _0x5dc40c=_0x5308b9;if(validateMemberId(_0x54fe0e['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x54fe0e['id']][_0x5dc40c(0x156)]==_0x54fe0e[_0x5dc40c(0x156)]){if(hasPermission(_0x54fe0e['id'],_0x5dc40c(0xe7)))try{serverconfig[_0x5dc40c(0x21c)][_0x54fe0e[_0x5dc40c(0x2ae)]][_0x5dc40c(0x2ce)]['name']=_0x54fe0e[_0x5dc40c(0x299)][_0x5dc40c(0x2ce)][_0x5dc40c(0x14c)],serverconfig[_0x5dc40c(0x21c)][_0x54fe0e[_0x5dc40c(0x2ae)]]['info'][_0x5dc40c(0x164)]=_0x54fe0e['data']['info']['color'],serverconfig['serverroles'][_0x54fe0e[_0x5dc40c(0x2ae)]][_0x5dc40c(0x2ce)]['displaySeperate']=_0x54fe0e[_0x5dc40c(0x299)][_0x5dc40c(0x2ce)][_0x5dc40c(0xe1)],saveConfig(),_0x2ce0b6({'type':_0x5dc40c(0x110),'msg':_0x5dc40c(0x116)}),io[_0x5dc40c(0x1e0)]('updateMemberList'),io['to'](usersocket[_0x54fe0e['id']])[_0x5dc40c(0x1e0)](_0x5dc40c(0x87));}catch(_0x3d19da){consolas(_0x5dc40c(0x195)['red']),console[_0x5dc40c(0x28f)](_0x3d19da);}else _0x2ce0b6({'type':'error','msg':'denied'});}}),_0x40336d['on'](_0x5308b9(0x126),function(_0x561f5f,_0x30b974){var _0x9b0ada=_0x5308b9;if(validateMemberId(_0x561f5f['id'],_0x40336d)==!![]&&serverconfig[_0x9b0ada(0xd8)][_0x561f5f['id']]['token']==_0x561f5f['token']){if(hasPermission(_0x561f5f['id'],_0x9b0ada(0xe7)))try{var _0x2d9f61=generateId(0x4);serverconfig[_0x9b0ada(0x21c)][_0x2d9f61]=JSON[_0x9b0ada(0x22c)](_0x9b0ada(0x10e)+_0x2d9f61+',\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22name\x22:\x20\x22New\x20Role\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22icon\x22:\x20null,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22color\x22:\x20\x22#FFFFFF\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22deletable\x22:\x201,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22sortId\x22:\x20'+generateId(0x4)+',\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22displaySeperate\x22:\x200\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22permissions\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22readMessages\x22:\x201,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22sendMessages\x22:\x201,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22uploadFiles\x22:\x201\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22members\x22:\x20[\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20],\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22token\x22:\x20[]\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}'),saveConfig(),_0x30b974({'type':_0x9b0ada(0x110),'msg':'The\x20role\x20has\x20been\x20successfully\x20created'});}catch(_0x2887d1){consolas(_0x9b0ada(0xcd)['red']),console[_0x9b0ada(0x28f)](_0x2887d1);}else _0x30b974({'type':'error','permission':_0x9b0ada(0xa9)});}else consolas(_0x9b0ada(0x149));}),_0x40336d['on'](_0x5308b9(0x180),function(_0x40bc9f,_0x13a88c){var _0x3547b9=_0x5308b9;if(validateMemberId(_0x40bc9f['id'],_0x40336d)==!![]&&serverconfig[_0x3547b9(0xd8)][_0x40bc9f['id']]['token']==_0x40bc9f[_0x3547b9(0x156)]){if(hasPermission(_0x40bc9f['id'],'manageRoles'))try{serverconfig['serverroles'][_0x40bc9f['roleId']][_0x3547b9(0x2ce)][_0x3547b9(0x119)]==0x1?(delete serverconfig[_0x3547b9(0x21c)][_0x40bc9f[_0x3547b9(0x2ae)]],saveConfig(),_0x13a88c({'type':_0x3547b9(0x110),'msg':_0x3547b9(0x18e)})):_0x13a88c({'type':_0x3547b9(0xd9),'msg':_0x3547b9(0x193)});}catch(_0x1e8d24){consolas(_0x3547b9(0x1d4)[_0x3547b9(0x162)]),console[_0x3547b9(0x28f)](_0x1e8d24);}else _0x13a88c({'type':_0x3547b9(0xd9),'msg':'denied'});}else consolas(_0x3547b9(0x149));}),_0x40336d['on'](_0x5308b9(0xf0),function(_0x1c55da,_0x2a9c95){var _0x31e0a1=_0x5308b9;if(validateMemberId(_0x1c55da['id'],_0x40336d)==!![]){if(Array[_0x31e0a1(0x1b7)](_0x1c55da[_0x31e0a1(0x11c)])){var _0x2caed2=![];for(var _0x37fd32=0x0;_0x37fd32<_0x1c55da[_0x31e0a1(0x11c)]['length'];_0x37fd32++){if(hasPermission(_0x1c55da['id'],_0x1c55da[_0x31e0a1(0x11c)][_0x37fd32]))_0x2caed2=!![],_0x2a9c95({'type':'success','permission':_0x31e0a1(0x255)});else{}}_0x2caed2==![]&&_0x2a9c95({'type':_0x31e0a1(0x110),'permission':_0x31e0a1(0xa9)});}else hasPermission(_0x1c55da['id'],_0x1c55da[_0x31e0a1(0x11c)])?_0x2a9c95({'type':_0x31e0a1(0x110),'permission':'granted'}):_0x2a9c95({'type':'success','permission':_0x31e0a1(0xa9)});}}),_0x40336d['on'](_0x5308b9(0x1e4),function(_0x4d89eb){var _0x5bca4e=_0x5308b9;if(validateMemberId(_0x4d89eb['id'],_0x40336d)==!![]&&serverconfig[_0x5bca4e(0xd8)][_0x4d89eb['id']][_0x5bca4e(0x156)]==_0x4d89eb['token']){if(_0x4d89eb['id']==_0x4d89eb[_0x5bca4e(0x19e)]){sendMessageToUser(_0x40336d['id'],JSON[_0x5bca4e(0x22c)](_0x5bca4e(0x282)));return;}else{if(hasPermission(_0x4d89eb['id'],_0x5bca4e(0x1f9))==![])sendMessageToUser(_0x40336d['id'],JSON[_0x5bca4e(0x22c)]('{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permission!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20cant\x20kick\x20that\x20person.\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}'));else{var _0x54ec88=getMemberHighestRole(_0x4d89eb['id']),_0x5bd3b4=getMemberHighestRole(_0x4d89eb[_0x5bca4e(0x19e)]);if(_0x54ec88[_0x5bca4e(0x2ce)][_0x5bca4e(0x239)]<=_0x5bd3b4[_0x5bca4e(0x2ce)]['sortId']){sendMessageToUser(_0x40336d['id'],JSON[_0x5bca4e(0x22c)](_0x5bca4e(0x2d2)));return;}_0x4d89eb[_0x5bca4e(0x19e)]=escapeHtml(_0x4d89eb[_0x5bca4e(0x19e)]),delete serverconfig[_0x5bca4e(0xd8)][_0x4d89eb[_0x5bca4e(0x19e)]],saveConfig(),sendMessageToUser(_0x40336d['id'],JSON[_0x5bca4e(0x22c)](_0x5bca4e(0x289))),io['sockets'][_0x5bca4e(0xf5)][_0x5bca4e(0x264)](_0x3ddfd2=>{var _0x525842=_0x5bca4e;if(_0x3ddfd2['id']===usersocket[_0x4d89eb[_0x525842(0x19e)]]){var _0x43600c='\x20';_0x4d89eb['reason']=escapeHtml(_0x4d89eb[_0x525842(0xe3)]),_0x4d89eb[_0x525842(0xe3)]!=null&&_0x4d89eb[_0x525842(0xe3)][_0x525842(0x1cc)]>0x0&&(_0x43600c=_0x525842(0x1d1)+_0x4d89eb[_0x525842(0xe3)]),sendMessageToUser(_0x3ddfd2['id'],JSON[_0x525842(0x22c)](_0x525842(0xcb)+_0x43600c+_0x525842(0x297))),_0x3ddfd2['disconnect'](!![]);}}),io[_0x5bca4e(0x1e0)](_0x5bca4e(0x87));}}}});function _0x3a4e84(_0x180566){var _0x51e9a5=_0x5308b9,_0x26e55e=_0x180566['time'],_0x350549=new Date()['getTime']();if(isNaN(_0x26e55e)==!![]){sendMessageToUser(_0x40336d['id'],JSON[_0x51e9a5(0x22c)](_0x51e9a5(0x83)));return;}_0x26e55e==null||_0x26e55e<=0x0?(_0x26e55e=-0x1,_0x350549+=_0x350549*0x2):_0x350549+=0x15180*_0x26e55e*0x3e8;var _0x33bbc1=_0x40336d[_0x51e9a5(0x1b4)][_0x51e9a5(0xfe)];if(!serverconfig['ipblacklist'][_0x51e9a5(0x98)](_0x33bbc1))return serverconfig[_0x51e9a5(0xd8)][_0x180566[_0x51e9a5(0x19e)]][_0x51e9a5(0x237)]=0x1,serverconfig[_0x51e9a5(0x1f4)][_0x180566['target']]=JSON[_0x51e9a5(0x22c)](_0x51e9a5(0x1b1)+_0x180566['id']+_0x51e9a5(0x2d5)+_0x180566[_0x51e9a5(0xe3)]+_0x51e9a5(0x174)+_0x350549+'\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'),saveConfig(),consolas((_0x51e9a5(0x1c6)+serverconfig[_0x51e9a5(0xd8)][_0x180566[_0x51e9a5(0x19e)]]['name']+_0x51e9a5(0x249)+_0x33bbc1+_0x51e9a5(0xe4))['yellow']),consolas(_0x51e9a5(0x266)+_0x180566['reason']),consolas(_0x51e9a5(0x2a0)+_0x26e55e),!![];}_0x40336d['on'](_0x5308b9(0x1d8),function(_0x56eab6){var _0x134b2=_0x5308b9;if(validateMemberId(_0x56eab6['id'],_0x40336d)==!![]&&serverconfig[_0x134b2(0xd8)][_0x56eab6['id']][_0x134b2(0x156)]==_0x56eab6[_0x134b2(0x156)]){if(_0x56eab6['id']==_0x56eab6[_0x134b2(0x19e)]){sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x134b2(0x24f)));return;}else{if(hasPermission(_0x56eab6['id'],_0x134b2(0x230))==![])sendMessageToUser(_0x40336d['id'],JSON[_0x134b2(0x22c)](_0x134b2(0x160)));else{var _0x423602=getMemberHighestRole(_0x56eab6['id']),_0x595025=getMemberHighestRole(_0x56eab6[_0x134b2(0x19e)]);if(_0x423602[_0x134b2(0x2ce)][_0x134b2(0x239)]<=_0x595025[_0x134b2(0x2ce)]['sortId']){sendMessageToUser(_0x40336d['id'],JSON[_0x134b2(0x22c)]('{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Error!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20cant\x20ban\x20that\x20person\x20because\x20its\x20role\x20is\x20higher\x20then\x20yours\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}'));return;}if(_0x3a4e84(_0x56eab6)==![])return;sendMessageToUser(_0x40336d['id'],JSON[_0x134b2(0x22c)](_0x134b2(0x29a))),io[_0x134b2(0xf5)]['sockets'][_0x134b2(0x264)](_0x4ee402=>{var _0x2155b4=_0x134b2;if(_0x4ee402['id']===usersocket[_0x56eab6[_0x2155b4(0x19e)]]){var _0x47a5a4='\x20';_0x56eab6[_0x2155b4(0xe3)]=escapeHtml(_0x56eab6[_0x2155b4(0xe3)]),_0x56eab6['reason']!=null&&_0x56eab6['reason'][_0x2155b4(0x1cc)]>0x0&&(_0x56eab6['reason']['replaceAll']('\x20','')['length']>0x0?_0x47a5a4='Reason:\x20'+_0x56eab6[_0x2155b4(0xe3)]:_0x47a5a4='\x20'),sendMessageToUser(_0x4ee402['id'],JSON[_0x2155b4(0x22c)]('{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22You\x20have\x20been\x20banned\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22'+_0x47a5a4+_0x2155b4(0x22d))),_0x4ee402['disconnect'](!![]);}}),io['emit']('updateMemberList');}}}}),_0x40336d['on'](_0x5308b9(0x1d7),function(_0x1893a5){var _0x3c5574=_0x5308b9;if(validateMemberId(_0x1893a5['id'],_0x40336d)==!![]){var _0x544457=_0x1893a5[_0x3c5574(0x15a)][_0x3c5574(0x1ed)]('-'),_0x4afbc9=_0x544457[0x0],_0x3ac53b=_0x544457[0x1],_0x1580a7=_0x544457[0x2];if(!checkUserChannelPermission(_0x1580a7,_0x1893a5['id'],_0x3c5574(0x173))){sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x3c5574(0x238))),_0x40336d[_0x3c5574(0x1b3)](0x0);return;}try{serverconfig[_0x3c5574(0x27c)][_0x4afbc9][_0x3c5574(0x232)][_0x3c5574(0x16b)][_0x3ac53b][_0x3c5574(0x123)][_0x1580a7]!=null&&(_0x40336d[_0x3c5574(0x1b3)](escapeHtml(_0x1893a5[_0x3c5574(0x15a)])),consolas(('User\x20joined\x20room\x20'+escapeHtml(_0x1893a5[_0x3c5574(0x15a)]))[_0x3c5574(0x17e)],_0x3c5574(0xb3)));}catch(_0x1fb4f6){try{_0x40336d[_0x3c5574(0x1ef)](escapeHtml(_0x1893a5[_0x3c5574(0x15a)]));}catch(_0x2cd2b7){console['log'](ee);}consolas((_0x3c5574(0x10a)+_0x1893a5[_0x3c5574(0x15a)])[_0x3c5574(0x114)],_0x3c5574(0xb3));return;}}else consolas('Couldnt\x20set\x20room\x20because\x20token\x20or\x20id\x20didnt\x20match'[_0x3c5574(0x162)],_0x3c5574(0xb3)),consolas((_0x3c5574(0x1c7)+serverconfig['servermembers'][_0x1893a5['id']]['id'])[_0x3c5574(0x114)],_0x3c5574(0xb3)),consolas((_0x3c5574(0x2cb)+_0x1893a5['id'])['yellow'],_0x3c5574(0xb3)),consolas((_0x3c5574(0x13d)+serverconfig['servermembers'][_0x1893a5['id']][_0x3c5574(0x156)])[_0x3c5574(0x114)],_0x3c5574(0xb3)),consolas(('User\x20Token\x20'+_0x1893a5[_0x3c5574(0x156)])[_0x3c5574(0x114)],_0x3c5574(0xb3)),sendMessageToUser(usersocket[_0x1893a5['id']],JSON[_0x3c5574(0x22c)](_0x3c5574(0x89)));}),_0x40336d['on'](_0x5308b9(0x222),function(_0x153cdb,_0x4f6a0b){var _0x3848fc=_0x5308b9;validateMemberId(_0x153cdb['id'],_0x40336d)==!![]&&serverconfig[_0x3848fc(0xd8)][_0x153cdb['id']][_0x3848fc(0x156)]==_0x153cdb[_0x3848fc(0x156)]&&io[_0x3848fc(0x1e0)](_0x3848fc(0x1eb),_0x153cdb['voice']);}),_0x40336d['on'](_0x5308b9(0x171),function(_0x41258e){var _0x2756e8=_0x5308b9;validateMemberId(_0x41258e['id'],_0x40336d)==!![]&&serverconfig[_0x2756e8(0xd8)][_0x41258e['id']][_0x2756e8(0x156)]==_0x41258e['token']&&(consolas(_0x2756e8(0xb8),'Debug'),serverconfig[_0x2756e8(0xd8)][_0x41258e['id']][_0x2756e8(0x14c)]=escapeHtml(_0x41258e[_0x2756e8(0x1ca)]),saveConfig(),io[_0x2756e8(0x1e0)]('updateMemberList'));}),_0x40336d['on'](_0x5308b9(0x29d),function(_0x48f36f,_0x1ac2f7){var _0x32f9f7=_0x5308b9;validateMemberId(_0x48f36f['id'],_0x40336d)==!![]&&serverconfig[_0x32f9f7(0xd8)][_0x48f36f['id']][_0x32f9f7(0x156)]==_0x48f36f[_0x32f9f7(0x156)]&&(hasPermission(_0x48f36f['id'],_0x32f9f7(0x2db))?(consolas(_0x32f9f7(0x260)+serverconfig[_0x32f9f7(0x209)][_0x32f9f7(0x14c)]+_0x32f9f7(0x185)+escapeHtml(_0x48f36f['value']),_0x32f9f7(0xb3)),serverconfig[_0x32f9f7(0x209)]['name']=escapeHtml(_0x48f36f[_0x32f9f7(0x16a)]),saveConfig(),_0x1ac2f7({'type':'success','msg':_0x32f9f7(0x16c)})):_0x1ac2f7({'type':'error','msg':_0x32f9f7(0xbb)}));}),_0x40336d['on'](_0x5308b9(0x8b),function(_0x2f807b,_0x432697){var _0x3bfbb9=_0x5308b9;validateMemberId(_0x2f807b['id'],_0x40336d)==!![]&&serverconfig[_0x3bfbb9(0xd8)][_0x2f807b['id']][_0x3bfbb9(0x156)]==_0x2f807b[_0x3bfbb9(0x156)]&&(hasPermission(_0x2f807b['id'],_0x3bfbb9(0x2db))?(consolas(_0x3bfbb9(0x28c)+serverconfig[_0x3bfbb9(0x209)][_0x3bfbb9(0x90)]+'\x20to\x20'+escapeHtml(_0x2f807b[_0x3bfbb9(0x16a)]),_0x3bfbb9(0xb3)),serverconfig[_0x3bfbb9(0x209)][_0x3bfbb9(0x90)]=escapeHtml(_0x2f807b[_0x3bfbb9(0x16a)]),saveConfig(),_0x432697({'type':_0x3bfbb9(0x110),'msg':'Server\x20description\x20was\x20successfully\x20changed'})):_0x432697({'type':_0x3bfbb9(0xd9),'msg':_0x3bfbb9(0x1b9)}));}),_0x40336d['on'](_0x5308b9(0x8e),function(_0x5d92a0){var _0x2549c3=_0x5308b9;validateMemberId(_0x5d92a0['id'],_0x40336d)==!![]&&serverconfig[_0x2549c3(0xd8)][_0x5d92a0['id']]['token']==_0x5d92a0[_0x2549c3(0x156)]&&(consolas('User\x20changed\x20status',_0x2549c3(0xb3)),serverconfig[_0x2549c3(0xd8)][_0x5d92a0['id']]['status']=escapeHtml(_0x5d92a0['status']),saveConfig(),io[_0x2549c3(0x1e0)](_0x2549c3(0x87)));}),_0x40336d['on']('setPFP',function(_0x24ab11){var _0x5eb8eb=_0x5308b9;validateMemberId(_0x24ab11['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x24ab11['id']][_0x5eb8eb(0x156)]==_0x24ab11['token']&&(consolas(_0x5eb8eb(0x14b),'Debug'),serverconfig[_0x5eb8eb(0xd8)][_0x24ab11['id']][_0x5eb8eb(0x176)]=_0x24ab11[_0x5eb8eb(0x176)],saveConfig(),io['emit']('updateMemberList'));}),_0x40336d['on']('getGroupList',function(_0x53b2e5){var _0x26bef9=_0x5308b9;validateMemberId(_0x53b2e5['id'],_0x40336d)==!![]&&serverconfig[_0x26bef9(0xd8)][_0x53b2e5['id']][_0x26bef9(0x156)]==_0x53b2e5['token']&&io['to'](usersocket[_0x53b2e5['id']])[_0x26bef9(0x1e0)]('receiveGroupList',getGroupList(_0x53b2e5));}),_0x40336d['on']('getMemberList',function(_0x192e70){var _0x114420=_0x5308b9;if(validateMemberId(_0x192e70['id'],_0x40336d)==!![]&&serverconfig[_0x114420(0xd8)][_0x192e70['id']][_0x114420(0x156)]==_0x192e70[_0x114420(0x156)]){if(!hasPermission(_0x192e70['id'],_0x114420(0x1e5),_0x192e70[_0x114420(0x11f)]))return;io['to'](usersocket[_0x192e70['id']])['emit'](_0x114420(0x181),getMemberList(_0x192e70,_0x192e70[_0x114420(0x123)]));}}),_0x40336d['on']('isTyping',function(_0x9a9364){var _0x380992=_0x5308b9;if(validateMemberId(_0x9a9364['id'],_0x40336d,!![])==!![]&&serverconfig['servermembers'][_0x9a9364['id']][_0x380992(0x156)]==_0x9a9364['token']){var _0x5c639c=serverconfig['servermembers'][_0x9a9364['id']][_0x380992(0x14c)];typingMembers[_0x380992(0x98)](_0x5c639c)==![]&&typingMembers[_0x380992(0xdf)](escapeHtml(_0x5c639c)),clearTimeout(typingMembersTimeout[_0x5c639c]),typingMembersTimeout[_0x5c639c]=setTimeout(()=>{var _0x2f0906=_0x380992;typingMembers[_0x2f0906(0x98)](_0x5c639c)==!![]&&typingMembers[_0x2f0906(0x1b2)](escapeHtml(_0x5c639c)),io['in'](_0x9a9364[_0x2f0906(0x15a)])[_0x2f0906(0x1e0)](_0x2f0906(0x2b5),typingMembers);},0x4*0x3e8),io['in'](_0x9a9364['room'])[_0x380992(0x1e0)]('memberTyping',typingMembers);}}),_0x40336d['on']('stoppedTyping',function(_0xcb8fa5){var _0x45c496=_0x5308b9;if(validateMemberId(_0xcb8fa5['id'],_0x40336d)==!![]&&serverconfig[_0x45c496(0xd8)][_0xcb8fa5['id']][_0x45c496(0x156)]==_0xcb8fa5[_0x45c496(0x156)]){var _0xa308cb=serverconfig['servermembers'][_0xcb8fa5['id']][_0x45c496(0x14c)];typingMembers[_0x45c496(0x98)](_0xa308cb)==!![]&&typingMembers[_0x45c496(0x1b2)](_0xa308cb),io['in'](_0xcb8fa5[_0x45c496(0x15a)])[_0x45c496(0x1e0)](_0x45c496(0x2b5),typingMembers);}}),_0x40336d['on'](_0x5308b9(0x1a4),function(_0x13c50f){var _0x56776f=_0x5308b9;if(validateMemberId(_0x13c50f['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x13c50f['id']][_0x56776f(0x156)]==_0x13c50f['token']){if(!hasPermission(_0x13c50f['id'],_0x56776f(0x1e5),_0x13c50f[_0x56776f(0x11f)]))return;io['to'](usersocket[_0x13c50f['id']])[_0x56776f(0x1e0)](_0x56776f(0x100),serverconfig[_0x56776f(0x27c)][_0x13c50f['group']][_0x56776f(0x2ce)][_0x56776f(0x15d)]);}}),_0x40336d['on'](_0x5308b9(0x2be),function(_0x3bb11a){var _0x16218a=_0x5308b9;if(validateMemberId(_0x3bb11a['id'],_0x40336d)==!![]&&serverconfig[_0x16218a(0xd8)][_0x3bb11a['id']][_0x16218a(0x156)]==_0x3bb11a[_0x16218a(0x156)]){consolas(_0x16218a(0x2c3),_0x16218a(0xb3));var _0x32f323=_0x3bb11a['channel'];checkUserChannelPermission(_0x32f323,_0x3bb11a['id'],_0x16218a(0x173))==!![]&&io['to'](usersocket[_0x3bb11a['id']])['emit'](_0x16218a(0x1ce),getSavedChatMessage(_0x3bb11a[_0x16218a(0x11f)],_0x3bb11a[_0x16218a(0x1de)],_0x3bb11a['channel']));}}),_0x40336d['on'](_0x5308b9(0xfd),function(_0x140eca){var _0x5be0ad=_0x5308b9;if(validateMemberId(_0x140eca['id'],_0x40336d)==!![]&&serverconfig[_0x5be0ad(0xd8)][_0x140eca['id']]['token']==_0x140eca[_0x5be0ad(0x156)]){if(!hasPermission(_0x140eca['id'],_0x5be0ad(0x1bc))){sendMessageToUser(_0x40336d['id'],JSON[_0x5be0ad(0x22c)](_0x5be0ad(0x2ab)));return;}try{var _0x57969d=generateId(0x4);serverconfig[_0x5be0ad(0x27c)][_0x140eca[_0x5be0ad(0x11f)]]['channels']['categories'][_0x57969d]=JSON['parse'](_0x5be0ad(0x2b8)+_0x57969d+_0x5be0ad(0x105)+escapeHtml(_0x140eca[_0x5be0ad(0x16a)])+'\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22channel\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'),saveConfig(),io[_0x5be0ad(0x1e0)](_0x5be0ad(0x29f),getChannelTree(_0x140eca));}catch(_0x13436b){consolas(_0x5be0ad(0x192)['red'],_0x5be0ad(0xb3)),consolas(colors['red'](_0x13436b),_0x5be0ad(0xb3));}}else console[_0x5be0ad(0x28f)](_0x5be0ad(0x25c));}),_0x40336d['on'](_0x5308b9(0x118),function(_0x46b9ad){var _0x3bfd19=_0x5308b9;if(validateMemberId(_0x46b9ad['id'],_0x40336d)==!![]&&serverconfig[_0x3bfd19(0xd8)][_0x46b9ad['id']]['token']==_0x46b9ad['token']){if(!hasPermission(_0x46b9ad['id'],_0x3bfd19(0x273))){sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x3bfd19(0x2ca)));return;}try{(_0x46b9ad[_0x3bfd19(0x16a)]==null||_0x46b9ad[_0x3bfd19(0x16a)][_0x3bfd19(0x1cc)]<=0x0)&&(_0x46b9ad[_0x3bfd19(0x16a)]=_0x3bfd19(0x251)),_0x46b9ad[_0x3bfd19(0x16a)]=escapeHtml(_0x46b9ad[_0x3bfd19(0x16a)]),serverconfig['groups'][_0x46b9ad['group']][_0x3bfd19(0x2ce)][_0x3bfd19(0x15d)]=_0x46b9ad[_0x3bfd19(0x16a)],saveConfig(),io[_0x3bfd19(0x1e0)](_0x3bfd19(0x100),_0x46b9ad[_0x3bfd19(0x16a)]);}catch(_0x55adbd){consolas(_0x3bfd19(0x19b)[_0x3bfd19(0x162)],'Debug'),consolas(colors[_0x3bfd19(0x162)](_0x55adbd),_0x3bfd19(0xb3));}}else{}}),_0x40336d['on'](_0x5308b9(0x22a),function(_0x55a0d5,_0x454071){var _0x512786=_0x5308b9;if(validateMemberId(_0x55a0d5['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x55a0d5['id']]['token']==_0x55a0d5[_0x512786(0x156)]){if(!hasPermission(_0x55a0d5['id'],'manageGroups')){sendMessageToUser(_0x40336d['id'],JSON[_0x512786(0x22c)](_0x512786(0x16d)));return;}try{var _0x5c6820=escapeHtml(_0x55a0d5['groupName']),_0x9c040a=_0x55a0d5['groupId'];serverconfig[_0x512786(0x27c)][_0x9c040a][_0x512786(0x2ce)][_0x512786(0x14c)]=_0x5c6820,saveConfig(),_0x454071({'type':_0x512786(0x110),'msg':'Group\x20Name\x20Updated'}),io[_0x512786(0x1e0)]('receiveGroupList',getGroupList(_0x55a0d5));}catch(_0x4a57e3){consolas(_0x512786(0xe6)['red'],_0x512786(0xb3)),consolas(colors[_0x512786(0x162)](_0x4a57e3),'Debug'),_0x454071({'type':_0x512786(0xd9),'msg':_0x512786(0x1a7)});}}else{}}),_0x40336d['on'](_0x5308b9(0x2d3),function(_0x4d5829,_0x1c6bff){var _0x3020c9=_0x5308b9;if(validateMemberId(_0x4d5829['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x4d5829['id']][_0x3020c9(0x156)]==_0x4d5829[_0x3020c9(0x156)]){if(!hasPermission(_0x4d5829['id'],_0x3020c9(0x273))){sendMessageToUser(_0x40336d['id'],JSON[_0x3020c9(0x22c)](_0x3020c9(0x172)));return;}try{var _0xa8072e=_0x4d5829[_0x3020c9(0x23c)],_0x4be116=_0x4d5829['groupId'],_0x4973a8=_0x4d5829['roleId'];serverconfig['groups'][_0x4be116]['permissions'][_0x4973a8]=_0xa8072e,saveConfig(),io[_0x3020c9(0x1e0)](_0x3020c9(0x130),getGroupList(_0x4d5829)),_0x1c6bff({'type':_0x3020c9(0x110),'msg':_0x3020c9(0x178)});}catch(_0x1db578){consolas(_0x3020c9(0x23b)['red'],_0x3020c9(0xb3)),consolas(colors[_0x3020c9(0x162)](_0x1db578),_0x3020c9(0xb3)),_0x1c6bff({'type':_0x3020c9(0xd9),'msg':_0x3020c9(0xc2)});}}else{}}),_0x40336d['on'](_0x5308b9(0x23a),function(_0x1131ff){var _0x211431=_0x5308b9;if(validateMemberId(_0x1131ff['id'],_0x40336d)==!![]&&serverconfig[_0x211431(0xd8)][_0x1131ff['id']][_0x211431(0x156)]==_0x1131ff[_0x211431(0x156)]){if(!hasPermission(_0x1131ff['id'],_0x211431(0x273))){sendMessageToUser(_0x40336d['id'],JSON[_0x211431(0x22c)]('{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20change\x20the\x20group\x20icon\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}'));return;}try{(_0x1131ff[_0x211431(0x16a)]==null||_0x1131ff[_0x211431(0x16a)][_0x211431(0x1cc)]<=0x0)&&(_0x1131ff[_0x211431(0x16a)]=_0x211431(0x25f)),_0x1131ff['value']=escapeHtml(_0x1131ff[_0x211431(0x16a)]),serverconfig[_0x211431(0x27c)][_0x1131ff[_0x211431(0x11f)]][_0x211431(0x2ce)]['icon']=_0x1131ff[_0x211431(0x16a)],saveConfig(),io[_0x211431(0x1e0)](_0x211431(0x15b),getGroupList(_0x1131ff));}catch(_0x773b2f){consolas(_0x211431(0x284)[_0x211431(0x162)],_0x211431(0xb3)),consolas(colors[_0x211431(0x162)](_0x773b2f),_0x211431(0xb3));}}else{}}),_0x40336d['on'](_0x5308b9(0x8a),function(_0x35284b){var _0x5d0ef9=_0x5308b9;if(validateMemberId(_0x35284b['id'],_0x40336d)==!![]&&serverconfig[_0x5d0ef9(0xd8)][_0x35284b['id']][_0x5d0ef9(0x156)]==_0x35284b[_0x5d0ef9(0x156)]){if(!hasPermission(_0x35284b['id'],'manageChannels')){sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x5d0ef9(0xe5)));return;}try{consolas((_0x5d0ef9(0x2a2)+_0x35284b['group']+',\x20category\x20'+_0x35284b['category'])['yellow'],_0x5d0ef9(0xb3));var _0x2d48ea=generateId(0x4);serverconfig[_0x5d0ef9(0x27c)][_0x35284b[_0x5d0ef9(0x11f)]][_0x5d0ef9(0x232)]['categories'][_0x35284b['category']][_0x5d0ef9(0x123)][_0x2d48ea]=JSON[_0x5d0ef9(0x22c)](_0x5d0ef9(0xb2)+_0x2d48ea+',\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22name\x22:\x20\x22'+escapeHtml(_0x35284b[_0x5d0ef9(0x16a)])+_0x5d0ef9(0x12b)),saveConfig(),io[_0x5d0ef9(0x1e0)](_0x5d0ef9(0x29f),getChannelTree(_0x35284b));}catch(_0x36c375){consolas(_0x5d0ef9(0x287)[_0x5d0ef9(0x162)],'Debug'),consolas(colors[_0x5d0ef9(0x162)](_0x36c375),_0x5d0ef9(0xb3));}}else{}}),_0x40336d['on'](_0x5308b9(0x2b1),function(_0x22bb9c){var _0x3aa6f4=_0x5308b9;if(validateMemberId(_0x22bb9c['id'],_0x40336d)==!![]&&serverconfig[_0x3aa6f4(0xd8)][_0x22bb9c['id']]['token']==_0x22bb9c[_0x3aa6f4(0x156)]){if(!hasPermission(_0x22bb9c['id'],_0x3aa6f4(0x273))){sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x3aa6f4(0x2a3)));return;}try{var _0x1158fa=generateId(0x4),_0x386d63=generateId(0x4),_0x7b680d=generateId(0x4);serverconfig[_0x3aa6f4(0x27c)][_0x1158fa]=JSON[_0x3aa6f4(0x22c)]('{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22info\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22id\x22:\x20'+_0x1158fa+_0x3aa6f4(0x105)+escapeHtml(_0x22bb9c[_0x3aa6f4(0x16a)])+'\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22icon\x22:\x20\x22/img/default_icon.png\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22banner\x22:\x20\x22/img/default_banner.png\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22isDeletable\x22:\x201,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22sortId\x22:\x200,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22access\x22:\x20[\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20]\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22channels\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22categories\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22'+_0x386d63+'\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22info\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22id\x22:\x20'+_0x386d63+_0x3aa6f4(0x2e1)+_0x7b680d+_0x3aa6f4(0x13a)+_0x7b680d+_0x3aa6f4(0xa7)),saveConfig(),io[_0x3aa6f4(0x1e0)]('updateGroupList');}catch(_0x5ff7aa){consolas(_0x3aa6f4(0x192)['red'],_0x3aa6f4(0xb3)),consolas(colors[_0x3aa6f4(0x162)](_0x5ff7aa),_0x3aa6f4(0xb3));}}else{}}),_0x40336d['on'](_0x5308b9(0x1e1),function(_0x427bd8){var _0x438b73=_0x5308b9;if(validateMemberId(_0x427bd8['id'],_0x40336d)==!![]&&serverconfig[_0x438b73(0xd8)][_0x427bd8['id']][_0x438b73(0x156)]==_0x427bd8[_0x438b73(0x156)]){if(serverconfig[_0x438b73(0x27c)][_0x427bd8['group']][_0x438b73(0x2ce)][_0x438b73(0x221)]==0x0){sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x438b73(0x129)));return;}if(!hasPermission(_0x427bd8['id'],'manageGroups')){sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x438b73(0xbc)));return;}try{delete serverconfig[_0x438b73(0x27c)][_0x427bd8[_0x438b73(0x11f)]],saveConfig(),io[_0x438b73(0x1e0)](_0x438b73(0x130));}catch(_0x3ecd40){consolas('Couldnt\x20delete\x20group\x20'[_0x438b73(0x162)],_0x438b73(0xb3)),consolas(colors[_0x438b73(0x162)](_0x3ecd40),_0x438b73(0xb3));}}else{}}),_0x40336d['on'](_0x5308b9(0x194),function(_0x8f19ed){var _0x11ec90=_0x5308b9;if(validateMemberId(_0x8f19ed['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x8f19ed['id']][_0x11ec90(0x156)]==_0x8f19ed[_0x11ec90(0x156)]){if(!hasPermission(_0x8f19ed['id'],_0x11ec90(0x1bc))){sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x11ec90(0x107)));return;}try{var _0x27bc8d=_0x8f19ed['channelId'][_0x11ec90(0x10c)]('channel-',''),_0x1f3e55=resolveGroupByChannelId(_0x27bc8d),_0x530d0e=resolveCategoryByChannelId(_0x27bc8d);delete serverconfig[_0x11ec90(0x27c)][_0x1f3e55][_0x11ec90(0x232)]['categories'][_0x530d0e][_0x11ec90(0x123)][_0x27bc8d],saveConfig(),io[_0x11ec90(0x1e0)]('receiveChannelTree',getChannelTree(_0x8f19ed));}catch(_0x17b934){consolas(_0x11ec90(0x1f6)[_0x11ec90(0x162)],_0x11ec90(0xb3)),consolas(colors['red'](_0x17b934),'Debug');}}else{}}),_0x40336d['on'](_0x5308b9(0x262),function(_0x10c313){var _0x300f57=_0x5308b9;if(validateMemberId(_0x10c313['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x10c313['id']][_0x300f57(0x156)]==_0x10c313['token']){if(!hasPermission(_0x10c313['id'],_0x300f57(0x1bc))){sendMessageToUser(_0x40336d['id'],JSON[_0x300f57(0x22c)](_0x300f57(0xbd)));return;}try{delete serverconfig[_0x300f57(0x27c)][_0x10c313['group']][_0x300f57(0x232)]['categories'][_0x10c313[_0x300f57(0x1de)][_0x300f57(0x10c)]('category-','')],saveConfig(),io[_0x300f57(0x1e0)](_0x300f57(0x29f),getChannelTree(_0x10c313));}catch(_0x5957f7){consolas(_0x300f57(0x19c)[_0x300f57(0x162)],_0x300f57(0xb3)),consolas(colors[_0x300f57(0x162)](_0x5957f7),'Debug');}}else consolas(_0x300f57(0x298));}),_0x40336d['on'](_0x5308b9(0xdb),function(_0x2c86d1){var _0x3d6ccb=_0x5308b9;if(validateMemberId(_0x2c86d1['id'],_0x40336d)==!![]){consolas(_0x3d6ccb(0x214),_0x3d6ccb(0xb3));try{checkUserChannelPermission(_0x2c86d1['channel'],_0x2c86d1['id'],_0x3d6ccb(0x173))==!![]&&io['to'](usersocket[_0x2c86d1['id']])['emit'](_0x3d6ccb(0xcf),serverconfig['groups'][_0x2c86d1[_0x3d6ccb(0x11f)]][_0x3d6ccb(0x232)][_0x3d6ccb(0x16b)][_0x2c86d1[_0x3d6ccb(0x1de)]]['channel'][_0x2c86d1[_0x3d6ccb(0x123)]]);}catch{io['to'](usersocket[_0x2c86d1['id']])[_0x3d6ccb(0x1e0)](_0x3d6ccb(0xcf),serverconfig['groups'][_0x2c86d1['group']]);}}}),_0x40336d['on'](_0x5308b9(0xfb),function(_0x2ac889){var _0x1fefbb=_0x5308b9;checkRateLimit(_0x40336d);if(validateMemberId(_0x2ac889['id'],_0x40336d)==!![]&&serverconfig[_0x1fefbb(0xd8)][_0x2ac889['id']][_0x1fefbb(0x156)]==_0x2ac889[_0x1fefbb(0x156)]){try{var _0x28ba87=JSON[_0x1fefbb(0x22c)](fs[_0x1fefbb(0x228)]('./chats/'+_0x2ac889['group']+'/'+_0x2ac889[_0x1fefbb(0x1de)]+'/'+_0x2ac889[_0x1fefbb(0x123)]+'/'+_0x2ac889[_0x1fefbb(0x270)]));(_0x28ba87['id']==_0x2ac889['id']||hasPermission(_0x2ac889['id'],'manageMessages'))&&(fs[_0x1fefbb(0x161)]('./chats/'+_0x2ac889[_0x1fefbb(0x11f)]+'/'+_0x2ac889[_0x1fefbb(0x1de)]+'/'+_0x2ac889[_0x1fefbb(0x123)]+'/'+_0x2ac889[_0x1fefbb(0x270)]),io[_0x1fefbb(0x1e0)](_0x1fefbb(0x1d5),_0x28ba87[_0x1fefbb(0x270)]));}catch(_0x20c575){consolas(_0x1fefbb(0x170)+_0x2ac889['group']+'/'+_0x2ac889[_0x1fefbb(0x1de)]+'/'+_0x2ac889[_0x1fefbb(0x123)]+'/'+_0x2ac889[_0x1fefbb(0x270)],_0x1fefbb(0xb3)),consolas(_0x20c575,_0x1fefbb(0xb3));}io['to'](usersocket[_0x2ac889['id']])['emit'](_0x1fefbb(0xcf),serverconfig[_0x1fefbb(0x27c)][_0x2ac889[_0x1fefbb(0x11f)]][_0x1fefbb(0x232)][_0x1fefbb(0x16b)][_0x2ac889['category']][_0x1fefbb(0x123)][_0x2ac889[_0x1fefbb(0x123)]]);}}),_0x40336d['on'](_0x5308b9(0xb0),function(_0x53e2d5){var _0x127238=_0x5308b9;return;serverconfig['servermembers'][_0x53e2d5['id']]['isOnline']=0x0,serverconfig[_0x127238(0xd8)][_0x53e2d5['id']][_0x127238(0x242)]=_0x53e2d5[_0x127238(0x2c7)],showedOfflineMessage[_0x53e2d5['id']]=![],setTimeout(()=>{var _0x20453c=_0x127238;if(serverconfig[_0x20453c(0xd8)][_0x53e2d5['id']]['isOnline']==0x0&&showedOfflineMessage[_0x53e2d5['id']]==![])showedOfflineMessage[_0x53e2d5['id']]=!![],io[_0x20453c(0x1e0)]('memberOffline',serverconfig[_0x20453c(0xd8)][_0x53e2d5['id']][_0x20453c(0x14c)]),consolas(_0x20453c(0x217)+_0x53e2d5['id']+_0x20453c(0x199),_0x20453c(0xb3));else{}},0x5*0x3e8*0x3c);}),_0x40336d['on'](_0x5308b9(0x236),async function(_0xa41710){var _0x1c7743=_0x5308b9;checkRateLimit(_0x40336d);if(validateMemberId(_0xa41710['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0xa41710['id']]['token']==_0xa41710[_0x1c7743(0x156)])try{io['to'](usersocket[escapeHtml(_0xa41710['id'])])[_0x1c7743(0x1e0)](_0x1c7743(0x250),{'code':await getMemberProfile(escapeHtml(_0xa41710[_0x1c7743(0x19e)])),'top':_0xa41710[_0x1c7743(0x278)],'left':_0xa41710[_0x1c7743(0xde)]});}catch(_0x14c82e){consolas(_0x1c7743(0x29c)[_0x1c7743(0x162)],_0x1c7743(0xb3)),consolas(colors[_0x1c7743(0x162)](_0x14c82e),_0x1c7743(0xb3));}else{}}),_0x40336d['on'](_0x5308b9(0x9f),async function(_0x591f6b,_0x19dfeb){var _0x55231c=_0x5308b9;checkRateLimit(_0x40336d);if(validateMemberId(_0x591f6b['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x591f6b['id']][_0x55231c(0x156)]==_0x591f6b[_0x55231c(0x156)])try{var _0x283a14=[];fs['readdirSync']('./public/emojis')['sort']((_0x658767,_0x4ac79a)=>{var _0x26657b=_0x55231c;let _0x3d9151=fs[_0x26657b(0x296)](_0x26657b(0xd3)+_0x658767),_0x3716ff=fs[_0x26657b(0x296)](_0x26657b(0xd3)+_0x4ac79a);return new Date(_0x3716ff[_0x26657b(0x24a)])[_0x26657b(0x2c4)]()-new Date(_0x3d9151[_0x26657b(0x24a)])[_0x26657b(0x2c4)]();})[_0x55231c(0x264)](_0x334610=>{_0x283a14['push'](_0x334610);}),_0x283a14[_0x55231c(0x1cc)]>0x0?_0x19dfeb({'type':_0x55231c(0x110),'data':_0x283a14,'msg':_0x55231c(0x96)}):_0x19dfeb({'type':_0x55231c(0xd9),'data':null,'msg':_0x55231c(0x267)});}catch(_0x15275c){consolas(_0x55231c(0xa8)[_0x55231c(0x162)],_0x55231c(0xb3)),consolas(colors['red'](_0x15275c),_0x55231c(0xb3));}else{}}),_0x40336d['on'](_0x5308b9(0x102),async function(_0xbba3e5,_0x504c50){var _0x23910e=_0x5308b9;checkRateLimit(_0x40336d);if(validateMemberId(_0xbba3e5['id'],_0x40336d)==!![]&&serverconfig[_0x23910e(0xd8)][_0xbba3e5['id']]['token']==_0xbba3e5[_0x23910e(0x156)])try{if(!hasPermission(_0xbba3e5['id'],_0x23910e(0x113))){sendMessageToUser(_0x40336d['id'],JSON[_0x23910e(0x22c)](_0x23910e(0x127))),_0x504c50({'type':_0x23910e(0xd9),'msg':_0x23910e(0x8d)});return;}_0x504c50({'type':'success','data':serverconfig[_0x23910e(0x1f4)],'msg':_0x23910e(0x91)});}catch(_0x45aa40){consolas(_0x23910e(0xa8)[_0x23910e(0x162)],'Debug'),consolas(colors[_0x23910e(0x162)](_0x45aa40),'Debug');}else{}}),_0x40336d['on'](_0x5308b9(0x226),async function(_0x4ecbd4,_0x47695d){var _0x2fd8eb=_0x5308b9;checkRateLimit(_0x40336d);if(validateMemberId(_0x4ecbd4['id'],_0x40336d)==!![]&&serverconfig[_0x2fd8eb(0xd8)][_0x4ecbd4['id']][_0x2fd8eb(0x156)]==_0x4ecbd4[_0x2fd8eb(0x156)])try{if(!hasPermission(_0x4ecbd4['id'],'manageEmojis')){sendMessageToUser(_0x40336d['id'],JSON[_0x2fd8eb(0x22c)](_0x2fd8eb(0x2b3))),_0x47695d({'type':_0x2fd8eb(0xd9),'msg':_0x2fd8eb(0x103)});return;}var _0x2d8e1b=findEmojiByID(_0x4ecbd4[_0x2fd8eb(0x263)]),_0x31787f=_0x2fd8eb(0x2d4)+_0x4ecbd4[_0x2fd8eb(0x263)]+'_'+_0x4ecbd4['emojiName']+'.'+_0x2d8e1b[_0x2fd8eb(0x1ed)]('.')[_0x2fd8eb(0x1b2)]();fs[_0x2fd8eb(0xfa)]('./public/emojis/'+_0x2d8e1b,_0x2fd8eb(0xd3)+_0x31787f,function(_0x2a11f9){var _0x4ff2aa=_0x2fd8eb;_0x2a11f9?_0x47695d({'type':_0x4ff2aa(0xd9),'error':_0x2a11f9,'msg':_0x4ff2aa(0x124)}):_0x47695d({'type':_0x4ff2aa(0x110),'msg':_0x4ff2aa(0x2c1)});});}catch(_0x5071c6){consolas(_0x2fd8eb(0xa8)[_0x2fd8eb(0x162)],_0x2fd8eb(0xb3)),consolas(colors[_0x2fd8eb(0x162)](_0x5071c6),_0x2fd8eb(0xb3));}else{}}),_0x40336d['on'](_0x5308b9(0x147),function(_0x182c3c,_0x575b49){var _0x41aa16=_0x5308b9;checkRateLimit(_0x40336d);var _0x416fdb,_0x58bc7f,_0x5ba5c0=generateId(0xc);_0x182c3c[_0x41aa16(0x15c)]=_0x182c3c['filename'][_0x41aa16(0x128)]('\x20','_');if(_0x182c3c['type']==null)_0x58bc7f=_0x41aa16(0x1aa),_0x416fdb=_0x41aa16(0x131)+_0x5ba5c0+'_'+escapeHtml(_0x182c3c['filename']);else{if(_0x182c3c[_0x41aa16(0x137)]=='emoji'){if(!hasPermission(_0x182c3c['id'],_0x41aa16(0x12d))){sendMessageToUser(_0x40336d['id'],JSON['parse'](_0x41aa16(0x134))),_0x575b49({'type':_0x41aa16(0xd9),'msg':'You\x20dont\x20have\x20permissions\x20to\x20manage\x20Emojis'});return;}_0x58bc7f=_0x41aa16(0x2d0),_0x416fdb=_0x41aa16(0x2d4)+_0x5ba5c0+'_'+escapeHtml(_0x182c3c[_0x41aa16(0x15c)]);}}var _0x2c080d=serverconfig[_0x41aa16(0x209)][_0x41aa16(0x1c3)],_0x58eabd=serverconfig[_0x41aa16(0x209)][_0x41aa16(0x24e)],_0x4f2344=serverconfig[_0x41aa16(0x209)]['cfHash'];if(!hasPermission(_0x182c3c['id'],'uploadFiles')){sendMessageToUser(_0x40336d['id'],JSON[_0x41aa16(0x22c)](_0x41aa16(0x206))),_0x575b49({'type':_0x41aa16(0xd9),'msg':_0x41aa16(0xc0)});return;}var {ext:_0x4cd8b4,mime:_0x9e7626}=fileTypeFromBuffer(_0x182c3c[_0x41aa16(0x1ec)]);fileTypeFromBuffer(_0x182c3c[_0x41aa16(0x1ec)])['then'](_0x5f3c67=>{var _0x2ce5a9=_0x41aa16;if(_0x5f3c67==null){_0x575b49({'type':_0x2ce5a9(0xd9),'msg':'Unkown\x20MIME\x20type!'});return;}consolas(_0x2ce5a9(0x1c1)['yellow']+_0x9e7626,'Debug');if(serverconfig[_0x2ce5a9(0x209)][_0x2ce5a9(0x1e9)][_0x2ce5a9(0x98)](_0x5f3c67[_0x2ce5a9(0x101)])){consolas('Upload\x20File\x20Extention\x20Type:\x20'[_0x2ce5a9(0x114)]+_0x4cd8b4,_0x2ce5a9(0xb3));if(validateMemberId(_0x182c3c['id'],_0x40336d)==!![]&&serverconfig[_0x2ce5a9(0xd8)][_0x182c3c['id']][_0x2ce5a9(0x156)]==_0x182c3c[_0x2ce5a9(0x156)]){var _0x4a74fc=serverconfig[_0x2ce5a9(0x209)][_0x2ce5a9(0x203)];if(serverconfig[_0x2ce5a9(0x209)]['useCloudflareImageCDN']==0x1){consolas(_0x2ce5a9(0x151)[_0x2ce5a9(0x1b6)]);const _0x4057a1=new FormData();var _0x2271fb=_0x2ce5a9(0x285)+generateId(0x22);_0x4057a1[_0x2ce5a9(0x11d)](_0x2ce5a9(0x1ec),_0x182c3c[_0x2ce5a9(0x1ec)]),_0x4057a1['append']('id',_0x2271fb),fetch('https://api.cloudflare.com/client/v4/accounts/'+_0x2c080d+'/images/v1',{'method':_0x2ce5a9(0x224),'headers':{'Authorization':'Bearer\x20'+_0x58eabd},'body':_0x4057a1})[_0x2ce5a9(0x279)](_0x42691f=>{var _0x14dc13=_0x2ce5a9;_0x42691f[_0x14dc13(0x271)]==0xc8?(consolas(_0x14dc13(0x167)+(_0x14dc13(0x1a2)+_0x4f2344+'/'+_0x2271fb+_0x14dc13(0xf7)),_0x14dc13(0xb3)),_0x575b49({'type':_0x14dc13(0x110),'msg':_0x14dc13(0x1a2)+_0x4f2344+'/'+_0x2271fb+_0x14dc13(0xf7)})):_0x575b49({'type':_0x14dc13(0xd9),'msg':_0x42691f[_0x14dc13(0x2bc)]});});return;}else getSize(_0x58bc7f,(_0x3f5f55,_0x18e28e)=>{var _0x6ef94f=_0x2ce5a9;if(_0x3f5f55)throw _0x3f5f55;var _0x22367d=(_0x18e28e/0x400/0x400)[_0x6ef94f(0x1f5)](0x2),_0x1302b2=getMemberHighestRole(_0x182c3c['id']),_0x415d34=_0x1302b2[_0x6ef94f(0x179)]['maxUpload'];if(_0x415d34==null){if(hasPermission(_0x182c3c['id'],_0x6ef94f(0x2e0)))_0x415d34=0x1869f;else{_0x575b49({'type':_0x6ef94f(0xd9),'msg':'You\x20are\x20not\x20allowed\x20to\x20upload\x20files'});return;}}if(_0x22367d>_0x415d34){consolas(_0x6ef94f(0x117),_0x6ef94f(0xb3)),consolas('File\x20Size\x20of\x20upload:\x20'+_0x22367d,_0x6ef94f(0xb3)),consolas(_0x6ef94f(0xb5)+_0x1302b2[_0x6ef94f(0x179)][_0x6ef94f(0xec)],_0x6ef94f(0xb3)),_0x575b49({'type':_0x6ef94f(0xd9),'msg':_0x6ef94f(0x208)});return;}var _0x140256=Math[_0x6ef94f(0xe8)]((_0x18e28e/0x400/0x400)[_0x6ef94f(0x1f5)](0x2));if(_0x140256<_0x4a74fc){consolas('Member\x20'+_0x182c3c['id']+_0x6ef94f(0x1ac)+_0x182c3c[_0x6ef94f(0x15c)],'Debug');var _0x35e260;try{fs[_0x6ef94f(0x143)](_0x58bc7f+'/'+_0x416fdb,_0x182c3c['file'],function(_0x5e341f){_0x35e260=_0x5e341f;});}catch(_0x22d3a1){_0x35e260=_0x22d3a1;}if(_0x35e260==null){consolas('Image\x20is\x20being\x20uploaded\x20to\x20local\x20server',_0x6ef94f(0xb3)),_0x575b49({'type':_0x6ef94f(0x110),'msg':_0x58bc7f[_0x6ef94f(0x10c)](_0x6ef94f(0x1af),'')+'/'+_0x416fdb});return;}_0x575b49({'type':_0x6ef94f(0xd9),'msg':_0x35e260});}else consolas((_0x6ef94f(0x231)+_0x4a74fc+_0x6ef94f(0x191))[_0x6ef94f(0x114)]),_0x575b49({'type':'error','msg':_0x6ef94f(0x1a3)});});}}else _0x575b49({'type':_0x2ce5a9(0xd9),'msg':_0x2ce5a9(0x150)});});}),_0x40336d['on'](_0x5308b9(0x252),function(_0x413f84,_0x235fd6){var _0x58570f=_0x5308b9;checkRateLimit(_0x40336d),validateMemberId(_0x413f84['id'],_0x40336d)==!![]&&serverconfig[_0x58570f(0xd8)][_0x413f84['id']][_0x58570f(0x156)]==_0x413f84['token']?_0x235fd6(serverconfig[_0x58570f(0x209)]):(consolas('ID\x20or\x20Token\x20was\x20invalid\x20while\x20requesting\x20server\x20information',_0x58570f(0xb3)),consolas(('ID:\x20'+_0x413f84['id'])[_0x58570f(0x114)],_0x58570f(0xb3)),consolas((_0x58570f(0x1cb)+_0x413f84[_0x58570f(0x156)])[_0x58570f(0x114)],_0x58570f(0xb3)));}),_0x40336d['on'](_0x5308b9(0x256),function(_0x1be363,_0x2d760d){var _0x31d4e1=_0x5308b9;checkRateLimit(_0x40336d);if(validateMemberId(_0x1be363['id'],_0x40336d)==!![]&&serverconfig[_0x31d4e1(0xd8)][_0x1be363['id']][_0x31d4e1(0x156)]==_0x1be363[_0x31d4e1(0x156)]){if(hasPermission(_0x1be363['id'],_0x31d4e1(0x273))){var _0x23ac93=serverconfig[_0x31d4e1(0x27c)][_0x1be363[_0x31d4e1(0x11f)]];_0x2d760d({'type':'success','msg':'Successfully\x20resolved\x20group','data':_0x23ac93});}else _0x2d760d({'type':_0x31d4e1(0xd9),'msg':'You\x20dont\x20have\x20the\x20permissions\x20to\x20manage\x20groups'});}else consolas(_0x31d4e1(0x1f7),_0x31d4e1(0xb3)),consolas((_0x31d4e1(0x1e8)+_0x1be363['id'])[_0x31d4e1(0x114)],_0x31d4e1(0xb3)),consolas((_0x31d4e1(0x1cb)+_0x1be363[_0x31d4e1(0x156)])['yellow'],'Debug');}),_0x40336d['on']('getChannelInfo',function(_0x14ea69,_0x357ecb){var _0x73624d=_0x5308b9;checkRateLimit(_0x40336d);if(validateMemberId(_0x14ea69['id'],_0x40336d)==!![]&&serverconfig[_0x73624d(0xd8)][_0x14ea69['id']][_0x73624d(0x156)]==_0x14ea69[_0x73624d(0x156)]){if(hasPermission(_0x14ea69['id'],_0x73624d(0x1bc))){var _0x283301=resolveChannelById(_0x14ea69[_0x73624d(0x123)][_0x73624d(0x10c)](_0x73624d(0x13b),''));_0x357ecb({'type':_0x73624d(0x110),'msg':_0x73624d(0x229),'data':_0x283301});}else _0x357ecb({'type':_0x73624d(0xd9),'msg':_0x73624d(0x2b0)});}else consolas(_0x73624d(0x1f7),_0x73624d(0xb3)),consolas((_0x73624d(0x1e8)+_0x14ea69['id'])[_0x73624d(0x114)],_0x73624d(0xb3)),consolas((_0x73624d(0x1cb)+_0x14ea69['token'])[_0x73624d(0x114)],_0x73624d(0xb3));}),_0x40336d['on']('updateChannelName',function(_0x205a68,_0x5ac2e7){var _0xab78a7=_0x5308b9;if(validateMemberId(_0x205a68['id'],_0x40336d)==!![]&&serverconfig[_0xab78a7(0xd8)][_0x205a68['id']]['token']==_0x205a68[_0xab78a7(0x156)]){if(hasPermission(_0x205a68['id'],'manageChannels')){var _0x2c5fbd=resolveGroupByChannelId(_0x205a68[_0xab78a7(0x123)]),_0x2c5dec=resolveCategoryByChannelId(_0x205a68['channel']);serverconfig[_0xab78a7(0x27c)][_0x2c5fbd]['channels'][_0xab78a7(0x16b)][_0x2c5dec]['channel'][_0x205a68['channel']][_0xab78a7(0x14c)]=_0x205a68[_0xab78a7(0x14c)],saveConfig(),_0x5ac2e7({'type':_0xab78a7(0x110),'msg':'Successfully\x20updated\x20channel\x20name'}),io[_0xab78a7(0x1e0)](_0xab78a7(0x29f),getChannelTree(_0x205a68));}else _0x5ac2e7({'type':'error','msg':_0xab78a7(0x2b0)});}else consolas('ID\x20or\x20Token\x20was\x20invalid\x20while\x20requesting\x20server\x20information',_0xab78a7(0xb3)),consolas(('ID:\x20'+_0x205a68['id'])['yellow'],_0xab78a7(0xb3)),consolas((_0xab78a7(0x1cb)+_0x205a68[_0xab78a7(0x156)])[_0xab78a7(0x114)],_0xab78a7(0xb3));}),_0x40336d['on'](_0x5308b9(0x8c),function(_0x5e4b8f,_0x517059){var _0x27740f=_0x5308b9;checkRateLimit(_0x40336d),validateMemberId(_0x5e4b8f['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x5e4b8f['id']][_0x27740f(0x156)]==_0x5e4b8f[_0x27740f(0x156)]?hasPermission(_0x5e4b8f['id'],_0x27740f(0xe7))?_0x517059(serverconfig[_0x27740f(0x21c)]):_0x517059({'type':'error','msg':'You\x20dont\x20have\x20the\x20permissions\x20to\x20manage\x20server\x20roles'}):(consolas(_0x27740f(0x1f7),'Debug'),consolas(('ID:\x20'+_0x5e4b8f['id'])[_0x27740f(0x114)],_0x27740f(0xb3)),consolas((_0x27740f(0x1cb)+_0x5e4b8f['token'])[_0x27740f(0x114)],_0x27740f(0xb3)));}),_0x40336d['on'](_0x5308b9(0x136),function(_0x157d94,_0xdf963d){var _0x521ea0=_0x5308b9;checkRateLimit(_0x40336d),validateMemberId(_0x157d94['id'],_0x40336d)==!![]&&serverconfig[_0x521ea0(0xd8)][_0x157d94['id']][_0x521ea0(0x156)]==_0x157d94[_0x521ea0(0x156)]?hasPermission(_0x157d94['id'],_0x521ea0(0x1bc))||hasPermission(_0x157d94['id'],_0x521ea0(0x135))||hasPermission(_0x157d94['id'],_0x521ea0(0x273))?_0xdf963d(serverconfig[_0x521ea0(0x27c)]):_0xdf963d({'type':_0x521ea0(0xd9),'msg':_0x521ea0(0x1fe)}):(consolas(_0x521ea0(0x1f7),'Debug'),consolas((_0x521ea0(0x1e8)+_0x157d94['id'])[_0x521ea0(0x114)],_0x521ea0(0xb3)),consolas((_0x521ea0(0x1cb)+_0x157d94[_0x521ea0(0x156)])['yellow'],_0x521ea0(0xb3)));}),_0x40336d['on'](_0x5308b9(0x28e),function(_0x5925a2,_0x15aea4){var _0x333cf7=_0x5308b9;checkRateLimit(_0x40336d);if(validateMemberId(_0x5925a2['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x5925a2['id']][_0x333cf7(0x156)]==_0x5925a2[_0x333cf7(0x156)]){if(hasPermission(_0x5925a2['id'],_0x333cf7(0x1bc))||hasPermission(_0x5925a2['id'],_0x333cf7(0x135))||hasPermission(_0x5925a2['id'],_0x333cf7(0x273)))try{serverconfig['groups']=_0x5925a2[_0x333cf7(0x26c)],saveConfig(),_0x15aea4({'type':_0x333cf7(0x110),'msg':_0x333cf7(0x10d)}),io['to'](usersocket[_0x5925a2['id']])[_0x333cf7(0x1e0)](_0x333cf7(0x29f),getChannelTree(_0x5925a2)),io[_0x333cf7(0x1e0)](_0x333cf7(0x29f),getChannelTree(_0x5925a2)),io['to'](usersocket[_0x5925a2['id']])[_0x333cf7(0x1e0)](_0x333cf7(0x15b),getGroupList(_0x5925a2)),io['emit'](_0x333cf7(0x15b),getGroupList(_0x5925a2));}catch(_0xc3bea3){consolas(_0x333cf7(0x195)[_0x333cf7(0x162)]),console['log'](_0xc3bea3);}else _0x15aea4({'type':_0x333cf7(0xd9),'msg':_0x333cf7(0xa9)});}}),_0x40336d['on']('saveMediaSettings',function(_0x1198ac,_0x4032ec){var _0xdb7cfd=_0x5308b9;checkRateLimit(_0x40336d);if(validateMemberId(_0x1198ac['id'],_0x40336d)==!![]&&serverconfig['servermembers'][_0x1198ac['id']][_0xdb7cfd(0x156)]==_0x1198ac[_0xdb7cfd(0x156)]){if(hasPermission(_0x1198ac['id'],_0xdb7cfd(0x1db)))try{consolas('Server\x20Media\x20Settings\x20are\x20being\x20changed!'[_0xdb7cfd(0x114)]),consolas(_0xdb7cfd(0xc5)+_0x1198ac['maxLocalUpload']),consolas('Use\x20Cloudflare:\x20'+_0x1198ac['useCloudflare']),consolas(_0xdb7cfd(0x99)+_0x1198ac['cloudflareAccountId']),consolas(_0xdb7cfd(0x295)+_0x1198ac['cloudflareAccountToken']),consolas('CF\x20Account\x20Hash:\x20'+_0x1198ac[_0xdb7cfd(0xc7)]),serverconfig[_0xdb7cfd(0x209)]['maxUploadStorage']=_0x1198ac['maxLocalUpload'],serverconfig['serverinfo'][_0xdb7cfd(0x2b9)]=_0x1198ac[_0xdb7cfd(0xd6)],serverconfig[_0xdb7cfd(0x209)][_0xdb7cfd(0x1c3)]=_0x1198ac['cloudflareAccountId'],serverconfig[_0xdb7cfd(0x209)][_0xdb7cfd(0x24e)]=_0x1198ac[_0xdb7cfd(0x1bb)],serverconfig['serverinfo'][_0xdb7cfd(0x1d6)]=_0x1198ac['cloudflareHash'],saveConfig(),_0x4032ec({'type':_0xdb7cfd(0x110),'msg':_0xdb7cfd(0x220)});}catch(_0x1f1ab2){_0x4032ec({'type':_0xdb7cfd(0xd9),'msg':_0xdb7cfd(0x15e)+_0x1f1ab2});}else _0x4032ec({'type':_0xdb7cfd(0xd9),'msg':_0xdb7cfd(0x84)});}}),_0x40336d['on'](_0x5308b9(0x1bd),function(_0x5a079b,_0x1f0086){var _0x4403e4=_0x5308b9;checkRateLimit(_0x40336d);if(validateMemberId(_0x5a079b['id'],_0x40336d)==!![]&&serverconfig[_0x4403e4(0xd8)][_0x5a079b['id']][_0x4403e4(0x156)]==_0x5a079b[_0x4403e4(0x156)]){if(hasPermission(_0x5a079b['id'],_0x4403e4(0x187)))try{serverconfig[_0x4403e4(0x209)][_0x4403e4(0xfc)]=_0x5a079b['newRateLimit'],serverconfig['serverinfo']['dropInterval']=_0x5a079b[_0x4403e4(0x205)],saveConfig(),_0x1f0086({'type':_0x4403e4(0x110),'msg':_0x4403e4(0x2c5)});}catch(_0x27a641){_0x1f0086({'type':'error','msg':_0x4403e4(0x9a)+_0x27a641});}else _0x1f0086({'type':'error','msg':_0x4403e4(0x2b7)});}});});function a0_0x102e(_0x421a2e,_0x2d1e9d){var _0x35cf28=a0_0x35cf();return a0_0x102e=function(_0x102ea7,_0x329d63){_0x102ea7=_0x102ea7-0x83;var _0x51c974=_0x35cf28[_0x102ea7];return _0x51c974;},a0_0x102e(_0x421a2e,_0x2d1e9d);}function hasPermission(_0x2e27fa,_0x44ac04,_0x2b6371=null){var _0x4c8b4c=a0_0x320c35,_0x5843cf=![],_0x1ade56=![],_0x4f665b=![],_0x4e7cc9=resolveRolesByUserId(_0x2e27fa);Object[_0x4c8b4c(0x10b)](serverconfig[_0x4c8b4c(0x21c)])[_0x4c8b4c(0x264)](function(_0x4fe3a9){var _0x3d2d7c=_0x4c8b4c;if(serverconfig[_0x3d2d7c(0x21c)][_0x4fe3a9][_0x3d2d7c(0x17c)][_0x3d2d7c(0x98)](_0x2e27fa)){if(serverconfig['serverroles'][_0x4fe3a9]['permissions']['administrator']==0x1)return _0x5843cf=!![],_0x4f665b=!![],!![];else{if(serverconfig[_0x3d2d7c(0x21c)][_0x4fe3a9][_0x3d2d7c(0x179)][_0x44ac04]==0x1)return _0x5843cf=!![],_0x4f665b=!![],!![];else{if(serverconfig[_0x3d2d7c(0x21c)][_0x4fe3a9][_0x3d2d7c(0x179)][_0x44ac04]==0x0)_0x4f665b!=!![]&&(_0x5843cf=![]);else{}}}}else{}});if(_0x4f665b==!![])return _0x5843cf;if(_0x2b6371!=null)return Object[_0x4c8b4c(0x10b)](serverconfig[_0x4c8b4c(0x27c)][_0x2b6371][_0x4c8b4c(0x179)])['forEach'](function(_0x451463){var _0x35e30f=_0x4c8b4c;_0x4e7cc9[_0x35e30f(0x98)](_0x451463)&&Object['keys'](serverconfig['groups'][_0x2b6371][_0x35e30f(0x179)][_0x451463])[_0x35e30f(0x264)](function(_0x5a0710){var _0x51c92b=_0x35e30f;if(_0x44ac04==_0x5a0710&&serverconfig[_0x51c92b(0x27c)][_0x2b6371][_0x51c92b(0x179)][_0x451463][_0x5a0710]==0x1)return _0x5843cf=!![],!![];else _0x44ac04==_0x5a0710&&serverconfig[_0x51c92b(0x27c)][_0x2b6371][_0x51c92b(0x179)][_0x451463][_0x5a0710]==0x0&&(_0x5843cf=![]);});}),_0x5843cf;return Object[_0x4c8b4c(0x10b)](serverconfig[_0x4c8b4c(0x27c)])[_0x4c8b4c(0x264)](function(_0x456be1){var _0x3bed00=_0x4c8b4c;Object[_0x3bed00(0x10b)](serverconfig[_0x3bed00(0x27c)][_0x456be1][_0x3bed00(0x179)])[_0x3bed00(0x264)](function(_0x5658ca){var _0x3b1fa3=_0x3bed00;_0x4e7cc9[_0x3b1fa3(0x98)](_0x5658ca)&&Object[_0x3b1fa3(0x10b)](serverconfig[_0x3b1fa3(0x27c)][_0x456be1][_0x3b1fa3(0x179)][_0x5658ca])['forEach'](function(_0x289305){var _0x249985=_0x3b1fa3;if(_0x44ac04==_0x289305&&serverconfig[_0x249985(0x27c)][_0x456be1]['permissions'][_0x5658ca][_0x289305]==0x1)_0x5843cf=!![];else _0x44ac04==_0x289305&&serverconfig['groups'][_0x456be1]['permissions'][_0x5658ca][_0x289305]==0x0&&(_0x5843cf=![]);});}),_0x4e7cc9[_0x3bed00(0x264)](_0x30fe9c=>{var _0xbf1a2b=_0x3bed00;serverconfig[_0xbf1a2b(0x27c)][_0x456be1]['permissions'][_0x30fe9c]!=null&&((serverconfig[_0xbf1a2b(0x27c)][_0x456be1][_0xbf1a2b(0x179)][_0x30fe9c][_0x44ac04]==0x1||serverconfig[_0xbf1a2b(0x27c)][_0x456be1][_0xbf1a2b(0x179)][_0x30fe9c][_0xbf1a2b(0x125)]==0x1)&&(_0x5843cf=!![]));});}),_0x5843cf;}function checkUserChannelPermission(_0x183b06,_0x5f1036,_0x20a2e2){var _0x4a9c88=a0_0x320c35,_0x2da446=![],_0x5474f3=resolveRolesByUserId(_0x5f1036),_0x1c4fd5=resolveGroupByChannelId(_0x183b06),_0x25187f=resolveCategoryByChannelId(_0x183b06);return _0x5474f3[_0x4a9c88(0x264)](_0x24811b=>{var _0x990e56=_0x4a9c88;try{if(hasPermission(_0x5f1036,_0x990e56(0x125)))_0x2da446=!![];else{if(serverconfig[_0x990e56(0x27c)][_0x1c4fd5][_0x990e56(0x232)][_0x990e56(0x16b)][_0x25187f][_0x990e56(0x123)][_0x183b06][_0x990e56(0x179)][_0x24811b][_0x20a2e2]==0x1)_0x2da446=!![];else{if(serverconfig[_0x990e56(0x27c)][_0x1c4fd5]['channels'][_0x990e56(0x16b)][_0x25187f][_0x990e56(0x123)][_0x183b06][_0x990e56(0x179)][_0x24811b][_0x20a2e2]==0x0)return _0x2da446=![],![];else{if(hasPermission(_0x5f1036,_0x20a2e2))_0x2da446=!![];else serverconfig[_0x990e56(0x27c)][_0x1c4fd5]['channels'][_0x990e56(0x16b)][_0x25187f]['channel'][_0x183b06][_0x990e56(0x179)]=={}&&(_0x2da446=!![]);}}}}catch{_0x2da446=!![];}}),_0x2da446;}function resolveGroupByChannelId(_0x163be9){var _0x5c8304=a0_0x320c35,_0x25e3c4=null;return Object['keys'](serverconfig[_0x5c8304(0x27c)])[_0x5c8304(0x12a)]()[_0x5c8304(0x264)](function(_0x3d181f){var _0x534c2e=_0x5c8304;Object[_0x534c2e(0x10b)](serverconfig[_0x534c2e(0x27c)][_0x3d181f][_0x534c2e(0x232)]['categories'])[_0x534c2e(0x12a)]()[_0x534c2e(0x264)](function(_0x53f0d0){var _0x532f6c=_0x534c2e;Object[_0x532f6c(0x10b)](serverconfig['groups'][_0x3d181f]['channels']['categories'][_0x53f0d0][_0x532f6c(0x123)])[_0x532f6c(0x12a)]()['forEach'](function(_0x396c96){_0x396c96==_0x163be9&&(_0x25e3c4=_0x3d181f);});});}),_0x25e3c4;}function resolveCategoryByChannelId(_0x2df1c5){var _0x54e9c4=a0_0x320c35,_0x210d0d=null;return Object[_0x54e9c4(0x10b)](serverconfig[_0x54e9c4(0x27c)])['reverse']()['forEach'](function(_0x44e9fc){var _0x1c39ed=_0x54e9c4;Object[_0x1c39ed(0x10b)](serverconfig[_0x1c39ed(0x27c)][_0x44e9fc][_0x1c39ed(0x232)][_0x1c39ed(0x16b)])['reverse']()[_0x1c39ed(0x264)](function(_0x570efb){var _0x3b08c1=_0x1c39ed;Object[_0x3b08c1(0x10b)](serverconfig['groups'][_0x44e9fc][_0x3b08c1(0x232)][_0x3b08c1(0x16b)][_0x570efb][_0x3b08c1(0x123)])[_0x3b08c1(0x12a)]()[_0x3b08c1(0x264)](function(_0x33882b){_0x33882b==_0x2df1c5&&(_0x210d0d=_0x570efb);});});}),_0x210d0d;}function resolveRolesByUserId(_0x2b1f76){var _0x225ca8=a0_0x320c35,_0x2d1346=[];return Object[_0x225ca8(0x10b)](serverconfig['serverroles'])['reverse']()['forEach'](function(_0x511434){var _0x3b935a=_0x225ca8;serverconfig[_0x3b935a(0x21c)][_0x511434][_0x3b935a(0x17c)][_0x3b935a(0x98)](_0x2b1f76)==!![]&&(_0x2d1346[_0x3b935a(0x98)](_0x511434)==![]&&_0x2d1346[_0x3b935a(0xdf)](_0x511434));}),_0x2d1346;}function resolveChannelById(_0x2c6f6b){var _0x496bfc=a0_0x320c35,_0x16d750=null;return Object['keys'](serverconfig['groups'])[_0x496bfc(0x12a)]()[_0x496bfc(0x264)](function(_0x32454f){var _0x2f599c=_0x496bfc;Object[_0x2f599c(0x10b)](serverconfig[_0x2f599c(0x27c)][_0x32454f][_0x2f599c(0x232)][_0x2f599c(0x16b)])[_0x2f599c(0x12a)]()[_0x2f599c(0x264)](function(_0x2f02e3){var _0xe2ac17=_0x2f599c;Object[_0xe2ac17(0x10b)](serverconfig['groups'][_0x32454f]['channels'][_0xe2ac17(0x16b)][_0x2f02e3][_0xe2ac17(0x123)])['reverse']()[_0xe2ac17(0x264)](function(_0x593842){var _0x20851c=_0xe2ac17;if(_0x593842==_0x2c6f6b)return _0x16d750=serverconfig[_0x20851c(0x27c)][_0x32454f][_0x20851c(0x232)][_0x20851c(0x16b)][_0x2f02e3][_0x20851c(0x123)][_0x2c6f6b],serverconfig[_0x20851c(0x27c)][_0x32454f][_0x20851c(0x232)][_0x20851c(0x16b)][_0x2f02e3][_0x20851c(0x123)][_0x2c6f6b];});});}),_0x16d750;}function checkRateLimit(_0x4961b9){var _0x4d0187=a0_0x320c35,_0x5bf7f7=_0x4961b9['handshake'][_0x4d0187(0xfe)];if(_0x5bf7f7=='::1'||_0x5bf7f7[_0x4d0187(0x98)](_0x4d0187(0x14f)))return;ratelimit[_0x5bf7f7]==null?ratelimit[_0x5bf7f7]=0x1:ratelimit[_0x5bf7f7]++;if(ratelimit[_0x5bf7f7]>serverconfig[_0x4d0187(0x209)]['rateLimit']){consolas(_0x4d0187(0x20a)[_0x4d0187(0x162)]),sendMessageToUser(_0x4961b9['id'],JSON[_0x4d0187(0x22c)]('{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Rate\x20Limited!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22Your\x20connection\x20was\x20terminated.\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}')),_0x4961b9[_0x4d0187(0x1fb)]();!serverconfig[_0x4d0187(0x2e2)]['includes'](_0x5bf7f7)&&(serverconfig['ipblacklist'][_0x4d0187(0xdf)](_0x5bf7f7),saveConfig(),consolas(_0x4d0187(0x1c0)+_0x5bf7f7+_0x4d0187(0x21d)));return;}setTimeout(()=>{try{ratelimit[_0x5bf7f7]--;}catch{}},serverconfig['serverinfo'][_0x4d0187(0x20e)]*0x3e8);}async function getUserBadges(_0x362a2b){return new Promise((_0x87a0a8,_0x2fee58)=>{var _0x3b7327=a0_0x102e,_0x213b4f=_0x3b7327(0x15f)+serverconfig[_0x3b7327(0xd8)][_0x362a2b]['id'];(async function(){var _0xd37b44=_0x3b7327;const _0xcf2cb0=await fetch(_0x213b4f);if(_0xcf2cb0[_0xd37b44(0x271)]==0x194)return _0x87a0a8(null),null;else{if(_0xcf2cb0[_0xd37b44(0x271)]==0xc8){const _0x2ffced=await _0xcf2cb0[_0xd37b44(0x2e3)]();return _0x87a0a8(_0x2ffced),_0x2ffced;}else return _0x87a0a8(null),null;}}());});return prom;}async function getMemberProfile(_0x132216){var _0xd674e8=a0_0x320c35,_0x1829ba=serverconfig[_0xd674e8(0xd8)][_0x132216][_0xd674e8(0x14c)],_0x522a43=serverconfig[_0xd674e8(0xd8)][_0x132216][_0xd674e8(0x271)],_0xe765a5=serverconfig['servermembers'][_0x132216][_0xd674e8(0x26e)],_0x11b87b=serverconfig[_0xd674e8(0xd8)][_0x132216][_0xd674e8(0x176)],_0x14da36=serverconfig[_0xd674e8(0xd8)][_0x132216]['banner'],_0x17b4aa=serverconfig[_0xd674e8(0xd8)][_0x132216][_0xd674e8(0xf9)],_0x3bf702=serverconfig[_0xd674e8(0xd8)][_0x132216][_0xd674e8(0x242)],_0xeec568=await getUserBadges(_0x132216)[_0xd674e8(0x279)](_0x1e3b3c=>{var _0x45c10d=_0xd674e8,_0x46b955='';if(_0x1e3b3c!=null){var _0x3f62a6=JSON[_0x45c10d(0x22c)](_0x1e3b3c);Object[_0x45c10d(0x10b)](_0x3f62a6)['forEach'](function(_0x1f7757){var _0x2d0d79=_0x45c10d;_0x46b955+=_0x2d0d79(0x24c)+_0x3f62a6[_0x1f7757][_0x2d0d79(0x176)]+_0x2d0d79(0x1ae)+_0x3f62a6[_0x1f7757]['display']+_0x2d0d79(0x2a4);});}var _0x2a9fa2='\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22profile_banner\x22\x20style=\x22background-image:\x20url(\x27'+_0x14da36+_0x45c10d(0x1f1)+_0x11b87b+_0x45c10d(0xd1)+_0x46b955+_0x45c10d(0x21f)+_0x1829ba+_0x45c10d(0x186)+_0x522a43+_0x45c10d(0x292)+_0xe765a5+_0x45c10d(0x22f)+new Date(_0x17b4aa)[_0x45c10d(0xf4)](_0x45c10d(0x1d9))+_0x45c10d(0xd7)+new Date(_0x3bf702)[_0x45c10d(0xf4)](_0x45c10d(0x1d9))+_0x45c10d(0x277);return Object[_0x45c10d(0x10b)](serverconfig[_0x45c10d(0x21c)])[_0x45c10d(0x12a)]()[_0x45c10d(0x264)](function(_0x3c7727){var _0x156a77=_0x45c10d,_0x4345b0=serverconfig[_0x156a77(0x21c)][_0x3c7727]['info'][_0x156a77(0x164)],_0x28bc55=serverconfig[_0x156a77(0x21c)][_0x3c7727][_0x156a77(0x2ce)]['name'];serverconfig[_0x156a77(0x21c)][_0x3c7727][_0x156a77(0x17c)]['includes'](_0x132216)&&(_0x2a9fa2+='<code\x20class=\x22role\x22\x20id=\x22'+_0x3c7727+_0x156a77(0x28d)+_0x4345b0+_0x156a77(0x1b0)+_0x28bc55+_0x156a77(0x11e));}),_0x2a9fa2+=_0x45c10d(0x155)+_0x132216+_0x45c10d(0x11a),_0x2a9fa2+=_0x45c10d(0x26f),_0x2a9fa2;});return _0xeec568;}function convertMention(_0xe01e67){var _0x5e202f=a0_0x320c35,_0x48b4ec,_0x323d78;try{_0x48b4ec=_0xe01e67[_0x5e202f(0x2d7)][_0x5e202f(0x128)](/[\\<>@#&!]/g,'')['split']('\x20');if(_0x48b4ec==null)return _0xe01e67[_0x5e202f(0x2d7)];for(let _0x37541e=0x0;_0x37541e<_0x48b4ec[_0x5e202f(0x1cc)];_0x37541e++){try{_0x323d78=_0x48b4ec[_0x37541e],_0x323d78=_0x323d78['replace'](/\D/g,''),_0xe01e67[_0x5e202f(0x2d7)]=_0xe01e67[_0x5e202f(0x2d7)][_0x5e202f(0x128)](_0x5e202f(0x159)+_0x323d78+_0x5e202f(0xeb),'<label\x20class=\x22mention\x22\x20id=\x22mention-'+serverconfig[_0x5e202f(0xd8)][_0x323d78]['id']+_0x5e202f(0x1a9)+serverconfig[_0x5e202f(0xd8)][_0x323d78][_0x5e202f(0x14c)]+'</label>');}catch(_0x25b1d7){}}return _0xe01e67['message'];}catch(_0x5e8c97){console['log'](_0x5e8c97);}}function getSavedChatMessage(_0x3e7356,_0x2be00f,_0x502267){var _0x32eb65=a0_0x320c35,_0x2e5e90=_0x32eb65(0xad)+_0x3e7356+'/'+_0x2be00f+'/'+_0x502267+'/';if(!fs[_0x32eb65(0x12c)](_0x2e5e90)){consolas(_0x32eb65(0x2c9)+_0x2e5e90+'\x20didnt\x20exist','Debug');return;}var _0x5105a8=[];return fs[_0x32eb65(0x1c5)]('./chats/'+_0x3e7356+'/'+_0x2be00f+'/'+_0x502267+'/')[_0x32eb65(0x264)](_0x98476=>{var _0x44c533=_0x32eb65,_0x333db1=JSON[_0x44c533(0x22c)](fs['readFileSync'](_0x44c533(0xad)+_0x3e7356+'/'+_0x2be00f+'/'+_0x502267+'/'+_0x98476));_0x333db1[_0x44c533(0x2d7)][_0x44c533(0x98)](_0x44c533(0x218))&&_0x333db1[_0x44c533(0x2d7)][_0x44c533(0x1ed)](_0x44c533(0x218))[_0x44c533(0x1cc)]-0x1<=0x1&&(_0x333db1[_0x44c533(0x2d7)]=_0x333db1[_0x44c533(0x2d7)][_0x44c533(0x128)]('<br>','')),_0x5105a8[_0x44c533(0xdf)](_0x333db1);}),_0x5105a8=_0x5105a8[_0x32eb65(0xc1)]((_0x4422ab,_0xc86f7)=>{var _0x2e16ff=_0x32eb65;if(_0x4422ab[_0x2e16ff(0x213)]<_0xc86f7[_0x2e16ff(0x213)])return-0x1;}),_0x5105a8;}function saveChatMessage(_0x2dfe22){var _0x30e636=a0_0x320c35,_0x3d6b06=_0x2dfe22[_0x30e636(0x11f)],_0x1414f1=_0x2dfe22[_0x30e636(0x1de)],_0x5d6f3b=_0x2dfe22[_0x30e636(0x123)];_0x2dfe22[_0x30e636(0x2d7)]['includes']('\x0a')&&_0x2dfe22[_0x30e636(0x2d7)][_0x30e636(0x1ed)]('\x0a')[_0x30e636(0x1cc)]-0x1>0x1&&(_0x2dfe22['message']=_0x2dfe22['message'][_0x30e636(0x128)]('\x0a',_0x30e636(0x218))),!fs['existsSync'](_0x30e636(0xad)+_0x3d6b06+'/'+_0x1414f1+'/'+_0x5d6f3b+'/')&&fs[_0x30e636(0xea)](_0x30e636(0xad)+_0x3d6b06+'/'+_0x1414f1+'/'+_0x5d6f3b+'/',{'recursive':!![]}),fs[_0x30e636(0x9e)]('./chats/'+_0x3d6b06+'/'+_0x1414f1+'/'+_0x5d6f3b+'/'+_0x2dfe22['messageId'],JSON[_0x30e636(0x225)](_0x2dfe22),function(_0x3da37f){if(_0x3da37f)return console['log'](_0x3da37f);});}function sendMessageToUser(_0x372f19,_0x27a1a4){var _0x4c811b=a0_0x320c35;io['to'](_0x372f19)[_0x4c811b(0x1e0)](_0x4c811b(0xd0),_0x27a1a4);}function generateId(_0x5c4bca){var _0x5a0330=a0_0x320c35;let _0xb1b032='1';const _0x5085f8=_0x5a0330(0x207),_0x4305f9=_0x5085f8[_0x5a0330(0x1cc)];let _0x5dad73=0x0;while(_0x5dad73<_0x5c4bca-0x1){_0xb1b032+=_0x5085f8['charAt'](Math[_0x5a0330(0xff)](Math['random']()*_0x4305f9)),_0x5dad73+=0x1;}return _0xb1b032;}function getMemberList(_0x56f31b,_0x14eeb4){var _0x31958d=a0_0x320c35,_0x2db10d='',_0x223f92=serverconfig[_0x31958d(0xd8)],_0x325806=serverconfig[_0x31958d(0x21c)],_0x26f192=[],_0x36f2da=[];return Object[_0x31958d(0x10b)](_0x325806)[_0x31958d(0x12a)]()[_0x31958d(0x264)](function(_0x330e2e){var _0x39592c=_0x31958d;_0x26f192[_0x325806[_0x330e2e][_0x39592c(0x2ce)][_0x39592c(0x239)]]=_0x325806[_0x330e2e];}),_0x26f192=_0x26f192[_0x31958d(0x12a)](),_0x26f192['forEach'](_0x50f831=>{var _0x45608d=_0x31958d,_0x2bdc58=!![];_0x50f831['info'][_0x45608d(0xe1)]==0x1&&Object[_0x45608d(0x10b)](_0x223f92)[_0x45608d(0x264)](function(_0x3099ed){var _0x213879=_0x45608d;if(serverconfig[_0x213879(0xd8)][_0x3099ed][_0x213879(0x237)]==0x1)return;var _0x1f2ad2=getMemberHighestRole(_0x3099ed);if(_0x50f831[_0x213879(0x17c)]['includes'](_0x3099ed)&&_0x50f831[_0x213879(0x2ce)][_0x213879(0xe1)]==0x1||_0x50f831['info']['id']==0x1){_0x50f831[_0x213879(0x2ce)]['id']==0x1&&getMemberLastOnlineTime(_0x3099ed)>0x5&&(!_0x36f2da[_0x213879(0x98)](_0x3099ed)&&_0x36f2da[_0x213879(0xdf)](_0x3099ed));if(checkUserChannelPermission(_0x14eeb4,_0x3099ed,_0x213879(0x173))==!![]){if(_0x1f2ad2[_0x213879(0x2ce)]['displaySeperate']==0x1&&_0x50f831[_0x213879(0x2ce)]['id']!=_0x1f2ad2[_0x213879(0x2ce)]['id']&&_0x50f831['info']['id']!=0x1)return;var _0x491dd8='';if(_0x50f831['info']['id']!=0x1){if(getMemberLastOnlineTime(_0x3099ed)>0x5)return;}else{if(getMemberLastOnlineTime(_0x3099ed)<0x5)return;else _0x491dd8=_0x213879(0x153);}_0x2bdc58==!![]&&(_0x2db10d+='<div\x20class=\x22infolist-role\x22\x20title=\x22'+_0x50f831[_0x213879(0x2ce)][_0x213879(0x14c)]+_0x213879(0x85)+_0x50f831[_0x213879(0x2ce)][_0x213879(0x164)]+_0x213879(0x18a)+_0x50f831[_0x213879(0x2ce)]['name']+_0x213879(0xb4)+_0x50f831['info'][_0x213879(0x164)]+';\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>',_0x2bdc58=![]),_0x2db10d+=_0x213879(0x258)+_0x223f92[_0x3099ed]['id']+_0x213879(0x2c0)+_0x491dd8+_0x213879(0x133)+_0x223f92[_0x3099ed]['id']+_0x213879(0x142)+_0x223f92[_0x3099ed][_0x213879(0x176)]+_0x213879(0x9b)+_0x223f92[_0x3099ed]['id']+_0x213879(0x2dc)+_0x223f92[_0x3099ed]['id']+'\x22\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20style=\x22color:\x20'+_0x50f831[_0x213879(0x2ce)][_0x213879(0x164)]+';\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x223f92[_0x3099ed][_0x213879(0x14c)]+_0x213879(0x1a6)+_0x223f92[_0x3099ed]['id']+_0x213879(0x85)+_0x50f831['info'][_0x213879(0x164)]+_0x213879(0x18a)+_0x223f92[_0x3099ed]['status']+_0x213879(0x97);}}});}),_0x2db10d;}function getMemberHighestRole(_0x48978b){var _0x3dbf49=a0_0x320c35,_0xb22778=serverconfig[_0x3dbf49(0x21c)],_0x140b14=0x0,_0x84dd4b=null;Object[_0x3dbf49(0x10b)](_0xb22778)[_0x3dbf49(0x12a)]()[_0x3dbf49(0x264)](function(_0x8a4e05){var _0x4d074d=_0x3dbf49;_0xb22778[_0x8a4e05][_0x4d074d(0x17c)][_0x4d074d(0x98)](_0x48978b)&&(_0xb22778[_0x8a4e05]['info'][_0x4d074d(0x239)]>_0x140b14&&(_0x140b14=_0xb22778[_0x8a4e05]['info'][_0x4d074d(0x239)],_0x84dd4b=_0xb22778[_0x8a4e05]));});if(_0x84dd4b==null)return _0xb22778['0'];return _0x84dd4b;}function a0_0x35cf(){var _0x2a1c46=['banUsers','Cannot\x20upload\x20file!\x20Max\x20Upload\x20Size\x20Limit\x20','channels','Checking\x20for\x20template\x20file...','Channel\x20permissions\x20have\x20been\x20updated','targetUser','getMemberProfile','isBanned','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Access\x20denied\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20dont\x20have\x20access\x20to\x20this\x20channel.\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','sortId','updateGroupIcon','Couldnt\x20update\x20group\x20permissions','perms','request','getMinutes','big','\x20was\x20saved!','gif','lastOnline','setup','Channel\x20was\x20','./config.example.json','You\x27re\x20running\x20version\x20','https://www.youtube.com/embed/','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22viewGroup\x22:\x201\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','\x20(IP\x20','birthtime','clear','<img\x20class=\x22profile_badge\x22\x20src=\x22https://raw.githubusercontent.com/hackthedev/dcts-shipping/main/badges/','map','cfAccountToken','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22You\x20cant\x20ban\x20yourself!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','receiveMemberProfile','https://t4.ftcdn.net/jpg/04/46/93/93/360_F_446939375_83iP0UYTg5F9vHl6icZwgrEBHXeXMVaU.jpg','getServerInfo',',\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22token\x22:\x20\x22','\x20seems\x20to\x20be\x20a\x20invalid\x20id','granted','getGroupInfo','form-data','<div\x20class=\x22memberlist-container\x22\x20id=\x22','Unable\x20to\x20add\x20role\x20to\x20channel','\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22server-entry\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20title=\x22','</summary>','Invalid\x20token?','unbanUser','You\x27ve\x20been\x20banned\x20for\x20','https://wallpapers-clan.com/wp-content/uploads/2022/05/cute-pfp-25.jpg','Changing\x20servername\x20from\x20','node-fetch','deleteCategory','emojiId','forEach','socket.io','\x20Reason:\x20','No\x20Emojis\x20found','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22name\x22:\x20\x22','Searching\x20for\x20','getChannelTree','./logs','sorted','You\x20cant\x20remove\x20roles\x20that\x20are\x20higher\x20or\x20equal\x20then\x20yours','aboutme','</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>','messageId','status','headers','manageGroups','<i>$1</i>','onreadystatechange','white','</code>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<hr>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h2\x20class=\x22profile_headline\x22>Roles</h2>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22profile_roles\x22>','posY','then','New\x20version\x20','Available\x20Server\x20Admin\x20Token(s):','groups','<h2>','\x22\x20><video\x20width=\x22560\x22\x20height=\x22315\x22\x20class=\x22video-embed\x22\x20controls>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<source\x20src=\x22','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22id\x22:\x20','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22joined\x22:\x20','</details>','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22You\x20cant\x20kick\x20yourself!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','ID\x20WAS\x20WRONG\x20ON\x20USER\x20JOIN\x20','Couldnt\x20update\x20group\x20icon','uploaded_','If\x20accessed\x20via\x20the\x20internet,\x20SSL\x20wont\x20work\x20and\x20will\x20cause\x20problems','Couldnt\x20create\x20channel','25503SaxXFJ','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Kicked\x20User!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22The\x20user\x20has\x20been\x20kicked.\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Nice\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','tenor','searchTenorGif','Changing\x20server\x20description\x20from\x20','\x22><div\x20class=\x22role_color\x22\x20style=\x22background-color:\x20','updateChannelHierarchy','log','deleteEmoji','\x20is\x20available!','</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<hr>\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h2\x20class=\x22profile_headline\x22>About\x20Me</h2>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22profile_aboutme\x22>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','We\x20were\x20unable\x20to\x20send\x20the\x20message\x20because\x20the\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20channel\x20wasnt\x20found.\x20Maybe\x20it\x20was\x20deleted?\x20Reselect\x20a\x20channel\x20from\x20the\x20channel\x20list','youtu.be','CF\x20Account\x20Token:\x20','statSync','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22closePrompt();\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','nope','data','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Banned\x20User!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22The\x20user\x20has\x20been\x20banned.\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Nice\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','uncaughtException','Couldnt\x20get\x20member\x20profile','updateServerName','\x27);\x22\x20id=\x22group-entry-','receiveChannelTree','\x20Duration:\x20','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Save\x20your\x20token!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22Save\x20the\x20following\x20token!\x20#Without\x20it\x20you\x20cant\x20access\x20your\x20account\x20on\x20this\x20server.\x20Back\x20it\x20up\x20now!\x20##Token:\x20','Trying\x20to\x20create\x20channel\x20in\x20group\x20','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20create\x20groups\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','\x22\x20/>','&category=','Category\x20\x20was\x20','open','<code\x20class=\x22markdown\x22>$1</code>','trim','&client_key=','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20create\x20categories\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','\x22\x20onerror=\x22this.src=\x27/img/error.png\x27\x22\x20class=\x22inline-text-emoji\x20','Deleted\x20Emoji\x20successfully.','roleId','delete','You\x20dont\x20have\x20the\x20permissions\x20to\x20manage\x20channels','createGroup','./config_backups/config_','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20manage\x20Emojis\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','1938948tuDaec','memberTyping','match','You\x20dont\x20have\x20the\x20permissions\x20to\x20manage\x20the\x20rate\x20settings','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22info\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22id\x22:\x20','useCloudflareImageCDN','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22You\x27ve\x20been\x20unbanned!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22Please\x20reload\x20the\x20page.\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Very\x20nice\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22onclick=\x27window.location.reload()\x27\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','&quot;','code','addRoleToGroup','getChatlog','\x22\x20src=\x22/emojis/','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20class=\x22memberlist-img\x20','Emoji\x20successfully\x20updated','108eHrfOG','Trying\x20to\x20get\x20chat\x20log','getTime','Settings\x20saved\x20successfully.','316539orOoTT','time','role','Directory\x20','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20change\x20the\x20group\x20banner\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','User\x20Id\x20','Details:\x20','&key=','info','Cant\x20Delete\x20Emoji','./public/emojis','You\x20dont\x20have\x20permissions\x20to\x20manage\x20emojis','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Error!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20cant\x20kick\x20that\x20person\x20because\x20its\x20role\x20is\x20higher\x20then\x20yours\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','updateGroupPermissions','emoji_','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22reason\x22:\x20\x22','Member\x20connected.\x20User:\x20','message','The\x20user\x20','lastIndexOf','1111','manageServerInfo','\x27);\x22\x20id=\x22','12DZBOUy','result\x20was\x20','./public/sounds','bypassUploadLimit',',\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22name\x22:\x20\x22General\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22channel\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22','ipblacklist','text','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Invalid\x20Duration!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22Enter\x20a\x20number\x20like\x201,2,3\x20or\x20leave\x20it\x20completely\x20empty\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','You\x20dont\x20have\x20the\x20permissions\x20to\x20manage\x20the\x20upload\x20settings','\x22\x20style=\x22color:\x20','https','updateMemberList','existing\x20Member\x20joined','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Couldnt\x20process\x20channel\x20join\x20request\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22User\x20ID\x20or\x20Token\x20does\x20not\x20match.\x20Known\x20issue,\x20will\x20be\x20fixed.\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22window.location.reload()\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','createChannel','updateServerDesc','getServerRoles','You\x20dont\x20have\x20permissions\x20to\x20manage\x20Bans','setStatus','search','description','Successfully\x20received\x20banlist','env','manageMembers','toLowerCase','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22banner\x22:\x20\x22','Successfully\x20received\x20emojis','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>','includes','CF\x20Account\x20ID:\x20','Server\x20couldnt\x20save\x20rate\x20settings:\x20','\x22\x20onerror=\x22this.src\x20=\x20\x27/img/default_pfp.png\x27\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22memberlist-member-info\x20name\x22\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onclick=\x22getMemberProfile(\x27','getDate','readyState','writeFile','getEmojis','Server\x20Admin\x20Token:','Returning\x20img\x20embed','<pre\x20class=\x22markdown\x22>$1</pre>','send','Unable\x20to\x20resolve\x20member','You\x27ve\x20been\x20permanently\x20banned','media_formats',',\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22name\x22:\x20\x22chat\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22text\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22description\x22:\x20\x22Default\x20Channel\x20Description\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22sortId\x22:\x200,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22permissions\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22readMessages\x22:\x201,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22sendMessages\x22:\x201,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22viewChannel\x22:\x201\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22permissions\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22viewGroup\x22:\x201\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','Couldnt\x20get\x20emojis','denied','To\x20obtain\x20the\x20admin\x20role\x20in\x20your\x20server,\x20copy\x20the\x20following\x20token.',',\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22messageId\x22:\x22','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Saved!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22refreshValues();\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22token\x22:\x20\x22','./chats/','\x22\x20class=\x22server-icon\x22\x20src=\x22','statusCode','userDisconnected','\x20day(s)','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22id\x22:\x20','Debug','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<hr\x20style=\x22margin-bottom:\x2016px;border:\x201px\x20solid\x20','Max\x20User\x20Upload\x20Size:\x20','Role\x20was\x20successfully\x20removed\x20from\x20the\x20channel','User\x20Data\x20was\x20resolved','User\x20changed\x20username','</li></a>','Welcome\x20to\x20DCTS','You\x20cant\x20change\x20the\x20server\x20name:\x20Missing\x20permissions','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20delete\x20groups\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20delete\x20categories\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','updateRoleAppearance','<del>$1</del>','You\x20dont\x20have\x20permissions\x20to\x20upload\x20files','sort','Unable\x20to\x20update\x20group\x20permissions','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22','Couldnt\x20save\x20or\x20generate\x20key','Local\x20Upload\x20Limit:\x20','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22group-entry-marker\x22\x20id=\x22group-marker-','cloudflareHash','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22nickname\x22:\x20null,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22status\x22:\x20\x22','Couldnt\x20find\x20user\x20','\x22\x20target=\x22_blank\x22>','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22You\x20have\x20been\x20kicked\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22','##Reason:\x20#','Unable\x20to\x20create\x20role','Download:\x20https://github.com/hackthedev/dcts-shipping/releases','receiveCurrentChannel','modalMessage','\x27);\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22profile_badge_container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','removeRoleFromChannel','./public/emojis/','indexOf','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22onclick=\x27closeModal()\x27\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','useCloudflare','</code><br>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<code\x20class=\x22joined\x22>Last\x20Online\x20','servermembers','error','url','getCurrentChannel','\x22></div>','stdin','posX','push','</a>','displaySeperate','Config\x20file\x20config.json\x20didnt\x20exist.','reason',')\x20was\x20added\x20to\x20the\x20blacklist\x20because\x20he\x20was\x20banned','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20create\x20channels\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','Couldnt\x20update\x20group\x20name','manageRoles','round','Role\x20removed','mkdirSync','&gt;','maxUpload','Cant\x20send\x20message\x20because\x20member\x20id\x20wasnt\x20valid','Resolved\x20URL:\x20','\x27)\x22><li\x20class=\x22channelTrigger\x22\x20id=\x22channel-','checkPermission','UNEXPECTED\x20ERROR','colors','User\x20couldnt\x20be\x20unbanned','toLocaleString','sockets','Unable\x20to\x20remove\x20role\x20to\x20group','/public','userConnected','joined','rename','deleteMessage','rateLimit','createCategory','address','floor','receiveGroupBanner','mime','getBans','You\x20dont\x20have\x20permissions\x20to\x20manage\x20Emojis','Error\x20on\x20error\x20message\x20sending',',\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22name\x22:\x20\x22','Server\x20is\x20running\x20on\x20port\x20','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20delete\x20channels\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','./logs/error_','Coudlnt\x20copy\x20template\x20file\x20','Couldnt\x20find\x20room\x20','keys','replace','Changes\x20were\x20successfully\x20applied','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22info\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22id\x22:\x20','You\x20cant\x20assign\x20roles\x20that\x20are\x20higher\x20or\x20equal\x20then\x20yours','success','resume','./config.json','manageBans','yellow','<ul>','Role\x20was\x20updated\x20successfully','File\x20Size\x20was\x20too\x20big!','updateGroupBanner','deletable','\x22>+</code>','Role\x20was\x20successfully\x20removed\x20from\x20the\x20group','permission','append','</code>','group','newMemberJoined','Couldnt\x20find\x20message\x20channel','listen','channel','Couldnt\x20update\x20emoji','administrator','createRole','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20manage\x20Bans\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','replaceAll','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Error!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22This\x20group\x20cant\x20be\x20deleted.\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','reverse','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22text\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22description\x22:\x20\x22Default\x20Channel\x20Description\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22sortId\x22:\x200,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22permissions\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22readMessages\x22:\x201,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22sendMessages\x22:\x201,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22viewChannel\x22:\x201\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','existsSync','manageEmojis','ssl','&lt;','updateGroupList','upload_','roles','\x22\x20id=\x22','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20manage\x20Emojis\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','manageGroup','getGroupChannels','type','test','\x20\x20\x20-\x20','\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22id\x22:\x20','channel-','createMessageEmbed','Server\x20Token\x20','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22id\x22:\x220\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22name\x22:\x22','GIFs\x20are\x20disabled\x20on\x20this\x20server','removeRoleFromGroup','Running\x20Server\x20in\x20public\x20(production)\x20mode.','\x22\x20src=\x22','writeFileSync','results','hasRole','addRoleToChannel','fileUpload','Unkown\x20command:\x20','Token\x20or\x20ID\x20incorrect','connection','User\x20changed\x20icon','name','Deleting\x20user\x20','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</a>','127.0.0.1','This\x20file\x20type\x20is\x20not\x20allowed\x20on\x20the\x20server','Image\x20is\x20being\x20uploaded\x20to\x20CDN','Role\x20permissions\x20have\x20been\x20updated','offline_pfp','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22aboutme\x22:\x20\x22','<code\x20style=\x22cursor:\x20pointer;\x22\x20onclick=\x22addRoleFromProfile(id);\x22\x20class=\x22role\x22\x20id=\x22addRole-','token','\x22></span>','.txt','&lt;@','room','receiveGroupList','filename','banner','Server\x20couldnt\x20save\x20settings:\x20','https://raw.githubusercontent.com/hackthedev/dcts-shipping/main/badges/','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permission!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20cant\x20ban\x20that\x20person.\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','unlinkSync','red','<summary\x20class=\x22categoryTrigger\x22\x20id=\x22category-','color','Unable\x20to\x20add\x20member\x20to\x20group','messageSend','Uploaded\x20url:\x20','updateRoleHierarchy','copyFileSync','value','categories','Server\x20was\x20successfully\x20renamed','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20change\x20the\x20group\x20name\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','brightGreen','<a\x20onclick=\x22setUrl(\x27?group=','Couldnt\x20delete\x20file\x20./chats/','setUsername','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20change\x20the\x20group\x20permissions\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','viewChannel','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22until\x22:\x20','getHours','icon','./config_backups','Group\x20Permissions\x20Updated','permissions','utf8','Server\x20was\x20terminated.','members','resolveMember','green','Error\x20on\x20token\x20message\x20sending','deleteRole','receiveMemberList','Unable\x20to\x20update\x20channel\x20permissions\x20from\x20role','messageCreate','The\x20config\x20file\x20','\x20to\x20','</h2></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22profile_status\x22>','manageRateSettings','italic','93848rPbYSy',';\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','Running\x20Server\x20in\x20localhost\x20(testing)\x20mode.','\x20redeemed!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22closePrompt();\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','</a><div\x20class=\x22iframe-container\x22\x20id=\x22','The\x20role\x20has\x20been\x20successfully\x20deleted','645388uqyZSI','saveChannelPermissions','MB\x20reached!','Couldnt\x20create\x20category','This\x20role\x20cant\x20be\x20deleted','deleteChannel','Unable\x20to\x20sort\x20roles','xhr2','utf-8','Emoji\x20Convertion\x20test\x20error','\x20is\x20now\x20offline','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<a\x20onclick=\x22setUrl(\x27?group=','Couldnt\x20update\x20group\x20banner','Couldnt\x20delete\x20category','Returning\x20url','target','3189074vRZZYq','Reloaded\x20config','Group\x20was\x20not\x20a\x20number','https://imagedelivery.net/','Server\x27s\x20max.\x20upload\x20limit\x20reached','getGroupBanner','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Invalid\x20Token\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22Your\x20Auth\x20Token\x20was\x20incorrect\x20or\x20not\x20set.\x20You\x20can\x20contact\x20the\x20server\x20admin\x20to\x20get\x20your\x20token\x20or\x20reset\x20your\x20account\x20entirely.\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Import\x20Token\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22importToken()\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x221\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Reset\x20Account\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22resetAccount()\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22memberlist-member-info\x20status\x22\x20id=\x22','Unable\x20to\x20update\x20group\x20name','<a\x20href=\x22','\x22>@','./public/uploads','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22readMessages\x22:\x201,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22sendMessages\x22:\x201\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','\x20is\x20uploading\x20the\x20file\x20','<b>$1</b>','.png\x22\x20title=\x22','./public',';\x22></div>','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22bannedBy\x22:\x20\x22','pop','join','handshake','enabled','cyan','isArray','memberOnline','You\x20cant\x20change\x20the\x20server\x20description:\x20Missing\x20permissions','Trying\x20to\x20search\x20GIF','cloudflareAccountToken','manageChannels','saveRateSettings','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div></a>','setEncoding','IP\x20','Upload\x20File\x20MIME\x20Type:\x20','Config\x20file\x20config.json\x20did\x20exist','cfAccountId','https://raw.githubusercontent.com/hackthedev/dcts-shipping/main/version','readdirSync','\x20User\x20','Server\x20Id\x20','debug','use','username','Token:\x20','length','Successfully\x20copied\x20config.example.json\x20to\x20config.json','receiveChatlog','2867025SDltsd','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22color\x22:\x22#FFFFFF\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','Reason:\x20','user','static','Unable\x20to\x20delete\x20role','receiveDeleteMessage','cfHash','setRoom','banUser','narrow','client_key','manageUploads','The\x20log\x20file\x20','Returning\x20vid\x20embed','category','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22IP\x20Blacklisted\x20','emit','deleteGroup','\x22><img\x20class=\x22image-embed\x22\x20src=\x22','\x20has\x20been\x20unbanned','kickUser','viewGroup','receiveToken','Unable\x20to\x20add\x20role\x20to\x20group','ID:\x20','uploadFileTypes','sendMessages','receiveVoiceData','file','split','youtube','leave',',\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22isBanned\x22:\x200,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22isMuted\x22:\x200\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','\x27)\x22></div>\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22profile_pfp_container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22profile_icon\x22\x20style=\x22background-image:\x20url(\x27','Neither\x20the\x20config.json\x20file\x20nor\x20the\x20config.example.json\x20file\x20were\x20found.','express','banlist','toFixed','Couldnt\x20delete\x20channel','ID\x20or\x20Token\x20was\x20invalid\x20while\x20requesting\x20server\x20information','receiveGifImage','kickUsers','\x22\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20title=\x22YouTube\x20video\x20player\x22\x20frameborder=\x220\x22\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20allow=\x22accelerometer;\x20autoplay;\x20clipboard-write;\x20encrypted-media;\x20gyroscope;\x20picture-in-picture;\x20web-share\x22\x20allowfullscreen></iframe></div>','disconnect','&#039;','</ul>','You\x20dont\x20have\x20the\x20permissions\x20to\x20manage\x20group\x20channels','\x20joined\x20the\x20server!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22group\x22:\x220\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22category\x22:\x220\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22channel\x22:\x220\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22room\x22:\x220-0-0\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22timestamp\x22:\x20','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Couldnt\x20redeem\x20key\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22A\x20unkown\x20error\x20occured\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22closePrompt();\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','&limit=','Disconnected\x20user\x20because\x20ip\x20is\x20blacklisted','maxUploadStorage','createServer','newDropInterval','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Missing\x20permissions!\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20arent\x20allowed\x20to\x20upload\x20files\x20\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','0123456789','File\x20is\x20too\x20large','serverinfo','Limit\x20exceeded','Syntax\x20error:\x20delete\x20<option>\x20<value>\x20','https://www.youtube.com/watch?v=','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22Channel\x20not\x20found\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22','dropInterval','User\x20did\x20not\x20have\x20a\x20valid\x20token.','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</video></div>','Channel\x20was\x20not\x20a\x20number','{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22title\x22:\x20\x22You\x20cant\x20chat\x20here\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x20\x22You\x20cant\x20send\x20a\x20message\x20in\x20this\x20channel,\x20sorry.\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22error\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','timestamp','Resolving\x20Channel\x20ID\x20to\x20Name','PORT','<div\x20class=\x22iframe-container\x22\x20id=\x22','Member\x20','<br>','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22icon\x22:\x22\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22token\x22:null,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22message\x22:\x22','saveRolePermissions','content-type','serverroles','\x20was\x20added\x20to\x20the\x20blacklist\x20for\x20rate\x20limit\x20spam','Trying\x20to\x20copy\x20template\x20file','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22profile_content\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22profile_username\x22><h2\x20style=\x22margin-bottom:\x200\x20!important;\x22>','Settings\x20saved\x20successfully,\x20please\x20try\x20to\x20upload\x20a\x20profile\x20picture\x20to\x20see\x20if\x20it\x20works.','isDeletable','sendVoiceData','Group\x20was\x20','POST','stringify','updateEmoji','Unable\x20to\x20update\x20permissions\x20from\x20role','readFileSync','Successfully\x20resolved\x20channel','updateGroupName','\x22\x20style=\x22color:\x20#ABB8BE;\x22>','parse','\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22buttons\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x220\x22:\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22text\x22:\x20\x22Ok\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22events\x22:\x20\x22\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20},\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22type\x22:\x20\x22success\x22,\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22popup_type\x22:\x20\x22confirm\x22\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}','memberPresent','<br><br>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<code\x20class=\x22joined\x22>Joined\x20'];a0_0x35cf=function(){return _0x2a1c46;};return a0_0x35cf();}function getGroupList(_0x8fad91){var _0x35734d=a0_0x320c35,_0x3b1b4d='',_0x448ea3=serverconfig[_0x35734d(0x27c)],_0xe2fc4=[],_0x31a5d7=resolveRolesByUserId(_0x8fad91['id']);const _0xde6443=_0x448ea3;let _0x480d82=Object[_0x35734d(0x10b)](_0xde6443)[_0x35734d(0xc1)]((_0x9e33cc,_0x422f0f)=>{var _0x4eef48=_0x35734d;return _0xde6443[_0x422f0f][_0x4eef48(0x2ce)][_0x4eef48(0x239)]-_0xde6443[_0x9e33cc][_0x4eef48(0x2ce)][_0x4eef48(0x239)];});return _0x480d82=_0x480d82['map'](_0x2a0fa4=>_0xde6443[_0x2a0fa4]),_0x480d82['forEach'](_0x3bccec=>{var _0xc97dcb=_0x35734d;hasPermission(_0x8fad91['id'],'manageGroups')&&_0xe2fc4[_0xc97dcb(0x98)](_0x3bccec[_0xc97dcb(0x2ce)]['id'])==![]?(_0xe2fc4['push'](_0x3bccec[_0xc97dcb(0x2ce)]['id']),_0x3b1b4d+=_0xc97dcb(0x19a)+_0x3bccec[_0xc97dcb(0x2ce)]['id']+_0xc97dcb(0x29e)+_0x3bccec[_0xc97dcb(0x2ce)]['id']+_0xc97dcb(0xc6)+_0x3bccec['info']['id']+_0xc97dcb(0x25a)+_0x3bccec[_0xc97dcb(0x2ce)][_0xc97dcb(0x14c)]+_0xc97dcb(0x133)+_0x3bccec[_0xc97dcb(0x2ce)]['id']+'\x22\x20class=\x22server-icon\x22\x20src=\x22'+_0x3bccec[_0xc97dcb(0x2ce)][_0xc97dcb(0x176)]+_0xc97dcb(0x14e)):_0x31a5d7[_0xc97dcb(0x264)](_0x2ef267=>{var _0x22dd5b=_0xc97dcb;try{_0x3bccec['permissions'][_0x2ef267][_0x22dd5b(0x1e5)]==0x1&&_0xe2fc4[_0x22dd5b(0x98)](_0x3bccec[_0x22dd5b(0x2ce)]['id'])==![]&&(_0xe2fc4[_0x22dd5b(0xdf)](_0x3bccec[_0x22dd5b(0x2ce)]['id']),_0x3b1b4d+=_0x22dd5b(0x16f)+_0x3bccec[_0x22dd5b(0x2ce)]['id']+'\x27);\x22><div\x20class=\x22server-entry\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20title=\x22'+_0x3bccec[_0x22dd5b(0x2ce)]['name']+'\x22\x20id=\x22'+_0x3bccec['info']['id']+_0x22dd5b(0xae)+_0x3bccec['info']['icon']+_0x22dd5b(0x1be));}catch{}});}),_0x3b1b4d;}function getChannelTree(_0x136783){var _0x21b141=a0_0x320c35,_0x1461e6=_0x136783['group'],_0x46ea44=[],_0xe46737=[],_0x536ed5=_0x21b141(0x27d)+serverconfig[_0x21b141(0x27c)][_0x1461e6]['info'][_0x21b141(0x14c)]+'</h2><hr>',_0x583063=serverconfig['groups'],_0x276b9a=serverconfig[_0x21b141(0x21c)];(_0x1461e6==null||_0x583063[_0x1461e6]==null)&&(_0x1461e6=0x0);var _0x3dab65=_0x583063[_0x1461e6][_0x21b141(0x232)]['categories'],_0x190721=![];const _0x284e91=serverconfig[_0x21b141(0x27c)][_0x1461e6][_0x21b141(0x232)]['categories'];let _0x6b77d1=Object[_0x21b141(0x10b)](_0x284e91)[_0x21b141(0xc1)]((_0x198546,_0x355e4f)=>{var _0x3691c5=_0x21b141;return _0x284e91[_0x355e4f][_0x3691c5(0x2ce)][_0x3691c5(0x239)]-_0x284e91[_0x198546][_0x3691c5(0x2ce)]['sortId'];});var _0x247363=[];return _0x6b77d1=_0x6b77d1['map'](_0x2e154f=>_0x284e91[_0x2e154f]),_0x6b77d1[_0x21b141(0x264)](_0x284459=>{var _0x261af8=_0x21b141;_0x190721=![];hasPermission(_0x136783['id'],_0x261af8(0x1bc),_0x136783['group'])==!![]&&(_0x536ed5+='<details\x20open>',_0x536ed5+=_0x261af8(0x163)+_0x284459[_0x261af8(0x2ce)]['id']+_0x261af8(0x22b)+_0x284459[_0x261af8(0x2ce)]['name']+_0x261af8(0x25b),_0x536ed5+=_0x261af8(0x115),_0x190721=!![]);const _0x21ebbc=serverconfig[_0x261af8(0x27c)][_0x1461e6][_0x261af8(0x232)]['categories'][_0x284459['info']['id']][_0x261af8(0x123)];let _0x164741=Object[_0x261af8(0x10b)](_0x21ebbc)[_0x261af8(0xc1)]((_0x6327ff,_0x409067)=>{var _0x126a3c=_0x261af8;return _0x21ebbc[_0x409067][_0x126a3c(0x239)]-_0x21ebbc[_0x6327ff][_0x126a3c(0x239)];});_0x164741=_0x164741[_0x261af8(0x24d)](_0x5a9e11=>_0x21ebbc[_0x5a9e11]),_0x164741[_0x261af8(0x264)](_0x5e0afd=>{var _0x584183=_0x261af8;hasPermission(_0x136783['id'],'viewGroup',_0x136783[_0x584183(0x11f)])&&_0x190721==![]&&_0x164741[_0x584183(0x1cc)]>0x0&&checkUserChannelPermission(_0x5e0afd['id'],_0x136783['id'],_0x584183(0x173))&&(_0x536ed5+='<details\x20open>',_0x536ed5+='<summary\x20class=\x22categoryTrigger\x22\x20id=\x22category-'+_0x284459[_0x584183(0x2ce)]['id']+_0x584183(0x22b)+_0x284459[_0x584183(0x2ce)][_0x584183(0x14c)]+_0x584183(0x25b),_0x536ed5+='<ul>',_0x190721=!![]),Object[_0x584183(0x10b)](_0x276b9a)[_0x584183(0x264)](function(_0x3f2827){var _0x15b806=_0x584183;if(_0x276b9a[_0x3f2827][_0x15b806(0x17c)][_0x15b806(0x98)](_0x136783['id'])){if(checkUserChannelPermission(_0x5e0afd['id'],_0x136783['id'],_0x15b806(0x173))||hasPermission(_0x136783['id'],_0x15b806(0x1bc),_0x136783['group']))_0x247363['includes'](_0x5e0afd['id']+'_'+_0x5e0afd[_0x15b806(0x14c)])==![]&&(_0x536ed5+=_0x15b806(0x16f)+_0x1461e6+_0x15b806(0x2a5)+_0x284459[_0x15b806(0x2ce)]['id']+'&channel='+_0x5e0afd['id']+_0x15b806(0xef)+_0x5e0afd['id']+_0x15b806(0x22b)+_0x5e0afd[_0x15b806(0x14c)]+_0x15b806(0xb9),_0x247363[_0x15b806(0xdf)](_0x5e0afd['id']+'_'+_0x5e0afd[_0x15b806(0x14c)]));else{}}});}),_0x536ed5+=_0x261af8(0x1fd),_0x536ed5+=_0x261af8(0x281);}),_0x536ed5;}function isVideo(_0x23308d){var _0xd6dfeb=a0_0x320c35;return/\.(mp4|webp)$/[_0xd6dfeb(0x138)](_0x23308d);}function validateMemberId(_0x41f814,_0x21c974,_0x1f5228=![]){var _0x51af49=a0_0x320c35;return _0x1f5228==![]&&checkRateLimit(_0x21c974),_0x41f814[_0x51af49(0x1cc)]==0xc&&isNaN(_0x41f814)==![]?!![]:![];}function saveConfig(){var _0x28a7ed=a0_0x320c35;fs[_0x28a7ed(0x143)](_0x28a7ed(0x112),JSON['stringify'](serverconfig,![],0x4),function(_0xdbd559){var _0x13d1f6=_0x28a7ed;if(_0xdbd559)return console[_0x13d1f6(0x28f)](_0xdbd559);consolas(_0x13d1f6(0x184)[_0x13d1f6(0x1b6)]+colors[_0x13d1f6(0x1b6)](_0x13d1f6(0x108)+date+'.txt')+_0x13d1f6(0x240)[_0x13d1f6(0x1b6)]);}),serverconfig=JSON['parse'](fs[_0x28a7ed(0x228)](_0x28a7ed(0x112),{'encoding':_0x28a7ed(0x197)}));}function reloadConfig(){var _0x32c71=a0_0x320c35;serverconfig=JSON[_0x32c71(0x22c)](fs[_0x32c71(0x228)](_0x32c71(0x112),{'encoding':'utf-8'})),consolas(_0x32c71(0x1a0)[_0x32c71(0x1b6)]);}function updateMember(){var _0x25265e=a0_0x320c35;Object[_0x25265e(0x10b)](serverconfig[_0x25265e(0xd8)])[_0x25265e(0x264)](function(_0x5e4aaf){});}function isImgUrl(_0x5380d4){return new Promise((_0x326af6,_0x5517ec)=>{return request(_0x5380d4,function(_0x163e02,_0x4595c9,_0x342f2b){var _0x40f65d=a0_0x102e;!_0x163e02&&_0x4595c9[_0x40f65d(0xaf)]==0xc8?(_0x4595c9[_0x40f65d(0x272)][_0x40f65d(0x21b)][_0x40f65d(0x2b6)](/(image)+\//g)[_0x40f65d(0x1cc)]!=0x0?_0x326af6(!![]):_0x326af6(![]),_0x326af6(!![])):_0x326af6(![]);});});}function linkify(_0x5b3539,_0x5113cc,_0x35d8d5){return new Promise((_0x168ada,_0x443050)=>{var _0x42e208=a0_0x102e,_0x1ec537=/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;return _0x5b3539[_0x42e208(0x10c)](_0x1ec537,function(_0x47b228){var _0x46e389=_0x42e208;if(_0x47b228[_0x46e389(0x94)]()[_0x46e389(0x98)](_0x46e389(0x1ee))||_0x47b228['toLowerCase']()[_0x46e389(0x98)](_0x46e389(0x294)))return _0x168ada(createYouTubeEmbed(_0x47b228)),createYouTubeEmbed(_0x47b228);else isImgUrl(_0x47b228)[_0x46e389(0x279)](_0x14bd1d=>{var _0x511fc5=_0x46e389;console[_0x511fc5(0x28f)](_0x511fc5(0x2de)+_0x14bd1d);if(_0x14bd1d==!![]){console[_0x511fc5(0x28f)](_0x511fc5(0xa1));var _0x2b1e23=_0x511fc5(0x1a8)+_0x47b228+_0x511fc5(0xca)+_0x47b228+_0x511fc5(0x18d)+_0x5113cc+_0x511fc5(0x1e2)+_0x47b228+_0x511fc5(0xdc);io['in'](_0x35d8d5)[_0x511fc5(0x1e0)](_0x511fc5(0x13c),{'messageId':_0x5113cc,'code':_0x2b1e23}),_0x168ada(_0x511fc5(0x1a8)+_0x47b228+_0x511fc5(0xca)+_0x47b228+'</a><div\x20class=\x22iframe-container\x22\x20id=\x22'+_0x5113cc+'\x22><img\x20class=\x22image-embed\x22\x20src=\x22'+_0x47b228+_0x511fc5(0xdc));}else{if(isVideo(_0x47b228)){console[_0x511fc5(0x28f)](_0x511fc5(0x1dd));var _0x2b1e23=_0x511fc5(0x216)+_0x5113cc+'\x22\x20><video\x20width=\x22560\x22\x20height=\x22315\x22\x20class=\x22video-embed\x22\x20controls>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<source\x20src=\x22'+_0x47b228+_0x511fc5(0x210);io['in'](_0x35d8d5)[_0x511fc5(0x1e0)](_0x511fc5(0x13c),{'messageId':_0x5113cc,'code':_0x2b1e23}),_0x168ada(_0x511fc5(0x216)+_0x5113cc+_0x511fc5(0x27e)+_0x47b228+_0x511fc5(0x210));}else{console['log'](_0x511fc5(0x19d));var _0x2b1e23=_0x511fc5(0x1a8)+_0x47b228+_0x511fc5(0xca)+_0x47b228+'</a>';return io['in'](_0x35d8d5)[_0x511fc5(0x1e0)]('createMessageLink',{'messageId':_0x5113cc,'code':_0x2b1e23}),_0x168ada(_0x511fc5(0x1a8)+_0x47b228+_0x511fc5(0xca)+_0x47b228+_0x511fc5(0xe0)),_0x511fc5(0x1a8)+_0x47b228+'\x22\x20target=\x22_blank\x22>'+_0x47b228+'</a>';}}});});});}function createYouTubeEmbed(_0x54a2f9,_0x446af3){var _0x269e64=a0_0x320c35,_0x1d53eb=_0x54a2f9[_0x269e64(0x10c)](_0x269e64(0x20c),'')[_0x269e64(0x128)]('\x20',''),_0x245a63=_0x269e64(0x216)+_0x446af3+'\x22\x20><iframe\x20width=\x22560\x22\x20height=\x22315\x22\x20src=\x22https://www.youtube.com/embed/'+_0x1d53eb+_0x269e64(0x1fa);return consolas('Resolving\x20YouTube\x20URL\x20'+_0x54a2f9),consolas('Resolved:\x20'+_0x1d53eb),consolas(_0x269e64(0xee)+_0x269e64(0x247)+_0x1d53eb),_0x245a63;}function markdown(_0x447eee,_0x3c1b58,_0x4f01f3){var _0x4b9a71=a0_0x320c35;return linkify(_0x447eee,_0x3c1b58,_0x4f01f3),_0x447eee=_0x447eee['replace'](/_(.*?)_/gim,'<i>$1</i>')[_0x4b9a71(0x10c)](/`(.*?)`/gim,_0x4b9a71(0x2a8))[_0x4b9a71(0x10c)](/´´´(.*?)´´´/gim,_0x4b9a71(0xa2))[_0x4b9a71(0x10c)](/~~(.*)~~/gim,_0x4b9a71(0xbf))[_0x4b9a71(0x10c)](/\*\*(.*)\*\*/gim,_0x4b9a71(0x1ad))[_0x4b9a71(0x10c)](/\*(.*)\*/gim,_0x4b9a71(0x274)),_0x447eee;}function getEmojiCode(_0x4d7cdf,_0x2d1a1d,_0x2666db){var _0x12de4d=a0_0x320c35;return _0x4d7cdf['substring'](_0x4d7cdf[_0x12de4d(0xd4)](_0x2d1a1d)+0x1,_0x4d7cdf[_0x12de4d(0x2d9)](_0x2666db));}function escapeHtml(_0x5f4d1d){var _0x1bdac9=a0_0x320c35;if(_0x5f4d1d==null||_0x5f4d1d[_0x1bdac9(0x1cc)]<=0x0)return _0x5f4d1d;var _0xd20869={'&':'&amp;','<':_0x1bdac9(0x12f),'>':_0x1bdac9(0xeb),'\x22':_0x1bdac9(0x2bb),'\x27':_0x1bdac9(0x1fc)};return _0x5f4d1d[_0x1bdac9(0x10c)](/[&<>"']/g,function(_0x26e752){return _0xd20869[_0x26e752];});}function findEmojiByID(_0x59ae8a){var _0x57a1b9=a0_0x320c35,_0x493898='';return fs[_0x57a1b9(0x1c5)]('./public/emojis')[_0x57a1b9(0x264)](_0x59de5d=>{var _0x422a0e=_0x57a1b9;if(_0x59de5d[_0x422a0e(0x98)](_0x59ae8a)){_0x493898=_0x59de5d;return;}}),_0x493898;}
+// express und http Module importieren. Sie sind dazu da, die HTML-Dateien
+// aus dem Ordner "public" zu veröffentlichen.
+
+import {createRequire} from "module";
+const require = createRequire(import.meta.url)
+
+var express = require('express');
+var app = express();
+
+var https = require('https');
+const fs = require("fs");
+
+// Depending on the SSL setting, this will switch.
+// Localhost Implementation
+var server; // = require('http').createServer(app)
+
+
+var FormData = require('form-data');
+const fetch = require('node-fetch')
+const getSize = require('get-folder-size');
+//var fileType = import("file-type")
+import {fileTypeFromBuffer} from 'file-type';
+import {channel} from "diagnostics_channel";
+
+const colors = require('colors');
+var request = require('request');
+//require('whatwg-fetch')
+
+var usersocket = []
+var showedOfflineMessage = [];
+
+var typingMembers = [];
+var typingMembersTimeout = [];
+
+var ratelimit = [];
+var socketToIP = [];
+
+var debugmode = false;
+var versionCode = 645;
+
+
+async function consolas(text, event = null){
+    return new Promise((resolve, reject) => {
+
+        var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        var dateTime = date+' '+time;
+        var tmp_prefix = "[" + dateTime + "] ";
+        var consolePrefix = tmp_prefix;
+
+
+        if(event == null){
+            console.log(consolePrefix + text);
+        }
+        else{
+            if(event == "Debug"){
+                if(debugmode == true){
+                    if(text.length == 0){
+                        consolePrefix = "";
+                    }
+
+                    console.log(consolePrefix + text);
+                }
+            }
+            else{
+                if(text.length <= 0 || text == null){
+                    console.log(" ");
+                }
+                else{
+                    console.log(consolePrefix + `[${event}] `  + text);
+                }
+
+
+            }
+        }
+
+        resolve(true);
+    });
+}
+
+async function checkVersionUpdate() {
+    return new Promise((resolve, reject) => {
+        var badgeUrl = 'https://raw.githubusercontent.com/hackthedev/dcts-shipping/main/version';
+
+
+        (async function () {
+            const res = await fetch(badgeUrl)
+            //console.log(res);
+
+            if(res.status == 404){
+                resolve(null);
+                return null;
+            }
+            else if(res.status == 200){
+                const onlineVersionCode = await res.text();
+                //console.log(html)
+
+                if(onlineVersionCode > versionCode){
+                    resolve(onlineVersionCode.replaceAll("\n\r", "").replaceAll("\n", ""));
+                    return onlineVersionCode.replaceAll("\n\r", "").replaceAll("\n", "");
+                }
+                else{
+                    resolve(null);
+                    return null;
+                }
+
+                resolve(html);
+                return html;
+            }
+            else{
+                resolve(null);
+                return null;
+            }
+        })()
+
+
+    });
+
+    return prom;
+}
+
+console.clear();
+
+
+// If directory does not exist, create it
+if (!fs.existsSync("./logs")){
+    fs.mkdirSync("./logs");
+}
+
+// If directory does not exist, create it
+if (!fs.existsSync("./public/emojis")){
+    fs.mkdirSync("./public/emojis");
+}
+
+// If directory does not exist, create it
+if (!fs.existsSync("./public/sounds")){
+    fs.mkdirSync("./public/sounds");
+}
+
+// If directory does not exist, create it
+if (!fs.existsSync("./config_backups")){
+    fs.mkdirSync("./config_backups");
+}
+
+// if upload directory exists
+if (!fs.existsSync("./public/uploads")){
+    fs.mkdirSync("./public/uploads");
+}
+
+// if config.json exists
+try {
+    if (fs.existsSync("./config.json")) {
+        consolas("Config file config.json did exist".yellow, "Debug");
+    }
+    else{
+        consolas("Config file config.json didnt exist.".yellow, "Debug");
+        consolas("Checking for template file...".yellow, "Debug");
+
+        // config.json didnt exist. Does template config exist?
+        if (fs.existsSync("./config.example.json")) {
+
+            consolas("Trying to copy template file".yellow, "Debug");
+
+            // Trying to copy file
+            try {
+                fs.copyFileSync("./config.example.json", "./config.json");
+                consolas(" ", "Debug");
+                consolas("Successfully copied config.example.json to config.json".green, "Debug");
+            }
+            catch (error){
+                consolas("Coudlnt copy template file ".red + colors.red(error), "Debug");
+            }
+        }
+        else{
+            consolas("Neither the config.json file nor the config.example.json file were found.".red, "Debug");
+            consolas("Server was terminated.".red, "Debug");
+            process.exit();
+        }
+    }
+} catch(err) {
+    console.error(err);
+    exit();
+}
+
+consolas(" ", "Debug");
+consolas(" ", "Debug");
+consolas(" ", "Debug");
+consolas(" ", "Debug");
+
+consolas(colors.brightGreen(`Welcome to DCTS`));
+consolas(colors.brightGreen(`Stay up-to-date at https://dcts.chat`));
+consolas(" ");
+consolas(colors.cyan(`You're running version ` + versionCode));
+
+var checkVer = await checkVersionUpdate();
+if(checkVer != null){
+    consolas(colors.cyan.underline(`New version ${checkVer} is available!`));
+    consolas(" ");
+    consolas(colors.cyan(`Download: https://github.com/hackthedev/dcts-shipping/releases`));
+}
+
+consolas(" " );
+consolas(" ");
+
+// Holy Server Config File
+var serverconfig = JSON.parse(fs.readFileSync("./config.json", {encoding: "utf-8"}));
+
+
+if(serverconfig.serverinfo.ssl.enabled == 1){
+    console.log("Yes");
+
+    server = https.createServer({
+        key: fs.readFileSync(serverconfig.serverinfo.ssl.key),
+        cert: fs.readFileSync(serverconfig.serverinfo.ssl.cert),
+        ca: fs.readFileSync(serverconfig.serverinfo.ssl.chain),
+
+        requestCert: false,
+        rejectUnauthorized: false },app);
+
+    consolas("Running Server in public (production) mode.".green);
+    consolas(" ");
+}
+else{
+    consolas("Running Server in localhost (testing) mode.".yellow);
+    consolas("If accessed via the internet, SSL wont work and will cause problems".yellow);
+    consolas(" ");
+
+    server = require('http').createServer(app);
+}
+
+
+// Get list of Channels in Category
+// serverconfig.groups["0"].channels.categories["34"].channel
+
+// Get channel
+// serverconfig.groups["0"].channels.categories["34"].channel["79"]
+
+// Get categories inside group
+// serverconfig.groups["0"].channels.categories
+
+// Get Group
+// serverconfig.groups["0"]
+
+
+process.on('uncaughtException', function(err) {
+
+    // Handle the error safely
+    consolas("");
+    consolas("");
+    consolas("UNEXPECTED ERROR".red);
+    //consolas("============================================".red);
+    //consolas(" !!! UNEXPECTED ERROR !!!".red);
+    //consolas("============================================".red);
+    consolas(" ");
+    consolas(colors.red(err.message));
+
+    console.log(" ");
+    console.log("Details: ".red);
+    console.log(colors.grey(err).italic);
+
+    // Log Error To File
+    var date = new Date().toLocaleString();
+    date = date.replace(", ", "_");
+    date = date.replaceAll(":", "-");
+    date = date.replaceAll(".", "-");
+
+    // Create the log file
+    fs.writeFile("./logs/error_" + date + ".txt", err.message + "\n" + err.stack, function(err) {
+        if(err) {
+            return console.log(err);
+        }
+        consolas("The log file ".cyan + colors.white("./logs/error_" + date + ".txt") + " was saved!".cyan, "Debug");
+    });
+
+
+    // Create the config file
+    fs.writeFile("./config_backups/config_" + date + ".txt", JSON.stringify(serverconfig, false, 4), function(err) {
+        if(err) {
+            return console.log(err);
+        }
+        consolas("The config file ".cyan + colors.white("./logs/error_" + date + ".txt") + " was saved!".cyan, "Debug");
+    });
+})
+
+
+
+process.stdin.resume();
+process.stdin.setEncoding('utf8');
+
+process.stdin.on('data', function (text) {
+    var data = text.trim();
+
+    var args = data.split(" ");
+    var command = args[0];
+
+    try{
+        if (command == 'reload') {
+            serverconfig = JSON.parse(fs.readFileSync("./config.json", {encoding: "utf-8"}));
+            consolas("Reloaded config".cyan);
+        }
+        if (command == 'debug') {
+            debugmode = !debugmode;
+            consolas(`Debug Mode set to ${debugmode}`.cyan);
+        }
+        else if (command == 'roles') {
+            var serverroles = serverconfig.serverroles;
+            var serverRolesSorted = []
+
+            console.log("");
+            console.log("Server Roles:".cyan);
+
+            // Add them to array for sorting
+            Object.keys(serverroles).forEach(function(role) {
+                serverRolesSorted.push(serverconfig.serverroles[role]);
+            });
+
+            // Sort Server Roles by sortId
+            serverRolesSorted = serverRolesSorted.sort((a, b) => {
+                if (a.info.sortId > b.info.sortId) {
+                    return -1;
+                }
+            });
+
+            serverRolesSorted.forEach(role => {
+                console.log(colors.yellow("- " + role.info.id));
+                console.log("   - " + role.info.name);
+                console.log("");
+            })
+        }
+        else if(command == "token"){
+            if(args.length == 2){
+
+                var roleIdArg = args[1];
+
+                if(isNaN(roleIdArg) == false){
+                    try{
+                        var roleToken = generateId(64);
+                        serverconfig.serverroles[roleIdArg].token.push(roleToken);
+                        saveConfig();
+
+                        consolas(colors.cyan(`Redeem key generated for role ${serverconfig.serverroles[roleIdArg].info.name}`));
+                        consolas(colors.cyan(roleToken))
+                    }
+                    catch (Err){
+                        consolas("Couldnt save or generate key".yellow);
+                        consolas(colors.red(Err));
+                    }
+                }
+            }
+            else{
+                consolas(colors.yellow(`Missing Argument: Role ID`));
+            }
+
+        }
+        else if (command == 'delete') {
+            if(args.length == 3){
+                if(args[1] == "user"){
+                    if(args[2].length == 12){
+                        if(serverconfig.servermembers[args[2]] != null){
+                            delete serverconfig.servermembers[args[2]];
+                            consolas(`Deleting user ${args[2]}`.cyan);
+                            saveConfig();
+                        }
+                        else{
+                            consolas(`Couldnt find user ${args[2]}`.yellow);
+                        }
+                    }
+                    else{
+                        consolas(`${args[2]} seems to be a invalid id`.yellow);
+                    }
+                }
+            }
+            else{
+                consolas("Syntax error: delete <option> <value> ".cyan + command);
+            }
+        }
+        else{
+            consolas("Unkown command: ".cyan + command);
+        }
+    }
+    catch(e){
+        consolas("Couldnt handle command input".red)
+        consolas(colors.red(e))
+    }
+});
+
+
+
+
+// Mit dieser zusätzlichen Zeile bringen wir Socket.io in unseren Server.
+var io = require('socket.io')(server, {
+    maxHttpBufferSize: 1e8,
+    secure: true
+});
+
+
+
+// Mit diesem Kommando starten wir den Webserver.
+var port = process.env.PORT || serverconfig.serverinfo.port;
+server.listen(port, function () {
+// Wir geben einen Hinweis aus, dass der Webserer läuft.
+
+    consolas(colors.brightGreen('Server is running on port ' + port));
+
+    if(serverconfig.serverinfo.setup == 0){
+
+        var adminToken = generateId(64);
+        serverconfig.serverinfo.setup = 1;
+        serverconfig.serverroles["1111"].token.push(adminToken);
+        saveConfig();
+
+
+        consolas(colors.brightGreen(`To obtain the admin role in your server, copy the following token.`));
+        consolas(colors.brightGreen(`You can use it if prompted or if you right click on the server icon and press "Redeem Key"`));
+        consolas(colors.brightGreen(` `));
+
+        consolas(colors.brightGreen(`Server Admin Token:`));
+        consolas(colors.brightGreen(adminToken));
+        consolas(colors.brightGreen(` `));
+        consolas(colors.brightGreen(` `));
+    }
+    else if(serverconfig.serverroles["1111"].token.length > 0){
+        consolas(colors.brightGreen(` `));
+        consolas(colors.brightGreen(` `));
+        consolas(colors.brightGreen(`Welcome to DCTS`));
+        consolas(colors.brightGreen(`To obtain the admin role in your server, copy the following token.`));
+        consolas(colors.brightGreen(`You can use it if prompted or if you right click on the server icon and press "Redeem Key"`));
+        consolas(colors.brightGreen(` `));
+
+        console.log(colors.cyan(`Available Server Admin Token(s):`));
+        console.log(colors.cyan(serverconfig.serverroles["1111"].token));
+        consolas(colors.brightGreen(` `));
+        consolas(colors.brightGreen(` `));
+    }
+
+});
+
+function getMemberLastOnlineTime(memberID){
+    var lastOnline = serverconfig.servermembers[memberID].lastOnline / 1000;
+
+    var today = new Date().getTime() / 1000;
+    var diff = today - lastOnline;
+    var minutesPassed = Math.round(diff / 60);
+
+    return minutesPassed
+}
+
+// Hier teilen wir express mit, dass die öffentlichen HTML-Dateien
+// im Ordner "public" zu finden sind.
+app.use(express.static('./public'));
+
+// === Ab hier folgt der Code für den Chat-Server
+
+// Hier sagen wir Socket.io, dass wir informiert werden wollen,
+// wenn sich etwas bei den Verbindungen ("connections") zu
+// den Browsern tut.
+io.on('connection', function (socket) {
+
+    // Check if user ip is blacklisted
+    var ip = socket.handshake.address;
+    if(serverconfig.ipblacklist.includes(ip)){
+
+
+        sendMessageToUser(socket.id, JSON.parse(
+            `{
+                        "title": "IP Blacklisted ${ip}",
+                        "message": "Your IP Address was blacklisted. Reach out to the server admin if you think this is an error",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": "onclick='closeModal()'"
+                            }
+                        },
+                        "type": "error"
+                    }`));
+
+
+
+        socket.disconnect();
+
+        consolas("Disconnected user because ip is blacklisted", "Debug");
+    }
+
+    function getDateDayDifference(timestamp1, timestamp2, mode = null) {
+        var difference = timestamp1 - timestamp2;
+        var daysDifference = Math.round(difference/1000/60/60/24);
+
+        return daysDifference;
+    }
+
+
+    socket.on('userConnected', function (member) {
+
+        //var ip = socket.handshake.headers["x-real-ip"];
+        //var port = socket.handshake.headers["x-real-port"];
+
+        try{
+            if(serverconfig.banlist[member.id] != null){
+
+                var durationStamp = serverconfig.banlist[member.id].until;
+                var banReason = serverconfig.banlist[member.id].reason;
+                var bannedInDays = "";
+
+                var bannedDate = durationStamp;
+                var currentDate = new Date().getTime();
+                var title = "";
+
+                if(durationStamp == null || durationStamp <= 0 ){
+                    title = "You've been permanently banned";
+                }
+                else{
+                    if(currentDate > bannedDate){
+                        // unban user
+
+                        serverconfig.servermembers[member.id].isBanned = 0;
+                        delete serverconfig.banlist[member.id];
+                        saveConfig();
+
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                        "title": "You've been unbanned!",
+                        "message": "Please reload the page.",
+                        "buttons": {
+                            "0": {
+                                "text": "Very nice",
+                                "events": "onclick='window.location.reload()'"
+                            }
+                        },
+                        "type": "success"
+                    }`));
+
+                        consolas(colors.yellow("Automatically unbanned user " + member.name + ` (${member.id})`));
+
+                        return;
+                    }
+                    else{
+                        bannedInDays = getDateDayDifference(durationStamp, currentDate);
+
+                        var bannedInMiliSeconds = durationStamp - currentDate;
+                        var bannedInSeconds = bannedInMiliSeconds / 1000;
+                        var bannedInMinutes = bannedInSeconds / 60;
+                        var bannedInHours = bannedInMinutes / 24;
+                        var bannedDays = bannedInHours / 30;
+                        var bannedMonths = bannedDays / 30;
+                        var bannedYears = bannedMonths / 12;
+
+                        title = `You've been banned for ${bannedInDays} day(s)`;
+                        if(banReason.length > 0){
+                            title += "##Reason: #" + banReason;
+                        }
+
+                        /*
+                        title = `You've been banned for ##${Math.round(bannedYears)} year(s),#
+                                                        ${Math.round(bannedMonths % 12)} months(s).#
+                                                        ${Math.round(bannedDays % 30)} days(s).#
+                                                        ${Math.round(bannedInHours % 24)} hours(s).#
+                                                        ${Math.round(bannedInMinutes % 60)} minutes(s) and#
+                                                        ${Math.round(bannedInSeconds % 60)} seconds(s)`;
+
+                         */
+                    }
+
+                }
+
+                title = title.replaceAll("\n", "");
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "${title}",
+                        "message": "",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": "onclick='closeModal()'"
+                            }
+                        },
+                        "type": "success"
+                    }`));
+
+                checkRateLimit(socket);
+
+                socket.disconnect();
+                return;
+            }
+        }
+        catch{
+
+        }
+
+
+        consolas(`Member connected. User: ${member.name} (${member.id})`, "Debug");
+
+        if(member.id.length == 12 && isNaN(member.id) == false){
+
+            consolas("Setting user " + member.id, "Debug")
+            usersocket[member.id] = socket.id;
+
+
+            if(serverconfig.servermembers[member.id] == null) {
+                // New Member joined the server
+
+                var userToken = generateId(48);
+                io.to(usersocket[member.id]).emit("receiveToken", userToken);
+
+                consolas("The member connected for the first time", "Debug");
+
+                serverconfig.servermembers[member.id] = JSON.parse(
+                    `{
+                              "id": ${member.id},
+                              "token": "${userToken}",
+                              "name": "${member.name}",
+                              "nickname": null,
+                              "status": "${member.status}",
+                              "aboutme": "${member.aboutme}",
+                              "icon": "${member.icon}",
+                              "banner": "${member.banner}",
+                              "joined": ${new Date().getTime()},
+                              "isOnline": 1,
+                              "lastOnline": ${new Date().getTime()},
+                              "isBanned": 0,
+                              "isMuted": 0
+                            }
+                        `);
+                saveConfig();
+
+                if(serverconfig.serverroles["0"].members.includes(member.id) == false){
+                    consolas("Assigning new user default role", "Debug");
+                    serverconfig.serverroles["0"].members.push(member.id);
+                    saveConfig();
+                }
+
+
+
+                try{
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                        "title": "Save your token!",
+                        "message": "Save the following token! #Without it you cant access your account on this server. Back it up now! ##Token: ${serverconfig.servermembers[member.id].token}",
+                        "buttons": {
+                            "0": {
+                                "text": "Saved!",
+                                "events": "refreshValues();"
+                            }
+                        },
+                        "token": "${serverconfig.servermembers[member.id].token}",
+                        "type": "success"
+                    }`));
+                }
+                catch (e){
+                    consolas("Error on token message sending".red, "Debug");
+                    consolas(e, "Debug");
+                }
+
+                var tmpToken = member.token;
+                member.token = null;
+
+                io.emit("updateMemberList");
+
+                // Save System Message and emit join event
+                io.emit("newMemberJoined", member);
+                var sysmsgcode =
+                    `{
+                        "id":"0",
+                        "name":"${member.name}",
+                        "icon":"",
+                        "token":null,
+                        "message":"${member.name} joined the server!",
+                        "group":"0",
+                        "category":"0",
+                        "channel":"0",
+                        "room":"0-0-0",
+                        "timestamp": ${new Date().getTime()},
+                        "messageId":"${generateId(12)}",
+                        "color":"#FFFFFF"
+                    }
+                    `;
+
+                saveChatMessage(JSON.parse(sysmsgcode));
+
+                member.token = tmpToken;
+            }
+            else{
+
+                if(member.token == null || member.token.length != 48 ||
+                    serverconfig.servermembers[member.id].token == null ||
+                    serverconfig.servermembers[member.id].token != member.token){
+
+                    //console.log(serverconfig.servermembers[member.id]);
+
+                    try{
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                        "title": "Invalid Token",
+                        "message": "Your Auth Token was incorrect or not set. You can contact the server admin to get your token or reset your account entirely.",
+                        "buttons": {
+                            "0": {
+                                "text": "Import Token",
+                                "events": "importToken()"
+                            },
+                            "1": {
+                                "text": "Reset Account",
+                                "events": "resetAccount()"
+                            }
+                        },
+                        "type": "error"
+                    }`));
+                    }
+                    catch (e){
+                        consolas("Error on error message sending".red, "Debug");
+                        consolas(e, "Debug");
+                    }
+
+
+                    consolas("User did not have a valid token.", "Debug");
+                    socket.disconnect();
+                    return;
+                }
+
+                usersocket[member.id] = socket.id;
+
+                serverconfig.servermembers[member.id].name = escapeHtml(member.name);
+                serverconfig.servermembers[member.id].status = escapeHtml(member.status);
+                serverconfig.servermembers[member.id].aboutme = escapeHtml(member.aboutme);
+                serverconfig.servermembers[member.id].icon = escapeHtml(member.icon);
+                serverconfig.servermembers[member.id].banner = escapeHtml(member.banner);
+                serverconfig.servermembers[member.id].lastOnline = new Date().getTime();
+                saveConfig();
+
+                consolas("existing Member joined", "Debug");
+
+
+                if(serverconfig.servermembers[member.id].isOnline == 0){
+                    // Member is back online
+                    serverconfig.servermembers[member.id].isOnline = 1;
+
+                    var lastOnline = serverconfig.servermembers[member.id].lastOnline / 1000;
+
+                    var today = new Date().getTime() / 1000;
+                    var diff = today - lastOnline;
+                    var minutesPassed = Math.round(diff / 60);
+
+
+                    if(minutesPassed > 5){
+                        io.emit("updateMemberList");
+                        io.emit("memberOnline", member);
+                    }
+                }
+                else{
+                    io.emit("updateMemberList");
+                    io.emit("memberPresent", member);
+                }
+
+                //response({type: "existingMember"});
+
+            }
+        }
+        else{
+            socket.disconnect();
+            consolas("ID WAS WRONG ON USER JOIN ".red + member.id, "Debug");
+        }
+    });
+
+
+
+    socket.on('redeemKey', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            var roles = serverconfig.serverroles;
+
+            Object.keys(roles).forEach(function(roleId) {
+                var role = roles[roleId];
+
+                if(role.token.includes(member.value)){
+                    try{
+                        role.members.push(member.id);
+                        //serverconfig.serverroles["0"].members.pop(member.id);
+                        role.token.pop(member.value);
+                        saveConfig();
+
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                        "title": "${role.info.name} redeemed!",
+                        "message": "",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": "closePrompt();"
+                            }
+                        },
+                        "type": "success",
+                        "popup_type": "confirm"
+                    }`));
+
+                        io.emit("updateMemberList");
+                    }
+                    catch(e){
+
+                        console.log("Couldnt redeem key".red)
+                        console.log(colors.red(e));
+
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                        "title": "Couldnt redeem key",
+                        "message": "A unkown error occured",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": "closePrompt();"
+                            }
+                        },
+                        "popup_type": "confirm",
+                        "type": "error"
+                    }`));
+                    }
+                }
+                else{
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                        "title": "Wrong key!",
+                        "message": "The key you've entered was wrong",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "popup_type": "confirm",
+                        "type": "error"
+                    }`));
+                }
+            });
+        }
+    });
+
+
+
+    socket.on('messageSend', function (member) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+            if(isNaN(member.group) == true){
+                consolas("Group was not a number", "Debug");
+                return;
+            }
+            if(isNaN(member.channel) == true){
+                consolas("Channel was not a number", "Debug");
+                return;
+            }
+            if(isNaN(member.category) == true){
+                consolas("Category was not a number", "Debug");
+                return;
+            }
+            if(member.message.length <= 0){
+                consolas("Message is shorter than 1 charachter", "Debug");
+                return;
+            }
+
+            if(!hasPermission(member.id, "sendMessages")){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                                    "title": "You cant chat here",
+                                    "message": "You cant send a message in this channel, sorry.",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "error",
+                                    "popup_type": "confirm"
+                                }`));
+
+                return;
+            }
+
+            if(serverconfig.mutelist.hasOwnProperty(member.id)){
+
+                var reasonText = ""
+
+                // if reason is set
+                if(serverconfig.mutelist[member.id].reason.length > 0)
+                    var reasonText = `##Reason:#${serverconfig.mutelist[member.id].reason}`;
+
+                if(serverconfig.mutelist[member.id].duration == -1){
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                                    "title": "You're muted!",
+                                    "message": "You cant send messages until an admin unmutes you${reasonText}",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "error",
+                                    "popup_type": "confirm"
+                                }`));
+                }
+                else{
+
+                    // Mute ran out
+                    if(new Date(serverconfig.mutelist[member.id].duration).getTime() < new Date().getTime()){
+                        delete serverconfig.mutelist[member.id];
+                        serverconfig.servermembers[member.id].isMuted = 0;
+                        saveConfig();
+                    }
+                    else{
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                                    "title": "You're muted!",
+                                    "message": "You cant send a message until ${new Date(serverconfig.mutelist[member.id].duration).toLocaleString()}${reasonText}",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "error",
+                                    "popup_type": "confirm"
+                                }`));
+                    }
+
+                }
+
+
+                return;
+            }
+
+
+
+            // Check if room exists
+            try{
+                if(serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel] != null){
+
+                    if(!checkUserChannelPermission(member.channel, member.id, "sendMessages")){
+
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                                    "title": "You cant chat here",
+                                    "message": "You cant send a message in this channel, sorry.",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "error",
+                                    "popup_type": "confirm"
+                                }`));
+
+                        return;
+                    }
+
+                    if(!checkUserChannelPermission(member.channel, member.id, "viewChannel")){
+
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                                    "title": "You cant chat here",
+                                    "message": "You cant send a message in this channel, sorry.",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "error",
+                                    "popup_type": "confirm"
+                                }`));
+
+                        return;
+                    }
+
+
+                    var messageid = generateId(12);
+                    member.timestamp = new Date().getTime();
+                    member.messageId = messageid;
+
+                    member.icon = escapeHtml(member.icon);
+                    member.name = escapeHtml(member.name);
+                    member.message = escapeHtml(member.message);
+
+                    member.message = convertMention(member);
+                    member.lastOnline = new Date().getTime();
+
+                    if(member.message.replaceAll(" ", "") == null){
+                        consolas(colors.red("Message was null"))
+                        return
+                    }
+
+
+
+                    // Get Emojis (only works with one)
+                    //const emojiCode = getEmojiCode(member.message, ':', ':');
+                    //console.log("Emoji Code was " + emojiCode)
+
+
+                    /*
+                    The following performs the same replace function with the only
+                    difference to check if any text is left after converting the emojis.
+                    If not, make the emoji bigger if no text is present.
+                     */
+
+                    var reg = /(:)\w+/ig;
+                    var sendBigEmoji = "";
+                    member.message.replace(reg, function (emoji) {
+                        try{
+                            var text = member.message.replaceAll(emoji + ":", ``).replaceAll(" ", "");
+
+                            if(text.length == 0){
+                                sendBigEmoji = "big"
+                            }
+                        }
+                        catch (err){
+                            consolas(colors.red("Emoji Convertion test error"));
+                        }
+                    });
+
+                    // Actually replaces the text with the emoji and displays it
+                    member.message.replace(reg, function (emoji) {
+                        try{
+                            var emojiName = findEmojiByID(emoji.replaceAll(":", "")).split("_")[2].split(".")[0];
+                            member.message = member.message.replaceAll(emoji + ":", `<span><img title="${emojiName}" onerror="this.src='/img/error.png'" class="inline-text-emoji ${sendBigEmoji}" src="/emojis/${findEmojiByID(emoji.replaceAll(":", ""))}"></span>`);
+
+                        }
+                        catch{
+
+                        }
+                    });
+
+                    /*
+                    if(emojiCode.length > 0){
+                        // match(":(.*):")
+                        var matched = member.message.search(`(:)\\w+`);
+                        console.log(matched);
+
+                        member.message = member.message.replaceAll(`(:)\\w+`, `<span><img class="inline-text-emoji" src="/emojis/${findEmojiByID(emojiCode)}"></span>`);
+                    }
+
+                     */
+
+
+                    //member.message = markdown(member.message, messageid, member.room);
+                    member.token = null;
+
+
+                    // Display role color of the highest role
+                    var userRoleArr = [];
+                    Object.keys(serverconfig.serverroles).forEach(function(role) {
+
+                        if(serverconfig.serverroles[role].members.includes(member.id) &&
+                            serverconfig.serverroles[role].info.displaySeperate == 1){
+                            userRoleArr.push(serverconfig.serverroles[role]);
+                        }
+                    });
+
+                    // Show user color in highest role
+                    userRoleArr = userRoleArr.sort((a, b) => {
+                        if (a.info.sortId > b.info.sortId) {
+                            return -1;
+                        }
+                    });
+                    member.color = userRoleArr[0].info.color;
+
+
+                    // Save the Chat Message to file
+                    saveChatMessage(member);
+
+                    // Remove user from typing
+                    var username = serverconfig.servermembers[member.id].name;
+                    if(typingMembers.includes(username) == true){
+                        typingMembers.pop(username);
+                    }
+                    io.in(member.room).emit("memberTyping", typingMembers);
+
+                    // Send message
+                    io.in(member.room).emit("messageCreate", member);
+                    io.emit("markChannelMessage", {group: member.group, category: member.category, channel: member.channel});
+
+                }
+                else{
+                    consolas("Couldnt find message channel", "Debug");
+
+                    var msg = `We were unable to send the message because the 
+                channel wasnt found. Maybe it was deleted? Reselect a channel from the channel list`.replaceAll("\n", "");
+
+                    sendMessageToUser(usersocket[member.id], JSON.parse(
+                        `{
+                        "title": "Channel not found",
+                        "message": "${msg}",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "success",
+                        "popup_type": "confirm"
+                    }`));
+                }
+            }
+            catch(err){
+                consolas("Couldnt send message because room didnt exist".yellow, "Debug");
+                consolas(`Group was ${member.group}`.yellow, "Debug");
+                consolas(`Category  was ${member.category}`.yellow, "Debug");
+                consolas(`Channel was ${member.channel}`.yellow, "Debug");
+                consolas("Error");
+                console.log(err);
+
+
+                var msg = `We were unable to send the message because the 
+                channel wasnt found. Maybe it was deleted? Reselect a channel from the channel list`.replaceAll("\n", "");
+
+                sendMessageToUser(usersocket[member.id], JSON.parse(
+                    `{
+                        "title": "Channel not found",
+                        "message": "${msg}",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "success",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+        }
+        else{
+            consolas("Cant send message because member id wasnt valid".red, "Debug");
+            consolas("ID: " + member.id, "Debug");
+        }
+    });
+
+    socket.on('getChannelTree', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+        ) {
+
+            if(!hasPermission(member.id, "viewGroup", member.group)){
+                return;
+            }
+
+            response({type: "success", data: getChannelTree(member)});
+            //io.to(usersocket[member.id]).emit("receiveChannelTree", getChannelTree(member));
+        }
+    });
+
+    socket.on('getUserFromId', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+        ) {
+            response({type: "success", user: serverconfig.servermembers[member.target]});
+            //io.to(usersocket[member.id]).emit("receiveChannelTree", getChannelTree(member));
+        }
+    });
+
+    socket.on('getAllRoles', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+        ) {
+            if(!hasPermission(member.id, "manageRoles", member.group)){
+                return;
+            }
+
+            var highestRole = getMemberHighestRole(member.id);
+
+
+            var roles = serverconfig.serverroles;
+            var sortIndex = 0;
+            var returnRole = [];
+
+            let sortedRoles = Object.keys(roles).sort((a, b) => {
+                return roles[b].info.sortId - roles[a].info.sortId
+            });
+
+            sortedRoles = sortedRoles.reverse().map((key) => roles[key]);
+
+
+
+            // Only returns roles that are can be assigned
+            Object.keys(sortedRoles).reverse().forEach(function(role) {
+                //console.log(roles[role].info.name)
+
+                if(sortedRoles[role].info.sortId < highestRole.info.sortId || hasPermission(member.id, "administrator", member.group)){
+                    sortIndex = sortedRoles[role].info.sortId;
+
+                    if(sortedRoles[role].members.includes(member.targetUser)){
+                        sortedRoles[role].info.hasRole = 1;
+                    }
+                    else{
+                        sortedRoles[role].info.hasRole = 0;
+                    }
+
+                    returnRole.push(sortedRoles[role]);
+                }
+            });
+
+
+
+            io.emit("updateMemberList");
+            response({type: "success", data: returnRole});
+            //io.to(usersocket[member.id]).emit("receiveChannelTree", getChannelTree(member));
+        }
+    });
+
+    function httpGetAsync(theUrl, callback, id)
+    {
+        // create the request object
+        var XMLHttpRequest = require('xhr2');
+        var xmlHttp = new XMLHttpRequest();
+
+        // set the state change callback to capture when the response comes in
+        xmlHttp.onreadystatechange = function()
+        {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            {
+                callback(xmlHttp.responseText, id);
+            }
+        }
+
+        // open as a GET call, pass in the url and set async = True
+        xmlHttp.open("GET", theUrl, true);
+        //xmlHttp.setRequestHeader('Content-Type', 'application/json');
+
+        /*
+        xmlHttp.setRequestHeader('Access-Control-Allow-Headers', '*');
+         xmlHttp.setRequestHeader('Content-Type', 'application/json');
+        xmlHttp.setRequestHeader('Access-Control-Allow-Headers', '*');
+        xmlHttp.setRequestHeader("Access-Control-Allow-Origin", "*")
+        xmlHttp.setRequestHeader("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS")
+
+         */
+
+        // call send with no params as they were passed in on the url string
+        xmlHttp.send(null);
+
+        return;
+    }
+
+    function tenorCallback_search(responsetext, id)
+    {
+        // Parse the JSON response
+        var response_objects = JSON.parse(responsetext);
+
+        var top_10_gifs = response_objects["results"];
+
+        // load the GIFs -- for our example we will load the first GIFs preview size (nanogif) and share size (gif)
+
+
+        top_10_gifs.forEach(gif => {
+
+            io.to(usersocket[id]).emit("receiveGifImage", {gif: gif.media_formats.gif.url, preview: gif.media_formats.gifpreview.url});
+            /*
+            document.getElementById("emoji-entry-container").insertAdjacentHTML("beforeend",
+                `<img
+                    onclick="sendGif('${gif.media_formats.gif.url}')" src="${gif.media_formats.gifpreview.url}"
+                    onmouseover="changeGIFSrc('${gif.media_formats.gif.url}', this);"
+                    onmouseleave="changeGIFSrc('${gif.media_formats.gifpreview.url}', this);"
+                    style="padding: 1%;border-radius: 20px;float: left;width: 48%; height: fit-content;">`
+                */
+        })
+
+
+
+        //document.getElementById("share_gif").src = top_10_gifs[0]["media_formats"]["gif"]["url"]; top_10_gifs[0]["media_formats"]["gif"]["url"]
+
+        return;
+
+    }
+
+    function searchTenor(search, id)
+    {
+        // set the apikey and limit
+        var apikey = serverconfig.serverinfo.tenor.api_key;
+        var clientkey = serverconfig.serverinfo.tenor.client_key;
+        var lmt = serverconfig.serverinfo.tenor.limit;
+
+        // test search term
+        var search_term = search;
+
+        // using default locale of en_US
+        var search_url = "https://tenor.googleapis.com/v2/search?q=" + search_term + "&key=" +
+            apikey +"&client_key=" + clientkey +  "&limit=" + lmt;
+
+        httpGetAsync(search_url,tenorCallback_search, id);
+
+        // data will be loaded by each call's callback
+        return;
+    }
+
+    socket.on('searchTenorGif', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+        ) {
+            if(serverconfig.serverinfo.tenor.enabled != 1){
+                response({type: "error", msg: "GIFs are disabled on this server"});
+            }
+            else{
+                response({type: "success", msg: "Trying to search GIF"});
+            }
+
+            searchTenor(member.search, member.id);
+            consolas("Searching for " + member.search)
+        }
+    });
+
+    socket.on('deleteEmoji', function (member, response) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true
+        ) {
+
+            if(hasPermission(member.id, "manageEmojis")){
+                try{
+
+                    try {
+                        fs.unlinkSync(`./public/emojis/${member.emoji}`);
+
+                        console.log("Deleted Emoji successfully.");
+                        response({type: "success", msg: "Emoji deleted successfully"});
+
+                    } catch (error) {
+                        consolas("Coudlnt delete emoji", "Debug")
+                        consolas(error, "Debug")
+
+                        response({type: "error", msg: "Cant Delete Emoji", error: error});
+                    }
+                }
+                catch(e){
+                    consolas("Unable to resolve member".red);
+                    console.log(e);
+                }
+            }
+            else{
+                response({type: "error", msg: "You dont have permissions to manage emojis"});
+            }
+        }
+    });
+
+    socket.on('resolveMember', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "resolveMembers")){
+                try{
+
+                    var resolved = serverconfig.servermembers[member.target];
+                    var tmp = resolved.token;
+
+                    resolved.token = null;
+                    response({type: "success", msg: "User Data was resolved", data: resolved });
+                    resolved.token = tmp;
+                }
+                catch(e){
+                    consolas("Unable to resolve member".red);
+                    console.log(e);
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('unmuteUser', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "muteUsers")){
+
+                if(serverconfig.mutelist.hasOwnProperty(member.target)){
+                    delete serverconfig.mutelist[member.target];
+                    //response({type: "success", msg: `The user ${serverconfig.servermembers[member.target].name} has been unmuted` });
+                }
+                else{
+                    //response({type: "error", msg: `The user ${serverconfig.servermembers[member.target].name} isnt muted` });
+                }
+
+
+                serverconfig.servermembers[member.target].isMuted = 0;
+                saveConfig();
+
+                io.emit("updateMemberList");
+            }
+            else{
+                //response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('unbanUser', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageBans")){
+                try{
+
+                    serverconfig.servermembers[member.target].isBanned = 0;
+                    delete serverconfig.banlist[member.target];
+                    saveConfig();
+
+                    response({type: "success", msg: `The user ${serverconfig.servermembers[member.target].name} has been unbanned` });
+                }
+                catch(e){
+                    response({type: "error", msg: `User couldnt be unbanned`});
+                    consolas("Unable to resolve member".red);
+                    console.log(e);
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('addUserToRole', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageMembers")){
+                try{
+                    var highestUserRole = getMemberHighestRole(member.id);
+
+                    // If user is not a admin they cant assign roles that are higher
+                    if(!hasPermission(member.id, "administrator")){
+                        if(serverconfig.serverroles[member.role].info.sortId >= highestUserRole.info.sortId){
+                            response({type: "error", msg: "You cant assign roles that are higher or equal then yours"});
+                            return;
+                        }
+                    }
+
+                    serverconfig.serverroles[member.role].members.push(member.target);
+                    saveConfig();
+
+                    io.emit("updateMemberList");
+                    io.to(usersocket[member.target]).emit("updateMemberList");
+                    response({type: "success", msg: "Role assigned"});
+
+                }
+                catch(e){
+                    consolas("Unable to add member to group".red);
+                    console.log(colors.red(e));
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('removeUserFromRole', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageMembers")){
+                try{
+
+                    // If user is not a admin they cant assign roles that are higher
+                    if(!hasPermission(member.id, "administrator")){
+                        if(serverconfig.serverroles[member.role].info.sortId >= highestUserRole.info.sortId){
+                            response({type: "error", msg: "You cant remove roles that are higher or equal then yours"});
+                            return;
+                        }
+                    }
+
+                    serverconfig.serverroles[member.role].members.pop(member.target);
+                    saveConfig();
+
+
+                    io.emit("updateMemberList");
+                    io.to(usersocket[member.target]).emit("updateMemberList");
+                    response({type: "success", msg: "Role removed"});
+                }
+                catch(e){
+                    consolas("Unable to remove member from group".red);
+                    console.log(colors.red(e));
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('saveRolePermissions', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageRoles")){
+                try{
+                    serverconfig.serverroles[member.role].permissions = member.permissions;
+                    saveConfig();
+
+                    io.emit("updateMemberList");
+                    response({type: "success", msg: "Role permissions have been updated"});
+                }
+                catch(e){
+                    consolas("Unable to update permissions from role".red);
+                    console.log(colors.red(e));
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('saveChannelPermissions', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageChannels")){
+                try{
+                    //console.log(member.role);
+                    console.log(member.permissions);
+
+                    var memberChannel = member.channel.replace("channel-", "");
+
+                    var group = resolveGroupByChannelId(memberChannel);
+                    var category = resolveCategoryByChannelId(memberChannel);
+
+                    serverconfig.groups[group].channels.categories[category].channel[memberChannel].permissions[member.role] = member.permissions;
+                    saveConfig();
+
+                    io.emit("receiveChannelTree");
+                    response({type: "success", msg: "Channel permissions have been updated"});
+                }
+                catch(e){
+                    consolas("Unable to update channel permissions from role".red);
+                    console.log(colors.red(e));
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('removeRoleFromChannel', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageChannels")){
+                try{
+
+                    var memberChannel = member.channel.replace("channel-", "");
+
+                    var group = resolveGroupByChannelId(memberChannel);
+                    var category = resolveCategoryByChannelId(memberChannel);
+
+                    console.clear();
+
+                    delete serverconfig.groups[group].channels.categories[category].channel[memberChannel].permissions[member.role];
+                    saveConfig();
+
+                    response({type: "success", msg: "Role was successfully removed from the channel"});
+                }
+                catch(e){
+                    consolas("Unable to remove role from channel".red);
+                    console.log(colors.red(e));
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('addRoleToChannel', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageChannels")){
+                try{
+
+                    var memberChannel = member.channel.replace("channel-", "");
+
+                    var group = resolveGroupByChannelId(memberChannel);
+                    var category = resolveCategoryByChannelId(memberChannel);
+
+                    serverconfig.groups[group].channels.categories[category].channel[memberChannel].permissions[member.role] = JSON.parse
+                    (
+                        `
+                        {
+                            "readMessages": 1,
+                            "sendMessages": 1
+                        }
+                        `
+                    );
+                    saveConfig();
+
+                    response({type: "success", msg: "Role was successfully removed from the channel"});
+                }
+                catch(e){
+                    consolas("Unable to add role to channel".red);
+                    console.log(colors.red(e));
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('addRoleToGroup', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageGroups")){
+                try{
+
+
+                    serverconfig.groups[member.group].permissions[member.role] = JSON.parse(
+                        `
+                        {
+                            "viewGroup": 1
+                        }
+                        `
+                    )
+                    saveConfig();
+
+                    response({type: "success", msg: "Role was successfully added to the group"});
+                }
+                catch(e){
+                    consolas("Unable to add role to group".red);
+                    console.log(colors.red(e));
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('removeRoleFromGroup', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageGroups")){
+                try{
+
+
+                    delete serverconfig.groups[member.group].permissions[member.role];
+                    saveConfig();
+
+                    response({type: "success", msg: "Role was successfully removed from the group"});
+                }
+                catch(e){
+                    consolas("Unable to remove role to group".red);
+                    console.log(colors.red(e));
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('updateRoleHierarchy', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageRoles")){
+                try{
+                    var sortedRoles = member.sorted.reverse();
+
+                    for(let i = 0; i < sortedRoles.length; i++){
+                        var roleId = sortedRoles[i];
+                        serverconfig.serverroles[roleId].info.sortId = i;
+                    }
+
+                    saveConfig();
+
+                    response({type: "success", msg: "Role was updated successfully"});
+                }
+                catch(e){
+                    consolas("Unable to sort roles".red);
+                    console.log(e);
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('updateRoleAppearance', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageRoles")){
+                try{
+                    serverconfig.serverroles[member.roleId].info.name = member.data.info.name;
+                    serverconfig.serverroles[member.roleId].info.color = member.data.info.color;
+                    serverconfig.serverroles[member.roleId].info.displaySeperate = member.data.info.displaySeperate;
+
+                    saveConfig();
+
+                    response({type: "success", msg: "Role was updated successfully"});
+
+                    // Update to everyone and yourself
+                    io.emit("updateMemberList");
+                    io.to(usersocket[member.id]).emit("updateMemberList");
+                }
+                catch(e){
+                    consolas("Unable to sort roles".red);
+                    console.log(e);
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on('createRole', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageRoles")){
+                try{
+                    var roleid = generateId(4);
+
+                    serverconfig.serverroles[roleid] = JSON.parse(
+                        `{
+                                "info": {
+                                    "id": ${roleid},
+                                    "name": "New Role",
+                                    "icon": null,
+                                    "color": "#FFFFFF",
+                                    "deletable": 1,
+                                    "sortId": ${generateId(4)},
+                                    "displaySeperate": 0
+                                },
+                                "permissions": {
+                                    "readMessages": 1,
+                                    "sendMessages": 1,
+                                    "uploadFiles": 1
+                                },
+                                "members": [
+                                ],
+                                "token": []
+                            }`
+                    );
+
+                    saveConfig();
+
+                    response({type: "success", msg: "The role has been successfully created"});
+                }
+                catch(e){
+                    consolas("Unable to create role".red);
+                    console.log(e);
+                }
+            }
+            else{
+                response({type: "error", permission: "denied"});
+            }
+
+
+        }
+        else{
+            consolas("Token or ID incorrect");
+        }
+    });
+
+    socket.on('deleteRole', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageRoles")){
+                try{
+
+                    if(serverconfig.serverroles[member.roleId].info.deletable == 1){
+                        delete serverconfig.serverroles[member.roleId];
+                        saveConfig();
+
+                        response({type: "success", msg: "The role has been successfully deleted"});
+                    }
+                    else{
+                        response({type: "error", msg: "This role cant be deleted"});
+                    }
+                }
+                catch(e){
+                    consolas("Unable to delete role".red);
+                    console.log(e);
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+
+
+        }
+        else{
+            consolas("Token or ID incorrect");
+        }
+    });
+
+    socket.on('checkPermission', function (member, response) {
+        if(validateMemberId(member.id, socket) == true) {
+
+
+            if(Array.isArray(member.permission)){
+
+                //console.log("Checking for multiple permissions");
+
+                var found = false;
+                for (var i = 0; i < member.permission.length; i++) {
+
+                    //console.log(member.permission[i])
+
+                    if(hasPermission(member.id, member.permission[i])){
+                        found = true;
+                        response({type: "success", permission: "granted", user: serverconfig.servermembers[member.id]});
+                    }
+                    else{
+                        // Dont do anything as it still loops
+                    }
+                }
+
+                if(found == false){
+                    response({type: "success", permission: "denied", user: serverconfig.servermembers[member.id]});
+                }
+
+            }
+            else{ // Single permission check
+
+                //console.log("Checking for single permissions");
+                //console.log(member.permission + " - " + hasPermission(member.id, member.permission));
+                //console.log(" ")
+
+                if (hasPermission(member.id, member.permission)) {
+                    response({type: "success", permission: "granted", user: serverconfig.servermembers[member.id]});
+                } else {
+                    response({type: "success", permission: "denied", user: serverconfig.servermembers[member.id]});
+                }
+            }
+        }
+    });
+
+    socket.on('kickUser', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            if(member.id == member.target){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "You cant kick yourself!",
+                        "message": "",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+            else{
+                if(hasPermission(member.id, "kickUsers") == false){
+
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                        "title": "Missing permission!",
+                        "message": "You cant kick that person.",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "success",
+                        "popup_type": "confirm"
+                    }`));
+                }
+                else {
+
+                    var kicker = getMemberHighestRole(member.id);
+                    var kicking = getMemberHighestRole(member.target);
+
+
+                    if(kicker.info.sortId <= kicking.info.sortId){
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                                    "title": "Error!",
+                                    "message": "You cant kick that person because its role is higher then yours",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "success",
+                                    "popup_type": "confirm"
+                                }`));
+                        return;
+                    }
+
+                    //try{
+                    // Delete user from server
+                    member.target = escapeHtml(member.target);
+                    delete serverconfig.servermembers[member.target];
+                    saveConfig();
+
+                    // Notify Admins
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                        "title": "Kicked User!",
+                        "message": "The user has been kicked.",
+                        "buttons": {
+                            "0": {
+                                "text": "Nice",
+                                "events": ""
+                            }
+                        },
+                        "type": "success",
+                        "popup_type": "confirm"
+                    }`));
+
+                    io.sockets.sockets.forEach((target) => {
+
+                        if (target.id === usersocket[member.target]) {
+
+                            var reasonText = " ";
+                            member.reason = escapeHtml(member.reason);
+                            if (member.reason != null && member.reason.length > 0) {
+                                reasonText = `Reason: ${member.reason}`
+                            }
+
+                            sendMessageToUser(target.id, JSON.parse(
+                                `{
+                                    "title": "You have been kicked",
+                                    "message": "${reasonText}",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": "closePrompt();"
+                                        }
+                                    },
+                                    "type": "success",
+                                    "popup_type": "confirm"
+                                }`));
+
+                            target.disconnect(true);
+                        }
+                    });
+
+                    // Update Memberlist
+                    io.emit("updateMemberList");
+                    //}
+                    //catch(e){
+                    //    consolas(`Unable to kick user: ${e}`.red);
+                    //}
+                }
+            }
+
+
+
+        }
+    });
+
+    function banUser(member){
+
+
+        var duration = member.time;
+        var bannedUntil = new Date().getTime();
+
+        if(isNaN(duration) == true){
+            sendMessageToUser(socket.id, JSON.parse(
+                `{
+                                "title": "Invalid Duration!",
+                                "message": "Enter a number like 1,2,3 or leave it completely empty",
+                                "buttons": {
+                                    "0": {
+                                        "text": "Ok",
+                                        "events": ""
+                                    }
+                                },
+                                "type": "error",
+                                "popup_type": "confirm"
+                            }`));
+            return;
+        }
+
+
+        if(duration == null || duration <= 0){
+            duration = -1;
+            bannedUntil += bannedUntil * 2
+        }
+        else{
+            bannedUntil += (86400 * duration) * 1000;
+            //bannedUntil = bannedUntil;
+        }
+
+        // Ban IP of User
+        var ip = socket.handshake.address;
+        if(!serverconfig.ipblacklist.hasOwnProperty(ip)){
+
+            // Add IP to Blacklist
+            //serverconfig.ipblacklist.push(ip);
+
+            // Set Member to be banned
+            serverconfig.servermembers[member.target].isBanned = 1;
+
+            //console.log(bannedUntil);
+
+            // Add member to banlist
+            serverconfig.banlist[member.target] = JSON.parse(`
+                        {
+                            "bannedBy": "${member.id}",
+                            "reason": "${member.reason}",
+                            "until": ${bannedUntil}
+                        }
+                        `);
+
+            saveConfig();
+
+
+            consolas(` User ${serverconfig.servermembers[member.target].name} (IP ${ip}) was added to the blacklist because he was banned`.yellow);
+            consolas(` Reason: ${member.reason}`);
+            consolas(` Duration: ${duration}`);
+
+            return true;
+        }
+    }
+
+
+    socket.on('banUser', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            if(member.id == member.target){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "You cant ban yourself!",
+                        "message": "",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+            else{
+                if(hasPermission(member.id, "banUsers") == false){
+
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                        "title": "Missing permission!",
+                        "message": "You cant ban that person.",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "success",
+                        "popup_type": "confirm"
+                    }`));
+                }
+                else {
+
+                    var banner = getMemberHighestRole(member.id);
+                    var banning = getMemberHighestRole(member.target);
+
+                    if(banner.info.sortId <= banning.info.sortId){
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                                    "title": "Error!",
+                                    "message": "You cant ban that person because its role is higher then yours",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "success",
+                                    "popup_type": "confirm"
+                                }`));
+                        return;
+                    }
+
+                    if(banUser(member) == false){
+                        return;
+                    }
+
+                    // Delete user from server
+                    //member.target = escapeHtml(member.target);
+                    //delete serverconfig.servermembers[member.target];
+                    //saveConfig();
+
+                    // Notify Admins
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                        "title": "Banned User!",
+                        "message": "The user has been banned.",
+                        "buttons": {
+                            "0": {
+                                "text": "Nice",
+                                "events": ""
+                            }
+                        },
+                        "type": "success",
+                        "popup_type": "confirm"
+                    }`));
+
+                    io.sockets.sockets.forEach((target) => {
+
+                        if (target.id === usersocket[member.target]) {
+
+                            var reasonText = " ";
+                            member.reason = escapeHtml(member.reason);
+                            if (member.reason != null && member.reason.length > 0) {
+
+                                if(member.reason.replaceAll(" ", "").length > 0){
+                                    reasonText = `Reason: ${member.reason}`
+                                }
+                                else{
+                                    reasonText = ` `;
+                                }
+                            }
+
+                            sendMessageToUser(target.id, JSON.parse(
+                                `{
+                                    "title": "You have been banned",
+                                    "message": "${reasonText}",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "success",
+                                    "popup_type": "confirm"
+                                }`));
+
+                            target.disconnect(true);
+                        }
+                    });
+
+                    // Update Memberlist
+                    io.emit("updateMemberList");
+                    //}
+                    //catch(e){
+                    //    consolas(`Unable to kick user: ${e}`.red);
+                    //}
+                }
+            }
+
+
+
+        }
+    });
+
+    function addMinutesToDate(date, minutes) {
+        return new Date(date.getTime() + minutes*60000);
+    }
+
+    function muteUser(member){
+        var duration = member.time;
+
+        if(isNaN(duration) == true){
+            sendMessageToUser(socket.id, JSON.parse(
+                `{
+                                "title": "Invalid Duration!",
+                                "message": "Enter a number like 1,2,3 or leave it completely for permanent mute until removed",
+                                "buttons": {
+                                    "0": {
+                                        "text": "Ok",
+                                        "events": ""
+                                    }
+                                },
+                                "type": "error",
+                                "popup_type": "confirm"
+                            }`));
+            return null;
+        }
+
+        if(duration == null || duration <= 0){
+            duration = -1;
+        }
+        else{
+            duration = new Date().getTime()+((60 * duration) * 1000);
+        }
+
+        if(!serverconfig.mutelist.hasOwnProperty(member.target)){
+
+            // used for checks
+            serverconfig.servermembers[member.target].isMuted = 1;
+
+            // Add member to mutelist
+            serverconfig.mutelist[member.target] = JSON.parse(`
+                        {
+                            "mutedBy": "${member.id}",
+                            "reason": "${member.reason}",
+                            "duration": ${duration}
+                        }
+                        `);
+
+            saveConfig();
+
+            consolas(` User ${serverconfig.servermembers[member.target].name} (IP ${ip}) was muted`.yellow);
+            consolas(` Reason: ${member.reason}`);
+            consolas(` Duration: ${duration}`);
+
+            io.emit("updateMemberList");
+
+            return duration;
+        }
+        else{
+            serverconfig.servermembers[member.target].isMuted = 1;
+            serverconfig.mutelist[member.target].duration = duration;
+            saveConfig();
+
+            io.emit("updateMemberList");
+
+            return duration;
+        }
+
+        return true;
+    }
+
+    socket.on('muteUser', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            if(member.id == member.target){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "You cant mute yourself!",
+                        "message": "",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+            else{
+                if(hasPermission(member.id, "muteUsers") == false){
+
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                        "title": "Missing permission!",
+                        "message": "You cant mute that person.",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                }
+                else {
+
+                    var mod = getMemberHighestRole(member.id);
+                    var userToMute = getMemberHighestRole(member.target);
+
+                    if(mod.info.sortId <= userToMute.info.sortId){
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                                    "title": "Error!",
+                                    "message": "You cant mute that person because its role is higher then yours",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "error",
+                                    "popup_type": "confirm"
+                                }`));
+                        return;
+                    }
+
+                    var mutedUntil = null;
+                    var mutedStatus = muteUser(member);
+                    if(mutedStatus == false){
+                        return;
+                    }
+                    else{
+                        mutedUntil = mutedStatus;
+                    }
+
+                    // Delete user from server
+                    //member.target = escapeHtml(member.target);
+                    //delete serverconfig.servermembers[member.target];
+                    //saveConfig();
+
+                    // Notify Admins
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                        "title": "Muted User!",
+                        "message": "The user has been muted.",
+                        "buttons": {
+                            "0": {
+                                "text": "Nice",
+                                "events": ""
+                            }
+                        },
+                        "type": "success",
+                        "popup_type": "confirm"
+                    }`));
+
+                    io.emit("updateMemberList");
+
+                    var reasonText = ""
+                    if(member.reason.length > 0)
+                        reasonText = `##Reason:#${member.reason}`;
+
+                    console.log(member.time)
+
+                    if(member.time.length == 0){
+                        // You have been muted
+                        sendMessageToUser(usersocket[member.target], JSON.parse(
+                            `{
+                                    "title": "You have been muted",
+                                    "message": "${reasonText}",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "success",
+                                    "popup_type": "confirm"
+                                }`));
+                    }
+                    else {
+                        // You have been muted
+                        sendMessageToUser(usersocket[member.target], JSON.parse(
+                            `{
+                                    "title": "You have been muted until ${new Date(mutedStatus).toLocaleString()}",
+                                    "message": "${reasonText}",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "success",
+                                    "popup_type": "confirm"
+                                }`));
+                    }
+                }
+            }
+        }
+    });
+
+    socket.on('setRoom', function (member) {
+        if(validateMemberId(member.id, socket) == true
+
+        ) {
+
+            var room = member.room.split('-');
+            var group = room[0];
+            var category = room[1];
+            var channel = room[2];
+
+            if(!checkUserChannelPermission(channel, member.id, "viewChannel")){
+
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                                    "title": "Access denied",
+                                    "message": "You dont have access to this channel.",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "error",
+                                    "popup_type": "confirm"
+                                }`));
+
+                socket.join(0);
+                return;
+            }
+
+            try{
+                if(serverconfig.groups[group].channels.categories[category].channel[channel] != null){
+                    socket.join(escapeHtml(member.room));
+                    consolas(`User joined room ${escapeHtml(member.room)}`.green, "Debug");
+                }
+            }
+            catch(erorr){
+
+                try{
+                    socket.leave(escapeHtml(member.room));
+                }
+                catch (ww)
+                {
+                    console.log(ee)
+                }
+
+                consolas(`Couldnt find room ${member.room}`.yellow, "Debug");
+
+                /*
+                sendMessageToUser(usersocket[member.id], JSON.parse(
+                    `{
+                                "title": "Couldnt find channel",
+                                "message": "We were unable to find the channel you selected. Maybe it got deleted?",
+                                "buttons": {
+                                    "0": {
+                                        "text": "Ok",
+                                        "events": "onclick='closeModal()'"
+                                    }
+                                },
+                                "type": "error"
+                            }`));
+
+                 */
+
+                return;
+            }
+
+        }
+        else{
+            consolas(`Couldnt set room because token or id didnt match`.red, "Debug");
+            consolas(`Server Id ${serverconfig.servermembers[member.id].id}`.yellow, "Debug");
+            consolas(`User Id ${member.id}`.yellow, "Debug");
+            consolas(`Server Token ${serverconfig.servermembers[member.id].token}`.yellow, "Debug");
+            consolas(`User Token ${member.token}`.yellow, "Debug");
+
+
+            sendMessageToUser(usersocket[member.id], JSON.parse(
+                `{
+                    "title": "Couldnt process channel join request",
+                    "message": "User ID or Token does not match. Known issue, will be fixed.",
+                    "buttons": {
+                        "0": {
+                            "text": "Ok",
+                            "events": "window.location.reload()"
+                        }
+                    },
+                    "type": "error",
+                    "popup_type": "confirm"
+                }`));
+        }
+    });
+
+    socket.on('sendVoiceData', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            io.emit("receiveVoiceData", member.voice);
+        }
+    });
+
+    socket.on('setUsername', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            consolas("User changed username", "Debug");
+            serverconfig.servermembers[member.id].name = escapeHtml(member.username);
+            saveConfig();
+
+            io.emit("updateMemberList");
+        }
+    });
+
+    socket.on('updateServerName', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            if(hasPermission(member.id, "manageServerInfo")){
+                consolas(`Changing servername from ${serverconfig.serverinfo.name} to ${escapeHtml(member.value)}`, "Debug");
+
+                serverconfig.serverinfo.name = escapeHtml(member.value);
+                saveConfig();
+
+                response({type: "success", msg: "Server was successfully renamed"});
+            }
+            else{
+                response({type: "error", msg: "You cant change the server name: Missing permissions"});
+            }
+        }
+    });
+
+    socket.on('updateServerDesc', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            if(hasPermission(member.id, "manageServerInfo")){
+                consolas(`Changing server description from ${serverconfig.serverinfo.description} to ${escapeHtml(member.value)}`, "Debug");
+
+                serverconfig.serverinfo.description = escapeHtml(member.value);
+                saveConfig();
+
+                response({type: "success", msg: "Server description was successfully changed"});
+            }
+            else{
+                response({type: "error", msg: "You cant change the server description: Missing permissions"});
+            }
+        }
+    });
+
+    socket.on('setStatus', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            consolas("User changed status", "Debug");
+            serverconfig.servermembers[member.id].status = escapeHtml(member.status);
+            saveConfig();
+
+            io.emit("updateMemberList");
+        }
+    });
+
+    socket.on('setPFP', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            consolas("User changed icon", "Debug");
+            serverconfig.servermembers[member.id].icon = member.icon;
+            saveConfig();
+
+            io.emit("updateMemberList", );
+        }
+    });
+
+
+    socket.on('getGroupList', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+            io.to(usersocket[member.id]).emit("receiveGroupList", getGroupList(member));
+        }
+    });
+
+    socket.on('getMemberList', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            if(!hasPermission(member.id, "viewGroup", member.group)){
+                return;
+            }
+
+            io.to(usersocket[member.id]).emit("receiveMemberList", getMemberList(member, member.channel));
+        }
+    });
+
+
+    socket.on('isTyping', function (member) {
+        if(validateMemberId(member.id, socket, true) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            //consolas("Typing room: " + member.room);
+            //consolas("Typing member id: " + member.id);
+
+            // if user is muted dont do anything
+            if(serverconfig.mutelist.hasOwnProperty(member.id)){
+                return;
+            }
+
+            var username = serverconfig.servermembers[member.id].name;
+
+            if(typingMembers.includes(username) == false){
+                typingMembers.push(escapeHtml(username));
+            }
+
+            clearTimeout(typingMembersTimeout[username]);
+            typingMembersTimeout[username] = setTimeout(() => {
+
+                if(typingMembers.includes(username) == true){
+                    typingMembers.pop(escapeHtml(username));
+                }
+
+                io.in(member.room).emit("memberTyping", typingMembers);
+
+            }, 4 * 1000);
+
+            //console.log(typingMembersTimeout[username]);
+
+            io.in(member.room).emit("memberTyping", typingMembers);
+        }
+    });
+
+    socket.on('stoppedTyping', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            //consolas("Stopped room: " + member.room);
+            //consolas("Stopped id: " + member.id);
+
+            var username = serverconfig.servermembers[member.id].name;
+
+            if(typingMembers.includes(username) == true){
+                typingMembers.pop(username);
+            }
+
+            io.in(member.room).emit("memberTyping", typingMembers);
+        }
+    });
+
+    socket.on('getGroupBanner', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            if(!hasPermission(member.id, "viewGroup", member.group)){
+                return;
+            }
+
+            io.to(usersocket[member.id]).emit("receiveGroupBanner", serverconfig.groups[member.group].info.banner);
+        }
+    });
+
+    socket.on('getChatlog', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token) {
+
+            consolas("Trying to get chat log", "Debug");
+
+
+            var channel = member.channel;
+
+            if(checkUserChannelPermission(channel, member.id, "viewChannel") == true){
+                io.to(usersocket[member.id]).emit("receiveChatlog", getSavedChatMessage(member.group, member.category, member.channel));
+            }
+        }
+    });
+
+    socket.on('createCategory', function (member) {
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(!hasPermission(member.id, "manageChannels")){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "Missing permissions!",
+                        "message": "You arent allowed to create categories",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+
+            try{
+                var catId = generateId(4);
+                serverconfig.groups[member.group].channels.categories[catId] = JSON.parse(
+                    `{
+                        "info": {
+                            "id": ${catId},
+                            "name": "${escapeHtml(member.value)}"
+                        },
+                        "channel": {
+                        }
+                    }
+                        `);
+                saveConfig();
+                io.emit("receiveChannelTree", getChannelTree(member));
+            }
+            catch (e){
+                consolas("Couldnt create category".red, "Debug");
+                consolas(colors.red(e), "Debug");
+            }
+
+        }
+        else{
+            console.log("Invalid token?")
+        }
+    });
+
+    socket.on('updateGroupBanner', function (member) {
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(!hasPermission(member.id, "manageGroups")){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "Missing permissions!",
+                        "message": "You arent allowed to change the group banner",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+
+            try{
+                // Default Fallback Banner
+                if(member.value == null || member.value.length <= 0){
+                    member.value = "https://t4.ftcdn.net/jpg/04/46/93/93/360_F_446939375_83iP0UYTg5F9vHl6icZwgrEBHXeXMVaU.jpg";
+                }
+
+                member.value = escapeHtml(member.value);
+                serverconfig.groups[member.group].info.banner = member.value;
+                saveConfig();
+
+
+                io.emit("updateGroupList");
+                //io.emit("receiveGroupBanner", member.value); // bug
+            }
+            catch (e){
+                consolas("Couldnt update group banner".red, "Debug");
+                consolas(colors.red(e), "Debug");
+            }
+
+        }
+        else{
+
+        }
+    });
+
+    socket.on('updateGroupName', function (member, response) {
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(!hasPermission(member.id, "manageGroups")){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "Missing permissions!",
+                        "message": "You arent allowed to change the group name",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+
+            try{
+
+                var groupName = escapeHtml(member.groupName);
+                var groupId = member.groupId;
+                serverconfig.groups[groupId].info.name = groupName;
+                saveConfig();
+
+                response({type: "success", msg: "Group Name Updated"});
+
+                io.emit("updateGroupList");
+            }
+            catch (e){
+                consolas("Couldnt update group name".red, "Debug");
+                consolas(colors.red(e), "Debug");
+
+                response({type: "error", msg: "Unable to update group name"});
+            }
+
+        }
+        else{
+
+        }
+    });
+
+    socket.on('updateGroupPermissions', function (member, response) {
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(!hasPermission(member.id, "manageGroups")){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "Missing permissions!",
+                        "message": "You arent allowed to change the group permissions",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+
+            try{
+
+                var groupPerms = member.perms;
+                var groupId = member.groupId;
+                var role = member.roleId;
+                serverconfig.groups[groupId].permissions[role] = groupPerms;
+                saveConfig();
+
+
+                io.emit("updateGroupList");
+                response({type: "success", msg: "Group Permissions Updated"});
+
+            }
+            catch (e){
+                consolas("Couldnt update group permissions".red, "Debug");
+                consolas(colors.red(e), "Debug");
+
+                response({type: "error", msg: "Unable to update group permissions"});
+            }
+
+        }
+        else{
+
+        }
+    });
+
+    socket.on('updateGroupIcon', function (member) {
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(!hasPermission(member.id, "manageGroups")){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "Missing permissions!",
+                        "message": "You arent allowed to change the group icon",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+
+            try{
+                if(member.value == null || member.value.length <= 0){
+                    member.value = "https://wallpapers-clan.com/wp-content/uploads/2022/05/cute-pfp-25.jpg";
+                }
+
+                member.value = escapeHtml(member.value);
+                serverconfig.groups[member.group].info.icon = member.value;
+                saveConfig();
+
+                io.emit("updateGroupList");
+            }
+            catch (e){
+                consolas("Couldnt update group icon".red, "Debug");
+                consolas(colors.red(e), "Debug");
+            }
+
+        }
+        else{
+
+        }
+    });
+
+    socket.on('createChannel', function (member) {
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(!hasPermission(member.id, "manageChannels")){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "Missing permissions!",
+                        "message": "You arent allowed to create channels",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+
+            try{
+                consolas(`Trying to create channel in group ${member.group}, category ${member.category}`.yellow, "Debug");
+
+                var channelId = generateId(4);
+                serverconfig.groups[member.group].channels.categories[member.category].channel[channelId] = JSON.parse(
+                    `{
+                        "id": ${channelId},
+                        "name": "${escapeHtml(member.value)}",
+                        "type": "text",
+                        "description": "Default Channel Description",
+                        "sortId": 0,
+                        "permissions": {
+                            "0": {
+                                "readMessages": 1,
+                                "sendMessages": 1,
+                                "viewChannel": 0
+                            }
+                        }
+                    }
+                `);
+
+                saveConfig();
+                io.emit("receiveChannelTree", getChannelTree(member));
+            }
+            catch (e){
+                consolas("Couldnt create channel".red, "Debug");
+                consolas(colors.red(e), "Debug");
+            }
+
+        }
+        else{
+
+        }
+    });
+
+    socket.on('createGroup', function (member) {
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(!hasPermission(member.id, "manageGroups")){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "Missing permissions!",
+                        "message": "You arent allowed to create groups",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+
+            try{
+                var groupId = generateId(4);
+                var categoryId = generateId(4);
+                var channelId = generateId(4);
+
+                serverconfig.groups[groupId] = JSON.parse(
+                    `{
+                        "info": {
+                            "id": ${groupId},
+                            "name": "${escapeHtml(member.value)}",
+                            "icon": "/img/default_icon.png",
+                            "banner": "/img/default_banner.png",
+                            "isDeletable": 1,
+                            "sortId": 0,
+                            "access": [
+                            ]
+                        },
+                        "channels": {
+                            "categories": {
+                                "${categoryId}": {
+                                    "info": {
+                                        "id": ${categoryId},
+                                        "name": "General"
+                                    },
+                                    "channel": {
+                                        "${channelId}": {
+                                            "id": ${channelId},
+                                            "name": "chat",
+                                            "type": "text",
+                                            "description": "Default Channel Description",
+                                            "sortId": 0,
+                                            "permissions": {
+                                                "0": {
+                                                    "readMessages": 1,
+                                                    "sendMessages": 1,
+                                                    "viewChannel": 1
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "permissions": {
+                            "0": {
+                                "viewGroup": 0
+                            }
+                        }
+                    }
+                `);
+
+                saveConfig();
+                io.emit("updateGroupList");
+            }
+            catch (e){
+                consolas("Couldnt create category".red, "Debug");
+                consolas(colors.red(e), "Debug");
+            }
+
+        }
+        else{
+
+        }
+    });
+
+    socket.on('deleteGroup', function (member) {
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ){
+            if(serverconfig.groups[member.group].info.isDeletable == 0){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "Error!",
+                        "message": "This group cant be deleted.",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+
+            if(!hasPermission(member.id, "manageGroups")){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "Missing permissions!",
+                        "message": "You arent allowed to delete groups",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+
+
+            try{
+                delete serverconfig.groups[member.group];
+                saveConfig();
+
+                io.emit("updateGroupList");
+            }
+            catch (e){
+                consolas("Couldnt delete group ".red, "Debug");
+                consolas(colors.red(e), "Debug");
+            }
+
+        }
+        else{
+
+        }
+    });
+
+    socket.on('deleteChannel', function (member) {
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(!hasPermission(member.id, "manageChannels")){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "Missing permissions!",
+                        "message": "You arent allowed to delete channels",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+
+            try{
+                var channelId = member.channelId.replace("channel-", "");
+                var group = resolveGroupByChannelId(channelId);
+                var category = resolveCategoryByChannelId(channelId);
+
+                delete serverconfig.groups[group].channels.categories[category].channel[channelId];
+                saveConfig();
+
+                io.emit("receiveChannelTree", getChannelTree(member));
+            }
+            catch (e){
+                consolas("Couldnt delete channel".red, "Debug");
+                consolas(colors.red(e), "Debug");
+            }
+
+        }
+        else{
+
+        }
+    });
+
+    socket.on('deleteCategory', function (member) {
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(!hasPermission(member.id, "manageChannels")){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                        "title": "Missing permissions!",
+                        "message": "You arent allowed to delete categories",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+                return;
+            }
+
+            try{
+                delete serverconfig.groups[member.group].channels.categories[member.category.replace("category-", "")];
+                saveConfig();
+
+                io.emit("receiveChannelTree", getChannelTree(member));
+            }
+            catch (e){
+                consolas("Couldnt delete category".red, "Debug");
+                consolas(colors.red(e), "Debug");
+            }
+
+        }
+        else{
+            consolas("nope");
+        }
+    });
+
+    socket.on('getCurrentChannel', function (member) {
+        if(validateMemberId(member.id, socket) == true) {
+
+            consolas("Resolving Channel ID to Name", "Debug");
+            //console.log(serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel]);
+
+            try{
+                if(checkUserChannelPermission(member.channel, member.id, "viewChannel") == true){
+                    io.to(usersocket[member.id]).emit("receiveCurrentChannel", serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel]);
+                }
+
+            }
+            catch{
+                io.to(usersocket[member.id]).emit("receiveCurrentChannel", serverconfig.groups[member.group]);
+            }
+        }
+    });
+
+    socket.on('deleteMessage', function (member) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true && serverconfig.servermembers[member.id].token == member.token) {
+
+            try{
+                var message = JSON.parse(fs.readFileSync(`./chats/${member.group}/${member.category}/${member.channel}/${member.messageId}`));
+
+                if(message.id == member.id || hasPermission(member.id, "manageMessages")){
+                    fs.unlinkSync(`./chats/${member.group}/${member.category}/${member.channel}/${member.messageId}`);
+                    io.emit("receiveDeleteMessage", message.messageId);
+                }
+            }
+            catch(error){
+                consolas(`Couldnt delete file ./chats/${member.group}/${member.category}/${member.channel}/${member.messageId}`, "Debug");
+                consolas(error, "Debug");
+            }
+            io.to(usersocket[member.id]).emit("receiveCurrentChannel", serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel]);
+        }
+    });
+
+    socket.on('userDisconnected', function (member) {
+        return;
+        serverconfig.servermembers[member.id].isOnline = 0;
+        serverconfig.servermembers[member.id].lastOnline = member.time;
+        showedOfflineMessage[member.id] = false;
+
+        setTimeout(() => {
+
+            if(serverconfig.servermembers[member.id].isOnline == 0 &&
+                showedOfflineMessage[member.id] == false){
+                showedOfflineMessage[member.id] = true;
+                io.emit("memberOffline", serverconfig.servermembers[member.id].name);
+
+                consolas(`Member ${member.id} is now offline`, "Debug");
+            }
+            else{
+                //console.log(`Member ${member.id} is still online`);
+            }
+
+        }, 5 * 1000 * 60);
+
+
+    });
+
+    socket.on('getMemberProfile', async function (member) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            try{
+
+                io.to(usersocket[escapeHtml(member.id)]).emit("receiveMemberProfile",
+                    {
+                        "code":  await getMemberProfile(
+                            escapeHtml(member.target)),
+                        "top": member.posY,
+                        "left": member.posX
+                    }
+                );
+            }
+            catch (e){
+                consolas("Couldnt get member profile".red, "Debug");
+                consolas(colors.red(e), "Debug");
+            }
+
+        }
+        else{
+
+        }
+    });
+
+    socket.on('getEmojis', async function (member, response) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            try{
+
+                /*
+                if(!hasPermission(member.id, "manageEmojis")){
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                            "title": "Missing permissions!",
+                            "message": "You arent allowed to manage Emojis",
+                            "buttons": {
+                                "0": {
+                                    "text": "Ok",
+                                    "events": "onclick='closeModal()'"
+                                }
+                            },
+                            "type": "error"
+                        }`));
+
+                    response({type: "error", msg: "You dont have permissions to manage Emojis"});
+                    return;
+                }
+
+                 */
+
+                // Emoji List array
+                var emojiList = [];
+
+                // Get all local emojis sorted by creation date
+                fs.readdirSync("./public/emojis").sort((a, b) => {
+                    let aStat = fs.statSync(`./public/emojis/${a}`),
+                        bStat = fs.statSync(`./public/emojis/${b}`);
+
+                    return new Date(bStat.birthtime).getTime() - new Date(aStat.birthtime).getTime();
+                }).forEach(file => {
+                    //console.log(file);
+                    emojiList.push(file);
+                });
+
+                if(emojiList.length > 0){
+                    response({type: "success", data: emojiList, msg: "Successfully received emojis"})
+                }
+                else{
+                    response({type: "error", data: null, msg: "No Emojis found"})
+                }
+
+
+            }
+            catch (e){
+                consolas("Couldnt get emojis".red, "Debug");
+                consolas(colors.red(e), "Debug");
+            }
+
+        }
+        else{
+
+        }
+    });
+
+    socket.on('getBans', async function (member, response) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            try{
+
+
+                if(!hasPermission(member.id, "manageBans")){
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                            "title": "Missing permissions!",
+                            "message": "You arent allowed to manage Bans",
+                            "buttons": {
+                                "0": {
+                                    "text": "Ok",
+                                    "events": ""
+                                }
+                            },
+                            "type": "error",
+                        "popup_type": "confirm"
+                        }`));
+
+                    response({type: "error", msg: "You dont have permissions to manage Bans"});
+                    return;
+                }
+
+                response({type: "success", data: serverconfig.banlist, msg: "Successfully received banlist"})
+
+
+            }
+            catch (e){
+                consolas("Couldnt get emojis".red, "Debug");
+                consolas(colors.red(e), "Debug");
+            }
+
+        }
+        else{
+
+        }
+    });
+
+    socket.on('updateEmoji', async function (member, response) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            try{
+
+                if(!hasPermission(member.id, "manageEmojis")){
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                            "title": "Missing permissions!",
+                            "message": "You arent allowed to manage Emojis",
+                            "buttons": {
+                                "0": {
+                                    "text": "Ok",
+                                    "events": ""
+                                }
+                            },
+                            "type": "error",
+                        "popup_type": "confirm"
+                        }`));
+
+                    response({type: "error", msg: "You dont have permissions to manage Emojis"});
+                    return;
+                }
+
+                var oldEmoji = findEmojiByID(member.emojiId);
+                var newEmoji = `emoji_${member.emojiId}_${member.emojiName}.${oldEmoji.split(".").pop()}`;
+
+                //consolas("Updating Emoji".yellow, "Debug");
+                //consolas("From: ".yellow + oldEmoji, "Debug");
+                //consolas("To: ".yellow + newEmoji, "Debug");
+
+                fs.rename('./public/emojis/' + oldEmoji, `./public/emojis/` + newEmoji, function(err) {
+                    if ( err ){
+                        response({type: "error", error: err, msg: "Couldnt update emoji"})
+                    }
+                    else{
+                        response({type: "success", msg: "Emoji successfully updated"})
+                    }
+                });
+            }
+            catch (e){
+                consolas("Couldnt get emojis".red, "Debug");
+                consolas(colors.red(e), "Debug");
+            }
+
+        }
+        else{
+
+        }
+    });
+
+    socket.on("fileUpload", function(member, response) {
+        checkRateLimit(socket);
+
+        var filename;
+        var localUploadPath;
+        var fileId = generateId(12);
+
+        member.filename = member.filename.replaceAll(" ", "_");
+
+        if(member.type == null){
+            localUploadPath = "./public/uploads";
+            filename = "upload_" + fileId + "_" + escapeHtml(member.filename);
+        }
+        else if(member.type == "emoji"){
+
+            if(!hasPermission(member.id, "manageEmojis")){
+                sendMessageToUser(socket.id, JSON.parse(
+                    `{
+                            "title": "Missing permissions!",
+                            "message": "You arent allowed to manage Emojis",
+                            "buttons": {
+                                "0": {
+                                    "text": "Ok",
+                                    "events": ""
+                                }
+                            },
+                            "type": "error",
+                            "popup_type": "confirm"
+                        }`));
+
+                response({type: "error", msg: "You dont have permissions to manage Emojis"});
+                return;
+            }
+
+            localUploadPath = "./public/emojis"
+            filename = "emoji_" + fileId + "_" + escapeHtml(member.filename);
+        }
+
+        var cloudflareId = serverconfig.serverinfo.cfAccountId;
+        var cloudflareToken = serverconfig.serverinfo.cfAccountToken;
+        var cloudflareHash = serverconfig.serverinfo.cfHash;
+
+        if(!hasPermission(member.id, "uploadFiles")){
+            sendMessageToUser(socket.id, JSON.parse(
+                `{
+                            "title": "Missing permissions!",
+                            "message": "You arent allowed to upload files ",
+                            "buttons": {
+                                "0": {
+                                    "text": "Ok",
+                                    "events": ""
+                                }
+                            },
+                            "type": "error",
+                            "popup_type": "confirm"
+                        }`));
+
+            response({type: "error", msg: "You dont have permissions to upload files"});
+            return;
+        }
+
+        var { ext, mime } = fileTypeFromBuffer(member.file);
+
+        fileTypeFromBuffer(member.file).then(filetype =>{
+            // File Mime: filetype.mime
+            // File Extension: filetype.ext
+            if(filetype == null){
+                response({type: "error", msg: "Unkown MIME type!"});
+                return;
+            }
+
+            consolas("Upload File MIME Type: ".yellow + mime, "Debug");
+            if(serverconfig.serverinfo.uploadFileTypes.includes(filetype.mime)){
+                consolas("Upload File Extention Type: ".yellow + ext, "Debug");
+
+                if (validateMemberId(member.id, socket) == true &&
+                    serverconfig.servermembers[member.id].token == member.token
+                ) {
+                    var maxFolderSize = serverconfig.serverinfo.maxUploadStorage;
+
+
+                    // If we want to save images to cloudflare
+                    if (serverconfig.serverinfo.useCloudflareImageCDN == 1) {
+                        consolas("Image is being uploaded to CDN".cyan);
+
+                        const form = new FormData();
+                        var cloudname = "uploaded_" + generateId(34);
+                        form.append('file', member.file);
+                        form.append('id', cloudname);
+
+                        fetch(`https://api.cloudflare.com/client/v4/accounts/${cloudflareId}/images/v1`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': 'Bearer ' + cloudflareToken
+                            },
+                            body: form
+                        }).then(result => {
+                            //console.log(result);
+                            //console.log(result.status);
+
+                            // Lets check the result
+                            if (result.status == 200) {
+                                consolas("Uploaded url: " + `https://imagedelivery.net/${cloudflareHash}/${cloudname}/public`, "Debug");
+                                response({type: "success", msg: `https://imagedelivery.net/${cloudflareHash}/${cloudname}/public`});
+                            } else {
+                                //response(result.code);
+                                response({type: "error", msg: result.code});
+                            }
+                        })
+                        return;
+
+
+                        // We want images to be saved locally here
+                    } else {
+                        getSize(localUploadPath, (err, size) => {
+                            if (err) { throw err; }
+
+                            //console.log(size + ' bytes');
+                            var fileSizeMB = (size / 1024 / 1024).toFixed(2);
+                            var userRole = getMemberHighestRole(member.id);
+                            var userUpload = userRole.permissions.maxUpload;
+
+
+                            if(userUpload == null){
+                                if(hasPermission(member.id, "bypassUploadLimit")){
+                                    userUpload = 99999;
+                                }
+                                else{
+                                    response({type: "error", msg: "You are not allowed to upload files"});
+                                    return;
+                                }
+                            }
+
+                            consolas("File Size in MB: " + fileSizeMB)
+
+                            if(fileSizeMB > userUpload){
+                                consolas("File Size was too big!" , "Debug");
+                                consolas(`File Size of upload: ${fileSizeMB}` , "Debug");
+                                consolas(`Max User Upload Size: ${ userRole.permissions.maxUpload}` , "Debug");
+
+                                response({type: "error", msg: "File is too large"});
+                                return;
+                            }
+
+                            //console.log((size / 1024 / 1024).toFixed(2) + ' MB ' + maxFolderSize);
+
+                            var currentFolderSize = Math.round((size / 1024 / 1024).toFixed(2));
+
+
+                            if(currentFolderSize < maxFolderSize){
+
+
+                                consolas(`Member ${member.id} is uploading the file ${member.filename}`, "Debug");
+                                var error;
+
+
+                                try{
+                                    fs.writeFileSync(localUploadPath + "/" + filename, member.file, function(err) {
+                                        error = err;
+                                    });
+                                }
+                                catch(err){
+                                    error = err;
+                                }
+
+
+                                // IF everything worked out well, we can check if we want to
+                                // upload it to cloudflare or not
+                                if(error == null){
+                                    consolas("Image is being uploaded to local server", "Debug");
+                                    response({type: "success", msg: localUploadPath.replace("./public", "") + "/" + filename});
+
+                                    return;
+                                }
+
+                                response({type: "error", msg: error});
+                            }
+                            else{
+                                consolas(`Cannot upload file! Max Upload Size Limit ${maxFolderSize}MB reached!`.yellow);
+                                response({type: "error", msg: "Server's max. upload limit reached"});
+                            }
+
+
+                        });
+                    }
+                }
+            }
+            else{
+                response({type: "error", msg: "This file type is not allowed on the server"});
+                consolas("File Type for upload not allowed. File Type: " + filetype.mime)
+            }
+        });
+    });
+
+    socket.on("getServerInfo", function(member, response) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+            response(serverconfig.serverinfo);
+        }
+        else{
+            consolas("ID or Token was invalid while requesting server information", "Debug");
+            consolas(`ID: ${member.id}`.yellow, "Debug");
+            consolas(`Token: ${member.token}`.yellow, "Debug");
+        }
+    });
+
+    socket.on("getGroupInfo", function(member, response) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+            if(hasPermission(member.id, "manageGroups")){
+
+                var groupObj = serverconfig.groups[member.group];
+                response({type: "success", msg: "Successfully resolved group", data: groupObj });
+            }
+            else{
+                response({type: "error", msg: "You dont have the permissions to manage groups"})
+            }
+        }
+        else{
+            consolas("ID or Token was invalid while requesting server information", "Debug");
+            consolas(`ID: ${member.id}`.yellow, "Debug");
+            consolas(`Token: ${member.token}`.yellow, "Debug");
+        }
+    });
+
+    socket.on("getChannelInfo", function(member, response) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+            if(hasPermission(member.id, "manageChannels")){
+
+                var channelObj = resolveChannelById(member.channel.replace("channel-", ""));
+                response({type: "success", msg: "Successfully resolved channel", data: channelObj });
+            }
+            else{
+                response({type: "error", msg: "You dont have the permissions to manage channels"})
+            }
+        }
+        else{
+            consolas("ID or Token was invalid while requesting server information", "Debug");
+            consolas(`ID: ${member.id}`.yellow, "Debug");
+            consolas(`Token: ${member.token}`.yellow, "Debug");
+        }
+    });
+
+    socket.on("updateChannelName", function(member, response) {
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+            if(hasPermission(member.id, "manageChannels")){
+
+                var group = resolveGroupByChannelId(member.channel);
+                var category = resolveCategoryByChannelId(member.channel);
+
+                serverconfig.groups[group].channels.categories[category].channel[member.channel].name = member.name;
+                saveConfig();
+
+                response({type: "success", msg: "Successfully updated channel name"});
+
+                // Let everyone know about the update
+                io.emit("receiveChannelTree", getChannelTree(member));
+            }
+            else{
+                response({type: "error", msg: "You dont have the permissions to manage channels"})
+            }
+        }
+        else{
+            consolas("ID or Token was invalid while requesting server information", "Debug");
+            consolas(`ID: ${member.id}`.yellow, "Debug");
+            consolas(`Token: ${member.token}`.yellow, "Debug");
+        }
+    });
+
+    socket.on("getServerRoles", function(member, response) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+            if(hasPermission(member.id, "manageRoles")){
+                response(serverconfig.serverroles);
+            }
+            else{
+                response({type: "error", msg: "You dont have the permissions to manage server roles"})
+            }
+        }
+        else{
+            consolas("ID or Token was invalid while requesting server information", "Debug");
+            consolas(`ID: ${member.id}`.yellow, "Debug");
+            consolas(`Token: ${member.token}`.yellow, "Debug");
+        }
+    });
+
+    socket.on("getGroupChannels", function(member, response) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+            if(hasPermission(member.id, "manageChannels") ||
+                hasPermission(member.id, "manageGroup") ||
+                hasPermission(member.id, "manageGroups")){
+
+                response(serverconfig.groups);
+            }
+            else{
+                response({type: "error", msg: "You dont have the permissions to manage group channels"})
+            }
+        }
+        else{
+            consolas("ID or Token was invalid while requesting server information", "Debug");
+            consolas(`ID: ${member.id}`.yellow, "Debug");
+            consolas(`Token: ${member.token}`.yellow, "Debug");
+        }
+    });
+
+    socket.on('updateChannelHierarchy', function (member, response) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageChannels") ||
+                hasPermission(member.id, "manageGroup") ||
+                hasPermission(member.id, "manageGroups"))
+            {
+                try{
+                    serverconfig.groups = member.sorted;
+
+                    saveConfig();
+
+                    response({type: "success", msg: "Changes were successfully applied"});
+
+                    // Update Channel Hierarchy for everyone
+                    io.to(usersocket[member.id]).emit("receiveChannelTree", getChannelTree(member));
+                    io.emit("receiveChannelTree", getChannelTree(member));
+
+                    // Update Group Hierarchy for everyone
+                    io.emit("updateGroupList");
+                }
+                catch(e){
+                    consolas("Unable to sort roles".red);
+                    console.log(e);
+                }
+            }
+            else{
+                response({type: "error", msg: "denied"});
+            }
+        }
+    });
+
+    socket.on("saveMediaSettings", function(member, response) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageUploads")){
+                try{
+
+                    consolas("Server Media Settings are being changed!".yellow);
+                    consolas(`Local Upload Limit: ${member.maxLocalUpload}`);
+                    consolas(`Use Cloudflare: ${member.useCloudflare}`);
+                    consolas(`CF Account ID: ${member.cloudflareAccountId}`);
+                    consolas(`CF Account Token: ${member.cloudflareAccountToken}`);
+                    consolas(`CF Account Hash: ${member.cloudflareHash}`);
+
+                    serverconfig.serverinfo.maxUploadStorage = member.maxLocalUpload;
+                    serverconfig.serverinfo.useCloudflareImageCDN = member.useCloudflare;
+                    serverconfig.serverinfo.cfAccountId = member.cloudflareAccountId;
+                    serverconfig.serverinfo.cfAccountToken = member.cloudflareAccountToken;
+                    serverconfig.serverinfo.cfHash = member.cloudflareHash;
+                    saveConfig();
+
+                    response({type: "success", msg: "Settings saved successfully, please try to upload a profile picture to see if it works."})
+                }
+                catch(error){
+                    response({type: "error", msg: "Server couldnt save settings: " + error})
+                }
+            }
+            else{
+                response({type: "error", msg: "You dont have the permissions to manage the upload settings"})
+            }
+
+        }
+    });
+
+    socket.on("saveRateSettings", function(member, response) {
+        checkRateLimit(socket);
+
+        if(validateMemberId(member.id, socket) == true &&
+            serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            if(hasPermission(member.id, "manageRateSettings")){
+                try{
+
+                    /*
+                    consolas("Server Rate Settings are being changed!".yellow);
+                    consolas(`Rate Limit: ${member.newRateLimit}`);
+                    consolas(`Drop Interval: ${member.newDropIntervaö}`);
+
+                     */
+
+                    serverconfig.serverinfo.rateLimit = member.newRateLimit;
+                    serverconfig.serverinfo.dropInterval = member.newDropInterval;
+                    saveConfig();
+
+                    response({type: "success", msg: "Settings saved successfully."})
+                }
+                catch(error){
+                    response({type: "error", msg: "Server couldnt save rate settings: " + error})
+                }
+            }
+            else{
+                response({type: "error", msg: "You dont have the permissions to manage the rate settings"})
+            }
+
+        }
+    });
+
+});
+
+
+
+function hasPermission(id, permission, searchGroup = null){
+
+    var foundPermission = false;
+    var foundAdmin = false;
+    var stopExecution = false;
+    var userroles = resolveRolesByUserId(id);
+
+    // This needs to be on top so it can check for administrator permissions
+    // For each server role
+    Object.keys(serverconfig.serverroles).forEach(function(role) {
+
+        if(serverconfig.serverroles[role].members.includes(id)){
+
+            if(serverconfig.serverroles[role].permissions["administrator"] == 1){
+                // User is admin
+                foundPermission = true;
+                stopExecution = true;
+                return true;
+
+            }
+            else if(serverconfig.serverroles[role].permissions[permission] == 1){
+                // User has permission
+                foundPermission = true;
+                stopExecution = true;
+                return true;
+            }
+            else if(serverconfig.serverroles[role].permissions[permission] == 0){
+                if(stopExecution != true){
+                    foundPermission = false;
+                }
+            }
+            else{
+
+            }
+        }
+        else{
+        }
+    });
+
+    if(stopExecution == true){
+        return foundPermission;
+    }
+
+
+    // Search Permission in specific group
+    if(searchGroup != null){
+
+        // For each Group Permission Role
+        Object.keys(serverconfig.groups[searchGroup].permissions).forEach(function(permrole) {
+
+            // If the user role includes the group role
+            if(userroles.includes(permrole)){
+
+                // For each permission of the group role
+                Object.keys(serverconfig.groups[searchGroup].permissions[permrole]).forEach(function(perm) {
+
+                    if(permission == perm && serverconfig.groups[searchGroup].permissions[permrole][perm] == 1) {
+                        //console.log("Found permission " + perm);
+                        //console.log("it was " + serverconfig.groups[searchGroup].permissions[permrole][perm])
+
+                        foundPermission = true;
+                        return true;
+                    }
+                    else  if(permission == perm && serverconfig.groups[searchGroup].permissions[permrole][perm] == 0) {
+                        foundPermission = false
+                    }
+                });
+            }
+
+        });
+
+        return foundPermission;
+    }
+
+
+    // For each group
+    Object.keys(serverconfig.groups).forEach(function(group) {
+
+        // For each Group Permission Role
+        Object.keys(serverconfig.groups[group].permissions).forEach(function(permrole) {
+
+            // If the user role includes the group role
+            if(userroles.includes(permrole)){
+
+                // For each permission of the group role
+                Object.keys(serverconfig.groups[group].permissions[permrole]).forEach(function(perm) {
+
+                    if(permission == perm && serverconfig.groups[group].permissions[permrole][perm] == 1) {
+
+                        foundPermission = true;
+                    }
+                    else  if(permission == perm && serverconfig.groups[group].permissions[permrole][perm] == 0) {
+                        foundPermission = false
+                    }
+                });
+            }
+
+        });
+
+
+        userroles.forEach(userrole =>{
+
+            if(serverconfig.groups[group].permissions[userrole] != null){
+                if(serverconfig.groups[group].permissions[userrole][permission] == 1 ||
+                    serverconfig.groups[group].permissions[userrole]["administrator"] == 1){
+                    foundPermission = true;
+                }
+            }
+        })
+    });
+
+
+    return foundPermission;
+}
+
+function checkUserChannelPermission(channel, userId, perm){
+
+    var found = false;
+
+    var userRoles = resolveRolesByUserId(userId);
+
+    var group = resolveGroupByChannelId(channel);
+    var category = resolveCategoryByChannelId(channel);
+
+    userRoles.forEach(role =>{
+
+        if(hasPermission(userId, "administrator")){
+            found = true;
+            return;
+        }
+        if(hasPermission(userId, "manageChannels")){
+            found = true;
+            return;
+        }
+
+        if(group != null && category != null && channel != null){
+            //consolas(`serverconfig.groups[${group}].channels.categories[${category}].channel[${channel}].permissions[${role}][${perm}]`)
+
+            // if the role is present in the channel perms
+            if(serverconfig.groups[group].channels.categories[category].channel[channel].permissions[role].hasOwnProperty(perm)){
+                //consolas(colors.yellow("Channel has property"));
+
+                // the role is allowed to see it
+                if(serverconfig.groups[group].channels.categories[category].channel[channel].permissions[role][perm] == 1){
+                    found = true;
+                }
+                // when a channel is denying that role
+                else if(serverconfig.groups[group].channels.categories[category].channel[channel].permissions[role][perm] == 0){
+                    found = false;
+                    //consolas(colors.red("IS forbidden!"))
+                    return false;
+                }
+            }
+            // if the role isnt setup there dont allow entrance
+            else{
+                found = false
+                //consolas("Channel does not have the property")
+                return;
+            }
+
+
+            if(hasPermission(userId, perm)){
+                found = true;
+            }
+            // if the channel wasnt setup yet with perms dont show it
+            else if(serverconfig.groups[group].channels.categories[category].channel[channel].permissions == {} ){
+                found = false;
+                return;
+            }
+        }
+        else{
+            found = true;
+        }
+    })
+
+    return found;
+
+}
+
+function resolveGroupByChannelId(id){
+
+    /*
+    console.log(" ");
+    console.log(" ");
+    console.log(" ");
+    console.log("Resolving Group by Channel ID " + id);
+
+     */
+
+    var found = null;
+    // Foreach Group
+    Object.keys(serverconfig.groups).reverse().forEach(function(group) {
+
+        //console.log(group);
+
+        // For each Category
+        Object.keys(serverconfig.groups[group].channels.categories).reverse().forEach(function(category) {
+
+
+            //console.log(category);
+
+            // For each Channel
+            Object.keys(serverconfig.groups[group].channels.categories[category].channel).reverse().forEach(function(channelId) {
+
+                if(channelId == id){
+                    found = group;
+                }
+            });
+        });
+    });
+
+    return found;
+}
+
+function resolveCategoryByChannelId(id){
+
+    var found = null;
+    // Foreach Group
+    Object.keys(serverconfig.groups).reverse().forEach(function(group) {
+
+        //console.log(group);
+
+        // For each Category
+        Object.keys(serverconfig.groups[group].channels.categories).reverse().forEach(function(category) {
+
+
+            //console.log(category);
+
+            // For each Channel
+            Object.keys(serverconfig.groups[group].channels.categories[category].channel).reverse().forEach(function(channelId) {
+
+
+                if(channelId == id){
+                    found = category;
+                }
+            });
+        });
+    });
+
+    return found;
+}
+
+function resolveRolesByUserId(id){
+
+    var userRoles = [];
+    // Foreach Group
+    Object.keys(serverconfig.serverroles).reverse().forEach(function(roles) {
+
+        if(serverconfig.serverroles[roles].members.includes(id) == true){
+
+            if(userRoles.includes(roles) == false){
+                userRoles.push(roles);
+            }
+        }
+
+    });
+
+    return userRoles;
+}
+
+function resolveChannelById(id){
+
+
+    /*
+    console.log(" ");
+    console.log(" ");
+    console.log(" ");
+    console.log(" ");
+    console.log("Looking for " + id);
+
+
+     */
+
+    var found = null;
+    // Foreach Group
+    Object.keys(serverconfig.groups).reverse().forEach(function(group) {
+
+        //console.log("- Group: " + group);
+
+        // For each Category
+        Object.keys(serverconfig.groups[group].channels.categories).reverse().forEach(function(category) {
+
+
+            //console.log("   - Category " + category);
+
+            // For each Channel
+            Object.keys(serverconfig.groups[group].channels.categories[category].channel).reverse().forEach(function(channelId) {
+                //console.log("      Channel:  " + channelId);
+
+
+                if(channelId == id){
+                    //console.log("Found Channel")
+                    found = serverconfig.groups[group].channels.categories[category].channel[id];
+                    return serverconfig.groups[group].channels.categories[category].channel[id];
+                }
+            });
+        });
+    });
+
+    //console.log("Finished")
+    return found;
+}
+
+
+function checkRateLimit(socket){
+    var ip = socket.handshake.address;
+
+    //console.log("IP RATE LIMIT")
+    //console.log(ip)
+
+    if(ip == "::1" || ip.includes("127.0.0.1")){
+        return;
+    }
+
+    if(ratelimit[ip] == null){
+        ratelimit[ip] = 1;
+    }else{
+        ratelimit[ip]++;
+    }
+
+    //consolas(`${ip} Rate Limit: ${ratelimit[ip]}`)
+
+    if(ratelimit[ip] > serverconfig.serverinfo.rateLimit){
+        consolas("Limit exceeded".red);
+
+        sendMessageToUser(socket.id, JSON.parse(
+            `{
+                        "title": "Rate Limited!",
+                        "message": "Your connection was terminated.",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                    }`));
+
+        socket.disconnect();
+
+        if(!serverconfig.ipblacklist.includes(ip)){
+
+            //serverconfig.ipblacklist.push(ip);
+            //saveConfig();
+            consolas(`IP ${ip} was added to the blacklist for rate limit spam`);
+        }
+
+        return;
+    }
+
+    setTimeout(() => {
+
+        try{
+            ratelimit[ip]--;
+        }catch { }
+
+    }, serverconfig.serverinfo.dropInterval * 1000);
+}
+
+async function getUserBadges(id) {
+    return new Promise((resolve, reject) => {
+        var badgeUrl = 'https://raw.githubusercontent.com/hackthedev/dcts-shipping/main/badges/' + serverconfig.servermembers[id].id;
+
+
+        (async function () {
+            const res = await fetch(badgeUrl)
+            //console.log(res);
+
+            if(res.status == 404){
+                resolve(null);
+                return null;
+            }
+            else if(res.status == 200){
+                const html = await res.text()
+                //console.log(html)
+                resolve(html);
+                return html;
+            }
+            else{
+                resolve(null);
+                return null;
+            }
+        })()
+
+
+    });
+
+    return prom;
+}
+
+async function getMemberProfile(id){
+
+    var memberUsername = serverconfig.servermembers[id].name;
+    var memberStatus = serverconfig.servermembers[id].status;
+    var memberAboutme = serverconfig.servermembers[id].aboutme;
+    var memberIcon = serverconfig.servermembers[id].icon;
+    var memberBanner = serverconfig.servermembers[id].banner;
+    var memberJoined = serverconfig.servermembers[id].joined;
+    var memberLastOnline = serverconfig.servermembers[id].lastOnline;
+    var isMuted = serverconfig.servermembers[id].isMuted;
+
+    // member badges
+    //console.log("URL");
+    //console.log('https://raw.githubusercontent.com/hackthedev/dcts-shipping/main/badges/' + serverconfig.servermembers[id].token);
+
+    // Show a small badge if the user is muted
+    var mutedBadge = "";
+    if(isMuted)
+        mutedBadge = `<br><code class="joined" style="color: indianred; border: 1px solid indianred;">Muted</code>`
+
+    // Handle User Badges
+    var codi = await getUserBadges(id).then(result => {
+
+        var badgeCode = "";
+        if(result != null){
+
+            var badges = JSON.parse(result);
+
+
+            Object.keys(badges).forEach(function (badge) {
+                //console.log(badge);
+                //console.log(badges[badge].display);
+
+                badgeCode += `<img class="profile_badge" src="https://raw.githubusercontent.com/hackthedev/dcts-shipping/main/badges/${badges[badge].icon}.png" title="${badges[badge].display}" />`;
+            });
+        }
+
+        // <div id="profile_banner" style="background-image: url('${memberBanner}');"></div>
+        var profile = `
+        <div id="profile_banner" style="background-image: url('${memberBanner}')"></div>
+    
+        <div id="profile_pfp_container">
+            <div id="profile_icon" style="background-image: url('${memberIcon}');"></div>
+            
+            <div id="profile_badge_container">
+                ${badgeCode}
+            </div>
+        
+    
+        <div id="profile_content">
+            <div id="profile_username"><h2 style="margin-bottom: 0 !important;">${memberUsername}</h2></div>
+            <div id="profile_status">${memberStatus}</div>
+            <hr>
+    
+            
+            <h2 class="profile_headline">About Me</h2>
+            <div class="profile_aboutme">            
+                ${memberAboutme}<br><br>
+                <code class="joined">Joined ${new Date(memberJoined).toLocaleString("narrow")}</code><br>
+                <code class="joined">Last Online ${new Date(memberLastOnline).toLocaleString("narrow")}</code>
+                ${mutedBadge}
+            </div>
+            <hr>
+            
+    
+            <h2 class="profile_headline">Roles</h2>
+            <div id="profile_roles">`;
+
+        Object.keys(serverconfig.serverroles).reverse().forEach(function (role) {
+
+            var roleColor = serverconfig.serverroles[role].info.color;
+            var roleName = serverconfig.serverroles[role].info.name;
+
+            if (serverconfig.serverroles[role].members.includes(id)) {
+                profile += `<code class="role" id="${role}"><div class="role_color" style="background-color: ${roleColor};"></div>${roleName}</code>`;
+            }
+        });
+
+        // Add Role Button
+        profile += `<code style="cursor: pointer;" onclick="addRoleFromProfile(id);" class="role" id="addRole-${id}">+</code>`;
+        profile += `</div>
+            </div>
+        </div>`;
+
+        return profile;
+    });
+
+    return codi;
+}
+
+function convertMention(text){
+
+    var pingedUsers;
+    var userId;
+    try{
+        pingedUsers = text.message.replaceAll(/[\\<>@#&!]/g, "").split(" ");
+
+        if(pingedUsers == null){
+            return text.message;
+        }
+
+        for(let i = 0; i < pingedUsers.length; i++){
+            try{
+                userId = pingedUsers[i];
+                userId = userId.replace(/\D/g,'');
+                text.message = text.message.replaceAll(`&lt;@${userId}&gt;`, `<label class="mention" id="mention-${serverconfig.servermembers[userId].id}">@${serverconfig.servermembers[userId].name}</label>`);
+            }
+            catch (lolz){
+                //consolas(colors.red(lolz), "Debug");
+            }
+        }
+
+        return text.message;
+    }
+    catch (exe){
+        console.log(exe)
+    }
+}
+
+function getSavedChatMessage(group, category, channel){
+
+    var dir = `./chats/${group}/${category}/${channel}/`;
+
+    if (!fs.existsSync(dir)){
+        consolas(`Directory ${dir} didnt exist`, "Debug");
+        return;
+    }
+
+    var messages = [];
+    fs.readdirSync(`./chats/${group}/${category}/${channel}/`).forEach(file => {
+
+        var message = JSON.parse(fs.readFileSync(`./chats/${group}/${category}/${channel}/${file}`));
+
+
+        if(message.message.includes("<br>") && (message.message.split("<br>").length-1) <= 1){
+            message.message = message.message.replaceAll("<br>", "")
+        }
+
+        messages.push(message);
+    });
+
+    //console.log(messages);
+
+    messages = messages.sort((a, b) => {
+        if (a.timestamp < b.timestamp) {
+            return -1;
+        }
+    });
+
+    /*
+    fs.readdirSync(`./chats/${group}/${category}/${channel}/`).forEach(file => {
+        messages.push( JSON.parse(fs.readFileSync(`./chats/${group}/${category}/${channel}/${file}`)) );
+    });
+
+
+     */
+
+
+    return messages;
+}
+
+function saveChatMessage(message){
+
+    var group = message.group;
+    var category = message.category;
+    var channel = message.channel;
+
+
+    if(message.message.includes("\n") && (message.message.split("\n").length-1) > 1){
+        message.message = message.message.replaceAll("\n", "<br>")
+    }
+
+    // If directory does not exist, creat it
+    if (!fs.existsSync(`./chats/${group}/${category}/${channel}/`)){
+        fs.mkdirSync(`./chats/${group}/${category}/${channel}/`, { recursive: true });
+    }
+
+    // Create the chat file
+    fs.writeFile(`./chats/${group}/${category}/${channel}/${message.messageId}`, JSON.stringify(message), function(err) {
+        if(err) {
+            return console.log(err);
+        }
+    });
+}
+
+function sendMessageToUser(socketId, data){
+    io.to(socketId).emit("modalMessage", data);
+}
+
+function generateId(length) {
+    let result = '1';
+    const characters = '0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length-1) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        counter += 1;
+    }
+    return result;
+}
+
+
+
+function getMemberList(member, channel){
+
+
+    var code = "";
+
+    var members = serverconfig.servermembers;
+    var roles = serverconfig.serverroles;
+
+    var sortedRoles = [];
+    var offlineMember = []
+
+    Object.keys(roles).reverse().forEach(function(role) {
+        sortedRoles[roles[role].info.sortId] = roles[role];
+    });
+
+    // Foreach role
+    sortedRoles = sortedRoles.reverse();
+    sortedRoles.forEach(role =>{
+
+        var noMembersInRole = true;
+        // Role ID:
+        // role
+
+        // Role Object
+        // roles[Role]
+
+
+        // If role display is on
+        if(role.info.displaySeperate == 1){
+
+            // Foreach Role Member
+            Object.keys(members).forEach(function(member) {
+
+                // Member ID:
+                // member
+
+                // Do not show banned users
+                if(serverconfig.servermembers[member].isBanned == 1){
+                    return;
+                }
+
+                // Member Object
+                // members[member]
+
+                //console.log(member);
+                //console.log(members[member]);
+
+                // check here for highest role
+                var highestMemberRole = getMemberHighestRole(member);
+
+
+                if((role.members.includes(member)  && role.info.displaySeperate == 1) ||
+                    role.info.id == 1){
+
+                    if(role.info.id == 1 && getMemberLastOnlineTime(member) > 5){
+                        if(!offlineMember.includes(member)){
+                            offlineMember.push(member);
+                        }
+                    }
+
+                    /*
+                    // Only display role in member list if at least one user is present in the role
+                    if(noMembersInRole == true){
+                        code += `<div class="infolist-role" title="${role.info.name}">
+                                    ${role.info.name}
+                                    <hr style="margin-bottom: 16px;">
+                                </div>`;
+
+                        noMembersInRole = false;
+                    }
+
+
+
+                    code += `<div class="memberlist-container" id="${members[member].id}">
+                                <img class="memberlist-img" id="${members[member].id}" src="${members[member].icon}" onerror="this.src = '/img/default_pfp.png';">
+                                <div class="memberlist-member-info name" onclick="getMemberProfile('${members[member].id}');" id="${members[member].id}" style="color: ${role.info.color};">
+                                    ${members[member].name}
+                                </div>
+                                <div class="memberlist-member-info status" id="${members[member].id}">
+                                    ${members[member].status}
+                                </div>
+                            </div>`;
+
+                     */
+
+                    if(checkUserChannelPermission(channel, member, "viewChannel") == true){
+
+                        if(highestMemberRole.info.displaySeperate == 1 && role.info.id != highestMemberRole.info.id && role.info.id != 1){
+                            return;
+                        }
+
+                        var extraClassOffline = "";
+                        if(role.info.id != 1){ // != Offline
+                            if(getMemberLastOnlineTime(member) > 5){
+                                return;
+                            }
+                        }
+                        else{
+                            if(getMemberLastOnlineTime(member) < 5){
+                                return;
+                            }
+                            else{
+                                extraClassOffline = "offline_pfp";
+                            }
+                        }
+
+                        // this can hide offline members - potential setting
+                        //if(offlineMember.includes(member)){
+                        //    return;
+                        //}
+
+                        // hide online members from offline section
+                        if(offlineMember.includes(member)){
+                            offlineMember.pop(member);
+                        }
+
+                        if(noMembersInRole == true){
+                            code += `<div class="infolist-role" title="${role.info.name}" style="color: ${role.info.color};">
+                                    ${role.info.name}
+                                    <hr style="margin-bottom: 16px;border: 1px solid ${role.info.color};">
+                                </div>`;
+
+                            noMembersInRole = false;
+                        }
+
+                        // If user is muted make it somehow visually known
+                        var nameStyle = `${members[member].name}`
+                        var statusStyle = `${members[member].status}`
+                        if(members[member].isMuted){
+                            nameStyle = `<s style="color: indianred;"><span style="font-style: italic;color:indianred">${members[member].name}</span></s>`;
+                            statusStyle = `<s style="color: indianred;"><span style="font-style: italic;color:indianred">${members[member].status}</span></s>`;
+                            extraClassOffline = "offline_pfp";
+                        }
+
+
+                        code += `<div class="memberlist-container" id="${members[member].id}">
+                                <img class="memberlist-img ${extraClassOffline}" id="${members[member].id}" src="${members[member].icon}" onerror="this.src = '/img/default_pfp.png'">
+                                <div class="memberlist-member-info name" 
+                                onclick="getMemberProfile('${members[member].id}');" id="${members[member].id}" 
+                                style="color: ${role.info.color};">
+                                    ${nameStyle}
+                                </div>
+                                <div class="memberlist-member-info status" id="${members[member].id}" style="color: ${role.info.color};">
+                                    ${statusStyle}
+                                </div>
+                            </div>`;
+
+                    }
+
+                }
+
+            });
+        }
+    });
+
+    return code;
+}
+
+function getMemberHighestRole(id){
+    var roles = serverconfig.serverroles;
+    var sortIndex = 0;
+    var returnRole = null;
+
+    Object.keys(roles).reverse().forEach(function(role) {
+        //console.log(roles[role].members)
+
+        if(roles[role].members.includes(id)){
+            if(roles[role].info.sortId > sortIndex){
+                sortIndex = roles[role].info.sortId;
+                returnRole = roles[role];
+            }
+        }
+    });
+
+    if(returnRole == null){
+        return roles["0"];
+    }
+
+    return returnRole;
+}
+
+function getGroupList(member){
+
+    var code = "";
+    var groups = serverconfig.groups;
+    var addedGroups = []
+
+    var userroles = resolveRolesByUserId(member.id);
+
+    const groupCollection = groups;
+    let sortedGroups = Object.keys(groupCollection).sort((a, b) => {
+        return groupCollection[b].info.sortId - groupCollection[a].info.sortId
+    });
+
+    // Foreach channel in the category, display it on the web page
+    sortedGroups = sortedGroups.map((key) => groupCollection[key]);
+    sortedGroups.forEach(group => {
+
+        // Admin
+        if(hasPermission(member.id, "manageGroups") &&
+            addedGroups.includes(group.info.id) == false
+        ){
+            addedGroups.push(group.info.id);
+            code += `
+                    <a onclick="setUrl('?group=${group.info.id}');" id="group-entry-${group.info.id}">
+                        <div class="group-entry-marker" id="group-marker-${group.info.id}"></div>
+                        <div class="server-entry">
+                           <img title="${group.info.name}" id="${group.info.id}" class="server-icon" src="${group.info.icon}">
+                        </div>
+                    </a>`;
+        }
+        else {
+            //reverse()
+
+            // Normal user
+            userroles.forEach(role => {
+                try {
+                    if (group.permissions[role].viewGroup == 1 &&
+                        addedGroups.includes(group.info.id) == false
+                    ) {
+                        addedGroups.push(group.info.id);
+                        code += `<a onclick="setUrl('?group=${group.info.id}');"><div class="server-entry">
+                                    <img title="${group.info.name}" id="${group.info.id}" class="server-icon" src="${group.info.icon}">
+                                </div></a>`;
+                    }
+                } catch {
+
+                }
+            });
+        }
+
+    });
+
+
+    return code;
+}
+
+function getChannelTree(member){
+    var group = member.group;
+
+    var addedChannels = [];
+    var addedCategories = [];
+
+    //var treecode = "";
+    var treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`;
+
+    var groups = serverconfig.groups;
+    var roles = serverconfig.serverroles;
+
+    if(group == null || groups[group] == null){
+        group = 0;
+    }
+
+
+    var groupCategories = groups[group].channels.categories;
+    var showedCategory = false;
+
+    /*
+    if(serverconfig.groups[group].channels.length == null){
+        if(hasPermission(member.id, "manageGroups")){
+            console.log("checked perm")
+            treecode += `<h2>${serverconfig.groups[group].info.name}</h2><hr>`;
+        }
+    }
+
+     */
+
+    const catCollection = serverconfig.groups[group].channels.categories;
+    let sortedCats = Object.keys(catCollection).sort((a, b) => {
+        return catCollection[b].info.sortId - catCollection[a].info.sortId
+    });
+
+
+    var added_channels = [];
+
+
+
+
+    // Foreach channel in the category, display it on the web page
+    sortedCats = sortedCats.map((key) => catCollection[key]);
+
+
+    sortedCats.forEach(cat => {
+
+
+        showedCategory = false;
+        /*
+        if(hasPermission(member.id, "viewGroup", member.group)){
+            // Add Category
+            treecode +=  "<details open>";
+            treecode += `<summary class="categoryTrigger" id="category-${cat.info.id}" style="color: #ABB8BE;">${cat.info.name}</summary>`;
+            treecode += `<ul>`
+        }
+
+         */
+
+        if(hasPermission(member.id, "manageChannels", member.group) == true ){
+            // Add Category
+            treecode +=  "<details open>";
+            treecode += `<summary class="categoryTrigger" id="category-${cat.info.id}" style="color: #ABB8BE;">${cat.info.name}</summary>`;
+            treecode += `<ul>`
+            showedCategory = true;
+        }
+
+        //showedCategory = false;
+
+        const chanCollection = serverconfig.groups[group].channels.categories[cat.info.id].channel;
+        let sortedChans = Object.keys(chanCollection).sort((a, b) => {
+            return chanCollection[b].sortId - chanCollection[a].sortId
+        });
+
+        // For each Category, sort the category's channels
+        sortedChans = sortedChans.map((key) => chanCollection[key]);
+        sortedChans.forEach(chan => {
+            //console.log(cat.info.name)
+
+            //console.log(hasPermission(member.id, "manageChannels", member.group))
+
+            if (
+                hasPermission(member.id, "viewGroup", member.group) &&
+                showedCategory == false && sortedChans.length > 0 &&
+                checkUserChannelPermission(chan.id, member.id, "viewChannel")
+            ){
+                // Add Category
+                treecode +=  "<details open>";
+                treecode += `<summary class="categoryTrigger" id="category-${cat.info.id}" style="color: #ABB8BE;">${cat.info.name}</summary>`;
+                treecode += `<ul>`
+                showedCategory = true;
+            }
+
+
+            Object.keys(roles).forEach(function(role) {
+                if(roles[role].members.includes(member.id)){
+                    if(checkUserChannelPermission(chan.id, member.id, "viewChannel") || hasPermission(member.id, "manageChannels", member.group)){
+
+                        if(added_channels.includes(chan.id + "_" + chan.name) == false){
+                            treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}')"><li class="channelTrigger" id="channel-${chan.id}" style="color: #ABB8BE;">${chan.name}</li></a>`;
+                            added_channels.push(chan.id + "_" + chan.name)
+                        }
+
+                    }
+                    else{
+                        //console.log(`User ${serverconfig.servermembers[member.id].name} was denied`)
+                    }
+                }
+            });
+
+        });
+
+        /*
+        if(sortedCats.length == null){
+
+            if(hasPermission(member.id, "manageChannels")){
+                if(showedCategory == false && addedCategories.includes(groupCategories[category].info.name) == false){
+
+                    treecode +=  "<details open>";
+                    treecode += `<summary class="categoryTrigger" id="${category}">${groupCategories[category].info.name}</summary>`;
+                    treecode += `<ul>`
+
+                    addedCategories.push(groupCategories[category].info.name)
+                }
+            }
+
+        }
+
+         */
+
+        treecode += "</ul>";
+        treecode += "</details>";
+
+    });
+
+    return treecode;
+}
+
+
+function isVideo(url) {
+    return /\.(mp4|webp)$/.test(url);
+}
+
+function validateMemberId(id, socket, bypass = false){
+
+    if(bypass == false){
+        checkRateLimit(socket);
+    }
+
+    if(id.length == 12 && isNaN(id) == false){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+function saveConfig(){
+    fs.writeFileSync("./config.json", JSON.stringify(serverconfig, false, 4), function(err) {
+        if(err) {
+            return console.log(err);
+        }
+        consolas("The config file ".cyan + colors.cyan("./logs/error_" + date + ".txt") + " was saved!".cyan);
+    });
+
+    // reread config (update in program)
+    serverconfig = JSON.parse(fs.readFileSync("./config.json", {encoding: "utf-8"}));
+
+    //io.emit("configUpdate");
+}
+
+function reloadConfig(){
+    // reread config (update in program)
+    serverconfig = JSON.parse(fs.readFileSync("./config.json", {encoding: "utf-8"}));
+    consolas("Reloaded config".cyan);
+}
+
+function updateMember(){
+    Object.keys(serverconfig.servermembers).forEach(function(k){
+        //console.log(k + ' - ' + serverconfig.servermembers[k].name);
+    });
+}
+
+function isImgUrl(url) {
+    return new Promise((resolve, reject) => {
+        return request( url, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+
+                if(((response.headers['content-type']).match(/(image)+\//g)).length != 0){
+                    resolve(true);
+                    //return true;
+                }else{
+                    resolve(false);
+                    //return false;
+                }
+
+                resolve(true);
+                //return true;
+
+            } else {
+                resolve(false);
+                //return false;
+            }
+        });
+    });
+    //return /\.(jpg|jpeg|png|webp|avif|gif)$/.test(url)
+}
+
+function linkify(text, messageid, roomid) {
+    return new Promise((resolve, reject) => {
+
+        var urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+
+        return text.replace(urlRegex, function (url) {
+
+            if (url.toLowerCase().includes("youtube") || url.toLowerCase().includes("youtu.be")) {
+
+
+                resolve(createYouTubeEmbed(url));
+                return createYouTubeEmbed(url);
+
+            } else {
+
+                isImgUrl(url).then((result) => {
+                    console.log("result was " + result);
+
+                    if (result == true) {
+                        console.log("Returning img embed")
+
+                        var code = `<a href="${url}" target="_blank">${url}</a><div class="iframe-container" id="${messageid}"><img class="image-embed" src="${url}"></div>`
+                        io.in(roomid).emit("createMessageEmbed", {messageId: messageid, code: code});
+
+                        resolve(`<a href="${url}" target="_blank">${url}</a><div class="iframe-container" id="${messageid}"><img class="image-embed" src="${url}"></div>`);
+                        //return `<a href="' + url + '" target="_blank">' + url + '</a><div class="iframe-container" id="${messageid}"><img class="image-embed" src="${url}"></div>`;
+
+
+
+
+                    } else if (isVideo(url)) {
+                        console.log("Returning vid embed")
+
+                        var code = `<div class="iframe-container" id="${messageid}" ><video width="560" height="315" class="video-embed" controls>
+                            <source src="${url}">
+                            </video></div>`;
+
+                        io.in(roomid).emit("createMessageEmbed", {messageId: messageid, code: code});
+
+                        resolve(`<div class="iframe-container" id="${messageid}" ><video width="560" height="315" class="video-embed" controls>
+                            <source src="${url}">
+                            </video></div>`);
+
+                        //return `<div class="iframe-container" id="${messageid}" ><video width="560" height="315" class="video-embed" controls>
+                        //<source src="${url}">
+                        //</video></div>`;
+
+                    } else {
+                        console.log("Returning url")
+
+                        var code = `<a href="${url}" target="_blank">${url}</a>`;
+                        io.in(roomid).emit("createMessageLink", {messageId: messageid, code: code});
+                        resolve('<a href="' + url + '" target="_blank">' + url + '</a>');
+                        return '<a href="' + url + '" target="_blank">' + url + '</a>';
+                    }
+                })
+            }
+        });
+    });
+}
+
+function createYouTubeEmbed(url, messageid){
+
+    var videocode = url.replace("https://www.youtube.com/watch?v=", "").replaceAll(" ", "");
+
+    var code = `<div class="iframe-container" id="${messageid}" ><iframe width="560" height="315" src="https://www.youtube.com/embed/${videocode}" 
+                title="YouTube video player" frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
+
+    consolas("Resolving YouTube URL " + url);
+    consolas("Resolved: " + videocode);
+    consolas("Resolved URL: " + "https://www.youtube.com/embed/" + videocode);
+
+    return code;
+
+}
+
+function markdown(text, messageid, roomid) {
+
+    linkify(text, messageid, roomid);
+
+    text = text
+        .replace(/_(.*?)_/gim, '<i>$1</i>')
+        .replace(/`(.*?)`/gim, '<code class="markdown">$1</code>')
+        .replace(/´´´(.*?)´´´/gim, '<pre class="markdown">$1</pre>')
+        .replace(/~~(.*)~~/gim, '<del>$1</del>')
+        //.replace(/-(.*)/gim, '<li>$1</li>')
+        .replace(/\*\*(.*)\*\*/gim, '<b>$1</b>')
+        .replace(/\*(.*)\*/gim, '<i>$1</i>');
+
+    return text;
+}
+
+function getEmojiCode(str, char1, char2) {
+    return str.substring(
+        str.indexOf(char1) + 1,
+        str.lastIndexOf(char2)
+    );
+}
+
+
+
+
+function escapeHtml(text) {
+
+    if(text == null || text.length <= 0){
+        return text;
+    }
+
+    var map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+function findEmojiByID(id){
+    // Get all local emojis
+
+    var filename = "";
+    fs.readdirSync("./public/emojis").forEach(file => {
+        if(file.includes(id)){
+            filename = file;
+            return;
+        }
+    });
+
+    return filename;
+}

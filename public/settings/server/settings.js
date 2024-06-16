@@ -1,1 +1,250 @@
-var a0_0x3032da=a0_0x38fd;(function(_0x417b3f,_0x153f2e){var _0x1c4e08=a0_0x38fd,_0x23463a=_0x417b3f();while(!![]){try{var _0x18a011=-parseInt(_0x1c4e08(0xb5))/0x1+parseInt(_0x1c4e08(0xee))/0x2+parseInt(_0x1c4e08(0xaf))/0x3*(parseInt(_0x1c4e08(0xca))/0x4)+parseInt(_0x1c4e08(0xbc))/0x5*(parseInt(_0x1c4e08(0xed))/0x6)+-parseInt(_0x1c4e08(0xf4))/0x7+-parseInt(_0x1c4e08(0xce))/0x8*(parseInt(_0x1c4e08(0xd9))/0x9)+parseInt(_0x1c4e08(0xf6))/0xa*(-parseInt(_0x1c4e08(0xd5))/0xb);if(_0x18a011===_0x153f2e)break;else _0x23463a['push'](_0x23463a['shift']());}catch(_0x276607){_0x23463a['push'](_0x23463a['shift']());}}}(a0_0x1dda,0x2e782),console[a0_0x3032da(0xb3)]('%c'+a0_0x3032da(0xef),a0_0x3032da(0xba)),console[a0_0x3032da(0xb3)]('%c'+a0_0x3032da(0xf7),a0_0x3032da(0xd3)));var socket=io[a0_0x3032da(0xae)]();socket[a0_0x3032da(0xcc)](a0_0x3032da(0xd2),{'id':getID(),'token':getToken(),'permission':[a0_0x3032da(0xe4),'manageGroup',a0_0x3032da(0xc6),a0_0x3032da(0xdc),a0_0x3032da(0xf2),'viewLogs',a0_0x3032da(0xc1),'manageRateSettings']},function(_0x44e4cf){var _0x579b25=a0_0x3032da;_0x44e4cf[_0x579b25(0xc2)]==_0x579b25(0xe0)?window[_0x579b25(0xc8)][_0x579b25(0xbd)]=window[_0x579b25(0xc8)]['origin']:document[_0x579b25(0xea)](_0x579b25(0xb4))[_0x579b25(0xbe)]['display']=_0x579b25(0xdf);});var checkEmptyElements=document[a0_0x3032da(0xc4)](a0_0x3032da(0xd6));checkEmptyElements[a0_0x3032da(0xdd)](_0x273594=>{var _0x15ca8f=a0_0x3032da,_0x593319=_0x273594;console[_0x15ca8f(0xb3)](_0x593319['id']+'\x20hm');if(_0x593319==null||_0x593319['id']['length']<=0x0||_0x593319['id'][_0x15ca8f(0xb1)]('info'))return;var _0x61e028=document[_0x15ca8f(0xc4)](_0x15ca8f(0xe3)+_0x593319['id']+'\x20a');_0x61e028[_0x15ca8f(0xec)]>0x0&&_0x61e028[_0x15ca8f(0xdd)](_0x360d38=>{var _0x443077=_0x15ca8f;if(_0x360d38['id'][_0x443077(0xec)]<=0x0||_0x360d38==null)return;console[_0x443077(0xb3)](_0x443077(0xd0)+_0x360d38['id']),socket[_0x443077(0xcc)](_0x443077(0xd2),{'id':getID(),'token':getToken(),'permission':_0x360d38['id']},function(_0x23760b){var _0x3e5484=_0x443077;if(_0x23760b[_0x3e5484(0xc2)]==_0x3e5484(0xe0)){var _0x3d2d77=document[_0x3e5484(0xea)](_0x360d38['id']+_0x3e5484(0xd4));_0x3d2d77!=null&&_0x3d2d77[_0x3e5484(0xf1)]();var _0x33c852=_0x360d38[_0x3e5484(0xb7)]['id'];document[_0x3e5484(0xea)](_0x360d38['id'])[_0x3e5484(0xf1)]();var _0x183bfb=document[_0x3e5484(0xc4)](_0x3e5484(0xe3)+_0x33c852+'\x20a'),_0xfdd699=0x0;_0x183bfb['forEach'](_0x84f614=>{_0x84f614['id']['length']!=0x0&&_0xfdd699++;}),(_0x183bfb['length']==0x0||_0xfdd699==0x0)&&document['getElementById'](_0x33c852)['remove']();}else{}});});});function a0_0x38fd(_0x4fa03d,_0x55216d){var _0x1ddad7=a0_0x1dda();return a0_0x38fd=function(_0x38fdc8,_0xca3d7c){_0x38fdc8=_0x38fdc8-0xad;var _0x37cab0=_0x1ddad7[_0x38fdc8];return _0x37cab0;},a0_0x38fd(_0x4fa03d,_0x55216d);}function a0_0x1dda(){var _0x1b1e64=['username','connect','3RJRhCh','Hey\x20im\x20new!','includes','substring','log','pagebody','198856TCwnhb',';\x20path=/','parentNode','https://wallpapers-clan.com/wp-content/uploads/2022/05/cute-pfp-25.jpg','split','color:\x20#FF0000;\x20-webkit-text-stroke:\x202px\x20black;\x20font-size:\x2072px;\x20font-weight:\x20bold;','?page=','40675GtviuQ','href','style','get','aboutme','manageServerInfo','permission','text/css','querySelectorAll','pfp','manageChannels','token','location','replaceState','1412144LKFWaT','.css','emit','src','336sAGqeI','all','Checking\x20setting\x20','toUTCString','checkPermission','color:\x20#FF0000;\x20-webkit-text-stroke:\x200px\x20black;\x20font-size:\x2020px;\x20font-weight:\x20bold;','-br','143SzCMry','#nav_settings\x20div','cookie','page/','207BCReQC','text','Whats\x20your\x20username?','manageUploads','forEach','search','block','denied','rel','media','#nav_settings\x20#','manageServer','appendChild','page','stylesheet','createElement','link','getElementById','status','length','138auJAaB','81322JNmUZw','WAIT!','head','remove','manageGroup','script','909433ZfVyWo','.html','46710hpSgRT','People\x20can\x20use\x20the\x20console\x20to\x20steal\x20your\x20account\x20xo\x20!','type','then','content','innerHTML'];a0_0x1dda=function(){return _0x1b1e64;};return a0_0x1dda();}var page=getUrlParams(a0_0x3032da(0xe6));if(page==null){}else{fetch(a0_0x3032da(0xd8)+getUrlParams(a0_0x3032da(0xe6))+'/'+getUrlParams(a0_0x3032da(0xe6))+a0_0x3032da(0xf5))[a0_0x3032da(0xf9)](_0x5dc0d2=>_0x5dc0d2[a0_0x3032da(0xda)]())['then'](_0x51b841=>document['getElementById'](a0_0x3032da(0xfa))[a0_0x3032da(0xfb)]=_0x51b841);var head=document['getElementsByTagName'](a0_0x3032da(0xf0))[0x0],link=document[a0_0x3032da(0xe8)](a0_0x3032da(0xe9));link[a0_0x3032da(0xe1)]=a0_0x3032da(0xe7),link[a0_0x3032da(0xf8)]=a0_0x3032da(0xc3),link[a0_0x3032da(0xbd)]=a0_0x3032da(0xd8)+page+'/'+page+a0_0x3032da(0xcb),link[a0_0x3032da(0xe2)]=a0_0x3032da(0xcf),head[a0_0x3032da(0xe5)](link);var jsc=document[a0_0x3032da(0xe8)](a0_0x3032da(0xf3));jsc[a0_0x3032da(0xcd)]=window[a0_0x3032da(0xc8)][a0_0x3032da(0xbd)]['replace'](a0_0x3032da(0xbb)+getUrlParams(a0_0x3032da(0xe6)),'')+('/page/'+page+'/'+page+'.js'),head['appendChild'](jsc);}function setCookie(_0x51e5e9,_0x481870,_0x588076){var _0x189582=a0_0x3032da,_0x162a89='';if(_0x588076){var _0x4b0c37=new Date();_0x4b0c37['setTime'](_0x4b0c37['getTime']()+_0x588076*0x18*0x3c*0x3c*0x3e8),_0x162a89=';\x20expires='+_0x4b0c37[_0x189582(0xd1)]();}document[_0x189582(0xd7)]=_0x51e5e9+'='+(_0x481870||'')+_0x162a89+_0x189582(0xb6);}function getCookie(_0x19d79e){var _0x57caad=a0_0x3032da,_0x212cc0=_0x19d79e+'=',_0x66048=document[_0x57caad(0xd7)][_0x57caad(0xb9)](';');for(var _0x53749f=0x0;_0x53749f<_0x66048[_0x57caad(0xec)];_0x53749f++){var _0x134bf1=_0x66048[_0x53749f];while(_0x134bf1['charAt'](0x0)=='\x20')_0x134bf1=_0x134bf1[_0x57caad(0xb2)](0x1,_0x134bf1[_0x57caad(0xec)]);if(_0x134bf1['indexOf'](_0x212cc0)==0x0)return _0x134bf1[_0x57caad(0xb2)](_0x212cc0['length'],_0x134bf1[_0x57caad(0xec)]);}return null;}function eraseCookie(_0x599019){var _0x66442a=a0_0x3032da;document[_0x66442a(0xd7)]=_0x599019+'=;\x20Path=/;\x20Expires=Thu,\x2001\x20Jan\x201970\x2000:00:01\x20GMT;';}function setUrl(_0x2d9fd2){var _0x2db05b=a0_0x3032da;window['history'][_0x2db05b(0xc9)](null,null,_0x2d9fd2);}function getUrlParams(_0x13d687){var _0x250333=a0_0x3032da,_0x55696e=window['location'][_0x250333(0xde)],_0x31d397=new URLSearchParams(_0x55696e),_0x30c066=_0x31d397[_0x250333(0xbf)](_0x13d687);return _0x30c066;}function getToken(){var _0x3ea0a8=a0_0x3032da,_0x271895=getCookie(_0x3ea0a8(0xc7));return _0x271895==null||_0x271895[_0x3ea0a8(0xec)]<=0x0?null:_0x271895;}function getAboutme(){var _0xd97ecd=a0_0x3032da,_0x58d568=getCookie(_0xd97ecd(0xc0));return _0x58d568==null||_0x58d568[_0xd97ecd(0xec)]<=0x0?'':_0x58d568;}function getBanner(){var _0x24bf25=getCookie('banner');return _0x24bf25==null||_0x24bf25['length']<=0x0?'':_0x24bf25;}function getID(){var _0x1d0e0c=a0_0x3032da,_0xd34246=getCookie('id');return _0xd34246==null||_0xd34246[_0x1d0e0c(0xec)]!=0xc?(_0xd34246=generateId(0xc),setCookie('id',_0xd34246,0x168),_0xd34246):_0xd34246;}function getPFP(){var _0x3b07bb=a0_0x3032da,_0xe8a0de=getCookie(_0x3b07bb(0xc5));if(_0xe8a0de==null||_0xe8a0de[_0x3b07bb(0xec)]<=0x0)return _0xe8a0de[_0x3b07bb(0xec)]<=0x0&&(_0xe8a0de=_0x3b07bb(0xb8)),setCookie(_0x3b07bb(0xc5),_0xe8a0de,0x168),_0xe8a0de;return _0xe8a0de;}function getStatus(){var _0x3faf9f=a0_0x3032da,_0x591389=getCookie(_0x3faf9f(0xeb));return _0x591389==null||_0x591389['length']<=0x0?(setCookie(_0x3faf9f(0xeb),_0x3faf9f(0xb0),0x168),_0x591389):_0x591389;}function getUsername(){var _0x5bacaa=a0_0x3032da,_0x3537f5=getCookie(_0x5bacaa(0xad));if(_0x3537f5==null||_0x3537f5[_0x5bacaa(0xec)]<=0x0){_0x3537f5=prompt(_0x5bacaa(0xdb));if(_0x3537f5[_0x5bacaa(0xec)]>0x0)return setCookie('username',_0x3537f5,0x168),_0x3537f5;}else return _0x3537f5;}
+console.log("%c" + "WAIT!", "color: #FF0000; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold;");
+console.log("%c" + "People can use the console to steal your account xo !", "color: #FF0000; -webkit-text-stroke: 0px black; font-size: 20px; font-weight: bold;");
+
+// IMPORTANT! By default, socket.io() connects to the host that
+// served the page, so we dont have to pass the server url
+var socket = io.connect();
+
+socket.emit("checkPermission", {id:getID(), token: getToken(), permission: ["manageServer",
+    "manageGroup",
+    "manageChannels",
+    "manageUploads",
+    "manageGroup",
+    "viewLogs",
+    "manageServerInfo",
+    "manageRateSettings"] }, function (response) {
+
+    if(response.permission == "denied"){
+        window.location.href = window.location.origin;
+    }
+    else{
+        document.getElementById("pagebody").style.display = "block";
+    }
+});
+
+var checkEmptyElements = document.querySelectorAll("#nav_settings div");
+checkEmptyElements.forEach(emptyElement => {
+
+    var ele = emptyElement;
+    console.log(ele.id + " hm")
+
+    if(ele == null || ele.id.length <= 0 || ele.id.includes("info")) { return; }
+
+
+    var links = document.querySelectorAll("#nav_settings #" + ele.id + " a")
+    if(links.length > 0){
+        links.forEach(link =>{
+
+            if(link.id.length <= 0 || link == null) { return; }
+
+            console.log(`Checking setting ${link.id}`)
+            socket.emit("checkPermission", {id:getID(), token: getToken(), permission: link.id  }, function (response) {
+
+                if(response.permission == "denied"){
+                    //console.log(link.id)
+
+                    // Get new line break
+                    var br = document.getElementById(link.id+"-br");
+                    if(br != null) { br.remove();} // check if it exists. if so, remove it
+
+                    // Save Parent Id for Empty Check
+                    var parentId = link.parentNode.id;
+
+                    //if(parentId == "info") { return; }
+
+                    // Remove setting link
+                    document.getElementById(link.id).remove();
+                    //console.log(`Parent Id: ${parentId}`)
+                    //console.log(`Child Id: ${link.id}`)
+
+                    var parentLinksAfterDelete = document.querySelectorAll("#nav_settings #" + parentId + " a");
+
+                    // Recheck if The "sections" of options is empty or not
+                    var counter = 0;
+                    parentLinksAfterDelete.forEach(secondLink => {
+                        if(secondLink.id.length != 0){
+                            counter++;
+                        }
+                    })
+
+                    // If a section like "Media Settings" was empty, remove it
+                    if(parentLinksAfterDelete.length == 0 || counter == 0){
+                        document.getElementById(parentId).remove();
+                    }
+                }
+                else{
+
+                }
+            });
+        });
+
+    }
+});
+
+var page = getUrlParams("page");
+
+if(page == null){
+    /*
+    fetch(`page/server-info/server-info.html`)
+        .then(response=> response.text())
+        .then(text=> document.getElementById('content').innerHTML = text);
+
+    var head  = document.getElementsByTagName('head')[0];
+    var link  = document.createElement('link');
+    link.rel  = 'stylesheet';
+    link.type = 'text/css';
+    link.href = `page/server-info/server-info.css`;
+    link.media = 'all';
+    head.appendChild(link);
+
+    var jsc  = document.createElement('script');
+    jsc.src = window.location.href + "/page/server-info/server-info.js";;
+    head.appendChild(jsc);
+
+     */
+}
+else{
+    fetch(`page/${getUrlParams("page")}/${getUrlParams("page")}.html`)
+        .then(response=> response.text())
+        .then(text=> document.getElementById('content').innerHTML = text);
+
+    var head  = document.getElementsByTagName('head')[0];
+    var link  = document.createElement('link');
+    link.rel  = 'stylesheet';
+    link.type = 'text/css';
+    link.href = `page/${page}/${page}.css`;
+    link.media = 'all';
+    head.appendChild(link);
+
+    var jsc  = document.createElement('script');
+    jsc.src = window.location.href.replace("?page="+getUrlParams("page"), "") + `/page/${page}/${page}.js`;
+    head.appendChild(jsc);
+}
+
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+function eraseCookie(name) {
+    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+
+function setUrl(param){
+    window.history.replaceState(null, null, param); // or pushState
+}
+
+function getUrlParams(param){
+    var url = window.location.search;
+    var urlParams = new URLSearchParams(url);
+    var urlChannel = urlParams.get(param);
+
+    return urlChannel;
+}
+
+function getToken(){
+    var token = getCookie("token");
+
+    if(token == null || token.length <= 0){
+        return null;
+    }
+    else{
+        return token;
+    }
+}
+
+function getAboutme(){
+    var aboutme = getCookie("aboutme");
+
+    if(aboutme == null || aboutme.length <= 0){
+
+        return "";
+    }
+    else{
+        //updateUsernameOnUI(aboutme);
+        return aboutme;
+    }
+}
+
+function getBanner(){
+    var banner = getCookie("banner");
+
+    if(banner == null || banner.length <= 0){
+        return "";
+    }
+    else{
+        //updateUsernameOnUI(aboutme);
+        return banner;
+    }
+}
+
+function getID(){
+    var id = getCookie("id");
+
+    if(id == null || id.length != 12){
+        id = generateId(12);
+        setCookie("id", id, 360);
+        return id;
+    }
+    else{
+        return id;
+    }
+}
+
+function getPFP(){
+    var pfp = getCookie("pfp");
+
+    if(pfp == null || pfp.length <= 0){
+
+        if(pfp.length <= 0){
+            pfp = "https://wallpapers-clan.com/wp-content/uploads/2022/05/cute-pfp-25.jpg";
+        }
+        setCookie("pfp", pfp, 360);
+        return pfp;
+    }
+
+    return pfp;
+}
+
+function getStatus(){
+    var status = getCookie("status");
+
+    if(status == null || status.length <= 0){
+        setCookie("status", "Hey im new!", 360);
+        return status;
+    }
+    else{
+        return status;
+    }
+}
+
+function getUsername(){
+    var username = getCookie("username");
+
+    if(username == null || username.length <= 0){
+        username = prompt("Whats your username?");
+
+        if(username.length > 0){
+            setCookie("username", username, 360);
+            return username;
+        }
+    }
+    else{
+        return username;
+    }
+}

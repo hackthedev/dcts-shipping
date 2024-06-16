@@ -1,1 +1,192 @@
-function a0_0x1813(_0x216585,_0x2d910a){var _0x208e5d=a0_0x208e();return a0_0x1813=function(_0x1813a4,_0x28c0ad){_0x1813a4=_0x1813a4-0xc8;var _0x4ed3b7=_0x208e5d[_0x1813a4];return _0x4ed3b7;},a0_0x1813(_0x216585,_0x2d910a);}(function(_0x3eab74,_0x26832f){var _0x1d97f6=a0_0x1813,_0x47e563=_0x3eab74();while(!![]){try{var _0x526059=-parseInt(_0x1d97f6(0xcf))/0x1+-parseInt(_0x1d97f6(0xd8))/0x2*(-parseInt(_0x1d97f6(0xe6))/0x3)+-parseInt(_0x1d97f6(0xe5))/0x4+parseInt(_0x1d97f6(0xe4))/0x5+-parseInt(_0x1d97f6(0xf2))/0x6+parseInt(_0x1d97f6(0xe0))/0x7*(-parseInt(_0x1d97f6(0xcd))/0x8)+-parseInt(_0x1d97f6(0xdb))/0x9*(-parseInt(_0x1d97f6(0xd4))/0xa);if(_0x526059===_0x26832f)break;else _0x47e563['push'](_0x47e563['shift']());}catch(_0xe04f48){_0x47e563['push'](_0x47e563['shift']());}}}(a0_0x208e,0x45574));var notifyBoxTimeout,notifyBoxTimeoutHide;function notify(_0x468bb8,_0x1f3a78,_0x193dfb=0xfa0,_0x37566c=null,_0x5dbb30=null){var _0x23eada=a0_0x1813,_0x2e44d3=document[_0x23eada(0xef)](_0x23eada(0xd6)),_0x21d0f8=document[_0x23eada(0xef)](_0x23eada(0xd1)),_0xce5f47=document[_0x23eada(0xef)]('notification-container-icon');clearTimeout(notifyBoxTimeout),clearTimeout(notifyBoxTimeoutHide),_0x2e44d3[_0x23eada(0xd9)]['animation']=_0x23eada(0xe2),_0x21d0f8['innerText']=_0x468bb8,_0xce5f47[_0x23eada(0xf1)]=_0x23eada(0xce)+_0x1f3a78+_0x23eada(0xd0),_0xce5f47[_0x23eada(0xd7)]=()=>{var _0x3a1ea3=_0x23eada;_0xce5f47[_0x3a1ea3(0xf1)]=_0x3a1ea3(0xe8);};_0x193dfb==null&&(_0x193dfb=0xfa0);_0x37566c!=null&&playSound(_0x37566c);if(_0x1f3a78==_0x23eada(0xda))_0x2e44d3[_0x23eada(0xd9)][_0x23eada(0xca)]=_0x23eada(0xcc),_0x2e44d3['style']['color']=_0x23eada(0xd3);else{if(_0x1f3a78==_0x23eada(0xd5))_0x2e44d3['style'][_0x23eada(0xca)]=_0x23eada(0xc9),_0x2e44d3[_0x23eada(0xd9)]['color']=_0x23eada(0xd3);else _0x1f3a78==_0x23eada(0xe1)?(_0x2e44d3[_0x23eada(0xd9)][_0x23eada(0xca)]=_0x23eada(0xf0),_0x2e44d3[_0x23eada(0xd9)]['color']=_0x23eada(0xd3)):(_0x2e44d3[_0x23eada(0xd9)][_0x23eada(0xca)]=_0x23eada(0xeb),_0x2e44d3['style'][_0x23eada(0xec)]=_0x23eada(0xd3));}_0x2e44d3['style'][_0x23eada(0xe9)]=_0x23eada(0xcb),notifyBoxTimeout=setTimeout(()=>{var _0x4064b0=_0x23eada;_0x2e44d3[_0x4064b0(0xd9)][_0x4064b0(0xdf)]=_0x4064b0(0xdc),notifyBoxTimeoutHide=setTimeout(()=>{var _0x1f9153=_0x4064b0;_0x2e44d3[_0x1f9153(0xd9)][_0x1f9153(0xe9)]='none',_0x5dbb30!=null&&window[_0x1f9153(0xde)][_0x1f9153(0xed)]();},_0x4064b0(0xee));},_0x193dfb);}var audio=new Audio();function a0_0x208e(){var _0xee460b=['/img/error.png','display','body','#202225','color','reload','800','getElementById','#E9B31C','src','2714592mJafBv','beforeend','play','#1EDC49','backgroundColor','block','tomato','832LKJVye','/img/','220471PVUHMW','.png','notification-container-title','volume','white','3010abmdFy','success','notification-container','onerror','604lFPvuP','style','error','47241RvtEbP','fadeout\x201s','<style>\x0a\x20\x20\x20\x20\x20\x20\x20\x20#notification-container{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20float:\x20right;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20position:\x20fixed;\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20right:\x200;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20top:\x200;\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20z-index:\x2099999;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x20fit-content;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20display:\x20table;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:\x20fit-content;\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding:\x200px\x2016px\x200px\x208px\x20!important;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20margin:\x2024px\x2024px\x200\x200\x20!important;\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background-color:\x20#202225;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20color:\x20#ABB8BE;\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border:\x201px\x20solid\x20#677073;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border-radius:\x208px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20animation:\x20fadein\x201s;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20tr,\x20th,\x20td,\x20table{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20margin:\x200\x20!important;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding-top:\x200\x20!important;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding-bottom:\x200\x20!important;\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20#notification-container\x20tr{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20float:\x20left;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20#notification-container\x20img{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x2035px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:\x2035px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20float:\x20left;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20margin-right:\x204px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20@keyframes\x20fadein\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20from\x20{\x20opacity:\x200;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20to\x20\x20\x20{\x20opacity:\x201;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20@keyframes\x20fadeout\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20from\x20{\x20opacity:\x201;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20to\x20\x20\x20{\x20opacity:\x200;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20</style>\x0a\x20\x20\x20\x20<div\x20id=\x22notification-container\x22\x20style=\x22display:\x20none;\x22>\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20<table>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<tr>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<th><img\x20id=\x22notification-container-icon\x22\x20src=\x22/img/error.png\x22></th>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<th><p\x20id=\x22notification-container-title\x22>Data\x20Successfully\x20Saved</p></th>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</tr>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</table>\x0a\x20\x20\x20\x20</div>','location','animation','37891VZyloJ','warning','fadein\x201s','/sounds/','725635JWBGLO','2191884gUUXay','3405AihBis','.mp3'];a0_0x208e=function(){return _0xee460b;};return a0_0x208e();}function playSound(_0x3f99b0,_0x4852c1=0.1){var _0x4a538a=a0_0x1813;audio[_0x4a538a(0xf1)]=_0x4a538a(0xe3)+_0x3f99b0+_0x4a538a(0xe7),audio[_0x4a538a(0xd2)]=_0x4852c1,audio[_0x4a538a(0xc8)]();}function setupNotify(){var _0x523637=a0_0x1813,_0x2a5b06=_0x523637(0xdd);document[_0x523637(0xea)]['insertAdjacentHTML'](_0x523637(0xf3),_0x2a5b06);}
+var notifyBoxTimeout;
+var notifyBoxTimeoutHide;
+function notify(text, icon, duration = 4000, sound = null, reload = null){
+    var notifyBox = document.getElementById("notification-container");
+    var notifyTitle = document.getElementById("notification-container-title");
+    var notifyIcon = document.getElementById("notification-container-icon");
+
+    // Disable fade in out stuff
+    clearTimeout(notifyBoxTimeout);
+    clearTimeout(notifyBoxTimeoutHide);
+
+    notifyBox.style.animation = "fadein 1s";
+    notifyTitle.innerText = text
+
+    notifyIcon.src = "/img/" + icon + ".png";
+    notifyIcon.onerror = () => {
+        notifyIcon.src = "/img/error.png";
+    }
+
+    if(duration == null){
+        duration = 4000;
+    }
+
+    if(sound != null){
+        playSound(sound)
+    }
+
+    if(icon == "error"){
+        notifyBox.style.backgroundColor = "tomato";
+        notifyBox.style.color = "white";
+    }
+    else if(icon == "success"){
+        notifyBox.style.backgroundColor = "#1EDC49";
+        notifyBox.style.color = "white";
+    }
+    else if(icon == "warning"){
+        notifyBox.style.backgroundColor = "#E9B31C";
+        notifyBox.style.color = "white";
+    }
+    else{
+        notifyBox.style.backgroundColor = "#202225";
+        notifyBox.style.color = "white";
+    }
+
+    notifyBox.style.display = "block";
+
+    notifyBoxTimeout = setTimeout(() => {
+        notifyBox.style.animation = "fadeout 1s";
+
+        notifyBoxTimeoutHide = setTimeout(() => {
+            notifyBox.style.display = "none";
+
+
+            if(reload != null){
+                window.location.reload()
+            }
+        }, "800");
+    }, duration);
+}
+
+var audio = new Audio();
+function playSound(sound, volume = 0.1){
+    audio.src = `/sounds/${sound}.mp3`;
+    audio.volume = volume;
+    audio.play();
+}
+
+function setupNotify(){
+    var code = `<style>
+        #notification-container{
+            float: right;
+            position: fixed;
+    
+            right: 0;
+            top: 0;
+    
+            z-index: 99999;
+            width: fit-content;
+            display: table;
+            height: fit-content;
+    
+            padding: 0px 16px 0px 8px !important;
+            margin: 24px 24px 0 0 !important;
+    
+            background-color: #202225;
+            color: #ABB8BE;
+    
+            border: 1px solid #677073;
+            border-radius: 8px;
+            animation: fadein 1s;
+        }
+    
+        tr, th, td, table{
+            margin: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important; 
+        }
+    
+        #notification-container tr{
+            float: left;
+        }
+    
+        #notification-container img{
+            width: 35px;
+            height: 35px;
+            float: left;
+            margin-right: 4px;
+        }
+    
+        @keyframes fadein {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+    
+        @keyframes fadeout {
+            from { opacity: 1; }
+            to   { opacity: 0; }
+        }
+    
+    </style>
+    <div id="notification-container" style="display: none;">
+    
+        <table>
+            <tr>
+                <th><img id="notification-container-icon" src="/img/error.png"></th>
+                <th><p id="notification-container-title">Data Successfully Saved</p></th>
+            </tr>
+        </table>
+    </div>`;
+
+    document.body.insertAdjacentHTML("beforeend", code);
+
+}
+
+
+/*
+
+<style>
+    #notification-container{
+        float: right;
+        position: fixed;
+
+        right: 0;
+        top: 0;
+
+        z-index: 99999;
+        width: fit-content;
+        display: table;
+        height: 5%;
+
+        padding: 0px 16px 10px 8px;
+        margin: 24px 24px 0 0;
+
+        background-color: #202225;
+
+        border-radius: 8px;
+        animation: fadein 1s;
+    }
+
+    #notification-container tr{
+        float: left;
+    }
+
+    #notification-container img{
+        width: 35px;
+        height: 35px;
+        float: left;
+        margin-right: 4px;
+    }
+
+    @keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    @keyframes fadeout {
+        from { opacity: 1; }
+        to   { opacity: 0; }
+    }
+
+</style>
+<div id="notification-container" style="display: none;">
+
+    <table>
+        <tr>
+            <th><img id="notification-container-icon" src="/img/error.png"></th>
+            <th><p id="notification-container-title">Data Successfully Saved</p></th>
+        </tr>
+    </table>
+</div>
+
+ */

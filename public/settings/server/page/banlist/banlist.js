@@ -1,1 +1,147 @@
-var a0_0x55ad2e=a0_0x1191;function a0_0x4b9b(){var _0x6b534e=['<i>Banned\x20Until:\x20<i>','7aEyDcd','reason','\x22></p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20id=\x22ban-by-','2911809lrJYHn',')\x22\x20value=\x22Unban\x22/>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20id=\x22ban-reason-','log','</i>','banner','#ban-username-','remove','1644515fUogPs','querySelector','9253640jSeVpt','8631iXgMWq','resolveMember','forEach','/settings/server','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22banned-entry-img-containers\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22banned-entry-banner-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22banned-entry-banner\x22\x20style=\x22background-image:\x20url(\x27','userConnected','2475084pEjkEk','location','1120fvoFom','name',')</h1>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20type=\x22button\x22\x20onclick=\x22getBanObject(','unbanUser','querySelectorAll','onclick','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22banned-entry-container\x22\x20id=\x22banned-id-','type','\x27);\x22\x20></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22banned-entry-img-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20class=\x22banned-entry-icon\x22\x20src=\x22','cursor','.banned-entry-container','data','info','getElementById','bannedBy','normal','msg','#banned-id-','style','toLocaleDateString','emit','ban-container','permission','pagebody','Unkown\x20Error!\x20Reloading\x20might\x20fix\x20it','#ban-by-','beforeend','\x22></p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20id=\x22ban-until-','3152155cKBaOl','Canceled\x20unban','innerText','origin','getBans','href','\x20(click\x20for\x20info)</i>','until','<i>Banned\x20By:\x20<i>','success','1064622cBfIhN','denied','4pOIUyu','<i>Reason:\x20','#ban-reason-','innerHTML','error','#ban-until-','settings_profile_save'];a0_0x4b9b=function(){return _0x6b534e;};return a0_0x4b9b();}(function(_0x409914,_0x968ac4){var _0xf2e88=a0_0x1191,_0x3cc189=_0x409914();while(!![]){try{var _0x611844=parseInt(_0xf2e88(0x86))/0x1+parseInt(_0xf2e88(0x72))/0x2+-parseInt(_0xf2e88(0x7f))/0x3*(-parseInt(_0xf2e88(0x74))/0x4)+-parseInt(_0xf2e88(0xad))/0x5+-parseInt(_0xf2e88(0x8f))/0x6*(parseInt(_0xf2e88(0x7c))/0x7)+-parseInt(_0xf2e88(0x88))/0x8+-parseInt(_0xf2e88(0x89))/0x9*(parseInt(_0xf2e88(0x91))/0xa);if(_0x611844===_0x968ac4)break;else _0x3cc189['push'](_0x3cc189['shift']());}catch(_0x5c25cc){_0x3cc189['push'](_0x3cc189['shift']());}}}(a0_0x4b9b,0xcd2b3),setupNotify());function a0_0x1191(_0x4941cb,_0xc36398){var _0x4b9b22=a0_0x4b9b();return a0_0x1191=function(_0x119127,_0x57c135){_0x119127=_0x119127-0x72;var _0x5f0b05=_0x4b9b22[_0x119127];return _0x5f0b05;},a0_0x1191(_0x4941cb,_0xc36398);}var servername=document['getElementById']('server_name'),serverdescription=document['getElementById']('server_description'),saveButton=document[a0_0x55ad2e(0x9e)](a0_0x55ad2e(0x7a)),serverconfigName,serverconfigDesc;socket[a0_0x55ad2e(0xa5)]('checkPermission',{'id':getID(),'token':getToken(),'permission':'manageBans'},function(_0x495ef9){var _0x5f079c=a0_0x55ad2e;_0x495ef9[_0x5f079c(0xa7)]==_0x5f079c(0x73)?window[_0x5f079c(0x90)][_0x5f079c(0xb2)]=window[_0x5f079c(0x90)][_0x5f079c(0xb0)]+_0x5f079c(0x8c):document['getElementById'](_0x5f079c(0xa8))['style']['display']='block';}),socket['emit'](a0_0x55ad2e(0x8e),{'id':getID(),'name':getUsername(),'icon':getPFP(),'status':getStatus(),'token':getToken(),'aboutme':getAboutme(),'banner':getBanner()}),getBans();function getBanObject(_0x28d716){var _0x2bbdee=a0_0x55ad2e,_0x20a72b=bannedObj[_0x28d716];document[_0x2bbdee(0x87)](_0x2bbdee(0x76)+_0x28d716)[_0x2bbdee(0x77)]=_0x2bbdee(0x75)+_0x20a72b[_0x2bbdee(0x7d)]+_0x2bbdee(0x82),document[_0x2bbdee(0x87)](_0x2bbdee(0x79)+_0x28d716)[_0x2bbdee(0x77)]=_0x2bbdee(0x7b)+new Date(_0x20a72b[_0x2bbdee(0xb4)])[_0x2bbdee(0xa4)]()+_0x2bbdee(0x82),document[_0x2bbdee(0x87)](_0x2bbdee(0xaa)+_0x28d716)['innerHTML']=_0x2bbdee(0xb5)+_0x20a72b[_0x2bbdee(0x9f)]+_0x2bbdee(0xb3),document[_0x2bbdee(0x87)](_0x2bbdee(0xaa)+_0x28d716)[_0x2bbdee(0xa3)][_0x2bbdee(0x9a)]='pointer',document['querySelector'](_0x2bbdee(0xaa)+_0x28d716)[_0x2bbdee(0x96)]=function(){var _0xd77eb8=_0x2bbdee;socket['emit'](_0xd77eb8(0x8a),{'id':getID(),'token':getToken(),'target':_0x20a72b[_0xd77eb8(0x9f)]},function(_0x57f42a){var _0x42ac3f=_0xd77eb8;notify('User\x20was\x20banned\x20by\x20'+_0x57f42a[_0x42ac3f(0x9c)][_0x42ac3f(0x92)],'info',null,_0x42ac3f(0xa0));});},console[_0x2bbdee(0x81)](bannedObj[_0x28d716]);}function unbanUser(_0x45e8f9){var _0x44122e=a0_0x55ad2e,_0x5185b5=document[_0x44122e(0x87)](_0x44122e(0x84)+_0x45e8f9)[_0x44122e(0xaf)]['split']('\x20')[0x0],_0x2a7fdc=document[_0x44122e(0x87)](_0x44122e(0xa2)+_0x45e8f9);if(!confirm('Do\x20you\x20want\x20to\x20unban\x20the\x20user\x20'+_0x5185b5+'?')){notify(_0x44122e(0xae),_0x44122e(0x9d));return;}socket[_0x44122e(0xa5)](_0x44122e(0x94),{'id':getID(),'token':getToken(),'target':_0x45e8f9},function(_0x1883b9){var _0x1f299f=_0x44122e;_0x1883b9[_0x1f299f(0x98)]==_0x1f299f(0xb6)?(notify(_0x1883b9[_0x1f299f(0xa1)],_0x1f299f(0xb6)),_0x2a7fdc[_0x1f299f(0x85)]()):(notify(_0x1883b9[_0x1f299f(0xa1)],_0x1f299f(0x78)),console[_0x1f299f(0x81)](_0x1883b9[_0x1f299f(0x9c)]));});}var bannedObj='';function getBans(){var _0x1b0a18=a0_0x55ad2e,_0x490e92=document[_0x1b0a18(0x9e)](_0x1b0a18(0xa6));socket[_0x1b0a18(0xa5)](_0x1b0a18(0xb1),{'id':getID(),'token':getToken()},function(_0x509a42){var _0x2445a0=_0x1b0a18;try{if(_0x509a42[_0x2445a0(0x98)]==_0x2445a0(0xb6)){_0x490e92['innerHTML']='',bannedObj=_0x509a42[_0x2445a0(0x9c)],console[_0x2445a0(0x81)](_0x509a42),Object['keys'](_0x509a42[_0x2445a0(0x9c)])[_0x2445a0(0x8b)](_0x58d408=>{var _0x511b94=_0x2445a0;socket[_0x511b94(0xa5)](_0x511b94(0x8a),{'id':getID(),'token':getToken(),'target':_0x58d408},function(_0x1f6308){var _0xc0eaf6=_0x511b94;if(_0x1f6308[_0xc0eaf6(0x98)]==_0xc0eaf6(0xb6)){var _0x45dc68=_0x1f6308[_0xc0eaf6(0x9c)];console[_0xc0eaf6(0x81)](_0x45dc68);var _0x21857a=_0xc0eaf6(0x97)+_0x45dc68['id']+_0xc0eaf6(0x8d)+_0x45dc68[_0xc0eaf6(0x83)]+_0xc0eaf6(0x99)+_0x45dc68['icon']+'\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22banned-entry-info-container\x22>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h1\x20clas=\x22banned-entry-username\x22\x20id=\x22ban-username-'+_0x45dc68['id']+'\x22>'+_0x45dc68['name']+'\x20('+_0x45dc68['id']+_0xc0eaf6(0x93)+_0x45dc68['id']+')\x22\x20value=\x22Get\x20Info\x22/>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20type=\x22button\x22\x20onclick=\x22unbanUser('+_0x45dc68['id']+_0xc0eaf6(0x80)+_0x45dc68['id']+_0xc0eaf6(0xac)+_0x45dc68['id']+_0xc0eaf6(0x7e)+_0x45dc68['id']+'\x22></p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20';_0x490e92['insertAdjacentHTML'](_0xc0eaf6(0xab),_0x21857a);}else notify(_0x1f6308[_0xc0eaf6(0xa1)],_0xc0eaf6(0x78));});});try{var _0x7e158=document[_0x2445a0(0x95)](_0x2445a0(0x9b));console['log'](_0x7e158);}catch(_0x2e8e71){console[_0x2445a0(0x81)](_0x2e8e71);}}else alert(_0x509a42['msg']);}catch(_0x22bb30){console['log'](_0x22bb30),notify(_0x2445a0(0xa9),_0x2445a0(0x78));}});}
+setupNotify();
+
+var servername = document.getElementById("server_name");
+var serverdescription = document.getElementById("server_description");
+var saveButton = document.getElementById("settings_profile_save");
+
+var serverconfigName;
+var serverconfigDesc;
+
+socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageBans" }, function (response) {
+
+    if(response.permission == "denied"){
+        window.location.href = window.location.origin + "/settings/server";
+    }
+    else{
+        document.getElementById("pagebody").style.display = "block";
+    }
+});
+
+socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
+    aboutme: getAboutme(), banner: getBanner()});
+
+getBans();
+
+
+// document.querySelector("#ban-reason-119012019689").innerText = "Fag"
+
+function getBanObject(id){
+    var user = bannedObj[id];
+
+    document.querySelector("#ban-reason-" + id).innerHTML = "<i>Reason: " + user.reason + "</i>";
+    document.querySelector("#ban-until-" + id).innerHTML = "<i>Banned Until: <i>" + new Date(user.until).toLocaleDateString() + "</i>";
+    document.querySelector("#ban-by-" + id).innerHTML = "<i>Banned By: <i>" + user.bannedBy + " (click for info)</i>";
+    document.querySelector("#ban-by-" + id).style.cursor = "pointer";
+
+    document.querySelector("#ban-by-" + id).onclick = function()
+    {
+        socket.emit("resolveMember", {id:getID(), token: getToken(), target: user.bannedBy }, function (response) {
+            notify("User was banned by " + response.data.name, "info", null, "normal");
+        });
+    };
+
+    console.log(bannedObj[id]);
+}
+
+function unbanUser(id) {
+
+    var username = document.querySelector(`#ban-username-${id}`).innerText.split(" ")[0];
+    var container = document.querySelector(`#banned-id-${id}`);
+
+    if (!confirm("Do you want to unban the user " + username + "?")){
+        notify("Canceled unban", "info")
+        return;
+    }
+
+
+    socket.emit("unbanUser", {id: getID(), token: getToken(), target: id}, function (response) {
+        //notify("User was banned by " + response.data.name, "info", null, "normal");
+        if(response.type == "success"){
+            notify(response.msg, "success");
+            container.remove();
+        }
+        else{
+            notify(response.msg, "error");
+            console.log(response.data)
+        }
+    });
+
+
+}
+
+var bannedObj = "";
+function getBans() {
+    var emojiContainer = document.getElementById("ban-container");
+
+    socket.emit("getBans", { id:getID(), token: getToken() }, function (response1) {
+
+        try {
+            if (response1.type == "success") {
+                //settings_icon.value = response.msg;
+                emojiContainer.innerHTML = "";
+                bannedObj = response1.data;
+                console.log(response1)
+
+                // For each banned member
+                Object.keys(response1.data).forEach(bannedMember => {
+
+                    // Resolve member
+                    socket.emit("resolveMember", {id:getID(), token: getToken(), target: bannedMember }, function (response2) {
+
+                        if (response2.type == "success") {
+                            var user = response2.data;
+                            console.log(user)
+
+                            var code = `
+                                        <div class="banned-entry-container" id="banned-id-${user.id}">
+                                        
+                                            <div class="banned-entry-img-containers">
+                                                <div class="banned-entry-banner-container">
+                                                    <div class="banned-entry-banner" style="background-image: url('${user.banner}');" ></div>
+                                                </div>
+                                            
+                                                <div class="banned-entry-img-container">
+                                                    <img class="banned-entry-icon" src="${user.icon}">
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="banned-entry-info-container">                                        
+                                                <h1 clas="banned-entry-username" id="ban-username-${user.id}">${user.name} (${user.id})</h1>
+                                                <input type="button" onclick="getBanObject(${user.id})" value="Get Info"/>
+                                                <input type="button" onclick="unbanUser(${user.id})" value="Unban"/>
+                                                <p id="ban-reason-${user.id}"></p>
+                                                <p id="ban-until-${user.id}"></p>
+                                                <p id="ban-by-${user.id}"></p>
+                                            </div>
+                                        </div>
+                                        
+                                        `;
+
+                            emojiContainer.insertAdjacentHTML("beforeend", code);
+                        }
+                        else{
+                            notify(response2.msg, "error");
+                        }
+                    });
+                });
+
+
+                try{
+                    var entries = document.querySelectorAll(".banned-entry-container");
+                    console.log(entries)
+                }
+                catch(err){
+                    console.log(err);
+                }
+
+            } else {
+                alert(response1.msg)
+            }
+        }
+        catch (Ex){
+            console.log(Ex);
+            notify("Unkown Error! Reloading might fix it", "error");
+        }
+
+    });
+}

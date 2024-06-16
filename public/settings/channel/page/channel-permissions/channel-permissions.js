@@ -1,1 +1,197 @@
-var a0_0x389e46=a0_0x5261;(function(_0x5181af,_0x1787a9){var _0x27b4ea=a0_0x5261,_0x4427ab=_0x5181af();while(!![]){try{var _0x57577c=-parseInt(_0x27b4ea(0xe0))/0x1+parseInt(_0x27b4ea(0xfc))/0x2+-parseInt(_0x27b4ea(0xda))/0x3+parseInt(_0x27b4ea(0xf0))/0x4+-parseInt(_0x27b4ea(0xe1))/0x5*(parseInt(_0x27b4ea(0xf2))/0x6)+-parseInt(_0x27b4ea(0xea))/0x7*(-parseInt(_0x27b4ea(0xf9))/0x8)+parseInt(_0x27b4ea(0xf7))/0x9*(parseInt(_0x27b4ea(0x103))/0xa);if(_0x57577c===_0x1787a9)break;else _0x4427ab['push'](_0x4427ab['shift']());}catch(_0x14e12c){_0x4427ab['push'](_0x4427ab['shift']());}}}(a0_0x67f6,0x56d28));var serverconfigName,editChannel={},serverRoleResponse={},currentChannelId='',currentRoleId='';currentChannelId=getUrlParams('id'),socket[a0_0x389e46(0xe3)](a0_0x389e46(0x108),{'id':getID(),'name':getUsername(),'icon':getPFP(),'status':getStatus(),'token':getToken(),'aboutme':getAboutme(),'banner':getBanner()}),socket[a0_0x389e46(0xe3)](a0_0x389e46(0xe8),{'id':getID(),'token':getToken(),'channel':currentChannelId},function(_0x459464){var _0x3a9b07=a0_0x389e46;try{editChannel=_0x459464['data'],console['log'](_0x3a9b07(0xe6)),console[_0x3a9b07(0xf8)](editChannel);}catch(_0x3df141){console[_0x3a9b07(0xf8)](_0x3a9b07(0xdf)),console[_0x3a9b07(0xf8)](_0x3df141);}}),socket[a0_0x389e46(0xe3)]('getServerRoles',{'id':getID(),'token':getToken()},function(_0x558379){var _0x4830b5=a0_0x389e46;serverRoleResponse=_0x558379,console[_0x4830b5(0xf8)]('Role\x20Response:'),console['log'](_0x558379);var _0x1fbe16=[],_0x5e08f0='',_0x638764='';console['log'](editChannel),Object[_0x4830b5(0xef)](editChannel[_0x4830b5(0xed)])[_0x4830b5(0xdd)](function(_0x86811f){var _0x20d841=_0x4830b5;_0x638764=serverRoleResponse[_0x86811f],_0x5e08f0+=_0x20d841(0xe2)+_0x638764[_0x20d841(0xf6)]['id']+_0x20d841(0xde)+_0x638764[_0x20d841(0xf6)]['id']+_0x20d841(0xee)+_0x638764[_0x20d841(0xf6)]['id']+_0x20d841(0xfa)+_0x638764[_0x20d841(0xf6)]['id']+_0x20d841(0xfd)+_0x638764[_0x20d841(0xf6)]['id']+'\x22\x20style=\x22display:\x20inline-block;color:\x20'+_0x638764['info'][_0x20d841(0x107)]+_0x20d841(0xf5)+_0x638764[_0x20d841(0xf6)][_0x20d841(0xe9)]+'\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>';}),rolelist[_0x4830b5(0x105)]('beforeend',_0x5e08f0);});function a0_0x5261(_0x34e8d7,_0x4fbcd5){var _0x67f651=a0_0x67f6();return a0_0x5261=function(_0x526151,_0x3ea4af){_0x526151=_0x526151-0xd9;var _0x3edaf7=_0x67f651[_0x526151];return _0x3edaf7;},a0_0x5261(_0x34e8d7,_0x4fbcd5);}function a0_0x67f6(){var _0x53eedc=['permissionlist','EditChannel','location','getChannelInfo','name','4396714vAKERW','Please\x20enter\x20the\x20role\x20id\x20you\x20want\x20to\x20add','The\x20role\x20id\x20has\x20to\x20be\x20a\x20number','permissions',')\x22\x20style=\x22background-image:\x20url(\x27/img/up.png\x27);background-size:\x20cover;object-fit:\x20cover;background-position:\x20center\x20center;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x2010px;\x20height:\x2010px;display:\x20inline-block;\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20onclick=\x22moveRoleDown(','keys','419420cGeddu','innerText','984426NICiRj','addRoleToChannel','block',';\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','info','71118OFRwYv','log','8NXXbKl',')\x22\x20style=\x22background-image:\x20url(\x27/img/down.png\x27);background-size:\x20cover;object-fit:\x20cover;background-position:\x20center\x20center;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x2010px;\x20height:\x2010px;display:\x20inline-block;\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22role-entry\x22\x20onclick=\x22loadRolePerms(\x27','checked','806134LeDnMU','\x27)\x22\x20id=\x22','Role\x20id:\x20','querySelectorAll','inline-block','style','msg','430rhhIOY','#permissionlist\x20p\x20input','insertAdjacentHTML','Channel\x20Permissions\x20-\x20','color','userConnected','saveChannelPermissions','removeRoleFromChannel','display','The\x20role\x20id\x20(4\x20character\x20long\x20number)\x20you\x27ve\x20entered\x20is\x20incorrect.','1547811uicGZb','reload','getElementById','forEach','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20onclick=\x22moveRoleUp(','Unable\x20to\x20get\x20Channel\x20Information','440178TSAHEu','5GCSqkX','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22role-entry-container\x22\x20id=\x22','emit','\x20input'];a0_0x67f6=function(){return _0x53eedc;};return a0_0x67f6();}function removeRole(){var _0x2dca46=a0_0x389e46;console['log'](currentRoleId),socket['emit'](_0x2dca46(0x10a),{'id':getID(),'token':getToken(),'role':currentRoleId,'channel':currentChannelId},function(_0x42af11){var _0x34ac9f=_0x2dca46;alert(_0x42af11[_0x34ac9f(0x102)]),window['location'][_0x34ac9f(0xdb)]();});}function addRole(){var _0x45b620=a0_0x389e46,_0x187a93=prompt(_0x45b620(0xeb));if(_0x187a93!=0x0){if(_0x187a93['length']!=0x4||isNaN(_0x187a93)==!![]){alert(_0x45b620(0xd9));return;}}if(isNaN(_0x187a93)==!![]){alert(_0x45b620(0xec));return;}socket[_0x45b620(0xe3)](_0x45b620(0xf3),{'id':getID(),'token':getToken(),'role':_0x187a93,'channel':currentChannelId},function(_0x79fbe6){var _0x3572e7=_0x45b620;alert(_0x79fbe6['msg']),window[_0x3572e7(0xe7)][_0x3572e7(0xdb)]();});}function savePermissions(){var _0x1ea6aa=a0_0x389e46;console[_0x1ea6aa(0xf8)](editChannel[_0x1ea6aa(0xed)][currentRoleId]),socket[_0x1ea6aa(0xe3)](_0x1ea6aa(0x109),{'id':getID(),'token':getToken(),'channel':currentChannelId,'role':currentRoleId,'permissions':editChannel[_0x1ea6aa(0xed)][currentRoleId]},function(_0x2a5f37){var _0x14e153=_0x1ea6aa;alert(_0x2a5f37[_0x14e153(0x102)]),window['location'][_0x14e153(0xdb)]();});}function tickSetting(_0x54977a){var _0x3a44e6=a0_0x389e46;document[_0x3a44e6(0xdc)]('saveButton')[_0x3a44e6(0x101)][_0x3a44e6(0x10b)]=_0x3a44e6(0x100),document[_0x3a44e6(0xdc)]('cancelButton')['style'][_0x3a44e6(0x10b)]=_0x3a44e6(0x100);var _0x4744de=document[_0x3a44e6(0xff)]('#'+_0x54977a['id']+_0x3a44e6(0xe4));_0x4744de[0x0][_0x3a44e6(0xfb)]=!_0x4744de[0x0][_0x3a44e6(0xfb)],_0x4744de[0x0][_0x3a44e6(0xfb)]==!![]?editChannel[_0x3a44e6(0xed)][currentRoleId][_0x54977a['id']]=0x1:editChannel[_0x3a44e6(0xed)][currentRoleId][_0x54977a['id']]=0x0;}function loadRolePerms(_0x1e4c07){var _0x3c8f6a=a0_0x389e46;currentRoleId=_0x1e4c07,console[_0x3c8f6a(0xf8)](_0x3c8f6a(0xfe)+currentRoleId);var _0x55887e=editChannel[_0x3c8f6a(0xed)][_0x1e4c07];document[_0x3c8f6a(0xdc)]('permheader')[_0x3c8f6a(0xf1)]=_0x3c8f6a(0x106)+editChannel['name'],document['getElementById']('removeRole')[_0x3c8f6a(0x101)][_0x3c8f6a(0x10b)]=_0x3c8f6a(0xf4),document[_0x3c8f6a(0xdc)](_0x3c8f6a(0xe5))['style'][_0x3c8f6a(0x10b)]=_0x3c8f6a(0xf4),permListPage=document[_0x3c8f6a(0xff)](_0x3c8f6a(0x104)),permListPage['forEach'](_0x5b2741=>{var _0x333812=_0x3c8f6a;_0x5b2741[_0x333812(0xfb)]=![];}),Object[_0x3c8f6a(0xef)](_0x55887e)[_0x3c8f6a(0xdd)](function(_0x3a644b){var _0x5bb6cd=_0x3c8f6a;children=document[_0x5bb6cd(0xff)]('#'+_0x3a644b+'\x20input'),console['log'](_0x3a644b),_0x55887e[_0x3a644b]==0x1?children[0x0]['checked']=!![]:children[0x0]['checked']=![];});}
+var serverconfigName;
+var editChannel = {};
+
+var serverRoleResponse = {};
+var currentChannelId = "";
+var currentRoleId = "";
+
+currentChannelId = getUrlParams("id");
+
+socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
+    aboutme: getAboutme(), banner: getBanner()});
+
+socket.emit("getChannelInfo", {id: getID(), token: getToken(), channel: currentChannelId}, function (response) {
+    try{
+
+        editChannel = response.data;
+
+        console.log("EditChannel")
+        console.log(editChannel);
+
+        //loadRolePerms(getUrlParams("id"));
+
+
+    }
+    catch(err){
+        console.log("Unable to get Channel Information");
+        console.log(err);
+    }
+
+});
+
+socket.emit("getServerRoles", {id:getID(), token: getToken() }, function (response) {
+
+    //console.log(response);
+    serverRoleResponse = response;
+
+    console.log("Role Response:")
+    console.log(response);
+
+    var roleArraySorted = [];
+    var code = "";
+    var role = "";
+
+    console.log(editChannel)
+
+    // Foreach role in the channel permissions
+    Object.keys(editChannel.permissions).forEach(function(perm) {
+
+        //console.log("Role " + perm + " has the following permissions");
+
+        /*
+        console.log("Perm)")
+        console.log(perm)
+        console.log(serverRoleResponse[perm]);
+
+         */
+
+        role = serverRoleResponse[perm];
+
+        /*
+        console.log(role);
+        console.log(serverRoleResponse[perm]);
+
+         */
+
+
+
+        code += `
+                   <div class="role-entry-container" id="${role.info.id}">
+                       <div onclick="moveRoleUp(${role.info.id})" style="background-image: url('/img/up.png');background-size: cover;object-fit: cover;background-position: center center;
+                       width: 10px; height: 10px;display: inline-block;"></div>
+                       
+                       <div onclick="moveRoleDown(${role.info.id})" style="background-image: url('/img/down.png');background-size: cover;object-fit: cover;background-position: center center;
+                       width: 10px; height: 10px;display: inline-block;"></div>
+                       
+                        <p class="role-entry" onclick="loadRolePerms('${role.info.id}')" id="${role.info.id}" style="display: inline-block;color: ${role.info.color};">
+                            ${role.info.name}
+                        </p>
+                   </div>`;
+
+
+        //children = document.querySelectorAll(`#${perm} input`);
+
+        /*
+        if (editChannel[perm] == 1){
+            children[0].checked = true;
+        }
+        else{
+            children[0].checked = false;
+        }
+
+         */
+    });
+
+    rolelist.insertAdjacentHTML("beforeend", code);
+});
+
+function removeRole(){
+
+    console.log(currentRoleId);
+
+    socket.emit("removeRoleFromChannel", {id:getID(), token: getToken(), role: currentRoleId, channel: currentChannelId }, function (response) {
+        alert(response.msg);
+        window.location.reload();
+    });
+}
+
+function addRole(){
+
+    var roleId = prompt("Please enter the role id you want to add");
+
+    if(roleId != 0){
+        if(roleId.length != 4 || isNaN(roleId) == true){
+            alert("The role id (4 character long number) you've entered is incorrect.");
+            return;
+        }
+    }
+    if(isNaN(roleId) == true){
+        alert("The role id has to be a number");
+        return;
+    }
+
+
+    socket.emit("addRoleToChannel", {id:getID(), token: getToken(), role: roleId, channel: currentChannelId }, function (response) {
+        alert(response.msg);
+        window.location.reload();
+    });
+}
+
+function savePermissions(){
+
+    console.log(editChannel.permissions[currentRoleId]);
+
+    socket.emit("saveChannelPermissions", {id:getID(), token: getToken(), channel: currentChannelId, role: currentRoleId, permissions: editChannel.permissions[currentRoleId] }, function (response) {
+        alert(response.msg);
+        window.location.reload();
+    });
+}
+
+function tickSetting(element){
+    document.getElementById("saveButton").style.display = "inline-block";
+    document.getElementById("cancelButton").style.display = "inline-block";
+
+    var childInput = document.querySelectorAll(`#${element.id} input`);
+    childInput[0].checked = !childInput[0].checked;
+
+    //console.log("!obj2")
+    //console.log(editChannel)
+    //console.log(element.id)
+
+    if(childInput[0].checked == true){
+        editChannel.permissions[currentRoleId][element.id] = 1;
+    }
+    else{
+        editChannel.permissions[currentRoleId][element.id] = 0;
+    }
+
+    //console.log(editChannel.permissions);
+}
+
+function loadRolePerms(roleId){
+
+    currentRoleId = roleId;
+    console.log("Role id: " + currentRoleId);
+
+    // Get Permissions
+    var channelperms = editChannel.permissions[roleId];
+
+    //console.log("Channel Permissions for role " + roleId)
+    //console.log(channelperms);
+
+    document.getElementById("permheader").innerText = "Channel Permissions - " + editChannel.name;
+    document.getElementById("removeRole").style.display = "block";
+    document.getElementById("permissionlist").style.display = "block";
+
+
+    // Uncheck everything before checking the permissions for the specific role
+    permListPage = document.querySelectorAll(`#permissionlist p input`);
+    permListPage.forEach(perm =>{
+        perm.checked = false;
+    })
+
+    // Set the permissions in the view
+    Object.keys(channelperms).forEach(function(perm) {
+
+        children = document.querySelectorAll(`#${perm} input`);
+        console.log(perm);
+
+        if (channelperms[perm] == 1){
+            children[0].checked = true;
+        }
+        else{
+            children[0].checked = false;
+        }
+    });
+
+}

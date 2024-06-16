@@ -1,1 +1,159 @@
-function a0_0x2189(){var _0x14f000=['\x22\x20class=\x22emoji-action-icon\x22\x20src=\x22/img/delete.png\x22\x20onclick=\x22deleteEmoji(\x27','5507115UsDODB','display','key','/settings/server','keypress','895059taEMeD','\x22\x20style=\x22display:\x20none;\x22\x20class=\x22emoji-action-icon\x22\x20src=\x22/img/save.png\x22\x20onclick=\x22saveEmojiName(\x27','none','data','getElementById','emoji','name','forEach','insertAdjacentHTML','emit','value','trying\x20to\x20delete\x20emoji\x20','parentNode','style','7832412OHkYUa','deleteEmoji','denied','Emoji\x20successfully\x20deleted','Unkown\x20Error!\x20Reloading\x20might\x20fix\x20it','msg','8131344ZIhThd','origin','Enter','getEmojis','2446900nRmcIp','updateEmoji','manageEmojis','Emoji\x20successfully\x20updated','fileUpload','type','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22emoji-name\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20type=\x22text\x22\x20onkeyup=\x22checkState(this);\x22\x20id=\x22','\x22\x20value=\x22','querySelector','alt','href','server_description','beforeend','error','checkPermission','success','split','6oxqFEc','\x27,\x20this);\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22emoji-actions\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20id=\x22delete-','\x27,\x20this);\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20id=\x22save-','server_name','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22emoji-entry\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22emoji-img\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20class=\x22emoji\x22\x20src=\x22/emojis/','sending','remove','settings_profile_save','256820RtBjUg','log','userConnected','input','1125952YrFFrU'];a0_0x2189=function(){return _0x14f000;};return a0_0x2189();}var a0_0x9dde79=a0_0x2099;(function(_0x52554f,_0xfe694){var _0x164312=a0_0x2099,_0x2185cd=_0x52554f();while(!![]){try{var _0x3a064b=parseInt(_0x164312(0x1ca))/0x1+-parseInt(_0x164312(0x1b0))/0x2+parseInt(_0x164312(0x198))/0x3+parseInt(_0x164312(0x191))/0x4+parseInt(_0x164312(0x193))/0x5*(parseInt(_0x164312(0x1c1))/0x6)+-parseInt(_0x164312(0x1a6))/0x7+parseInt(_0x164312(0x1ac))/0x8;if(_0x3a064b===_0xfe694)break;else _0x2185cd['push'](_0x2185cd['shift']());}catch(_0x3e9d67){_0x2185cd['push'](_0x2185cd['shift']());}}}(a0_0x2189,0x95728),setupNotify());var servername=document[a0_0x9dde79(0x19c)](a0_0x9dde79(0x1c5)),serverdescription=document['getElementById'](a0_0x9dde79(0x1bb)),saveButton=document[a0_0x9dde79(0x19c)](a0_0x9dde79(0x1c9)),serverconfigName,serverconfigDesc;socket[a0_0x9dde79(0x1a1)](a0_0x9dde79(0x1be),{'id':getID(),'token':getToken(),'permission':a0_0x9dde79(0x1b2)},function(_0xecc662){var _0x39abcd=a0_0x9dde79;_0xecc662['permission']==_0x39abcd(0x1a8)?window['location'][_0x39abcd(0x1ba)]=window['location'][_0x39abcd(0x1ad)]+_0x39abcd(0x196):document[_0x39abcd(0x19c)]('pagebody')['style'][_0x39abcd(0x194)]='block';}),socket[a0_0x9dde79(0x1a1)](a0_0x9dde79(0x1cc),{'id':getID(),'name':getUsername(),'icon':getPFP(),'status':getStatus(),'token':getToken(),'aboutme':getAboutme(),'banner':getBanner()}),getEmojis();function checkState(_0x4d9c97){var _0xbfb674=a0_0x9dde79,_0x31e927=document[_0xbfb674(0x1b8)]('#save-'+_0x4d9c97['id']);_0x4d9c97[_0xbfb674(0x1a2)]!=_0x4d9c97[_0xbfb674(0x1b9)][_0xbfb674(0x1c0)]('_')[0x2][_0xbfb674(0x1c0)]('.')[0x0]?_0x31e927[_0xbfb674(0x1a5)][_0xbfb674(0x194)]='block':_0x31e927[_0xbfb674(0x1a5)][_0xbfb674(0x194)]=_0xbfb674(0x19a),_0x4d9c97['addEventListener'](_0xbfb674(0x197),function(_0x84c18a){var _0x3a1048=_0xbfb674;_0x84c18a[_0x3a1048(0x195)]===_0x3a1048(0x1ae)&&_0x31e927['click']();});}function getEmojis(){var _0x55ce0d=a0_0x9dde79,_0x342bba=document[_0x55ce0d(0x19c)]('emoji-container');socket[_0x55ce0d(0x1a1)](_0x55ce0d(0x1af),{'id':getID(),'token':getToken()},function(_0x4bd73b){var _0xfa40ce=_0x55ce0d;try{_0x4bd73b[_0xfa40ce(0x1b5)]==_0xfa40ce(0x1bf)?(_0x342bba['innerHTML']='',_0x4bd73b[_0xfa40ce(0x19b)][_0xfa40ce(0x19f)](_0x15cb86=>{var _0x40f6ba=_0xfa40ce,_0x1b8b93=_0x15cb86[_0x40f6ba(0x1c0)]('_')[0x1],_0x256e2f=_0x15cb86[_0x40f6ba(0x1c0)]('_')[0x2],_0x490e87=_0x40f6ba(0x1c6)+_0x15cb86+_0x40f6ba(0x1b6)+_0x1b8b93+'\x22\x20alt=\x22'+_0x15cb86+_0x40f6ba(0x1b7)+_0x256e2f[_0x40f6ba(0x1c0)]('.')[0x0]+_0x40f6ba(0x1c3)+_0x1b8b93+_0x40f6ba(0x192)+_0x15cb86+_0x40f6ba(0x1c4)+_0x1b8b93+_0x40f6ba(0x199)+_0x1b8b93+_0x40f6ba(0x1c2);_0x342bba[_0x40f6ba(0x1a0)](_0x40f6ba(0x1bc),_0x490e87);})):notify(_0x4bd73b['msg'],_0xfa40ce(0x1bd));}catch(_0x20d5e9){console[_0xfa40ce(0x1cb)](_0x20d5e9),notify(_0xfa40ce(0x1aa),_0xfa40ce(0x1bd));}console['log'](_0x4bd73b);});}function deleteEmoji(_0x2602e3,_0x1d9dc0){var _0x1598b7=a0_0x9dde79;console[_0x1598b7(0x1cb)](_0x1598b7(0x1a3)+_0x2602e3),console[_0x1598b7(0x1cb)](_0x1598b7(0x1c7));var _0x1d611b=_0x1d9dc0[_0x1598b7(0x1a4)]['parentNode'],_0x47e490=_0x1d611b[_0x1598b7(0x1b8)]('input');socket[_0x1598b7(0x1a1)](_0x1598b7(0x1a7),{'emoji':_0x2602e3,'id':getID(),'token':getToken()},function(_0x533a2f){var _0x427c1c=_0x1598b7;_0x533a2f['type']==_0x427c1c(0x1bf)?(_0x1d9dc0[_0x427c1c(0x1c8)](),notify(_0x427c1c(0x1a9),_0x427c1c(0x1bf)),getEmojis()):notify(_0x427c1c(0x1a9),_0x427c1c(0x1bd));});}function a0_0x2099(_0x153541,_0xe4bddb){var _0x21890d=a0_0x2189();return a0_0x2099=function(_0x209960,_0x209589){_0x209960=_0x209960-0x191;var _0x42a7ab=_0x21890d[_0x209960];return _0x42a7ab;},a0_0x2099(_0x153541,_0xe4bddb);}function saveEmojiName(_0x495bdc,_0x4e97ed){var _0x3f4f9f=a0_0x9dde79,_0x3a4e56=_0x4e97ed[_0x3f4f9f(0x1a4)][_0x3f4f9f(0x1a4)],_0x523ad6=_0x3a4e56[_0x3f4f9f(0x1b8)](_0x3f4f9f(0x1cd));socket[_0x3f4f9f(0x1a1)](_0x3f4f9f(0x1b1),{'emojiId':_0x495bdc,'emojiName':_0x523ad6[_0x3f4f9f(0x1a2)],'id':getID(),'token':getToken()},function(_0xbfedf8){var _0x3a7783=_0x3f4f9f;_0xbfedf8[_0x3a7783(0x1b5)]==_0x3a7783(0x1bf)?(_0x4e97ed[_0x3a7783(0x1a5)][_0x3a7783(0x194)]=_0x3a7783(0x19a),notify(_0x3a7783(0x1b3),_0x3a7783(0x1bf)),getEmojis()):notify(_0xbfedf8[_0x3a7783(0x1ab)],_0x3a7783(0x1bd));});}function upload(_0x316436){var _0x51102e=a0_0x9dde79;socket[_0x51102e(0x1a1)](_0x51102e(0x1b4),{'file':_0x316436[0x0],'filename':_0x316436[0x0][_0x51102e(0x19e)],'id':getID(),'token':getToken(),'type':_0x51102e(0x19d)},function(_0x12e537){var _0x2c28ee=_0x51102e;_0x12e537[_0x2c28ee(0x1b5)]==_0x2c28ee(0x1bf)?getEmojis():notify(_0x12e537[_0x2c28ee(0x1ab)],_0x2c28ee(0x1bd)),console[_0x2c28ee(0x1cb)](_0x12e537);});}
+setupNotify();
+
+var servername = document.getElementById("server_name");
+var serverdescription = document.getElementById("server_description");
+var saveButton = document.getElementById("settings_profile_save");
+
+var serverconfigName;
+var serverconfigDesc;
+
+socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageEmojis" }, function (response) {
+
+    if(response.permission == "denied"){
+        window.location.href = window.location.origin + "/settings/server";
+    }
+    else{
+        document.getElementById("pagebody").style.display = "block";
+    }
+});
+
+socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
+    aboutme: getAboutme(), banner: getBanner()});
+
+getEmojis();
+
+function checkState(element, ){
+
+
+    var emojiSaveElement = document.querySelector(`#save-${element.id}`);
+
+
+    if(element.value != element.alt.split("_")[2].split(".")[0]){
+        emojiSaveElement.style.display = "block";
+    }
+    else{
+        emojiSaveElement.style.display = "none";
+    }
+
+    // Execute a function when the user presses a key on the keyboard
+    element.addEventListener("keypress", function(event) {
+        // If the user presses the "Enter" key on the keyboard
+        if (event.key === "Enter") {
+            emojiSaveElement.click();
+        }
+    });
+}
+
+
+
+function getEmojis() {
+    var emojiContainer = document.getElementById("emoji-container");
+
+    socket.emit("getEmojis", { id:getID(), token: getToken() }, function (response) {
+
+        try {
+            if (response.type == "success") {
+                //settings_icon.value = response.msg;
+                emojiContainer.innerHTML = "";
+
+                response.data.forEach(emoji => {
+                    //console.log(emoji)
+
+
+                    var emojiId = emoji.split("_")[1];
+                    var emojiName = emoji.split("_")[2];
+
+                    //console.log("Emoji ID: " + emojiId);
+                    //console.log("Emoji Name: " + emojiName);
+
+                    var code = `
+                    <div class="emoji-entry">
+                        <div class="emoji-img">
+                            <img class="emoji" src="/emojis/${emoji}">
+                        </div>
+                
+                        <div class="emoji-name">
+                            <input type="text" onkeyup="checkState(this);" id="${emojiId}" alt="${emoji}" value="${emojiName.split(".")[0]}">
+                            <div class="emoji-actions">
+                                <img id="delete-${emojiId}" class="emoji-action-icon" src="/img/delete.png" onclick="deleteEmoji('${emoji}', this);">
+                                <img id="save-${emojiId}" style="display: none;" class="emoji-action-icon" src="/img/save.png" onclick="saveEmojiName('${emojiId}', this);">
+                            </div>
+                        </div>
+                    </div>`;
+
+                    emojiContainer.insertAdjacentHTML("beforeend", code);
+                })
+
+                //alert(response.msg)
+            } else {
+                notify(response.msg, "error")
+            }
+        }
+        catch (Ex){
+            console.log(Ex);
+            notify("Unkown Error! Reloading might fix it", "error");
+        }
+
+        console.log(response);
+    });
+}
+
+function deleteEmoji(emoji, element){
+
+    console.log("trying to delete emoji " + emoji)
+    console.log("sending")
+
+    var parentNode = element.parentNode.parentNode;
+    var inputField = parentNode.querySelector("input");
+
+    socket.emit("deleteEmoji", {emoji: emoji, id:getID(), token: getToken()}, function (response) {
+
+        if(response.type == "success"){
+            element.remove();
+
+            notify("Emoji successfully deleted", "success");
+            getEmojis();
+        }
+        else{
+            notify("Emoji successfully deleted", "error");
+            //alert(response.msg)
+        }
+    });
+}
+
+function saveEmojiName(id, element){
+
+    var parentNode = element.parentNode.parentNode;
+    var inputField = parentNode.querySelector("input");
+
+    socket.emit("updateEmoji", {emojiId: id, emojiName: inputField.value, id:getID(), token: getToken()}, function (response) {
+
+        if(response.type == "success"){
+            element.style.display = "none";
+            //inputField.alt = inputField.value;
+
+            notify("Emoji successfully updated", "success")
+            getEmojis();
+        }
+        else{
+            notify(response.msg, "error")
+        }
+    });
+}
+
+function upload(files) {
+
+    socket.emit("fileUpload", {file: files[0], filename: files[0].name, id:getID(), token: getToken(), type: "emoji" }, function (response) {
+
+        if(response.type == "success"){
+            //settings_icon.value = response.msg;
+            //alert(response.msg)
+            getEmojis();
+        }
+        else{
+            notify(response.msg, "error")
+        }
+
+        console.log(response);
+    });
+}

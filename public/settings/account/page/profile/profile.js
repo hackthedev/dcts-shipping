@@ -1,1 +1,217 @@
-var a0_0x3d3237=a0_0x2522;(function(_0x41ae02,_0x37d40a){var _0x50c6eb=a0_0x2522,_0x56866f=_0x41ae02();while(!![]){try{var _0xdf7c8e=-parseInt(_0x50c6eb(0xbc))/0x1*(-parseInt(_0x50c6eb(0xdf))/0x2)+-parseInt(_0x50c6eb(0xb8))/0x3+parseInt(_0x50c6eb(0xcf))/0x4*(parseInt(_0x50c6eb(0xda))/0x5)+parseInt(_0x50c6eb(0xc5))/0x6+parseInt(_0x50c6eb(0xd6))/0x7+-parseInt(_0x50c6eb(0xb7))/0x8+-parseInt(_0x50c6eb(0xc4))/0x9;if(_0xdf7c8e===_0x37d40a)break;else _0x56866f['push'](_0x56866f['shift']());}catch(_0x59597c){_0x56866f['push'](_0x56866f['shift']());}}}(a0_0x10f3,0xdda65),socket[a0_0x3d3237(0xc6)](a0_0x3d3237(0xe7),{'id':getID(),'name':getUsername(),'icon':getPFP(),'status':getStatus(),'token':getToken(),'aboutme':getAboutme(),'banner':getBanner()}));function upload(_0x33807d,_0x560e73){var _0x92c89b=a0_0x3d3237;if(_0x560e73==_0x92c89b(0xe5))socket['emit'](_0x92c89b(0xb9),{'file':_0x33807d[0x0],'filename':_0x33807d[0x0][_0x92c89b(0xc0)],'id':getID(),'token':getToken()},function(_0x19e44a){var _0x4df34a=_0x92c89b;_0x19e44a[_0x4df34a(0xd4)]==_0x4df34a(0xe3)?(settings_icon[_0x4df34a(0xd3)]=_0x19e44a[_0x4df34a(0xbd)],updatePreview('settings_profile_icon')):alert(_0x19e44a[_0x4df34a(0xbd)]),console['log'](_0x19e44a);});else _0x560e73==_0x92c89b(0xd7)&&socket[_0x92c89b(0xc6)](_0x92c89b(0xb9),{'file':_0x33807d[0x0],'filename':_0x33807d[0x0][_0x92c89b(0xc0)],'id':getID(),'token':getToken()},function(_0x1aad23){var _0x3bb259=_0x92c89b;_0x1aad23[_0x3bb259(0xd4)]=='success'?(settings_banner[_0x3bb259(0xd3)]=_0x1aad23[_0x3bb259(0xbd)],updatePreview(_0x3bb259(0xd7))):alert(_0x1aad23[_0x3bb259(0xbd)]),console[_0x3bb259(0xdd)](_0x1aad23);});}function a0_0x2522(_0x4ac900,_0x2a2de0){var _0x10f3a2=a0_0x10f3();return a0_0x2522=function(_0x252217,_0x443804){_0x252217=_0x252217-0xb7;var _0x32cbbe=_0x10f3a2[_0x252217];return _0x32cbbe;},a0_0x2522(_0x4ac900,_0x2a2de0);}function setPreview(){var _0x4195db=a0_0x3d3237;settings_username=document['getElementById']('settings_profile_username'),settings_status=document[_0x4195db(0xcc)](_0x4195db(0xba)),settings_aboutme=document['getElementById'](_0x4195db(0xdc)),settings_icon=document['getElementById'](_0x4195db(0xe5)),settings_banner=document['getElementById'](_0x4195db(0xd7)),preview_username=document[_0x4195db(0xcc)](_0x4195db(0xca)),preview_status=document[_0x4195db(0xcc)](_0x4195db(0xc8)),preview_aboutme=document[_0x4195db(0xcc)](_0x4195db(0xd9)),preview_icon=document[_0x4195db(0xcc)](_0x4195db(0xd1)),preview_banner=document[_0x4195db(0xcc)](_0x4195db(0xcb)),saveButton=document[_0x4195db(0xcc)](_0x4195db(0xe6)),preview_icon['style'][_0x4195db(0xbb)]=_0x4195db(0xc9)+getPFP()+'\x22)',preview_banner[_0x4195db(0xc1)][_0x4195db(0xbb)]='url(\x22'+getBanner()+'\x22)',settings_username[_0x4195db(0xd3)]=''+getUsername(),settings_status[_0x4195db(0xd3)]=''+getStatus(),settings_aboutme[_0x4195db(0xbf)]=''+getAboutme(),settings_icon[_0x4195db(0xd3)]=''+getPFP(),settings_banner['value']=''+getBanner(),preview_username[_0x4195db(0xd2)]=_0x4195db(0xc3)+getUsername()+_0x4195db(0xe0),preview_status['innerText']=''+getStatus(),preview_aboutme['innerText']=''+getAboutme();}function saveSettings(){var _0x5ae908=a0_0x3d3237;try{settings_icon[_0x5ae908(0xd3)]!=null&&settings_icon[_0x5ae908(0xd3)][_0x5ae908(0xe2)]>0x0&&(setPFP(settings_icon[_0x5ae908(0xd3)]),console[_0x5ae908(0xdd)](_0x5ae908(0xde)),console[_0x5ae908(0xdd)](settings_icon[_0x5ae908(0xd3)])),settings_banner[_0x5ae908(0xd3)]!=null&&settings_banner[_0x5ae908(0xd3)][_0x5ae908(0xe2)]>0x0&&(setBanner(settings_banner[_0x5ae908(0xd3)]),console[_0x5ae908(0xdd)](_0x5ae908(0xdb)),console[_0x5ae908(0xdd)](settings_banner[_0x5ae908(0xd3)])),settings_aboutme[_0x5ae908(0xd3)]!=null&&settings_aboutme[_0x5ae908(0xd3)][_0x5ae908(0xe2)]>0x0&&(setAboutme(settings_aboutme[_0x5ae908(0xd3)]),console[_0x5ae908(0xdd)](_0x5ae908(0xbe))),settings_username['value']!=null&&settings_username[_0x5ae908(0xd3)][_0x5ae908(0xe2)]>=0x3&&(setUser(settings_username[_0x5ae908(0xd3)]),console[_0x5ae908(0xdd)](_0x5ae908(0xc2))),settings_status[_0x5ae908(0xd3)]!=null&&settings_status['value']['length']>0x0&&(setStatus(settings_status['value']),console[_0x5ae908(0xdd)]('Saved\x20status')),settings_aboutme[_0x5ae908(0xd3)]!=null&&settings_aboutme['value'][_0x5ae908(0xe2)]>0x0&&(setAboutme(settings_aboutme[_0x5ae908(0xd3)]),console['log'](_0x5ae908(0xbe))),saveButton['style'][_0x5ae908(0xd8)]=_0x5ae908(0xe1);}catch(_0xf01c94){alert('Error\x20while\x20trying\x20to\x20save\x20settings:\x20'+_0xf01c94);return;}}function setUser(_0x563a44){var _0x19ede1=a0_0x3d3237;setCookie(_0x19ede1(0xd5),_0x563a44,0x168);}function setBanner(_0x2ca492){setCookie('banner',_0x2ca492,0x168);}function setStatus(_0x358a88){var _0x5c0658=a0_0x3d3237;setCookie(_0x5c0658(0xcd),_0x358a88,0x168);}function a0_0x10f3(){var _0x147ef4=['724NTKIhw','settings_profile_username','profile_icon','innerHTML','value','type','username','10973249fYmzaL','settings_profile_banner','display','profile_aboutme','17080QPJupQ','Saved\x20Banner','settings_profile_aboutme','log','Saved\x20Icon','3634tubejE','</h2>','none','length','success','onload','settings_profile_icon','settings_profile_save','userConnected','aboutme','2333792cwylXP','4986354ZhvfIg','fileUpload','settings_profile_status','backgroundImage','424UUbbAt','msg','Saved\x20about\x20me','innerText','name','style','Saved\x20user','<h2>','13514094miqTzD','8441844gHjtAP','emit','NOt\x20same','profile_status','url(\x22','profile_username','profile_banner','getElementById','status','block'];a0_0x10f3=function(){return _0x147ef4;};return a0_0x10f3();}function setPFP(_0x19fe14){setCookie('pfp',_0x19fe14,0x168);}function setAboutme(_0x116157){var _0x29d237=a0_0x3d3237;setCookie(_0x29d237(0xe8),_0x116157,0x168);}function updatePreview(_0x4d8917){var _0x563882=a0_0x3d3237,_0x422ee7=document[_0x563882(0xcc)](_0x4d8917)[_0x563882(0xd3)];try{_0x4d8917==_0x563882(0xd0)&&(preview_username[_0x563882(0xd2)]='<h2>'+_0x422ee7+_0x563882(0xe0)),_0x4d8917==_0x563882(0xba)&&(preview_status[_0x563882(0xd2)]=''+_0x422ee7),_0x4d8917==_0x563882(0xdc)&&(preview_aboutme[_0x563882(0xd2)]=''+_0x422ee7),_0x4d8917=='settings_profile_icon'&&(preview_icon[_0x563882(0xc1)][_0x563882(0xbb)]=_0x563882(0xc9)+_0x422ee7+'\x22)'),_0x4d8917==_0x563882(0xd7)&&(preview_banner['style'][_0x563882(0xbb)]=_0x563882(0xc9)+_0x422ee7+'\x22)'),preview_username['innerText']!=getUsername()||preview_status[_0x563882(0xbf)]!=getStatus()||preview_aboutme['innerText']!=getAboutme()||settings_icon[_0x563882(0xd3)]!=getPFP()||settings_banner[_0x563882(0xd3)]!=getBanner()?(console['log'](_0x563882(0xc7)),saveButton['style'][_0x563882(0xd8)]=_0x563882(0xce)):(console[_0x563882(0xdd)]('same'),saveButton['style']['display']=_0x563882(0xe1));}catch(_0x4b60db){console[_0x563882(0xdd)](_0x4b60db);}}window[a0_0x3d3237(0xe4)]=function(){Sleep(0x1f4),setPreview();};function Sleep(_0xb78df0){return new Promise(_0x229dd9=>setTimeout(_0x229dd9,_0xb78df0));}var settings_username=document[a0_0x3d3237(0xcc)](a0_0x3d3237(0xd0)),settings_status=document['getElementById'](a0_0x3d3237(0xba)),settings_aboutme=document['getElementById'](a0_0x3d3237(0xdc)),settings_icon=document[a0_0x3d3237(0xcc)](a0_0x3d3237(0xe5)),settings_banner=document[a0_0x3d3237(0xcc)]('settings_profile_banner'),preview_username=document[a0_0x3d3237(0xcc)](a0_0x3d3237(0xca)),preview_status=document['getElementById'](a0_0x3d3237(0xc8)),preview_aboutme=document[a0_0x3d3237(0xcc)](a0_0x3d3237(0xd9)),preview_icon=document[a0_0x3d3237(0xcc)](a0_0x3d3237(0xd1)),preview_banner=document[a0_0x3d3237(0xcc)](a0_0x3d3237(0xcb)),saveButton=document[a0_0x3d3237(0xcc)](a0_0x3d3237(0xe6));
+socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
+    aboutme: getAboutme(), banner: getBanner()});
+
+function upload(files, id) {
+
+    if(id  == "settings_profile_icon") {
+        socket.emit("fileUpload", {file: files[0], filename: files[0].name, id:getID(), token: getToken() }, function (response) {
+
+            if(response.type == "success"){
+                settings_icon.value = response.msg;
+                updatePreview("settings_profile_icon");
+            }
+            else{
+                alert(response.msg)
+            }
+
+            console.log(response);
+        });
+    }
+    else if(id == "settings_profile_banner"){
+        socket.emit("fileUpload", {file: files[0], filename: files[0].name, id:getID(), token: getToken() }, function (response) {
+
+            if(response.type == "success"){
+                settings_banner.value = response.msg;
+                updatePreview("settings_profile_banner");
+            }
+            else{
+                alert(response.msg)
+            }
+
+            console.log(response);
+        });
+    }
+}
+
+function setPreview(){
+
+    settings_username = document.getElementById("settings_profile_username");
+    settings_status = document.getElementById("settings_profile_status");
+    settings_aboutme = document.getElementById("settings_profile_aboutme");
+    settings_icon = document.getElementById("settings_profile_icon");
+    settings_banner = document.getElementById("settings_profile_banner");
+
+    preview_username = document.getElementById("profile_username");
+    preview_status = document.getElementById("profile_status");
+    preview_aboutme = document.getElementById("profile_aboutme");
+    preview_icon = document.getElementById("profile_icon");
+    preview_banner = document.getElementById("profile_banner");
+    saveButton = document.getElementById("settings_profile_save");
+
+
+    preview_icon.style.backgroundImage = `url("${getPFP()}")`;
+    preview_banner.style.backgroundImage = `url("${getBanner()}")`;
+
+    settings_username.value = `${getUsername()}`;
+    settings_status.value = `${getStatus()}`;
+    settings_aboutme.innerText = `${getAboutme()}`;
+
+    settings_icon.value = `${getPFP()}`;
+    settings_banner.value = `${getBanner()}`;
+
+    preview_username.innerHTML = `<h2>${getUsername()}</h2>`;
+    preview_status.innerText = `${getStatus()}`;
+    preview_aboutme.innerText = `${getAboutme()}`;
+
+
+}
+
+function saveSettings(){
+
+
+    //const iconStyles = window.getComputedStyle(settings_icon);
+    //const BannerStyles = window.getComputedStyle(settings_banner);
+
+    // Icon
+    try{
+        if(settings_icon.value != null && settings_icon.value.length > 0){
+            setPFP(settings_icon.value);
+            console.log("Saved Icon");
+            console.log(settings_icon.value);
+        }
+
+        // Banner
+        if(settings_banner.value != null && settings_banner.value.length > 0){
+            setBanner(settings_banner.value);
+            console.log("Saved Banner");
+            console.log(settings_banner.value);
+        }
+
+        // About me
+        if(settings_aboutme.value != null && settings_aboutme.value.length > 0){
+            setAboutme(settings_aboutme.value);
+            console.log("Saved about me");
+        }
+
+
+        // Username
+        if(settings_username.value != null && settings_username.value.length >= 3){
+            setUser(settings_username.value);
+            console.log("Saved user");
+        }
+
+        // Status
+        if(settings_status.value != null && settings_status.value.length > 0){
+            setStatus(settings_status.value);
+            console.log("Saved status");
+        }
+
+        // About me
+        if(settings_aboutme.value != null && settings_aboutme.value.length > 0){
+            setAboutme(settings_aboutme.value);
+            console.log("Saved about me");
+        }
+
+        saveButton.style.display = "none";
+    }
+    catch(error){
+        alert("Error while trying to save settings: " + error);
+        return;
+    }
+}
+
+function setUser(username){
+    setCookie("username", username, 360);
+}
+
+function setBanner(banner){
+    setCookie("banner", banner, 360);
+}
+
+function setStatus(status){
+    setCookie("status", status, 360);
+}
+
+function setPFP(pfp){
+    setCookie("pfp", pfp, 360);
+}
+
+function setAboutme(aboutme){
+    setCookie("aboutme", aboutme, 360);
+}
+
+function updatePreview(id){
+    var newSetting = document.getElementById(id).value;
+
+    try{
+
+        // Username
+        if(id == "settings_profile_username"){
+            preview_username.innerHTML = `<h2>${newSetting}</h2>`;
+        }
+
+        // Status
+        if(id == "settings_profile_status"){
+            preview_status.innerHTML = `${newSetting}`;
+        }
+
+        // About me
+        if(id == "settings_profile_aboutme"){
+            preview_aboutme.innerHTML = `${newSetting}`;
+        }
+
+        // Icon
+        if(id == "settings_profile_icon"){
+            preview_icon.style.backgroundImage = `url("${newSetting}")`;
+        }
+
+        // Banner
+        if(id == "settings_profile_banner"){
+            preview_banner.style.backgroundImage = `url("${newSetting}")`;
+        }
+
+        // Username
+        if(preview_username.innerText != getUsername() ||
+            preview_status.innerText != getStatus() ||
+            preview_aboutme.innerText != getAboutme() ||
+            settings_icon.value != getPFP() ||
+            settings_banner.value != getBanner()
+
+        ){
+            console.log("NOt same");
+            saveButton.style.display = "block";
+        }
+        else{
+            console.log("same");
+            saveButton.style.display = "none";
+        }
+    }
+    catch(e){
+        console.log(e);
+    }
+
+}
+
+window.onload = function () {
+
+    Sleep(500);
+    setPreview();
+}
+
+function Sleep(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+
+var settings_username = document.getElementById("settings_profile_username");
+var settings_status = document.getElementById("settings_profile_status");
+var settings_aboutme = document.getElementById("settings_profile_aboutme");
+var settings_icon = document.getElementById("settings_profile_icon");
+var settings_banner = document.getElementById("settings_profile_banner");
+
+var preview_username = document.getElementById("profile_username");
+var preview_status = document.getElementById("profile_status");
+var preview_aboutme = document.getElementById("profile_aboutme");
+var preview_icon = document.getElementById("profile_icon");
+var preview_banner = document.getElementById("profile_banner");
+var saveButton = document.getElementById("settings_profile_save");

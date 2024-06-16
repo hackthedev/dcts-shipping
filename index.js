@@ -457,6 +457,10 @@ app.use(express.static('./public'));
 // den Browsern tut.
 io.on('connection', function (socket) {
 
+    socket.on('audioStream', (audioData) => {
+        socket.broadcast.emit('audioStream', audioData);
+    });
+
     // Check if user ip is blacklisted
     var ip = socket.handshake.address;
     if(serverconfig.ipblacklist.includes(ip)){

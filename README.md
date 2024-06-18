@@ -1,7 +1,7 @@
 # DCTS - Direct Communication Through Sockets
 ![Version](https://img.shields.io/static/v1?label=State&message=Early%20Access&color=orange) 
 <!-- ![GitHub all releases](https://img.shields.io/github/downloads/hackthedev/dcts-shipping/total?color=success&label=Downloads) -->
-[Visit our Forum](https://dcts.chat/)
+[Visit our Forum - (Early Release Notes/ Plans) ](https://dcts.chat/)
 
 This project was made with the goal to combine TeamSpeak and Discord. The goal: A platform that looks modern like Discord but runs the server like TeamSpeak. DCTS allows you to run your own Discord Server like a TeamSpeak server, in simple words.
 

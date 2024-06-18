@@ -27,6 +27,8 @@ var request = require('request');
 //require('whatwg-fetch')
 
 var usersocket = []
+var userOldRoom = []
+var peopleInVC = {}
 var showedOfflineMessage = [];
 
 var typingMembers = [];
@@ -208,7 +210,6 @@ var serverconfig = JSON.parse(fs.readFileSync("./config.json", {encoding: "utf-8
 
 
 if(serverconfig.serverinfo.ssl.enabled == 1){
-    console.log("Yes");
 
     server = https.createServer({
         key: fs.readFileSync(serverconfig.serverinfo.ssl.key),
@@ -760,7 +761,65 @@ io.on('connection', function (socket) {
         }
     });
 
+    // vc setting
+    socket.on('audioStream', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+            peopleInVC[member.room][member.id].lastActivity = new Date().getTime();
+            socket.to(member.room).emit("audioData", {speakingMember: member.id, audioData: member.audioData});
+        }
+    });
 
+    socket.on('joinedVC', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+
+            var memberTransmitObj = {id: member.id, name: serverconfig.servermembers[member.id].name, icon: serverconfig.servermembers[member.id].icon, room: member.room, lastActivity: member.lastActivity};
+
+            if(peopleInVC[member.room] == null) peopleInVC[member.room] = {};
+            peopleInVC[member.room][member.id] = memberTransmitObj;
+
+            socket.to(member.room).emit("userJoinedVC", memberTransmitObj);
+            socket.emit("userJoinedVC", memberTransmitObj);
+        }
+    });
+
+    socket.on('leftVC', function (member) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+            // User already left, so the room id wouldnt be correct anymore
+            member.room = userOldRoom[member.id];
+            try{ delete peopleInVC[member.room][member.id] } catch (error) { console.log("error deleting it"); console.log(error); }
+            socket.to(member.room).emit("userLeftVC", {id: member.id, name: serverconfig.servermembers[member.id].name, icon: serverconfig.servermembers[member.id].icon, room: member.room});
+        }
+    });
+
+    socket.on('getVCMembers', function (member, response) {
+        if(validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+            Object.keys(peopleInVC[member.room]).forEach(function(memberId) {
+               var user = peopleInVC[member.room][memberId];
+
+
+                var lastOnline = user.lastActivity / 1000;
+
+                var today = new Date().getTime() / 1000;
+                var diff = today - lastOnline;
+                var minutesPassed = Math.round(diff / 60);
+
+                if(minutesPassed > 0){
+                    delete peopleInVC[member.room][memberId];
+                }
+            });
+
+
+            response({type: "success", vcMembers: peopleInVC[member.room]});
+        }
+    });
 
     socket.on('redeemKey', function (member) {
         if(validateMemberId(member.id, socket) == true
@@ -974,6 +1033,24 @@ io.on('connection', function (socket) {
                         return;
                     }
 
+                    if(serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel].type == "voice"){
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                                    "title": "You cant chat here",
+                                    "message": "This is a voice channel",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "error",
+                                    "popup_type": "confirm"
+                                }`));
+
+                        return;
+                    }
+
 
                     var messageid = generateId(12);
                     member.timestamp = new Date().getTime();
@@ -990,13 +1067,6 @@ io.on('connection', function (socket) {
                         consolas(colors.red("Message was null"))
                         return
                     }
-
-
-
-                    // Get Emojis (only works with one)
-                    //const emojiCode = getEmojiCode(member.message, ':', ':');
-                    //console.log("Emoji Code was " + emojiCode)
-
 
                     /*
                     The following performs the same replace function with the only
@@ -1031,19 +1101,6 @@ io.on('connection', function (socket) {
                         }
                     });
 
-                    /*
-                    if(emojiCode.length > 0){
-                        // match(":(.*):")
-                        var matched = member.message.search(`(:)\\w+`);
-                        console.log(matched);
-
-                        member.message = member.message.replaceAll(`(:)\\w+`, `<span><img class="inline-text-emoji" src="/emojis/${findEmojiByID(emojiCode)}"></span>`);
-                    }
-
-                     */
-
-
-                    //member.message = markdown(member.message, messageid, member.room);
                     member.token = null;
 
 
@@ -1193,7 +1250,13 @@ io.on('connection', function (socket) {
                         sortedRoles[role].info.hasRole = 0;
                     }
 
-                    returnRole.push(sortedRoles[role]);
+                    // Get Highest role of user doing it
+                    var executer = getMemberHighestRole(member.id);
+
+                    // Only let people show roles they can actually assign
+                    if(sortedRoles[role].info.sortId < executer.info.sortId && role != 0 && role != 1){
+                        returnRole.push(sortedRoles[role]);
+                    }
                 }
             });
 
@@ -1316,8 +1379,6 @@ io.on('connection', function (socket) {
 
                     try {
                         fs.unlinkSync(`./public/emojis/${member.emoji}`);
-
-                        console.log("Deleted Emoji successfully.");
                         response({type: "success", msg: "Emoji deleted successfully"});
 
                     } catch (error) {
@@ -1434,6 +1495,27 @@ io.on('connection', function (socket) {
                         }
                     }
 
+                    var executer = getMemberHighestRole(member.id);
+                    var target = getMemberHighestRole(member.target);
+
+
+                    if(executer.info.sortId >= target.info.sortId){
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                                    "title": "Error!",
+                                    "message": "You cant assign this role because its higher or equal then yours",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "success",
+                                    "popup_type": "confirm"
+                                }`));
+                        return;
+                    }
+
                     serverconfig.serverroles[member.role].members.push(member.target);
                     saveConfig();
 
@@ -1467,6 +1549,32 @@ io.on('connection', function (socket) {
                             response({type: "error", msg: "You cant remove roles that are higher or equal then yours"});
                             return;
                         }
+                    }
+
+                    var executer = getMemberHighestRole(member.id);
+                    var target = getMemberHighestRole(member.target);
+
+
+                    if(executer.info.sortId <= target.info.sortId){
+                        sendMessageToUser(socket.id, JSON.parse(
+                            `{
+                                    "title": "Error!",
+                                    "message": "You cant remove this role because its higher or equal then yours",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "success",
+                                    "popup_type": "confirm"
+                                }`));
+                        return;
+                    }
+
+                    // Default Roles
+                    if(serverconfig.serverroles[member.role].info.id == 0 || serverconfig.serverroles[member.role] == 1){
+                        return;
                     }
 
                     serverconfig.serverroles[member.role].members.pop(member.target);
@@ -1520,7 +1628,6 @@ io.on('connection', function (socket) {
             if(hasPermission(member.id, "manageChannels")){
                 try{
                     //console.log(member.role);
-                    console.log(member.permissions);
 
                     var memberChannel = member.channel.replace("channel-", "");
 
@@ -2336,7 +2443,6 @@ io.on('connection', function (socket) {
                     if(member.reason.length > 0)
                         reasonText = `##Reason:#${member.reason}`;
 
-                    console.log(member.time)
 
                     if(member.time.length == 0){
                         // You have been muted
@@ -2401,14 +2507,71 @@ io.on('connection', function (socket) {
                                     "popup_type": "confirm"
                                 }`));
 
+                if(userOldRoom.hasOwnProperty(member.id)){
+                    socket.leave(userOldRoom[member.id])
+                }
+
                 socket.join(0);
+                userOldRoom[member.id] = 0;
                 return;
             }
 
             try{
+                // If the channel exists
                 if(serverconfig.groups[group].channels.categories[category].channel[channel] != null){
-                    socket.join(escapeHtml(member.room));
-                    consolas(`User joined room ${escapeHtml(member.room)}`.green, "Debug");
+
+                    // If its a text channel
+                    if(serverconfig.groups[group].channels.categories[category].channel[channel].type == "text"){
+
+                        // Permission already checked above for text on default
+
+                        // Update Room and save previous one
+                        if(userOldRoom.hasOwnProperty(member.id)){
+                            socket.leave(userOldRoom[member.id])
+                        }
+                        socket.join(escapeHtml(member.room));
+                        userOldRoom[member.id] = escapeHtml(member.room);
+
+                        consolas(`User joined text room ${escapeHtml(member.room)}`.green, "Debug");
+                    }
+                    // If its a voice channel
+                    else if(serverconfig.groups[group].channels.categories[category].channel[channel].type == "voice") {
+
+                        // If user can use VC
+                        if (!checkUserChannelPermission(channel, member.id, "useVOIP")) {
+                            sendMessageToUser(socket.id, JSON.parse(
+                                `{
+                                    "title": "Access denied",
+                                    "message": "You're not allowed to talk in this channel",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "error",
+                                    "popup_type": "confirm"
+                                }`));
+
+                            // Update Room and save previous one
+                            if (userOldRoom.hasOwnProperty(member.id)) {
+                                socket.leave(userOldRoom[member.id])
+                            }
+                            socket.join(0);
+                            userOldRoom[member.id] = 0;
+                            return;
+                        }
+
+                        // Update Room and save previous one
+                        if(userOldRoom.hasOwnProperty(member.id)){
+                            socket.leave(userOldRoom[member.id])
+                        }
+                        socket.join(escapeHtml(member.room));
+                        userOldRoom[member.id] = escapeHtml(member.room);
+
+                        consolas(`User joined VC room ${escapeHtml(member.room)}`.green, "Debug");
+                    }
+
                 }
             }
             catch(erorr){
@@ -2464,14 +2627,6 @@ io.on('connection', function (socket) {
                     "type": "error",
                     "popup_type": "confirm"
                 }`));
-        }
-    });
-
-    socket.on('sendVoiceData', function (member, response) {
-        if(validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token) {
-
-            io.emit("receiveVoiceData", member.voice);
         }
     });
 
@@ -2910,7 +3065,7 @@ io.on('connection', function (socket) {
                     `{
                         "id": ${channelId},
                         "name": "${escapeHtml(member.value)}",
-                        "type": "text",
+                        "type": "${member.type}",
                         "description": "Default Channel Description",
                         "sortId": 0,
                         "permissions": {
@@ -3165,7 +3320,7 @@ io.on('connection', function (socket) {
     socket.on('getCurrentChannel', function (member) {
         if(validateMemberId(member.id, socket) == true) {
 
-            consolas("Resolving Channel ID to Name", "Debug");
+            //consolas("Resolving Channel ID to Name", "Debug");
             //console.log(serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel]);
 
             try{
@@ -4782,8 +4937,16 @@ function getChannelTree(member){
                     if(checkUserChannelPermission(chan.id, member.id, "viewChannel") || hasPermission(member.id, "manageChannels", member.group)){
 
                         if(added_channels.includes(chan.id + "_" + chan.name) == false){
-                            treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}')"><li class="channelTrigger" id="channel-${chan.id}" style="color: #ABB8BE;">${chan.name}</li></a>`;
-                            added_channels.push(chan.id + "_" + chan.name)
+
+                            // if text channel
+                            if(chan.type == "text"){
+                                treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}')"><li class="channelTriggerchannelTrigger" id="channel-${chan.id}" style="color: #ABB8BE;">⌨ ${chan.name}</li></a>`;
+                                added_channels.push(chan.id + "_" + chan.name)
+                            }
+                            else if(chan.type == "voice"){
+                                treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}', true);"><li class="channelTrigger" id="channel-${chan.id}" style="color: #ABB8BE;">🎤 ${chan.name}</li></a>`;
+                                added_channels.push(chan.id + "_" + chan.name)
+                            }
                         }
 
                     }
@@ -4795,23 +4958,6 @@ function getChannelTree(member){
 
         });
 
-        /*
-        if(sortedCats.length == null){
-
-            if(hasPermission(member.id, "manageChannels")){
-                if(showedCategory == false && addedCategories.includes(groupCategories[category].info.name) == false){
-
-                    treecode +=  "<details open>";
-                    treecode += `<summary class="categoryTrigger" id="${category}">${groupCategories[category].info.name}</summary>`;
-                    treecode += `<ul>`
-
-                    addedCategories.push(groupCategories[category].info.name)
-                }
-            }
-
-        }
-
-         */
 
         treecode += "</ul>";
         treecode += "</details>";
@@ -4907,7 +5053,6 @@ function linkify(text, messageid, roomid) {
             } else {
 
                 isImgUrl(url).then((result) => {
-                    console.log("result was " + result);
 
                     if (result == true) {
                         console.log("Returning img embed")

@@ -144,13 +144,13 @@ function markdown(msg, msgid){
 
                     } else if (isVideo(msg) == true) {
                         console.log("Is video")
-                        var code = `<!--<p id="msg-${msgid}"><div class="iframe-container" id="${msgid}" > --><video style="background-color: black;" width="560" height="315" class="video-embed" controls>
+                        var code = `<!--<p id="msg-${msgid}"><div class="iframe-container" id="${msgid}" > --><video width="560" height="315" class="video-embed" controls>
                                     <source src="${url}">
                                     </video></div><!--</p>-->`;
 
                         //setTimeout(() => scrollDown(), 10)
 
-                        msg = msg.replace(url, `<video style="background-color: black;" width="560" height="315" class="video-embed" controls>
+                        msg = msg.replace(url, `<video width="560" height="315" class="video-embed" controls>
                                                     <source src="${url}">
                                                 </video></div>`)
 
@@ -216,174 +216,89 @@ async function checkConnection(delay) {
 checkConnection(2000)
 
 
-// VC STUFF
 
-// Flag for recording or not
-var recordAudio = false;
-function stopAudioRecording(){
-    recordAudio = false;
-    socket.emit("leftVC", { id: getID() , username: getUsername(), icon: getPFP(), room: getRoom(), token: getToken() });
-}
 
-function joinVC(id){
+function mictest(){
+    var constraints = { audio: true };
+    navigator.mediaDevices.getUserMedia(constraints).then(function(mediaStream) {
+        var mediaRecorder = new MediaRecorder(mediaStream);
 
-    document.getElementById("content").innerHTML = "";
-    getChannelTreeSocket();
-    socket.emit("getCurrentChannel", { id: getID() , username: getUsername(), icon: getPFP(), group: getGroup(), category: getCategory(), channel: getChannel(), token: getToken() });
-    socket.emit("joinedVC", { id: getID() , username: getUsername(), icon: getPFP(), room: getRoom(), token: getToken(), lastActivity: new Date().getTime() });
-    socket.emit("getVCMembers", { id: getID() , username: getUsername(), icon: getPFP(), room: getRoom(), token: getToken() }, function (response) {
+        mediaRecorder.start();
 
-        Object.keys(response.vcMembers).forEach(function(vcMember) {
-            addVCMember(response.vcMembers[vcMember])
-        })
+        mediaRecorder.onstart = function(e) {
+            //
+        };
 
+        mediaRecorder.ondataavailable = async function(e) {
+            var blob = new Blob([e.data], { 'type' : 'audio/ogg; codecs=opus' });
+            socket.emit("sendVoiceData", {id:getID(), token: getToken(), voice: blob }, function (response) {
+                // response
+            });
+        };
+
+
+        mediaRecorder.onstop = function(e) {
+            //
+        };
+
+        // Start recording
+
+
+        // Stop recording after 5 seconds and broadcast it to server
+        setTimeout(function() {
+            mediaRecorder.stop()
+        }, 10);
     });
-    startAudioRecording();
 }
 
 
-function startAudioRecording(){
+async function getMedia(constraints) {
 
-    if(recordAudio == true){
-        return;
-    }
+    try {
+        let stream = null;
 
-    recordAudio = true;
-    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-        .then((stream) => {
-                var mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.audioBitsPerSecond = 700;
-                var audioChunks = [];
-                var minTime = 500;
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
 
-                mediaRecorder.start();
-                setTimeout(function () {
-                    mediaRecorder.stop();
-                }, minTime);
-
-                mediaRecorder.addEventListener("dataavailable", function (event) {
-                    audioChunks.push(event.data);
-                });
-
-                mediaRecorder.addEventListener("stop", function () {
-
-                    if(recordAudio != false){
-                        mediaRecorder.start();
-                        setTimeout(function () {
-                            mediaRecorder.stop();
-                        }, minTime);
-                    }
-                    else{
-                        stream.getTracks().forEach(function(track) {
-                            track.stop();
-                        });
-                    }
-
-                    var audioBlob = new Blob(audioChunks);
-                    audioChunks = [];
-                    var fileReader = new FileReader();
-                    fileReader.readAsDataURL(audioBlob);
-                    fileReader.onloadend = function () {
-                        var base64String = fileReader.result;
-                        socket.emit("audioStream", {id: getID(), token: getToken(), audioData: base64String, room: getRoom(), lastActivity: new Date().getTime()});
-                    };
-
-
-                });
-        })
-        .catch((error) => {
-            console.error('Error capturing audio.', error);
+        var blob = new Blob([stream], { 'type' : 'audio/ogg; codecs=opus' });
+        socket.emit("sendVoiceData", {id:getID(), token: getToken(), voice: blob }, function (response) {
+            // response
         });
+
+        console.log(blob);
+        let audio = new Audio();
+        audio.srcObject = stream;
+        audio.play();
+
+
+    } catch(err) {
+        document.write(err)
+    }
 }
 
-// When Receiving audio data
-socket.on('audioData', (data) => {
-    console.log(data)
-    console.log("Received data");
-
-    var newData = data.audioData.split(";");
-    newData[0] = "data:audio/ogg;";
-    newData = newData[0] + newData[1];
-
-    var audio = new Audio(newData);
+//getMedia({ audio: true, video: false })
 
 
-    const audioContext = new AudioContext();
-    const mediaStreamAudioSourceNode = audioContext.createMediaElementSource(audio);
-    const analyserNode = audioContext.createAnalyser();
-    mediaStreamAudioSourceNode.connect(analyserNode);
+socket.on('receiveVoiceData', function (data) {
 
-    const pcmData = new Float32Array(analyserNode.fftSize);
-    analyserNode.getFloatTimeDomainData(pcmData);
-    let sumSquares = 0.0;
-    for (const amplitude of pcmData) { sumSquares += amplitude*amplitude; }
-    var finalDB = Math.sqrt(sumSquares / pcmData.length);
+    console.log("RE")
 
-    console.log(finalDB);
-
-
-
-
-
-
-    mediaStreamAudioSourceNode.connect(audioContext.destination);
-
-    if (!audio || document.hidden) {
-        return;
-    }
+    var blob = new Blob([data], { 'type' : 'audio/ogg; codecs=opus' });
+    console.log(blob);
+    var audio = document.createElement('audio');    // document.createElement('audio')
+    audio.src = window.URL.createObjectURL(blob);
     audio.play();
+
+    //data.play();
+
+    /*
+    let audio = new Audio();
+    audio.srcObject = data;
+    audio.play();
+
+     */
+
 });
 
-
-// When Receiving audio data
-socket.on('userJoinedVC', (member) => {
-    addVCMember(member);
-});
-
-function addVCMember(member){
-    var userContentCheck = document.getElementById("vc-user-container-" + member.id);
-    if(userContentCheck != null) return;
-
-    var contentBox = document.getElementById("content")
-
-    var memberName = member.name;
-    if(memberName.length > 15){
-        memberName = member.name.substr(0, 15) + "...";
-    }
-
-    var userCode = `
-        <div id="vc-user-container-${member.id}" 
-            style="
-                margin: 20px; 
-                padding: 40px;
-                text-align: center;
-                border: 1px solid gray;
-                background-color: #2F3136;
-                border-radius: 8px;
-                width: 200px;
-                overflow: hidden;
-                float: left;
-                
-        ">
-            
-            <img id="vc-user-icon-${member.id}" title="${member.name}" 
-            onerror="this.src = '/img/default_pfp.png';" 
-            src='${member.icon}' style='height: 80px; height: 80px; border-radius: 50%;'>
-            <h1 id="vc-user-name-${member.id}" style="font-size: 18px">${memberName}</h1>
-        </div>`;
-
-    contentBox.insertAdjacentHTML("beforeend", userCode);
-}
-
-function removeVCUser(member){
-    var userContentCheck = document.getElementById(`vc-user-container-${member.id}`);
-    if(userContentCheck != null) userContentCheck.remove();
-}
-
-// When Receiving audio data
-socket.on('userLeftVC', (member) => {
-    removeVCUser(member)
-});
 
 
 
@@ -409,16 +324,11 @@ scope.addEventListener("click", (event) => {
         clickedElement.className == "message-profile-info-name" ||
         clickedElement.className == "memberlist-member-info name" ||
         clickedElement.className == "memberlist-member-info status" ||
-        clickedElement.className == "mention" ||
-        clickedElement.id.includes("vc-user-container") ||
-        clickedElement.id.includes("vc-user-icon") ||
-        clickedElement.id.includes("vc-user-name")
+        clickedElement.className == "mention"
     ){
         var userid = clickedElement.id;
 
-        //if(clickedElement.className == "mention") { userid = userid.replace("mention-", "")}
-        userid = userid.split("-").pop();
-        console.log("Userid is " + userid)
+        if(clickedElement.className == "mention") { userid = userid.replace("mention-", "")}
         getMemberProfile(userid, mouseX, mouseY);
     }
     else if(clickedElement.className.includes("role") && clickedElement.id.split("-")[0] == "addRole"){
@@ -656,15 +566,9 @@ scope.addEventListener("contextmenu", (event) => {
 
         socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageChannels" }, function (response) {
             if(response.permission == "denied") { return; }
-            addContextMenuItem(ContextMenu, "Create Text Channel",
+            addContextMenuItem(ContextMenu, "Create Channel",
                 `onclick="
-                createChannel('${clickedElement.id}', 'text');
-                ContextMenu.classList.remove('visible');
-                "`);
-
-            addContextMenuItem(ContextMenu, "Create Voice Channel",
-                `onclick="
-                createChannel('${clickedElement.id}', 'voice');
+                createChannel('${clickedElement.id}');
                 ContextMenu.classList.remove('visible');
                 "`);
         });
@@ -693,15 +597,9 @@ scope.addEventListener("contextmenu", (event) => {
 
         socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageChannels" }, function (response) {
             if(response.permission == "denied") { return; }
-            addContextMenuItem(ContextMenu, "Create Text Channel",
+            addContextMenuItem(ContextMenu, "Create Channel",
                 `onclick="
-                createChannel('${clickedElement.id}', 'text');
-                ContextMenu.classList.remove('visible');
-                "`);
-
-            addContextMenuItem(ContextMenu, "Create Voice Channel",
-                `onclick="
-                createChannel('${clickedElement.id}', 'voice');
+                createChannel('${clickedElement.id}');
                 ContextMenu.classList.remove('visible');
                 "`);
         });
@@ -820,10 +718,12 @@ scope.addEventListener("contextmenu", (event) => {
     if((ContextMenu.offsetHeight*4) + mouseY > document.body.offsetHeight){
         ContextMenu.style.top = `${mouseY - ContextMenu.offsetHeight}px`;
         ContextMenu.style.left = `${mouseX}px`;
+        console.log("is out of bounds")
     }
     else{
         ContextMenu.style.top = `${mouseY}px`;
         ContextMenu.style.left = `${mouseX}px`;
+        console.log("is not out of bounds")
     }
 
 
@@ -915,6 +815,7 @@ function createCategory(){
     var catname = prompt("Category Name:");
 
     if(catname == null ||catname.length <= 0){
+        console.log("No name?")
         return;
     }
     else{
@@ -923,19 +824,19 @@ function createCategory(){
 }
 
 
-function createChannel(category, channelType){
+function createChannel(category){
     var catname = prompt("Channel Name:");
 
     if(catname == null ||catname.length <= 0){
         return;
     }
     else{
-        socket.emit("createChannel", { id: getID(), value: catname, type: channelType, token: getToken(), group: getGroup().replace("group-", ""), category: category.replace("category-", "")});
-
+        socket.emit("createChannel", { id: getID(), value: catname, token: getToken(), group: getGroup().replace("group-", ""), category: category.replace("category-", "")});
     }
 }
 
 function deleteChannel(id){
+    console.log(id);
     socket.emit("deleteChannel", { id: getID(), token: getToken(), channelId: id, group: getGroup().replace("group-", "")});
 }
 
@@ -1046,7 +947,7 @@ function userJoined(){
          */
     }
     else{
-
+        console.log("gay")
     }
 }
 
@@ -1110,6 +1011,8 @@ function changePFP(){
     if(pfp.length > 0){
         setCookie("pfp", pfp, 360);
         updatePFPOnUI(pfp, true);
+
+        console.log("Letting Server know pfp changed");
     }
     else{
 
@@ -1192,6 +1095,20 @@ var validImage = []
 function isImage(url){
 
     const img = new Image();
+
+    /*
+    if(notAImage.includes(url)){
+        console.log("Not a Image")
+        return false;
+    }
+
+    if(validImage.includes(url)){
+        return true;
+    }
+
+     */
+
+    //console.log("checking link " + url)
 
     img.src = url;
 
@@ -1430,12 +1347,24 @@ var test = 0;
 var testrun = 0;
 function sendMessage(messagebox) {
 
+    //console.log(event.keyCode)
+
+
     if(event.keyCode != 13){
         lastKey = event.keyCode;
     }
 
+    /*
+    if(event.keyCode == 8){
+
+    }
+    */
+
     // Adding new line
     if(event.keyCode == 13 && lastKey == 16 && testrun < 6){
+        //document.getElementById("messagebox").style.height = `calc(${document.getElementById("messagebox").offsetHeight}px + 5px) !important;`
+
+        /*document.getElementById("messagebox").offsetHeight +*/
 
         if(test == 0){
             test = 44;
@@ -1565,6 +1494,8 @@ function convertMention(text, playSoundOnMention = false){
 
             if(playSoundOnMention == true)
             {
+                //console.log("PLayed message sound");
+                //console.log(playSoundOnMention)
                 playSound("message", 0.5);
             }
         }
@@ -1625,6 +1556,8 @@ socket.on('messageCreate', function (message) {
         var today = new Date().getTime() / 1000;
         var diff = today - lastMessage;
         var minutesPassed = Math.round(diff / 60);
+
+        //console.log("Past: " + minutesPassed + " minutes");
 
         if(authorDivs[0].id == message.id && minutesPassed < 5){
             messagecontent[0].insertAdjacentHTML("beforeend",
@@ -1722,6 +1655,9 @@ function deleteMessageFromChat(id){
 }
 
 function bulkDeleteMessageFromChat(id){
+
+
+    //var children = [].slice.call(document.getElementById(id));
     var children = null;
 
     try{
@@ -1733,10 +1669,14 @@ function bulkDeleteMessageFromChat(id){
         children = document.querySelector(`#${id}`).parentNode;
     }
 
+    //console.log("Child")
+    //console.log(children)
     children = children.querySelector("p");
     console.log(children)
 
     for (var i = 0; i < children.length; i++) {
+        //console.log(children[i]); //second console output
+
         socket.emit("deleteMessage", { id: getID(), token: getToken(), messageId: children[i].id.replace("msg-", ""),
             group: getGroup().replace("group-", ""), category: getCategory().replace("category-", ""), channel: getChannel().replace("channel-", "") });
 
@@ -1747,13 +1687,31 @@ socket.on('receiveDeleteMessage', function (id) {
 
     console.clear();
 
+    //var parent = document.querySelector(`#msg-${CSS.escape(id)}`);
+    //parent.remove();
+    //var container = document.querySelector(`.message-container #${id}`).parentNode.parentNode;
+    //console.log(container)
+
+    console.log(`Deleting from chat #msg-${id}`)
+    console.log(`Scanning for #msg-${id}`)
+    //var parent = document.querySelector(`#msg-${id} p`).parentNode.parentNode;
+
+
+    // document.querySelector(`#msg-152598637369 p`).parentNode;
     var message = document.querySelectorAll(`div .message-profile-content #msg-${id}`);
     var parentContainer = message[0].parentNode.parentNode;
     var parent = message[0].parentNode;
 
+
+    console.log("Message is:")
+    console.log(message)
     message.forEach(msg => {
         msg.remove();
     });
+
+    console.log("parent: ")
+    console.log(parent)
+    console.log(parent.children.length)
 
     if(parentContainer.querySelector(".message-profile-content-message") == null){
         parentContainer.remove();
@@ -1810,6 +1768,8 @@ socket.on('receiveChannelTree', function (data) {
 
         var markedMessage3 = [];
         markedMessage3 = getCookie("unmarkedMessages");
+
+        console.log(markedMessage3);
     }
     catch(Ex){
         //console.log(Ex)
@@ -1920,15 +1880,26 @@ socket.on('receiveMemberProfile', function (data) {
 
     // If is out of bounds
 
+    /*
+    console.log(winHeight)
+    console.log(data.top);
+    console.log(profileContent.offsetHeight);
+    console.log((profileContent.offsetHeight - data.top));
+
+     */
+
     if((data.top + profileContent.offsetHeight) <= winHeight){
         profileContent.style.top = `${data.top}px`;
+        //console.log("first");
     }
     else{
         if(data.top + profileContent.offsetHeight > winHeight){
             profileContent.style.top = `${data.top - ((data.top + profileContent.offsetHeight) - winHeight) - 20}px`;
+            //console.log("second");
         }
         else{
             profileContent.style.top = `${data.top - (winHeight - profileContent.offsetHeight)}px`;
+            //console.log("second");
         }
 
     }
@@ -2026,6 +1997,8 @@ socket.on('receiveToken', function (data) {
 
 socket.on('modalMessage', function (data) {
 
+    console.log(data);
+
     var buttonArray = [];
     Object.keys(data.buttons).forEach(function(button) {
 
@@ -2034,6 +2007,12 @@ socket.on('modalMessage', function (data) {
 
         buttonArray.push([buttonText.toLowerCase(), buttonEvents])
     });
+
+    for(let i = 0; i < data.buttons.length; i++){
+        console.log("button : " + data.buttons[i])
+    }
+
+    console.log(buttonArray);
 
     Confirm(data.title, data.message, "info", buttonArray, "confirm").then(result => {
 
@@ -2050,6 +2029,7 @@ function setActiveGroup(group){
 
 function addRoleFromProfile(userId){
     socket.emit("getAllRoles", {id:getID(), token: getToken(), group: getGroup(), targetUser: userId }, function (response) {
+        console.log(response)
 
         var roleList = document.getElementById("profile-role-menu").querySelector("#role-menu-list");
         roleList.innerHTML = "";
@@ -2059,6 +2039,7 @@ function addRoleFromProfile(userId){
 
             var roleObj = roles[role]
 
+            console.log(roleObj)
             var roleId = roleObj.info.id;
             var roleName = roleObj.info.name;
             var roleColor = roleObj.info.color;
@@ -2191,6 +2172,12 @@ function resetAccount(){
 
 
 document.getElementById("message-actions").onclick = function(e) {
+    // e = Mouse click event.
+    //var rect = e.target.getBoundingClientRect();
+    //var x = e.clientX - rect.left; //x position within the element.
+    //var y = e.clientY - rect.top;  //y position within the element.
+    //console.log("Left? : " + x + " ; Top? : " + y + ".");
+
     var x = e.clientX;
     var y = e.clientY;
 
@@ -2211,6 +2198,16 @@ document.getElementById("message-actions").onclick = function(e) {
         getEmojis()
 
         var test = document.getElementById("message-actions-image");
+
+
+
+        /*
+        console.log(emojiBox.offsetHeight)
+        emojiBox.style.top = ((test.style.top + (emojiBox.offsetHeight * 2)) - 60) + "px";
+        emojiBox.style.left = ((test.style.left + emojiBox.offsetWidth * 3.1) + "px");
+
+         */
+
 
         emojiBox.style.top = (y - emojiBox.offsetHeight - 40) + "px";
         emojiBox.style.left = x -  emojiBox.offsetWidth +"px";
@@ -2479,28 +2476,14 @@ function getServerInfo(returnData = false){
     });
 }
 
-function setUrl(param, isVC = false){
+function setUrl(param){
 
     window.history.replaceState(null, null, param); // or pushState
+    chatlog.innerHTML = "";
 
-    if(isVC == true){
-        socket.emit("setRoom", { id: getID() , username: getUsername(), icon: getPFP(), room: getRoom(), token: getToken() });
+    document.getElementById("messagebox-content").focus();
 
-        joinVC(param);
-        document.getElementById("messagebox").style.visibility = "hidden";
-        document.getElementById("content").innerHTML = "";
-        return;
-    }
-    else{
-        if(recordAudio ) stopAudioRecording();
-        chatlog.innerHTML = "";
-        document.getElementById("messagebox").style.visibility = "visible";
-        document.getElementById("messagebox-content").focus();
-    }
-
-    socket.emit("setRoom", { id: getID() , username: getUsername(), icon: getPFP(), room: getRoom(), token: getToken() });
     refreshValues();
-
 }
 
 function setChannelName(name){
@@ -2540,8 +2523,10 @@ function upload(files) {
     socket.emit("fileUpload", {file: files, filename: files.name, id:getID(), token: getToken() }, function (response) {
 
         if(response.type == "success"){
+            //notify(response.msg, "success")
             console.log(response);
 
+            //console.log(`sending  ${window.location.origin + response.msg}`)
             sendMessageToServer(getID(), getUsername(), getPFP(), window.location.origin + response.msg);
         }
         else{

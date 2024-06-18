@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
+            integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
+            crossorigin="anonymous"
+    ></script>
+    <script defer src="settings.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+    <title>Channel Settings</title>
+</head>
+<body id="pagebody" style="display: none;">
+
+<script>
+
+    try{
+        var channelId = getUrlParams('id');
+    }
+    catch(e){
+        if(channelId == null || isNaN(channelId)){
+            console.log("The channel was not found.");
+        }
+    }
+
+</script>
+
+<style>
+
+    /* width */
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #202225;
+        border-radius: 12px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #202225;
+    }
+
+    html, body{
+        margin: 0;
+        padding: 0;
+
+        font-family: 'Roboto', sans-serif;
+        color: #ABB8BE;
+        background-color: #36393F;
+
+        width: 100%;
+        height: 100%;
+    }
+
+    #navigation{
+        background-color: #292B2F;
+
+        padding: 32px;
+
+        width: calc(20% - 64px);
+        height: calc(100% - 64px);
+
+        float: left;
+    }
+
+    #nav_settings {
+        float: right;
+        width: 150px;
+
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    #nav_settings h2 {
+        text-transform: uppercase;
+        font-size: 12px;
+    }
+    
+    #nav_settings a{
+        cursor: pointer;
+        line-height: 175%;
+
+        text-decoration: none;
+        color: #ABB8BB;
+
+    }
+
+    #nav_settings a:hover{
+        color: #fafcff;
+        transition: all 200ms;
+    }
+
+    #nav_settings hr {
+        border: 1px solid #36393F;
+        background-color: #36393F;
+        color: #36393F;
+
+        margin: 16px 0 16px 0;
+    }
+
+    #content {
+
+        width: calc(100% - 64px - 20%);
+        height: calc(100% - 64px - 50px);
+        padding: 32px;
+
+        display:block;
+        float: left;
+
+        overflow-y: auto;
+    }
+
+    #back {
+        width: 30px;
+        height: 30px;
+
+        margin: 20px 20px 0 0;
+
+        background-color: red;
+        float: right;
+        display: block;
+
+        background-image: url("/img/back.png");
+        transform: scaleX(-1);
+        background-size: cover;
+
+        object-fit: cover;
+        background-color: transparent;
+        background-position: center center;
+    }
+
+    #wrapper {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+
+
+</style>
+
+
+<div id="wrapper">
+    <div id="navigation">
+
+        <div id="nav_settings">
+            <h2>Channel Settings</h2>
+            <a onclick="this.href = '/settings/channel/?id=' + getUrlParams('id') + '&page=channel-info';">Info</a><br>
+            <a onclick="this.href = '/settings/channel/?id=' + getUrlParams('id') + '&page=channel-permissions';">Permissions</a>
+            <hr>
+        </div>
+
+    </div>
+
+    <a href="/"><div id="back"></div></a>
+    <div id="content">
+
+
+    </div>
+</div>
+
+
+</body>
+</html>

@@ -10,7 +10,8 @@ Since you can host the server yourself you're also the one in control of the dat
 <br>
 
 ## Obfuscated?
-Yes. Its not open source. I dont want my work to be copied but yet i still want people to be able to use it. I'll find a better solution in the future.
+<s>Yes. Its not open source. I dont want my work to be copied but yet i still want people to be able to use it. I'll find a better solution in the future.</s>
+The following update wont be obfuscated anymore. More on it can be read [here](https://dcts.chat/main-forum/open-source-update/#post-61)
 
 <br>
 

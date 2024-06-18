@@ -9,11 +9,12 @@ var socket = io.connect()
 
 function addRoleFromProfile(userId){
     socket.emit("getAllRoles", {id:getID(), token: getToken(), group: getGroup(), targetUser: userId }, function (response) {
-
+        
 
     });
 }
 
+<<<<<<< HEAD
 socket.on('connect', () => {
 
     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
@@ -74,6 +75,8 @@ socket.on('audioStream', (audioData) => {
 
 
 
+=======
+>>>>>>> parent of 1fecc67 (early implementation of vc)
 function setCookie(name,value,days) {
     var expires = "";
     if (days) {

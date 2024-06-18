@@ -22,7 +22,7 @@ socket.on('connect', () => {
             var mediaRecorder = new MediaRecorder(stream);
             mediaRecorder.audioBitsPerSecond = 700;
             var audioChunks = [];
-            var minTime = 200;
+            var minTime = 500;
 
             mediaRecorder.start();
             setTimeout(function () {

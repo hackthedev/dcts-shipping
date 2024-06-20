@@ -9,11 +9,6 @@ Since you can host the server yourself you're also the one in control of the dat
 
 <br>
 
-## Obfuscated?
-Yes. Its not open source. I dont want my work to be copied but yet i still want people to be able to use it. I'll find a better solution in the future.
-
-<br>
-
 ## Licensing
 The software will be free for personal use and for non-profit communities. Commercial use will require a license (or maybe not). 
 

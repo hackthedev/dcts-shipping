@@ -10,7 +10,8 @@ Since you can host the server yourself you're also the one in control of the dat
 <br>
 
 ## Licensing
-The software will be free for personal use and for non-profit communities. Commercial use will require a license (or maybe not).   
+While the code itself is open-source i dont plan to license it (maybe in the future). As long as its not used for commercial use or re-published _(e.g. editing it and releasing it with the same or different name)_ i really dont mind it. 
+Its similar to WinRAR where they tolerate the personal use of it despite the trial being over. If you have questions feel free to contact me.
 
 <br>
 

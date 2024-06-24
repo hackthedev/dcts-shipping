@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+  dcts:
+    image: ghcr.io/t2vee/dcts
+    restart: always
+    ports:
+      - '8080:2052'

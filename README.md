@@ -11,7 +11,7 @@ Since you can host the server yourself you're also the one in control of the dat
 
 ## Licensing
 While the code itself is open-source i dont plan to license it (maybe in the future until i find a license). As long as its not used for commercial use or re-published _(e.g. editing it and releasing it with the same or different name; forks etc are fine ofc)_ i really dont mind it. 
-Its similar to WinRAR where they tolerate the personal use of it despite the trial being over. If you have questions feel free to contact me.
+If you have questions feel free to contact me.
 
 <br>
 

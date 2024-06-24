@@ -1,4 +1,4 @@
-FROM node:21-bookworm
+FROM node:21-alpine
 
 RUN mkdir -p /opt/app
 WORKDIR /opt/app

@@ -10,26 +10,44 @@ Since you can host the server yourself you're also the one in control of the dat
 <br>
 
 ## Licensing
-The software will be free for personal use and for non-profit communities. Commercial use will require a license (or maybe not). 
+The software will be free for personal use and for non-profit communities. Commercial use will require a license (or maybe not).   
 
 <br>
 
-## How to install
-Requires node.js to be installed (tested with v16.16.0). Afterwards execute the following commands inside the app's directory.
+## Installing
+### Docker
+To install via docker you can either clone and build or use the prebuilt image.
 ```
-npm install
-node .
+$ sudo docker run --name dcts-server  -p 8080:2052 ghcr.io/t2vee/dcts
+```
+or via docker-compose:
+```
+$ curl -L -O https://github.com/t2vee/dcts-shipping/raw/docker-support/docker/docker-compose.yml
+$ sudo docker compose up -d
 ```
 
-## Tested Versions
-- ✔️ v16.16.0 
-- 🚫 v12.22.9 
+
+### NPM
+Requires node.js to be installed, see [Tested Versions](https://github.com/t2vee/dcts-shipping/tree/docker-support?tab=readme-ov-file#tested-versions). Clone the git repository and execute the following commands inside the app's directory.
+```
+$ git clone https://github.com/hackthedev/dcts-shipping --depth 1
+$ npm install
+$ node .
+```
 
 <br>
 
 ## Connecting to your server
 Once you've installed the server and its running, you can open your browser and enter the server's ip and add the port 2052.<br>
 Example: localhost:2052
+
+<br>
+
+## Tested Versions
+- ✔️ v21.7.3
+- ✔️ v18.20.2
+- ✔️ v16.16.0
+- 🚫 v12.22.9
 
 <br>
 

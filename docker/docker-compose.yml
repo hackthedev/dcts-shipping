@@ -3,5 +3,10 @@ services:
   dcts:
     image: ghcr.io/t2vee/dcts
     restart: always
+    volumes:
+      - dcts:/app/chats
     ports:
       - '8080:2052'
+
+volumes:
+  dcts:

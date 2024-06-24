@@ -42,7 +42,7 @@ Example: localhost:2052
 
 <br>
 
-## Tested Versions
+## Tested Node Versions
 - ✔️ v21.7.3
 - ✔️ v18.20.2
 - ✔️ v16.16.0

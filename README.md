@@ -17,7 +17,7 @@ Since you can host the server yourself you're also the one in control of the dat
 ### Docker
 To install via docker you can either clone and build or use the prebuilt image.
 ```
-$ sudo docker run --name dcts-server  -p 8080:2052 ghcr.io/t2vee/dcts
+$ sudo docker run --name dcts-server  -p 8080:2052 ghcr.io/hackthedev/dcts-shipping
 ```
 or via docker-compose:
 ```

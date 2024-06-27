@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   dcts:
-    image: ghcr.io/t2vee/dcts
+    image: ghcr.io/hackthedev/dcts-shipping
     restart: always
     volumes:
       - dcts:/app/chats

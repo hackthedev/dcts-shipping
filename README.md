@@ -18,17 +18,17 @@ The software will be free for personal use and for non-profit communities. Comme
 ### Docker
 To install via docker you can either clone and build or use the prebuilt image.
 ```
-$ sudo docker run --name dcts-server  -p 8080:2052 ghcr.io/t2vee/dcts
+$ sudo docker run --name dcts-server  -p 8080:2052 ghcr.io/hackthedev/dcts-shipping
 ```
 or via docker-compose:
 ```
-$ curl -L -O https://github.com/t2vee/dcts-shipping/raw/docker-support/docker/docker-compose.yml
+$ curl -L -O https://github.com/hackthedev/dcts-shipping/raw/main/docker/docker-compose.yml
 $ sudo docker compose up -d
 ```
 
 
 ### NPM
-Requires node.js to be installed, see [Tested Versions](https://github.com/t2vee/dcts-shipping/tree/docker-support?tab=readme-ov-file#tested-versions). Clone the git repository and execute the following commands inside the app's directory.
+Requires node.js to be installed, see [Tested Versions](https://github.com/hackthedev/dcts-shipping?tab=readme-ov-file#tested-node-versions). Clone the git repository and execute the following commands inside the app's directory.
 ```
 $ git clone https://github.com/hackthedev/dcts-shipping --depth 1
 $ npm install

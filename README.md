@@ -7,9 +7,6 @@ This project was made with the goal to combine TeamSpeak and Discord. The goal: 
 
 Since you can host the server yourself you're also the one in control of the data. This could be important for people who value their data privacy.
 
-<br>
-
-<!--## Licensing-->
 
 <br>
 

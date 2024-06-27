@@ -9,8 +9,7 @@ Since you can host the server yourself you're also the one in control of the dat
 
 <br>
 
-## Licensing
-The software will be free for personal use and for non-profit communities. Commercial use will require a license (or maybe not).   
+<!--## Licensing-->
 
 <br>
 
@@ -43,7 +42,7 @@ Example: localhost:2052
 
 <br>
 
-## Tested Versions
+## Tested Node Versions
 - ✔️ v21.7.3
 - ✔️ v18.20.2
 - ✔️ v16.16.0

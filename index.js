@@ -4940,7 +4940,7 @@ function getChannelTree(member){
 
                             // if text channel
                             if(chan.type == "text"){
-                                treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}')"><li class="channelTriggerchannelTrigger" id="channel-${chan.id}" style="color: #ABB8BE;">⌨ ${chan.name}</li></a>`;
+                                treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}')"><li class="channelTrigger" id="channel-${chan.id}" style="color: #ABB8BE;">⌨ ${chan.name}</li></a>`;
                                 added_channels.push(chan.id + "_" + chan.name)
                             }
                             else if(chan.type == "voice"){

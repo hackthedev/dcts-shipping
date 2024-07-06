@@ -35,7 +35,8 @@ $ node .
 
 ## Connecting to your server
 Once you've installed the server and its running, you can open your browser and enter the server's ip and add the port 2052.<br>
-Example: localhost:2052
+Example: http://localhost:2052<br>
+Depending on your configuration the port may vary
 
 <br>
 

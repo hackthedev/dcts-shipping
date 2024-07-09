@@ -1,5 +1,5 @@
 <h1>Attribution - NonCommercial - No Source Code Distribution License (BY-NC-NSD)</h1>
-    
+
 <h2>1. Definitions</h2>
 <p><strong>Licensor</strong>: The individual or entity offering the Work under this License.</p>
 <p><strong>Licensee</strong>: Any individual or entity that uses the Work under the terms of this License.</p>
@@ -15,7 +15,7 @@
 <p><strong>a. Attribution</strong>: The Licensee must give appropriate credit to the Licensor, provide a link to the License, and indicate if changes were made. This must be done in any reasonable manner, but not in any way that suggests the Licensor endorses the Licensee or the Licensee's use.</p>
 <p><strong>b. NonCommercial</strong>: The Licensee may not use the Work or any adaptations of the Work for commercial purposes.</p>
 <p><strong>c. No Source Code Distribution</strong>: The Licensee may not distribute, publicly display, publicly perform, or otherwise make available the original source code of the Work or any adaptations of it to third parties.</p>
-<p><strong>d. Permitted GitHub Forks</strong>: Forking the Work on GitHub or similar platforms is allowed, provided the fork and any adaptations are not distributed outside the platform and are made with the intent to help improve the original Work, for testing purposes, or for educational purposes, and comply with the other conditions of this License.</p>
+<p><strong>d. Permitted GitHub Forks</strong>: Forking the Work on GitHub or similar platforms is allowed, provided the fork and any adaptations are not distributed outside the platform and are made with the intent to help improve the original Work, for testing purposes, for educational purposes, or for personal use (not public), and comply with the other conditions of this License.</p>
 <br>
 
 <h2>4. Scope of License</h2>
@@ -32,3 +32,7 @@
 
 <h2>7. Changes to the License</h2>
 <p>The Licensor reserves the right to change the terms of this License at any time. Any changes will not be retroactive and will not affect the rights granted under previous versions of this License.</p>
+<br>
+
+<h2>8. Commercial Licenses</h2>
+<p>Commercial licenses may be requested by contacting the Licensor. These licenses will allow for commercial use of the Work under terms to be agreed upon with the Licensor.</p>

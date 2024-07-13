@@ -1,12 +1,14 @@
-version: "3.9"
 services:
   dcts:
     image: ghcr.io/hackthedev/dcts-shipping
     restart: always
     volumes:
       - dcts:/app/chats
+      - uploads:/app/public/uploads
+      - ./config.json:/app/config.json
     ports:
       - '8080:2052'
 
 volumes:
   dcts:
+  uploads:

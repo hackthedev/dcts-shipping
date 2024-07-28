@@ -15,7 +15,7 @@
 <p><strong>a. Attribution</strong>: The Licensee must give appropriate credit to the Licensor, provide a link to the License, and indicate if changes were made. This must be done in any reasonable manner, but not in any way that suggests the Licensor endorses the Licensee or the Licensee's use.</p>
 <p><strong>b. NonCommercial Revenue</strong>: The Licensee may use the Work or any adaptations of the Work for commercial purposes, provided that it is not used to generate revenue or profit.</p>
 <p><strong>c. No Source Code Distribution</strong>: The Licensee may not distribute, publicly display, publicly perform, or otherwise make available the original source code of the Work or any adaptations of it to third parties.</p>
-<p><strong>d. Permitted GitHub Forks</strong>: Forking the Work on GitHub or similar platforms is allowed, provided the fork and any adaptations are not distributed outside the platform and are made with the intent to help improve the original Work, for testing purposes, for educational purposes, or for personal use (not public), and comply with the other conditions of this License.</p>
+<p><strong>d. Permitted GitHub Forks</strong>: Forking the Work on GitHub or similar platforms is allowed, provided the fork and any adaptations are not distributed outside the platform and are made with the intent to help improve the original Work, for testing purposes, for educational purposes, or for personal use, and comply with the other conditions of this License.</p>
 <br>
 
 <h2>4. Scope of License</h2>

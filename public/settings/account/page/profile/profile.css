@@ -1,5 +1,6 @@
 #profile_container{
     padding: 4px;
+    z-index: 99999999 !important;
 
     width: calc(300px - 8px);
     height: auto;
@@ -83,6 +84,7 @@
 #profile_username {
     float: left;
     display: block;
+    overflow: hidden;
 
     width: 100%;
 }

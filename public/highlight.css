@@ -1,0 +1,72 @@
+    /* Customize the highlight.js styles for a dark background */
+    .hljs {
+        display: block !important;
+        overflow-x: auto !important;
+        background: #2b2b2b !important; /* Dark background */
+        color: #f8f8f2 !important; /* Light text color */
+        padding: 10px !important;
+        border-radius: 5px !important;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #3cc969 !important; /* Comment color */
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-subst {
+        color: #3cb2cf !important; /* Keyword color */
+      }
+      .hljs-literal,
+      .hljs-number,
+      .hljs-tag .hljs-attr {
+        color: #ae81ff !important; /* Literal color */
+      }
+      .hljs-string,
+      .hljs-doctag {
+        color: #C39178 !important; /* String color */
+      }
+      .hljs-title,
+      .hljs-section,
+      .hljs-name {
+        color: #D6DCAA !important; /* Title color */
+      }
+      .hljs-type,
+      .hljs-class .hljs-title {
+        color: #a6e22e !important; /* Type color */
+      }
+      .hljs-tag,
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-regexp,
+      .hljs-link,
+      .hljs-selector-id,
+      .hljs-selector-class {
+        color: #f8f8f2 !important; /* Other syntax elements color */
+      }
+      .hljs-built_in,
+      .hljs-builtin-name {
+        color: #66d9ef !important; /* Built-in color */
+      }
+      .hljs-meta {
+        color: #f8f8f2 !important; /* Meta color */
+      }
+      .hljs-emphasis {
+        font-style: italic !important; /* Emphasis style */
+      }
+      .hljs-strong {
+        font-weight: bold !important; /* Strong style */
+      }
+  
+      .ql-syntax {
+        background-color: #1F1F1F !important; /* Match the dark background */
+        color: #f8f8f2 !important; /* Match the light text color */
+        padding: 10px !important;
+        border-radius: 3px !important;
+        
+        font-size: 14px !important;
+        display: block;
+        float: left;
+        width: calc(100%);
+        overflow-x: auto;
+        
+      }

@@ -5,996 +5,54 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="expires" content="" />
 
     <script
             src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
             crossorigin="anonymous"
     ></script>
 
-    <script src="notify.js?v=5"></script>
-    <script src="prompt.js?v=5"></script>
-    <script defer src="chat.js?v=7"></script>
+    <script src="notify.js?v=6"></script>
+    <script src="prompt.js?v=6"></script>
+    <script src="popup.js"></script>
+
+    
+    <script defer src="webrtc/rtc.js"></script>
+    <script defer src="audioplayer/audioplayer.js"></script>
+
+    
+    <script defer src="chat.js?v=df54154684984"></script>
 
     <link href="/settings/account/page/profile/profile.css?v=1" rel="stylesheet">
     <link href="prompt.css" rel="stylesheet">
+    <link href="popup.css" rel="stylesheet">
+    <link href="highlight.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="audioplayer/audioplayer.css">
 
-    <title>Document</title>
+
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script defer src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/ruby.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/css.min.js"></script>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script defer src="chat.js?v=df54154684984"></script>    
+    <script defer src="/plugins/loader.js?v=1234"></script>
+
+    <title>DCTS</title>
 </head>
 <body>
 
-<style>
-
-    /* width */
-    ::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    /* Track */
-    ::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-        background: #202225;
-        border-radius: 12px;
-    }
-
-    /* Handle on hover */
-    ::-webkit-scrollbar-thumb:hover {
-        background: #202225;
-    }
-
-    html, body{
-        margin: 0;
-        padding: 0;
-
-
-
-        width: 100%;
-        height: 100%;
-    }
-
-    * {
-        font-family: 'Roboto', sans-serif;
-    }
-
-    #header{
-        height: calc(40px - 16px);
-        width: calc(100% - 16px);
-
-        padding:  8px;
-
-        background-color: #1E2124;
-        color: white;
-
-        position: relative;
-        display: block;
-    }
-
-    #serverlist {
-        height: calc(100% - 16px - 40px);
-        width: calc(80px - 16px);
-
-        padding:  8px;
-        /*align-content: center;*/
-        text-align: center;
-
-        background-color: #202225;
-        color: white;
-
-        display: block;
-        float: left;
-
-        overflow-y: auto;
-    }
-
-    #serverbanner-container {
-        height: calc(200px - 40px);
-        width: calc(100%);
-        background-color: transparent;
-        margin: 0 0 20px 0;
-
-        display: block;
-        float: left;
-
-
-        overflow: hidden;
-        box-shadow: 0 8px 8px -2px black;
-    }
-
-    #serverbanner-image {
-        height: calc(100%);
-        width: calc(100%);
-        -webkit-transition: transform .5s ease;
-
-        object-fit: cover;
-        background-color: transparent;
-        background-position: center center;
-
-        border-radius: 6px;
-
-    }
-
-    #serverbanner-image:hover {
-        -webkit-transform: scale(1.1);
-        -moz-transform: scale(1.1);
-        -o-transform: scale(1.1);
-        transform: scale(1.1);
-
-
-    }
-
-    #serverbanner-image:not(:hover) {
-        -webkit-transform: scale(1);
-        -moz-transform: scale(1);
-        -o-transform: scale(1);
-        transform: scale(1);
-    }
-
-    #channellist {
-        height: calc(100% - 40px - 50px);
-        width: calc(300px);
-
-        background-color: #2F3136;
-        color: white;
-
-        display: block;
-        float: left;
-    }
-
-    #channeltree {
-        display: block;
-        float: left;
-
-        height: calc(100% - 32px - 175px - 32px);
-        width: calc(100% - 32px);
-
-        padding:  16px;
-        overflow-y: auto;
-    }
-
-    #content-container {
-        height: calc(100% - 40px);
-        width: calc(100% - 80px - 200px - 300px);
-
-        background-color: #36393F;
-        color: white;
-
-        display: block;
-        float: left;
-
-        border-top-right-radius: 6px;
-        border-top-left-radius: 6px;
-    }
-
-    #channelname {
-        height: 20px;
-        width: 100%;
-
-        padding: 16px;
-        background-color: #36393F;
-
-        display: block;
-        float: left;
-
-        font-weight: bold;
-        font-size: 20px;
-
-        box-shadow: 0 4px 8px -2px black;
-    }
-
-    #content {
-        height: calc(100% - 40px - 40px - 32px - 32px);
-        width: calc(100% - 16px - 15px);
-        padding: 16px;
-
-        color: white;
-
-        display: block;
-        float: left;
-
-        overflow-y: auto;
-    }
-
-    #messagebox {
-        height: calc(60px - 20px - 20px);
-        width: calc(100% - 16px - 16px);
-
-        padding: 12px 12px 12px 8px;
-        margin: -8px 8px 28px 8px !important;
-
-        background-color: #40444B;
-        color: white;
-
-        display: block;
-        float: left;
-        border-radius: 10px;
-    }
-
-    #messagebox-content {
-        background-color: transparent;
-        color: white;
-
-        border: none;
-        padding: 8px;
-
-        line-height: 150%;
-        height: calc(100% - 3px);
-        width: calc(100% - 32px - 40px - 25px - 5px);
-
-        outline: none;
-        resize: none !important;
-        margin: -20px 8px 0 8px;
-        overflow-y: hidden;
-    }
-
-    #messagebox-media {
-        width: 25px;
-        height: 25px;
-        text-align: center;
-
-        float: left;
-        display: block;
-        background-color: transparent;
-    }
-
-    #message-actions {
-        display: block;
-        float: right;
-        width: 40px;
-    }
-
-    #infolist {
-        height: calc(100% - 32px - 40px);
-        width: calc(200px - 32px);
-        padding:  16px;
-
-        background-color: #2F3136;
-        color: white;
-
-        display: block;
-        float: left;
-
-        overflow-y: auto;
-    }
-
-    .server-icon {
-        width: 45px;
-        height: 45px;
-
-
-        filter: grayscale(100%);
-        background-color: transparent;
-    }
-
-    .server-entry {
-        margin-bottom: 8px;
-        cursor: pointer;
-    }
-
-
-    .server-icon:hover {
-        border-radius: 10%;
-        transition: all 400ms;
-
-        -webkit-transform: scale(1.1);
-        -moz-transform: scale(1.1);
-        -o-transform: scale(1.1);
-        transform: scale(1.1);
-        filter: grayscale(0%);
-    }
-
-    .server-icon:not(:hover) {
-        border-radius: 50%;
-        transition: all 400ms;
-
-        -webkit-transform: scale(1);
-        -moz-transform: scale(1);
-        -o-transform: scale(1);
-        transform: scale(1);
-        filter: grayscale(100%);
-    }
-
-    #profile-qa {
-        height: calc(50px);
-        width: calc(300px - 20px);
-
-        padding: 10px;
-
-        display: block;
-        float: left;
-        bottom: 0;
-        position: fixed;
-
-
-        background-color: #292B2F;
-    }
-
-    #profile-qa-img-container {
-        width: 50px;
-        height: 50px;
-
-        border-radius: 50%;
-        overflow: hidden;
-
-        display: block;
-        float: left;
-
-        -webkit-transition: transform .5s ease;
-    }
-
-    #profile-qa-img {
-        background-size: cover;
-
-        object-fit: cover;
-        background-position: center center;
-
-        width: 50px;
-        height: 50px;
-
-        border-radius: 50%;
-        cursor: pointer;
-    }
-
-    #profile-qa-img:hover {
-        -webkit-transform: scale(1.1);
-        -moz-transform: scale(1.1);
-        -o-transform: scale(1.1);
-        transform: scale(1.1);
-
-        transition: all 400ms;
-    }
-
-    #profile-qa-img:not(:hover) {
-        -webkit-transform: scale(1);
-        -moz-transform: scale(1);
-        -o-transform: scale(1);
-        transform: scale(1);
-
-        transition: all 400ms;
-    }
-
-    #profile-qa-info {
-        padding: 10px;
-
-        display: block;
-        float: left;
-
-        overflow: hidden;
-        background-color: transparent;
-
-        width: 60%;
-        height: 28px;
-        cursor: pointer;
-    }
-
-    #profile-qa-info label {
-        width: 150px;
-        height:20px;
-
-        overflow:hidden;
-        background-color: transparent;
-        display:block;
-        float:left;
-    }
-
-    #profile-qa #webrtc-controls {
-        display: block;
-        float: left;
-        background-color: transparent;
-
-        padding: 12px 12px 0 32px;
-
-        height: calc(45px - 24px);
-        width: auto;
-        cursor: pointer;
-    }
-
-    ul {
-        margin: 0 0 16px 0;
-        padding: 0 0 16px 16px;
-
-        /*list-style-image: url("https://cdn-icons-png.flaticon.com/512/32/32213.png"); */
-        list-style-type: disc;
-        cursor: pointer;
-    }
-
-    li {
-        padding: 4px;
-    }
-
-    li:hover {
-        background-color: rgb(0, 0, 0, 0.2);
-        border-radius: 4px;
-    }
-
-    .memberlist-container {
-        display:block;
-        float: left;
-        width: 100%;
-
-        background-color: transparent;
-
-        margin-bottom: 16px;
-        cursor: pointer;
-    }
-
-    .memberlist-img{
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        float: left;
-
-        background-size: cover;
-        object-fit: cover;
-        background-position: center center;
-    }
-
-    .memberlist-member-info{
-        height: 20px;
-        overflow: hidden;
-
-        float: left;
-        margin-left: 8px;
-
-        background-color: transparent;
-        width: 100px;
-    }
-
-    .memberlist-member-info.status {
-        font-size: 12px;
-        width: 120px;
-        width: calc(100% - 48px);
-
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .infolist-role {
-        margin-bottom: 8px;
-    }
-
-    .message-container {
-        display: block;
-        float: left;
-        background-color: transparent;
-
-        width: calc(100% - 40px);
-        padding: 20px;
-
-        margin-bottom: 0px;
-    }
-
-    .message-container:hover{
-        background-color: rgb(47, 49, 54, 0.5);
-        border-radius: 5px;
-
-        transition: all 800ms;
-        background-color: rgba(41, 43, 47, 0.5);
-    }
-
-    .message-container:not(:hover){
-        transition: all 800ms;
-        background-color: transparent;
-    }
-
-    .message-profile-content-message-appended, .message-profile-content-message{
-        padding: 4px 8px 4px 8px;
-        text-align: left;
-    }
-
-    .message-profile-content-message-appended:hover{
-        background-color: rgba(41, 43, 47, 0.5);
-    }
-
-    .message-profile-info-name {
-        font-weight: normal;
-        cursor: pointer;
-    }
-
-    .message-profile-img-container, .message-profile-img {
-        width: 40px;
-        height: 40px;
-
-        display: block;
-        float: left;
-
-        background-color: transparent;
-
-        border-radius: 50%;
-        cursor: pointer;
-
-        background-size: cover;
-        object-fit: cover;
-        background-position: center center;
-    }
-
-    .message-profile-info {
-        width: 150px;
-        height: 30px;
-        overflow: hidden;
-
-        display: block;
-        float: left;
-
-        background-color: transparent;
-        width: calc(100% - 50px - 12px);
-
-        margin: 4px 0 0 8px;
-        font-size: 16px;
-        font-weight: bold;
-
-        word-break: break-all;
-
-        cursor: pointer;
-    }
-
-    .message-profile-content{
-        display: block;
-        float: left;
-        background-color: transparent;
-
-        padding: 0 8px 0 8px;
-        font-size: 14px;
-        width: calc(100% - 50px - 16px);
-
-
-        overflow: hidden;
-    }
-
-    .message-profile-content a {
-        color: white;
-    }
-
-    .message-profile-content p{
-        float: left;
-        display: inline-block;
-        word-wrap: break-word;
-        width: 100%;
-
-
-
-        margin: 0;
-        font-size: 14px;
-    }
-
-    .message-profile-content iframe{
-        float: left;
-        display: block;
-
-        border-radius: 6px;
-    }
-
-    .systemAnnouncementChat {
-        background-color: #2F3136;
-        width: calc(100% - 20px);
-        padding: 4px 4px 4px 16px;
-        font-style: italic;
-
-        border-radius: 10px;
-        margin-bottom: 40px;
-
-        float: left;
-        display: block;
-    }
-
-    .systemAnnouncementChatUsername{
-        color: greenyellow;
-    }
-
-    code.markdown{
-        font-size: 12px;
-        background-color: #2c2d31;
-
-        padding: 4px 8px 4px 8px;
-        border-radius: 4px;
-
-        margin-left: -2px;
-    }
-
-    pre.markdown{
-        font-size: 12px;
-        background-color: #2c2d31;
-
-        padding: 4px 8px 4px 8px;
-        margin-left: 4px;
-
-        border-radius: 4px;
-        float: left;
-        display: block;
-
-        width: calc(100% - 8px);
-        margin-top: -4px;
-    }
-
-    #channeltree details summary a, #channeltree ul a {
-        color: white;
-        text-decoration: none;
-    }
-
-    .iframe-container {
-        display: inline-block;
-        float: left;
-        width: 100%;
-
-        /* margin: 8px 0 8px 0; */
-    }
-
-    .image-embed {
-        max-width: 400px;
-        height: auto;
-        display: inline-block;
-        float:left;
-        margin: 8px 0 8px 0;
-
-        border-radius: 6px;
-    }
-
-    .video-embed {
-        display: block;
-        float:left;
-        margin: 8px 0 8px 0;
-        border-radius: 6px;
-    }
-
-    #context-menu {
-        position: fixed;
-        z-index: 10000;
-        width: 150px;
-        background: #1b1a1a;
-        border-radius: 6px;
-        display: none;
-
-    }
-
-    #context-menu .item {
-        padding: 8px 10px;
-        font-size: 14px;
-        color: #eee;
-        cursor: pointer;
-    }
-
-    #context-menu .item:hover{
-        background: #343434;
-        border-radius: 6px;
-    }
-
-    #context-menu.visible{
-        display: block;
-    }
-
-    #typing-indicator {
-
-        font-style: italic;
-        font-size: 14px;
-        margin-bottom: -4px !important;
-        bottom: -4px !important;
-        display: none;
-    }
-
-    #typing-indicator-container {
-        float: left;
-        display: block;
-
-        margin-top: 8px;
-        margin-bottom: -20px !important;
-        bottom: -20px !important;
-    }
-
-    .message-profile-info .timestamp{
-        margin-left: 20px;
-        font-size: 10px;
-        color: #989898;
-    }
-
-    #modalBox{
-        background-color: #1D2125;
-        border: 1px solid #ABB8BE;
-        border-radius: 6px;
-
-        color: #ABB8BE;
-
-        padding: 16px;
-
-        filter: blur(0) !important;
-        z-index: 1;
-
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        -webkit-transform: translate(-50%, -50%);
-        transform: translate(-50%, -50%);
-
-        display: none;
-    }
-
-    #modalBoxTitle {
-        font-size: 20px;
-        margin-top: 0;
-    }
-
-    #channeltree h2 {
-        margin-top: -10px;
-        margin-bottom: -0px;
-        font-size: 16px;
-    }
-
-    #channeltree hr {
-        margin-bottom: 40px;
-    }
-
-    #serverlist .selectedGroup {
-        border-radius: 6px;
-        filter: grayscale(0%);
-    }
-
-    #channeltree details ul li {
-        list-style-position: inside;
-        /*  list-style-image: url("img/hashtag.png"); */
-    }
-
-    #profile-qa-settings {
-        width: 20px;
-        height: 20px;
-
-        margin: 15px 15px 0 0;
-
-        background-color: transparent;
-        float: right;
-
-        background-image: url("/img/settings.png");
-        background-size: cover;
-
-        object-fit: cover;
-        background-color: transparent;
-        background-position: center center;
-    }
-
-    #profile-qa-info-status{
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    /* Details Markers */
-    /*
-    summary {list-style: none}
-    summary::-webkit-details-marker {display: none; }
-
-    details summary::before {
-        margin-right: 4px;
-          🡒🡑↓
-        content:"🡒";
-        color: #ABB8BE;
-    }
-
-    details[open] summary::before {
-        margin-right: 4px;
-        content:"↓  " ;
-        color: #ABB8BE;
-    }
-    */
-
-
-    .inline-text-emoji{
-        width: 25px;
-        height: 25px;
-        display: inline-block;
-
-        margin: 0px 0px -8px 0px;
-    }
-
-    .inline-text-emoji.big{
-        width: 50px;
-        height: 50px;
-        display: inline-block;
-
-        margin: 0px 0px 2px 0px;
-    }
-
-    #emoji-box-container {
-        /*background-color: #40444B; */
-        background-color: #2F3136;
-
-
-        width: 30%;
-        height: 40%;
-        position: fixed;
-
-        padding: 8px;
-        border-radius: 8px;
-        border: 2px solid #202225;
-
-        box-shadow: 4px 4px 14px 0.5px rgb(30, 28, 28);
-
-        overflow-y: auto;
-    }
-
-    #emoji-box-container h2{
-        margin-top: 0;
-        font-size: 18px;
-    }
-
-    #emoji-box-container .emoji-entry{
-        float: left;
-        display: block;
-    }
-
-    .emoji-entry img.emoji:hover{
-        cursor: pointer;
-        border-radius: 10%;
-        transition: all 200ms;
-    }
-
-    .emoji-entry img.emoji:not(:hover){
-        border-radius: 0;
-        transition: all 200ms;
-    }
-
-    #emoji-box-container .emoji-entry .emoji-img img{
-        float: left;
-        width: 35px;
-        height: 35px;
-        display: block;
-        margin: 4px;
-    }
-
-    .rainbow-border {
-        --angle: 0deg;
-        border: 1px solid;
-        border-image: conic-gradient(from var(--angle), red, yellow, lime, aqua, blue, magenta, red) 1;
-        animation: 10s rotate linear infinite;
-    }
-
-    @keyframes rotate {
-        to {
-            --angle: 360deg;
-        }
-    }
-
-    @property --angle {
-        syntax: '<angle>';
-        initial-value: 0deg;
-        inherits: false;
-    }
-
-    #emoji-box-header-container{
-        background-color: #40444B;
-        margin: -8px;
-        margin-bottom: 8px;
-
-        display: block;
-        float: left;
-
-        width: calc(100% + 2.7%);
-        /* height: 12%; */
-
-        padding: 4px;
-        padding-left: 8px;
-        padding-bottom: 10px;
-        padding-top: 10px;
-
-        overflow: hidden;
-    }
-
-    #emoji-entry-container {
-        display: block;
-        float: left;
-        background-color: transparent;
-
-        width: calc(100% - 0%);
-        height: calc(100% - 18% - 0%);
-
-        overflow-y: auto;
-    }
-
-    .emoji-box-header h2{
-        margin: 0;
-    }
-
-    .emoji-box-header {
-        background-color: green;
-
-        display: block;
-        float: left;
-        background-color: #40444B;
-
-        padding: 6px 12px 6px 12px;
-        margin-right: 8px;
-    }
-
-    .emoji-box-header:hover{
-        cursor: pointer;
-        background-color: #2F3136;
-        border-radius: 8px;
-    }
-
-    .SelectedTab{
-        background-color: #2F3136;
-        border-radius: 8px;
-    }
-
-    label.mention{
-        /*background-color: rgba(255, 174, 0, 0.12);*/
-        color: skyblue;
-
-        padding: 2px 4px 2px 4px !important;
-        margin: 0px 2px 0px 0px;
-
-        border-radius: 4px;
-        /*width: calc(100% - 16px) !important;*/
-
-        display: inline-block !important;
-
-        cursor: pointer;
-    }
-
-    .group-entry-marker{
-
-        float: left;
-        display: none;
-        position: relative;
-
-        margin-top: 28%;
-        margin-left: -8px;
-
-        background-color: white;
-        border-radius: 50%;
-
-        width: 6px;
-        height: 6px;
-
-
-    }
-
-    #gif-searchbar {
-
-        width: 100%;
-        float: left;
-        margin-bottom: 6px;
-        display: none;
-    }
-
-    #gif-searchbar-input {
-
-        width: calc(100% - 2.9%);
-        float: left;
-
-        outline: none;
-        background-color: #40444B;
-        border: 1px solid #40444B;
-        padding: 4px;
-
-        color: white;
-
-        border-radius: 4px;
-    }
-
-    .offline_pfp {
-        filter: grayscale(100%);
-    }
-
-    @keyframes start-change-color {
-        from {
-            background-color: #ed7e07;
-        }
-        to {
-            background-color: #ddb787;
-        }
-    }
-
-    @keyframes stop-change-color {
-        from {
-            background-color: #ed7e07;
-        }
-        to {
-            background-color: #ddb787;
-        }
-    }
-
-</style>
 
 <div id="header"></div>
 
@@ -1011,94 +69,118 @@
     <div id="modalBoxButtons"></div>
 </div>
 
+<div id="popup-container" style="z-index: 99999;"></div>
+
+
 <div id="context-menu">
     <!-- <div class="item">Copy ID</div> -->
 </div>
 
 
 
-
-
-
-
-
+<!-- Markdown Editor -->
 <style>
-    #profile-role-menu{
-        position: fixed;
-        z-index: 100000;
-        width: calc(208px - 16px + 8px);
-        height: 150px;
 
-        padding: 8px;
-        background: #2F3136;
-        color: white;
-        border-radius: 6px;
-        border: 1px solid gray;
 
-        text-overflow: ellipsis;
-        overflow-y: auto;
-        display: none;
-        /*display: none;*/
-    }
+.editor-container {
+    width: calc(100% - 40px) !important;
+    background-color: #23272a;
+    border-radius: 8px;
+    /*box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);*/
+    padding: 0px;
+    
 
-    #role-menu-header, #role-menu-search-input{
-        display: inline-block;
-        float: left;
-    }
+    margin-left: -8px !important;
+    border-radius: 8px;
 
-    #role-menu-header{
-        width: 100%;
-        float: left;
-        position: sticky;
-    }
+    display: block;
+    float: left;
 
-    #role-menu-search-input {
-        outline: none !important;
-     }
+    transition: height 0.3s ease, transform 0.3s ease, margin 0.3s ease;
+    margin-left: 0px;
+}
 
-    #role-menu-search-icon {
-        margin-left: 8px;
-    }
+.ql-toolbar {
+    background-color: #34383c;
+    border: none;
+}
 
-    #role-menu-search-icon {
-        background-color: transparent;
-        width: 22px;
-        height: 22px;
+.ql-container {
+    background-color: #23272a;
+    color: #ffffff;
+    border: none;
+    transition: height 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
 
-        display: block;
-        float: left;
-    }
+.ql-editor {
+    background-color: #23272a;
+    color: #ffffff;
+    overflow-y: auto; /* Make it scrollable */
+    flex: 1; /* Ensure it grows to fill the container */
+    max-height: 400px; /* Limit max height */
+    padding-bottom: 8px;
+    overflow-y: auto; /* Make it scrollable */
+}
 
-    #role-menu-list{
-        height: 120px;
-        width: 100%;
+.ql-toolbar button {
+    color: #ffffff !important;
+}
 
-        margin-top: 8px;
+.ql-toolbar button:hover {
+    color: #7289da !important;
+}
 
-        display: block;
-        float: left;
+.ql-toolbar .ql-stroke {
+    fill: none;
+    stroke: lightgray;
+}
 
-        overflow-y: auto;
-    }
+.ql-toolbar .ql-picker {
+    color: white;
+}
 
-    .role-menu-entry {
-        padding: 10px 0 10px 0;
-        border-radius: 4px;
-    }
+.ql-toolbar .ql-even {
+    color: lightgray;
+}
 
-    .role-menu-entry:hover{
-        background: #484545;
-    }
+.ql-toolbar .ql-blockquote {
+    color: lightgray;
+}
 
-    #role-menu-search-input:hover, .role-menu-entry:hover, .role-menu-entry label:hover{
-        cursor: pointer;
-    }
+.ql-toolbar .ql-video { 
+    stroke: lightgray;
+    fill: none;
+}
 
-    .role-menu-entry-roleName{
-        -webkit-user-select: none;
-        user-select: none;
-    }
+.ql-toolbar .ql-image {
+    color: lightgray;
+    stroke: lightgray;
+    fill: none;
+}
+
+.ql-toolbar .ql-strike {
+    stroke: lightgray;
+    fill: none;
+}
+
+.ql-toolbar .ql-list {
+    stroke: lightgray;
+    fill: none;
+}
+
+.ql-toolbar .ql-formula {
+    stroke: lightgray;
+    fill: none;
+}
+
+.ql-toolbar button:hover{
+    color: red !important;
+}
+
 </style>
+
 
 <div id="profile-role-menu">
 
@@ -1139,6 +221,17 @@
 
 
 
+<!-- Mobile HTML-->
+
+<div id="leftSideMenu">
+    <div id="mobile-channellist-trigger" onclick="switchLeftSideMenu()"></div>
+
+    <div id="mobile_GroupAndChannelContainer">
+        <div id="mobile_GroupList"></div>
+        <div id="mobile_groupBanner"><img id="mobile_groupBannerDisplay" /></div>
+        <div id="mobile_channelList"></div>
+    </div>
+</div>
 
 
 <div id="profile_container" style="display: none;position: fixed;z-index: 10000;">
@@ -1149,20 +242,16 @@
     </div>
 
     <div id="profile_content">
-        <div id="profile_username"><h2>Shy Devil</h2></div>
-        <div id="profile_status">.gg/femboi</div>
+        <div id="profile_username"><h2></h2></div>
+        <div id="profile_status"></div>
         <hr>
 
-        <h2 class="profile_headline">About Me</h2>
+        <h2 class="profile_headline"></h2>
         <div id="profile_aboutme">
-            sys-admin. programmer.
-
-            Femboy Cartel
-            https://discord.gg/cr82MnSAfT
         </div>
         <hr>
 
-        <h2 id="profile_headline">Roles</h2>
+        <h2 id="profile_headline"></h2>
         <div id="profile_roles">
             <code class="role"><div class="role_color"></div>+</code>
         </div>
@@ -1187,6 +276,7 @@
 </div>
 
 <div id="channellist">
+
     <div id="serverbanner-container">
         <img id="serverbanner-image" src="/img/loading.gif">
     </div>
@@ -1223,59 +313,70 @@
 
     </div>
 
-    <div id="messagebox">
-        <div id="messagebox-media">+</div>
+    <div id="message-actions">
 
-        <textarea id="messagebox-content" style="margin-top: -8px;" autocomplete="off" placeholder="Enter your text message here"
-               onclick="closeEmojiBox()"
-               type="text" onkeydown="sendMessage(this)"></textarea>
+        <div id="emoji-box-container" style="display: none;">
+
+            <div id="emoji-box-header-container">
+                <div class='emoji-box-header' id="emoji-box-emojis" onclick="getEmojis(); selectEmojiTab(this);"><h2>Emojis</h2></div>
+                <div class='emoji-box-header' id="emoji-box-gifs" onclick="getGifs(); selectEmojiTab(this);"><h2>GIFs</h2></div>
+            </div>
+            <div id="gif-searchbar"><input autocomplete="off" placeholder="Search anything, then press enter" type="text" id="gif-searchbar-input"></div>
+
+            <div id="emoji-entry-container"></div>
+        </div>
+    </div>
+
+    <div id="messagebox">
+        <div id="messagebox-media"></div>
 
         <!--
-
-        <input id="messagebox-content" autocomplete="off" placeholder="Enter your text message here"
+        <textarea id="messagebox-content" style="margin-top: -8px;" autocomplete="off" placeholder="Enter your text message here"
                onclick="closeEmojiBox()"
-               type="text" onkeydown="sendMessage(this)">
+               type="text" onkeydown="sendMessage(this)"></textarea> -->
 
-               -->
+               <div class="editor-container" style="z-index: 9999999 !important;">
+                <div id="editor-toolbar" style="border: none !important;">
+                    <!-- Add toolbar buttons as needed -->
+                     <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
+                        <button title="Bold" class="ql-bold"></button>
+                        <button title="Italic" class="ql-italic"></button>
+                        <button title="Underline" class="ql-underline"></button>
+                        <button title="Strikeout" class="ql-strike"></button>
+                     </span>
 
-        <div id="message-actions">
+                     <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
+                        <button title="Link" class="ql-link"></button>
+                        <!--<button title="Image" class="ql-image"></button>
+                        <button title="Video" class="ql-video"></button>-->
+                     </span>
 
-            <div id="emoji-box-container" style="display: none;">
+                     <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
+                        <button title="Inline Code" class="ql-code"></button>
+                        <button title="Code Block" class="ql-code-block"></button>
+                        <button title="Blockquote" class="ql-blockquote"></button>
+                     </span>
+                    
+                     <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
+                        <button title="Numbered List" class="ql-list" value="ordered"></button>
+                        <button title="Bullet List" class="ql-list" value="bullet"></button>
+                        <button title="Formula" class="ql-formula"></button>
+                     </span>
+                     
 
-                <div id="emoji-box-header-container">
-                    <div class='emoji-box-header' id="emoji-box-emojis" onclick="getEmojis(); selectEmojiTab(this);"><h2>Emojis</h2></div>
-                    <div class='emoji-box-header' id="emoji-box-gifs" onclick="getGifs(); selectEmojiTab(this);"><h2>GIFs</h2></div>
+                     <img id="message-actions-image" src="/img/emoji.png">
+                     
+
                 </div>
-                <div id="gif-searchbar"><input autocomplete="off" placeholder="Search anything, then press enter" type="text" id="gif-searchbar-input"></div>
-
-                <div id="emoji-entry-container"></div>
-
-
-                <!--
-                <div id="emoji-box-header-container">
-                    <div class='emoji-box-header'><h2>Emojis</h2></div>
-                    <div class='emoji-box-header'><h2>GIFs</h2></div>
-                </div>
-
-                <div id="emoji-entry-container">-->
-
-                    <!--<div class="emoji-entry" title="${emojiName}" onclick="
-                                                      document.getElementById('messagebox-content').value += ' :${emojiName}: ';
-                                                      document.getElementById('emoji-box-container').style.display = 'none';
-                                                      document.getElementById('messagebox-content').focus();">
-                        <div class="emoji-img">
-                            <img class="emoji" src="/emojis/${emoji}">
-                        </div>
-                    </div>-
-                </div>-->
-
+                <div id="editor" style="border: none !important;"></div>
             </div>
 
-            <img id="message-actions-image" src="/img/emoji.png" style="width: 40px; height: 40px;margin-top: -10px;background-color: transparent;border-radius: 50%;">
-        </div>
+            
+
+        
 
 
-        <div id="typing-indicator-container"><label id="typing-indicator">Shy Devil is typing...</label></div>
+        <div id="typing-indicator-container" style="display: block;"><label id="typing-indicator">Shy Devil is typing...</label></div>
     </div>
 
 
@@ -1305,6 +406,11 @@
     -->
 
 
+</div>
+
+<div id="rightSideMenu">
+    <div id="mobile-memberlist-trigger" onclick="switchRightSideMenu()"></div>
+    <div id="mobile_memberlist"></div>
 </div>
 
 </body>

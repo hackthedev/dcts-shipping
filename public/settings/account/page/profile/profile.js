@@ -33,6 +33,21 @@ function upload(files, id) {
     }
 }
 
+function resetAccount(){
+    var reset = confirm("Do you really want to reset your account? EVERYTHING will be reset.")
+
+    if(reset){
+        setCookie("id", null, 365);
+        setCookie("username", null, 365);
+        setCookie("status", null, 365);
+        setCookie("pfp", null, 365);
+        setCookie("token", null, 365);
+        setCookie("banner", null, 365);
+
+        alert("Your account has been reset. Please refresh the page if you want to continue");
+    }
+}
+
 function setPreview(){
 
     settings_username = document.getElementById("settings_profile_username");
@@ -52,16 +67,16 @@ function setPreview(){
     preview_icon.style.backgroundImage = `url("${getPFP()}")`;
     preview_banner.style.backgroundImage = `url("${getBanner()}")`;
 
-    settings_username.value = `${getUsername()}`;
-    settings_status.value = `${getStatus()}`;
-    settings_aboutme.innerText = `${getAboutme()}`;
+    settings_username.value = `${limitString(getUsername(), 30)}`;
+    settings_status.value = `${limitString(getStatus(), 100)}`;
+    settings_aboutme.innerText = `${limitString(getAboutme(), 500)}`;
 
     settings_icon.value = `${getPFP()}`;
     settings_banner.value = `${getBanner()}`;
 
-    preview_username.innerHTML = `<h2>${getUsername()}</h2>`;
-    preview_status.innerText = `${getStatus()}`;
-    preview_aboutme.innerText = `${getAboutme()}`;
+    preview_username.innerHTML = `<h2>${limitString(getUsername(), 30)}</h2>`;
+    preview_status.innerText = `${limitString(getStatus(), 100)}`;
+    preview_aboutme.innerText = `${limitString(getAboutme(), 500)}`;
 
 
 }
@@ -118,6 +133,11 @@ function saveSettings(){
         alert("Error while trying to save settings: " + error);
         return;
     }
+}
+
+function limitString(text, limit){
+    if(text.length <= limit) return text.substring(0, limit);
+    else return text.substring(0, limit) + "...";
 }
 
 function setUser(username){

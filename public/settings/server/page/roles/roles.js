@@ -291,15 +291,12 @@ function loadRolePerms(roleId){
     var memberlist = document.getElementById("memberlist");
     memberlist.innerHTML = "";
 
-    console.log(serverRoleResponse[currentRoleId].members);
+    let roleMembersHeader = document.getElementById("roleMembersHeader");
+    roleMembersHeader.innerText = `Role Members (${serverRoleResponse[currentRoleId].members.length})`
 
     Object.keys(serverRoleResponse[currentRoleId].members).reverse().forEach(function(member) {
 
         // resolve member
-
-        console.log("member:")
-        console.log(member)
-        console.log(serverRoleResponse[currentRoleId].members[member])
 
         socket.emit("resolveMember", {id:getID(), token: getToken(), target: serverRoleResponse[currentRoleId].members[member] }, function (response) {
 

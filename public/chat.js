@@ -5,19 +5,106 @@ console.log("%c" + "People can use the console to steal your account xo !", "col
 // served the page, so we dont have to pass the server url
 var socket = io.connect()
 
-
 var chatlog = document.getElementById("content");
 var channeltree = document.getElementById("channeltree");
 var serverlist = document.getElementById("serverlist");
 var groupbanner = document.getElementById("serverbanner-image");
 var memberlist = document.getElementById("infolist");
 var typingIndicator = document.getElementById("typing-indicator");
-var messageInputBox = document.getElementById("messagebox-content");
-
+var messageInputBox = document.querySelector('.ql-editor');
 var typetimeout;
 
+var solvedPow = false;
 setupNotify();
 setupPrompt();
+
+function powLoadingScreen(){
+    (function loop() {
+        setTimeout(() => {
+          // Your logic here
+      
+        if(solvedPow == false){
+            console.log("Trying to solve PoW...");
+            
+          loop();
+        }
+        else{
+            alert("Reached goal")
+        }
+    
+        }, 1000);
+      })();
+}
+
+//socket.emit('requestPow');
+
+socket.on('powChallenge', async ({ challenge, difficulty }) => {
+    console.log('Received PoW challenge:', challenge, 'Difficulty:', difficulty);
+
+    // Check if the solution is already stored
+    const storedSolution = getCookie(challenge);
+    if (storedSolution) {
+        console.log('Using stored solution:', storedSolution);
+        socket.emit('verifyPow', { challenge, solution: parseInt(storedSolution) });
+    } else {
+        powLoadingScreen();
+        const solution = await solvePow(challenge, difficulty);
+        solvedPow = true;
+
+        setCookie(challenge, solution, 30); // Store the solution in a cookie for 30 days
+        socket.emit('verifyPow', { challenge, solution });
+    }
+});
+
+socket.on('authSuccess', (data) => {
+    console.log(data.message);
+});
+
+socket.on('authFailure', (data) => {
+    console.log(data.message);
+});
+
+async function solvePow(challenge, difficulty) {
+    let solution = 0;
+    var currentPowLevel = 0;
+
+    const target = Array(difficulty + 1).join('0');
+
+    while (true) {
+        const hash = await sha256(challenge + solution);        
+        const currentDifficulty = getCurrentDifficulty(hash, difficulty);
+
+        if (hash.substring(0, difficulty) === target) {
+            return solution;
+        }
+        solution++;
+
+        if(currentDifficulty > currentPowLevel){
+            currentPowLevel = currentDifficulty;
+            console.log("Current Difficulty: " + currentDifficulty)
+        }
+    }
+}
+
+function getCurrentDifficulty(hash, targetDifficulty) {
+    let leadingZeros = 0;
+    for (let char of hash) {
+        if (char === '0') {
+            leadingZeros++;
+        } else {
+            break;
+        }
+    }
+    return Math.min(leadingZeros, targetDifficulty); // Ensure it doesn't exceed target difficulty
+}
+
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 
 /*
 console.log("Current Username: " + getUsername());
@@ -31,11 +118,37 @@ console.log("Current Channel: " + getChannel());
 console.log("Current Category: " + getCategory());
 console.log("Current Room: " + getRoom());
 
- */
+*/
 //console.log("Current Token: " + getToken());
 
 
 userJoined();
+
+document.addEventListener('DOMContentLoaded', function() {
+    chatlog = document.getElementById("content");
+    channeltree = document.getElementById("channeltree");
+    serverlist = document.getElementById("serverlist");
+    groupbanner = document.getElementById("serverbanner-image");
+    memberlist = document.getElementById("infolist");
+    typingIndicator = document.getElementById("typing-indicator");
+    messageInputBox = document.querySelector('.ql-editor');
+    typetimeout;
+
+    messageInputBox.addEventListener("keyup", function(){
+        // messageInputBox.value.split(" ").pop()
+    
+        var emojiName = messageInputBox.innerText.split(" ").pop();
+    
+        if(emojiName.startsWith(":")){
+            // try to get emoji names
+    
+            console.log(messageInputBox.innerText.split(" ").pop());
+        }
+    
+    });
+});
+
+
 
 var blockedData = [];
 var blockedDataCounter = [];
@@ -43,7 +156,7 @@ var bypassElement = [];
 var bypassCounter = [];
 
 // If markdown didnt get converted, this will
-function updateMarkdownLinks(delay) {
+async function updateMarkdownLinks(delay) {
     // await ...
     var elements = document.querySelectorAll(".message-profile-content p");
 
@@ -57,37 +170,42 @@ function updateMarkdownLinks(delay) {
 
     for(var i = elements.length; i > (elements.length - lengthi); i--){
 
-        try{
-
-            if(elements[i] != null && elements[i].innerText.length > 0) {
-
-
-                var marked = markdown(elements[i].innerText, elements[i].id);
-
-                if(marked != null && marked != elements[i].innerText){
-
-                    if(bypassCounter[elements[i].id] == null){
-                        bypassCounter[elements[i].id] = 0;
-                    }
-                    else{
-
-                        if(bypassCounter[elements[i].id] >= 1){
-                            bypassElement[elements[i].id] = 1;
+        if(elements[i] != null){
+            if(elements[i].className.includes("hljs")){
+                return;
+            }
+    
+            try{
+    
+                if(elements[i] != null && elements[i].innerText.length > 0) {
+    
+    
+                    var marked = await markdown(elements[i].innerText, elements[i].id);
+    
+                    if(marked != null && marked != elements[i].innerText){
+    
+                        if(bypassCounter[elements[i].id] == null){
+                            bypassCounter[elements[i].id] = 0;
                         }
-                        bypassCounter[elements[i].id]++;
-                    }
-
-                    if(bypassElement[elements[i].id] == null){
-                        elements[i].innerHTML = marked;
-                        setTimeout(() => scrollDown(), 10)
+                        else{
+    
+                            if(bypassCounter[elements[i].id] >= 1){
+                                bypassElement[elements[i].id] = 1;
+                            }
+                            bypassCounter[elements[i].id]++;
+                        }
+    
+                        if(bypassElement[elements[i].id] == null){
+                            elements[i].innerHTML = marked;
+                            setTimeout(() => scrollDown(), 10)
+                        }
                     }
                 }
             }
+            catch (err){
+                console.log(err)
+            }
         }
-        catch (err){
-            console.log(err)
-        }
-
     }
 
 
@@ -96,89 +214,148 @@ function updateMarkdownLinks(delay) {
 }
 updateMarkdownLinks(2000)// If markdown didnt get converted, this will
 
-function markdown(msg, msgid){
+function escapeHtml(text) {
 
-    try{
+    if(text == null || text.length <= 0){
+        return text;
+    }
+
+    var map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
 
 
-        //msg = msg
-        //    //.replace(/\*(.*?)*/gim, '<i>$1</i>')
-        //    .replace(/__(.*?)__/gim, '<u>$1</u>')
-        //    .replace(/`(.*?)`/gim, '<code class="markdown">$1</code>')
-        //    .replace(/´´´(.*?)´´´/gim, '<pre class="markdown">$1</pre>')
-        //    .replace(/~~(.*)~~/gim, '<del>$1</del>')
-        //    .replace(/-(.*)/gim, '<li>$1</li>')
-        //    .replace(/**(.*)**/gim, '<b>$1</b>')
-        //    //.replace(/\*(.*)\*/gim, '<i>$1</i>');
+async function checkMediaTypeAsync(url) {
 
-        if(msg == null){
-            return msg;
+    return new Promise((resolve, reject) => {  
+        
+        if(!isURL(url)){
+            resolve("unkown");
         }
 
-        try{
+        socket.emit("checkMediaUrlCache", { id: getID() , token: getToken(), url: url }, function (response) {
 
-            var msgUrls = getUrlFromText(msg);
-
-            msgUrls.forEach(url => {
-                if(isURL(url)) {
-                    if (isAudio(msg)) {
-                        //setTimeout(() => scrollDown(), 10)
-                        msg = msg.replace(url, `
-                                <div class="iframe-container" id="msg-${msgid}" >
-                                    <label>${url.split("/").pop().split("_").pop()}</label>
-                                    <div class="audio-embed-container">
-                                        <audio controls>
-                                            <source src="${url}">
-                                        </audio>
-                                    </div>
-                                </div>
-                           `);
-                    }
-                    else if (isImage(url) == true) {
-
-                        console.log("is image")
-                        //setTimeout(() => scrollDown(), 10)
-                        msg = msg.replace(url, `<div class="image-embed-container">
-                                                    <img class="image-embed" id="msg-${msgid.replace("msg-", "")}" alt="${url}" src="${url}" onerror="this.src = '/img/error.png';" >
-                                                </div>`);
-
-                    } else if (isVideo(msg) == true) {
-                        console.log("Is video")
-                        var code = `<!--<p id="msg-${msgid}"><div class="iframe-container" id="${msgid}" > --><video style="background-color: black;" width="560" height="315" class="video-embed" controls>
-                                    <source src="${url}">
-                                    </video></div><!--</p>-->`;
-
-                        //setTimeout(() => scrollDown(), 10)
-
-                        msg = msg.replace(url, `<video style="background-color: black;" width="560" height="315" class="video-embed" controls>
-                                                    <source src="${url}">
-                                                </video></div>`)
-
-                    } else {
-                        if (url.toLowerCase().includes("youtube") || url.toLowerCase().includes("youtu.be")) {
-                            //setTimeout(() => scrollDown(), 10)
-
-                            console.log("Is yt video")
-                            msg = msg.replace(url, createYouTubeEmbed(url, msgid))
+            if(response.isCached == true){
+                // return cached media type
+                resolve(response.mediaType);
+            }
+            else{
+                // url wasnt cached
+                let xhr = new XMLHttpRequest();
+                xhr.open('HEAD', url, false); // false makes the request synchronous
+                try {
+                    xhr.send();
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        let contentType = xhr.getResponseHeader('Content-Type');
+                        console.log(contentType);
+        
+                        if (contentType) {
+                        if (contentType.startsWith('audio/')) {
+                            resolve('audio');
+                        } else if (contentType.startsWith('video/')) {
+                            resolve('video');
+                        } else if (contentType.startsWith('image/')) {
+                            resolve('image');
                         } else {
-                            msg = msg.replace(url, `<a href="${url}" target="_blank">${url}</a>`)
-                            //return msg.replaceAll(url, `<a href="${url}" target="_blank">${url}</a>`)
+                            resolve('unknown');
                         }
+                        } else {
+                            console.log("Content-Type missing")
+                            throw new Error('Content-Type header is missing');
+                        }
+                    } 
+                    else {
+                        if(xhr.status == 404)
+                            return;
 
+                        throw new Error(`HTTP error! status: ${xhr.status}`);
+                    }
+                } 
+                catch (error) {
+                    console.error('Error checking media type:', error);
+                    reject('error');
+                }
+            }
+    
+        });
+
+    });
+}
+
+function markdownText(text, msgid) {
+    text = text
+        .replace(/`(.*?)`/gim, `<code class="markdown" id="msg-${msgid}">$1</code>`)
+        .replace(/´´´(.*?)´´´/gim, `<pre class="markdown" id="msg-${msgid}">$1</pre>`)
+        .replace(/~~(.*)~~/gim, '<del>$1</del>')
+        //.replace(/-(.*)/gim, '<li>$1</li>')
+        .replace(/\*\*(.*)\*\*/gim, '<b>$1</b>')
+        .replace(/\*(.*)\*/gim, '<i>$1</i>');
+
+    return text;
+}
+
+
+async function markdown(msg, msgid) {
+    if (msg == null) {
+        return msg;
+    }
+
+
+    try {
+
+        // Check if if we even have a url
+        let mediaType;
+        if(isURL(msg)){
+            mediaType = await checkMediaTypeAsync(msg);
+        }
+        else{
+            // Markdown Text formatting
+            if (!isURL(msg) && mediaType != "video" && mediaType != "audio" && mediaType != "image" && msg.length != 0) {
+                msg = markdownText(msg, msgid);
+                return msg;
+            }
+        }        
+
+        const msgUrls = getUrlFromText(msg);
+
+        for (const url of msgUrls) {
+            if (isURL(url)) {
+
+                if (mediaType == "audio") {
+                    msg = msg.replace(url, createAudioPlayerHTML(url));
+                } else if (mediaType == "image") {
+                    console.log("is image");
+                    msg = msg.replace(url, `<div class="image-embed-container">
+                                                <img class="image-embed" id="msg-${msgid.replace("msg-", "")}" alt="${url}" src="${url}" onerror="this.src = '/img/error.png';" >
+                                            </div>`);
+                } else if (mediaType == "video") {
+                    console.log("Is video");
+                    msg = msg.replace(url, `<video style="background-color: black;" max-width="600" height="355" class="video-embed" controls>
+                                                <source src="${url}">
+                                            </video></div>`);
+                } else {
+                    if (url.toLowerCase().includes("youtube") || url.toLowerCase().includes("youtu.be")) {
+                        console.log("Is yt video");
+                        msg = msg.replace(url, createYouTubeEmbed(url, msgid));
+                    } else {
+                        msg = msg.replace(url, `<a href="${url}" target="_blank">${url}</a>`);
                     }
                 }
-            });
-
-
-        }
-        catch (Exce){
-            //console.log(Exce)
+            }
+            
         }
 
         return msg;
-    }
-    catch (Exception){
-        //console.log(Exception);
+    } catch (error) {
+        console.error('Error in markdown function:', error);
+        return msg;
     }
 }
 
@@ -217,15 +394,9 @@ checkConnection(2000)
 
 
 // VC STUFF
+function joinVC(){
 
-// Flag for recording or not
-var recordAudio = false;
-function stopAudioRecording(){
-    recordAudio = false;
-    socket.emit("leftVC", { id: getID() , username: getUsername(), icon: getPFP(), room: getRoom(), token: getToken() });
-}
-
-function joinVC(id){
+    joinRoom(getRoom());
 
     document.getElementById("content").innerHTML = "";
     getChannelTreeSocket();
@@ -238,104 +409,20 @@ function joinVC(id){
         })
 
     });
-    startAudioRecording();
 }
 
+function limitString(text, limit){
+    if(text.length <= limit) return text.substring(0, limit);
+    else return text.substring(0, limit) + "...";
+}  
 
-function startAudioRecording(){
+function stopRecording() {
+    socket.emit("leftVC", { id: getID() , username: getUsername(), icon: getPFP(), room: getRoom(), token: getToken() });
+    console.log('Recording stopped');
 
-    if(recordAudio == true){
-        return;
-    }
-
-    recordAudio = true;
-    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-        .then((stream) => {
-                var mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.audioBitsPerSecond = 700;
-                var audioChunks = [];
-                var minTime = 500;
-
-                mediaRecorder.start();
-                setTimeout(function () {
-                    mediaRecorder.stop();
-                }, minTime);
-
-                mediaRecorder.addEventListener("dataavailable", function (event) {
-                    audioChunks.push(event.data);
-                });
-
-                mediaRecorder.addEventListener("stop", function () {
-
-                    if(recordAudio != false){
-                        mediaRecorder.start();
-                        setTimeout(function () {
-                            mediaRecorder.stop();
-                        }, minTime);
-                    }
-                    else{
-                        stream.getTracks().forEach(function(track) {
-                            track.stop();
-                        });
-                    }
-
-                    var audioBlob = new Blob(audioChunks);
-                    audioChunks = [];
-                    var fileReader = new FileReader();
-                    fileReader.readAsDataURL(audioBlob);
-                    fileReader.onloadend = function () {
-                        var base64String = fileReader.result;
-                        socket.emit("audioStream", {id: getID(), token: getToken(), audioData: base64String, room: getRoom(), lastActivity: new Date().getTime()});
-                    };
-
-
-                });
-        })
-        .catch((error) => {
-            console.error('Error capturing audio.', error);
-        });
+    leaveRoom(getRoom());
 }
 
-// When Receiving audio data
-socket.on('audioData', (data) => {
-    console.log(data)
-    console.log("Received data");
-
-    var newData = data.audioData.split(";");
-    newData[0] = "data:audio/ogg;";
-    newData = newData[0] + newData[1];
-
-    var audio = new Audio(newData);
-
-
-    const audioContext = new AudioContext();
-    const mediaStreamAudioSourceNode = audioContext.createMediaElementSource(audio);
-    const analyserNode = audioContext.createAnalyser();
-    mediaStreamAudioSourceNode.connect(analyserNode);
-
-    const pcmData = new Float32Array(analyserNode.fftSize);
-    analyserNode.getFloatTimeDomainData(pcmData);
-    let sumSquares = 0.0;
-    for (const amplitude of pcmData) { sumSquares += amplitude*amplitude; }
-    var finalDB = Math.sqrt(sumSquares / pcmData.length);
-
-    console.log(finalDB);
-
-
-
-
-
-
-    mediaStreamAudioSourceNode.connect(audioContext.destination);
-
-    if (!audio || document.hidden) {
-        return;
-    }
-    audio.play();
-});
-
-
-// When Receiving audio data
 socket.on('userJoinedVC', (member) => {
     addVCMember(member);
 });
@@ -501,22 +588,34 @@ scope.addEventListener("contextmenu", (event) => {
     // Entire Message: message-profile-content-message
     // Single Message: message-profile-content-message
 
-    if(//clickedElement.className == "message-profile-content" ||
-        clickedElement.className == "message-profile-content-message" ){
 
-        var messageid = getMessageId(clickedElement);
+    if(clickedElement.className == "markdown" ||
+        clickedElement.className == "message-profile-content-message" ||
+        clickedElement.parentNode.className == "message-profile-content-message"
+    ){
+
+        if(clickedElement.parentNode.className == "message-profile-content-message"){
+            clickedElement.id = clickedElement.parentNode.id;
+        }
 
         resetContextMenuItem(ContextMenu);
-        /*
-        addContextMenuItem(ContextMenu, "Delete All <i>(Buggy)</i>",
-            ErrorButtonCode + `onclick="bulkDeleteMessageFromChat('${clickedElement.id}');
-            ContextMenu.classList.remove('visible');
-            "`);
 
-         */
+        try{
+            // userid of msg
+            let msgAuthor = clickedElement.parentNode.parentNode.parentNode.querySelector(".message-profile-info").id
+
+            if(getID() == msgAuthor){
+                addContextMenuItem(ContextMenu, "Edit Message",
+                    `onclick="editMessage('${clickedElement.id}');
+                    ContextMenu.classList.remove('visible');
+                    "`);
+            }
+
+        } catch{}
+        
 
         addContextMenuItem(ContextMenu, "Delete Message",
-            `onclick="deleteMessageFromChat('${clickedElement.id}');
+            ErrorButtonCode + `onclick="deleteMessageFromChat('${clickedElement.id}');
             ContextMenu.classList.remove('visible');
             "`);
     }
@@ -532,7 +631,7 @@ scope.addEventListener("contextmenu", (event) => {
             ContextMenu.classList.remove('visible');
             "`);
     }
-     */
+    */
     else if(clickedElement.className == "memberlist-member-info" ||
         clickedElement.classList.contains("memberlist-img") ||
         clickedElement.className == "memberlist-container" ||
@@ -718,6 +817,15 @@ scope.addEventListener("contextmenu", (event) => {
 
         socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageChannels" }, function (response) {
             if(response.permission == "denied") { return; }
+            addContextMenuItem(ContextMenu, "Set as Default",
+                OkButtonCode + `onclick="
+                setDefaultChannel('${clickedElement.id}', 'text');
+                ContextMenu.classList.remove('visible');
+                "`);
+        });
+
+        socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageChannels" }, function (response) {
+            if(response.permission == "denied") { return; }
 
             addContextMenuItem(ContextMenu, "Delete Channel",
                 ErrorButtonCode +`onclick="
@@ -843,7 +951,7 @@ function editGroup(id){
 }
 
 function mentionUser(id){
-    messageInputBox.value += ` <@${id}> `;
+    messageInputBox.textContent += `<@${id}>`;
     messageInputBox.focus();
 }
 
@@ -996,7 +1104,8 @@ function unmuteUser(id){
 
 function getChannelTreeSocket(){
     socket.emit("getChannelTree", { id: getID() , token: getToken(), username: getUsername(), icon: getPFP(), group: getGroup() }, function (response) {
-        channeltree.innerHTML = response.data;
+        channeltree.innerHTML = response.data;        
+        document.getElementById("mobile_channelList").innerHTML = response.data;
 
         try{
             document.querySelector("div #channeltree #channel-" + getChannel()).style.color = "white";
@@ -1010,6 +1119,12 @@ function getChannelTreeSocket(){
         catch(Ex){
             //console.log(Ex)
         }
+    });
+}
+
+function setDefaultChannel(channelId){
+    socket.emit("setDefaultChannel", { id: getID() , token: getToken(), value: channelId.replace("channel-", "")}, function (response) {
+        notify(response.msg, response.type)
     });
 }
 
@@ -1043,7 +1158,7 @@ function userJoined(){
             var currentCategory = urlParams.get("category");
         }
 
-         */
+        */
     }
     else{
 
@@ -1080,16 +1195,45 @@ function getUrlParams(param){
     return urlChannel;
 }
 
-function changeUsername(){
-    var username = prompt("What should your new username be?", getUsername());
+function promptForUsername(reloadAfterChange = false) {
+    createPopup(
+        'Choosing a Username',
+        'Please enter your username:',
+        [
+            {
+                text: 'Change',
+                onClick: () => {
+                    const username = document.getElementById('username-input').value;
+                    if(username.length > 0){
+                        setCookie("username", username, 360);
+                        updateUsernameOnUI(username, true);
 
-    if(username.length > 0){
-        setCookie("username", username, 360);
-        updateUsernameOnUI(username, true);
-    }
-    else{
-        alert("Your username was too short");
-    }
+                        if(reloadAfterChange == true)
+                            window.location.reload();
+                    }
+                    else{
+                        alert("Your username was too short");
+                    }
+
+                    closePopup();
+                }
+            },
+            {
+                text: 'Cancel',
+                onClick: closePopup
+            }
+        ]
+    );
+
+    // Add input field
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'username-input';
+    document.querySelector('.popup p').appendChild(input);
+}
+
+function changeUsername(){
+    promptForUsername(true);
 }
 
 function changeStatus(){
@@ -1157,8 +1301,8 @@ function updatePFPOnUI(url, sync = false){
     }
 }
 
-function getChatlog(){
-    socket.emit("getChatlog", { id: getID(), token: getToken(), group: getGroup(), category: getCategory(), channel: getChannel()});
+function getChatlog(index = -1){
+    socket.emit("getChatlog", { id: getID(), token: getToken(), group: getGroup(), category: getCategory(), channel: getChannel(), startIndex: index});
 }
 
 function createYouTubeEmbed(url, messageid){
@@ -1171,7 +1315,7 @@ function createYouTubeEmbed(url, messageid){
         videocode = url.replace("https://youtu.be/", "").replaceAll(" ", "");
     }
 
-    var code = `<p id="msg-${messageid}"><div class="iframe-container" id="msg-${messageid}" ><iframe width="560" height="315" src="https://www.youtube.com/embed/${videocode}" 
+    var code = `<p id="msg-${messageid}"><div class="iframe-container" id="msg-${messageid}" ><iframe style="border: none;" width="560" height="315" src="https://www.youtube.com/embed/${videocode}" 
                 title="YouTube video player" frameborder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div></p>`;
 
@@ -1180,7 +1324,7 @@ function createYouTubeEmbed(url, messageid){
     console.log("Resolved: " + videocode);
     console.log("Resolved URL: " + "https://www.youtube.com/embed/" + videocode);
 
-     */
+    */
     return code;
 
 }
@@ -1217,13 +1361,13 @@ function isImage(url){
 }
 
 function isAudio(url) {
-    return /\.(mp3|wav|ogg)$/.test(url);
+    return /\.(mp3|wav|ogg)$/.test(url.toLowerCase());
 }
 
 function isVideo(url) {
 
 
-    return /\.(mp4|webp)$/.test(url);
+    return /\.(mp4|webp)$/.test(url.toLowerCase());
     /*
     const vid = new HTMLVideoElement();
     vid.src = url;
@@ -1237,7 +1381,7 @@ function isVideo(url) {
         return false;
     }
 
-     */
+    */
 }
 
 function getUrlFromText(text){
@@ -1354,11 +1498,11 @@ function getPFP(){
     var pfp = getCookie("pfp");
 
     if(pfp == null || pfp.length <= 0){
-        pfp = prompt("Please enter the url to your profile picture.");
+        //pfp = prompt("Please enter the url to your profile picture.");
 
-        if(pfp.length <= 0){
+        //if(pfp.length <= 0){
             pfp = "/img/default_pfp.png";
-        }
+        //}
         setCookie("pfp", pfp, 360);
         updatePFPOnUI(pfp);
         return pfp;
@@ -1386,12 +1530,15 @@ function getUsername(){
     var username = getCookie("username");
 
     if(username == null || username.length <= 0){
-        username = prompt("Whats your username?");
+        promptForUsername(true);
 
         if(username.length > 0){
             setCookie("username", username, 360);
             updateUsernameOnUI(username);
             return username;
+        }
+        else{
+
         }
     }
     else{
@@ -1434,45 +1581,6 @@ function sendMessage(messagebox) {
         lastKey = event.keyCode;
     }
 
-    // Adding new line
-    if(event.keyCode == 13 && lastKey == 16 && testrun < 6){
-
-        if(test == 0){
-            test = 44;
-        }
-        else{
-            test += 22;
-        }
-
-        testrun++;
-
-        // Resize message box container
-        document.getElementById('messagebox').setAttribute("style",
-            `
-            height: calc(${test}px - 4px) !important;
-            margin-top: -${test}px !important;
-        `);
-
-
-        // Resize message box input
-        // height: calc(${messageInputBox.offsetHeight}px + 10px) !important;
-        messageInputBox.setAttribute("style",
-            `
-               height: calc(100% - 4px)!important;                   
-               margin-top: 0.01px !important;
-               padding-bottom: 4px !important;               
-               overflow-y: auto;
-        `);
-        /*
-            height: calc(${messageInputBox.offsetHeight}px + 2px ) !important;
-            margin-top: -16px !important;
-            margin-bottom: -6px !important;
-            padding: 0 !important;
-         */
-
-
-        //document.getElementById("messagebox").style.marginTop = `-40px !important`;
-    }
 
     if(event.keyCode == 37 || event.keyCode == 38 ||
         event.keyCode == 39 || event.keyCode == 40){
@@ -1480,43 +1588,45 @@ function sendMessage(messagebox) {
     }
 
     if(event.keyCode == 13 && lastKey != 16) {
-        sendMessageToServer(getID(), getUsername(), getPFP(), messagebox.value);
-        messagebox.value = "";
-
-        messageInputBox.setAttribute("style",
-            `
-                padding: 8px;
-                height: calc(20px - 3px);
-                width: calc(100% - 32px - 40px - 25px - 5px);        
-                margin: -6px 8px 0 8px;
-                overflow-y: hidden;
-        `);
-
-
-        // Resize message box container
-        document.getElementById('messagebox').setAttribute("style",
-            `
-            height: calc(22px);
-            width: calc(100% - 16px - 16px);
-    
-        `);
-
-        setTimeout(() => {
-            messageInputBox.value = ""
-        }, 10);
-
-        test = 0;
-        testrun = 0;
-
         socket.emit("stoppedTyping", { id: getID(), token: getToken(), room: getRoom() });
     }
 
-
-    if(messagebox.value != ""){
+    if(messagebox.innerText != ""){
         setTyping();
     }
 
 }
+
+function switchLeftSideMenu(checkChannelLink = false){
+
+    let leftSideMenuContainer = document.getElementById("mobile_GroupAndChannelContainer")
+
+    if(leftSideMenuContainer.style.display == "block"){
+
+        if(getCategory() != null && getChannel() != null && checkChannelLink == true)
+            leftSideMenuContainer.style.display = "none";
+        else if (checkChannelLink == false)
+            leftSideMenuContainer.style.display = "none";
+    }
+    else {
+        leftSideMenuContainer.style.display = "block";
+    }
+}
+
+
+function switchRightSideMenu(){
+
+    let rightMenuContainer = document.getElementById("mobile_memberlist")
+
+    if(rightMenuContainer.style.display == "block"){
+        rightMenuContainer.style.display = "none";
+    }
+    else {
+        rightMenuContainer.style.display = "block";
+        rightMenuContainer.style.transform = `translateX(-${rightMenuContainer.offsetWidth}px)`
+    }
+}
+
 
 function sendMessageToServer(authorId, authorUsername, pfp, message){
 
@@ -1526,9 +1636,17 @@ function sendMessageToServer(authorId, authorUsername, pfp, message){
         return;
     }
 
+    // important
+    if(editMessageId != null)
+        editMessageId = editMessageId.replaceAll("msg-", "")
+
+    message = message.replaceAll("<p><br></p>", "");
     socket.emit("messageSend", { id: authorId, name: authorUsername, icon: pfp, token: getToken(),
         message: message, group: getGroup(), category: getCategory(),
-        channel: getChannel(), room: getRoom()  });
+        channel: getChannel(), room: getRoom(), editedMsgId: editMessageId });
+
+    editMessageId = null;
+    cancelMessageEdit();
 }
 
 function resolveMentions(){
@@ -1575,8 +1693,43 @@ function convertMention(text, playSoundOnMention = false){
     }
 }
 
-socket.on('messageCreate', function (message) {
-    message.message = markdown(message.message, message.messageId);
+
+socket.on('messageEdited', async function (message) {
+    message.message = await markdown(message.message, message.messageId);
+
+    let editElement = document.querySelector(`div.message-profile-content-message#msg-${message.messageId}`);
+    if(editElement.tagName.toLowerCase() != "div"){
+        editElement = document.querySelector(`div.message-profile-content-message#msg-${message.messageId}`).parentnode;
+    }
+
+    editElement.innerHTML = message.message;
+
+    // example html element: <pre class="editedMsg">Last Edited: 24.7.2024, 20:15:24</pre>
+    if(editElement.outerHTML.includes('<pre class="editedMsg">') || editElement.parentNode.outerHTML.includes('<pre class="editedMsg">')){
+        
+        let firstSearch = editElement.querySelector("pre.editedMsg");
+        let secondSearch = editElement.parentNode.querySelector("pre.editedMsg");
+
+        if(firstSearch != null){
+            firstSearch.innerHTML = `Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}`;
+        }
+        else if(secondSearch != null){
+            secondSearch.innerHTML = `Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}`;
+        }
+    }
+    else{
+        editElement.innerHTML = message.message;
+        editElement.outerHTML += `<pre class="editedMsg">Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}</pre>`;
+    }
+});
+
+
+socket.on('messageCreate', async function (message) {
+    message.message = await markdown(message.message, message.messageId);
+    let lastEditedCode = `<pre class="editedMsg">Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}</pre>`;
+
+    if(message.lastEdited == null)
+        lastEditedCode = "";
 
     // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
     var messagecode = `<div class="message-container" id="${message.messageId}">
@@ -1586,12 +1739,13 @@ socket.on('messageCreate', function (message) {
 
             <div class="message-profile-info" id="${message.id}">
                 <label class="message-profile-info-name"  id="${message.id}" style="color: ${message.color};">${message.name}</label>
-                <label class="timestamp">${new Date(message.timestamp).toLocaleString("narrow")}</label>
-           </div>
+                <label class="timestamp" id="${message.timestamp}">${new Date(message.timestamp).toLocaleString("narrow")}</label>
+        </div>
             <div class="message-profile-content" id="${message.timestamp}">
-                <p class="message-profile-content-message" id="msg-${message.messageId}">
+                <div class="message-profile-content-message" style="display: block !important; float: left !important;" id="msg-${message.messageId}">
                     ${message.message.replaceAll("\n", "<br>")}
-                </p>
+                </div>
+                ${lastEditedCode}
             </div>
         </div>`;
 
@@ -1620,15 +1774,15 @@ socket.on('messageCreate', function (message) {
         }
 
         // Calculate time passed
-        var lastMessage = messagecontent[0].id / 1000;
+        var lastMessage = messagecontent[0].parentNode.querySelector("label.timestamp").id / 1000;
 
         var today = new Date().getTime() / 1000;
         var diff = today - lastMessage;
         var minutesPassed = Math.round(diff / 60);
-
         if(authorDivs[0].id == message.id && minutesPassed < 5){
             messagecontent[0].insertAdjacentHTML("beforeend",
-                `<p class="message-profile-content-message" id="msg-${message.messageId}">${message.message.replaceAll("\n", "<br>")}</p>`
+                `<div class="message-profile-content-message" style="display: block !important;" id="msg-${message.messageId}">${message.message.replaceAll("\n", "<br>")}</div>
+                ${lastEditedCode}`
                 //`<p class="message-profile-content-message-appended" id="msg-${message.messageId}">${message.message}</p>`
             );
         }
@@ -1644,6 +1798,12 @@ socket.on('messageCreate', function (message) {
     resolveMentions();
     scrollDown();
 });
+
+function addToChatLog(element, text){
+    //text = markdown(text, null);
+    element.insertAdjacentHTML('beforeend', text);
+    scrollDown();
+}
 
 
 function getLastMessage(time = false){
@@ -1672,20 +1832,21 @@ function getLastMessage(time = false){
         }
 
         // Calculate time passed
-        var lastMessage = messagecontent[0].id / 1000;
+        var lastMessage = messagecontent[0].parentNode.querySelector("label.timestamp").id / 1000;
 
         var today = new Date().getTime() / 1000;
         var diff = today - lastMessage;
         var minutesPassed = Math.round(diff / 60);
 
         if(time == true){
-            return messagecontent[0].id;
+            return lastMessage * 1000;
         }
         else{
             return messagecontent[0];
         }
     }
 }
+
 
 function compareTimestamps(stamp1, stamp2){
     // Calculate time passed
@@ -1703,7 +1864,7 @@ socket.on('showUserJoinMessage', function (author) {
 
     // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
     var message = '<div class="systemAnnouncementChat">' +
-        '            <p>User <label class="systemAnnouncementChatUsername">' + author.username + '</label> joined the chat!</p>' +
+        '            <p>User <label class="systemAnnouncementChatUsername" id="">' + author.username + '</label> joined the chat!</p>' +
         '        </div>';
 
     addToChatLog(chatlog, message);
@@ -1714,6 +1875,233 @@ socket.on('updateGroupList', function (author) {
 
     getGroupList();
 });
+
+let editMessageId = null;
+
+function cancelMessageEdit(){
+    
+    editor.innerHTML = "<p><br></p>";
+    editMessageId = null;
+    let editHint = editorToolbar.querySelector("#editMsgHint");
+    editHint.remove();
+
+    // sneaky bug fix
+    allowEditorBlur = true;
+    editor.focus();
+    editor.blur();
+}
+
+
+function editMessage(id){
+
+    if(editMessageId == null && editorToolbar.querySelector("pre.editMsgHint") == null)
+        editorToolbar.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageEdit()'>You are editing a message</p>`)
+
+    // sneaky bug fix
+    editor.focus();
+    editor.blur();
+
+    let msgContent = null;
+
+    // It is what it is.
+    try{ 
+        msgContent = document.querySelector(`div .message-profile-content-message #${id}`).parentNode.cloneNode(true);
+     } catch { msgContent = document.querySelector(`div .message-profile-content-message #${id}`).cloneNode(true);}
+    
+     
+    // try to find emojis and remove the big classname
+    let emojis = msgContent.querySelectorAll(`.inline-text-emoji.big`);
+
+    if(emojis != null){
+        for(let i = 0; i < emojis.length; i++){
+            // Set reference
+            let emoji = emojis[i];
+
+            // Clone emoji
+            let clonedEmoji = emoji.cloneNode(true);
+            clonedEmoji.classList.remove("big");
+
+             // replace emoji
+            emoji.parentNode.replaceChild(clonedEmoji, emoji);
+        }
+    }
+
+    window.quill.root.innerHTML = msgContent.innerHTML;
+    editMessageId = msgContent.id;
+
+    setTimeout(() => {        
+        const regex = /<p>\s*<\/p>/gm;
+        window.quill.root.innerHTML = window.quill.root.innerHTML.replace(regex, '');
+        
+    }, 10);
+
+    editor.focus();
+}
+
+const Delta = Quill.import('delta');
+
+hljs.configure({
+    languages: ['javascript', 'python', 'ruby', 'xml', 'json', 'css'] 
+});
+
+
+window.quill = new Quill('#editor', {
+    modules: {
+        syntax: true,
+        toolbar: {
+            container: '#editor-toolbar',
+            handlers: {
+                'link': function(value) {
+                    if (value) {
+                        var href = prompt('Enter the URL');
+                        if (href) {
+                            quill.format('link', href);
+                        }
+                    } else {
+                        quill.format('link', false);
+                    }
+                }
+            }
+        }
+    },
+    theme: 'snow'
+});
+
+
+quill.clipboard.addMatcher('PRE', function(node, delta) {
+    return delta.compose(new Delta().retain(delta.length(), { 'code-block': true }));
+});
+
+quill.clipboard.addMatcher(Node.TEXT_NODE, function(node, delta) {
+    if (node.parentNode && node.parentNode.tagName === 'PRE') {
+    return delta.compose(new Delta().retain(delta.length(), { 'code-block': true }));
+    }
+    return delta;
+});
+
+var editorContainer = document.querySelector('.editor-container');
+var editorToolbar = document.getElementById("editor-toolbar")
+var quillContainer = document.querySelector('.ql-container');
+var editor = document.querySelector('.ql-editor');
+
+var initialToolbarHeight = editorToolbar.offsetHeight;
+var initialHeight = 40; // Initial height of the editor
+var maxHeight = 400; // Maximum height of the editor
+var lastHeight = initialHeight;
+var initialMargin = parseFloat(getComputedStyle(editorContainer).marginTop);
+var allowEditorBlur = true;
+
+// Creating a ResizeObserver instance
+const resizeObserver = new ResizeObserver(adjustEditorHeight);
+resizeObserver.observe(editor)
+
+function adjustEditorHeight() {
+    var lineHeight = 20; // Adjust this based on your editor's line height
+    var padding = 20; // Adjust this based on your editor's padding
+    var editorContentHeight = editor.scrollHeight; // Get the actual content height
+    
+    const initialHeight = 40; // Set your initial height here
+
+    // Calculate new height
+    const newHeight = editor.scrollHeight;
+    const toolbarHeightDiff = editorToolbar.offsetHeight - initialToolbarHeight
+
+    if (newHeight > initialHeight || toolbarHeightDiff > 0 ) {
+        // Adjust the container height and marginTop
+        editorContainer.style.height = newHeight + 'px';
+        //editorContainer.style.marginTop = -(newHeight - initialHeight) + 'px !important';
+        editorContainer.style.transform = `translateY(-${(newHeight-(40-toolbarHeightDiff))}px)`;
+        quillContainer.style.height = newHeight + 'px'; // Update the height of the ql-container
+    }
+    else {
+        editorContainer.style.height = initialHeight + 'px';
+        //editorContainer.style.transform = null;
+        editorContainer.style.marginTop = initialMargin - toolbarHeightDiff;
+    }
+}
+
+// Handle keydown events to expand the editor
+editor.addEventListener('keydown', function(event) {
+    setTyping();
+
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        
+        let msgContent = editor.innerHTML
+            .replace("<p><br></p>", "")
+            //.replace(/<p\s+id="msg-\d+"><br><\/p>/g, "").       // Replace empty lines.
+            .replace(/<p\s+id="msg-\d+">\s*<br\s*\/?>\s*<\/p>/g, "");       // Replace empty lines.
+       
+
+        // Handle the logic for sending the message to the server
+        sendMessageToServer(getID(), getUsername(), getPFP(), msgContent);
+
+        // Reset the editor content to a single <p><br></p>
+        editor.innerHTML = "<p><br></p>";
+
+        // Reset the editor container styles to their initial values
+        editorContainer.style.marginTop = -60 + 'px';
+        editorContainer.style.height = initialHeight + 'px';
+        quillContainer.style.height = initialHeight + 'px'; // Reset the height of the ql-container
+        editorContainer.style.transform = 'translateY(0)';
+        lastHeight = initialHeight;
+
+    } else if (event.key === 'Enter' && event.shiftKey) {
+        // Allow Shift+Enter to create a new line
+        setTimeout(adjustEditorHeight, 0); // Adjust height after DOM update
+        event.stopPropagation();
+    }
+});
+
+// Adjust height on focus and blur
+editor.addEventListener('focus', function() {
+    adjustEditorHeight();
+});
+
+document.addEventListener('mousedown', (event) => {
+
+    clickedElement = event.target;
+
+    if(clickedElement == editorContainer || getAllChildren(editorContainer).includes(clickedElement)){
+        allowEditorBlur = false;
+    }
+    else{
+        allowEditorBlur = true;
+    }
+
+});
+
+editor.addEventListener('blur', function() {
+
+    if(!allowEditorBlur)
+        return;
+    
+    const toolbarHeightDiff = editorToolbar.offsetHeight - initialToolbarHeight
+    editorContainer.style.marginTop = initialMargin-toolbarHeightDiff + 'px';
+        
+    editorContainer.style.marginBottom = 20 + 'px';
+    editorContainer.style.height = initialHeight + 'px';
+    quillContainer.style.height = initialHeight + 'px'; // Reset the height of the ql-container
+    editorContainer.style.transform = 'translateY(0)';
+    lastHeight = initialHeight;
+});
+
+function getAllChildren(element) {
+        const children = [];
+
+        function traverse(node) {
+            node.childNodes.forEach(child => {
+                if (child.nodeType === 1) { // Ensure it's an element node
+                    children.push(child);
+                    traverse(child);
+                }
+            });
+        }
+
+        traverse(element);
+        return children;
+    }
+
 
 function deleteMessageFromChat(id){
 
@@ -1734,7 +2122,6 @@ function bulkDeleteMessageFromChat(id){
     }
 
     children = children.querySelector("p");
-    console.log(children)
 
     for (var i = 0; i < children.length; i++) {
         socket.emit("deleteMessage", { id: getID(), token: getToken(), messageId: children[i].id.replace("msg-", ""),
@@ -1748,6 +2135,9 @@ socket.on('receiveDeleteMessage', function (id) {
     console.clear();
 
     var message = document.querySelectorAll(`div .message-profile-content #msg-${id}`);
+    if(message == null)
+        message = document.querySelectorAll(`div .message-profile-content-message #msg-${id}`);
+
     var parentContainer = message[0].parentNode.parentNode;
     var parent = message[0].parentNode;
 
@@ -1774,17 +2164,17 @@ socket.on('memberTyping', function (members) {
     }
 
     if(members.length == 1){
-        displayUsersText += members[0] + " is typing...";
+        displayUsersText += limitString(members[0], 15) + " is typing...";
     }
     else if(members.length == 2){
-        displayUsersText += members[0] + " and " + members[1] + " are typing...";
+        displayUsersText += limitString(members[0], 15) + " and " + limitString(members[1], 15) + " are typing...";
     }
     else{
         members.forEach(member => {
 
             // Show multiple typing
             if(runner <= 2){
-                displayUsersText += member + ", ";
+                displayUsersText += limitString(member, 15) + ", ";
             }
             runner++;
         });
@@ -1837,49 +2227,38 @@ socket.on('markChannelMessage', function (data) {
     var chanElement = document.querySelector(`#channel-${chan}`);
     chanElement.style.color = "orange";
 
-     */
+    */
 
 });
 
-socket.on('receiveChatlog', function (data) {
-
-
-    if(data == null){
-        console.log("Data was null history")
+socket.on('receiveChatlog', async function (data) {
+    if (data == null) {
+        console.log("Data was null history");
         return;
     }
-
     var previousMessageID = 0;
-    data.forEach(message => {
 
-        if(message.id == "0"){
-            var message = `<div class="systemAnnouncementChat">
-                                <p><label class="systemAnnouncementChatUsername">${message.name}</label> joined the server!</p>
-                                </div>`;
+    for (let message of data) {
+        try {
 
-            document.getElementById("content").insertAdjacentHTML("beforeend", message);
-            scrollDown();
-        }
-        else{
-            if(compareTimestamps(message.timestamp, getLastMessage(true)) <= 5
-                && previousMessageID == message.id
-            ){
-                message.message = markdown(message.message, message.messageId);
+            let lastEditCode = `<pre alt='receiveChatlog' class="editedMsg">Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}</pre>`;
+            if(message.lastEdited == null)
+                lastEditCode = ``
 
-                getLastMessage().insertAdjacentHTML("beforeend", `<p class='message-profile-content-message' id="msg-${message.messageId}">${message.message}</p>`);
-                //getLastMessage().insertAdjacentHTML("beforeend", `<p class='message-profile-content-message-appended' id="msg-${message.messageId}">${message.message}</p>`);
+            if (compareTimestamps(message.timestamp, getLastMessage(true)) <= 5 && previousMessageID == message.id) {
+                message.message = await markdown(message.message, message.messageId);
+
+                getLastMessage().insertAdjacentHTML("beforeend", `<div class='message-profile-content-message' style="display: block !important; float: left !important;" id="msg-${message.messageId}">${message.message}</div>${lastEditCode}`);
                 previousMessageID = message.id;
-
-            }
-            else{
-                message.message = markdown(message.message, message.messageId);
-                showMessageInChat(message)
+            } else {
+                message.message = await markdown(message.message, message.messageId);
+                await showMessageInChat(message);
                 previousMessageID = message.id;
             }
+        } catch (error) {
+            console.error(`Error processing message with ID ${message.messageId}:`, error);
         }
-
-
-    });
+    }
 
     scrollDown();
     resolveMentions();
@@ -1947,6 +2326,7 @@ socket.on('receiveMemberProfile', function (data) {
 
 socket.on('receiveMemberList', function (data) {
     memberlist.innerHTML = data;
+    document.getElementById("mobile_memberlist").innerHTML = data;
 });
 
 socket.on('updateMemberList', function (data) {
@@ -1960,6 +2340,12 @@ socket.on('updateGroupList', function (data) {
 socket.on('receiveGroupList', function (data) {
     serverlist.innerHTML = "";
     serverlist.innerHTML = data;
+
+    let mobileGroupList = document.getElementById("mobile_GroupList");
+    mobileGroupList.innerHTML = data;
+
+
+
     setActiveGroup(getGroup());
 });
 
@@ -1968,7 +2354,7 @@ socket.on('newMemberJoined', function (author) {
 
     // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
     var message = '<div class="systemAnnouncementChat">' +
-        '            <p><label class="systemAnnouncementChatUsername">' + author.name + '</label> joined the server!</p>' +
+        '            <p><label class="systemAnnouncementChatUsername">' + author.name + '</label> joined the server! <label class="timestamp" id="' + author.timestamp + '">' + author.timestamp.toLocaleString("narrow") + '</p>' +
         '        </div>';
 
     addToChatLog(chatlog, message);
@@ -2034,6 +2420,11 @@ socket.on('modalMessage', function (data) {
 
         buttonArray.push([buttonText.toLowerCase(), buttonEvents])
     });
+
+    for(let i = 0; i < data.buttons.length; i++){
+        console.log("button : " + data.buttons[i])
+    }
+
 
     Confirm(data.title, data.message, "info", buttonArray, "confirm").then(result => {
 
@@ -2140,7 +2531,7 @@ function showModal(data){
             var buttonText = data.buttons[button].text;
             var buttonEvent = data.buttons[button].events;
 
-            modalBoxButtons.insertAdjacentHTML("beforeend", `<button ${buttonEvent}>${buttonText}</button>`)
+            modalBoxButtons.insertAdjacentHTML("beforeend", `<button onclick="${buttonEvent}">${buttonText}</button>`)
         });
     }
 
@@ -2190,7 +2581,7 @@ function resetAccount(){
 
 
 
-document.getElementById("message-actions").onclick = function(e) {
+document.getElementById("message-actions-image").onclick = function(e) {
     var x = e.clientX;
     var y = e.clientY;
 
@@ -2212,6 +2603,8 @@ document.getElementById("message-actions").onclick = function(e) {
 
         var test = document.getElementById("message-actions-image");
 
+        emojiBox.style.position = "fixed";
+        emojiBox.style.float = "right";
         emojiBox.style.top = (y - emojiBox.offsetHeight - 40) + "px";
         emojiBox.style.left = x -  emojiBox.offsetWidth +"px";
     }
@@ -2278,7 +2671,6 @@ gifSearchbarInput.addEventListener("keypress", function(event) {
 
 function selectEmojiTab(element){
     var parentnode = element.parentNode.children;
-    console.log(parentnode)
 
     for(let i = 0; i < parentnode.length; i++){
         if(parentnode[i].classList.contains("SelectedTab")){
@@ -2291,8 +2683,8 @@ function selectEmojiTab(element){
 
 function sendGif(url){
 
-    if(document.getElementById("messagebox-content").value.replaceAll(" ", "").length >= 1){
-        sendMessageToServer(getID(), getUsername(), getPFP(), document.getElementById("messagebox-content").value);
+    if(document.querySelector('.ql-editor').innerHTML.replaceAll(" ", "").length >= 1){
+        sendMessageToServer(getID(), getUsername(), getPFP(), document.querySelector('.ql-editor').innerHTML);
     }
 
     sendMessageToServer(getID(), getUsername(), getPFP(), url);
@@ -2364,9 +2756,9 @@ function getEmojis() {
 
                 var code = `
                     <div class="emoji-entry" title="${emojiName}" onclick="
-                              document.getElementById('messagebox-content').value += ' :${emojiName}: ';
-                              document.getElementById('emoji-box-container').style.display = 'none';
-                              document.getElementById('messagebox-content').focus();">
+                            document.querySelector('.ql-editor').textContent += ' :${emojiName}: ';
+                            document.getElementById('emoji-box-container').style.display = 'none';
+                            ">
                         <div class="emoji-img">
                             <img class="emoji" src="/emojis/${emoji}">
                         </div>
@@ -2429,6 +2821,7 @@ function setAboutme(aboutme){
 
 socket.on('receiveGroupBanner', function (data) {
     groupbanner.src = data;
+    document.getElementById("mobile_groupBannerDisplay").src = data;
 });
 
 
@@ -2479,29 +2872,47 @@ function getServerInfo(returnData = false){
     });
 }
 
+
 function setUrl(param, isVC = false){
 
     window.history.replaceState(null, null, param); // or pushState
 
     if(isVC == true){
-        socket.emit("setRoom", { id: getID() , username: getUsername(), icon: getPFP(), room: getRoom(), token: getToken() });
+        socket.emit("checkChannelPermission", {id:getID(), channel: getChannel(), token: getToken(), permission: "useVOIP" }, function (response) {
+            if(response.permission == "granted"){
+                switchLeftSideMenu(true)
+                stopRecording();
+                
+                socket.emit("setRoom", { id: getID() , username: getUsername(), icon: getPFP(), room: getRoom(), token: getToken() });
 
-        joinVC(param);
-        document.getElementById("messagebox").style.visibility = "hidden";
-        document.getElementById("content").innerHTML = "";
-        return;
+                joinVC(param);
+                document.getElementById("messagebox").style.visibility = "hidden";
+                document.getElementById("content").innerHTML = "";
+            }
+        });
     }
     else{
-        if(recordAudio ) stopAudioRecording();
-        chatlog.innerHTML = "";
-        document.getElementById("messagebox").style.visibility = "visible";
-        document.getElementById("messagebox-content").focus();
+        stopRecording();
+        socket.emit("checkChannelPermission", {id:getID(), channel: getChannel(), token: getToken(), permission: "sendMessages" }, function (response) {
+            if(response.permission == "granted"){
+                switchLeftSideMenu(true)
+                
+                socket.emit("setRoom", { id: getID() , username: getUsername(), icon: getPFP(), room: getRoom(), token: getToken() });
+                chatlog.innerHTML = "";
+                document.getElementById("messagebox").style.visibility = "visible";
+                document.querySelector('.ql-editor').focus();
+            }
+            else{
+                chatlog.innerHTML = "";
+                document.getElementById("messagebox").style.visibility = "hidden";
+            }
+        });
     }
 
-    socket.emit("setRoom", { id: getID() , username: getUsername(), icon: getPFP(), room: getRoom(), token: getToken() });
     refreshValues();
 
 }
+
 
 function setChannelName(name){
     document.getElementById("channelname").innerText = name;
@@ -2523,17 +2934,21 @@ function generateId(length) {
     return result;
 }
 
-function addToChatLog(element, text){
-    //text = markdown(text, null);
-    element.insertAdjacentHTML('beforeend', text);
-    scrollDown();
-}
-
 function scrollDown(){
     var objDiv = document.getElementById("content");
     objDiv.scrollTop = objDiv.scrollHeight;
 }
 
+ // Add scroll event listener to the scroll container
+ /*
+ let scrollMessageCount = 0;
+ scrollContainer.addEventListener('scroll', function() {
+    if (scrollContainer.scrollTop === 0) {
+        
+        // We reached the top of the chat, try to load more messages
+    }
+});
+*/
 
 
 function upload(files) {
@@ -2555,7 +2970,7 @@ var uploadObject = document.getElementById('content');
 uploadObject.addEventListener('drop', function (e) {
     // Code for upload file here
     e.preventDefault()
-    uploadObject.style.backgroundColor = '#36393F';
+    uploadObject.style.backgroundColor = '#2B3137';
 
     var file = e.dataTransfer.files[0]
     var fileSize = file.size / 1024 / 1024;
@@ -2578,7 +2993,7 @@ uploadObject.addEventListener('dragover', function (e) {
 
 uploadObject.addEventListener('dragleave', function (e) {
     e.preventDefault();
-    uploadObject.style.backgroundColor = '#36393F';
+    uploadObject.style.backgroundColor = '#2B3137';
 }, false);
 
 
@@ -2587,26 +3002,45 @@ uploadObject.addEventListener('dragleave', function (e) {
 
 
 
-function showMessageInChat(message) {
+async function showMessageInChat(message) {
 
+    //message.message = await markdown(message.message, message.messageId)
 
-    message.message = markdown(message.message, message.messageId)
+    var messagecode = "";
+    if(message.isSystemMsg == true){
+        messagecode = `<div class="systemAnnouncementChat">
+                            <p><label class="systemAnnouncementChatUsername" id="msg-${message.id}">${message.name}</label> joined the server! <label class="timestamp" style="color: lightgray !important;">${new Date(message.timestamp).toLocaleString("narrow")}</label></p>
+                        </div>`;
+    }
+    else {
 
-    var messagecode = `<div class="message-container" id="msg-${message.messageId}">
-            <div class="message-profile-img-container">
-                <img class="message-profile-img" src="${message.icon}" id="${message.id}" onerror="this.src = '/img/default_pfp.png';">
-            </div>
+        let editCode = "";
 
-            <div class="message-profile-info" id="${message.id}">
-                <label class="message-profile-info-name" id="${message.id}" style="color: ${message.color};">${message.name}</label>
-                <label class="timestamp">${new Date(message.timestamp).toLocaleString("narrow")}</label>
-           </div>
-            <div class="message-profile-content" id="${message.timestamp}">
-                <p class="message-profile-content-message" id="msg-${message.messageId}">
-                    ${message.message}
-                </p>
-            </div>
-        </div>`;
+       
+        if(message.lastEdited != null){
+            console.log("Showing edit for " + message.message)
+            editCode = `<pre class="editedMsg">Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}</pre>`;
+        }
+        
+
+        messagecode = `<div class="message-container" id="msg-${message.messageId}">
+                            <div class="message-profile-img-container">
+                                <img class="message-profile-img" src="${message.icon}" id="${message.id}" onerror="this.src = '/img/default_pfp.png';">
+                            </div>
+                
+                            <div class="message-profile-info" id="${message.id}">
+                                <label class="message-profile-info-name" id="${message.id}" style="color: ${message.color};">${message.name}</label>
+                                <label class="timestamp" id="${message.timestamp}">${new Date(message.timestamp).toLocaleString("narrow")}</label>
+                            </div>
+
+                            <div class="message-profile-content" id="msg-${message.messageId}">
+                                <div class="message-profile-content-message" style="display: block !important; float: left !important;" id="msg-${message.messageId}">
+                                    ${message.message}
+                                </div>
+                                ${editCode}
+                            </div>
+                        </div>`;
+    }
 
     addToChatLog(chatlog, messagecode);
     convertMention(message, false)

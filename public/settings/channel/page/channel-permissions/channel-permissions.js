@@ -129,11 +129,14 @@ function addRole(){
 
 function savePermissions(){
 
+    console.log(editChannel);
+    console.log(editChannel.permissions);
     console.log(editChannel.permissions[currentRoleId]);
 
-    socket.emit("saveChannelPermissions", {id:getID(), token: getToken(), channel: currentChannelId, role: currentRoleId, permissions: editChannel.permissions[currentRoleId] }, function (response) {
+    socket.emit("saveChannelPermissions", {id:getID(), token: getToken(), channel: currentChannelId, role: currentRoleId, permission: editChannel.permissions[currentRoleId] }, function (response) {
         alert(response.msg);
-        window.location.reload();
+        console.log(response)
+        //window.location.reload();
     });
 }
 

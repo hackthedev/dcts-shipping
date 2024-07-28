@@ -21,6 +21,54 @@
     }
 </style>
 
+
+
+<!--
+    
+    <ul class="update current">
+            <ul class="content">
+
+                <div class="head">
+                    <h2>New Features</h2>
+                </div>
+                <ul>
+                    <li class="feature">Voice Chat</li>
+                    <ul>
+                        <li class="desc">
+                            Added a experimental voice chat feature
+                        </li>
+
+                        <li class="desc">
+                            You can now create text and voice channels in the channel tree using the right click context menu
+                        </li>
+                    </ul>
+
+                    <li class="feature">Timeout / Mute</li>
+                    <ul>
+                        <li class="desc">
+                            Its now possible to mute people for an infinite amount of time or specified amount of seconds/minutes
+                        </li>
+                    </ul>
+
+                    <li class="feature">Custom Kick / Ban Messages</li>
+                    <ul>
+                        <li class="desc">
+                            Its now possible to add a ban and kick reason when doing so.
+                        </li>
+                    </ul>
+                </ul>
+
+            </ul>
+        </ul>
+
+    
+    -->
+
+
+
+
+
+
 <div id="profile_change_container">
 
     <!-- <h2 class="profile_headline">Features that </h2> -->
@@ -29,6 +77,190 @@
 
 
         <ul class="update current">
+            <ul class="content">
+
+
+                <div class="head">
+                    <h2>SQL Support</h2><label class="update">July  28th, 2024 | v3.4.6</label>
+                </div>
+                <ul>
+                    <li class="feature">Storing Messages</li>
+                    <ul>
+                        <li class="desc">
+                            Its possible to enable SQL in the <code>config.php</code> file to enable and configurate sql. It was testes with MariaDB.
+                        </li>
+                    </ul>
+
+                    <li class="feature">Media Cache (SQL only)</li>
+                    <ul>
+                        <li class="desc">
+                            If you're using the SQL feature you will be able to benefit from a media cache feature i implemented. The server now checks for the type of media 
+                            using HTTP Requests and checking the Content-Type returned (= better media detection & better embeds etc). After the check the url will be stored in the database with its media type. If a media 
+                            check is requested the server will check the database first before making the HTTP Request.
+                        </li>
+                    </ul>
+                </ul>
+
+
+                <div class="head">
+                    <h2>Plugin System</h2>
+                </div>
+                <ul>
+                    <li class="feature">
+                        Implemented some sort of plugin system that can be used to customize the server as well as client.     
+                    </li>
+                    <ul>
+                        <li class="desc">
+                            You can add custom socket events, trigger events, modify basically everything to your likings without needing to modify the source files directly.
+                        </li>
+                        <li class="desc">
+                            You can also define custom functions etc that will trigger when the server is starting up. You can also create files etc that can modify the web client.
+                            Check out the Github Wiki.
+                        </li>
+                    </ul>
+                </ul>
+
+
+
+                <div class="head">
+                    <h2>Improvements</h2>
+                </div>
+                <ul>
+                    <li class="feature">Config Compatibility</li>
+                    <ul>
+                        <li class="desc">
+                            I implemented a pretty cool feature for myself so i can dynmaically check if config features exist or not and if not it will update the config 
+                            with pre-defined default variables. This way your server should never run into an error because it couldnt find a config variable when updating 
+                            <s>(as long as i dont forget it)</s>.
+                        </li>
+                    </ul>
+
+
+                    <li class="feature">Rich Text Editor</li>
+                    <ul>
+                        <li class="desc">
+                            The cool people that follow the Update Previews on Github Discussions (3 people currently <3) already know this but the text input field has
+                            been completely purged and sent to hell to be replaced with a new and cool Rich Text Editor or Markdown Editor. You can now type long fancy texts
+                            with easy formatting etc. I would suggest you try it out yourself ;) . Go to <a href="https://github.com/hackthedev/dcts-shipping/discussions" target="_blank">
+                            Github Discussions</a>
+                        </li>
+                    </ul>
+
+                    <li class="feature">WebRTC</li>
+                    <ul>
+                        <li class="desc">
+                            In the previous update i released a experimental voice chat that i tried to place together myself because i didnt really see how i could use WebRTC.
+                            I finally figured it out and implemented it as well and compared to the my previous attempt its a day and night difference. Also since using WebRTC the 
+                            audio is not being cut off anymore and other side effects are also gone. 
+                        </li>
+                    </ul>
+
+
+                    <li class="feature">Default Channel</li>
+                    <ul>
+                        <li class="desc">
+                            Its now possible to set a default channel where the server will send specific events like "... user joined the server" etc. These messages SHOULD be 
+                            stored now.
+                        </li>
+                    </ul>
+
+
+                    <li class="feature">Message editing</li>
+                    <ul>
+                        <li class="desc">
+                            Its now possible to edit messages.
+                        </li>
+                    </ul>
+
+
+                    <li class="feature">Member Count in Server Roles</li>
+                    <ul>
+                        <li class="desc">
+                            If you go to the server settings and click on a role and scroll all the way down where the role members will be listed there will be a small
+                            counter now showing how many members are in that role.
+                        </li>
+                    </ul>
+
+
+                    <li class="feature">New Colors</li>
+                    <ul>
+                        <li class="desc">
+                            Recolored the UI to look more nicer. At least i love it. I plan to add better customization features.
+                        </li>
+                    </ul>
+
+
+
+                    <li class="feature">Mobile UI</li>
+                    <ul>
+                        <li class="desc">
+                            Since i was already recoloring the UI i also tried to make the UI more mobile friendly. Before this update mobile wasnt really usable at all.
+                            Its still not perfect and some things need to be done still but at least you have basic functionality now.
+                        </li>
+                    </ul>
+                   
+                </ul>
+
+
+
+                <div class="head">
+                    <h2>Bugs</h2>
+                </div>
+                <ul>
+                    <li class="feature">Styling</li>
+                    <ul>
+                        <li class="desc">
+                            <a href="https://github.com/hackthedev/dcts-shipping/issues/8" target="_blank">Fixed a bug</a> where texts in the profile are overflowing. CSS is amazing.                    
+                        </li>
+                        <li class="desc">
+                            <a href="https://github.com/hackthedev/dcts-shipping/issues/9" target="_blank">Fixed a bug</a> where the typing indicator text "Shy Devil is typing..." 
+                            etc is overflowing                   
+                        </li>
+                    </ul>    
+
+
+                    <li class="feature">Code</li>
+                    <ul>
+                        <li class="desc">
+                            <a href="https://github.com/hackthedev/dcts-shipping/issues/6" target="_blank">Fixed a bug</a> where the channel right click menu didnt work.                    
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where messages wouldnt be put together that where sent in a given time span from the same author.                    
+                        </li>
+                        <li class="desc">
+                            Fixed a oversight where roles in the member profile arent sorted and displayed based on hierarchy.                   
+                        </li>
+                        <li class="desc">
+                            <s>Added more bugs to fix later</s>                 
+                        </li>
+
+                    </ul> 
+                </ul>
+
+
+
+        
+
+            </ul>
+        </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <ul class="update">
             <ul class="content">
 
                 <div class="head">

@@ -49,7 +49,8 @@
                 "uploadFiles": 1,
                 "redeemKey": 1,
                 "maxUpload": "7",
-                "manageChannels": 0
+                "manageChannels": 0,
+                "viewChannelHistory": 1
             },
             "members": [
 
@@ -115,8 +116,8 @@
                             "sortId": 2
                         },
                         "channel": {
-                            "1039": {
-                                "id": 1039,
+                            "0": {
+                                "id": 0,
                                 "name": "chat",
                                 "type": "text",
                                 "description": "Default Channel Description",
@@ -125,7 +126,8 @@
                                     "0": {
                                         "readMessages": 1,
                                         "sendMessages": 1,
-                                        "viewChannel": 1
+                                        "viewChannel": 1,
+                                        "viewChannelHistory": 1
                                     }
                                 }
                             }

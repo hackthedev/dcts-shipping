@@ -12,6 +12,7 @@ var promptInputNo;
 var promptInputCancel;
 var promptInputOk;
 
+
 function closePrompt(){
     //promptBox.style.display = "none";
 

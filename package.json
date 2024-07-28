@@ -2,7 +2,7 @@
   "name": "dcts",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.mjs",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,17 +11,24 @@
   "license": "",
   "dependencies": {
     "colors": "^1.4.0",
+    "crypto": "^1.0.1",
     "express": "^4.18.2",
     "file-type": "^18.2.1",
     "form-data": "^4.0.0",
+    "fs-extra": "^11.2.0",
     "get-folder-size": "^2.0.0",
     "install": "^0.13.0",
-    "mysql": "^2.18.1",
+    "mysql2": "^3.10.2",
     "node": "^19.8.1",
     "node-fetch": "^2.6.9",
     "request": "^2.88.2",
+    "sanitize-html": "^2.13.0",
     "socket.io": "^4.6.1",
     "uuid": "^9.0.0",
-    "xhr2": "^0.2.1"
+    "xhr2": "^0.2.1",
+    "xss-filters": "^1.2.7"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.2"
   }
 }

@@ -74,7 +74,7 @@ function setupNotify(){
             right: 0;
             top: 0;
     
-            z-index: 99999;
+            z-index: 9999999;
             width: fit-content;
             display: table;
             height: fit-content;

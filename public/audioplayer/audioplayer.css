@@ -1,0 +1,42 @@
+.audio-player {
+    float: left;
+    width: auto;
+    margin: 20px auto;
+    margin-top: 0;
+    padding: 10px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    background-color: #202225;
+    text-align: center;
+}
+
+.audio-info {
+    margin-bottom: 16px;
+    font-weight: bold;
+    color: lightgray;
+    text-align: left;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+button {
+    padding: 5px 10px;
+    margin: 0px 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #555;
+}
+
+input[type="range"] {
+    margin: 0 10px;
+}

@@ -57,6 +57,8 @@ export var versionCode = 346;
 let powDifficulty = 7;
 
 
+// check if needed directories are setup
+checkServerDirectories()
 
 // check if config file exists
 checkConfigFile()
@@ -305,8 +307,6 @@ checkVersionUpdate();
  }
 
 
-// check if needed directories are setup
-checkServerDirectories()
 
 
 consolas(" ", );

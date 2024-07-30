@@ -26,7 +26,7 @@ export async function checkAndCreateTable(table) {
   const query = `
     SELECT COUNT(*)
     FROM information_schema.tables 
-    WHERE table_schema = 'dcts' 
+    WHERE table_schema = '${table.name}' 
       AND table_name = ?
   `;
 
@@ -70,7 +70,7 @@ async function checkAndCreateColumns(table) {
   const query = `
     SELECT COLUMN_NAME
     FROM information_schema.columns
-    WHERE table_schema = 'dcts'
+    WHERE table_schema = '${table.name}'
       AND table_name = ?
   `;
 

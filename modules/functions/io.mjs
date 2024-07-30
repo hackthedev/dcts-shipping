@@ -94,6 +94,11 @@ export function checkServerDirectories(){
     if (!fs.existsSync("./public/uploads")){
         fs.mkdirSync("./public/uploads");
     }
+
+    // User Plugins Folder
+    if (!fs.existsSync("./plugins")){
+        fs.mkdirSync("./plugins");
+    }
 }
 
 export function checkConfigFile(){

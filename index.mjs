@@ -51,7 +51,7 @@ export var ratelimit = [];
 var socketToIP = [];
 
 export var debugmode = false;
-export var versionCode = 346;
+export var versionCode = 349;
 
 // PoW difficulty
 let powDifficulty = 7;

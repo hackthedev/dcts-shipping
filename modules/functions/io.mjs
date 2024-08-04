@@ -164,25 +164,25 @@ export async function getSavedChatMessage(group, category, channel, index = -1){
     }
 
 
-
     var dir = `./chats/${group}/${category}/${channel}/`;
 
     if (!fs.existsSync(dir)){
         consolas(`Directory ${dir} didnt exist`, "Debug");
-        return;
+        //return;
     }
-    fs.readdirSync(`./chats/${group}/${category}/${channel}/`).forEach(file => {
+    else{
+        fs.readdirSync(`./chats/${group}/${category}/${channel}/`).forEach(file => {
 
-        var message = JSON.parse(fs.readFileSync(`./chats/${group}/${category}/${channel}/${file}`));
+            var message = JSON.parse(fs.readFileSync(`./chats/${group}/${category}/${channel}/${file}`));
+            if(message.message.includes("<br>") && (message.message.split("<br>").length-1) <= 1){
+                message.message = message.message.replaceAll("<br>", "")
+            }
+    
+            sortedMessages.push(message);
+        });
+    }
 
-
-        if(message.message.includes("<br>") && (message.message.split("<br>").length-1) <= 1){
-            message.message = message.message.replaceAll("<br>", "")
-        }
-
-        sortedMessages.push(message);
-    });
-
+    
 
     sortedMessages = sortedMessages.sort((a, b) => {
         if (a.timestamp < b.timestamp) {

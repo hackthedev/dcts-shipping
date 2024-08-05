@@ -48,6 +48,6 @@ Depending on your configuration the port may vary
 
 <br>
 
-## Tutorial
-(version in video slightly outdated)<br>
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/LJ_IEe7nZnw/0.jpg)](https://www.youtube.com/watch?v=LJ_IEe7nZnw)
+## Screenshots
+![image](https://github.com/user-attachments/assets/68806ef4-c7ca-489e-8d3b-690f5e43d737)
+

@@ -14,7 +14,7 @@ DCTS is an open-source project created to give users full control over their com
 
 If you value the vision of DCTS and want to see it grow, consider making a donation. Every contribution helps accelerate development and ensures the project's future. Thank you for helping us keep DCTS alive and thriving!
 
-[Donate via PayPal](https://www.paypal.me/devilsstore)
+[Donate via PayPal](https://www.paypal.me/devilsstore) | [Donate via Ko-fi](https://ko-fi.com/shydevil)
 
 <br>
 

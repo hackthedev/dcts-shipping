@@ -17,31 +17,11 @@ socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "mana
     }
 });
 
-socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
-    aboutme: getAboutme(), banner: getBanner()});
-
 getBans();
 
 
 // document.querySelector("#ban-reason-119012019689").innerText = "Fag"
 
-function getBanObject(id){
-    var user = bannedObj[id];
-
-    document.querySelector("#ban-reason-" + id).innerHTML = "<i>Reason: " + user.reason + "</i>";
-    document.querySelector("#ban-until-" + id).innerHTML = "<i>Banned Until: <i>" + new Date(user.until).toLocaleDateString() + "</i>";
-    document.querySelector("#ban-by-" + id).innerHTML = "<i>Banned By: <i>" + user.bannedBy + " (click for info)</i>";
-    document.querySelector("#ban-by-" + id).style.cursor = "pointer";
-
-    document.querySelector("#ban-by-" + id).onclick = function()
-    {
-        socket.emit("resolveMember", {id:getID(), token: getToken(), target: user.bannedBy }, function (response) {
-            notify("User was banned by " + response.data.name, "info", null, "normal");
-        });
-    };
-
-    console.log(bannedObj[id]);
-}
 
 function unbanUser(id) {
 
@@ -69,79 +49,106 @@ function unbanUser(id) {
 
 }
 
-var bannedObj = "";
 function getBans() {
-    var emojiContainer = document.getElementById("ban-container");
+    var emojiContainer = document.getElementById("settings_banlist_container");
 
-    socket.emit("getBans", { id:getID(), token: getToken() }, function (response1) {
-
+    socket.emit("getBans", { id: getID(), token: getToken() }, function (response1) {
         try {
             if (response1.type == "success") {
-                //settings_icon.value = response.msg;
-                emojiContainer.innerHTML = "";
-                bannedObj = response1.data;
-                console.log(response1)
+                emojiContainer.innerHTML = ""; // Clear previous entries
 
-                // For each banned member
-                Object.keys(response1.data).forEach(bannedMember => {
+                const bannedObj = response1.data;
 
-                    // Resolve member
-                    socket.emit("resolveMember", {id:getID(), token: getToken(), target: bannedMember }, function (response2) {
+                // Create the table structure
+                let table = `
+                    <table class="settings_banlist_table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Status</th>
+                                <th>Reason</th>
+                                <th>Duration</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
 
-                        if (response2.type == "success") {
-                            var user = response2.data;
-                            console.log(user)
+                // Add rows for each banned user
+                Object.keys(bannedObj).forEach((bannedUserId, index) => {
+                    const banData = bannedObj[bannedUserId];
+                    const rowClass = index % 2 === 0 ? "settings_banlist_even_row" : "settings_banlist_odd_row";
 
-                            var code = `
-                                        <div class="banned-entry-container" id="banned-id-${user.id}">
-                                        
-                                            <div class="banned-entry-img-containers">
-                                                <div class="banned-entry-banner-container">
-                                                    <div class="banned-entry-banner" style="background-image: url('${user.banner}');" ></div>
-                                                </div>
-                                            
-                                                <div class="banned-entry-img-container">
-                                                    <img class="banned-entry-icon" src="${user.icon}">
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="banned-entry-info-container">                                        
-                                                <h1 clas="banned-entry-username" id="ban-username-${user.id}">${user.name} (${user.id})</h1>
-                                                <input type="button" onclick="getBanObject(${user.id})" value="Get Info"/>
-                                                <input type="button" onclick="unbanUser(${user.id})" value="Unban"/>
-                                                <p id="ban-reason-${user.id}"></p>
-                                                <p id="ban-until-${user.id}"></p>
-                                                <p id="ban-by-${user.id}"></p>
-                                            </div>
-                                        </div>
-                                        
-                                        `;
-
-                            emojiContainer.insertAdjacentHTML("beforeend", code);
-                        }
-                        else{
-                            notify(response2.msg, "error");
-                        }
-                    });
+                    table += `
+                        <tr class="${rowClass}">
+                            <td>
+                                <div class="settings_banlist_user_info">
+                                    <img class="settings_banlist_user_icon" src="${banData.bannedUserObj.icon}" alt="User Icon">
+                                    <span>${banData.bannedUserObj.name} (${banData.bannedUserObj.id})</span>
+                                </div>
+                            </td>
+                            <td>${banData.bannedUserObj.status || "No Status"}</td>
+                            <td>${banData.reason}</td>
+                            <td>${getReadableDuration(banData.until)}</td>
+                            <td>
+                                <button class="settings_banlist_unban_button" onclick="unbanUser('${bannedUserId}')">Unban</button>
+                                <button class="settings_banlist_details_button" onclick="toggleDetails('${bannedUserId}')">Details</button>
+                            </td>
+                        </tr>
+                        <tr class="settings_banlist_details_row ${rowClass}" id="settings_banlist_details_${bannedUserId}">
+                            <td colspan="5">
+                                <div class="settings_banlist_details_content ${rowClass}">
+                                    <p><strong>Banned By:</strong> ${banData.bannedModObj.name} (${banData.bannedModObj.id})</p>
+                                    <p><strong>Reason:</strong> ${banData.reason}</p>
+                                    <p><strong>IP Address:</strong> ${banData.ip}</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
                 });
+                
 
+                // Close the table
+                table += `
+                        </tbody>
+                    </table>
+                `;
 
-                try{
-                    var entries = document.querySelectorAll(".banned-entry-container");
-                    console.log(entries)
-                }
-                catch(err){
-                    console.log(err);
-                }
-
+                // Add it to the html
+                emojiContainer.insertAdjacentHTML("beforeend", table);
             } else {
-                alert(response1.msg)
+                alert(response1.msg);
             }
+        } catch (ex) {
+            console.log(ex);
+            notify("Unknown Error! Reloading might fix it", "error");
         }
-        catch (Ex){
-            console.log(Ex);
-            notify("Unkown Error! Reloading might fix it", "error");
-        }
-
     });
+}
+
+function toggleDetails(userId) {
+    const detailsRow = document.getElementById(`settings_banlist_details_${userId}`);
+    const content = detailsRow.querySelector(".settings_banlist_details_content");
+
+    if (detailsRow.style.display === "none" || !detailsRow.style.display) {
+        detailsRow.style.display = "table-row";
+        content.style.maxHeight = content.scrollHeight + "px";
+    } else {
+        content.style.maxHeight = "0px";
+        setTimeout(() => {
+            detailsRow.style.display = "none";
+        }, 300); // Match animation duration
+    }
+}
+
+function getReadableDuration(untilTimestamp) {
+    const remainingTime = untilTimestamp - Date.now();
+    if (remainingTime <= 0) return "Expired";
+
+    const seconds = Math.floor(remainingTime / 1000) % 60;
+    const minutes = Math.floor(remainingTime / (1000 * 60)) % 60;
+    const hours = Math.floor(remainingTime / (1000 * 60 * 60)) % 24;
+    const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
+
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }

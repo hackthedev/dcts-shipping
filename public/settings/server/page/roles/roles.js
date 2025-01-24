@@ -6,8 +6,6 @@ var editedServerRoleResponse = [];
 var editedPermissions = {};
 var currentRoleId = "";
 
-socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
-    aboutme: getAboutme(), banner: getBanner()});
 
 socket.emit("checkPermission", {id:getID(), token: getToken(), permission: ["manageRoles", "manageGroup"] }, function (response) {
 
@@ -192,9 +190,7 @@ function tickSetting(element){
 
     // Load current permissions too
     Object.keys(serverRoleResponse[currentRoleId].permissions).forEach(function(perm) {
-
         editedPermissions[perm] = serverRoleResponse[currentRoleId].permissions[perm];
-        console.log(perm);
     });
 
     console.log(" ")

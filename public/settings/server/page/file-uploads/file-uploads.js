@@ -14,8 +14,7 @@ var localUploadLimit;
 var serverconfigName;
 var serverconfigDesc;
 
-socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
-    aboutme: getAboutme(), banner: getBanner()});
+
 
 socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageUploads" }, function (response) {
 

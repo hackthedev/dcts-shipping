@@ -1,22 +1,36 @@
-import { queryDatabase } from "./mysql.mjs"
+import { queryDatabase } from "./mysql.mjs";
 import { XMLHttpRequest, fetch } from "../../../index.mjs";
 
-export async function cacheMediaUrl(url, mediaType){
-  return await queryDatabase(`INSERT INTO url_cache (url, media_type) VALUES ('${url}', '${mediaType}')`);
+export async function cacheMediaUrl(url, mediaType) {
+  const query = `INSERT INTO url_cache (url, media_type) VALUES (?, ?)`;
+  return await queryDatabase(query, [url, mediaType]);
 }
 
-export async function getMediaUrlFromCache(url){
-  return await queryDatabase(`SELECT media_type FROM url_cache WHERE url='${url}'`);
+export async function getMediaUrlFromCache(url) {
+  const query = `SELECT media_type FROM url_cache WHERE url = ?`;
+  return await queryDatabase(query, [url]);
 }
 
-export async function saveChatMessageInDb(message){
-  return await queryDatabase(`
-    INSERT INTO messages (messageId, message, room) 
-    VALUES ('${message.messageId}', '${encodeToBase64((JSON.stringify(message)))}', '${message.room}')
+export async function saveChatMessageInDb(message) {
+  const query = `
+    INSERT INTO messages (authorId, messageId, message, room) 
+    VALUES (?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE 
-        message = VALUES(message), 
-        room = VALUES(room)
-`);
+      message = VALUES(message), 
+      room = VALUES(room)
+  `;
+
+  const encodedMessage = encodeToBase64(JSON.stringify(message));
+  return await queryDatabase(query, [message.id, message.messageId, encodedMessage, message.room]);
+}
+
+export function leaveAllRooms(socket) {
+  const rooms = socket.rooms;            
+  rooms.forEach((room) => {
+    if (room !== socket.id) { // Exclude the socket's own room
+      socket.leave(room);
+    }
+  });
 }
 
 export function encodeToBase64(jsonString) {
@@ -35,19 +49,24 @@ export function escapeJSONString(str) {
             .replace(/\t/g, '\\t');  // Escape tabs
 }
 
-export async function getChatMessagesFromDb(roomId, index, msgId = null){
+export async function getChatMessagesFromDb(roomId, index, msgId = null) {
+  if (msgId != null) {
+    const query = `SELECT * FROM messages WHERE messageId = ?`;
+    return await queryDatabase(query, [msgId]);
+  }
 
-  if(msgId != null)
-    return await queryDatabase(`SELECT * FROM messages WHERE messageId='${msgId}'`);
+  if (index === -1) {
+    const query = `SELECT * FROM messages WHERE room = ?`;
+    return await queryDatabase(query, [roomId]);
+  }
 
-  if(index == -1)
-    return await queryDatabase(`SELECT * FROM messages WHERE room='${roomId}'`);
-
-  return await queryDatabase(`SELECT top(${index}) * FROM messages WHERE room='${roomId}'`);
+  const query = `SELECT * FROM messages WHERE room = ? LIMIT ?`;
+  return await queryDatabase(query, [roomId, index]);
 }
 
-export async function deleteChatMessagesFromDb(messageId){
-  return await queryDatabase(`DELETE FROM messages WHERE messageId='${messageId}'`);
+export async function deleteChatMessagesFromDb(messageId) {
+  const query = `DELETE FROM messages WHERE messageId = ?`;
+  return await queryDatabase(query, [messageId]);
 }
 
 export async function getStringSizeInBytes(str) {
@@ -58,20 +77,19 @@ export async function getStringSizeInBytes(str) {
 
 export async function getStringSizeInMegabytes(str) {
   const bytes = await getStringSizeInBytes(str);
-  const megabytes = bytes / (1024 * 1024); // Convert bytes to MB
-  return megabytes;
+  return bytes / (1024 * 1024); // Convert bytes to MB
 }
 
-// same as in chat.js
+// Same as in chat.js
 export async function checkMediaTypeAsync(url) {
   try {
-    let response = await fetch(url, { method: 'HEAD' });
+    const response = await fetch(url, { method: 'HEAD' });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    let contentType = response.headers.get('Content-Type');
+    const contentType = response.headers.get('Content-Type');
 
     if (!contentType) {
       throw new Error('Content-Type header is missing');
@@ -87,24 +105,16 @@ export async function checkMediaTypeAsync(url) {
       return 'unknown';
     }
   } catch (error) {
-
-    if(error.message.includes("404"))
-      return;
-
-    
-    //console.error('Error checking media type:', error);
+    if (error.message.includes("404")) return;
     return 'error';
   }
 }
 
-export function isURL(text){
+export function isURL(text) {
   try {
-
-      const url = new URL(text);
-      return url.protocol === 'http:' || url.protocol === 'https:' || url.protocol == "data:";
-
-
+    const url = new URL(text);
+    return url.protocol === 'http:' || url.protocol === 'https:' || url.protocol === 'data:';
   } catch (err) {
-      return false;
+    return false;
   }
 }

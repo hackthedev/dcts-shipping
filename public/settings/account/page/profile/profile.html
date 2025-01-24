@@ -6,13 +6,13 @@
     <div class="profile_input_container">
         <label>PFP</label><br>
         <input type="text" id="settings_profile_icon" oninput="updatePreview('settings_profile_icon');">
-        <input type="file" accept="image/jpeg, image/png, image/jpg, image/webp, image/gif" onchange="upload(this.files, 'settings_profile_icon')" />
+        <input type="file" accept="image/jpeg, image/png, image/jpg, image/webp, image/gif" onchange="handleUpload(this.files, 'settings_profile_icon')" />
     </div>
 
     <div class="profile_input_container">
         <label>Banner</label><br>
         <input type="text" id="settings_profile_banner" oninput="updatePreview('settings_profile_banner');">
-        <input type="file" accept="image/jpeg, image/png, image/jpg, image/webp, image/gif" onchange="upload(this.files, 'settings_profile_banner')" />
+        <input type="file" accept="image/jpeg, image/png, image/jpg, image/webp, image/gif" onchange="handleUpload(this.files, 'settings_profile_banner')" />
     </div>
 
 

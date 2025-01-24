@@ -23,7 +23,8 @@ const constraints = {
 
 async function joinRoom(roomId) {
   if (!roomId) {
-    alert('Please enter a room ID');
+    //alert('Please enter a room ID');
+    console.log("No room id set")
     return;
   }
 

@@ -1,3 +1,8 @@
+:root{
+    --settings-banlist-even: #41484f;
+    --settings-banlist-odd: #33393f;
+}
+
 #profile_container{
     padding: 4px;
 
@@ -106,4 +111,79 @@ h1 {
 .banned-entry-container {
     float: left;
     margin-bottom: 5%;
+}
+
+
+.settings_banlist_table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    text-align: left;
+}
+
+.settings_banlist_table th, .settings_banlist_table td {
+    padding: 12px !important;
+    border: 1px solid #ABB0BE;
+}
+
+.settings_banlist_even_row {
+    background-color: var(--settings-banlist-even);
+}
+
+.settings_banlist_odd_row {
+    background-color: var(--settings-banlist-odd);
+}
+
+.settings_banlist_user_info {
+    display: flex;
+    align-items: center;
+}
+
+.settings_banlist_user_icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.settings_banlist_unban_button {
+    padding: 8px 12px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.settings_banlist_details_button {
+    padding: 8px 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.settings_banlist_details_row {
+    display: none;
+    overflow: hidden;
+}
+
+.settings_banlist_details_row .settings_banlist_even_row,
+.settings_banlist_details_content .settings_banlist_even_row {
+    background-color: var(--settings-banlist-even);
+}
+
+.settings_banlist_details_row .settings_banlist_odd_row,
+.settings_banlist_details_content .settings_banlist_odd_row {
+    background-color: var(--settings-banlist-odd);
+}
+
+.settings_banlist_details_content {
+    padding: 10px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    border-radius: 4px;
 }

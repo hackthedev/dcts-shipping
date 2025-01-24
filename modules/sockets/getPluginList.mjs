@@ -4,38 +4,29 @@ import { scanDirectory } from "../functions/io.mjs"
 
 export default (socket) => {
     socket.on('getPluginList', (member, response) => {
-        if (
-            validateMemberId(member.id, socket) === true &&
-            serverconfig.servermembers[member.id].token === member.token
-        ) {
-            // get plugins from server dir 
-            let plugins = scanDirectory("./public/plugins", { includeFiles: false, recursive: false })
-            let pluginObj = {};
+        let plugins = scanDirectory("./public/plugins", { includeFiles: false, recursive: false })
+        let pluginObj = {};
 
-            // foreach plugin
-            for(let i = 0; i < plugins.length; i++){
+        // foreach plugin
+        for(let i = 0; i < plugins.length; i++){
 
-                let pluginName = copyObject(plugins[i]).split("\\").pop();
+            let pluginName = copyObject(plugins[i]).split("\\").pop();
 
-                pluginObj[pluginName] = {};
-                pluginObj[pluginName].filePaths = [];
+            pluginObj[pluginName] = {};
+            pluginObj[pluginName].filePaths = [];
 
-                // check root of plugin
-                let pluginRoot = scanDirectory(plugins[i], { includeFiles: true, recursive: false })
+            // check root of plugin
+            let pluginRoot = scanDirectory(plugins[i], { includeFiles: true, recursive: false })
 
-                 // check for entry script
-                if(pluginRoot.includes(`${plugins[i]}\\main.js`)){
-                    pluginObj[pluginName].filePaths.push(`${plugins[i]}\\main.js`)
-                    pluginObj[pluginName].filePaths = pluginObj[pluginName].filePaths.map(plugin => plugin.replace("public\\", ""));
+                // check for entry script
+            if(pluginRoot.includes(`${plugins[i]}\\main.js`)){
+                pluginObj[pluginName].filePaths.push(`${plugins[i]}\\main.js`)
+                pluginObj[pluginName].filePaths = pluginObj[pluginName].filePaths.map(plugin => plugin.replace("public\\", ""));
 
-                }
             }
-
-            
-            response({ type: 'success', plugins: pluginObj });
-            
-        } else {
-            response({ type: 'error', message: 'Invalid member or token' });
         }
+
+        
+        response({ type: 'success', plugins: pluginObj });
     });
 };

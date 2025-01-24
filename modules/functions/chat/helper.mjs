@@ -4,6 +4,7 @@
 import {serverconfig, fetch, fs} from "../../../index.mjs"
 
 export async function getUserBadges(id) {
+    return null;
     return new Promise((resolve, reject) => {
         var badgeUrl = 'https://raw.githubusercontent.com/hackthedev/dcts-shipping/main/badges/' + serverconfig.servermembers[id].id;
 

@@ -19,6 +19,29 @@
     background: #424549;
 }
 
+:root {
+    --primary: #34383C;
+    --primary-bright: #898d93;
+    --primary-hover: color-mix(in srgb, var(--primary) 80%, white 20%);
+    --primary-selected: color-mix(in srgb, var(--primary) 80%, white 40%);
+
+    --secondary: #2492c9;
+    --secondary-hover: color-mix(in srgb, var(--secondary) 80%, white 20%);
+
+    --success: #5CCD5C;
+    --success-hover: color-mix(in srgb, var(--success) 80%, white 20%);
+
+    --error: indianred;
+    --error-hover: color-mix(in srgb, var(--error) 80%, white 20%);
+
+    --primary-text: #F0F0F0;
+
+    --transition-all: all 200ms;
+
+
+    
+  }
+
 html, body{
     margin: 0;
     padding: 0;
@@ -601,7 +624,7 @@ pre.markdown{
     /* margin: 8px 0 8px 0; */
 }
 
-.image-embed, .message-profile-content.message-profile-content-message p img {
+.image-embed, .message-profile-content .message-profile-content-message img {
     max-width: 400px;
     height: auto;
     text-align: left;

@@ -1,15 +1,15 @@
 /*
     The functions here are basically the "core" of the chat app on the server side.
  */
-import {serverconfig, xssFilters, colors} from "../../../index.mjs"
-import {consolas} from "../io.mjs";
-import {io} from "../../../index.mjs";
-import {getMemberHighestRole, getUserBadges} from "./helper.mjs";
-import {checkEmptyConfigVar} from "../main.mjs";
+import { serverconfig, xssFilters, colors, saveConfig } from "../../../index.mjs"
+import { consolas } from "../io.mjs";
+import { io } from "../../../index.mjs";
+import { getMemberHighestRole, getUserBadges } from "./helper.mjs";
+import { checkBool, checkEmptyConfigVar } from "../main.mjs";
 
 var serverconfigEditable = serverconfig;
 
-export function getMemberLastOnlineTime(memberID){
+export function getMemberLastOnlineTime(memberID) {
     var lastOnline = serverconfig.servermembers[memberID].lastOnline / 1000;
 
     var today = new Date().getTime() / 1000;
@@ -19,7 +19,7 @@ export function getMemberLastOnlineTime(memberID){
     return minutesPassed
 }
 
-export function hasPermission(id, permission, searchGroup = null){
+export function hasPermission(id, permission, searchGroup = null) {
 
     var foundPermission = false;
     var foundAdmin = false;
@@ -28,61 +28,61 @@ export function hasPermission(id, permission, searchGroup = null){
 
     // This needs to be on top so it can check for administrator permissions
     // For each server role
-    Object.keys(serverconfig.serverroles).forEach(function(role) {
+    Object.keys(serverconfig.serverroles).forEach(function (role) {
 
-        if(serverconfig.serverroles[role].members.includes(id)){
+        if (serverconfig.serverroles[role].members.includes(id)) {
 
-            if(serverconfig.serverroles[role].permissions["administrator"] == 1){
+            if (serverconfig.serverroles[role].permissions["administrator"] == 1) {
                 // User is admin
                 foundPermission = true;
                 stopExecution = true;
                 return true;
 
             }
-            else if(serverconfig.serverroles[role].permissions[permission] == 1){
+            else if (serverconfig.serverroles[role].permissions[permission] == 1) {
                 // User has permission
                 foundPermission = true;
                 stopExecution = true;
                 return true;
             }
-            else if(serverconfig.serverroles[role].permissions[permission] == 0){
-                if(stopExecution != true){
+            else if (serverconfig.serverroles[role].permissions[permission] == 0) {
+                if (stopExecution != true) {
                     foundPermission = false;
                 }
             }
-            else{
+            else {
 
             }
         }
-        else{
+        else {
         }
     });
 
-    if(stopExecution == true){
+    if (stopExecution == true) {
         return foundPermission;
     }
 
 
     // Search Permission in specific group
-    if(searchGroup != null){
+    if (searchGroup != null) {
 
         // For each Group Permission Role
-        Object.keys(serverconfig.groups[searchGroup].permissions).forEach(function(permrole) {
+        Object.keys(serverconfig.groups[searchGroup].permissions).forEach(function (permrole) {
 
             // If the user role includes the group role
-            if(userroles.includes(permrole)){
+            if (userroles.includes(permrole)) {
 
                 // For each permission of the group role
-                Object.keys(serverconfig.groups[searchGroup].permissions[permrole]).forEach(function(perm) {
+                Object.keys(serverconfig.groups[searchGroup].permissions[permrole]).forEach(function (perm) {
 
-                    if(permission == perm && serverconfig.groups[searchGroup].permissions[permrole][perm] == 1) {
+                    if (permission == perm && serverconfig.groups[searchGroup].permissions[permrole][perm] == 1) {
                         //console.log("Found permission " + perm);
                         //console.log("it was " + serverconfig.groups[searchGroup].permissions[permrole][perm])
 
                         foundPermission = true;
                         return true;
                     }
-                    else  if(permission == perm && serverconfig.groups[searchGroup].permissions[permrole][perm] == 0) {
+                    else if (permission == perm && serverconfig.groups[searchGroup].permissions[permrole][perm] == 0) {
                         foundPermission = false
                     }
                 });
@@ -95,22 +95,22 @@ export function hasPermission(id, permission, searchGroup = null){
 
 
     // For each group
-    Object.keys(serverconfig.groups).forEach(function(group) {
+    Object.keys(serverconfig.groups).forEach(function (group) {
 
         // For each Group Permission Role
-        Object.keys(serverconfig.groups[group].permissions).forEach(function(permrole) {
+        Object.keys(serverconfig.groups[group].permissions).forEach(function (permrole) {
 
             // If the user role includes the group role
-            if(userroles.includes(permrole)){
+            if (userroles.includes(permrole)) {
 
                 // For each permission of the group role
-                Object.keys(serverconfig.groups[group].permissions[permrole]).forEach(function(perm) {
+                Object.keys(serverconfig.groups[group].permissions[permrole]).forEach(function (perm) {
 
-                    if(permission == perm && serverconfig.groups[group].permissions[permrole][perm] == 1) {
+                    if (permission == perm && serverconfig.groups[group].permissions[permrole][perm] == 1) {
 
                         foundPermission = true;
                     }
-                    else  if(permission == perm && serverconfig.groups[group].permissions[permrole][perm] == 0) {
+                    else if (permission == perm && serverconfig.groups[group].permissions[permrole][perm] == 0) {
                         foundPermission = false
                     }
                 });
@@ -119,11 +119,11 @@ export function hasPermission(id, permission, searchGroup = null){
         });
 
 
-        userroles.forEach(userrole =>{
+        userroles.forEach(userrole => {
 
-            if(serverconfig.groups[group].permissions[userrole] != null){
-                if(serverconfig.groups[group].permissions[userrole][permission] == 1 ||
-                    serverconfig.groups[group].permissions[userrole]["administrator"] == 1){
+            if (serverconfig.groups[group].permissions[userrole] != null) {
+                if (serverconfig.groups[group].permissions[userrole][permission] == 1 ||
+                    serverconfig.groups[group].permissions[userrole]["administrator"] == 1) {
                     foundPermission = true;
                 }
             }
@@ -134,7 +134,7 @@ export function hasPermission(id, permission, searchGroup = null){
     return foundPermission;
 }
 
-export function checkUserChannelPermission(channel, userId, perm){
+export function checkUserChannelPermission(channel, userId, perm) {
 
     var found = false;
     var userRoles = resolveRolesByUserId(userId);
@@ -142,57 +142,57 @@ export function checkUserChannelPermission(channel, userId, perm){
     var group = resolveGroupByChannelId(channel);
     var category = resolveCategoryByChannelId(channel);
 
-    for(let i = 0; i < userRoles.length; i++){
+    for (let i = 0; i < userRoles.length; i++) {
         let role = userRoles[i];
 
-        if(hasPermission(userId, "administrator")){
+        if (hasPermission(userId, "administrator")) {
             found = true;
             return true;
         }
-        if(hasPermission(userId, "manageChannels")){
+        if (hasPermission(userId, "manageChannels")) {
             found = true;
             return true;
         }
 
-        if(group != null && category != null && channel != null){
-            
+        if (group != null && category != null && channel != null) {
+
             // if the channel wasnt setup with the role check the default role permissions
-            if(serverconfig.groups[group].channels.categories[category].channel[channel].permissions.hasOwnProperty(role) == false){
+            if (serverconfig.groups[group].channels.categories[category].channel[channel].permissions.hasOwnProperty(role) == false) {
                 role = "0";
             }
-            
+
             // if the role is present in the channel perms
-            if(serverconfig.groups[group].channels.categories[category].channel[channel].permissions[role].hasOwnProperty(perm)){
+            if (serverconfig.groups[group].channels.categories[category].channel[channel].permissions[role].hasOwnProperty(perm)) {
 
                 // the role is allowed to see it
-                if(serverconfig.groups[group].channels.categories[category].channel[channel].permissions[role][perm] == 1){
+                if (serverconfig.groups[group].channels.categories[category].channel[channel].permissions[role][perm] == 1) {
                     found = true;
                 }
                 // when a channel is denying that role
-                else if(serverconfig.groups[group].channels.categories[category].channel[channel].permissions[role][perm] == 0){
-                    if(found != true) found = false;
+                else if (serverconfig.groups[group].channels.categories[category].channel[channel].permissions[role][perm] == 0) {
+                    if (found != true) found = false;
                     //consolas(colors.red("IS forbidden!"))
-                    if(found != true) return false;
+                    if (found != true) return false;
                 }
             }
             // if the role isnt setup there dont allow entrance
-            else{
-                if(found != true) found = false
+            else {
+                if (found != true) found = false
                 //consolas("Channel does not have the property")
                 return false;
             }
 
 
-            if(hasPermission(userId, perm)){
+            if (hasPermission(userId, perm)) {
                 found = true;
             }
             // if the channel wasnt setup yet with perms dont show it
-            else if(serverconfig.groups[group].channels.categories[category].channel[channel].permissions == {} ){
-                if(found != true) found = false;
-                if(found != true) return false;
+            else if (serverconfig.groups[group].channels.categories[category].channel[channel].permissions == {}) {
+                if (found != true) found = false;
+                if (found != true) return false;
             }
         }
-        else{
+        else {
             found = true;
         }
     }
@@ -201,7 +201,7 @@ export function checkUserChannelPermission(channel, userId, perm){
 
 }
 
-export function resolveGroupByChannelId(id){
+export function resolveGroupByChannelId(id) {
 
     /*
     console.log(" ");
@@ -213,20 +213,20 @@ export function resolveGroupByChannelId(id){
 
     var found = null;
     // Foreach Group
-    Object.keys(serverconfig.groups).reverse().forEach(function(group) {
+    Object.keys(serverconfig.groups).reverse().forEach(function (group) {
 
         //console.log(group);
 
         // For each Category
-        Object.keys(serverconfig.groups[group].channels.categories).reverse().forEach(function(category) {
+        Object.keys(serverconfig.groups[group].channels.categories).reverse().forEach(function (category) {
 
 
             //console.log(category);
 
             // For each Channel
-            Object.keys(serverconfig.groups[group].channels.categories[category].channel).reverse().forEach(function(channelId) {
+            Object.keys(serverconfig.groups[group].channels.categories[category].channel).reverse().forEach(function (channelId) {
 
-                if(channelId == id){
+                if (channelId == id) {
                     found = group;
                 }
             });
@@ -236,25 +236,25 @@ export function resolveGroupByChannelId(id){
     return found;
 }
 
-export function resolveCategoryByChannelId(id){
+export function resolveCategoryByChannelId(id) {
 
     var found = null;
     // Foreach Group
-    Object.keys(serverconfig.groups).reverse().forEach(function(group) {
+    Object.keys(serverconfig.groups).reverse().forEach(function (group) {
 
         //console.log(group);
 
         // For each Category
-        Object.keys(serverconfig.groups[group].channels.categories).reverse().forEach(function(category) {
+        Object.keys(serverconfig.groups[group].channels.categories).reverse().forEach(function (category) {
 
 
             //console.log(category);
 
             // For each Channel
-            Object.keys(serverconfig.groups[group].channels.categories[category].channel).reverse().forEach(function(channelId) {
+            Object.keys(serverconfig.groups[group].channels.categories[category].channel).reverse().forEach(function (channelId) {
 
 
-                if(channelId == id){
+                if (channelId == id) {
                     found = category;
                 }
             });
@@ -264,7 +264,7 @@ export function resolveCategoryByChannelId(id){
     return found;
 }
 
-export function resolveRolesByUserId(id){
+export function resolveRolesByUserId(id) {
 
     var userRoles = [];
 
@@ -275,10 +275,10 @@ export function resolveRolesByUserId(id){
     for (var i = 0; i < roles.length; i++) {
         var role = roles[i];
         var roleConfig = serverconfig.serverroles[role];
-    
+
         // Check if the role configuration has a members array and if the user ID exists in it
         if (roleConfig.members.includes(id)) {
-            
+
             // If the userRoles array does not already include this role, add it
             if (!userRoles.includes(role)) {
                 userRoles.push(role);
@@ -288,19 +288,19 @@ export function resolveRolesByUserId(id){
     return userRoles;
 }
 
-export function resolveChannelById(id){
+export function resolveChannelById(id) {
 
     var found = null;
     // Foreach Group
-    Object.keys(serverconfig.groups).reverse().forEach(function(group) {
+    Object.keys(serverconfig.groups).reverse().forEach(function (group) {
 
         // For each Category
-        Object.keys(serverconfig.groups[group].channels.categories).reverse().forEach(function(category) {
+        Object.keys(serverconfig.groups[group].channels.categories).reverse().forEach(function (category) {
 
             // For each Channel
-            Object.keys(serverconfig.groups[group].channels.categories[category].channel).reverse().forEach(function(channelId) {
+            Object.keys(serverconfig.groups[group].channels.categories[category].channel).reverse().forEach(function (channelId) {
 
-                if(channelId == id){
+                if (channelId == id) {
                     found = serverconfig.groups[group].channels.categories[category].channel[id];
                     return serverconfig.groups[group].channels.categories[category].channel[id];
                 }
@@ -311,7 +311,7 @@ export function resolveChannelById(id){
     return found;
 }
 
-export async function getMemberProfile(id){
+export async function getMemberProfile(id) {
 
     var memberUsername = xssFilters.inHTMLData(serverconfig.servermembers[id].name);
     var memberStatus = xssFilters.inHTMLData(serverconfig.servermembers[id].status);
@@ -321,6 +321,7 @@ export async function getMemberProfile(id){
     var memberJoined = xssFilters.inHTMLData(serverconfig.servermembers[id].joined);
     var memberLastOnline = xssFilters.inHTMLData(serverconfig.servermembers[id].lastOnline);
     var isMuted = xssFilters.inHTMLData(serverconfig.servermembers[id].isMuted);
+    var isBanned = xssFilters.inHTMLData(serverconfig.servermembers[id].isBanned);
 
     // Important mhm
     memberJoined = Number(memberJoined);
@@ -329,14 +330,18 @@ export async function getMemberProfile(id){
 
     // Show a small badge if the user is muted
     var mutedBadge = "";
-    if(isMuted == 1)
+    if (isMuted == 1)
         mutedBadge = `<br><code class="joined" style="color: indianred; border: 1px solid indianred;">Muted</code>`
+
+    var banBadge = "";
+    if (isBanned == 1)
+        banBadge = `<br><code class="joined" style="color: indianred; border: 1px solid indianred;">Banned</code>`
 
     // Handle User Badges
     return await getUserBadges(id).then(result => {
 
         var badgeCode = "";
-        if(result != null){
+        if (result != null) {
 
             var badges = JSON.parse(result);
 
@@ -368,7 +373,7 @@ export async function getMemberProfile(id){
                 ${memberAboutme}<br><br>
                 <code class="joined">Joined ${new Date(memberJoined).toLocaleString("narrow")}</code><br>
                 <code class="joined">Last Online ${new Date(memberLastOnline).toLocaleString("narrow")}</code>
-                ${mutedBadge}
+                ${mutedBadge} ${banBadge}
             </div>
             <hr>
             
@@ -397,18 +402,18 @@ export async function getMemberProfile(id){
                 profile += `<code class="role" id="${role.id}"><div class="role_color" style="background-color: ${roleColor};"></div>${roleName}</code>`;
             }
         }
-                        
 
-            /*
-        Object.keys(serverconfig.serverroles).reverse().forEach(function (role) {
-            var roleColor = serverconfig.serverroles[role].info.color;
-            var roleName = serverconfig.serverroles[role].info.name;
 
-            if (serverconfig.serverroles[role].members.includes(id)) {
-                profile += `<code class="role" id="${role}"><div class="role_color" style="background-color: ${roleColor};"></div>${roleName}</code>`;
-            }
-        });
-        */
+        /*
+    Object.keys(serverconfig.serverroles).reverse().forEach(function (role) {
+        var roleColor = serverconfig.serverroles[role].info.color;
+        var roleName = serverconfig.serverroles[role].info.name;
+
+        if (serverconfig.serverroles[role].members.includes(id)) {
+            profile += `<code class="role" id="${role}"><div class="role_color" style="background-color: ${roleColor};"></div>${roleName}</code>`;
+        }
+    });
+    */
 
         // Add Role Button
         profile += `<code style="cursor: pointer;" onclick="addRoleFromProfile(id);" class="role" id="addRole-${id}">+</code>`;
@@ -422,7 +427,7 @@ export async function getMemberProfile(id){
     return codi;
 }
 
-export function getMemberList(member, channel){
+export function getMemberList(member, channel) {
 
     var code = "";
 
@@ -430,15 +435,16 @@ export function getMemberList(member, channel){
     var roles = serverconfig.serverroles;
 
     var sortedRoles = [];
-    var offlineMember = []
+    var offlineMember = [];
+    var bannedMember = [];
 
-    Object.keys(roles).reverse().forEach(function(role) {
+    Object.keys(roles).reverse().forEach(function (role) {
         sortedRoles[roles[role].info.sortId] = roles[role];
     });
 
     // Foreach role
     sortedRoles = sortedRoles.reverse();
-    sortedRoles.forEach(role =>{
+    sortedRoles.forEach(role => {
 
         var noMembersInRole = true;
         // Role ID:
@@ -449,10 +455,10 @@ export function getMemberList(member, channel){
 
 
         // If role display is on
-        if(role.info.displaySeperate == 1){
+        if (role.info.displaySeperate == 1) {
 
             // Foreach Role Member
-            Object.keys(members).forEach(function(member) {
+            Object.keys(members).forEach(function (member) {
 
                 // Member ID:
                 // member
@@ -461,48 +467,50 @@ export function getMemberList(member, channel){
                 // members[member]
 
                 // Do not show banned users
-                if(serverconfig.servermembers[member].isBanned == 1){
-                    return;
+                if (serverconfig.servermembers[member].isBanned == 1) {
+                    if(!bannedMember.includes(member)) bannedMember.push(member);
+
+                    if(checkBool(serverconfig.serverinfo.moderation.bans.memberListHideBanned, "bool") == true) return;
                 }
 
                 // check here for highest role
                 var highestMemberRole = getMemberHighestRole(member);
 
                 // If member is in role and the role is set to be shown
-                if((role.members.includes(member)  && role.info.displaySeperate == 1) ||
-                    role.info.id == 1){
+                if ((role.members.includes(member) && role.info.displaySeperate == 1) ||
+                    role.info.id == 1) {
 
                     // if role is the "Offline" role and member is gone for more then 5 minutes
-                    if(role.info.id == 1 && getMemberLastOnlineTime(member) > 5){
+                    if (role.info.id == 1 && getMemberLastOnlineTime(member) > 5) {
                         // Add member to offline list (if not already done)
-                        if(!offlineMember.includes(member)){
+                        if (!offlineMember.includes(member)) {
                             offlineMember.push(member);
                         }
                     }
 
                     // If the user has the permission to see the channel
-                    if(checkUserChannelPermission(channel, member, "viewChannel") == true){
+                    if (checkUserChannelPermission(channel, member, "viewChannel") == true) {
 
                         // If role should be displayed and
                         // the current role is not the member's highest role and (dont remember why)
                         // the role is not the "Offline Role", then return lol
-                        if(highestMemberRole.info.displaySeperate == 1 && role.info.id != highestMemberRole.info.id && role.info.id != 1){
+                        if (highestMemberRole.info.displaySeperate == 1 && role.info.id != highestMemberRole.info.id && role.info.id != 1) {
                             return;
                         }
 
                         // Gray Color effect for offline members in the member list
                         // Should also avoid duplicate listing in role AND offline for memberlist
                         var extraClassOffline = "";
-                        if(role.info.id != 1){ // != Offline
-                            if(getMemberLastOnlineTime(member) > 5){
+                        if (role.info.id != 1) { // != Offline
+                            if (getMemberLastOnlineTime(member) > 5) {
                                 return;
                             }
                         }
-                        else{
-                            if(getMemberLastOnlineTime(member) < 5){
+                        else {
+                            if (getMemberLastOnlineTime(member) < 5) {
                                 return;
                             }
-                            else{
+                            else {
                                 extraClassOffline = "offline_pfp";
                             }
                         }
@@ -515,12 +523,12 @@ export function getMemberList(member, channel){
                         //}
 
                         // hide online members from offline section (?)
-                        if(offlineMember.includes(member)){
+                        if (offlineMember.includes(member)) {
                             offlineMember.pop(member);
                         }
 
                         // If the role object itself wasnt yet listed
-                        if(noMembersInRole == true){
+                        if (noMembersInRole == true /*&& (members[member].isMuted == false && members[member].isBanned == false)*/) {
 
                             // Add the code for the role "header"
                             code += `<div class="infolist-role" title="${role.info.name}" style="color: ${role.info.color};">
@@ -539,15 +547,20 @@ export function getMemberList(member, channel){
                         members[member].icon = xssFilters.inHTMLData(members[member].icon);
                         members[member].id = xssFilters.inHTMLData(members[member].id);
 
-                        // If user is muted make it somehow visually known
+                        // If user is muted or banned make it somehow visually known
                         var nameStyle = `${members[member].name}`
                         var statusStyle = `${members[member].status}`
 
+                        if (members[member].isMuted || members[member].isBanned) {
+                            let displayColor = "white";
+                            if(members[member].isMuted) displayColor = "grey";
+                            if(members[member].isBanned) displayColor = "indianred";
 
-                        if(members[member].isMuted){
-                            nameStyle = `<s style="color: indianred;"><span style="font-style: italic;color:indianred">${members[member].name}</span></s>`;
-                            statusStyle = `<s style="color: indianred;"><span style="font-style: italic;color:indianred">${members[member].status}</span></s>`;
+                            nameStyle = `<s style="color: ${displayColor};"><span style="font-style: italic;color:${displayColor}">${members[member].name}</span></s>`;
+                            statusStyle = `<s style="color: ${displayColor};"><span style="font-style: italic;color:${displayColor}">${members[member].status}</span></s>`;
                             extraClassOffline = "offline_pfp";
+
+                            //if(role.info.id == "1") return;
                         }
 
 
@@ -574,7 +587,7 @@ export function getMemberList(member, channel){
     return code;
 }
 
-export function getGroupList(member){
+export function getGroupList(member) {
 
     member.id = xssFilters.inHTMLData(member.id)
     member.token = xssFilters.inHTMLData(member.token)
@@ -595,9 +608,9 @@ export function getGroupList(member){
     sortedGroups.forEach(group => {
 
         // Admin
-        if(hasPermission(member.id, "manageGroups") &&
+        if (hasPermission(member.id, "manageGroups") &&
             addedGroups.includes(group.info.id) == false
-        ){
+        ) {
             addedGroups.push(group.info.id);
             code += `
                     <a onclick="setUrl('?group=${group.info.id}');" id="group-entry-${group.info.id}">
@@ -633,7 +646,7 @@ export function getGroupList(member){
     return code;
 }
 
-export function getChannelTree(member){
+export function getChannelTree(member) {
 
     member.id = xssFilters.inHTMLData(member.id)
     member.token = xssFilters.inHTMLData(member.token)
@@ -649,7 +662,7 @@ export function getChannelTree(member){
     var groups = serverconfig.groups;
     var roles = serverconfig.serverroles;
 
-    if(group == null || groups[group] == null){
+    if (group == null || groups[group] == null) {
         group = 0;
     }
 
@@ -671,9 +684,9 @@ export function getChannelTree(member){
         showedCategory = false;
 
         // Show Category if can edit channels (grammar 101)
-        if(hasPermission(member.id, "manageChannels", member.group) == true ){
+        if (hasPermission(member.id, "manageChannels", member.group) == true) {
             // Add Category
-            treecode +=  "<details open>";
+            treecode += "<details open>";
             treecode += `<summary class="categoryTrigger" id="category-${cat.info.id}" style="color: #ABB8BE;">${cat.info.name}</summary>`;
             treecode += `<ul>`
 
@@ -699,40 +712,40 @@ export function getChannelTree(member){
                 hasPermission(member.id, "viewGroup", member.group) &&
                 showedCategory == false && sortedChans.length > 0 &&
                 checkUserChannelPermission(chan.id, member.id, "viewChannel")
-            ){
+            ) {
                 // Add Category
-                treecode +=  "<details open>";
+                treecode += "<details open>";
                 treecode += `<summary class="categoryTrigger" id="category-${cat.info.id}" style="color: #ABB8BE;">${cat.info.name}</summary>`;
                 treecode += `<ul>`
                 showedCategory = true;
             }
 
             // Foreach server role
-            Object.keys(roles).forEach(function(role) {
+            Object.keys(roles).forEach(function (role) {
 
                 // if the member is part of the role
-                if(roles[role].members.includes(member.id)){
+                if (roles[role].members.includes(member.id)) {
 
                     // if the user has the permission to either view the channel or manage channels
-                    if(checkUserChannelPermission(chan.id, member.id, "viewChannel") || hasPermission(member.id, "manageChannels", member.group)){
+                    if (checkUserChannelPermission(chan.id, member.id, "viewChannel") || hasPermission(member.id, "manageChannels", member.group)) {
 
 
-                        if(added_channels.includes(chan.id + "_" + chan.name) == false){
+                        if (added_channels.includes(chan.id + "_" + chan.name) == false) {
 
                             // if text channel
-                            if(chan.type == "text"){
+                            if (chan.type == "text") {
                                 treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}')"><li class="channelTrigger" id="channel-${chan.id}" style="color: #ABB8BE;">⌨ ${chan.name}</li></a>`;
 
                                 added_channels.push(chan.id + "_" + chan.name)
                             }
-                            else if(chan.type == "voice"){
+                            else if (chan.type == "voice") {
                                 treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}', true);"><li class="channelTrigger" id="channel-${chan.id}" style="color: #ABB8BE;">🎤 ${chan.name}</li></a>`;
                                 added_channels.push(chan.id + "_" + chan.name)
                             }
                         }
 
                     }
-                    else{
+                    else {
                         //console.log(`User ${serverconfig.servermembers[member.id].name} was denied`)
                     }
                 }
@@ -749,133 +762,204 @@ export function getChannelTree(member){
     return treecode;
 }
 
-export function banUser(member){
+export function banUser(socket, member) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
-    var duration = member.time;
-    var bannedUntil = new Date().getTime();
+    let ip = socket.handshake.address;
 
-    if(isNaN(duration) == true){
-        sendMessageToUser(socket.id, JSON.parse(
-            `{
-                                "title": "Invalid Duration!",
-                                "message": "Enter a number like 1,2,3 or leave it completely empty",
-                                "buttons": {
-                                    "0": {
-                                        "text": "Ok",
-                                        "events": ""
-                                    }
-                                },
-                                "type": "error",
-                                "popup_type": "confirm"
-                            }`));
-        return;
-    }
+    // get member ban date
+    let bannedUntil = getNewDate(member.duration).getTime();
 
+    // Set Member to be banned
+    serverconfig.servermembers[member.target].isBanned = 1;
 
-    if(duration == null || duration <= 0){
-        duration = -1;
-        bannedUntil += bannedUntil * 2
-    }
-    else{
-        bannedUntil += (86400 * duration) * 1000;
-        //bannedUntil = bannedUntil;
-    }
+    // Add member to banlist
+    serverconfigEditable.banlist[member.target] = JSON.parse(`
+                    {
+                        "bannedBy": "${member.id}",
+                        "reason": "${member.reason}",
+                        "until": ${bannedUntil},
+                        "ip": "${ip}"
+                    }
+                    `);
 
+    saveConfig(serverconfigEditable);
+
+    consolas(` User ${serverconfigEditable.servermembers[member.target].name} (IP ${ip}) was added to the blacklist because he was banned`.yellow);
+    consolas(` Reason: ${member.reason}`);
+    consolas(` Duration: ${bannedUntil}`);
+
+    return banIp(socket, bannedUntil);
+}
+
+export function banIp(socket, durationTimestamp) {
+    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
+    
     // Ban IP of User
-    var ip = socket.handshake.address;
-    if(!serverconfig.ipblacklist.hasOwnProperty(ip)){
-
+    let ip = socket.handshake.address;
+    if (!serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
         // Add IP to Blacklist
-        //serverconfig.ipblacklist.push(ip);
-
-        // Set Member to be banned
-        serverconfig.servermembers[member.target].isBanned = 1;
-
-        //console.log(bannedUntil);
-
-        // Add member to banlist
-        serverconfigEditable.banlist[member.target] = JSON.parse(`
-                        {
-                            "bannedBy": "${member.id}",
-                            "reason": "${member.reason}",
-                            "until": ${bannedUntil}
-                        }
-                        `);
-
+        serverconfigEditable.ipblacklist[ip] = durationTimestamp;
         saveConfig(serverconfigEditable);
 
-
-        consolas(` User ${serverconfigEditable.servermembers[member.target].name} (IP ${ip}) was added to the blacklist because he was banned`.yellow);
-        consolas(` Reason: ${member.reason}`);
-        consolas(` Duration: ${duration}`);
-
+        console.log(`IP ${ip} banned until ${durationTimestamp}`)
         return true;
     }
 }
 
-export function muteUser(member){
+export function unbanIp(socket) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
-
-    var duration = member.time;
-
-    if(isNaN(duration) == true){
-        sendMessageToUser(socket.id, JSON.parse(
-            `{
-                                "title": "Invalid Duration!",
-                                "message": "Enter a number like 1,2,3 or leave it completely for permanent mute until removed",
-                                "buttons": {
-                                    "0": {
-                                        "text": "Ok",
-                                        "events": ""
-                                    }
-                                },
-                                "type": "error",
-                                "popup_type": "confirm"
-                            }`));
-        return null;
-    }
-
-    if(duration == null || duration <= 0){
-        duration = -1;
+    
+    let ip = socket.handshake.address;
+    if (serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
+        delete serverconfigEditable.ipblacklist[ip];
+        saveConfig(serverconfigEditable);
     }
     else{
-        duration = new Date().getTime()+((60 * duration) * 1000);
+        console.log("does not have propertie " + ip)
+    }
+}
+
+export function findInJson(obj, keyToFind, valueToFind) {
+    let result = null; // Store the first matching result
+
+    function search(currentObj) {
+        if (typeof currentObj !== "object" || currentObj === null) {
+            return;
+        }
+
+        for (const key in currentObj) {
+            if (key === keyToFind && currentObj[key] === valueToFind) {
+                result = currentObj; // Save the current object containing the key-value pair
+                return; // Stop searching further
+            }
+
+            // Recursively search nested objects
+            if (typeof currentObj[key] === "object" && currentObj[key] !== null) {
+                search(currentObj[key]);
+                if (result) return; // Stop further recursion if result is found
+            }
+        }
     }
 
-    if(!serverconfig.mutelist.hasOwnProperty(member.target)){
+    search(obj);
 
+    return result; // Return the matching object or null if not found
+}
+
+
+export function formatDateTime(date) {
+    if (!(date instanceof Date)) {
+        throw new Error("Invalid date: Please pass a valid Date object.");
+    }
+
+    const formatter = new Intl.DateTimeFormat("en-US", {
+        month: "long",   // Full month name (e.g., January)
+        day: "numeric",  // Numeric day (e.g., 19)
+        year: "numeric", // Full year (e.g., 2025)
+        hour: "numeric", // Hour (12-hour format)
+        minute: "numeric", // Minute
+        hour12: false     // Use 12-hour format
+    });
+
+    let formattedDate = formatter.format(date);
+
+    // Replace "at" with a comma, if present
+    return formattedDate.replace(" at ", ", ");
+}
+
+function getReadableDuration(untilTimestamp) {
+    // 14d 23h 58m 58s
+    const remainingTime = untilTimestamp - Date.now();
+    if (remainingTime <= 0) return "Expired";
+
+    const seconds = Math.floor(remainingTime / 1000) % 60;
+    const minutes = Math.floor(remainingTime / (1000 * 60)) % 60;
+    const hours = Math.floor(remainingTime / (1000 * 60 * 60)) % 24;
+    const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
+
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
+
+
+export function getNewDate(offset) {
+    // basically getReadableDuration but as date
+    const units = {
+        seconds: 1000,
+        second: 1000,
+        minutes: 1000 * 60,
+        minute: 1000 * 60,
+        hours: 1000 * 60 * 60,
+        hour: 1000 * 60 * 60,
+        days: 1000 * 60 * 60 * 24,
+        day: 1000 * 60 * 60 * 24,
+        months: "months",
+        month: "months",
+        years: "years",
+        year: "years",
+        perma: "perma"
+    };
+
+    const [amountStr, unit] = offset.split(" ");
+    const amount = parseInt(amountStr, 10);
+
+    if (unit === "perma") {
+        return new Date("9999-12-31T23:59:59Z");
+    }
+
+    if (isNaN(amount) || !units[unit]) {
+        throw new Error("Invalid offset format. Use '<number> <unit>' (e.g., '-1 day', '+2 hours').");
+    }
+
+    const now = new Date();
+
+    if (units[unit] === "months") {
+        now.setMonth(now.getMonth() + amount);
+    } else if (units[unit] === "years") {
+        now.setFullYear(now.getFullYear() + amount);
+    } else {
+        now.setTime(now.getTime() + amount * units[unit]);
+    }
+
+    return now;
+}
+
+export function muteUser(member) {
+    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);    
+
+    let muteDate;
+    let jsonObj;
+    try{
+        muteDate = getNewDate(member.time).getTime();
+        jsonObj = JSON.parse(`
+            {
+                "mutedBy": "${member.id}",
+                "reason": "${member.reason}",
+                "duration": ${muteDate}
+            }
+            `);
+    }
+    catch (err){
+        return { error: err }
+    }
+
+    if (!serverconfig.mutelist.hasOwnProperty(member.target)) {
         // used for checks
         serverconfigEditable.servermembers[member.target].isMuted = 1;
 
         // Add member to mutelist
-        serverconfigEditable.mutelist[member.target] = JSON.parse(`
-                        {
-                            "mutedBy": "${member.id}",
-                            "reason": "${member.reason}",
-                            "duration": ${duration}
-                        }
-                        `);
+        serverconfigEditable.mutelist[member.target] = jsonObj;
 
         saveConfig(serverconfigEditable);
-
-        consolas(` User ${serverconfigEditable.servermembers[member.target].name} (IP ${ip}) was muted`.yellow);
-        consolas(` Reason: ${member.reason}`);
-        consolas(` Duration: ${duration}`);
-
-        io.emit("updateMemberList");
-
-        return duration;
+        return { duration: muteDate};
     }
-    else{
+    else {
         serverconfigEditable.servermembers[member.target].isMuted = 1;
-        serverconfigEditable.mutelist[member.target].duration = duration;
+        serverconfigEditable.mutelist[member.target].duration = muteDate;
         saveConfig(serverconfigEditable);
 
         io.emit("updateMemberList");
 
-        return duration;
+        return { duration: muteDate};
     }
-
-    return true;
 }

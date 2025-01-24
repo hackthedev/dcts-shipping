@@ -19,6 +19,12 @@
         initial-value: 0deg;
         inherits: false;
     }
+
+    a.feature-link{
+        color: #ABB8BE;
+        text-decoration-color: #ABB8BE !important;
+        font-style: italic;
+    }
 </style>
 
 
@@ -76,7 +82,187 @@
     <div class="profile_input_container" >
 
 
+
+
+
         <ul class="update current">
+            <ul class="content">
+
+                <div class="head">
+                    <h2>Whats new?</h2><label class="update">Janurary  24th, 2025 | v3.9.6</label>
+                </div>
+                <ul>
+                    <a class="feature-link" href="https://www.reddit.com/r/dcts/comments/1i8k4vq/emoji_autocomplete/" target="_blank">
+                        <li class="feature">Emoji auto-complete</li>
+                    </a>
+                    <ul>
+                        <li class="desc">
+                            When texting and using <code>:name</code> for a emoji it will now show auto-complete options for emojis that would fit
+                        </li>
+                    </ul>
+
+
+
+                    <a class="feature-link" href="https://www.reddit.com/r/dcts/" target="_blank">
+                        <li class="feature">Subreddit!</li>
+                    </a>
+                    <ul>
+                        <li class="desc">
+                            To better connect to the community a subreddit has been made called r/dcts. Update Previews and current development progress will be posted there.
+                        </li>
+                    </ul>
+
+
+                    <a class="feature-link" href="https://www.reddit.com/r/dcts/comments/1hs3c4t/reworkedprompt_library_adding_better_ui_like/" target="_blank">
+                        <li class="feature">Better Prompts and Popups!</li>
+                    </a>
+                    <ul>
+                        <li class="desc">
+                            I've made a new small library for myself to craft very dynamic and good working popups, prompts and what not.
+                        </li>
+                        <li class="desc">
+                            Improved chat creation dialog
+                        </li>
+                        <li class="desc">
+                            Improved chat deletion dialog
+                        </li>
+                        <li class="desc">
+                            Improved ban user dialg
+                        </li>
+                        <li class="desc">
+                            Improved channel creation dialog
+                        </li>
+                        <li class="desc">
+                            Improved chat deletion dialog
+                        </li>
+                        <li class="desc">
+                            and much more!
+                        </li>
+                    </ul>
+
+
+
+                    <a class="feature-link" href="https://www.reddit.com/r/dcts/comments/1i3340s/improved_login_ip_ban_system/" target="_blank">
+                        <li class="feature">Password Login!</li>
+                    </a>
+                    <ul>
+                        <li class="desc">
+                            Its now possible to log into accounts using username and password. This means that you no longer need a token for it.
+                        </li>
+                        <li class="desc">
+                            You can now easily use multiple devices with the same account. <i>(dont know why i didnt think about this)</i>
+                        </li>
+                    </ul>
+
+
+
+
+                    <a class="feature-link" href="https://www.reddit.com/r/dcts/comments/1i1bd4c/login_demo/" target="_blank">
+                        <li class="feature">Member Onboarding!</li>
+                    </a>
+                    <ul>
+                        <li class="desc">
+                            When a member joins that isnt logged a new onboarding screen will be shown! It allows the user to easily create their account and customize it.
+                        </li>
+                    </ul>
+
+
+                    <a class="feature-link" href="https://www.reddit.com/r/dcts/comments/1i4k5ol/improved_tooltips_new_channel_create_prompt/" target="_blank">
+                        <li class="feature">Tooltips!!</li>
+                    </a>
+                    <ul>
+                        <li class="desc">
+                            While making the new  prompt library to display messages and confirmation dialogs etc i also made a tooltip library to help guide and explain the interface to users!
+                        </li>
+                        <li class="desc">
+                            For example if a prompt has a question mark next to the title you can click it to get a explaination of that the fields and buttons do.
+                        </li>
+                    </ul>
+
+
+                </ul>
+
+                <div class="head">
+                    <h2>Improvements</h2>
+                </div>
+                <ul>
+                    <a class="feature-link" href="https://www.reddit.com/r/dcts/comments/1i8hivf/improved_settings_system_ban_display/" target="_blank">
+                        <li class="feature">Reworked Member Ban Dashboard!</li>
+                    </a>
+                    <ul>
+                        <li class="desc">
+                            The section to show banned members has been complete reworked, UI and Backend. It looks way better now, uses only a single request now and is overall just better
+                        </li>
+                    </ul>
+
+
+
+
+                    <a class="feature-link" href="https://www.reddit.com/r/dcts/comments/1i4tb7z/improved_bans_dialog/" target="_blank">
+                        <li class="feature">Reworked Ban System!</li>
+                    </a>
+                    <ul>
+                        <li class="desc">
+                            The way you ban members was improved as well! You can now choose for how long you want to ban a member like 1 minute, 2 days, 3 months, 4 years etc in a very easy way!
+                        </li>
+                        <li class="desc">
+                            I also updated the way bans are being stored and how IP bans work! If you ban a member manually the IP ban will last for the ban duration
+                        </li>
+                        <li class="desc">
+                            If you exceed the rate limit you wont be permanently IP banned anymore but instead temporarily for 10 minutes! This can be configurated in the <code>config.json</code> file.
+                        </li>
+                    </ul>
+
+
+
+
+                    <a target="_blank">
+                        <li class="feature">Bug fixes & Improvements</li>
+                    </a>
+                    <ul>
+                        <li class="desc">
+                            Fixed a bug where it wasnt possible to delete database messages
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where the automatic SQL table and column creation wouldnt work.
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where other users where able to delete messages made by others
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where it wasnt possible to kick a user and where canceling the kick would kick the user anyway
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where clicking the channel in the channel list thats already open would reload the chat again
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where the settings pages wouldnt always load when clicking the setting in the navigation.
+                        </li>
+                        <li class="desc">
+                            Improved the way the configuration file is being written and accessed
+                        </li>
+                    </ul>
+
+
+                </ul>
+
+            </ul>
+        </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <ul class="update">
             <ul class="content">
 
 

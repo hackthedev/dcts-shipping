@@ -3,12 +3,14 @@ services:
     image: ghcr.io/hackthedev/dcts-shipping
     restart: always
     volumes:
-      - dcts:/app/chats
-      - uploads:/app/public/uploads
-      - ./config.json:/app/config.json
+      - dcts:/app/dcts                    # Named volume
+      - uploads:/app/public/uploads       # Named volume
+      - ./config.json:/app/config.json    # Bind mount
+      - ./chats:/app/chats                # Bind mount
+      - ./logs:/app/logs                  # Bind mount
     ports:
-      - '8080:2052'
+      - '8080:2052'                       # Port mapping
 
 volumes:
-  dcts:
-  uploads:
+  dcts:                                   # Named volume
+  uploads:                                # Named volume

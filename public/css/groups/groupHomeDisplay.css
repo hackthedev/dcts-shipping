@@ -1,0 +1,33 @@
+#homeScreenGroupContainer{
+    float: left;
+    width: calc(100% - 64px);
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding: 32px;
+}
+
+#homeGroupStatsMostActiveUserContainer{
+    float: left;
+    max-height: 320px;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.activeUserEntry {
+    float: left;
+    margin: 8px;
+    padding: 2px 16px;
+
+    background-color: #24292E;
+
+    width: calc(100% - 32px);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#activeUserTableList {
+    width: 100%;
+}

@@ -1,15 +1,6 @@
 {
-  "name": "dcts",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.mjs",
-  "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "",
   "dependencies": {
+<<<<<<< HEAD
     "bcrypt": "^5.1.1",
     "colors": "^1.4.0",
     "crypto": "^1.0.1",
@@ -32,5 +23,13 @@
   },
   "devDependencies": {
     "typescript": "^5.5.2"
+=======
+    "axios": "^1.7.7",
+    "child_process": "^1.0.2",
+    "ffi-napi": "^4.0.3",
+    "inquirer": "^12.0.0",
+    "puppeteer": "^23.5.0",
+    "ref-napi": "^3.0.3"
+>>>>>>> ca711e5e9a8274fa99f5145356a4b064398afb4e
   }
 }

@@ -192,6 +192,7 @@
     
         return sortedMessages;
     }
+<<<<<<< HEAD
     
     export function scanDirectory(dir, options = {}) {
         const { includeFiles = false, recursive = false } = options;
@@ -202,6 +203,54 @@
         for (const entry of entries) {
             const fullPath = path.join(dir, entry.name);
             if (entry.isDirectory()) {
+=======
+
+
+    var dir = `./chats/${group}/${category}/${channel}/`;
+
+    if (!fs.existsSync(dir)){
+        consolas(`Directory ${dir} didnt exist`, "Debug");
+        //return;
+    }
+    else{
+        fs.readdirSync(`./chats/${group}/${category}/${channel}/`).forEach(file => {
+
+            var message = JSON.parse(fs.readFileSync(`./chats/${group}/${category}/${channel}/${file}`));
+            if(message.message.includes("<br>") && (message.message.split("<br>").length-1) <= 1){
+                message.message = message.message.replaceAll("<br>", "")
+            }
+    
+            sortedMessages.push(message);
+        });
+    }
+
+    
+
+    sortedMessages = sortedMessages.sort((a, b) => {
+        if (a.timestamp < b.timestamp) {
+            return -1;
+        }
+    });
+
+    return sortedMessages;
+}
+
+export function scanDirectory(dir, options = {}) {
+    const { includeFiles = false, recursive = false } = options;
+    const result = [];
+
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+            result.push(fullPath);
+            if (recursive) {
+                result.push(scanDirectory(fullPath));
+            }
+        } else if (entry.isFile()) {
+            if (includeFiles) {
+>>>>>>> ca711e5e9a8274fa99f5145356a4b064398afb4e
                 result.push(fullPath);
                 if (recursive) {
                     result.push(scanDirectory(fullPath));
@@ -222,6 +271,7 @@
         if(editedMsgId != null){
             message.messageId = editedMsgId;
         }
+<<<<<<< HEAD
     
         // If SQL is enabled it will try to save it there
         if(serverconfig.serverinfo.sql.enabled == true){
@@ -251,3 +301,7 @@
             }
         });
     }
+=======
+    });
+}
+>>>>>>> ca711e5e9a8274fa99f5145356a4b064398afb4e

@@ -28,6 +28,7 @@ function notify(text, icon, duration = 4000, sound = null, reload = null){
     if(icon == "error"){
         notifyBox.style.backgroundColor = "tomato";
         notifyBox.style.color = "white";
+        notifyBox.style.color = "white";
     }
     else if(icon == "success"){
         notifyBox.style.backgroundColor = "#1EDC49";

@@ -1,0 +1,9 @@
+#emoji-suggestions .emoji-suggestion-entry:hover {
+    transition: all 150ms;
+    background-color: #30363c;
+}
+
+#emoji-suggestions .emoji-suggestion-entry:not(:hover) {
+    transition: all 150ms;
+    background-color: #24292E;
+}

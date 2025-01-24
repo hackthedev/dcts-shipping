@@ -1,42 +1,51 @@
-socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
-    aboutme: getAboutme(), banner: getBanner()});
+socket.emit("userConnected", {
+    id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
+    aboutme: getAboutme(), banner: getBanner()
+});
 
-function upload(files, id) {
 
-    if(id  == "settings_profile_icon") {
-        socket.emit("fileUpload", {file: files[0], filename: files[0].name, id:getID(), token: getToken() }, function (response) {
+async function handleUpload(files, id) {
+    try {
+        // Ensure `files` is an array of `File` objects
+        const fileArray = Array.isArray(files) ? files : Array.from(files);
 
-            if(response.type == "success"){
-                settings_icon.value = response.msg;
-                updatePreview("settings_profile_icon");
+        // Wait for the upload to complete
+        const result = await upload(fileArray);
+
+        if (id === "settings_profile_icon") {
+            if (Array.isArray(result)) {
+                result.urls.forEach((url, index) => {
+                    console.log(`File ${index + 1} uploaded to: ${url}`);
+                    settings_icon.value = url;
+                });
+            } else {
+                console.log(`File uploaded to: ${result.urls}`);
+                settings_icon.value = result.urls;
             }
-            else{
-                alert(response.msg)
+            updatePreview("settings_profile_icon");
+        } else if (id === "settings_profile_banner") {
+            if (Array.isArray(result)) {
+                result.urls.forEach((url, index) => {
+                    console.log(`File ${index + 1} uploaded to: ${url}`);
+                    settings_banner.value = url;
+                });
+            } else {
+                console.log(`File uploaded to: ${result}`);
+                console.log(result);
+                settings_banner.value = result.urls;
             }
-
-            console.log(response);
-        });
-    }
-    else if(id == "settings_profile_banner"){
-        socket.emit("fileUpload", {file: files[0], filename: files[0].name, id:getID(), token: getToken() }, function (response) {
-
-            if(response.type == "success"){
-                settings_banner.value = response.msg;
-                updatePreview("settings_profile_banner");
-            }
-            else{
-                alert(response.msg)
-            }
-
-            console.log(response);
-        });
+            updatePreview("settings_profile_banner");
+        }
+    } catch (error) {
+        console.error("An error occurred during the upload process:", error);
     }
 }
 
-function resetAccount(){
+
+function resetAccount() {
     var reset = confirm("Do you really want to reset your account? EVERYTHING will be reset.")
 
-    if(reset){
+    if (reset) {
         setCookie("id", null, 365);
         setCookie("username", null, 365);
         setCookie("status", null, 365);
@@ -48,7 +57,7 @@ function resetAccount(){
     }
 }
 
-function setPreview(){
+function setPreview() {
 
     settings_username = document.getElementById("settings_profile_username");
     settings_status = document.getElementById("settings_profile_status");
@@ -81,132 +90,132 @@ function setPreview(){
 
 }
 
-function saveSettings(){
+function saveSettings() {
 
 
     //const iconStyles = window.getComputedStyle(settings_icon);
     //const BannerStyles = window.getComputedStyle(settings_banner);
 
     // Icon
-    try{
-        if(settings_icon.value != null && settings_icon.value.length > 0){
+    try {
+        if (settings_icon.value != null && settings_icon.value.length > 0) {
             setPFP(settings_icon.value);
             console.log("Saved Icon");
             console.log(settings_icon.value);
         }
 
         // Banner
-        if(settings_banner.value != null && settings_banner.value.length > 0){
+        if (settings_banner.value != null && settings_banner.value.length > 0) {
             setBanner(settings_banner.value);
             console.log("Saved Banner");
             console.log(settings_banner.value);
         }
 
         // About me
-        if(settings_aboutme.value != null && settings_aboutme.value.length > 0){
+        if (settings_aboutme.value != null && settings_aboutme.value.length > 0) {
             setAboutme(settings_aboutme.value);
             console.log("Saved about me");
         }
 
 
         // Username
-        if(settings_username.value != null && settings_username.value.length >= 3){
+        if (settings_username.value != null && settings_username.value.length >= 3) {
             setUser(settings_username.value);
             console.log("Saved user");
         }
 
         // Status
-        if(settings_status.value != null && settings_status.value.length > 0){
+        if (settings_status.value != null && settings_status.value.length > 0) {
             setStatus(settings_status.value);
             console.log("Saved status");
         }
 
         // About me
-        if(settings_aboutme.value != null && settings_aboutme.value.length > 0){
+        if (settings_aboutme.value != null && settings_aboutme.value.length > 0) {
             setAboutme(settings_aboutme.value);
             console.log("Saved about me");
         }
 
         saveButton.style.display = "none";
     }
-    catch(error){
+    catch (error) {
         alert("Error while trying to save settings: " + error);
         return;
     }
 }
 
-function limitString(text, limit){
-    if(text.length <= limit) return text.substring(0, limit);
+function limitString(text, limit) {
+    if (text.length <= limit) return text.substring(0, limit);
     else return text.substring(0, limit) + "...";
 }
 
-function setUser(username){
+function setUser(username) {
     setCookie("username", username, 360);
 }
 
-function setBanner(banner){
+function setBanner(banner) {
     setCookie("banner", banner, 360);
 }
 
-function setStatus(status){
+function setStatus(status) {
     setCookie("status", status, 360);
 }
 
-function setPFP(pfp){
+function setPFP(pfp) {
     setCookie("pfp", pfp, 360);
 }
 
-function setAboutme(aboutme){
+function setAboutme(aboutme) {
     setCookie("aboutme", aboutme, 360);
 }
 
-function updatePreview(id){
+function updatePreview(id) {
     var newSetting = document.getElementById(id).value;
 
-    try{
+    try {
 
         // Username
-        if(id == "settings_profile_username"){
+        if (id == "settings_profile_username") {
             preview_username.innerHTML = `<h2>${newSetting}</h2>`;
         }
 
         // Status
-        if(id == "settings_profile_status"){
+        if (id == "settings_profile_status") {
             preview_status.innerHTML = `${newSetting}`;
         }
 
         // About me
-        if(id == "settings_profile_aboutme"){
+        if (id == "settings_profile_aboutme") {
             preview_aboutme.innerHTML = `${newSetting}`;
         }
 
         // Icon
-        if(id == "settings_profile_icon"){
+        if (id == "settings_profile_icon") {
             preview_icon.style.backgroundImage = `url("${newSetting}")`;
         }
 
         // Banner
-        if(id == "settings_profile_banner"){
+        if (id == "settings_profile_banner") {
             preview_banner.style.backgroundImage = `url("${newSetting}")`;
         }
 
         // Username
-        if(preview_username.innerText != getUsername() ||
+        if (preview_username.innerText != getUsername() ||
             preview_status.innerText != getStatus() ||
             preview_aboutme.innerText != getAboutme() ||
             settings_icon.value != getPFP() ||
             settings_banner.value != getBanner()
 
-        ){
+        ) {
             console.log("NOt same");
             saveButton.style.display = "block";
         }
-        else{
+        else {
             console.log("same");
             saveButton.style.display = "none";
         }
     }
-    catch(e){
+    catch (e) {
         console.log(e);
     }
 

@@ -54,7 +54,7 @@ var socketToIP = [];
 
 export var allowLogging = false;
 export var debugmode = false;
-export var versionCode = 396;
+export var versionCode = 401;
 
 
 // config file saving

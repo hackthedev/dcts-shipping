@@ -52,6 +52,7 @@ var typingMembersTimeout = [];
 export var ratelimit = [];
 var socketToIP = [];
 
+export var allowLogging = false;
 export var debugmode = false;
 export var versionCode = 396;
 
@@ -462,6 +463,7 @@ server.listen(port, function () {
 
         consolas(colors.brightGreen(` `));
         consolas(colors.brightGreen(` `));
+        allowLogging = true;
     }
 
 });
@@ -903,26 +905,10 @@ io.on('connection', function (socket) {
                     serverconfig.servermembers[member.id].token == null ||
                     serverconfig.servermembers[member.id].token != member.token) {
 
-                    //console.log(serverconfig.servermembers[member.id]);
 
                     try {
-
-                        sendMessageToUser(socket.id, JSON.parse(
-                            `{
-                        "title": "Invalid Login",
-                        "message": "Something was wrong with your login. Please login again",
-                        "buttons": {
-                            "0": {
-                                "text": "Import Token",
-                                "events": "importToken()"
-                            },
-                            "1": {
-                                "text": "Reset Account",
-                                "events": "resetAccount()"
-                            }
-                        },
-                        "type": "error"
-                    }`));
+                        response({ error: "Invalid login", title: "Invalid Login", msg: "Something went wrong with your login.<br><a onclick='resetAccount();'>Reset Session</a><br>", type: "error", displayTime: 1000*60*60 })
+                        return;
                     }
                     catch (e) {
                         consolas("Error on error message sending".red, "Debug");
@@ -1265,7 +1251,7 @@ io.on('connection', function (socket) {
                 return;
             }
 
-            if (!hasPermission(member.id, "sendMessages")) {
+            if (!hasPermission(member.id, ["sendMessages", "viewChannel"])) {
                 sendMessageToUser(socket.id, JSON.parse(
                     `{
                                     "title": "You cant chat here",
@@ -1286,45 +1272,6 @@ io.on('connection', function (socket) {
             // Check if room exists
             try {
                 if (serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel] != null) {
-
-                    if (!checkUserChannelPermission(member.channel, member.id, "sendMessages")) {
-
-                        sendMessageToUser(socket.id, JSON.parse(
-                            `{
-                                    "title": "You cant chat here",
-                                    "message": "You cant send a message in this channel, sorry.",
-                                    "buttons": {
-                                        "0": {
-                                            "text": "Ok",
-                                            "events": ""
-                                        }
-                                    },
-                                    "type": "error",
-                                    "type": "error",
-                                    "popup_type": "confirm"
-                                }`));
-
-                        return;
-                    }
-
-                    if (!checkUserChannelPermission(member.channel, member.id, "viewChannel")) {
-
-                        sendMessageToUser(socket.id, JSON.parse(
-                            `{
-                                    "title": "You cant chat here",
-                                    "message": "You cant send a message in this channel, sorry.",
-                                    "buttons": {
-                                        "0": {
-                                            "text": "Ok",
-                                            "events": ""
-                                        }
-                                    },
-                                    "type": "error",
-                                    "popup_type": "confirm"
-                                }`));
-
-                        return;
-                    }
 
                     // bug
                     // editing message makes new id and timestamp
@@ -1649,7 +1596,7 @@ io.on('connection', function (socket) {
     socket.on('getUserFromId', function (member, response) {
         if (validateMemberId(member.id, socket) == true
         ) {
-            response({ type: "success", user: serverconfig.servermembers[member.target] });
+            response({ type: "success", user: getCastingMemberObject(serverconfig.servermembers[member.target]) });
             //io.to(usersocket[member.id]).emit("receiveChannelTree", getChannelTree(member));
         }
     });
@@ -2319,7 +2266,7 @@ io.on('connection', function (socket) {
             member.permission = xssFilters.inHTMLData(member.permission);
             member.channel = xssFilters.inHTMLData(member.channel);
 
-            var userObj = copyObject(serverconfig.servermembers[member.id]);
+            var userObj = getCastingMemberObject(serverconfig.servermembers[member.id]);
 
             if (Array.isArray(member.permission)) {
 
@@ -2330,9 +2277,8 @@ io.on('connection', function (socket) {
 
                     //console.log(member.permission[i])
 
-                    if (checkUserChannelPermission(member.channel, member.id, member.permission[i])) {
+                    if (hasPermission(member.id, member.permission[i], member.channel)) {
                         found = true;
-                        userObj.token = null;
                         response({ type: "success", permission: "granted", user: userObj });
                     }
                     else {
@@ -2341,18 +2287,15 @@ io.on('connection', function (socket) {
                 }
 
                 if (found == false) {
-                    userObj.token = null;
                     response({ type: "success", permission: "denied", user: userObj });
                 }
 
             }
             else { // Single permission check
 
-                if (checkUserChannelPermission(member.channel, member.id, member.permission)) {
-                    userObj.token = null;
+                if (hasPermission(member.id, member.permission, member.channel)) {
                     response({ type: "success", permission: "granted", user: userObj });
                 } else {
-                    userObj.token = null;
                     response({ type: "success", permission: "denied", user: userObj });
                 }
             }
@@ -2703,7 +2646,7 @@ io.on('connection', function (socket) {
             var category = room[1];
             var channel = room[2];
 
-            if (!checkUserChannelPermission(channel, member.id, "viewChannel")) {
+            if (!hasPermission(member.id, "viewChannel", channel)) {
 
                 sendMessageToUser(socket.id, JSON.parse(
                     `{
@@ -2736,7 +2679,7 @@ io.on('connection', function (socket) {
                     else if (serverconfig.groups[group].channels.categories[category].channel[channel].type == "voice") {
 
                         // If user can use VC
-                        if (!checkUserChannelPermission(channel, member.id, "useVOIP")) {
+                        if (!hasPermission(member.id, "useVOIP", channel)) {
                             sendMessageToUser(socket.id, JSON.parse(
                                 `{
                                     "title": "Access denied",
@@ -3005,10 +2948,10 @@ io.on('connection', function (socket) {
             && serverconfig.servermembers[member.id].token == member.token) {
 
             consolas("Trying to get chat log", "Debug");
-            var channel = member.channel;
 
-            if (checkUserChannelPermission(channel, member.id, "viewChannelHistory") == true) {
-                io.to(usersocket[member.id]).emit("receiveChatlog", await getSavedChatMessage(member.group, member.category, member.channel, member.index));
+            console.log(member)
+            if (hasPermission(member.id, ["viewChannel", "viewChannelHistory"], member.channelId)) {
+                io.to(usersocket[member.id]).emit("receiveChatlog", await getSavedChatMessage(member.groupId, member.categoryId, member.channelId, member.index));
             }
         }
     });
@@ -3292,6 +3235,7 @@ io.on('connection', function (socket) {
             catch (e) {
                 consolas("Couldnt create channel".red, "Debug");
                 consolas(colors.red(e), "Debug");
+
             }
 
         }
@@ -3515,7 +3459,7 @@ io.on('connection', function (socket) {
             //console.log(serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel]);
 
             try {
-                if (checkUserChannelPermission(member.channel, member.id, "viewChannel") == true) {
+                if (hasPermission(member.id, "viewChannel", member.channel) == true) {
                     io.to(usersocket[member.id]).emit("receiveCurrentChannel", serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel]);
                 }
 

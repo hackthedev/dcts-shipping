@@ -21,6 +21,15 @@
             border: 3px solid rgba(255, 255, 255, 0.2); /* Neutral soft white border */
         }
 
+        #prompt-container a{
+            text-decoration: underline;
+            font-style: italic;
+        }
+
+        #prompt-container a:hover{
+            cursor: pointer;
+        }
+
         /* Gradient overlay for the bottom fade-out effect */
         #prompt-container::after {
             content: "";

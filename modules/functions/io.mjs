@@ -2,10 +2,34 @@
     io in terms of input/output not socket.io
     everything that will handle stuff being read or written to the disk is here
  */
-    import {serverconfig, fs, path, colors, debugmode, saveConfig, reloadConfig, flipDebug} from "../../index.mjs"
+    import {serverconfig, fs, path, colors, debugmode, saveConfig, reloadConfig, flipDebug, allowLogging} from "../../index.mjs"
     import {saveChatMessageInDb, getChatMessagesFromDb, decodeFromBase64} from "./mysql/helper.mjs"
     
     var serverconfigEditable = serverconfig;
+
+    export function logFile(filePath, text, callback = () => {}) {
+        if(!allowLogging) return;
+        
+        const dir = path.dirname(filePath);
+    
+        // Ensure the directory exists
+        fs.mkdir(dir, { recursive: true }, (err) => {
+            if (err) {
+                callback(err);
+                return;
+            }
+    
+            // Append to the file, creating it if it does not exist
+            fs.appendFile(filePath, text + "\n", (err) => {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+    
+                callback(null);
+            });
+        });
+    }
     
     export async function consolas(text, event = null){
         return new Promise((resolve, reject) => {
@@ -16,6 +40,8 @@
             var dateTime = date+' '+time;
             var tmp_prefix = "[" + dateTime + "] ";
             var consolePrefix = tmp_prefix;
+
+            logFile("./logs/events/log_" + date + ".txt", text);
     
             if(event == null){
                 console.log(consolePrefix + text);
@@ -30,15 +56,7 @@
                         console.log(consolePrefix + text);
                     }
                 }
-                else if(event.toLowerCase() == "log"){
-                    // Create the log file
-                    fs.writeFile("./logs/events/log_" + date + ".txt", text, function(err) {
-                        if(err) {
-                            return console.log(err);
-                        }
-                        consolas("The log file ".cyan + colors.white("./logs/events/log_" + date + ".txt") + " was saved!".cyan, "Debug");
-                    });
-    
+                else if(event.toLowerCase() == "log"){    
                     // Only display logs when debug is true
                     if(debugmode != false){
                         if(text.length == 0){

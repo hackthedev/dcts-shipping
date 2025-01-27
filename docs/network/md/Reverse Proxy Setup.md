@@ -1,0 +1,71 @@
+# Reverse Proxy Setup
+
+This document will explain how to use the chat software and setup a reverse proxy. This will result in the url being https://your-domain.com/app instead of https://your-domain.com:2086/ [^portnote] .
+
+------
+
+## nginx Setup
+
+The following configuration is a example on how you can use the chat app using the reverse proxy. It will change the address from https://you-domain.com:2086 to https://your-domain.com/app
+
+```nginx
+location /app/ {
+	proxy_pass http://127.0.0.1:2086/;
+	proxy_set_header Host $host;
+}
+
+location /socket.io/ {
+	proxy_pass http://127.0.0.1:2086/socket.io/;
+	proxy_set_header Host $host;
+}
+```
+
+------
+
+## apache Setup
+
+You can also use apache instead of nginx. You will likely need to enable specific modules.
+
+```bash
+sudo a2enmod proxy proxy_http proxy_wstunnel
+sudo systemctl restart apache2
+```
+
+This is a untested apache configuration and a example on how to setup the reverse proxy:
+
+```xml
+<VirtualHost *:80>
+    ServerName dcts.chat
+    DocumentRoot /var/www/html
+
+    # Proxy for /app/
+    ProxyPreserveHost On
+    ProxyPass /app/ http://127.0.0.1:2086/
+    ProxyPassReverse /app/ http://127.0.0.1:2086/
+
+    # Proxy for /socket.io/
+    ProxyPass /socket.io/ http://127.0.0.1:2086/socket.io/
+    ProxyPassReverse /socket.io/ http://127.0.0.1:2086/socket.io/
+
+    # Handle WebSocket Upgrade
+    <Location /socket.io/>
+        ProxyPreserveHost On
+        ProxyPass ws://127.0.0.1:2086/socket.io/
+        ProxyPassReverse ws://127.0.0.1:2086/socket.io/
+    </Location>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+> [!NOTE]
+>
+> The apache setup was not tested yet and is only a rough example on how it could work.
+
+> [!IMPORTANT]
+>
+> Its important to change the socket.io path as well because otherwise the client will run into 404 errors trying to find the socket.io endpoint. Both for nginx and apache!
+
+[^portnote]: The port configured inside of your config.json file
+

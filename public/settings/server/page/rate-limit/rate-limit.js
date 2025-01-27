@@ -28,7 +28,7 @@ socket.emit("getServerInfo", {id:getID(), token: getToken() }, function (respons
     saveButton = document.getElementById("settings_profile_save");
 
     rateLimit = response.rateLimit;
-    dropInterval = response.rateLimitDropInterval;
+    dropInterval = response.dropInterval;
 
     setting_rateLimit.value = rateLimit;
     setting_dropInterval.value = dropInterval;

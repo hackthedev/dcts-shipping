@@ -9,75 +9,26 @@
         "cfAccountId": "",
         "cfAccountToken": "",
         "cfHash": "",
-        "rateLimit": "256",
+        "rateLimit": "128",
         "dropInterval": "5",
-        "ssl": {
-            "key": "/path/to/privkey.pem",
-            "cert": "/path/to/cert.pem",
-            "chain": "/path/to/chain.pem",
-            "enabled": 0
-        },
-        "tenor": {
-            "enabled": 0,
-            "api_key": "",
-            "client_key": "",
-            "limit": 50
-        },
-        "defaultChannel": "0",
-        "sql": {
-            "enabled": false,
-            "host": "localhost",
-            "username": "",
-            "password": "",
-            "database": "dcts",
-            "connectionLimit": 10
-        },
         "uploadFileTypes": [
             "image/png",
             "image/jpeg",
             "image/gif",
             "image/webp",
-            "audio/mpeg",
-            "video/mp4",
-            "video/quicktime",
-            "audio/vnd.wave"
+            "audio/mpeg"
         ],
-        "messageLoadLimit": 50,
-        "moderation": {
-            "messaging": {
-                "repeatedMessages": {
-                    "enabled": false,
-                    "counter": 0,
-                    "actions": {},
-                    "timespan": 0,
-                    "bypassers": []
-                },
-                "blacklist": {
-                    "enabled": false,
-                    "words": [],
-                    "actions": {},
-                    "channels": [],
-                    "userprofile": true,
-                    "bypassers": []
-                }
-            },
-            "ai": {
-                "profanity_check_enabled": true,
-                "spam_check_enabled": true,
-                "spam_api_key": "",
-                "profanity_api_key": ""
-            },
-            "bans": {
-                "ipBanDuration": "10 minutes",
-                "memberListHideBanned": true
-            }
+        "ssl": {
+            "key": "/etc/letsencrypt/live/EXAMPLE.COM/privkey.pem",
+            "cert": "/etc/letsencrypt/live/EXAMPLE.COM/cert.pem",
+            "chain": "/etc/letsencrypt/live/EXAMPLE.com/chain.pem",
+            "enabled": 0
         },
-        "registration": {
-            "enabled": true,
-            "accessCodes": []
-        },
-        "login": {
-            "maxLoginAttempts": 5
+        "tenor": {
+            "enabled": 0,
+            "api_key": "KEY_HERE",
+            "client_key": "VALUE_HERE",
+            "limit": 50
         }
     },
     "serverroles": {
@@ -96,11 +47,13 @@
                 "readMessages": 1,
                 "sendMessages": 1,
                 "uploadFiles": 1,
+                "redeemKey": 1,
                 "maxUpload": "7",
-                "viewChannelHistory": 1,
-                "redeemKey": 1
+                "manageChannels": 0,
+                "viewChannelHistory": 1
             },
             "members": [
+
             ],
             "token": []
         },
@@ -136,8 +89,10 @@
                 "manageChannels": 0
             },
             "members": [
+
             ],
             "token": [
+
             ]
         }
     },
@@ -146,7 +101,7 @@
             "info": {
                 "id": 0,
                 "name": "Home",
-                "icon": "/img/default_icon.png",
+                "icon": "img/default_icon.png",
                 "banner": "/img/default_banner.png",
                 "isDeletable": 1,
                 "sortId": 2,
@@ -158,7 +113,7 @@
                         "info": {
                             "id": 0,
                             "name": "General",
-                            "sortId": 0
+                            "sortId": 2
                         },
                         "channel": {
                             "0": {
@@ -169,10 +124,10 @@
                                 "sortId": 0,
                                 "permissions": {
                                     "0": {
-                                        "viewChannelHistory": 1,
                                         "readMessages": 1,
                                         "sendMessages": 1,
-                                        "viewChannel": 1
+                                        "viewChannel": 1,
+                                        "viewChannelHistory": 1
                                     }
                                 }
                             }
@@ -183,15 +138,16 @@
             "permissions": {
                 "0": {
                     "viewGroup": 1,
-                    "viewChannel": 1,
                     "sendMessages": 1,
                     "readMessages": 1
                 }
             }
         }
     },
-    "servermembers": {},
-    "ipblacklist": {},
+    "servermembers": {
+
+    },
+    "ipblacklist": [],
     "banlist": {},
     "mutelist": {}
 }

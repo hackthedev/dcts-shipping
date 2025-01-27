@@ -19,297 +19,218 @@ export function getMemberLastOnlineTime(memberID) {
     return minutesPassed
 }
 
-export function hasPermission(id, permission, searchGroup = null) {
+export function hasPermission(userId, permissions, channelId = null) {
+    const userRoles = resolveRolesByUserId(userId);
 
-    var foundPermission = false;
-    var foundAdmin = false;
-    var stopExecution = false;
-    var userroles = resolveRolesByUserId(id);
+    // Ensure permissions is an array
+    const permissionsToCheck = Array.isArray(permissions) ? permissions : [permissions];
 
-    // This needs to be on top so it can check for administrator permissions
-    // For each server role
-    Object.keys(serverconfig.serverroles).forEach(function (role) {
+    // Helper to check permissions for a given role in a permissions object
+    function checkRolePermissions(roles, permissionsObj) {
+        for (const role of roles) {
+            const rolePermissions = permissionsObj[role];
+            if (rolePermissions) {
+                // Check if all required permissions are explicitly set to 1 for the role
+                const allPermissionsGranted = permissionsToCheck.every(
+                    (perm) => rolePermissions[perm] === 1
+                );
+                if (allPermissionsGranted) return true;
 
-        if (serverconfig.serverroles[role].members.includes(id)) {
-
-            if (serverconfig.serverroles[role].permissions["administrator"] == 1) {
-                // User is admin
-                foundPermission = true;
-                stopExecution = true;
-                return true;
-
-            }
-            else if (serverconfig.serverroles[role].permissions[permission] == 1) {
-                // User has permission
-                foundPermission = true;
-                stopExecution = true;
-                return true;
-            }
-            else if (serverconfig.serverroles[role].permissions[permission] == 0) {
-                if (stopExecution != true) {
-                    foundPermission = false;
-                }
-            }
-            else {
-
+                // If any permission is explicitly denied (0), deny access immediately
+                const anyPermissionDenied = permissionsToCheck.some(
+                    (perm) =>
+                        rolePermissions[perm] === 0 || // Explicitly denied
+                        !(perm in rolePermissions) // Undefined permission
+                );
+                if (anyPermissionDenied) return false;
             }
         }
-        else {
+        return undefined; // Permissions not explicitly defined
+    }
+
+    // 1. Check if the user has the "administrator" permission at the server level (global bypass)
+    for (const role of userRoles) {
+        const roleConfig = serverconfig.serverroles[role];
+        if (roleConfig?.permissions["administrator"] === 1) {
+            return true; // Administrator bypasses all checks
         }
-    });
-
-    if (stopExecution == true) {
-        return foundPermission;
     }
 
+    // 2. Check Channel Permissions (Highest Priority)
+    if (channelId) {
+        const group = resolveGroupByChannelId(channelId);
+        const category = resolveCategoryByChannelId(channelId);
 
-    // Search Permission in specific group
-    if (searchGroup != null) {
+        if (group && category) {
+            const channelPermissions =
+                serverconfig.groups[group]?.channels?.categories[category]?.channel[channelId]?.permissions;
 
-        // For each Group Permission Role
-        Object.keys(serverconfig.groups[searchGroup].permissions).forEach(function (permrole) {
-
-            // If the user role includes the group role
-            if (userroles.includes(permrole)) {
-
-                // For each permission of the group role
-                Object.keys(serverconfig.groups[searchGroup].permissions[permrole]).forEach(function (perm) {
-
-                    if (permission == perm && serverconfig.groups[searchGroup].permissions[permrole][perm] == 1) {
-                        //console.log("Found permission " + perm);
-                        //console.log("it was " + serverconfig.groups[searchGroup].permissions[permrole][perm])
-
-                        foundPermission = true;
-                        return true;
-                    }
-                    else if (permission == perm && serverconfig.groups[searchGroup].permissions[permrole][perm] == 0) {
-                        foundPermission = false
-                    }
-                });
-            }
-
-        });
-
-        return foundPermission;
-    }
-
-
-    // For each group
-    Object.keys(serverconfig.groups).forEach(function (group) {
-
-        // For each Group Permission Role
-        Object.keys(serverconfig.groups[group].permissions).forEach(function (permrole) {
-
-            // If the user role includes the group role
-            if (userroles.includes(permrole)) {
-
-                // For each permission of the group role
-                Object.keys(serverconfig.groups[group].permissions[permrole]).forEach(function (perm) {
-
-                    if (permission == perm && serverconfig.groups[group].permissions[permrole][perm] == 1) {
-
-                        foundPermission = true;
-                    }
-                    else if (permission == perm && serverconfig.groups[group].permissions[permrole][perm] == 0) {
-                        foundPermission = false
-                    }
-                });
-            }
-
-        });
-
-
-        userroles.forEach(userrole => {
-
-            if (serverconfig.groups[group].permissions[userrole] != null) {
-                if (serverconfig.groups[group].permissions[userrole][permission] == 1 ||
-                    serverconfig.groups[group].permissions[userrole]["administrator"] == 1) {
-                    foundPermission = true;
+            if (channelPermissions) {
+                const result = checkRolePermissions(userRoles, channelPermissions);
+                if (result !== undefined) {
+                    return result; // Use explicitly defined or inherited value
                 }
             }
-        })
-    });
+        }
+    }
 
+    // 3. Check Group Role Permissions (Middle Priority)
+    for (const group in serverconfig.groups) {
+        const groupPermissions = serverconfig.groups[group]?.permissions || {};
 
-    return foundPermission;
+        const result = checkRolePermissions(userRoles, groupPermissions);
+        if (result !== undefined) {
+            return result; // Use explicitly defined or inherited value
+        }
+    }
+
+    // 4. Check Server Role Permissions (Lowest Priority)
+    for (const role of userRoles) {
+        const roleConfig = serverconfig.serverroles[role];
+        if (roleConfig) {
+            const rolePermissions = roleConfig.permissions;
+            if (rolePermissions) {
+                // Check if all required permissions are explicitly set to 1 for the role
+                const allPermissionsGranted = permissionsToCheck.every(
+                    (perm) => rolePermissions[perm] === 1
+                );
+                if (allPermissionsGranted) return true;
+
+                // If any permission is explicitly denied (0), deny access immediately
+                const anyPermissionDenied = permissionsToCheck.some(
+                    (perm) =>
+                        rolePermissions[perm] === 0 || // Explicitly denied
+                        !(perm in rolePermissions) // Undefined permission
+                );
+                if (anyPermissionDenied) return false;
+            }
+        }
+    }
+
+    // If undefined across all levels, return null (or a default fallback value)
+    return null;
 }
 
-export function checkUserChannelPermission(channel, userId, perm) {
-
-    var found = false;
-    var userRoles = resolveRolesByUserId(userId);
-
-    var group = resolveGroupByChannelId(channel);
-    var category = resolveCategoryByChannelId(channel);
-
-    for (let i = 0; i < userRoles.length; i++) {
-        let role = userRoles[i];
-
-        if (hasPermission(userId, "administrator")) {
-            found = true;
-            return true;
-        }
-        if (hasPermission(userId, "manageChannels")) {
-            found = true;
-            return true;
-        }
-
-        if (group != null && category != null && channel != null) {
-
-            // if the channel wasnt setup with the role check the default role permissions
-            if (serverconfig.groups[group].channels.categories[category].channel[channel].permissions.hasOwnProperty(role) == false) {
-                role = "0";
-            }
-
-            // if the role is present in the channel perms
-            if (serverconfig.groups[group].channels.categories[category].channel[channel].permissions[role].hasOwnProperty(perm)) {
-
-                // the role is allowed to see it
-                if (serverconfig.groups[group].channels.categories[category].channel[channel].permissions[role][perm] == 1) {
-                    found = true;
-                }
-                // when a channel is denying that role
-                else if (serverconfig.groups[group].channels.categories[category].channel[channel].permissions[role][perm] == 0) {
-                    if (found != true) found = false;
-                    //consolas(colors.red("IS forbidden!"))
-                    if (found != true) return false;
-                }
-            }
-            // if the role isnt setup there dont allow entrance
-            else {
-                if (found != true) found = false
-                //consolas("Channel does not have the property")
-                return false;
-            }
 
 
-            if (hasPermission(userId, perm)) {
-                found = true;
-            }
-            // if the channel wasnt setup yet with perms dont show it
-            else if (serverconfig.groups[group].channels.categories[category].channel[channel].permissions == {}) {
-                if (found != true) found = false;
-                if (found != true) return false;
-            }
-        }
-        else {
-            found = true;
+
+export function checkUserChannelPermission(channel, userId, perms) {
+    const userRoles = resolveRolesByUserId(userId);
+    const group = resolveGroupByChannelId(channel);
+    const category = resolveCategoryByChannelId(channel);
+
+    // Validate if the channel, group, and category are properly configured
+    if (!group || !category || !channel) {
+        return false; // Deny if any required identifier is missing
+    }
+
+    const channelPermissions =
+        serverconfig.groups[group]?.channels?.categories[category]?.channel[channel]?.permissions;
+
+    if (!channelPermissions) {
+        return false; // Deny if no permissions are configured for the channel
+    }
+
+    // Ensure `perms` is an array, even if a single permission is passed
+    const permissionsToCheck = Array.isArray(perms) ? perms : [perms];
+
+    // Check for "administrator" permission in any role
+    for (const role of userRoles) {
+        const effectiveRole = channelPermissions.hasOwnProperty(role) ? role : "0";
+
+        if (channelPermissions[effectiveRole]?.["administrator"] === 1) {
+            return true; // If the user has "administrator", grant access immediately
         }
     }
 
-    return found;
+    // Check all specified permissions for each user role
+    for (const role of userRoles) {
+        const effectiveRole = channelPermissions.hasOwnProperty(role) ? role : "0";
 
+        // Check if all required permissions are explicitly set to 1 for the role
+        const allPermissionsGranted = permissionsToCheck.every(
+            (perm) => channelPermissions[effectiveRole]?.[perm] === 1
+        );
+
+        // If all permissions are granted for this role, return true
+        if (allPermissionsGranted) {
+            return true;
+        }
+
+        // If any permission is explicitly denied (0), deny access immediately
+        const anyPermissionDenied = permissionsToCheck.some(
+            (perm) =>
+                channelPermissions[effectiveRole]?.[perm] === 0 ||
+                !(perm in channelPermissions[effectiveRole])
+        );
+
+        if (anyPermissionDenied) {
+            return false;
+        }
+    }
+
+    // Deny by default if no role grants all the required permissions
+    return false;
 }
+
+
 
 export function resolveGroupByChannelId(id) {
-
-    /*
-    console.log(" ");
-    console.log(" ");
-    console.log(" ");
-    console.log("Resolving Group by Channel ID " + id);
-
-     */
-
-    var found = null;
-    // Foreach Group
-    Object.keys(serverconfig.groups).reverse().forEach(function (group) {
-
-        //console.log(group);
-
-        // For each Category
-        Object.keys(serverconfig.groups[group].channels.categories).reverse().forEach(function (category) {
-
-
-            //console.log(category);
-
-            // For each Channel
-            Object.keys(serverconfig.groups[group].channels.categories[category].channel).reverse().forEach(function (channelId) {
-
-                if (channelId == id) {
-                    found = group;
-                }
-            });
-        });
-    });
-
-    return found;
-}
-
-export function resolveCategoryByChannelId(id) {
-
-    var found = null;
-    // Foreach Group
-    Object.keys(serverconfig.groups).reverse().forEach(function (group) {
-
-        //console.log(group);
-
-        // For each Category
-        Object.keys(serverconfig.groups[group].channels.categories).reverse().forEach(function (category) {
-
-
-            //console.log(category);
-
-            // For each Channel
-            Object.keys(serverconfig.groups[group].channels.categories[category].channel).reverse().forEach(function (channelId) {
-
-
-                if (channelId == id) {
-                    found = category;
-                }
-            });
-        });
-    });
-
-    return found;
-}
-
-export function resolveRolesByUserId(id) {
-
-    var userRoles = [];
-
-    // Get the keys of serverroles in reverse order
-    var roles = Object.keys(serverconfig.serverroles).reverse();
-
-    // Loop through each role
-    for (var i = 0; i < roles.length; i++) {
-        var role = roles[i];
-        var roleConfig = serverconfig.serverroles[role];
-
-        // Check if the role configuration has a members array and if the user ID exists in it
-        if (roleConfig.members.includes(id)) {
-
-            // If the userRoles array does not already include this role, add it
-            if (!userRoles.includes(role)) {
-                userRoles.push(role);
+    for (const group of Object.keys(serverconfig.groups).reverse()) {
+        const categories = serverconfig.groups[group].channels.categories;
+        for (const category of Object.keys(categories).reverse()) {
+            const channels = categories[category].channel;
+            if (channels.hasOwnProperty(id)) {
+                return group; // Return as soon as the group is found
             }
         }
     }
+    return null; // Return null if no group is found
+}
+
+
+export function resolveCategoryByChannelId(id) {
+    for (const group of Object.keys(serverconfig.groups).reverse()) {
+        const categories = serverconfig.groups[group].channels.categories;
+        for (const category of Object.keys(categories).reverse()) {
+            const channels = categories[category].channel;
+            if (channels.hasOwnProperty(id)) {
+                return category; // Return as soon as the category is found
+            }
+        }
+    }
+    return null; // Return null if no category is found
+}
+
+
+export function resolveRolesByUserId(id) {
+    const userRoles = [];
+    const roles = Object.keys(serverconfig.serverroles).reverse();
+
+    for (const role of roles) {
+        const roleConfig = serverconfig.serverroles[role];
+        if (roleConfig.members.includes(id) && !userRoles.includes(role)) {
+            userRoles.push(role); // Add role if user is a member and not already included
+        }
+    }
+
     return userRoles;
 }
 
+
 export function resolveChannelById(id) {
-
-    var found = null;
-    // Foreach Group
-    Object.keys(serverconfig.groups).reverse().forEach(function (group) {
-
-        // For each Category
-        Object.keys(serverconfig.groups[group].channels.categories).reverse().forEach(function (category) {
-
-            // For each Channel
-            Object.keys(serverconfig.groups[group].channels.categories[category].channel).reverse().forEach(function (channelId) {
-
-                if (channelId == id) {
-                    found = serverconfig.groups[group].channels.categories[category].channel[id];
-                    return serverconfig.groups[group].channels.categories[category].channel[id];
-                }
-            });
-        });
-    });
-
-    return found;
+    for (const group of Object.keys(serverconfig.groups).reverse()) {
+        const categories = serverconfig.groups[group].channels.categories;
+        for (const category of Object.keys(categories).reverse()) {
+            const channels = categories[category].channel;
+            if (channels.hasOwnProperty(id)) {
+                return channels[id]; // Return the channel configuration as soon as it's found
+            }
+        }
+    }
+    return null; // Return null if no channel is found
 }
+
 
 export async function getMemberProfile(id) {
 

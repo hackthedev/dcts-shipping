@@ -610,8 +610,6 @@ scope.addEventListener("contextmenu", (event) => {
 
     ContextMenuSelectedMessage = clickedElement;
 
-    console.log(clickedElement)
-
 
     var ErrorButtonCode = `onMouseOver="this.style.backgroundColor='#eb5055'; this.style.color='white';"
                 onMouseOut="this.style.backgroundColor='transparent'; this.style.color='#eb5055';" 
@@ -688,8 +686,6 @@ scope.addEventListener("contextmenu", (event) => {
 
         try {
             var userid = clickedElement.id;
-            console.log("Found userid " + userid);
-
             resetContextMenuItem(ContextMenu);
 
             socket.emit("checkPermission", { id: getID(), token: getToken(), permission: "banMember" }, function (response) {
@@ -1344,12 +1340,12 @@ function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag =
             else {
                 if (response.error) {
                     showSystemMessage({
-                        title: response.msg,
-                        text: response.text || "",
+                        title: response.title,
+                        text: response.msg || "",
                         icon: response.type,
                         img: null,
                         type: response.type,
-                        duration: response.msgDisplayDuration || 3000
+                        duration: response.displayTime || 3000
                     });
                 }
             }
@@ -1498,7 +1494,7 @@ function updatePFPOnUI(url, sync = false) {
 }
 
 function getChatlog(index = -1) {
-    socket.emit("getChatlog", { id: getID(), token: getToken(), group: getGroup(), category: getCategory(), channel: getChannel(), startIndex: index });
+    socket.emit("getChatlog", { id: getID(), token: getToken(), groupId: getGroup(), categoryId: getCategory(), channelId: getChannel(), startIndex: index });
 }
 
 function createYouTubeEmbed(url, messageid) {
@@ -2927,16 +2923,18 @@ socket.on('modalMessage', function (data) {
     console.log(data)
 
     var buttonArray = [];
-    Object.keys(data.buttons).forEach(function (button) {
+    if(data.buttons){
+        Object.keys(data.buttons).forEach(function (button) {
 
-        var buttonText = data.buttons[button].text;
-        var buttonEvents = data.buttons[button].events;
-
-        buttonArray.push([buttonText.toLowerCase(), buttonEvents])
-    });
-
-    for (let i = 0; i < data.buttons.length; i++) {
-        console.log("button : " + data.buttons[i])
+            var buttonText = data.buttons[button].text;
+            var buttonEvents = data.buttons[button].events;
+    
+            buttonArray.push([buttonText.toLowerCase(), buttonEvents])
+        });
+    
+        for (let i = 0; i < data.buttons.length; i++) {
+            console.log("button : " + data.buttons[i])
+        }
     }
 
     if (data.token != null && data.action == "register") {
@@ -2953,20 +2951,13 @@ socket.on('modalMessage', function (data) {
     }
 
     showSystemMessage({
-        title: data.title,
-        text: data.message,
+        title: data.title ? data.title : data.msg,
+        text: data.msg || "",
         icon: data.type || "info",
         img: null,
         type: data.type || "neutral",
         duration: data.displayTime || 4000
     });
-
-    /*
-    Confirm(data.title, data.message, "info", buttonArray, "confirm").then(result => {
-
-        console.log(result);
-    })
-        */
 });
 
 function setActiveGroup(group) {
@@ -3049,56 +3040,6 @@ function checkCheckedRoleMenu(element) {
             }
         }
     });
-}
-
-function showModal(data) {
-    var modalBox = document.getElementById("modalBox");
-    var modalBoxTitle = document.getElementById("modalBoxTitle");
-    var modalBoxText = document.getElementById("modalBoxText");
-    var modalBoxButtons = document.getElementById("modalBoxButtons");
-
-    var BodyBlur = document.getElementsByTagName('BODY')[0];;
-    // filter: blur(3px);
-    // transform: translateZ(0);
-
-    //BodyBlur.style.filter = "blur(4px)";
-    //BodyBlur.style.transform = "translateZ(0)";
-
-
-    modalBox.removeAttribute("filter");
-    modalBoxTitle.removeAttribute("filter");
-    modalBoxText.removeAttribute("filter");
-
-    modalBox.style.display = "block";
-    modalBoxButtons.innerHTML = "";
-    modalBoxTitle.innerText = data.title.replaceAll("#", "\n");
-    modalBoxText.innerText = data.message.replaceAll("#", "\n");
-
-
-    if (data.buttons != null) {
-
-        Object.keys(data.buttons).forEach(function (button) {
-
-            var buttonText = data.buttons[button].text;
-            var buttonEvent = data.buttons[button].events;
-
-            modalBoxButtons.insertAdjacentHTML("beforeend", `<button onclick="${buttonEvent}">${buttonText}</button>`)
-        });
-    }
-
-    //if(data.token != null){
-    //    setCookie("token", data.token, 365);
-    //}
-}
-
-function closeModal() {
-    var modalBox = document.getElementById("modalBox");
-    var modalBoxTitle = document.getElementById("modalBoxTitle");
-    var modalBoxText = document.getElementById("modalBoxText");
-
-    modalBox.style.display = "none";
-    modalBoxTitle.innerText = "";
-    modalBoxText.innerText = "";
 }
 
 function importToken() {
@@ -3419,7 +3360,7 @@ function refreshValues() {
 }
 
 function getMemberList() {
-    socket.emit("getMemberList", { id: getID(), username: getUsername(), icon: getPFP(), token: getToken(), channel: getChannel() }, function (response) {
+    socket.emit("getMemberList", { id: getID(), username: getUsername(), icon: getPFP(), token: getToken(), channel: getChannel(), group: getGroup() }, function (response) {
 
         if (response.error) {
             showSystemMessage({
@@ -3471,7 +3412,7 @@ function setUrl(param, isVC = false) {
     let channelId = urlData[2]?.replace("channel=", "")
 
     // channel already open, dont reload it
-    if (getChannel() == channelId) return;
+    if (getChannel() == channelId && channelId && getChannel()) return;
 
 
     window.history.replaceState(null, null, param); // or pushState
@@ -3517,7 +3458,9 @@ function setUrl(param, isVC = false) {
         socket.emit("getGroupStats", { id: getID(), token: getToken(), group: getGroup() }, function (response) {
 
             if (response.type == "success") {
-                console.log(response)
+
+                // not enough users chatted to show group stats
+                if(response.mostActiveUsers.length <= 1) return;
 
                 contentBox = document.getElementById("content");
 

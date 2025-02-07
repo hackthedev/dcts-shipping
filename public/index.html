@@ -14,6 +14,8 @@
             crossorigin="anonymous"
     ></script>
 
+    <script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
+
     <!-- New to-be-implement features-->
     <script src="js/alerts.js"></script>
     <script src="js/prompts.js"></script>
@@ -38,6 +40,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/channeltree.css">
     <link rel="stylesheet" href="audioplayer/audioplayer.css">
     <link rel="stylesheet" href="css/groups/groupHomeDisplay.css">
     <link rel="stylesheet" href="css/emoji-autocomplete.css">
@@ -57,14 +60,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/css.min.js"></script>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <script defer src="chat.js?v=df54154684984"></script>    
 
     <!-- tooltips -->
     <script defer src="js/tooltips/dialogs/createChannel.js"></script>    
     <script defer src="js/tooltips/dialogs/banUser.js"></script>    
     <script defer src="js/tooltips/dialogs/muteUser.js"></script>    
     <script defer src="js/tooltips/dialogs/accountOnboarding.js"></script>    
+
+    <!-- general chat functions -->
+      
+    <script src="js/core/ModView.js"></script>   
+    <script src="js/core/ContextMenu.js"></script>   
     <script src="js/emojis.js"></script>    
+    <script src="js/core/CookieManager.js"></script>    
+    <script src="js/core/ModActions.js"></script>    
+    <script src="js/core/AdminActions.js"></script>    
+    <script src="js/core/ChatManager.js"></script>    
+    <script src="js/core/UserManager.js"></script>    
+    <script src="js/core/Channeltree.js"></script>    
+
+    
+    <script defer src="chat.js?v=df54154684984"></script>    
 
     <title>DCTS Chat</title> <!-- {{meta.page.title}} -->
 </head>

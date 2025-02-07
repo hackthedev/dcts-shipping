@@ -41,7 +41,7 @@ function uploadFileInChunks(file, fileIndex) {
     const chunkSize = 5 * 1024 * 1024; // 5 MB per chunk
     const totalChunks = Math.ceil(file.size / chunkSize);
     let currentChunk = 0;
-    const fileIdValue = generateId(12);
+    const fileIdValue = UserManager.generateId(12);
 
     // Return a promise that resolves with the final URL when upload is complete
     return new Promise((resolve, reject) => {
@@ -56,8 +56,8 @@ function uploadFileInChunks(file, fileIndex) {
 
             const metadata = {
                 filename: file.name,
-                id: getID(),
-                token: getToken(),
+                id: UserManager.getID(),
+                token: UserManager.getToken(),
                 totalChunks: totalChunks,
                 chunkIndex: currentChunk,
                 fileId: fileIdValue

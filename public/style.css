@@ -39,10 +39,19 @@
     --transition-all: all 200ms;
 
 
-    
-  }
 
-html, body{
+}
+
+.sortable-chosen, sortable-chosen.sortable-ghost {
+    opacity: 0;
+}
+.sortable-ghost {
+  background-color: var(--primary);
+  opacity: 1;
+}
+
+html,
+body {
     margin: 0;
     padding: 0;
     width: 100%;
@@ -53,11 +62,11 @@ html, body{
     font-family: 'Roboto', sans-serif;
 }
 
-#header{
+#header {
     height: calc(40px - 16px);
     width: calc(100% - 16px);
 
-    padding:  8px;
+    padding: 8px;
 
     background-color: #1E2124;
     color: white;
@@ -70,7 +79,7 @@ html, body{
     height: calc(100% - 16px - 40px);
     width: calc(80px - 16px);
 
-    padding:  8px;
+    padding: 8px;
     /*align-content: center;*/
     text-align: center;
 
@@ -83,70 +92,8 @@ html, body{
     overflow-y: auto;
 }
 
-#serverbanner-container {
-    height: calc(200px - 40px);
-    width: calc(100%);
-    background-color: transparent;
-    margin: 0 0 20px 0;
-
-    display: block;
-    float: left;
 
 
-    overflow: hidden;
-    box-shadow: 0 8px 8px -2px black;
-}
-
-#serverbanner-image {
-    height: calc(100%);
-    width: calc(100%);
-    -webkit-transition: transform .5s ease;
-
-    object-fit: cover;
-    background-color: transparent;
-    background-position: center center;
-
-    border-radius: 6px;
-
-}
-
-#serverbanner-image:hover {
-    -webkit-transform: scale(1.1);
-    -moz-transform: scale(1.1);
-    -o-transform: scale(1.1);
-    transform: scale(1.1);
-
-
-}
-
-#serverbanner-image:not(:hover) {
-    -webkit-transform: scale(1);
-    -moz-transform: scale(1);
-    -o-transform: scale(1);
-    transform: scale(1);
-}
-
-#channellist {
-    height: calc(100% - 40px - 50px);
-    width: calc(300px);
-
-    background-color: #24292E;
-    color: white;
-
-    display: block;
-    float: left;
-}
-
-#channeltree {
-    display: block;
-    float: left;
-
-    height: calc(100% - 32px - 175px - 32px);
-    width: calc(100% - 32px);
-
-    padding:  16px;
-    overflow-y: auto;
-}
 
 #content-container {
     height: calc(100% - 40px);
@@ -219,7 +166,7 @@ html, body{
     background-color: transparent;
 }
 
-#message-actions-image{
+#message-actions-image {
     width: 30px;
     height: 30px;
     display: block;
@@ -238,7 +185,7 @@ html, body{
 #infolist {
     height: calc(100% - 32px - 40px);
     width: calc(200px - 32px);
-    padding:  16px;
+    padding: 16px;
 
     background-color: #24292E;
     color: white;
@@ -361,12 +308,12 @@ html, body{
 
 #profile-qa-info label {
     width: 150px;
-    height:20px;
+    height: 20px;
 
-    overflow:hidden;
+    overflow: hidden;
     background-color: transparent;
-    display:block;
-    float:left;
+    display: block;
+    float: left;
 }
 
 #profile-qa #webrtc-controls {
@@ -400,7 +347,7 @@ li:hover {
 }
 
 .memberlist-container {
-    display:block;
+    display: block;
     float: left;
     width: 100%;
 
@@ -410,7 +357,7 @@ li:hover {
     cursor: pointer;
 }
 
-.memberlist-img{
+.memberlist-img {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -421,7 +368,7 @@ li:hover {
     background-position: center center;
 }
 
-.memberlist-member-info{
+.memberlist-member-info {
     height: 20px;
     overflow: hidden;
 
@@ -457,7 +404,7 @@ li:hover {
     margin-bottom: 0px;
 }
 
-.message-container:hover{
+.message-container:hover {
     background-color: rgb(47, 49, 54, 0.5);
     border-radius: 5px;
 
@@ -465,17 +412,18 @@ li:hover {
     background-color: rgba(41, 43, 47, 0.5);
 }
 
-.message-container:not(:hover){
+.message-container:not(:hover) {
     transition: all 800ms;
     background-color: transparent;
 }
 
-.message-profile-content-message-appended p, .message-profile-content-message p{
+.message-profile-content-message-appended p,
+.message-profile-content-message p {
     padding: 4px 8px 4px 8px !important;
     text-align: left !important;
 }
 
-.message-profile-content-message-appended:hover{
+.message-profile-content-message-appended:hover {
     background-color: rgba(41, 43, 47, 0.5);
 }
 
@@ -484,7 +432,8 @@ li:hover {
     cursor: pointer;
 }
 
-.message-profile-img-container, .message-profile-img {
+.message-profile-img-container,
+.message-profile-img {
     width: 40px;
     height: 40px;
 
@@ -521,7 +470,7 @@ li:hover {
     cursor: pointer;
 }
 
-.message-profile-content{
+.message-profile-content {
     display: block;
     float: left;
     background-color: transparent;
@@ -538,7 +487,7 @@ li:hover {
     color: white;
 }
 
-.message-profile-content p{
+.message-profile-content p {
     float: left;
     display: inline-block;
     word-wrap: break-word;
@@ -548,7 +497,7 @@ li:hover {
     font-size: 14px;
 }
 
-.message-profile-content iframe{
+.message-profile-content iframe {
     float: left;
     display: block;
 
@@ -577,11 +526,11 @@ li:hover {
     display: block;
 }
 
-.systemAnnouncementChatUsername{
+.systemAnnouncementChatUsername {
     color: greenyellow;
 }
 
-code.markdown{
+code.markdown {
     font-size: 12px;
     background-color: #292a2d !important;
     font-weight: bold;
@@ -592,7 +541,7 @@ code.markdown{
     font-family: "Lucida Console", "Courier New", monospace;
 }
 
-pre.markdown{
+pre.markdown {
     font-size: 12px;
     background-color: #292a2d !important;
 
@@ -610,11 +559,6 @@ pre.markdown{
     width: calc(100% - 8px);
 }
 
-#channeltree details summary a, #channeltree ul a {
-    color: white;
-    text-decoration: none;
-}
-
 .iframe-container {
     display: inline-block;
     float: left;
@@ -624,7 +568,8 @@ pre.markdown{
     /* margin: 8px 0 8px 0; */
 }
 
-.image-embed, .message-profile-content .message-profile-content-message img {
+.image-embed,
+.message-profile-content .message-profile-content-message img {
     max-width: 400px;
     height: auto;
     text-align: left;
@@ -662,12 +607,12 @@ pre.markdown{
     cursor: pointer;
 }
 
-#context-menu .item:hover{
+#context-menu .item:hover {
     background: #343434;
     border-radius: 6px;
 }
 
-#context-menu.visible{
+#context-menu.visible {
     display: block;
 }
 
@@ -693,13 +638,14 @@ pre.markdown{
     margin-left: 20px;
 }
 
-.message-profile-info .timestamp, .systemAnnouncementChat .timestamp{
+.message-profile-info .timestamp,
+.systemAnnouncementChat .timestamp {
     margin-left: 20px;
     font-size: 10px;
     color: #989898;
 }
 
-#modalBox{
+#modalBox {
     background-color: #1D2125;
     border: 1px solid #ABB8BE;
     border-radius: 6px;
@@ -740,10 +686,6 @@ pre.markdown{
     filter: grayscale(0%);
 }
 
-#channeltree details ul li {
-    list-style-position: inside;
-    /*  list-style-image: url("img/hashtag.png"); */
-}
 
 #profile-qa-settings {
     width: 20px;
@@ -762,7 +704,7 @@ pre.markdown{
     background-position: center center;
 }
 
-#profile-qa-info-status{
+#profile-qa-info-status {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -786,7 +728,7 @@ details[open] summary::before {
 }
 */
 
-pre.editedMsg{
+pre.editedMsg {
     margin-top: 10px;
     margin-left: 6px;
     font-size: 10px;
@@ -796,14 +738,14 @@ pre.editedMsg{
     font-style: italic;
 }
 
-.inline-text-emoji{
+.inline-text-emoji {
     width: 25px;
     height: 25px;
 
     margin-bottom: -6px !important;
 }
 
-.inline-text-emoji.big{
+.inline-text-emoji.big {
     width: 50px;
     height: 50px;
     display: inline-block;
@@ -831,28 +773,28 @@ pre.editedMsg{
     overflow-x: hidden;
 }
 
-#emoji-box-container h2{
+#emoji-box-container h2 {
     margin-top: 0;
     font-size: 18px;
 }
 
-#emoji-box-container .emoji-entry{
+#emoji-box-container .emoji-entry {
     float: left;
     display: block;
 }
 
-.emoji-entry img.emoji:hover{
+.emoji-entry img.emoji:hover {
     cursor: pointer;
     border-radius: 10%;
     transition: all 200ms;
 }
 
-.emoji-entry img.emoji:not(:hover){
+.emoji-entry img.emoji:not(:hover) {
     border-radius: 0;
     transition: all 200ms;
 }
 
-#emoji-box-container .emoji-entry .emoji-img img{
+#emoji-box-container .emoji-entry .emoji-img img {
     float: left;
     width: 35px;
     height: 35px;
@@ -879,7 +821,7 @@ pre.editedMsg{
     inherits: false;
 }
 
-#emoji-box-header-container{
+#emoji-box-header-container {
     background-color: #40444B;
     margin: -8px;
     margin-bottom: 8px;
@@ -909,7 +851,7 @@ pre.editedMsg{
     overflow-y: auto;
 }
 
-.emoji-box-header h2{
+.emoji-box-header h2 {
     margin: 0;
 }
 
@@ -924,18 +866,18 @@ pre.editedMsg{
     margin-right: 8px;
 }
 
-.emoji-box-header:hover{
+.emoji-box-header:hover {
     cursor: pointer;
     background-color: #2F3136;
     border-radius: 8px;
 }
 
-.SelectedTab{
+.SelectedTab {
     background-color: #2F3136;
     border-radius: 8px;
 }
 
-label.mention{
+label.mention {
     /*background-color: rgba(255, 174, 0, 0.12);*/
     color: skyblue;
 
@@ -950,7 +892,7 @@ label.mention{
     cursor: pointer;
 }
 
-.group-entry-marker{
+.group-entry-marker {
 
     float: left;
     display: none;
@@ -999,6 +941,7 @@ label.mention{
     from {
         background-color: #ed7e07;
     }
+
     to {
         background-color: #ddb787;
     }
@@ -1008,12 +951,13 @@ label.mention{
     from {
         background-color: #ed7e07;
     }
+
     to {
         background-color: #ddb787;
     }
 }
 
-#profile-role-menu{
+#profile-role-menu {
     position: fixed;
     z-index: 100000;
     width: calc(208px - 16px + 8px);
@@ -1031,12 +975,13 @@ label.mention{
     /*display: none;*/
 }
 
-#role-menu-header, #role-menu-search-input{
+#role-menu-header,
+#role-menu-search-input {
     display: inline-block;
     float: left;
 }
 
-#role-menu-header{
+#role-menu-header {
     width: 100%;
     float: left;
     position: sticky;
@@ -1059,7 +1004,7 @@ label.mention{
     float: left;
 }
 
-#role-menu-list{
+#role-menu-list {
     height: 120px;
     width: 100%;
 
@@ -1076,15 +1021,17 @@ label.mention{
     border-radius: 4px;
 }
 
-.role-menu-entry:hover{
+.role-menu-entry:hover {
     background: #484545;
 }
 
-#role-menu-search-input:hover, .role-menu-entry:hover, .role-menu-entry label:hover{
+#role-menu-search-input:hover,
+.role-menu-entry:hover,
+.role-menu-entry label:hover {
     cursor: pointer;
 }
 
-.role-menu-entry-roleName{
+.role-menu-entry-roleName {
     -webkit-user-select: none;
     user-select: none;
 }
@@ -1093,7 +1040,7 @@ label.mention{
 
 /* Media query for mobile and other mobile css!!! */
 
-#leftSideMenu{
+#leftSideMenu {
     float: left;
     height: calc(100% - 40px);
     width: auto;
@@ -1102,7 +1049,7 @@ label.mention{
     display: none;
 }
 
-#rightSideMenu{
+#rightSideMenu {
     float: left;
     height: calc(100% - 40px);
     width: auto;
@@ -1113,7 +1060,7 @@ label.mention{
 
 #mobile_GroupAndChannelContainer {
     z-index: 9999999;
-    width: calc(100% - 40px) !important;    
+    width: calc(100% - 40px) !important;
     margin-left: 35px;
     height: calc(100% - 40px);
     max-width: 420px;
@@ -1125,7 +1072,7 @@ label.mention{
 }
 
 #mobile_memberlist {
-    width: calc(100% - 40px) !important;    
+    width: calc(100% - 40px) !important;
     /*margin-left: calc(-100% + 35px + 420p);*/
 
     height: calc(100% - 40px - 20px);
@@ -1141,7 +1088,7 @@ label.mention{
 }
 
 #mobile_GroupList {
-    width: calc(45px + 20px);    
+    width: calc(45px + 20px);
     height: calc(100%);
 
     float: left;
@@ -1169,17 +1116,17 @@ label.mention{
     padding: 8px;
 
     width: calc(100% - 16px - 65px);
-    height:  calc(100% - 160px - 16px);
+    height: calc(100% - 160px - 16px);
     overflow-y: auto;
 }
 
-#mobile_channelList h2{
+#mobile_channelList h2 {
     font-size: 18px;
     color: #ABB8BB;
     margin-bottom: 2px;
 }
 
-#mobile_channelList details{
+#mobile_channelList details {
     margin-top: 10px !important;
 }
 
@@ -1187,31 +1134,31 @@ label.mention{
     margin-left: 14px;
 }
 
-#mobile-channellist-trigger{
-    width: 35px; 
+#mobile-channellist-trigger {
+    width: 35px;
     height: 35px;
 
     background-color: transparent;
     background-image: url("img/sandwich.png");
     background-size: contain;
-    
+
     float: left;
     display: block;
 }
 
-#mobile-memberlist-trigger{
-    width: 35px; 
+#mobile-memberlist-trigger {
+    width: 35px;
     height: 35px;
 
     background-color: transparent;
     background-image: url("img/sandwich.png");
     background-size: contain;
-    
+
     float: left;
     display: block;
 }
 
-.editor-container{
+.editor-container {
     margin-top: -60px;
 }
 
@@ -1223,17 +1170,22 @@ label.mention{
     margin: 4px 8px 16px 16px;
 }
 
-#editMsgHint:hover{
+#editMsgHint:hover {
     cursor: pointer;
 }
 
 @media (max-width: 1050px) {
 
-    body{
+    body {
         overflow-x: hidden;
     }
 
-    #serverbanner-container, #profile-qa, #channeltree, #channellist, #infolist, #serverlist {
+    #serverbanner-container,
+    #profile-qa,
+    #channeltree,
+    #channellist,
+    #infolist,
+    #serverlist {
         display: none;
     }
 
@@ -1243,52 +1195,54 @@ label.mention{
 
     }
 
-    #content-container{
+    #content-container {
         width: calc(100% - 35px - 35px) !important;
         border-radius: 0;
     }
 
-    #header{
+    #header {
         width: calc(100% - 16px);
     }
 
-    #leftSideMenu, #rightSideMenu {
+    #leftSideMenu,
+    #rightSideMenu {
         display: block;
     }
 
-    .editor-container{
+    .editor-container {
         margin-top: -40px;
     }
 
     .message-container {
         margin: 0 0 30px 0;
-        padding: 0 ;
+        padding: 0;
         width: 100%;
     }
 
-    .message-container .editedMsg{
+    .message-container .editedMsg {
         margin-top: 0;
         padding-top: 0;
     }
-    
-    .message-container .message-profile-img, .message-profile-img-container{
+
+    .message-container .message-profile-img,
+    .message-profile-img-container {
         width: 30px;
         height: 30px;
         margin: 0;
         padding: 0;
     }
 
-    .message-container .message-profile-info-name{
+    .message-container .message-profile-info-name {
         font-size: 14px;
     }
 
-    .message-container .message-profile-content{
+    .message-container .message-profile-content {
         padding: 0 20px 0 30px !important;
         margin: 0;
         width: calc(100% - 50px);
     }
 
-    pre.ql-syntax{
+    pre.ql-syntax {
         width: calc(100%) !important;
     }
 

@@ -1,8 +1,16 @@
-socket.emit("userConnected", {
-    id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
-    aboutme: getAboutme(), banner: getBanner()
-});
+var settings_username = document.getElementById("settings_profile_username");
+var settings_loginName = document.getElementById("settings_profile_loginName");
+var settings_status = document.getElementById("settings_profile_status");
+var settings_aboutme = document.getElementById("settings_profile_aboutme");
+var settings_icon = document.getElementById("settings_profile_icon");
+var settings_banner = document.getElementById("settings_profile_banner");
 
+var preview_username = document.getElementById("profile_username");
+var preview_status = document.getElementById("profile_status");
+var preview_aboutme = document.getElementById("profile_aboutme");
+var preview_icon = document.getElementById("profile_icon");
+var preview_banner = document.getElementById("profile_banner");
+var saveButton = document.getElementById("settings_profile_save");
 
 async function handleUpload(files, id) {
     try {
@@ -46,46 +54,32 @@ function resetAccount() {
     var reset = confirm("Do you really want to reset your account? EVERYTHING will be reset.")
 
     if (reset) {
-        setCookie("id", null, 365);
-        setCookie("username", null, 365);
-        setCookie("status", null, 365);
-        setCookie("pfp", null, 365);
-        setCookie("token", null, 365);
-        setCookie("banner", null, 365);
+        CookieManager.setCookie("id", null, 365);
+        CookieManager.setCookie("username", null, 365);
+        CookieManager.setCookie("status", null, 365);
+        CookieManager.setCookie("pfp", null, 365);
+        CookieManager.setCookie("token", null, 365);
+        CookieManager.setCookie("banner", null, 365);
 
         alert("Your account has been reset. Please refresh the page if you want to continue");
     }
 }
 
 function setPreview() {
+    preview_icon.style.backgroundImage = `url("${UserManager.getPFP()}")`;
+    preview_banner.style.backgroundImage = `url("${UserManager.getBanner()}")`;
 
-    settings_username = document.getElementById("settings_profile_username");
-    settings_status = document.getElementById("settings_profile_status");
-    settings_aboutme = document.getElementById("settings_profile_aboutme");
-    settings_icon = document.getElementById("settings_profile_icon");
-    settings_banner = document.getElementById("settings_profile_banner");
+    settings_username.value = `${limitString(UserManager.getUsername(), 30)}`;
+    settings_status.value = `${limitString(UserManager.getStatus(), 100)}`;
+    settings_aboutme.innerText = `${limitString(UserManager.getAboutme(), 500)}`;
 
-    preview_username = document.getElementById("profile_username");
-    preview_status = document.getElementById("profile_status");
-    preview_aboutme = document.getElementById("profile_aboutme");
-    preview_icon = document.getElementById("profile_icon");
-    preview_banner = document.getElementById("profile_banner");
-    saveButton = document.getElementById("settings_profile_save");
+    settings_icon.value = `${UserManager.getPFP()}`;
+    settings_banner.value = `${UserManager.getBanner()}`;
 
-
-    preview_icon.style.backgroundImage = `url("${getPFP()}")`;
-    preview_banner.style.backgroundImage = `url("${getBanner()}")`;
-
-    settings_username.value = `${limitString(getUsername(), 30)}`;
-    settings_status.value = `${limitString(getStatus(), 100)}`;
-    settings_aboutme.innerText = `${limitString(getAboutme(), 500)}`;
-
-    settings_icon.value = `${getPFP()}`;
-    settings_banner.value = `${getBanner()}`;
-
-    preview_username.innerHTML = `<h2>${limitString(getUsername(), 30)}</h2>`;
-    preview_status.innerText = `${limitString(getStatus(), 100)}`;
-    preview_aboutme.innerText = `${limitString(getAboutme(), 500)}`;
+    preview_username.innerHTML = `<h2>${limitString(UserManager.getUsername(), 30)}</h2>`;
+    preview_status.innerText = `${limitString(UserManager.getStatus(), 100)}`;
+    preview_aboutme.innerText = `${limitString(UserManager.getAboutme(), 500)}`;
+    settings_loginName.value = `${limitString(UserManager.getLoginName(), 500)}`;
 
 
 }
@@ -99,40 +93,40 @@ function saveSettings() {
     // Icon
     try {
         if (settings_icon.value != null && settings_icon.value.length > 0) {
-            setPFP(settings_icon.value);
+            UserManager.setPFP(settings_icon.value);
             console.log("Saved Icon");
             console.log(settings_icon.value);
         }
 
         // Banner
         if (settings_banner.value != null && settings_banner.value.length > 0) {
-            setBanner(settings_banner.value);
+            UserManager.setBanner(settings_banner.value);
             console.log("Saved Banner");
             console.log(settings_banner.value);
         }
 
         // About me
         if (settings_aboutme.value != null && settings_aboutme.value.length > 0) {
-            setAboutme(settings_aboutme.value);
+            UserManager.setAboutme(settings_aboutme.value);
             console.log("Saved about me");
         }
 
 
         // Username
         if (settings_username.value != null && settings_username.value.length >= 3) {
-            setUser(settings_username.value);
+            UserManager.setUser(settings_username.value);
             console.log("Saved user");
         }
 
         // Status
         if (settings_status.value != null && settings_status.value.length > 0) {
-            setStatus(settings_status.value);
+            UserManager.setStatus(settings_status.value);
             console.log("Saved status");
         }
 
         // About me
         if (settings_aboutme.value != null && settings_aboutme.value.length > 0) {
-            setAboutme(settings_aboutme.value);
+            UserManager.setAboutme(settings_aboutme.value);
             console.log("Saved about me");
         }
 
@@ -147,26 +141,6 @@ function saveSettings() {
 function limitString(text, limit) {
     if (text.length <= limit) return text.substring(0, limit);
     else return text.substring(0, limit) + "...";
-}
-
-function setUser(username) {
-    setCookie("username", username, 360);
-}
-
-function setBanner(banner) {
-    setCookie("banner", banner, 360);
-}
-
-function setStatus(status) {
-    setCookie("status", status, 360);
-}
-
-function setPFP(pfp) {
-    setCookie("pfp", pfp, 360);
-}
-
-function setAboutme(aboutme) {
-    setCookie("aboutme", aboutme, 360);
 }
 
 function updatePreview(id) {
@@ -200,11 +174,11 @@ function updatePreview(id) {
         }
 
         // Username
-        if (preview_username.innerText != getUsername() ||
-            preview_status.innerText != getStatus() ||
-            preview_aboutme.innerText != getAboutme() ||
-            settings_icon.value != getPFP() ||
-            settings_banner.value != getBanner()
+        if (preview_username.innerText != UserManager.getUsername() ||
+            preview_status.innerText != UserManager.getStatus() ||
+            preview_aboutme.innerText != UserManager.getAboutme() ||
+            settings_icon.value != UserManager.getPFP() ||
+            settings_banner.value != UserManager.getBanner()
 
         ) {
             console.log("NOt same");
@@ -221,26 +195,8 @@ function updatePreview(id) {
 
 }
 
-window.onload = function () {
-
-    Sleep(500);
-    setPreview();
-}
+setPreview();
 
 function Sleep(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
-
-
-var settings_username = document.getElementById("settings_profile_username");
-var settings_status = document.getElementById("settings_profile_status");
-var settings_aboutme = document.getElementById("settings_profile_aboutme");
-var settings_icon = document.getElementById("settings_profile_icon");
-var settings_banner = document.getElementById("settings_profile_banner");
-
-var preview_username = document.getElementById("profile_username");
-var preview_status = document.getElementById("profile_status");
-var preview_aboutme = document.getElementById("profile_aboutme");
-var preview_icon = document.getElementById("profile_icon");
-var preview_banner = document.getElementById("profile_banner");
-var saveButton = document.getElementById("settings_profile_save");

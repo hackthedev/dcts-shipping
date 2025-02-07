@@ -5,7 +5,7 @@ var saveButton = document.getElementById("settings_profile_save");
 var serverconfigName;
 var serverconfigDesc;
 
-socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageServerInfo" }, function (response) {
+socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageServerInfo" }, function (response) {
 
     if(response.permission == "denied"){
         window.location.href = window.location.origin + "/settings/server";
@@ -17,7 +17,7 @@ socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "mana
 
 
 
-socket.emit("getServerInfo", {id:getID(), token: getToken() }, function (response) {
+socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
     try{
 
         servername = document.getElementById("server_name");
@@ -69,7 +69,7 @@ function updatePreview(){
 function saveSettings(){
     try{
         if(servername.value != null && servername.value.length > 0 && servername.value != serverconfigName){
-            socket.emit("updateServerName", {id:getID(), token: getToken(), value: servername.value }, function (response) {
+            socket.emit("updateServerName", {id: UserManager.getID(), token: UserManager.getToken(), value: servername.value }, function (response) {
                 console.log(response);
 
                 alert(response.msg);
@@ -77,7 +77,7 @@ function saveSettings(){
         }
 
         if(serverdescription.value != null && serverdescription.value.length > 0 && serverdescription.value != serverconfigDesc){
-            socket.emit("updateServerDesc", {id:getID(), token: getToken(), value: serverdescription.value }, function (response) {
+            socket.emit("updateServerDesc", {id: UserManager.getID(), token: UserManager.getToken(), value: serverdescription.value }, function (response) {
                 console.log(response);
                 alert(response.msg);
             });
@@ -89,24 +89,4 @@ function saveSettings(){
         alert("Error while trying to save settings: " + error);
         return;
     }
-}
-
-function setUser(username){
-    setCookie("username", username, 360);
-}
-
-function setBanner(banner){
-    setCookie("banner", banner, 360);
-}
-
-function setStatus(status){
-    setCookie("status", status, 360);
-}
-
-function setPFP(pfp){
-    setCookie("pfp", pfp, 360);
-}
-
-function setAboutme(aboutme){
-    setCookie("aboutme", aboutme, 360);
 }

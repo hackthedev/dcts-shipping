@@ -16,7 +16,7 @@ var serverconfigDesc;
 
 
 
-socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageUploads" }, function (response) {
+socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageUploads" }, function (response) {
 
     if(response.permission == "denied"){
         window.location.href = window.location.origin + "/settings/server";
@@ -27,7 +27,7 @@ socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "mana
 });
 
 
-socket.emit("getServerInfo", {id:getID(), token: getToken() }, function (response) {
+socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
 
     console.log(response);
 
@@ -76,7 +76,7 @@ function updatePreview(){
             setting_localFsLimit.value != localUploadLimit
 
         ){
-            console.log("NOt same");
+            console.log("Not same");
             saveButton.style.display = "block";
         }
         else{
@@ -95,7 +95,7 @@ function updatePreview(){
 function saveSettings(){
     try{
 
-        socket.emit("saveMediaSettings", { id: getID(), token: getToken(), useCloudflare: isChecked(setting_useLocalFs),
+        socket.emit("saveMediaSettings", { id: UserManager.getID(), token: UserManager.getToken(), useCloudflare: isChecked(setting_useLocalFs),
                                         cloudflareAccountId: setting_cfAccountId.value,
                                         cloudflareAccountToken: setting_cfAccountToken.value,
                                         cloudflareHash: setting_cfAccountHash.value,
@@ -110,24 +110,4 @@ function saveSettings(){
         alert("Error while trying to save settings: " + error);
         return;
     }
-}
-
-function setUser(username){
-    setCookie("username", username, 360);
-}
-
-function setBanner(banner){
-    setCookie("banner", banner, 360);
-}
-
-function setStatus(status){
-    setCookie("status", status, 360);
-}
-
-function setPFP(pfp){
-    setCookie("pfp", pfp, 360);
-}
-
-function setAboutme(aboutme){
-    setCookie("aboutme", aboutme, 360);
 }

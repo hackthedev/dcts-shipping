@@ -67,5 +67,9 @@ This is a untested apache configuration and a example on how to setup the revers
 >
 > Its important to change the socket.io path as well because otherwise the client will run into 404 errors trying to find the socket.io endpoint. Both for nginx and apache!
 
+> [!CAUTION]
+>
+> Currently there is issue where the nginx proxy would work but its unable to properly serve images. Until a fix is found its not recommended to use this. If you know what you're doing and find a fix yourself feel free to share it [on the subreddit](https://www.reddit.com/r/dcts/) or [create a issue on github](https://github.com/hackthedev/dcts-shipping/).
+
 [^portnote]: The port configured inside of your config.json file
 

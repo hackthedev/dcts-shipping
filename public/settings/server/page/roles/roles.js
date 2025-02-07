@@ -7,7 +7,7 @@ var editedPermissions = {};
 var currentRoleId = "";
 
 
-socket.emit("checkPermission", {id:getID(), token: getToken(), permission: ["manageRoles", "manageGroup"] }, function (response) {
+socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: ["manageRoles", "manageGroup"] }, function (response) {
 
     if(response.permission == "denied"){
         window.location.href = window.location.origin + "/settings/server";
@@ -26,7 +26,7 @@ function saveNumber(el){
 }
 
 
-socket.emit("getServerRoles", {id:getID(), token: getToken() }, function (response) {
+socket.emit("getServerRoles", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
 
     rolelist = document.getElementById("rolelist");
     roleColor = document.getElementById("roleColor");
@@ -85,7 +85,7 @@ function saveAppearance(){
         serverRoleResponse[currentRoleId].info.displaySeperate = 0;
     }
 
-    socket.emit("updateRoleAppearance", {id:getID(), token: getToken(), roleId: currentRoleId, data: serverRoleResponse[currentRoleId] }, function (response) {
+    socket.emit("updateRoleAppearance", {id: UserManager.getID(), token: UserManager.getToken(), roleId: currentRoleId, data: serverRoleResponse[currentRoleId] }, function (response) {
         alert(response.msg);
         window.location.reload();
     });
@@ -104,7 +104,7 @@ function saveSorting(){
         sortArray.push(role.id);
     })
 
-    socket.emit("updateRoleHierarchy", {id:getID(), token: getToken(), sorted: sortArray }, function (response) {
+    socket.emit("updateRoleHierarchy", {id: UserManager.getID(), token: UserManager.getToken(), sorted: sortArray }, function (response) {
 
         alert(response.msg);
         window.location.reload();
@@ -114,7 +114,7 @@ function saveSorting(){
 function removeFromRole(roleId, userId){
 
     console.log(`Removing user ${userId} from role `);
-    socket.emit("removeUserFromRole", {id:getID(), token: getToken(), role: roleId, target: userId }, function (response) {
+    socket.emit("removeUserFromRole", {id: UserManager.getID(), token: UserManager.getToken(), role: roleId, target: userId }, function (response) {
         alert(response.msg);
         window.location.reload();
     });
@@ -125,7 +125,7 @@ function savePermissions(){
     console.log("Saviong")
     console.log(editedServerRoleResponse[currentRoleId].permissions)
 
-    socket.emit("saveRolePermissions", {id:getID(), token: getToken(), role: currentRoleId, permissions: editedServerRoleResponse[currentRoleId].permissions }, function (response) {
+    socket.emit("saveRolePermissions", {id: UserManager.getID(), token: UserManager.getToken(), role: currentRoleId, permissions: editedServerRoleResponse[currentRoleId].permissions }, function (response) {
         alert(response.msg);
         window.location.reload();
     });
@@ -140,14 +140,14 @@ function addToRole(){
         return;
     }
 
-    socket.emit("addUserToRole", {id:getID(), token: getToken(), role: currentRoleId, target: userId }, function (response) {
+    socket.emit("addUserToRole", {id: UserManager.getID(), token: UserManager.getToken(), role: currentRoleId, target: userId }, function (response) {
         alert(response.msg);
         window.location.reload();
     });
 }
 
 function createRole(){
-    socket.emit("createRole", {id:getID(), token: getToken() }, function (response) {
+    socket.emit("createRole", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
         alert(response.msg);
         window.location.reload();
     });
@@ -210,7 +210,7 @@ function tickSetting(element){
 
 
 function deleteRole() {
-    socket.emit("deleteRole", {id: getID(), token: getToken(), roleId: currentRoleId}, function (response) {
+    socket.emit("deleteRole", {id: UserManager.getID(), token: UserManager.getToken(), roleId: currentRoleId}, function (response) {
         alert(response.msg);
         window.location.reload();
     });
@@ -229,6 +229,8 @@ function loadRolePerms(roleId){
             role.style.backgroundColor = "transparent";
         }
     })
+
+    document.getElementById("displaySeperate").checked = serverRoleResponse[roleId].displaySeperate;
 
 
 
@@ -260,17 +262,22 @@ function loadRolePerms(roleId){
         console.log(children[0])
         console.log(children)
 
-        if (roleperms[perm] == 1){
-            children[0].checked = true;
-        }
-        else{
-            if(children[0].type == "number"){
-                children[0].value = roleperms[perm];
+        try{
+            if (roleperms[perm] == 1){
+                children[0].checked = true;
             }
             else{
-                children[0].checked = false;
+                if(children[0].type == "number"){
+                    children[0].value = roleperms[perm];
+                }
+                else{
+                    children[0].checked = false;
+                }
+    
             }
-
+        }
+        catch (ex){
+            console.log(ex)
         }
     });
 
@@ -294,7 +301,7 @@ function loadRolePerms(roleId){
 
         // resolve member
 
-        socket.emit("resolveMember", {id:getID(), token: getToken(), target: serverRoleResponse[currentRoleId].members[member] }, function (response) {
+        socket.emit("resolveMember", {id: UserManager.getID(), token: UserManager.getToken(), target: serverRoleResponse[currentRoleId].members[member] }, function (response) {
 
             var code = `<div class="memberlist-container">
                         <div class="memberlist-banner" style="background-image: url('${response.data.banner}');"></div>
@@ -302,7 +309,7 @@ function loadRolePerms(roleId){
                         <div class="memberlist-username">${response.data.name}</div>
     
                         <div class="memberlist-actions">
-                            <input onclick="removeFromRole(${currentRoleId}, ${response.data.id})" type="button" value="Remove from Role">
+                            ${currentRoleId == 0 ? "" : `<input onclick="removeFromRole(${currentRoleId}, ${response.data.id})" type="button" value="Remove from Role">`}
                         </div>
                     </div>`;
 

@@ -1,0 +1,69 @@
+#serverbanner-container {
+    height: calc(200px - 40px);
+    width: calc(100%);
+    background-color: transparent;
+    margin: 0 0 20px 0;
+
+    display: block;
+    float: left;
+
+
+    overflow: hidden;
+    box-shadow: 0 8px 8px -2px black;
+}
+
+#serverbanner-image {
+    height: calc(100%);
+    width: calc(100%);
+    -webkit-transition: transform .5s ease;
+
+    object-fit: cover;
+    background-color: transparent;
+    background-position: center center;
+
+    border-radius: 6px;
+
+}
+
+#serverbanner-image:hover {
+    -webkit-transform: scale(1.1);
+    -moz-transform: scale(1.1);
+    -o-transform: scale(1.1);
+    transform: scale(1.1);
+
+
+}
+
+#serverbanner-image:not(:hover) {
+    -webkit-transform: scale(1);
+    -moz-transform: scale(1);
+    -o-transform: scale(1);
+    transform: scale(1);
+}
+
+#channellist {
+    height: calc(100% - 40px - 50px);
+    width: calc(300px);
+
+    background-color: #24292E;
+    color: white;
+
+    display: block;
+    float: left;
+}
+
+#channeltree {
+    display: block;
+    float: left;
+
+    height: calc(100% - 32px - 175px - 32px);
+    width: calc(100% - 32px);
+
+    padding: 16px;
+    overflow-y: auto;
+}
+
+#channeltree details ul li {
+    margin-left: 25px;
+    /*  list-style-image: url("img/hashtag.png"); */
+}

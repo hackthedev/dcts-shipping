@@ -5,7 +5,7 @@ import { serverconfig, xssFilters, colors, saveConfig } from "../../../index.mjs
 import { consolas } from "../io.mjs";
 import { io } from "../../../index.mjs";
 import { getMemberHighestRole, getUserBadges } from "./helper.mjs";
-import { checkBool, checkEmptyConfigVar } from "../main.mjs";
+import { checkBool, checkEmptyConfigVar, copyObject } from "../main.mjs";
 
 var serverconfigEditable = serverconfig;
 
@@ -19,102 +19,106 @@ export function getMemberLastOnlineTime(memberID) {
     return minutesPassed
 }
 
-export function hasPermission(userId, permissions, channelId = null) {
+export function hasPermission(userId, permissions, channelOrGroupId = null) {
     const userRoles = resolveRolesByUserId(userId);
 
     // Ensure permissions is an array
     const permissionsToCheck = Array.isArray(permissions) ? permissions : [permissions];
 
-    // Helper to check permissions for a given role in a permissions object
-    function checkRolePermissions(roles, permissionsObj) {
-        for (const role of roles) {
+    // Sort roles by their sortId in descending order (highest priority first)
+    const sortedRoles = userRoles
+        .map((roleId) => ({
+            id: roleId,
+            sortId: serverconfig.serverroles[roleId]?.info?.sortId || 0,
+        }))
+        .sort((a, b) => b.sortId - a.sortId);
+
+    // Helper to check permissions for sorted roles in a permissions object
+    function checkPermissions(sortedRoles, permissionsObj) {
+        let result = null; // Tracks whether permissions are granted or denied
+
+        for (const { id: role } of sortedRoles) {
             const rolePermissions = permissionsObj[role];
             if (rolePermissions) {
-                // Check if all required permissions are explicitly set to 1 for the role
-                const allPermissionsGranted = permissionsToCheck.every(
-                    (perm) => rolePermissions[perm] === 1
-                );
-                if (allPermissionsGranted) return true;
-
-                // If any permission is explicitly denied (0), deny access immediately
-                const anyPermissionDenied = permissionsToCheck.some(
-                    (perm) =>
-                        rolePermissions[perm] === 0 || // Explicitly denied
-                        !(perm in rolePermissions) // Undefined permission
-                );
-                if (anyPermissionDenied) return false;
+                // Deny takes precedence in conflicts
+                if (permissionsToCheck.some((perm) => rolePermissions[perm] === 0)) {
+                    result = false;
+                }
+                // Grant if allowed
+                if (permissionsToCheck.every((perm) => rolePermissions[perm] === 1)) {
+                    result = true;
+                }
             }
         }
-        return undefined; // Permissions not explicitly defined
+        return result; // Return the final decision (true/false) based on precedence
     }
 
-    // 1. Check if the user has the "administrator" permission at the server level (global bypass)
+    // 1. Check if the user has "administrator" permission at the server level (global bypass)
     for (const role of userRoles) {
         const roleConfig = serverconfig.serverroles[role];
-        if (roleConfig?.permissions["administrator"] === 1) {
+        if (roleConfig?.permissions?.administrator === 1) {
             return true; // Administrator bypasses all checks
         }
     }
 
-    // 2. Check Channel Permissions (Highest Priority)
-    if (channelId) {
-        const group = resolveGroupByChannelId(channelId);
-        const category = resolveCategoryByChannelId(channelId);
-
-        if (group && category) {
+    // 2. Check if the provided ID is a channel or a group
+    const group = resolveGroupByChannelId(channelOrGroupId);
+    if (group) {
+        // Handle channel permissions
+        const category = resolveCategoryByChannelId(channelOrGroupId);
+        if (category) {
             const channelPermissions =
-                serverconfig.groups[group]?.channels?.categories[category]?.channel[channelId]?.permissions;
+                serverconfig.groups[group]?.channels?.categories[category]?.channel[channelOrGroupId]?.permissions;
 
             if (channelPermissions) {
-                const result = checkRolePermissions(userRoles, channelPermissions);
-                if (result !== undefined) {
-                    return result; // Use explicitly defined or inherited value
-                }
+                const channelResult = checkPermissions(sortedRoles, channelPermissions);
+                if (channelResult !== null) return channelResult; // Return if permissions are explicitly set
             }
         }
-    }
+    } else if (serverconfig.groups[channelOrGroupId]) {
+        // Handle group permissions if the ID corresponds to a valid group
+        const groupPermissions = serverconfig.groups[channelOrGroupId]?.permissions;
 
-    // 3. Check Group Role Permissions (Middle Priority)
-    for (const group in serverconfig.groups) {
-        const groupPermissions = serverconfig.groups[group]?.permissions || {};
-
-        const result = checkRolePermissions(userRoles, groupPermissions);
-        if (result !== undefined) {
-            return result; // Use explicitly defined or inherited value
+        if (groupPermissions) {
+            const groupResult = checkPermissions(sortedRoles, groupPermissions);
+            if (groupResult !== null) return groupResult; // Return if permissions are explicitly set
         }
     }
 
-    // 4. Check Server Role Permissions (Lowest Priority)
-    for (const role of userRoles) {
+    // 3. Check group permissions for all groups (middle priority)
+    for (const groupId in serverconfig.groups) {
+        const groupPermissions = serverconfig.groups[groupId]?.permissions || {};
+        const groupResult = checkPermissions(sortedRoles, groupPermissions);
+        if (groupResult !== null) return groupResult; // Return if permissions are explicitly set
+    }
+
+    // 4. Check server role permissions (lowest priority)
+    for (const { id: role } of sortedRoles) {
         const roleConfig = serverconfig.serverroles[role];
-        if (roleConfig) {
-            const rolePermissions = roleConfig.permissions;
-            if (rolePermissions) {
-                // Check if all required permissions are explicitly set to 1 for the role
-                const allPermissionsGranted = permissionsToCheck.every(
-                    (perm) => rolePermissions[perm] === 1
-                );
-                if (allPermissionsGranted) return true;
-
-                // If any permission is explicitly denied (0), deny access immediately
-                const anyPermissionDenied = permissionsToCheck.some(
-                    (perm) =>
-                        rolePermissions[perm] === 0 || // Explicitly denied
-                        !(perm in rolePermissions) // Undefined permission
-                );
-                if (anyPermissionDenied) return false;
+        if (roleConfig?.permissions) {
+            // Deny if any permission is explicitly set to 0
+            if (permissionsToCheck.some((perm) => roleConfig.permissions[perm] === 0)) {
+                return false;
+            }
+            // Grant if all permissions are explicitly allowed
+            if (permissionsToCheck.every((perm) => roleConfig.permissions[perm] === 1)) {
+                return true;
             }
         }
     }
 
-    // If undefined across all levels, return null (or a default fallback value)
-    return null;
+    // Explicitly deny if no permissions are set
+    return false;
 }
 
 
 
-
 export function checkUserChannelPermission(channel, userId, perms) {
+
+    return hasPermission(userId, perms, channel);
+
+    /* DEPRECATED */
+
     const userRoles = resolveRolesByUserId(userId);
     const group = resolveGroupByChannelId(channel);
     const category = resolveCategoryByChannelId(channel);
@@ -410,7 +414,7 @@ export function getMemberList(member, channel) {
                     }
 
                     // If the user has the permission to see the channel
-                    if (checkUserChannelPermission(channel, member, "viewChannel") == true) {
+                    if (hasPermission(member, "viewChannel", channel) == true) {
 
                         // If role should be displayed and
                         // the current role is not the member's highest role and (dont remember why)
@@ -567,6 +571,21 @@ export function getGroupList(member) {
     return code;
 }
 
+function setJson(obj, path, value) {
+    const keys = path.split(".");
+    let current = obj;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]] || typeof current[keys[i]] !== "object") {
+            current[keys[i]] = {}; // Ensure parent object exists
+        }
+        current = current[keys[i]];
+    }
+
+    current[keys[keys.length - 1]] = copyObject(value); // Deep copy before setting
+}
+
+
 export function getChannelTree(member) {
 
     member.id = xssFilters.inHTMLData(member.id)
@@ -578,7 +597,8 @@ export function getChannelTree(member) {
     var addedChannels = [];
     var addedCategories = [];
 
-    var treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`;
+    var treecode = "";
+    let addedInitialCode = false;
 
     var groups = serverconfig.groups;
     var roles = serverconfig.serverroles;
@@ -597,6 +617,8 @@ export function getChannelTree(member) {
 
 
     var added_channels = [];
+    let channeltree = {};
+
 
     // Foreach channel in the category, display it on the web page
     sortedCats = sortedCats.map((key) => catCollection[key]);
@@ -605,14 +627,21 @@ export function getChannelTree(member) {
         showedCategory = false;
 
         // Show Category if can edit channels (grammar 101)
-        if (hasPermission(member.id, "manageChannels", member.group) == true) {
+        if (hasPermission(member.id, "manageChannels", group) == true) {
+
+            // show group name etc if allowed to
+            if(!addedInitialCode) treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`; addedInitialCode = true;
+
             // Add Category
-            treecode += "<details open>";
+            treecode += "<details open draggable='true'>";
             treecode += `<summary class="categoryTrigger" id="category-${cat.info.id}" style="color: #ABB8BE;">${cat.info.name}</summary>`;
             treecode += `<ul>`
 
             // change flag that it was already showed
             showedCategory = true;
+
+            setJson(channeltree, `groups.${group}.info`, serverconfig.groups[group].info)
+            setJson(channeltree, `groups.${group}.categories.${cat.info.id}.info`, serverconfig.groups[group].channels.categories[cat.info.id].info)
         }
 
         // Sort Categories based on sortID (Was a real pain to find out)
@@ -630,15 +659,21 @@ export function getChannelTree(member) {
             // and the category has at least one channel
             // and the user is allowed to view the channel
             if (
-                hasPermission(member.id, "viewGroup", member.group) &&
+                hasPermission(member.id, ["viewGroup"], group) &&
                 showedCategory == false && sortedChans.length > 0 &&
-                checkUserChannelPermission(chan.id, member.id, "viewChannel")
+                hasPermission(member.id, ["viewChannel"], chan.id)
             ) {
+                // show group name etc if allowed to
+                if(!addedInitialCode) treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`; addedInitialCode = true;
+
                 // Add Category
                 treecode += "<details open>";
                 treecode += `<summary class="categoryTrigger" id="category-${cat.info.id}" style="color: #ABB8BE;">${cat.info.name}</summary>`;
                 treecode += `<ul>`
                 showedCategory = true;
+                
+                setJson(channeltree, `groups.${group}.info`, serverconfig.groups[group].info)
+                setJson(channeltree, `groups.${group}.categories.${cat.info.id}.info`, serverconfig.groups[group].channels.categories[cat.info.id].info)
             }
 
             // Foreach server role
@@ -648,19 +683,21 @@ export function getChannelTree(member) {
                 if (roles[role].members.includes(member.id)) {
 
                     // if the user has the permission to either view the channel or manage channels
-                    if (checkUserChannelPermission(chan.id, member.id, "viewChannel") || hasPermission(member.id, "manageChannels", member.group)) {
+                    if (hasPermission(member.id, "viewChannel", chan.id) || hasPermission(member.id, "manageChannels", member.group)) {
 
+                        
+                        setJson(channeltree, `groups.${group}.categories.${cat.info.id}.channel.${chan.id}`, serverconfig.groups[group].channels.categories[cat.info.id].channel[chan.id])
 
                         if (added_channels.includes(chan.id + "_" + chan.name) == false) {
 
                             // if text channel
                             if (chan.type == "text") {
-                                treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}')"><li class="channelTrigger" id="channel-${chan.id}" style="color: #ABB8BE;">⌨ ${chan.name}</li></a>`;
+                                treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}')"><li class="channelTrigger sortable-channels" draggable='true' id="channel-${chan.id}" style="color: #ABB8BE;">⌨ ${chan.name}</li></a>`;
 
                                 added_channels.push(chan.id + "_" + chan.name)
                             }
                             else if (chan.type == "voice") {
-                                treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}', true);"><li class="channelTrigger" id="channel-${chan.id}" style="color: #ABB8BE;">🎤 ${chan.name}</li></a>`;
+                                treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}', true);"><li class="channelTrigger sortable-channels" draggable='true' id="channel-${chan.id}" style="color: #ABB8BE;">🎤 ${chan.name}</li></a>`;
                                 added_channels.push(chan.id + "_" + chan.name)
                             }
                         }
@@ -680,7 +717,7 @@ export function getChannelTree(member) {
 
     });
 
-    return treecode;
+    return channeltree;
 }
 
 export function banUser(socket, member) {
@@ -737,36 +774,46 @@ export function unbanIp(socket) {
         saveConfig(serverconfigEditable);
     }
     else{
-        console.log("does not have propertie " + ip)
+        console.log("does not have property " + ip)
     }
 }
 
-export function findInJson(obj, keyToFind, valueToFind) {
-    let result = null; // Store the first matching result
+export function findInJson(obj, keyToFind, valueToFind, returnPath = false) {
+    let result = null;
+    let foundPath = "";
 
-    function search(currentObj) {
+    function search(currentObj, currentPath = "") {
         if (typeof currentObj !== "object" || currentObj === null) {
             return;
         }
 
         for (const key in currentObj) {
+            let newPath = currentPath ? `${currentPath}.${key}` : key; // ✅ Build full path
+
             if (key === keyToFind && currentObj[key] === valueToFind) {
-                result = currentObj; // Save the current object containing the key-value pair
-                return; // Stop searching further
+                if (currentPath.includes("channel")) { // ✅ Ensure it's a CHANNEL path
+                    result = currentObj; 
+                    foundPath = currentPath; // ✅ Fix: Store only the path without `.id`
+                    return;
+                }
             }
 
-            // Recursively search nested objects
+            // ✅ Recursively search nested objects
             if (typeof currentObj[key] === "object" && currentObj[key] !== null) {
-                search(currentObj[key]);
-                if (result) return; // Stop further recursion if result is found
+                search(currentObj[key], newPath);
+                if (result) return; // ✅ Stop recursion when found
             }
         }
     }
 
     search(obj);
 
-    return result; // Return the matching object or null if not found
+    return returnPath ? foundPath : result; // ✅ Return full JSON path if requested
 }
+
+
+
+
 
 
 export function formatDateTime(date) {

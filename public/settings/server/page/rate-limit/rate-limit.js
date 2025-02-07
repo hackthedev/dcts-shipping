@@ -9,7 +9,7 @@ var serverconfigName;
 var serverconfigDesc;
 
 
-socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageRateLimit" }, function (response) {
+socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageRateLimit" }, function (response) {
 
     if(response.permission == "denied"){
         window.location.href = window.location.origin + "/settings/server";
@@ -20,7 +20,7 @@ socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "mana
 });
 
 
-socket.emit("getServerInfo", {id:getID(), token: getToken() }, function (response) {
+socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
 
     console.log(response);
     setting_rateLimit = document.getElementById("rate-limit");
@@ -66,7 +66,7 @@ function updatePreview(){
 function saveSettings(){
     try{
 
-        socket.emit("saveRateSettings", { id: getID(), token: getToken(),
+        socket.emit("saveRateSettings", { id: UserManager.getID(), token: UserManager.getToken(),
                                         newRateLimit: setting_rateLimit.value,
                                         newDropInterval: setting_dropInterval.value
         }, function (response) {

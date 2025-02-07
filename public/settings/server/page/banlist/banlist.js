@@ -7,7 +7,7 @@ var saveButton = document.getElementById("settings_profile_save");
 var serverconfigName;
 var serverconfigDesc;
 
-socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageBans" }, function (response) {
+socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageBans" }, function (response) {
 
     if(response.permission == "denied"){
         window.location.href = window.location.origin + "/settings/server";
@@ -34,7 +34,7 @@ function unbanUser(id) {
     }
 
 
-    socket.emit("unbanUser", {id: getID(), token: getToken(), target: id}, function (response) {
+    socket.emit("unbanUser", {id: UserManager.getID(), token: UserManager.getToken(), target: id}, function (response) {
         //notify("User was banned by " + response.data.name, "info", null, "normal");
         if(response.type == "success"){
             notify(response.msg, "success");
@@ -52,7 +52,7 @@ function unbanUser(id) {
 function getBans() {
     var emojiContainer = document.getElementById("settings_banlist_container");
 
-    socket.emit("getBans", { id: getID(), token: getToken() }, function (response1) {
+    socket.emit("getBans", { id: UserManager.getID(), token: UserManager.getToken() }, function (response1) {
         try {
             if (response1.type == "success") {
                 emojiContainer.innerHTML = ""; // Clear previous entries

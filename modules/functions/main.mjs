@@ -1,3 +1,4 @@
+import { error } from "console";
 import {
     debugmode,
     serverconfig,
@@ -18,6 +19,7 @@ import {
 } from "../../index.mjs"
 import { banIp, getNewDate } from "./chat/main.mjs";
 import { consolas } from "./io.mjs";
+import Logger from "./logger.mjs";
 
 var serverconfigEditable;
 
@@ -244,7 +246,53 @@ export function handleTerminalCommands(command, args) {
 }
 
 export function copyObject(obj) {
-    return JSON.parse(JSON.stringify(obj));
+    if(!obj){
+        Logger.debug("copyObject obj was null or undefined")
+        return;
+    }
+    
+    try{
+        return JSON.parse(JSON.stringify(obj));
+    }
+    catch (parseerror){
+        Logger.error("Unable to copy json object;")
+        Logger.error(parseerror)
+        console.log(obj)
+    }
+}
+
+export function moveJson(obj, fromPath, toPath) {
+    const getNestedObject = (obj, path) => path.split('.').reduce((o, key) => (o && o[key] !== undefined) ? o[key] : undefined, obj);
+    const setNestedObject = (obj, path, value) => {
+        const keys = path.split('.');
+        let current = obj;
+        for (let i = 0; i < keys.length - 1; i++) {
+            if (!current[keys[i]]) current[keys[i]] = {}; // Ensure path exists
+            current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+    };
+    const deleteNestedObject = (obj, path) => {
+        const keys = path.split('.');
+        let current = obj;
+        for (let i = 0; i < keys.length - 1; i++) {
+            if (!current[keys[i]]) return; // Path does not exist
+            current = current[keys[i]];
+        }
+        delete current[keys[keys.length - 1]];
+    };
+
+    const value = getNestedObject(obj, fromPath);
+    if (value === undefined) {
+        console.error(`❌ Path not found: ${fromPath}`);
+        return;
+    }
+
+    setNestedObject(obj, toPath, value);
+    deleteNestedObject(obj, fromPath);
+    console.log(`✅ Moved data from ${fromPath} to ${toPath}`);
+
+    return obj;
 }
 
 export function checkBool(value, type) {

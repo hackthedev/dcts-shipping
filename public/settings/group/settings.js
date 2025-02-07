@@ -5,7 +5,7 @@ console.log("%c" + "People can use the console to steal your account xo !", "col
 // served the page, so we dont have to pass the server url
 var socket = io.connect();
 
-socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageGRoups" }, function (response) {
+socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageGroups" }, function (response) {
     if(response.permission == "denied"){
         window.location.href = window.location.origin;
     }

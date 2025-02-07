@@ -1,5 +1,5 @@
 import {server, serverconfig, http, https, app, setServer, fs} from "../../index.mjs";
-import {consolas} from "./io.mjs";
+import Logger from "./logger.mjs";
 
 var serverconfigEditable = serverconfig;
 
@@ -14,13 +14,11 @@ export function checkSSL(){
             requestCert: false,
             rejectUnauthorized: false },app));
 
-        consolas("Running Server in public (production) mode.".green);
-        consolas(" ");
+        Logger.success("Running Server in public (production) mode with SSL.");
     }
     else{
-        consolas("Running Server in localhost (testing) mode.".yellow);
-        consolas("If accessed via the internet, SSL wont work and will cause problems".yellow);
-        consolas(" ");
+        Logger.warn("Running Server in localhost (testing) mode.");
+        Logger.warn("If accessed via the internet, SSL wont work and will cause problems");
 
         setServer(http.createServer(app))
     }

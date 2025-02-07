@@ -5,10 +5,11 @@ console.log("%c" + "People can use the console to steal your account xo !", "col
 // served the page, so we dont have to pass the server url
 var socket = io.connect();
 
-socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
-    aboutme: getAboutme(), banner: getBanner()}, function (response) {});
+socket.emit("userConnected", { id: UserManager.getID(), name: UserManager.getUsername(), icon: UserManager.getPFP(), 
+    status: UserManager.getStatus(), token: UserManager.getToken(),
+    aboutme: UserManager.getAboutme(), banner: UserManager.getBanner()}, function (response) {});
 
-socket.emit("checkPermission", {id:getID(), token: getToken(), permission: ["manageServer",
+socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: ["manageServer",
     "manageGroup",
     "manageChannels",
     "manageUploads",
@@ -41,7 +42,7 @@ checkEmptyElements.forEach(emptyElement => {
             if(link.id.length <= 0 || link == null) { return; }
 
             console.log(`Checking setting ${link.id}`)
-            socket.emit("checkPermission", {id:getID(), token: getToken(), permission: link.id  }, function (response) {
+            socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: link.id  }, function (response) {
 
                 if(response.permission == "denied"){
                     //console.log(link.id)
@@ -86,65 +87,24 @@ checkEmptyElements.forEach(emptyElement => {
 
 var page = getUrlParams("page");
 
-loadPageContent();
+loadPageContent(page);
 
-/*
-if(page == null){
-    /*
-    fetch(`page/server-info/server-info.html`)
-        .then(response=> response.text())
-        .then(text=> document.getElementById('content').innerHTML = text);
-
-    var head  = document.getElementsByTagName('head')[0];
-    var link  = document.createElement('link');
-    link.rel  = 'stylesheet';
-    link.type = 'text/css';
-    link.href = `page/server-info/server-info.css`;
-    link.media = 'all';
-    head.appendChild(link);
-
-    var jsc  = document.createElement('script');
-    jsc.src = window.location.href + "/page/server-info/server-info.js";;
-    head.appendChild(jsc);
-
-     */
-    /*
-}
-else{
-    fetch(`page/${getUrlParams("page")}/${getUrlParams("page")}.html`)
-        .then(response=> response.text())
-        .then(text=> document.getElementById('content').innerHTML = text);
-
-    var head  = document.getElementsByTagName('head')[0];
-    var link  = document.createElement('link');
-    link.rel  = 'stylesheet';
-    link.type = 'text/css';
-    link.href = `page/${page}/${page}.css`;
-    link.media = 'all';
-    head.appendChild(link);
-
-    var jsc  = document.createElement('script');
-    jsc.src = window.location.href.replace("?page="+getUrlParams("page"), "") + `/page/${page}/${page}.js`;
-    head.appendChild(jsc);
-}
-*/
-
-async function loadPageContent() {
-    const page = getUrlParams("page") || "server-info";
+async function loadPageContent(page) {
+    if(!page) page = "server-info";
 
     try {
-        // Load HTML content
-        const response = await fetch(`page/${page}/${page}.html`);
-        if (!response.ok) throw new Error(`Failed to load HTML for ${page}`);
-        const html = await response.text();
-        document.getElementById("content").innerHTML = html;
-
         // Attach CSS
         const head = document.head;
         const link = document.createElement("link");
         link.rel = "stylesheet";
         link.href = `page/${page}/${page}.css`;
         head.appendChild(link);
+
+        // Load HTML content
+        const response = await fetch(`page/${page}/${page}.html`);
+        if (!response.ok) throw new Error(`Failed to load HTML for ${page}`);
+        const html = await response.text();
+        document.getElementById("content").innerHTML = html;
 
         // Load JS after HTML is loaded
         const script = document.createElement("script");
@@ -159,29 +119,6 @@ async function loadPageContent() {
 }
 
 
-function setCookie(name,value,days) {
-    var expires = "";
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
-}
-function getCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-    }
-    return null;
-}
-function eraseCookie(name) {
-    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-}
-
 
 function setUrl(param){
     window.history.replaceState(null, null, param); // or pushState
@@ -193,96 +130,4 @@ function getUrlParams(param){
     var urlChannel = urlParams.get(param);
 
     return urlChannel;
-}
-
-function getToken(){
-    var token = getCookie("token");
-
-    if(token == null || token.length <= 0){
-        return null;
-    }
-    else{
-        return token;
-    }
-}
-
-function getAboutme(){
-    var aboutme = getCookie("aboutme");
-
-    if(aboutme == null || aboutme.length <= 0){
-
-        return "";
-    }
-    else{
-        //updateUsernameOnUI(aboutme);
-        return aboutme;
-    }
-}
-
-function getBanner(){
-    var banner = getCookie("banner");
-
-    if(banner == null || banner.length <= 0){
-        return "";
-    }
-    else{
-        //updateUsernameOnUI(aboutme);
-        return banner;
-    }
-}
-
-function getID(){
-    var id = getCookie("id");
-
-    if(id == null || id.length != 12){
-        id = generateId(12);
-        setCookie("id", id, 360);
-        return id;
-    }
-    else{
-        return id;
-    }
-}
-
-function getPFP(){
-    var pfp = getCookie("pfp");
-
-    if(pfp == null || pfp.length <= 0){
-
-        if(pfp.length <= 0){
-            pfp = "https://wallpapers-clan.com/wp-content/uploads/2022/05/cute-pfp-25.jpg";
-        }
-        setCookie("pfp", pfp, 360);
-        return pfp;
-    }
-
-    return pfp;
-}
-
-function getStatus(){
-    var status = getCookie("status");
-
-    if(status == null || status.length <= 0){
-        setCookie("status", "Hey im new!", 360);
-        return status;
-    }
-    else{
-        return status;
-    }
-}
-
-function getUsername(){
-    var username = getCookie("username");
-
-    if(username == null || username.length <= 0){
-        username = prompt("Whats your username?");
-
-        if(username.length > 0){
-            setCookie("username", username, 360);
-            return username;
-        }
-    }
-    else{
-        return username;
-    }
 }

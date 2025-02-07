@@ -68,13 +68,7 @@ socket.emit("getServerRoles", {id:getID(), token: getToken() }, function (respon
 
 
         code += `
-                   <div class="role-entry-container" id="${role.info.id}">
-                       <div onclick="moveRoleUp(${role.info.id})" style="background-image: url('/img/up.png');background-size: cover;object-fit: cover;background-position: center center;
-                       width: 10px; height: 10px;display: inline-block;"></div>
-                       
-                       <div onclick="moveRoleDown(${role.info.id})" style="background-image: url('/img/down.png');background-size: cover;object-fit: cover;background-position: center center;
-                       width: 10px; height: 10px;display: inline-block;"></div>
-                       
+                   <div class="role-entry-container" id="${role.info.id}">                       
                         <p class="role-entry" onclick="loadRolePerms('${role.info.id}')" id="${role.info.id}" style="display: inline-block;color: ${role.info.color};">
                             ${role.info.name}
                         </p>

@@ -5,7 +5,7 @@ let matches = []; // Stores the filtered emoji list
 function initializeEmojiAutocomplete(element, quill) {
 
     // Fetch emojis
-    socket.emit("getEmojis", { id: getID(), token: getToken() }, function (response) {
+    socket.emit("getEmojis", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
         if (response.type === "success") {
             emojiList = response.data; // Store full emoji names
         } else {

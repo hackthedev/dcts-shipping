@@ -37,6 +37,8 @@ export var request = require('request');
 export var xssFilters = require('xss-filters');
 const crypto = require('crypto');
 
+import Logger from "./modules/functions/logger.mjs";
+
 
 var checkedMediaCacheUrls = {};
 export var usersocket = []
@@ -54,7 +56,7 @@ var socketToIP = [];
 
 export var allowLogging = false;
 export var debugmode = false;
-export var versionCode = 401;
+export var versionCode = 419;
 
 
 // config file saving
@@ -107,7 +109,8 @@ import {
     hashPassword,
     getCastingMemberObject,
     findAndVerifyUser,
-    checkMemberMute
+    checkMemberMute,
+    moveJson
 } from "./modules/functions/main.mjs"
 
 // IO related functions
@@ -123,7 +126,6 @@ import { checkSSL } from "./modules/functions/http.mjs"
 
 // Chat functions
 import {
-    checkUserChannelPermission,
     hasPermission,
     getChannelTree,
     resolveGroupByChannelId,
@@ -276,11 +278,6 @@ const processPlugins = async () => {
     }
 };
 
-
-
-// Check if new version is available
-checkVersionUpdate();
-
 // Create a connection pool if sql is enabled
 export let pool = null;
 if (serverconfig.serverinfo.sql.enabled == true) {
@@ -337,25 +334,18 @@ if (serverconfig.serverinfo.sql.enabled == true) {
 
 
 
-consolas(" ",);
-consolas(" ",);
-consolas(" ",);
-consolas(" ",);
-
-consolas(colors.brightGreen(`Welcome to DCTS`));
-consolas(colors.brightGreen(`Checkout our subreddit at https://www.reddit.com/r/dcts/hot/`));
-consolas(" ");
-consolas(colors.cyan(`You're running version ` + versionCode));
+Logger.success(`Welcome to DCTS`);
+Logger.success(`Checkout our subreddit at https://www.reddit.com/r/dcts/`);
+Logger.success(`The Official Github Repo: https://github.com/hackthedev/dcts-shipping/`);
+Logger.success(`Support the project at https://ko-fi.com/shydevil`, Logger.colors.blink);
+Logger.info(`You're running version ` + versionCode);
 
 // Check if new Version exists
 var checkVer = await checkVersionUpdate()
 if (checkVer != null) {
-    consolas(colors.cyan.underline(`New version ${checkVer} is available!`));
-    consolas(colors.cyan(`Download: https://github.com/hackthedev/dcts-shipping/releases`));
+    Logger.info(`New version ${checkVer} is available!`, Logger.colors.fgCyan + Logger.colors.bright);
+    Logger.info(`Download: https://github.com/hackthedev/dcts-shipping/releases`, Logger.colors.fgCyan + Logger.colors.bright);
 }
-
-consolas(" ");
-consolas(" ");
 
 // Check if SSL is used or not
 checkSSL();
@@ -364,15 +354,10 @@ checkSSL();
 process.on('uncaughtException', function (err) {
 
     // Handle the error safely
-    consolas("");
-    consolas("");
-    consolas("UNEXPECTED ERROR".red);
-    consolas(" ");
-    consolas(colors.red(err.message));
-
-    console.log(" ");
-    console.log("Details: ".red);
-    console.log(colors.grey(err).italic);
+    Logger.error("UNEXPECTED ERROR");
+    Logger.error(err.message);
+    Logger.error("Details: ");
+    Logger.error(err.stack);
 
     // Log Error To File
     var date = new Date().toLocaleString();
@@ -385,7 +370,7 @@ process.on('uncaughtException', function (err) {
         if (err) {
             return console.log(err);
         }
-        consolas("The log file ".cyan + colors.white("./logs/error_" + date + ".txt") + " was saved!".cyan, "Debug");
+        Logger.debug("The log file ./logs/error_" + date + ".txt was saved!");
     });
 
 
@@ -394,7 +379,7 @@ process.on('uncaughtException', function (err) {
         if (err) {
             return console.log(err);
         }
-        consolas("The config file ".cyan + colors.white("./logs/error_" + date + ".txt") + " was saved!".cyan, "Debug");
+        Logger.debug("The config file ./logs/error_" + date + ".txt was saved!");
     });
 })
 
@@ -428,7 +413,7 @@ var port = process.env.PORT || serverconfig.serverinfo.port;
 server.listen(port, function () {
     // Wir geben einen Hinweis aus, dass der Webserer läuft.
 
-    consolas(colors.brightGreen('Server is running on port ' + port));
+    Logger.info('Server is running on port ' + port);
 
     if (serverconfig.serverinfo.setup == 0) {
 
@@ -438,31 +423,21 @@ server.listen(port, function () {
         saveConfig(serverconfig);
 
 
-        consolas(colors.brightGreen(`To obtain the admin role in your server, copy the following token.`));
-        consolas(colors.brightGreen(`You can use it if prompted or if you right click on the server icon and press "Redeem Key"`));
-        consolas(colors.brightGreen(` `));
+        Logger.info(`To obtain the admin role in your server, copy the following token.`);
+        Logger.info(`You can use it if prompted or if you right click on the server icon and press "Redeem Key"`);
 
-        consolas(colors.brightGreen(`Server Admin Token:`));
-        consolas(colors.brightGreen(adminToken));
-        consolas(colors.brightGreen(` `));
-        consolas(colors.brightGreen(` `));
+        Logger.info(`Server Admin Token:`);
+        Logger.info(adminToken);
     }
     else if (serverconfig.serverroles["1111"].token.length > 0) {
-        consolas(colors.brightGreen(` `));
-        consolas(colors.brightGreen(` `));
-        consolas(colors.brightGreen(`Welcome to DCTS`));
-        consolas(colors.brightGreen(`To obtain the admin role in your server, copy the following token.`));
-        consolas(colors.brightGreen(`You can use it if prompted or if you right click on the server icon and press "Redeem Key"`));
-        consolas(colors.brightGreen(` `));
+        Logger.info(`To obtain the admin role in your server, copy the following token.`);
+        Logger.info(`You can use it if prompted or if you right click on the server icon and press "Redeem Key"`);
 
-        consolas(colors.cyan(`Available Server Admin Token(s):`));
+        Logger.info(colors.cyan(`Available Server Admin Token(s):`));
 
         serverconfig.serverroles["1111"].token.forEach(token => {
-            consolas(colors.cyan(token))
+            if (token) Logger.info(token)
         })
-
-        consolas(colors.brightGreen(` `));
-        consolas(colors.brightGreen(` `));
         allowLogging = true;
     }
 
@@ -632,13 +607,11 @@ io.on('connection', function (socket) {
     if (serverconfig.ipblacklist.hasOwnProperty(ip)) {
 
 
-        if(Date.now() <= serverconfig.ipblacklist[ip]){
+        if (Date.now() <= serverconfig.ipblacklist[ip]) {
 
             let detailText = "";
             let banListResult = findInJson(serverconfig.banlist, "ip", ip);
-            if(banListResult != null){
-                console.log(banListResult)
-                
+            if (banListResult != null) {
                 let bannedUntilDate = new Date(banListResult.until);
                 bannedUntilDate.getFullYear() == "9999" ? detailText = "permanently banned" : detailText = `banned until: <br>${formatDateTime(bannedUntilDate)}`
                 detailText += banListResult?.reason !== null ? `<br><br>Reason:<br>${banListResult.reason}` : ""
@@ -657,14 +630,14 @@ io.on('connection', function (socket) {
                             "type": "error",
                             "displayTime": 60000
                         }`));
-    
-    
-    
+
+
+
             socket.disconnect();
-    
-            consolas("Disconnected user because ip is blacklisted", "Debug");
+
+            Logger.Debug("Disconnected user because ip is blacklisted");
         }
-        else if(Date.now() > serverconfig.ipblacklist[ip]){
+        else if (Date.now() > serverconfig.ipblacklist[ip]) {
             unbanIp(socket);
         }
     }
@@ -774,21 +747,21 @@ io.on('connection', function (socket) {
         // check member ban
         let banResult = checkMemberBan(socket, member);
         let banText = "";
-        if(banResult?.timestamp){
-            if(new Date(banResult.timestamp).getFullYear() == "9999"){
+        if (banResult?.timestamp) {
+            if (new Date(banResult.timestamp).getFullYear() == "9999") {
                 banText = "banned permanently";
             }
-            else{
+            else {
                 banText = `banned until <br>${formatDateTime(new Date(banResult.timestamp))}`
             }
         }
 
-        if(banResult?.reason){
+        if (banResult?.reason) {
             banText += `<br><br>Reason:<br>${banResult.reason}`
         }
 
-        if(banResult.result == true){
-            response({ error: `You've been ${banText}`, type: "error", msg: `You've been ${banText}`, msgDisplayDuration: 1000 * 60})
+        if (banResult.result == true) {
+            response({ error: `You've been ${banText}`, type: "error", msg: `You've been ${banText}`, msgDisplayDuration: 1000 * 60 })
             socket.disconnect();
             return;
         }
@@ -796,7 +769,7 @@ io.on('connection', function (socket) {
         // call checkMemberMute so it unmutes automatically
         checkMemberMute(socket, member);
 
-        consolas(`Member connected. User: ${member.name} (${member.id} - ${socketToIP[socket]})`, "Debug");
+        Logger.debug(`Member connected. User: ${member.name} (${member.id} - ${socketToIP[socket]})`);
 
         // Check if member is in default role
         if (serverconfig.serverroles["0"].members.includes(member.id) == false) {
@@ -815,10 +788,10 @@ io.on('connection', function (socket) {
                 if (member.onboarding === false) {
                     // cant proceed as the user needs to setup their account with a password
                     io.to(socket.id).emit("doAccountOnboarding");
-                    response({ 
-                        error: "Onboarding not completed", 
-                        finishedOnboarding: false, 
-                        msg: "Welcome!", 
+                    response({
+                        error: "Onboarding not completed",
+                        finishedOnboarding: false,
+                        msg: "Welcome!",
                         text: "Finish your account setup to continue",
                         type: "success"
                     })
@@ -907,7 +880,7 @@ io.on('connection', function (socket) {
 
 
                     try {
-                        response({ error: "Invalid login", title: "Invalid Login", msg: "Something went wrong with your login.<br><a onclick='resetAccount();'>Reset Session</a><br>", type: "error", displayTime: 1000*60*60 })
+                        response({ error: "Invalid login", title: "Invalid Login", msg: "Something went wrong with your login.<br><a onclick='UserManager.resetAccount();'>Reset Session</a><br>", type: "error", displayTime: 1000 * 60 * 60 })
                         return;
                     }
                     catch (e) {
@@ -971,7 +944,7 @@ io.on('connection', function (socket) {
 
         // Handling ip ban
         var ip = socket.handshake.address;
-        if(serverconfig.ipblacklist.hasOwnProperty(ip)){
+        if (serverconfig.ipblacklist.hasOwnProperty(ip)) {
 
             // if the ban has expired, unban them
             if (Date.now() > serverconfig.ipblacklist[ip]) {
@@ -980,7 +953,7 @@ io.on('connection', function (socket) {
         }
 
         // initiate login counter
-        if(!loginAttempts.hasOwnProperty(ip)){
+        if (!loginAttempts.hasOwnProperty(ip)) {
             loginAttempts.push(ip);
             loginAttempts[ip] = 0;
         }
@@ -989,7 +962,7 @@ io.on('connection', function (socket) {
         loginAttempts[ip]++;
 
         // if count exceeded, temporarily ban ip and clean up
-        if(loginAttempts[ip] > serverconfig.serverinfo.login.maxLoginAttempts){
+        if (loginAttempts[ip] > serverconfig.serverinfo.login.maxLoginAttempts) {
             banIp(socket, getNewDate(serverconfig.serverinfo.moderation.bans.ipBanDuration).getTime());
             delete loginAttempts[ip];
 
@@ -1089,16 +1062,19 @@ io.on('connection', function (socket) {
 
             // Add the user json object to the results so the client doesnt have to resolve each user
             for (let i = 0; i < totalGroupMessage.length; i++) {
-                // Copy the json object because else its just a refernece to the original
-                // since we want to delete the token this would be bad ( trust me im a engineer ;D )
-                let userObj = copyObject(serverconfig.servermembers[totalGroupMessage[i].authorId]);
-                userObj.token = null;
-
-                totalGroupMessage[i].user = userObj;
+                let serverMemberObj = serverconfig.servermembers[totalGroupMessage[i].authorId];
+            
+                if(serverMemberObj){
+                    let userObj = copyObject(serverMemberObj); // Korrekt
+                    userObj.token = null;
+                    userObj.name = serverMemberObj.name;
+                
+                    totalGroupMessage[i].user = userObj;
+                }
+                else{
+                    delete totalGroupMessage[i]
+                }
             }
-
-
-
             response({ type: "success", msg: null, mostActiveUsers: totalGroupMessage, group: groupInfo })
 
         }
@@ -1192,6 +1168,102 @@ io.on('connection', function (socket) {
         }
     });
 
+    socket.on('updateChannelTreeSorting', function (member, response) {
+        if (validateMemberId(member.id, socket) == true
+            && serverconfig.servermembers[member.id].token == member.token
+        ) {
+            member.id = xssFilters.inHTMLData(member.id)
+            member.token = xssFilters.inHTMLData(member.token)
+            member.group = xssFilters.inHTMLData(member.group)
+            member.data = xssFilters.inHTMLData(member.data)
+
+            if (!hasPermission(member.id, "manageChannels")) {
+                // secretly die cauz no need for error
+                return;
+            }
+
+            let channelStructure = JSON.parse(member.data);
+
+
+            //  categories are sorted numerically before assigning sortId
+            let sortedCategories = Object.keys(serverconfig.groups[member.group].channels.categories)
+                .map(id => parseInt(id))
+                .sort((a, b) => a - b);
+
+            // assign new sortId given by client
+            sortedCategories.forEach((categoryId, index) => {
+
+                if (serverconfig.groups[member.group].channels.categories[categoryId]) {
+                    serverconfig.groups[member.group].channels.categories[categoryId].info.sortId = channelStructure[categoryId].info.sortId;
+                } else {
+                    Logger.error(`Category ${categoryId} not found in serverconfig`);
+                }
+            });
+
+            saveConfig(serverconfig)
+
+            Object.keys(channelStructure)
+                .sort((a, b) => a - b) // ensure consistent sorting before assigning id
+                .forEach((category, index) => {
+                    let categoryChannels = channelStructure[category].channels;
+                    let newCategoryId = category;
+
+                    let totalChannels = categoryChannels.length;
+                    categoryChannels.forEach((channelId, channelIndex) => {
+                        let originalPath = findInJson(
+                            serverconfig.groups[member.group].channels.categories,
+                            "id",
+                            parseInt(channelId),
+                            true
+                        );
+
+                        let actualNewSortId = totalChannels - 1 - channelIndex; // reverse 
+
+                        if (originalPath) {
+                            let pathParts = originalPath.split(".");
+                            let originalCategoryId = pathParts[0];
+
+                            if (originalCategoryId !== newCategoryId) {
+                                if (!serverconfig.groups[member.group].channels.categories[originalCategoryId]) {
+                                    Logger.error(`Category ${originalCategoryId} does not exist!`);
+                                    return;
+                                }
+
+                                let channelData = serverconfig.groups[member.group].channels.categories[originalCategoryId].channel[channelId];
+
+                                if (channelData) {
+                                    // remove from old category
+                                    delete serverconfig.groups[member.group].channels.categories[originalCategoryId].channel[channelId];
+
+                                    // ensure the new category has a `channel` object
+                                    if (!serverconfig.groups[member.group].channels.categories[newCategoryId].channel) {
+                                        serverconfig.groups[member.group].channels.categories[newCategoryId].channel = {};
+                                    }
+
+                                    // move the channel to the new category
+                                    serverconfig.groups[member.group].channels.categories[newCategoryId].channel[channelId] = channelData;
+                                } else {
+                                    Logger.error(`Channel ${channelId} not found in category ${originalCategoryId}`);
+                                    return;
+                                }
+                            }
+
+                            //  Update sortId
+                            serverconfig.groups[member.group].channels.categories[newCategoryId].channel[channelId].sortId = actualNewSortId;
+
+                            saveConfig(serverconfig);
+                        } else {
+                            Logger.error(`Could not find original path for channel ${channelId}`);
+                        }
+                    });
+                });
+
+            io.emit("receiveChannelTree");
+
+            response({ type: "success", error: null, msg: null });
+        }
+    });
+
 
     socket.on('messageSend', async function (memberOriginal) {
         checkRateLimit(socket);
@@ -1206,18 +1278,18 @@ io.on('connection', function (socket) {
             // check member mute
             let muteResult = checkMemberMute(socket, member);
             let muteText = "";
-            if(muteResult?.timestamp){
-                if(new Date(muteResult.timestamp).getFullYear() == "9999"){
+            if (muteResult?.timestamp) {
+                if (new Date(muteResult.timestamp).getFullYear() == "9999") {
                     muteText = "muted permanently";
                 }
-                else{
+                else {
                     muteText = `muted until <br>${formatDateTime(new Date(muteResult.timestamp))}`
                 }
             }
-            if(muteResult?.reason){
+            if (muteResult?.reason) {
                 muteText += `<br><br>Reason:<br>${muteResult.reason}`
             }
-            if(muteResult.result == true){
+            if (muteResult.result == true) {
                 sendMessageToUser(socket.id, JSON.parse(
                     `{
                                     "title": "You have been ${muteText}",
@@ -1251,7 +1323,7 @@ io.on('connection', function (socket) {
                 return;
             }
 
-            if (!hasPermission(member.id, ["sendMessages", "viewChannel"])) {
+            if (!hasPermission(member.id, ["sendMessages", "viewChannel"], member.channel)) {
                 sendMessageToUser(socket.id, JSON.parse(
                     `{
                                     "title": "You cant chat here",
@@ -1386,7 +1458,7 @@ io.on('connection', function (socket) {
                     }
 
                     member = getCastingMemberObject(member);
-                    
+
                     // Save the Chat Message to file
                     saveChatMessage(member, member.editedMsgId);
 
@@ -1877,13 +1949,15 @@ io.on('connection', function (socket) {
             if (hasPermission(member.id, "manageMembers")) {
                 try {
 
+
                     // If user is not a admin they cant assign roles that are higher
-                    if (!hasPermission(member.id, "administrator")) {
-                        if (serverconfig.serverroles[member.role].info.sortId >= highestUserRole.info.sortId) {
+                    if (serverconfig.serverroles[member.role].info.sortId >= highestUserRole.info.sortId) {
+                        if (!hasPermission(member.id, "administrator")) {
                             response({ type: "error", msg: "You cant remove roles that are higher or equal then yours" });
                             return;
                         }
                     }
+
 
                     var executer = getMemberHighestRole(member.id);
                     var target = getMemberHighestRole(member.target);
@@ -2477,13 +2551,13 @@ io.on('connection', function (socket) {
             && serverconfig.servermembers[member.id].token == member.token) {
 
             if (member.id == member.target) {
-                response({ type: "error", msg: "You cant ban yourself!", error: "You cant ban yourself."});
+                response({ type: "error", msg: "You cant ban yourself!", error: "You cant ban yourself." });
                 return;
             }
             else {
                 if (hasPermission(member.id, "banUsers") == false) {
 
-                    response({ type: "error", msg: "You dont have permissions to ban members", error: "Missing permission banUsers"});
+                    response({ type: "error", msg: "You dont have permissions to ban members", error: "Missing permission banUsers" });
                     return;
                 }
                 else {
@@ -2492,9 +2566,9 @@ io.on('connection', function (socket) {
                     var banning = getMemberHighestRole(member.target);
 
                     if (banner.info.sortId <= banning.info.sortId) {
-                        response({ 
-                            type: "error", 
-                            msg: "User cant be banned because their role is higher or qual then yours", 
+                        response({
+                            type: "error",
+                            msg: "User cant be banned because their role is higher or qual then yours",
                             error: "Cant ban user whos role is higher or qual yours"
                         });
                         return;
@@ -2503,9 +2577,9 @@ io.on('connection', function (socket) {
                     banUser(socket, member);
 
                     // Notify Admins
-                    response({ 
-                        type: "success", 
-                        msg: "User has been banned", 
+                    response({
+                        type: "success",
+                        msg: "User has been banned",
                         error: null
                     });
 
@@ -2532,14 +2606,14 @@ io.on('connection', function (socket) {
                                 type: "error",
                                 popup_type: "confirm"
                             };
-                    
+
                             sendMessageToUser(target.id, payload);
-                    
+
                             // Disconnect user
                             target.disconnect(true);
                         }
                     });
-                    
+
 
                     // Update Memberlist
                     io.emit("updateMemberList");
@@ -2617,7 +2691,7 @@ io.on('connection', function (socket) {
                         // You have been muted
                         sendMessageToUser(usersocket[member.target], JSON.parse(
                             `{
-                                    "title": "You have been muted until ${new Date(mutedStatus).toLocaleString()}",
+                                    "title": "You have been muted until ${new Date(muteResult.duration).toLocaleString()}",
                                     "message": "${reasonText}",
                                     "buttons": {
                                         "0": {
@@ -2646,12 +2720,15 @@ io.on('connection', function (socket) {
             var category = room[1];
             var channel = room[2];
 
+            // annoying
+            if (channel == "null" || category == "null" || group == "null") return;
+
             if (!hasPermission(member.id, "viewChannel", channel)) {
 
                 sendMessageToUser(socket.id, JSON.parse(
                     `{
                                     "title": "Access denied",
-                                    "message": "You dont have access to this channel.",
+                                    "msg": "You dont have access to this channel.",
                                     "buttons": {
                                         "0": {
                                             "text": "Ok",
@@ -2949,33 +3026,29 @@ io.on('connection', function (socket) {
 
             consolas("Trying to get chat log", "Debug");
 
-            console.log(member)
             if (hasPermission(member.id, ["viewChannel", "viewChannelHistory"], member.channelId)) {
                 io.to(usersocket[member.id]).emit("receiveChatlog", await getSavedChatMessage(member.groupId, member.categoryId, member.channelId, member.index));
             }
         }
     });
 
-    socket.on('createCategory', function (member) {
+    socket.on('createCategory', function (member, response) {
         if (validateMemberId(member.id, socket) == true &&
             serverconfig.servermembers[member.id].token == member.token
         ) {
 
+            member.id = xssFilters.inHTMLData(member.id)
+            member.token = xssFilters.inHTMLData(member.token)
+            member.group = xssFilters.inHTMLData(member.group)
+            member.value = xssFilters.inHTMLData(member.value)
+
             if (!hasPermission(member.id, "manageChannels")) {
-                sendMessageToUser(socket.id, JSON.parse(
-                    `{
-                        "title": "Missing permissions!",
-                        "message": "You arent allowed to create categories",
-                        "buttons": {
-                            "0": {
-                                "text": "Ok",
-                                "events": ""
-                            }
-                        },
-                        "type": "error",
-                        "popup_type": "confirm"
-                    }`));
+                response({ error: "Missing permissions: manageChannels", msg: "Cant create category because you dont have the permissions to manage channels", type: "error" })
                 return;
+            }
+
+            if (!member.group) {
+                response({ error: "Missing parameter: group", msg: "No group specified", type: "error" })
             }
 
             try {
@@ -2984,13 +3057,16 @@ io.on('connection', function (socket) {
                     `{
                         "info": {
                             "id": ${catId},
-                            "name": "${escapeHtml(member.value)}"
+                            "name": "${escapeHtml(member.value)}",
+                            "sortId": 0
                         },
                         "channel": {
                         }
                     }
                         `);
                 saveConfig(serverconfig);
+                response({ error: null, msg: "Category created!", type: "success" })
+
                 io.emit("receiveChannelTree", getChannelTree(member));
             }
             catch (e) {
@@ -3202,7 +3278,7 @@ io.on('connection', function (socket) {
         ) {
 
             if (!hasPermission(member.id, "manageChannels")) {
-                response({ msg: "You are not allowed to create a channel", type: "error", error: "Missing permissions to create channel"})
+                response({ msg: "You are not allowed to create a channel", type: "error", error: "Missing permissions to create channel" })
                 return;
             }
 
@@ -3230,7 +3306,7 @@ io.on('connection', function (socket) {
 
                 saveConfig(serverconfig);
                 io.emit("receiveChannelTree", getChannelTree(member));
-                response({ msg: "Channel created successfully", type: "success"})
+                response({ msg: "Channel created successfully", type: "success" })
             }
             catch (e) {
                 consolas("Couldnt create channel".red, "Debug");
@@ -3301,7 +3377,7 @@ io.on('connection', function (socket) {
                                                 "0": {
                                                     "readMessages": 1,
                                                     "sendMessages": 1,
-                                                    "viewChannel": 1
+                                                    "viewChannel": 0
                                                 }
                                             }
                                         }
@@ -3393,7 +3469,7 @@ io.on('connection', function (socket) {
         ) {
 
             if (!hasPermission(member.id, "manageChannels")) {
-                response({ msg: "You arent allowed to deleteChannels", type: "error", error: "Missing Permissions: manageChannels"})
+                response({ msg: "You arent allowed to deleteChannels", type: "error", error: "Missing Permissions: manageChannels" })
                 return;
             }
 
@@ -3403,14 +3479,14 @@ io.on('connection', function (socket) {
                 var category = resolveCategoryByChannelId(channelId);
 
                 if (channelId == serverconfig.serverinfo.defaultChannel) {
-                    response({ msg: "You cant delete the default channel", type: "error", error: "Cant delete default channel"})
+                    response({ msg: "You cant delete the default channel", type: "error", error: "Cant delete default channel" })
                     return;
                 }
 
                 delete serverconfig.groups[group].channels.categories[category].channel[channelId];
                 saveConfig(serverconfig);
 
-                response({ msg: "Channel deleted", type: "success", error: null})
+                response({ msg: "Channel deleted", type: "success", error: null })
                 io.emit("receiveChannelTree", getChannelTree(member));
             }
             catch (e) {
@@ -3430,7 +3506,7 @@ io.on('connection', function (socket) {
         ) {
 
             if (!hasPermission(member.id, "manageChannels")) {
-                response({ msg: "You arent allowed to delete categories", type: "error", error: "Cant delete category, missing permission manageChannels"})
+                response({ msg: "You arent allowed to delete categories", type: "error", error: "Cant delete category, missing permission manageChannels" })
                 return;
             }
 
@@ -3438,7 +3514,7 @@ io.on('connection', function (socket) {
                 delete serverconfig.groups[member.group].channels.categories[member.category.replace("category-", "")];
                 saveConfig(serverconfig);
 
-                response({ msg: "Category deleted", type: "success", error: null})
+                response({ msg: "Category deleted", type: "success", error: null })
                 io.emit("receiveChannelTree", getChannelTree(member));
             }
             catch (e) {
@@ -3753,7 +3829,7 @@ io.on('connection', function (socket) {
     };
 
     socket.on("fileUpload", async ({ chunk, metadata }, response) => {
-        console.log("Received fileUpload event.");
+
 
         let { id, token, filename, type, totalChunks, chunkIndex, fileId } = metadata; // Expect fileId in metadata
         const sanitizedFilename = sanitizeFilename(filename);
@@ -3915,17 +3991,17 @@ io.on('connection', function (socket) {
             if (hasPermission(member.id, "manageServer")) {
                 // add more objects here
                 serverInfoObj.useCloudflareImageCDN = serverconfig.serverinfo.useCloudflareImageCDN,
-                serverInfoObj.cfAccountId = serverconfig.serverinfo.cfAccountId,
-                serverInfoObj.cfAccountToken = serverconfig.serverinfo.cfAccountToken,
-                serverInfoObj.cfHash = serverconfig.serverinfo.cfHash,
-                serverInfoObj.maxUploadStorage = serverconfig.serverinfo.maxUploadStorage,
-                serverInfoObj.rateLimit = serverconfig.serverinfo.rateLimit,
-                serverInfoObj.dropInterval = serverconfig.serverinfo.dropInterval,
-                serverInfoObj.messageLoadLimit = serverconfig.serverinfo.messageLoadLimit,
+                    serverInfoObj.cfAccountId = serverconfig.serverinfo.cfAccountId,
+                    serverInfoObj.cfAccountToken = serverconfig.serverinfo.cfAccountToken,
+                    serverInfoObj.cfHash = serverconfig.serverinfo.cfHash,
+                    serverInfoObj.maxUploadStorage = serverconfig.serverinfo.maxUploadStorage,
+                    serverInfoObj.rateLimit = serverconfig.serverinfo.rateLimit,
+                    serverInfoObj.dropInterval = serverconfig.serverinfo.dropInterval,
+                    serverInfoObj.messageLoadLimit = serverconfig.serverinfo.messageLoadLimit,
 
-                serverInfoObj.moderation = serverconfig.serverinfo.moderation,
-                serverInfoObj.registration = serverconfig.serverinfo.registration,
-                serverInfoObj.login = serverconfig.serverinfo.login
+                    serverInfoObj.moderation = serverconfig.serverinfo.moderation,
+                    serverInfoObj.registration = serverconfig.serverinfo.registration,
+                    serverInfoObj.login = serverconfig.serverinfo.login
             }
 
 

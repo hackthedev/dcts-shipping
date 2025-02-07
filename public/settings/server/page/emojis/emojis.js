@@ -1,4 +1,3 @@
-setupNotify();
 
 var servername = document.getElementById("server_name");
 var serverdescription = document.getElementById("server_description");
@@ -7,7 +6,7 @@ var saveButton = document.getElementById("settings_profile_save");
 var serverconfigName;
 var serverconfigDesc;
 
-socket.emit("checkPermission", {id:getID(), token: getToken(), permission: "manageEmojis" }, function (response) {
+socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageEmojis" }, function (response) {
 
     if(response.permission == "denied"){
         window.location.href = window.location.origin + "/settings/server";
@@ -47,7 +46,7 @@ function checkState(element, ){
 function getEmojis() {
     var emojiContainer = document.getElementById("emoji-container");
 
-    socket.emit("getEmojis", { id:getID(), token: getToken() }, function (response) {
+    socket.emit("getEmojis", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
 
         try {
             if (response.type == "success") {
@@ -84,12 +83,12 @@ function getEmojis() {
 
                 //alert(response.msg)
             } else {
-                notify(response.msg, "error")
+                //notify(response.msg, "error")
             }
         }
         catch (Ex){
             console.log(Ex);
-            notify("Unkown Error! Reloading might fix it", "error");
+            //notify("Unkown Error! Reloading might fix it", "error");
         }
 
         console.log(response);
@@ -104,16 +103,16 @@ function deleteEmoji(emoji, element){
     var parentNode = element.parentNode.parentNode;
     var inputField = parentNode.querySelector("input");
 
-    socket.emit("deleteEmoji", {emoji: emoji, id:getID(), token: getToken()}, function (response) {
+    socket.emit("deleteEmoji", {emoji: emoji, id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
 
         if(response.type == "success"){
             element.remove();
 
-            notify("Emoji successfully deleted", "success");
+            //notify("Emoji successfully deleted", "success");
             getEmojis();
         }
         else{
-            notify("Emoji successfully deleted", "error");
+            //notify("Emoji successfully deleted", "error");
             //alert(response.msg)
         }
     });
@@ -124,24 +123,24 @@ function saveEmojiName(id, element){
     var parentNode = element.parentNode.parentNode;
     var inputField = parentNode.querySelector("input");
 
-    socket.emit("updateEmoji", {emojiId: id, emojiName: inputField.value, id:getID(), token: getToken()}, function (response) {
+    socket.emit("updateEmoji", {emojiId: id, emojiName: inputField.value, id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
 
         if(response.type == "success"){
             element.style.display = "none";
             //inputField.alt = inputField.value;
 
-            notify("Emoji successfully updated", "success")
+            //notify("Emoji successfully updated", "success")
             getEmojis();
         }
         else{
-            notify(response.msg, "error")
+            //notify(response.msg, "error")
         }
     });
 }
 
 function upload(files) {
 
-    socket.emit("fileUpload", {file: files[0], filename: files[0].name, id:getID(), token: getToken(), type: "emoji" }, function (response) {
+    socket.emit("fileUpload", {file: files[0], filename: files[0].name, id: UserManager.getID(), token: UserManager.getToken(), type: "emoji" }, function (response) {
 
         if(response.type == "success"){
             //settings_icon.value = response.msg;
@@ -149,7 +148,7 @@ function upload(files) {
             getEmojis();
         }
         else{
-            notify(response.msg, "error")
+            //notify(response.msg, "error")
         }
 
         console.log(response);

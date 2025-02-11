@@ -35,10 +35,12 @@
             <ul class="content">
 
                 <div class="head">
-                    <h2>New Features</h2>
+                    <h2>New Features</h2><label class="update">Janurary  24th, 2025 | v3.9.6</label>
                 </div>
                 <ul>
-                    <li class="feature">Voice Chat</li>
+                    <a class="feature-link" href="https://www.reddit.com/r/dcts/comments/1i4tb7z/improved_bans_dialog/" target="_blank">
+                        <li class="feature">Reworked Ban System!</li>
+                    </a>
                     <ul>
                         <li class="desc">
                             Added a experimental voice chat feature
@@ -46,20 +48,6 @@
 
                         <li class="desc">
                             You can now create text and voice channels in the channel tree using the right click context menu
-                        </li>
-                    </ul>
-
-                    <li class="feature">Timeout / Mute</li>
-                    <ul>
-                        <li class="desc">
-                            Its now possible to mute people for an infinite amount of time or specified amount of seconds/minutes
-                        </li>
-                    </ul>
-
-                    <li class="feature">Custom Kick / Ban Messages</li>
-                    <ul>
-                        <li class="desc">
-                            Its now possible to add a ban and kick reason when doing so.
                         </li>
                     </ul>
                 </ul>
@@ -83,9 +71,110 @@
 
 
 
-
-
         <ul class="update current">
+            <ul class="content">
+
+                <div class="head">
+                    <h2>New Features</h2><label class="update">February  11th, 2025 | v4.4.9</label>
+                </div>
+                <ul>
+                    <a class="feature-link" href="https://www.reddit.com/r/dcts/comments/1ilsr9c/report_system_update/" target="_blank">
+                        <li class="feature">Report System</li>
+                    </a>
+                    <ul>
+                        <li class="desc">
+                            Added a way users can report messages
+                        </li>
+
+                        <li class="desc">
+                            Added a compact report overview for managing reports. Will show when at least one report exists
+                        </li>
+                    </ul>
+
+                    <li class="feature">New Documentation</li>
+                    <ul>
+                        <li class="desc">
+                            New documentations have been created. They can be found in the docs folder located at the projects root as .md files and .html files. Example: <code>/dcts/docs</code>.
+                        </li>
+                    </ul>
+
+                    <a class="feature-link" href="https://www.reddit.com/r/dcts/comments/1if210j/better_channel_sorting_channel_receiving/" target="_blank">
+                        <li class="feature">Drag & Drop Channel Sorting!!</li>
+                    </a>
+                    <ul>
+                        <li class="desc">
+                            YES! Its now possible to sort channels and categories using drag and drop. You can even move channels to other categories now!
+                        </li>
+                        <li class="desc">
+                            Since the way we receive channel data has been improved this feature was made possible!
+                        </li>
+                    </ul>
+
+                    <a class="feature-link" href="https://www.reddit.com/r/dcts/comments/1i8k4vq/emoji_autocomplete/" target="_blank">
+                        <li class="feature">Emoji Auto-complete</li>
+                    </a>
+                    <ul>
+                        <li class="desc">
+                            New documentations have been created. They can be found in the docs folder located at the projects root as .md files and .html files. Example: <code>/dcts/docs</code>.
+                        </li>
+                    </ul>
+
+                    <li class="feature">Bug Fixes & Improvements</li>
+                    <ul>
+                        <li class="desc">
+                            Fixed a bug where media like images on mobile are out of bounds
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where the mobile view is broken because the desktop channellist wasnt hidden
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where where the rate limit drop interval in settings wouldnt load after backend changes
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where media like images on mobile are out of bounds
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where the profile settings wouldnt load after improving the page load function
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where it wasnt possible to get the member profile
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where the member profile location was wayyy out of bounds
+                        </li>
+                        <li class="desc">
+                            Fixed a bug where media like images on mobile are out of bounds
+                        </li>
+                        <li class="desc">
+                            Fixed a visual "bug" where dragging any media for upload removed the shadow of the channel title box
+                        </li>
+                        <li class="desc">
+                            Fixed a "bug" where the group name wouldnt be displayed in the channel tree after reworking it to be a lot better (simply forgot it)
+                        </li>
+                        <li class="desc">
+                            Fixed a lot of styling bugs
+                        </li>
+                        <li class="desc">
+                            Improved Code MASSIVELY
+                        </li>
+                        <li class="desc">
+                            Improved Terminal logs
+                        </li>
+                        <li class="desc">
+                            .. and many other bugs
+                        </li>
+                    </ul>
+
+                </ul>
+
+            </ul>
+        </ul>
+
+
+
+
+
+        <ul class="update">
             <ul class="content">
 
                 <div class="head">
@@ -881,7 +970,4 @@
     </div>
 
 
-
-
-    <div id="settings_profile_save" onclick="saveSettings();" style="display: none;">Save</div>
 </div>

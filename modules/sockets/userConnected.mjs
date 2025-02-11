@@ -2,7 +2,7 @@ import { io, saveConfig, serverconfig, socketToIP, usersocket, xssFilters } from
 import { formatDateTime, resolveCategoryByChannelId, resolveChannelById, resolveGroupByChannelId } from "../functions/chat/main.mjs";
 import { saveChatMessage } from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
-import { checkMemberBan, checkMemberMute, copyObject, escapeHtml, generateId, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { checkMemberBan, checkMemberMute, copyObject, escapeHtml, generateId, hashPassword, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
 export default (socket) => {
     // socket.on code here
@@ -34,7 +34,7 @@ export default (socket) => {
             }
             else {
                 banText = `banned until <br>${formatDateTime(new Date(banResult.timestamp))}`
-            }
+            } 
         }
 
         if (banResult?.reason) {
@@ -179,11 +179,11 @@ export default (socket) => {
 
                 usersocket[member.id] = socket.id;
 
-                serverconfig.servermembers[member.id].name = escapeHtml(member.name);
-                serverconfig.servermembers[member.id].status = escapeHtml(member.status);
-                serverconfig.servermembers[member.id].aboutme = escapeHtml(member.aboutme);
-                serverconfig.servermembers[member.id].icon = escapeHtml(member.icon);
-                serverconfig.servermembers[member.id].banner = escapeHtml(member.banner);
+                serverconfig.servermembers[member.id].name = xssFilters.inHTMLData(member.name);
+                serverconfig.servermembers[member.id].status = xssFilters.inHTMLData(member.status);
+                serverconfig.servermembers[member.id].aboutme = xssFilters.inHTMLData(member.aboutme);
+                serverconfig.servermembers[member.id].icon = xssFilters.inHTMLData(member.icon);
+                serverconfig.servermembers[member.id].banner = xssFilters.inHTMLData(member.banner);
                 serverconfig.servermembers[member.id].lastOnline = new Date().getTime();
                 saveConfig(serverconfig);
 

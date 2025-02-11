@@ -13,7 +13,7 @@ socket.emit("userConnected", {
 });
 
 
-var page = getUrlParams("page");
+var page = getUrlParams("page") || "profile";
 loadPageContent(page)
 
 async function loadPageContent(page) {
@@ -51,6 +51,8 @@ async function loadPageContent(page) {
 
 function setUrl(param){
     window.history.replaceState(null, null, param); // or pushState
+    let page = param.replace("?page=", "");
+    loadPageContent(page)
 }
 
 function getUrlParams(param){

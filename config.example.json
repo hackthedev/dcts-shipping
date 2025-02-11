@@ -16,7 +16,8 @@
             "image/jpeg",
             "image/gif",
             "image/webp",
-            "audio/mpeg"
+            "audio/mpeg",
+            "video/mp4"
         ],
         "ssl": {
             "key": "/etc/letsencrypt/live/EXAMPLE.COM/privkey.pem",

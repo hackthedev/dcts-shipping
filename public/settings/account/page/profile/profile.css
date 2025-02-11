@@ -1,6 +1,6 @@
 #profile_container{
     padding: 4px;
-    z-index: 99999999 !important;
+    z-index: 99999 !important;
 
     width: calc(300px - 8px);
     height: auto;
@@ -8,6 +8,10 @@
 
     background-color: #202225;
     color: #ABB8BE;
+}
+
+#profile-role-menu{
+    z-index: 999999 !important;
 }
 
 #profile_banner{

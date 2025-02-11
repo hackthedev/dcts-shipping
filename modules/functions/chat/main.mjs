@@ -341,7 +341,7 @@ export async function getMemberProfile(id) {
     */
 
         // Add Role Button
-        profile += `<code style="cursor: pointer;" onclick="addRoleFromProfile(id);" class="role" id="addRole-${id}">+</code>`;
+        profile += `<code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${id}');" class="role" id="addRole-${id}">+</code>`;
         profile += `</div>
             </div>
         </div>`;

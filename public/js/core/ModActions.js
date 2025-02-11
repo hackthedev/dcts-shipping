@@ -3,10 +3,19 @@
 */
 class ModActions{
     static unmuteUser(id) {
-        socket.emit("unmuteUser", { id: UserManager.getID(), token: UserManager.getToken(), target: id });
+        socket.emit("unmuteUser", { id: UserManager.getID(), token: UserManager.getToken(), target: id }, function (response) {
+            showSystemMessage({
+                title: response.msg,
+                text: "",
+                icon: response.type,
+                img: null,
+                type: response.type,
+                duration: 1000
+            });
+        });
     }
     
-    static banUser(id) {
+    static banUser(id, afterSubmitAction = null) {
     
         customPrompts.showPrompt(
             "Ban User",
@@ -61,17 +70,41 @@ class ModActions{
             () => {
                 tooltipSystem.clearTooltipLocalStorage("tt_banUserDialog_");
                 banUserTooltip();
-            }
+            },
+            afterSubmitAction
         );
     }
 
-    static kickUser(id) {
-        var reason = prompt("Reason:");
-        if (!reason) return;
-        socket.emit("kickUser", { id: UserManager.getID(), token: UserManager.getToken(), target: id, reason: reason });
+    static kickUser(id, afterSubmitAction = null) {
+        customPrompts.showPrompt(
+            "Kick User",
+            `
+            <div class="prompt-form-group">
+                <label class="prompt-label" for="kickReason">Reason (optional)</label>
+                <input class="prompt-input" id="tt_kickUserDialog_kickReason" type="text" name="kickReason">
+            </div>
+            `,
+            (values) => {                
+                let kickReason = values.kickReason || "No reason provided";
+    
+                // Default kick action
+                socket.emit("kickUser", {
+                    id: UserManager.getID(),
+                    token: UserManager.getToken(),
+                    target: id,
+                    reason: kickReason
+                });
+            },
+            ["Kick", "error"],
+            false,
+            null,
+            null,  // No help function
+            afterSubmitAction // This ensures the afterSubmitAction is called
+        );
     }
     
-    static muteUser(id) {
+    
+    static muteUser(id, afterSubmitAction = null) {
         //var reason = prompt("Reason: (empty for none)");
         //var duration = prompt("Duration in minutes: (empty for permanent until unmuted)");
         //socket.emit("muteUser", { id: UserManager.getID(), token: UserManager.getToken(), target: id, reason: reason, time: duration });
@@ -130,7 +163,8 @@ class ModActions{
             () => {
                 tooltipSystem.clearTooltipLocalStorage("tt_mutenUserDialog_");
                 muteUserTooltip();
-            }
+            },
+            afterSubmitAction
         );
     }
 
@@ -158,8 +192,8 @@ class ModActions{
                     displayChecked = "";
                 }
     
-                roleList.insertAdjacentHTML("beforeend", `<div class="role-menu-entry" onclick="checkCheckedRoleMenu(this.querySelector('input'))">
-                            <input type="checkbox" ${displayChecked} class="role-menu-entry-checkbox" id="role-menu-entry_${roleId}_${userId}" onclick="checkCheckedRoleMenu(this)">
+                roleList.insertAdjacentHTML("beforeend", `<div class="role-menu-entry" onclick="ModActions.checkCheckedRoleMenu(this.querySelector('input'))">
+                            <input type="checkbox" ${displayChecked} class="role-menu-entry-checkbox" id="role-menu-entry_${roleId}_${userId}" onclick="ModActions.checkCheckedRoleMenu(this)">
                             <label style="color: ${roleColor};" class="role-menu-entry-roleName">${roleName}</label>
                         </div>`)
             });

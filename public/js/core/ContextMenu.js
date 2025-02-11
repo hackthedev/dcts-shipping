@@ -122,26 +122,43 @@ document.addEventListener("DOMContentLoaded", function () {
             try {
                 // userid of msg
                 let msgAuthor = clickedElement.parentNode.parentNode.parentNode.querySelector(".message-profile-info").id
+                console.log(msgAuthor)
 
                 if (UserManager.getID() == msgAuthor) {
                     addContextMenuItem(ContextMenu, "Edit Message",
                         `onclick="editMessage('${clickedElement.id}');
                         ContextMenu.classList.remove('visible');
                         "`);
+
+                    addContextMenuItem(ContextMenu, "Delete Message",
+                        ErrorButtonCode + `onclick="deleteMessageFromChat('${clickedElement.id}');
+                                ContextMenu.classList.remove('visible');
+                                "`);
+                }
+                else {
+                    socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: "manageMessages" }, function (response) {
+                        if (response.permission == "granted") {
+                            addContextMenuItem(ContextMenu, "Delete Message",
+                                ErrorButtonCode + `onclick="deleteMessageFromChat('${clickedElement.id}');
+                                    ContextMenu.classList.remove('visible');
+                                    "`);
+                        }
+                    });
                 }
 
             } catch { }
 
 
-            addContextMenuItem(ContextMenu, "Delete Message",
-                ErrorButtonCode + `onclick="deleteMessageFromChat('${clickedElement.id}');
-                ContextMenu.classList.remove('visible');
-                "`);
+
+
+            /*
+            ModView.addNotification(() => {
+                console.log('User clicked the notification badge!');
+            });
+            */
 
             addContextMenuItem(ContextMenu, "Report Message",
-                ErrorButtonCode + `onclick="ModView.addNotification(() => {
-    console.log('User clicked the notification badge!');
-});
+                ErrorButtonCode + `onclick="UserReports.reportMessage('${clickedElement.id}')
 
                 ContextMenu.classList.remove('visible');
                 "`);

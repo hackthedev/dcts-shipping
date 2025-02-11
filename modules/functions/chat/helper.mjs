@@ -84,8 +84,6 @@ export function getMemberHighestRole(id){
     var returnRole = null;
 
     Object.keys(roles).reverse().forEach(function(role) {
-        //console.log(roles[role].members)
-
         if(roles[role].members.includes(id)){
             if(roles[role].info.sortId > sortIndex){
                 sortIndex = roles[role].info.sortId;

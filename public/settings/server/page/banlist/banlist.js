@@ -84,7 +84,7 @@ function getBans() {
                             <td>
                                 <div class="settings_banlist_user_info">
                                     <img class="settings_banlist_user_icon" src="${banData.bannedUserObj.icon}" alt="User Icon">
-                                    <span>${banData.bannedUserObj.name} (${banData.bannedUserObj.id})</span>
+                                    <span id="ban-username-${banData.bannedUserObj.id}">${banData.bannedUserObj.name} (${banData.bannedUserObj.id})</span>
                                 </div>
                             </td>
                             <td>${banData.bannedUserObj.status || "No Status"}</td>

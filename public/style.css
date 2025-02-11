@@ -172,6 +172,7 @@ body {
     display: block;
     float: right;
     border-radius: 50%;
+    cursor: pointer;
 }
 
 #message-actions {
@@ -1072,7 +1073,7 @@ label.mention {
 }
 
 #mobile_memberlist {
-    width: calc(100% - 40px) !important;
+    width: calc(100% - 60px) !important;
     /*margin-left: calc(-100% + 35px + 420p);*/
 
     height: calc(100% - 40px - 20px);
@@ -1186,7 +1187,13 @@ label.mention {
     #channellist,
     #infolist,
     #serverlist {
-        display: none;
+        display: none !important;
+    }
+
+    img {
+        width: 100%; /* Forces it to scale */
+        height: auto; /* Maintains aspect ratio */
+        max-width: none; /* Allows resizing beyond parent limits */
     }
 
     #channelname {

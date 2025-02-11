@@ -29,40 +29,41 @@ class Logger {
     };
 
     static log(level, message, color) {
-        console.log(`${color}${Logger.displayDate()}[${level}] ${message}${Logger.colors.reset}`);
+        if (message instanceof Error) {
+            console.log(`${color}${Logger.displayDate()}[${level}] ${message.message}\n${message.stack}${Logger.colors.reset}`);
+        } else if (typeof message === 'object') {
+            console.log(`${color}${Logger.displayDate()}[${level}] ${JSON.stringify(message, null, 2)}${Logger.colors.reset}`);
+        } else {
+            console.log(`${color}${Logger.displayDate()}[${level}] ${message}${Logger.colors.reset}`);
+        }
     }
 
     static info(message, color = "") {
-        Logger.log("INFO", `${color}${message}${Logger.colors.reset}`, color ? color + Logger.colors.fgCyan : Logger.colors.fgCyan);
+        Logger.log("INFO", message, color ? color + Logger.colors.fgCyan : Logger.colors.fgCyan);
     }
 
     static success(message, color = "") {
-        Logger.log("SUCCESS", `${color}${message}${Logger.colors.reset}`, color ? color + Logger.colors.fgGreen : Logger.colors.fgGreen);
+        Logger.log("SUCCESS", message, color ? color + Logger.colors.fgGreen : Logger.colors.fgGreen);
     }
 
     static warn(message, color = "") {
-        Logger.log("WARN", `${color}${message}${Logger.colors.reset}`, color ? color + Logger.colors.fgYellow : Logger.colors.fgYellow);
+        Logger.log("WARN", message, color ? color + Logger.colors.fgYellow : Logger.colors.fgYellow);
     }
 
     static error(message, color = "") {
-        Logger.log("ERROR", `${color}${message}${Logger.colors.reset}`, color ? color + Logger.colors.fgRed : Logger.colors.fgRed);
+        Logger.log("ERROR", message, color ? color + Logger.colors.fgRed : Logger.colors.fgRed);
     }
 
     static debug(message, color = "") {
-        Logger.log("DEBUG", `${color}${message}${Logger.colors.reset}`, color ? color + Logger.colors.fgMagenta : Logger.colors.fgMagenta);
+        Logger.log("DEBUG", message, color ? color + Logger.colors.bright + Logger.colors.fgBlack : Logger.colors.bright + Logger.colors.fgBlack);
     }
 
     static displayDate() {
-        var today = new Date();
-        var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        var dateTime = date + ' ' + time;
-        var tmp_prefix = "[" + dateTime + "] ";
-        var consolePrefix = tmp_prefix;
-
-        return consolePrefix;
+        const today = new Date();
+        const date = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0');
+        const time = today.getHours().toString().padStart(2, '0') + ":" + today.getMinutes().toString().padStart(2, '0') + ":" + today.getSeconds().toString().padStart(2, '0');
+        return `[${date} ${time}] `;
     }
-
 }
 
 export default Logger;

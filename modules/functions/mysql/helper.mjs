@@ -1,5 +1,6 @@
 import { queryDatabase } from "./mysql.mjs";
 import { XMLHttpRequest, fetch } from "../../../index.mjs";
+import { report } from "process";
 
 export async function cacheMediaUrl(url, mediaType) {
   const query = `INSERT INTO url_cache (url, media_type) VALUES (?, ?)`;
@@ -9,6 +10,21 @@ export async function cacheMediaUrl(url, mediaType) {
 export async function getMediaUrlFromCache(url) {
   const query = `SELECT media_type FROM url_cache WHERE url = ?`;
   return await queryDatabase(query, [url]);
+}
+
+export async function saveReport(reportCreator, reportedUser, reportType, reportData = nul, reportNotes = null) {
+  const query = `INSERT INTO reports (reportCreator, reportedUser, reportType, reportData, reportNotes) VALUES (?, ?, ?, ?, ?)`;
+  return await queryDatabase(query, [reportCreator, reportedUser, reportType, reportData, reportNotes]);
+}
+
+export async function getReports(filter = "") {
+  const query = `SELECT * FROM reports ${filter}`;
+  return await queryDatabase(query, []);
+}
+
+export async function deleteReport(reportId) {
+  const query = `DELETE FROM reports WHERE id = ?`;
+  return await queryDatabase(query, [reportId]);
 }
 
 export async function saveChatMessageInDb(message) {

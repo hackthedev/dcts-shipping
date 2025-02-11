@@ -2,10 +2,6 @@
 
 This document will explain the SQL Setup and requirements as well as benefits. The chat app was developed for MySQL / MariaDB compatible SQL servers.
 
-> [!TIP]
->
-> It is almost a requirement as many features wont work without SQL. Only basic chatting would work and is a leftover legacy feature now.
-
 [TOC]
 
 ------

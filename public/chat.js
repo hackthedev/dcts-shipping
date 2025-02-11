@@ -11,12 +11,17 @@ if (!String.prototype.replaceAll) {
 }
 
 
-ModView.init();
-
 
 // IMPORTANT! By default, socket.io() connects to the host that
 // served the page, so we dont have to pass the server url
 var socket = io.connect()
+
+ModView.init();
+UserReports.getReports();
+
+socket.on('newReport', (member) => {
+    UserReports.getReports();
+});
 
 var chatlog = document.getElementById("content");
 var channeltree = document.getElementById("channeltree");
@@ -130,6 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
     memberlist = document.getElementById("infolist");
     typingIndicator = document.getElementById("typing-indicator");
     messageInputBox = document.querySelector('.ql-editor');
+    loadPlugins();
 });
 
 
@@ -444,25 +450,26 @@ function mentionUser(id) {
 }
 
 function getMemberProfile(id, x, y, event = null) {
-    //console.log("Requesting profile")
 
     if (x == null && y == null) {
         x = event.clientX;
         y = event.clientY;
     }
 
+    console.log("Requesting profile")
+
     socket.emit("getMemberProfile", { id: UserManager.getID(), token: UserManager.getToken(), target: id, posX: x, posY: y });
 }
 
 
 function redeemKey() {
-    var catname = prompt("Enter the key you want to redeem");
+    var key = prompt("Enter the key you want to redeem");
 
     if (catname == null || catname.length <= 0) {
         return;
     }
     else {
-        socket.emit("redeemKey", { id: UserManager.getID(), value: catname, token: UserManager.getToken() });
+        socket.emit("redeemKey", { id: UserManager.getID(), key: key, token: UserManager.getToken() });
     }
 }
 
@@ -1162,7 +1169,7 @@ const adjustEditorHeight = debounce(() => {
     const editorContentHeight = editor.scrollHeight;
     const toolbarHeightDiff = editorToolbar.offsetHeight - initialToolbarHeight;
 
-    if (editorContentHeight > initialHeight) {
+    if (editorContentHeight >= initialHeight) {
         const newHeight = Math.min(editorContentHeight, maxHeight);
         editorContainer.style.height = newHeight + 'px';
         editorContainer.style.transform = `translateY(-${(newHeight - (40 - toolbarHeightDiff))}px)`;
@@ -1173,10 +1180,6 @@ const adjustEditorHeight = debounce(() => {
 }, 100); // Adjust the wait time as needed
 
 function resetEditorHeight() {
-    // Reset the Quill editor's content programmatically
-    //quill.setContents([]); // Clears Quill's internal state for content
-
-    // Ensure height reset to initial values
     editorContainer.style.height = initialHeight + 'px';
     editorContainer.style.marginTop = initialMargin + 'px';
     editorContainer.style.transform = 'translateY(0)';
@@ -1418,6 +1421,10 @@ socket.on('receiveCurrentChannel', function (channel) {
 });
 
 socket.on('receiveMemberProfile', function (data) {
+    console.log("Received member profile")
+    data.top = parseInt(data.top)
+    data.left = parseInt(data.left)
+
     var profileContent = document.getElementById("profile_container");
     profileContent.innerHTML = data.code;
 
@@ -1429,7 +1436,6 @@ socket.on('receiveMemberProfile', function (data) {
     var winHeight = window.innerHeight;
 
     // If is out of bounds
-
     if ((data.top + profileContent.offsetHeight) <= winHeight) {
         profileContent.style.top = `${data.top}px`;
     }
@@ -1450,9 +1456,6 @@ socket.on('receiveMemberProfile', function (data) {
     else {
         profileContent.style.left = `${data.left - 20 - profileContent.offsetWidth}px`;
     }
-
-
-
 });
 
 socket.on('updateMemberList', function (data) {
@@ -1914,50 +1917,43 @@ function setUrl(param, isVC = false) {
 
             if (response.type == "success") {
 
-                // not enough users chatted to show group stats
+                // Not enough users chatted to show group stats
                 if (response.mostActiveUsers.length <= 1) return;
 
                 contentBox = document.getElementById("content");
 
                 let code = `
-                <div id="homeScreenGroupContainer">
-                
-                <h1 style="text-align: center">${response.group.info.name}</h1><br>
-                <h2>Top 100 Active Users</h2><hr>
-                
-                <div id="homeGroupStatsMostActiveUserContainer">
-                <table id="activeUserTableList">`;
+<div id="homeScreenGroupContainer">
+    <h1 style="text-align: center">${response.group.info.name}</h1><br>
+    <h2>Top 100 Active Users</h2><hr>
 
-                // Get newly created container
-                activeUserTable = document.getElementById("activeUserTableList");
+    <div id="homeGroupStatsMostActiveUserContainer">
+`;
 
-                console.log(response.mostActiveUsers)
+                // Generate user entries as divs instead of table rows
+                console.log(response.mostActiveUsers);
                 for (let i = 0; i < response.mostActiveUsers.length; i++) {
                     let user = response.mostActiveUsers[i];
-                
+
                     // Skip if user is null
                     if (!user) continue;
-                
+
                     let username = user.user.name;
                     let message_count = user.message_count;
-                
-                    code += `                            
-                        <tr>
-                            <td>
-                                <div class="activeUserEntry" onclick='getMemberProfile("${user.user.id}", null, null, event)'>
-                                    <p class="activeUserEntryName">${username}</p>
-                                    <div class="activeUserEntryDivider"></div>
-                                    <p class="activeUserEntryName">${message_count} messages</p>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
+
+                    code += `
+        <div class="activeUserEntry" onclick='getMemberProfile("${user.user.id}", null, null, event)'>
+            <p class="activeUserEntryName">${username}</p>
+            <div class="activeUserEntryDivider"></div>
+            <p class="activeUserEntryName">${message_count} messages</p>
+        </div>
+    `;
                 }
-                
 
+                code += `</div></div>`; // Close the flex container divs
 
-                code += `</table></div></div>`;
-                contentBox.insertAdjacentHTML("beforeend", code)
+                contentBox.insertAdjacentHTML("beforeend", code);
+
 
 
             }

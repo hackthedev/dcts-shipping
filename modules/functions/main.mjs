@@ -15,11 +15,13 @@ import {
     usersocket,
     sanitizeHtml,
     powVerifiedUsers,
-    bcrypt
+    bcrypt,
+    fs
 } from "../../index.mjs"
 import { banIp, getNewDate } from "./chat/main.mjs";
 import { consolas } from "./io.mjs";
 import Logger from "./logger.mjs";
+import path from "path";
 
 var serverconfigEditable;
 
@@ -101,6 +103,17 @@ export function sanitizeFilename(filename) {
         .replace(/\s+/g, '_');             // Replace spaces with underscores
 }
 
+export const mimeTypesCache = new Map(); // Cache to store validated MIME types by file ID
+export const fileSizeCache = new Map(); // Cache to track file sizes by file ID
+
+// Helper function to get the total size of files in a directory
+export const getFolderSize = (folderPath) => {
+    const files = fs.readdirSync(folderPath);
+    return files.reduce((total, file) => {
+        const { size } = fs.statSync(path.join(folderPath, file));
+        return total + size;
+    }, 0);
+};
 
 
 export async function checkVersionUpdate() {
@@ -246,15 +259,15 @@ export function handleTerminalCommands(command, args) {
 }
 
 export function copyObject(obj) {
-    if(!obj){
+    if (!obj) {
         Logger.debug("copyObject obj was null or undefined")
         return;
     }
-    
-    try{
+
+    try {
         return JSON.parse(JSON.stringify(obj));
     }
-    catch (parseerror){
+    catch (parseerror) {
         Logger.error("Unable to copy json object;")
         Logger.error(parseerror)
         console.log(obj)
@@ -632,7 +645,7 @@ export function checkMemberMute(socket, member) {
     if (serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
         console.log("Checking ipblacklist for IP:", ip);
     }
-    
+
 
     checkRateLimit(socket);
 
@@ -656,12 +669,12 @@ export function checkMemberMute(socket, member) {
     }
 
     // check ip blacklist
-    if(serverconfigEditable.ipblacklist.hasOwnProperty(ip)){
-        if(Date.now() >= serverconfigEditable.ipblacklist[ip]){
+    if (serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
+        if (Date.now() >= serverconfigEditable.ipblacklist[ip]) {
             delete serverconfigEditable.ipblacklist[ip];
             saveConfig(serverconfigEditable);
         }
-        else{
+        else {
             return { result: true, timestamp: serverconfigEditable.ipblacklist[ip] }
         }
     }
@@ -680,7 +693,7 @@ export function checkMemberBan(socket, member) {
     if (serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
         console.log("Checking ipblacklist for IP:", ip);
     }
-    
+
 
     checkRateLimit(socket);
 
@@ -705,12 +718,12 @@ export function checkMemberBan(socket, member) {
     }
 
     // check ip blacklist
-    if(serverconfigEditable.ipblacklist.hasOwnProperty(ip)){
-        if(Date.now() >= serverconfigEditable.ipblacklist[ip]){
+    if (serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
+        if (Date.now() >= serverconfigEditable.ipblacklist[ip]) {
             delete serverconfigEditable.ipblacklist[ip];
             saveConfig(serverconfigEditable);
         }
-        else{
+        else {
             return { result: true, timestamp: serverconfigEditable.ipblacklist[ip] }
         }
     }

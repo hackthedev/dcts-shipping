@@ -70,6 +70,9 @@ Example:
 # Navigate to the project directory
 cd /path/to/dcts-shipping
 
+# install all packages, only required on initial setup
+npm i
+
 # Start the server
 node .
 ```

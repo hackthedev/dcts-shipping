@@ -44,7 +44,7 @@ class Prompt {
 
             .prompt-button {
                 padding: 10px 20px;
-                background-color: var(--primary); 
+                background-color: #34383C; 
                 color: white;
                 border: none;
                 border-radius: 2px;
@@ -54,44 +54,44 @@ class Prompt {
             }
 
             .prompt-button.submit{
-                background-color: var(--secondary); 
+                background-color: #2492c9; 
             }
 
             .prompt-button.submit:hover{
                 background-color: var(--secondary-hover); 
-                transition: var(--transition-all);
+                transition: all 200ms;
             }
 
             .prompt-button.submit:not(:hover){
-                background-color: var(--secondary); 
-                transition: var(--transition-all);
+                background-color: #2492c9; 
+                transition: all 200ms;
             }
 
             .prompt-click-select{
                 padding: 12px;
                 border-radius: 2px;
-                background-color: var(--primary);
+                background-color:#34383C;
                 line-height: 0;
             }
 
             .prompt-click-select:hover{
                 border-radius: 4px;
-                transition: var(--transition-all);
-                background-color: var(--primary-hover);
+                transition: all 200ms;
+                background-color: color-mix(in srgb,#34383C 80%, white 20%);
             }
 
             .prompt-click-select:not(:hover){
                 border-radius: 2px;
-                transition: var(--transition-all);
-                background-color: var(--primary);
+                transition: all 200ms;
+                background-color:#34383C;
             }
 
             .prompt-click-select.selected {
-                background-color: var(--primary-selected);
+                background-color: color-mix(in srgb, #34383C 80%, white 40%);
             }
 
             .prompt-button:hover {
-                background-color: var(--primary-hover);
+                background-color: color-mix(in srgb,#34383C 80%, white 20%);
             }
 
             .profile-image-container {
@@ -237,27 +237,28 @@ class Prompt {
     }
     
 
-    showPrompt(title = 'Prompt', htmlContent, callback, customSubmitText = null, multiSelect = false, customMinWidth = null, helpAction = null) {
+    showPrompt(title = 'Prompt', htmlContent, callback, customSubmitText = null, multiSelect = false, customMinWidth = null, helpAction = null, afterSubmitAction = null) {
         this.currentCallback = callback;
+        this.afterSubmitAction = afterSubmitAction; // Store the afterSubmitAction function
         this.multiSelect = multiSelect;
         this.selectedValues = multiSelect ? [] : null;
         this.promptContent.innerHTML = htmlContent;
         this.modal.style.display = 'flex';
         this.promptContent.style.minWidth = `${customMinWidth}px` || "";
-
-        // Custom submit button
-        let submitButtonColor = customSubmitText ? customSubmitText[1] : "var(--secondary)";
+    
+        // Custom submit button color and text
+        let submitButtonColor = customSubmitText ? customSubmitText[1] : "#2492c9";
         this.submitButton.innerText = customSubmitText ? customSubmitText[0] : "Submit";
-
+    
         if (submitButtonColor === "success") {
-            this.submitButton.style.backgroundColor = "var(--success)"; // Green for success
+            this.submitButton.style.backgroundColor = "#5CCD5C"; // Green for success
         } else if (submitButtonColor === "error") {
-            this.submitButton.style.backgroundColor = "var(--error)"; // Red for error
+            this.submitButton.style.backgroundColor = "indianred"; // Red for error
         } else {
             this.submitButton.style.backgroundColor = submitButtonColor;
         }
-
-        // show buttons agin, else hidden
+    
+        // Show buttons
         this.submitButton.style.display = "block";
         this.closeButton.style.display = "block";
         this.helpButton.style.display = "block";
@@ -270,18 +271,19 @@ class Prompt {
     
         // Set up the help button
         if (helpAction) {
-            this.helpButton.style.display = 'inline'; // Show the help button
-            this.helpButton.onclick = helpAction;    // Set the help action
+            this.helpButton.style.display = 'inline';
+            this.helpButton.onclick = helpAction;
         } else {
-            this.helpButton.style.display = 'none';  // Hide the help button if no action is set
+            this.helpButton.style.display = 'none';
         }
     }
 
-    showConfirm(titleText, options, callback) {
+    showConfirm(titleText, options, callback, afterSubmitAction = null) {
         this.currentCallback = callback;
+        this.afterSubmitAction = afterSubmitAction;
     
         // Update the title
-        const titleElement = this.modal.querySelector('h2'); // Use the existing title element
+        const titleElement = this.modal.querySelector('h2');
         if (titleElement) {
             titleElement.innerText = titleText;
         }
@@ -299,7 +301,7 @@ class Prompt {
         buttonContainer.style.display = 'flex';
         buttonContainer.style.gap = '10px'; // Add space between buttons
         buttonContainer.style.justifyContent = 'center'; // Center-align the buttons
-        buttonContainer.style.marginTop = '20px'; // Optional: Add space above the buttons
+        buttonContainer.style.marginTop = '20px';
     
         // Create buttons for each option
         options.forEach(([label, color]) => {
@@ -307,34 +309,41 @@ class Prompt {
             button.className = 'prompt-button';
             button.innerText = label;
     
-            // Apply custom color based on the second element of the array
+            // Apply custom color
             if (color) {
                 if (color === "success") {
-                    button.style.backgroundColor = "var(--success)"; // Green for success
+                    button.style.backgroundColor = "#5CCD5C"; // Green for success
                     button.style.color = "#fff";
                 } else if (color === "error") {
-                    button.style.backgroundColor = "var(--error)"; // Red for error
+                    button.style.backgroundColor = "indianred"; // Red for error
                     button.style.color = "#fff";
                 } else {
-                    button.style.backgroundColor = color || "var(--primary)"; // Use custom colors if provided
+                    button.style.backgroundColor = color || "#2B3035";
                     button.style.color = "#fff";
                 }
             }
     
             button.onclick = () => {
-                this.closePrompt();
+                this.closePrompt(false); // Indicate that this was a valid selection
+    
+                // Ensure callback is executed only once
                 if (this.currentCallback) {
-                    this.currentCallback(label.toLowerCase()); // Return the selected option label
+                    this.currentCallback(label.toLowerCase());
+                    this.currentCallback = null; // Prevent duplicate execution
+                }
+    
+                if (this.afterSubmitAction) {
+                    this.afterSubmitAction({ canceled: false, selectedOption: label.toLowerCase() });
                 }
             };
-            buttonContainer.appendChild(button); // Append each button to the container
+    
+            buttonContainer.appendChild(button);
         });
     
-        this.promptContent.appendChild(buttonContainer); // Add the button container to the modal content
-    
-        // Show the modal
+        this.promptContent.appendChild(buttonContainer);
         this.modal.style.display = 'flex';
     }
+    
     
     
     
@@ -359,9 +368,26 @@ class Prompt {
     }
     
 
-    closePrompt() {
+    closePrompt(canceled = true) {
         this.modal.style.display = 'none';
+    
+        if (!canceled && this.currentCallback) {
+            this.currentCallback({ canceled });
+        }
+    
+        if (this.afterSubmitAction) {
+            this.afterSubmitAction({ canceled, values: null });
+        }
+    
+        // Only reset the callback if it wasn't from `showConfirm()`
+        if (canceled) {
+            this.currentCallback = null;
+        }
     }
+    
+    
+    
+    
 
     previewImage(event) {
 		const inputId = event.target.id;
@@ -383,6 +409,7 @@ class Prompt {
     submitPrompt() {
         const inputs = this.promptContent.querySelectorAll('input, select, textarea');
         let values = { selected: this.selectedValues };
+    
         inputs.forEach(input => {
             if (input.type === 'checkbox') {
                 values[input.name] = input.checked;
@@ -392,11 +419,19 @@ class Prompt {
                 values[input.name] = input.value;
             }
         });
-
-        this.closePrompt();
+    
+        // Ensure callback is executed only once
         if (this.currentCallback) {
             this.currentCallback(values);
+            this.currentCallback = null; // Prevent duplicate execution
         }
+    
+        if (this.afterSubmitAction) {
+            this.afterSubmitAction({ canceled: false, values });
+        }
+    
+        this.closePrompt(false);
     }
+    
+    
 }
-

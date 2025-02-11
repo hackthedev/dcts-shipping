@@ -70,7 +70,7 @@ export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = false;
-export let versionCode = 419;
+export let versionCode = 449;
 
 
 // config file saving

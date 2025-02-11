@@ -51,21 +51,21 @@ DCTS isn't just a chat platform; it's a vision for better communication, driven 
 ### Docker
 To install via docker you can either clone and build or use the prebuilt image.
 ```
-$ sudo docker run --name dcts-server  -p 8080:2052 ghcr.io/hackthedev/dcts-shipping
+sudo docker run --name dcts-server  -p 8080:2052 ghcr.io/hackthedev/dcts-shipping
 ```
 or via docker-compose:
 ```
-$ curl -L -O https://github.com/hackthedev/dcts-shipping/raw/main/docker/docker-compose.yml
-$ sudo docker compose up -d
+curl -L -O https://github.com/hackthedev/dcts-shipping/raw/main/docker/docker-compose.yml
+sudo docker compose up -d
 ```
 
 
 ### NPM
 Requires node.js to be installed, see [Tested Versions](https://github.com/hackthedev/dcts-shipping?tab=readme-ov-file#tested-node-versions). Clone the git repository and execute the following commands inside the app's directory.
 ```
-$ git clone https://github.com/hackthedev/dcts-shipping --depth 1
-$ npm install
-$ node .
+git clone https://github.com/hackthedev/dcts-shipping --depth 1
+npm install
+node .
 ```
 
 <br>

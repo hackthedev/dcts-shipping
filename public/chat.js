@@ -465,7 +465,7 @@ function getMemberProfile(id, x, y, event = null) {
 function redeemKey() {
     var key = prompt("Enter the key you want to redeem");
 
-    if (catname == null || catname.length <= 0) {
+    if (key == null || key.length <= 0) {
         return;
     }
     else {

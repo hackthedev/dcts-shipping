@@ -2,7 +2,7 @@ import { io, saveConfig, serverconfig, socketToIP, usersocket, xssFilters } from
 import { formatDateTime, resolveCategoryByChannelId, resolveChannelById, resolveGroupByChannelId } from "../functions/chat/main.mjs";
 import { saveChatMessage } from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
-import { checkMemberBan, checkMemberMute, copyObject, escapeHtml, generateId, hashPassword, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { checkMemberBan, checkMemberMute, copyObject, escapeHtml, generateId, getCastingMemberObject, hashPassword, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
 export default (socket) => {
     // socket.on code here
@@ -129,7 +129,7 @@ export default (socket) => {
                 }
 
                 // create copy of server member without token
-                var castingMember = copyObject(serverconfig.servermembers[member.id]);
+                var castingMember = getCastingMemberObject(copyObject(serverconfig.servermembers[member.id]));
                 delete castingMember.token;
                 delete castingMember.password;
 
@@ -143,7 +143,7 @@ export default (socket) => {
                 castingMember.messageId = generateId(12);
                 castingMember.isSystemMsg = true;
 
-                castingMember.message = `${member.name} joined the server!</label>`;
+                castingMember.message = `${member.name} joined the server!`;
                 saveChatMessage(castingMember);
 
                 io.emit("updateMemberList");

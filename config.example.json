@@ -50,7 +50,8 @@
                 "redeemKey": 1,
                 "maxUpload": "7",
                 "manageChannels": 0,
-                "viewChannelHistory": 1
+                "viewChannelHistory": 1,
+                "createReports": 1
             },
             "members": [
 

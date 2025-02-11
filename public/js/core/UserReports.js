@@ -47,7 +47,6 @@ class UserReports {
             id: UserManager.getID(),
             token: UserManager.getToken()
         }, function (response) {
-            console.log(response)
 
             try {
                 if (response.type == "success") {

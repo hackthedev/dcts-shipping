@@ -541,7 +541,7 @@ export function getGroupList(member) {
                     <a onclick="setUrl('?group=${group.info.id}');" id="group-entry-${group.info.id}">
                         <div class="group-entry-marker" id="group-marker-${group.info.id}"></div>
                         <div class="server-entry">
-                           <img title="${group.info.name}" id="${group.info.id}" class="server-icon" src="${group.info.icon}">
+                           <img title="${group.info.name}" id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
                         </div>
                     </a>`;
         }
@@ -630,7 +630,7 @@ export function getChannelTree(member) {
         if (hasPermission(member.id, "manageChannels", group) == true) {
 
             // show group name etc if allowed to
-            if(!addedInitialCode) treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`; addedInitialCode = true;
+            //if(!addedInitialCode) treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`; addedInitialCode = true;
 
             // Add Category
             treecode += "<details open draggable='true'>";

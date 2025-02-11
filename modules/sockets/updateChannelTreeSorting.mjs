@@ -1,4 +1,6 @@
-import { serverconfig, xssFilters } from "../../index.mjs";
+import { io, saveConfig, serverconfig, xssFilters } from "../../index.mjs";
+import { findInJson, hasPermission } from "../functions/chat/main.mjs";
+import { saveChatMessage } from "../functions/io.mjs";
 import { copyObject, validateMemberId } from "../functions/main.mjs";
 
 export default (socket) => {
@@ -17,6 +19,7 @@ export default (socket) => {
                     return;
                 }
     
+                
                 let channelStructure = JSON.parse(member.data);
     
     
@@ -87,6 +90,7 @@ export default (socket) => {
                                 serverconfig.groups[member.group].channels.categories[newCategoryId].channel[channelId].sortId = actualNewSortId;
     
                                 saveConfig(serverconfig);
+                                response({ type: "success", error: null, msg: "Successfully updated channel tree sorting" });
                             } else {
                                 Logger.error(`Could not find original path for channel ${channelId}`);
                             }

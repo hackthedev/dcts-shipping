@@ -24,6 +24,7 @@ class ChannelTree {
             ChannelTree.destroySortable();
 
             let tempContainer = document.createElement("div");
+            tempContainer.insertAdjacentHTML("beforeend", `<h2>${response.data.groups[group].info.name}</h2><hr>`);
 
             console.log(catCollection)
             sortedCats.forEach(cat => {
@@ -124,8 +125,7 @@ class ChannelTree {
     }
 
     static updateChannelTree() {
-        console.clear();
-        console.log("called update");
+        console.log("Updating channel tree");
     
         let channelStructure = {};
 
@@ -155,11 +155,10 @@ class ChannelTree {
                 });
             });
 
-            console.log(channelStructure)
-
             socket.emit("updateChannelTreeSorting", { id: UserManager.getID(), token: UserManager.getToken(), group: UserManager.getGroup(), data: JSON.stringify(channelStructure) }, function (response) {
 
                 console.log(response)
+                /*
                 showSystemMessage({
                     title: response.msg,
                     text: "",
@@ -168,6 +167,7 @@ class ChannelTree {
                     type: response.type,
                     duration: 1000
                 });
+                */
             });
         });
     }

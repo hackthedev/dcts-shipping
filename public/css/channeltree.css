@@ -17,9 +17,9 @@
     width: calc(100%);
     -webkit-transition: transform .5s ease;
 
-    object-fit: cover;
-    background-color: transparent;
-    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 100% 100%;
 
     border-radius: 6px;
 

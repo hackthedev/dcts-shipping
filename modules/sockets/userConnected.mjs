@@ -129,7 +129,7 @@ export default (socket) => {
                 }
 
                 // create copy of server member without token
-                var castingMember = getCastingMemberObject(copyObject(serverconfig.servermembers[member.id]));
+                var castingMember = getCastingMemberObject(serverconfig.servermembers[member.id]);
                 delete castingMember.token;
                 delete castingMember.password;
 

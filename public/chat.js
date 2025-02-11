@@ -16,8 +16,12 @@ if (!String.prototype.replaceAll) {
 // served the page, so we dont have to pass the server url
 var socket = io.connect()
 
-ModView.init();
-UserReports.getReports();
+socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: "manageReports" }, function (response) {
+    if (response.permission == "granted") {
+        ModView.init();
+        UserReports.getReports();
+    }
+});
 
 socket.on('newReport', (member) => {
     UserReports.getReports();
@@ -361,13 +365,14 @@ let connectionAttempts = 0;
 ChatManager.checkConnection(2000)
 
 
+
 // VC STUFF
 function joinVC() {
 
     joinRoom(UserManager.getRoom());
 
     document.getElementById("content").innerHTML = "";
-    ChannelTree.getTree();
+    getChannelTree()
     socket.emit("getCurrentChannel", { id: UserManager.getID(), username: UserManager.getUsername(), icon: UserManager.getPFP(), group: UserManager.getGroup(), category: UserManager.getCategory(), channel: UserManager.getChannel(), token: UserManager.getToken() });
     socket.emit("joinedVC", { id: UserManager.getID(), username: UserManager.getUsername(), icon: UserManager.getPFP(), room: UserManager.getRoom(), token: UserManager.getToken(), lastActivity: new Date().getTime() });
     socket.emit("getVCMembers", { id: UserManager.getID(), username: UserManager.getUsername(), icon: UserManager.getPFP(), room: UserManager.getRoom(), token: UserManager.getToken() }, function (response) {
@@ -516,7 +521,7 @@ function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag =
                 socket.emit("getGroupBanner", { id: UserManager.getID(), token: UserManager.getToken(), username: UserManager.getUsername(), icon: UserManager.getPFP(), group: UserManager.getGroup() });
                 socket.emit("getGroupList", { id: UserManager.getID(), group: UserManager.getGroup(), token: UserManager.getToken(), username: UserManager.getUsername(), icon: UserManager.getPFP() });
                 getMemberList()
-                ChannelTree.getTree();
+                getChannelTree()
                 socket.emit("getCurrentChannel", { id: UserManager.getID(), token: UserManager.getToken(), username: UserManager.getUsername(), icon: UserManager.getPFP(), group: UserManager.getGroup(), category: UserManager.getCategory(), channel: UserManager.getChannel() });
                 socket.emit("setRoom", { id: UserManager.getID(), room: UserManager.getRoom(), token: UserManager.getToken() });
 
@@ -566,6 +571,10 @@ function getUrlParams(param) {
     var urlChannel = urlParams.get(param);
 
     return urlChannel;
+}
+
+function getChannelTree(){
+    ChannelTree.getTree();
 }
 
 
@@ -1322,7 +1331,7 @@ socket.on('memberTyping', function (members) {
 
 socket.on('receiveChannelTree', function (data) {
 
-    ChannelTree.getTree();
+    getChannelTree()
     return;
 
     channeltree.innerHTML = data;
@@ -1472,10 +1481,7 @@ socket.on('receiveGroupList', function (data) {
 
     let mobileGroupList = document.getElementById("mobile_GroupList");
     mobileGroupList.innerHTML = data;
-
-
-
-    setActiveGroup(UserManager.getGroup());
+    setActiveGroup(UserManager.getGroup())
 });
 
 
@@ -1489,7 +1495,6 @@ socket.on('newMemberJoined', function (author) {
     addToChatLog(chatlog, message);
     scrollDown();
 
-    //socket.emit("getChannelTree", { id: UserManager.getID(), token: UserManager.getToken(), username: UserManager.getUsername(), icon: UserManager.getPFP(), room: UserManager.getRoom(), group: UserManager.getGroup() });
 });
 
 socket.on('memberOnline', function (member) {
@@ -1501,13 +1506,9 @@ socket.on('memberOnline', function (member) {
 
     addToChatLog(chatlog, message);
     scrollDown();
-
-    //socket.emit("getChannelTree", { id: UserManager.getID(), token: UserManager.getToken(), username: UserManager.getUsername(), icon: UserManager.getPFP(), room: UserManager.getRoom(), group: UserManager.getGroup() });
 });
 
 socket.on('memberPresent', function (member) {
-    //socket.emit("getChannelTree", { id: member.id, username: member.username, icon: member.pfp });
-    //socket.emit("getChannelTree", { id: UserManager.getID(), token: UserManager.getToken(), username: UserManager.getUsername(), icon: UserManager.getPFP(), room: UserManager.getRoom(), group: UserManager.getGroup() });
 });
 
 socket.on('receiveGifImage', function (response) {
@@ -1573,7 +1574,17 @@ function setActiveGroup(group) {
     if (group == null) {
         return;
     }
-    document.getElementById(group).classList.add('selectedGroup');
+
+    let groupIcons = document.querySelectorAll(`.server-icon`)
+    groupIcons.forEach(icon => {
+        if(icon.classList.contains("selectedGroup")) icon.classList.remove("selectedGroup");
+    })
+
+
+    document.querySelectorAll(`.group-icon-${group}`).forEach(icon => {
+        icon.classList.add('selectedGroup')
+        console.log("added selectedGroup")
+    })
 }
 
 
@@ -1813,7 +1824,7 @@ function refreshValues() {
     socket.emit("setRoom", { id: UserManager.getID(), username: UserManager.getUsername(), icon: UserManager.getPFP(), room: UserManager.getRoom(), token: UserManager.getToken() });
     getGroupList();
     getMemberList();
-    ChannelTree.getTree();
+    getChannelTree();
     socket.emit("getCurrentChannel", { id: UserManager.getID(), username: username, icon: UserManager.getPFP(), group: UserManager.getGroup(), category: UserManager.getCategory(), channel: UserManager.getChannel(), token: UserManager.getToken() });
 }
 
@@ -1871,7 +1882,6 @@ function setUrl(param, isVC = false) {
 
     // channel already open, dont reload it
     if (UserManager.getChannel() == channelId && channelId && UserManager.getChannel()) return;
-
 
     window.history.replaceState(null, null, param); // or pushState
 
@@ -1974,7 +1984,6 @@ function setUrl(param, isVC = false) {
     }
 
     refreshValues();
-
 }
 
 
@@ -2020,7 +2029,7 @@ var uploadObject = document.getElementById('content');
 // Handle the file drop event
 uploadObject.addEventListener('drop', async function (e) {
     e.preventDefault();
-    uploadObject.style.backgroundColor = '#2B3137';
+    uploadObject.style.backgroundColor = '';
 
     const files = Array.from(e.dataTransfer.files); // Handle multiple files if needed
     const fileSize = files[0].size / 1024 / 1024; // Example: Display the size of the first file
@@ -2043,6 +2052,8 @@ uploadObject.addEventListener('drop', async function (e) {
                     UserManager.getPFP(),
                     window.location.origin + url
                 ); // Sending all URLs at once
+
+                
             }
         } else {
             console.error("Upload encountered an error:", result.error);
@@ -2056,6 +2067,7 @@ uploadObject.addEventListener('drop', async function (e) {
 uploadObject.addEventListener('dragenter', function (e) {
     e.preventDefault();
     uploadObject.style.backgroundColor = 'gray';
+
 }, false);
 
 uploadObject.addEventListener('dragover', function (e) {
@@ -2065,7 +2077,7 @@ uploadObject.addEventListener('dragover', function (e) {
 
 uploadObject.addEventListener('dragleave', function (e) {
     e.preventDefault();
-    uploadObject.style.backgroundColor = '#2B3137';
+    uploadObject.style.backgroundColor = '';
 }, false);
 
 

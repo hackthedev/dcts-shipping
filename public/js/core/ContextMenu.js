@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Context Menu Stuff
     ContextMenu = document.getElementById("context-menu");
-    console.log("context menu is ", ContextMenu)
     const profile = document.getElementById("context-menu");
     var ContextMenuSelectedMessage;
 
@@ -35,7 +34,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             //if(clickedElement.className == "mention") { userid = userid.replace("mention-", "")}
             userid = userid.split("-").pop();
-            console.log("Userid is " + userid)
             getMemberProfile(userid, mouseX, mouseY);
         }
         else if (clickedElement.className.includes("role") && clickedElement.id.split("-")[0] == "addRole") {
@@ -81,9 +79,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const { clientX: mouseX, clientY: mouseY } = event;
         var clickedElement = document.elementFromPoint(mouseX, mouseY);
 
-        //console.log(clickedElement)
-        //console.log(clickedElement.className)
-
         ContextMenuSelectedMessage = clickedElement;
 
 
@@ -122,7 +117,6 @@ document.addEventListener("DOMContentLoaded", function () {
             try {
                 // userid of msg
                 let msgAuthor = clickedElement.parentNode.parentNode.parentNode.querySelector(".message-profile-info").id
-                console.log(msgAuthor)
 
                 if (UserManager.getID() == msgAuthor) {
                     addContextMenuItem(ContextMenu, "Edit Message",
@@ -212,8 +206,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         // check if target user is muted
                         socket.emit("getUserFromId", { id: UserManager.getID(), token: UserManager.getToken(), target: userid }, function (response2) {
-
-                            console.log(response2)
 
                             if (response2.user.isMuted == 1) {
                                 addContextMenuItem(ContextMenu, "Unmute User",
@@ -415,7 +407,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: "redeemKey" }, function (response) {
-                console.log(response)
                 if (response.permission == "denied") { return; }
 
                 addContextMenuItem(ContextMenu, "Redeem Key",

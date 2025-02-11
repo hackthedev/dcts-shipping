@@ -556,7 +556,7 @@ export function getGroupList(member) {
                     ) {
                         addedGroups.push(group.info.id);
                         code += `<a onclick="setUrl('?group=${group.info.id}');"><div class="server-entry">
-                                    <img title="${group.info.name}" id="${group.info.id}" class="server-icon" src="${group.info.icon}">
+                                    <img title="${group.info.name}" id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
                                 </div></a>`;
                     }
                 } catch {

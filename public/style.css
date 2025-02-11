@@ -146,7 +146,6 @@ body {
     border: none;
     padding: 8px;
 
-    line-height: 150%;
     height: calc(100% - 3px);
     width: calc(100% - 32px - 40px - 25px - 5px);
 
@@ -154,6 +153,10 @@ body {
     resize: none !important;
     margin: -20px 8px 0 8px;
     overflow-y: hidden;
+}
+
+.message-container p{
+    line-height: 150% !important;
 }
 
 #messagebox-media {

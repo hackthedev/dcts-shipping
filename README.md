@@ -68,6 +68,9 @@ npm install
 node .
 ```
 
+> [!TIP]
+> Install tutorial: https://www.youtube.com/watch?v=N8ILWcW8vGQ
+
 <br>
 
 ## Connecting to your server

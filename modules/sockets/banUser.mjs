@@ -1,10 +1,10 @@
-import { io, saveConfig, serverconfig, xssFilters } from "../../index.mjs";
+import { saveConfig, serverconfig, usersocket, xssFilters } from "../../index.mjs";
 import { getMemberHighestRole } from "../functions/chat/helper.mjs";
 import { banUser, getNewDate, hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('banUser', function (member, response) {
         if (validateMemberId(member.id, socket) == true
@@ -15,9 +15,9 @@ export default (socket) => {
                 return;
             }
             else {
-                if (hasPermission(member.id, "banUsers") == false) {
+                if (hasPermission(member.id, "banMember") == false) {
 
-                    response({ type: "error", msg: "You dont have permissions to ban members", error: "Missing permission banUsers" });
+                    response({ type: "error", msg: "You dont have permissions to ban members", error: "Missing permission banMember" });
                     return;
                 }
                 else {
@@ -45,6 +45,7 @@ export default (socket) => {
 
                     io.sockets.sockets.forEach((target) => {
 
+                        
                         // Check if the target's socket ID matches the user's socket ID
                         if (target.id === usersocket[member.target]) {
                             // Escape and process the reason text

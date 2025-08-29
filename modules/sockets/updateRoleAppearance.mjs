@@ -1,9 +1,9 @@
-import { io, saveConfig, serverconfig, usersocket, xssFilters } from "../../index.mjs";
+import { saveConfig, serverconfig, usersocket, xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('updateRoleAppearance', function (member, response) {
         if (validateMemberId(member.id, socket) == true

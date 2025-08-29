@@ -185,4 +185,6 @@ code.joined{
     border: 2px solid #3c3f44;
     border-radius: 6px;
     padding: 2px 4px 2px 4px;
+    margin: 4px 0px;
+    display: block;
 }

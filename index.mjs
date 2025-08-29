@@ -11,6 +11,8 @@ import path from 'path';
 import mysql from 'mysql2/promise';
 import sanitizeHtml from 'sanitize-html';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+
 
 // Depending on the SSL setting, this will switch.
 export let server; // = http.createServer(app);
@@ -48,7 +50,8 @@ export {
     fileTypeFromBuffer,
     XMLHttpRequest,
     colors,
-    request
+    request,
+    crypto
 };
 
 import Logger from "./modules/functions/logger.mjs";
@@ -58,9 +61,9 @@ export let checkedMediaCacheUrls = {};
 export let usersocket = []
 export let loginAttempts = [];
 export let userOldRoom = {}
+export let useridFromSocket = [];
 export let peopleInVC = {}
 export let showedOfflineMessage = [];
-export let powVerifiedUsers = [];
 
 export let typingMembers = [];
 export let typingMembersTimeout = [];
@@ -70,7 +73,7 @@ export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = false;
-export let versionCode = 449;
+export let versionCode = 543;
 
 
 // config file saving
@@ -80,8 +83,20 @@ let writeQueue = Promise.resolve(); // Queue for write operations
 let isClosing = false; // Flag to prevent multiple close attempts
 
 
-// PoW difficulty
-let powDifficulty = 7;
+
+
+// handle startup args
+let nodeArgs = process.argv;
+
+// remove the first few arguments because fuck that lol
+nodeArgs.shift()
+nodeArgs.shift()
+
+if (nodeArgs.includes("--debug")) {
+    // enable debug logging
+    Logger.logDebug = true;
+}
+
 
 
 // check if needed directories are setup
@@ -124,7 +139,8 @@ import {
     getCastingMemberObject,
     findAndVerifyUser,
     checkMemberMute,
-    moveJson
+    moveJson,
+    removeFromArray
 } from "./modules/functions/main.mjs"
 
 // IO related functions
@@ -140,45 +156,19 @@ import { checkSSL } from "./modules/functions/http.mjs"
 
 // Chat functions
 import {
-    hasPermission,
-    getChannelTree,
-    resolveGroupByChannelId,
-    muteUser,
-    resolveCategoryByChannelId,
-    banUser,
-    resolveChannelById,
-    resolveRolesByUserId,
-    getMemberLastOnlineTime,
-    getMemberProfile,
-    getMemberList,
-    getGroupList,
-    banIp,
     unbanIp,
-    getNewDate,
     formatDateTime,
     findInJson
 } from "./modules/functions/chat/main.mjs";
-
-import {
-    getMemberHighestRole,
-    convertMention,
-    findEmojiByID,
-} from "./modules/functions/chat/helper.mjs";
-
-import {
-    deleteChatMessagesFromDb,
-    getChatMessagesFromDb,
-    decodeFromBase64,
-    leaveAllRooms
-} from "./modules/functions/mysql/helper.mjs"
-
 
 import {
     checkAndCreateTable,
 } from "./modules/functions/mysql/mysql.mjs";
 
 import { fileURLToPath, pathToFileURL } from "url";
-
+import { offload } from './modules/functions/offload.mjs';
+import { registerTemplateMiddleware } from './modules/functions/template.mjs';
+import { listenToPow, powVerifiedUsers, sendPow, waitForPowSolution } from './modules/sockets/pow.mjs';
 
 
 
@@ -338,14 +328,22 @@ if (serverconfig.serverinfo.sql.enabled == true) {
 Logger.success(`Welcome to DCTS`);
 Logger.success(`Checkout our subreddit at https://www.reddit.com/r/dcts/`);
 Logger.success(`The Official Github Repo: https://github.com/hackthedev/dcts-shipping/`);
-Logger.success(`Support the project at https://ko-fi.com/shydevil`, Logger.colors.blink);
+
+Logger.space();
+Logger.info(`♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥`, Logger.colors.blink + Logger.colors.bright + Logger.colors.fgMagenta);
+Logger.info(`Support the project » https://ko-fi.com/shydevil`, Logger.colors.blink + Logger.colors.bright + Logger.colors.fgMagenta);
+Logger.info(`♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥`, Logger.colors.blink + Logger.colors.bright + Logger.colors.fgMagenta);
+Logger.space();
+
 Logger.info(`You're running version ` + versionCode);
 
 // Check if new Version exists
 var checkVer = await checkVersionUpdate()
 if (checkVer != null) {
-    Logger.info(`New version ${checkVer} is available!`, Logger.colors.fgCyan + Logger.colors.bright);
-    Logger.info(`Download: https://github.com/hackthedev/dcts-shipping/releases`, Logger.colors.fgCyan + Logger.colors.bright);
+    Logger.space();
+    Logger.info(`New version ${checkVer} is available!`, Logger.colors.blink + Logger.colors.fgCyan + Logger.colors.bright);
+    Logger.info(`Download » https://github.com/hackthedev/dcts-shipping/releases`, Logger.colors.blink + Logger.colors.fgCyan + Logger.colors.bright);
+    Logger.space();
 }
 
 // Check if SSL is used or not
@@ -373,15 +371,6 @@ process.on('uncaughtException', function (err) {
         }
         Logger.debug("The log file ./logs/error_" + date + ".txt was saved!");
     });
-
-
-    // Create the config backup file
-    fs.writeFile("./config_backups/config_" + date + ".txt", JSON.stringify(serverconfig, false, 4), function (err) {
-        if (err) {
-            return console.log(err);
-        }
-        Logger.debug("The config file ./logs/error_" + date + ".txt was saved!");
-    });
 })
 
 
@@ -397,6 +386,7 @@ process.stdin.on('data', function (text) {
 
     handleTerminalCommands(command, args);
 });
+
 
 // Setup socket.io
 export const io = new Server(server, {
@@ -442,138 +432,7 @@ server.listen(port, function () {
 app.use(express.urlencoded({ extended: true })); // Parses URL-encoded data
 app.use(express.json()); // Parses JSON bodies
 
-// stupid bs
-/*
-app.get('*', (req, res) => {
-    const { group, category, channel } = req.query;
-
-    // Determine the file path
-    let filePath = path.join(__dirname, 'public', req.path);
-
-    // Default to index.html for the root path or requests without extensions
-    if (req.path === '/' || path.extname(req.path) === '') {
-        filePath = path.join(__dirname, 'public', 'index.html');
-    }
-
-    // Check if the request is for the main HTML template
-    if (filePath.endsWith('index.html')) {
-        // Proceed only if at least one query parameter is present
-        if (!group && !category && !channel) {
-            console.log("No relevant query parameters found. Ignoring request.");
-        }
-
-
-        // Define placeholders and their replacements
-        const placeholders = [
-            ["meta.page.title", () => getMetaTitle(group, category, channel)],
-            ["category", () => category || "No Category Provided"],
-            ["channel", () => channel || "No Channel Provided"],
-        ];
-
-        // Template rendering function
-        function renderTemplate(template) {
-            return template.replace(/{{\s*([^{}\s]+)\s*}}/g, (match, key) => {
-                const placeholder = placeholders.find(([name]) => name === key);
-                return placeholder ? placeholder[1]() : ""; // Replace with function result or empty string
-            });
-        }
-
-        // Read and render the index.html template
-        return fs.readFile(filePath, 'utf8', (err, data) => {
-            if (err) {
-                console.error("Error reading file:", err.message);
-                return res.status(404).send('File not found');
-            }
-
-            const renderedContent = renderTemplate(data);
-            res.send(renderedContent);
-        });
-    }
-
-    // Serve other static files (CSS, JS, images, etc.)
-    fs.readFile(filePath, (err, data) => {
-        if (err) {
-            console.error("Error serving file:", err.message);
-            return res.status(404).send('File not found');
-        }
-
-        // Set the appropriate content type based on file extension
-        const ext = path.extname(filePath).toLowerCase();
-        const mimeTypes = {
-            // Text files
-            '.html': 'text/html',
-            '.css': 'text/css',
-            '.js': 'application/javascript',
-            '.json': 'application/json',
-            '.xml': 'application/xml',
-            '.csv': 'text/csv',
-        
-            // Image files
-            '.png': 'image/png',
-            '.jpg': 'image/jpeg',
-            '.jpeg': 'image/jpeg',
-            '.gif': 'image/gif',
-            '.svg': 'image/svg+xml',
-            '.webp': 'image/webp',
-            '.ico': 'image/x-icon',
-        
-            // Font files
-            '.woff': 'font/woff',
-            '.woff2': 'font/woff2',
-            '.ttf': 'font/ttf',
-            '.otf': 'font/otf',
-            '.eot': 'application/vnd.ms-fontobject',
-        
-            // Audio files
-            '.mp3': 'audio/mpeg',
-            '.wav': 'audio/wav',
-            '.ogg': 'audio/ogg',
-            '.m4a': 'audio/mp4',
-        
-            // Video files
-            '.mp4': 'video/mp4',
-            '.mkv': 'video/x-matroska',
-            '.webm': 'video/webm',
-            '.avi': 'video/x-msvideo',
-            '.mov': 'video/quicktime',
-        
-            // Document files
-            '.pdf': 'application/pdf',
-            '.doc': 'application/msword',
-            '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            '.ppt': 'application/vnd.ms-powerpoint',
-            '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            '.xls': 'application/vnd.ms-excel',
-            '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        
-            // Archive files
-            '.zip': 'application/zip',
-            '.rar': 'application/vnd.rar',
-            '.7z': 'application/x-7z-compressed',
-            '.tar': 'application/x-tar',
-            '.gz': 'application/gzip',
-        
-            // Other
-            '.txt': 'text/plain',
-            '.md': 'text/markdown',
-            '.yaml': 'text/yaml',
-            '.yml': 'text/yaml',
-            '.bin': 'application/octet-stream',
-        };
-
-        const contentType = mimeTypes[ext] || 'application/octet-stream';
-        res.setHeader('Content-Type', contentType);
-        res.send(data);
-    });
-});
-
-
-function getMetaTitle(groupId, categoryId, channelId){
-    if(groupId && categoryId && channelId){
-        return `Chat in #${serverconfig.groups[groupId].channels.categories[categoryId].channel[channelId].name}`
-    }
-}
-*/
+registerTemplateMiddleware(app, __dirname, fs, path, serverconfig);
 
 app.use(express.static(__dirname + '/public'));
 
@@ -581,50 +440,49 @@ app.use(express.static(__dirname + '/public'));
 // Process plugins at server start
 processPlugins().catch(err => console.error(err));
 
-
-
-
-
-
-
 /* Modular Socket events */
 const socketHandlers = [];
 const activeSockets = new Map(); // Track socket handlers by socket ID
 
 // **Load Handlers Once at Startup**
-const loadSocketHandlers = async (mainHandlersDir) => {
-    try {
-        const scanDir = (dir) => {
-            const files = fs.readdirSync(dir, { withFileTypes: true });
-            for (const file of files) {
-                const filePath = path.join(dir, file.name);
-                if (file.isDirectory()) {
-                    scanDir(filePath); // Recursive call for subdirectories
-                } else if (file.name.endsWith('.mjs')) {
-                    fileList.push(filePath);
-                }
-            }
-        };
+const loadSocketHandlers = async (mainHandlersDir, io) => {
+    const fileList = [];
 
-        const fileList = [];
-        scanDir(mainHandlersDir);
-
-        for (const filePath of fileList) {
-            const fileUrl = pathToFileURL(filePath).href;
-            try {
-                const { default: handler } = await import(fileUrl);
-                socketHandlers.push(handler);
-                Logger.debug(`Preloaded socket handler: ${fileUrl}`);
-            } catch (err) {
-                Logger.error(`Error importing socket handler: ${fileUrl}`);
-                Logger.error(err)
+    const scanDir = (dir) => {
+        const files = fs.readdirSync(dir, { withFileTypes: true });
+        for (const file of files) {
+            const filePath = path.join(dir, file.name);
+            if (file.isDirectory()) {
+                scanDir(filePath);
+            } else if (file.name.endsWith('.mjs')) {
+                fileList.push(filePath);
             }
         }
-    } catch (err) {
-        Logger.error("Error loading socket handlers:");
-        Logger.error(err)
+    };
+
+    scanDir(mainHandlersDir);
+
+    for (const filePath of fileList) {
+        const fileUrl = pathToFileURL(filePath).href;
+        try {
+            const { default: handlerFactory } = await import(fileUrl);
+
+            // NEU: handlerFactory(io) erzeugt den eigentlichen Socket-Handler
+            const handler = handlerFactory(io);
+
+            if (typeof handler === 'function') {
+                socketHandlers.push(handler);
+                Logger.debug(`Preloaded socket handler: ${filePath}`);
+            } else {
+                Logger.warn(`Ignored invalid socket handler in ${filePath}`);
+            }
+        } catch (err) {
+            Logger.error(`Error importing socket handler: ${fileUrl}`);
+            Logger.error(err);
+        }
     }
 };
+
 
 
 // **Register Handlers for Each Connection Using `socket.id`**
@@ -646,24 +504,46 @@ const registerSocketEvents = (socket) => {
     }
 };
 
-
-
 (async () => {
     try {
-        await loadSocketHandlers(path.join(__dirname, 'modules/sockets'));
+        await loadSocketHandlers(path.join(__dirname, 'modules/sockets'), io);
     } catch (err) {
         console.error("Critical error loading socket handlers:", err);
     }
 })();
 
 
+io.on('connection', async function (socket) {
 
-// === Ab hier folgt der Code für den Chat-Server
+    // socket ip
+    var ip = socket.handshake.address;
 
-// Hier sagen wir Socket.io, dass wir informiert werden wollen,
-// wenn sich etwas bei den Verbindungen ("connections") zu
-// den Browsern tut.
-io.on('connection', function (socket) {
+    listenToPow(socket);
+    sendPow(socket);
+
+    let powResult = await waitForPowSolution(socket);
+
+    if (!powResult) {
+        // send error to user?
+        sendMessageToUser(socket.id, JSON.parse(
+            `{
+                        "title": "PoW Timeout",
+                        "message": "It took you too long to upgrade your identity...",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": "onclick='closeModal()'"
+                            }
+                        },
+                        "type": "error",
+                        "displayTime": 600000
+                    }`));
+        socket.disconnect(true);
+    }
+    else {
+        // let client know pow was successful.
+        socket.emit("powAccepted");
+    }
 
     /*
         Improved socket handler
@@ -678,13 +558,18 @@ io.on('connection', function (socket) {
             activeSockets.get(socket.id).forEach((cleanup) => cleanup());
             activeSockets.delete(socket.id); // Remove socket entry
         }
+
+        // clean up stuff
+        try {
+            removeFromArray(powVerifiedUsers, socket.id);
+
+        }
+        catch (cleanupError) {
+            Logger.error(cleanupError);
+        }
     });
 
-    // For now to ignore proof of work, is buggy    
-    powVerifiedUsers.push(socket.id);
-
     // Check if user ip is blacklisted
-    var ip = socket.handshake.address;
     socketToIP[socket] = ip;
     if (serverconfig.ipblacklist.hasOwnProperty(ip)) {
 
@@ -865,3 +750,53 @@ export function setRatelimit(ip, value) {
 export function flipDebug() {
     debugmode = !debugmode;
 }
+
+
+
+const SECRET = serverconfig.serverinfo.turn.secret     // = static-auth-secret
+const TURN_HOST = serverconfig.serverinfo.turn.host; // oder DNS
+const TURN_PORT = serverconfig.serverinfo.turn.port;
+const TTL = 300;
+
+// --- /ice Endpoint ---
+function makeCreds(userId = "web") {
+    const exp = Math.floor(Date.now() / 1000) + TTL;
+    const username = `${exp}:${userId}`;
+    const credential = crypto.createHmac("sha1", SECRET).update(username).digest("base64");
+    return {
+        iceServers: [{
+            urls: [
+                `turn:${TURN_HOST}:${TURN_PORT}?transport=udp`,
+                //`turn:${TURN_HOST}:${TURN_PORT}?transport=tcp`,
+                //`turns:${TURN_HOST}:5349?transport=tcp`
+            ],
+            username,
+            credential
+        }]
+    };
+}
+
+app.get("/ice", /* requireLogin, rateLimit maybe */(req, res) => {
+    const userId = (req.user?.id) || (req.query.u || "web"); // setup quota per user on turn server!
+    Logger.debug("ICE User is " + userId);
+    res.set("Cache-Control", "no-store");                   
+
+    if (serverconfig.serverinfo.turn.enabled != true) {
+        res.json({
+            iceServers: [{
+                urls: [
+                ],
+                username: "",
+                credential: ""
+            }]
+        })
+
+        Logger.warn("[VOIP ICE] Turn Server used for voice chat and screen sharing is not enabled or configurated!");
+        Logger.warn("[VOIP ICE] Users behind firewalls and or strict NATs may not be able to talk or listen.");
+        Logger.warn("[VOIP ICE] Checkout /docs/network/ folder on how to setup a turn server");
+
+        return;
+    }
+
+    res.json(makeCreds(userId));
+});

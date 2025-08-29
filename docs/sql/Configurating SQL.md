@@ -58,6 +58,7 @@ By using a SQL you'll get a lot of improvements. You'll get the following improv
 - "Cloud" message storage and potential load balancing. When using a external server for the database you can create off-site backups. 
 - When you need to reinstall the chat app the messages wont be lost as they're stored in the database
 - Group statistics are only supported when SQL is enabled.
+- Report System only works with SQL enabled
 
 ------
 

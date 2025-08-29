@@ -3,7 +3,7 @@ class ChatManager{
         if (initConnectionCheck == false) {
     
             if (socket.connected == true) {
-                if (connectionAttempts > 3) {
+                if (connectionAttempts > 3 && !wasDisconnected) {
                     showSystemMessage({
                         title: "Connected!",
                         text: "",
@@ -27,7 +27,7 @@ class ChatManager{
             }
             else {
     
-                if (connectionAttempts > 3) {
+                if (connectionAttempts > 3 && !wasDisconnected) {
                     showSystemMessage({
                         title: "Connecting..",
                         text: "",
@@ -42,7 +42,7 @@ class ChatManager{
             }
         }
         else {
-            if (socket.connected == false && initConnectionCheck == true) {
+            if (socket.connected == false && initConnectionCheck == true && !wasDisconnected) {
                 disconnected = true;
                 showSystemMessage({
                     title: "Connection Lost",

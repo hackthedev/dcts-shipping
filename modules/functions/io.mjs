@@ -236,10 +236,18 @@
     
     export async function saveChatMessage(message, editedMsgId = null){
     
+        var group = message.group;
+        var category = message.category;
+        var channel = message.channel;
+        
         // for edited msgs
         if(editedMsgId != null){
             message.messageId = editedMsgId;
         }
+
+        // increase count and save it
+        serverconfig.groups[group].channels.categories[category].channel[channel].msgCount += 1;
+        saveConfig(serverconfig);
     
         // If SQL is enabled it will try to save it there
         if(serverconfig.serverinfo.sql.enabled == true){
@@ -248,10 +256,7 @@
             return;
         }
         consolas("Saved message in Storage", "Debug")
-    
-        var group = message.group;
-        var category = message.category;
-        var channel = message.channel;
+        
     
         if(message.message.includes("\n") && (message.message.split("\n").length-1) > 1){
             message.message = message.message.replaceAll("\n", "<br>")
@@ -268,4 +273,6 @@
                 return console.log(err);
             }
         });
+
+        serverconfig.groups[group].channels.categories[category].channel[channel].msgCount += 1;
     }

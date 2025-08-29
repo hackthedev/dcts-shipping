@@ -1,9 +1,9 @@
-import { io, serverconfig, usersocket, xssFilters } from "../../index.mjs";
+import { serverconfig, usersocket, xssFilters } from "../../index.mjs";
 import { getMemberProfile, hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { checkRateLimit, copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('getMemberProfile', async function (member) {     
         if (validateMemberId(member.id, socket) == true &&

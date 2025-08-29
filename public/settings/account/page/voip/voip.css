@@ -1,0 +1,100 @@
+#vc-settings {
+  width: 440px;
+  background: #292B2F;
+  color: #ABB8BE;
+  border: 1px solid #36393F;
+  border-radius: 12px;
+  padding: 22px;
+  font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+#vc-settings h2 {
+  margin: 0 0 18px 0;
+  font-size: 18px;
+  color: #E3E8EB;
+}
+
+.vc-row {
+  margin-bottom: 18px;
+}
+
+.vc-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.vc-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vc-select {
+  appearance: none;
+  height: 40px;
+  padding: 0 12px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #3a3d43;
+  background: #292B2F;
+  color: #ABB8BE;
+  outline: none;
+}
+
+.vc-btn {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid #3a3d43;
+  background: #2b2e33;
+  color: #dbe2e7;
+  cursor: pointer;
+}
+
+.vc-note {
+  color: gray;
+  font-style: italic;
+  font-size: 10px;
+
+  margin: 10px 0 20px 0;
+}
+
+.vc-btn.primary {
+  background: #ABB8BE;
+  color: #111;
+  border-color: transparent;
+}
+
+.vc-btn[disabled] {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.vc-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.vc-range {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vc-range input[type="range"] {
+  width: 100%;
+  accent-color: #ABB8BE;
+}
+
+.vc-range output {
+  min-width: 3ch;
+  text-align: right;
+}
+
+.vc-actions {
+  display: flex;
+  gap: 12px;
+}

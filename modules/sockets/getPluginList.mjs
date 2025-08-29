@@ -2,7 +2,7 @@ import { validateMemberId, copyObject } from "../functions/main.mjs";
 import { serverconfig } from "../../index.mjs";
 import { scanDirectory } from "../functions/io.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     socket.on('getPluginList', (member, response) => {
         let plugins = scanDirectory("./public/plugins", { includeFiles: false, recursive: false });
         let pluginObj = {};

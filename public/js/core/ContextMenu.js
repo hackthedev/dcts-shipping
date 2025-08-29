@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
     scope.addEventListener("click", (event) => {
 
         const { clientX: mouseX, clientY: mouseY } = event;
-        var clickedElement = document.elementFromPoint(mouseX, mouseY);
+        var clickedElement = event.target
         var profileContent = document.getElementById("profile_container");
 
 
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             //if(clickedElement.className == "mention") { userid = userid.replace("mention-", "")}
             userid = userid.split("-").pop();
-            getMemberProfile(userid, mouseX, mouseY);
+            getMemberProfile(userid, mouseX, mouseY, event);
         }
         else if (clickedElement.className.includes("role") && clickedElement.id.split("-")[0] == "addRole") {
             // Open Role Menu
@@ -52,17 +52,20 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         else {
 
-            if (clickedElement.id == "profile-role-menu" ||
-                clickedElement.id == "role-menu-header" ||
-                clickedElement.id == "role-menu-search-icon" ||
-                clickedElement.id == "role-menu-search-input" ||
-                clickedElement.id == "role-menu-list" ||
-                clickedElement.className == "role-menu-entry" ||
-                clickedElement.className == "role-menu-entry-roleName"
-            ) {
-                return;
+            // dont close the profile popup when we click somewhere on the profile
+            const all = profileContent.querySelectorAll("*");
+            for (const el of all) {
+                if (
+                    el === clickedElement ||
+                    (el.id && el.id === clickedElement.id) ||
+                    (el.className && el.className === clickedElement.className) ||
+                    [...el.classList].some(cls => clickedElement.classList.contains(cls))
+                ) {
+                    return;
+                }
             }
 
+            // otherwise on default close it
             profileContent.style.display = "none";
             profileContent.innerHTML = "";
 
@@ -306,7 +309,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 "`);
             });
         }
-        else if (clickedElement.className == "channelTrigger") {
+        else if (clickedElement.className.includes("channelTrigger")) {
             resetContextMenuItem(ContextMenu);
 
             socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: "manageChannels" }, function (response) {
@@ -369,10 +372,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
             socket.emit("checkPermission", {
                 id: UserManager.getID(), token: UserManager.getToken(), permission: ["manageServer",
-                    "manageGroup",
+                    "manageGroups",
                     "manageChannels",
                     "manageUploads",
-                    "manageGroup",
+                    "manageGroups",
                     "viewLogs",
                     "manageEmojis",
                     "manageBans",
@@ -434,6 +437,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 addContextMenuItem(ContextMenu, "Change Banner",
                     `onclick="
                     AdminActions.changeGroupBanner();
+                    ContextMenu.classList.remove('visible');
+                    "`);
+            });
+        }
+        // voice chat user actions
+        else if (clickedElement.className.includes("vc-admin-actions")) {
+            resetContextMenuItem(ContextMenu);
+
+            socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: ["manageMembers", "muteUsers", "banMember", "disconnectUsers"], any: true }, function (response) {
+                if (response.permission == "denied") { return; }
+
+                let targetUserId = clickedElement.getAttribute("member-id").split("-")[1]
+
+                addContextMenuItem(ContextMenu, "Disconnect User",
+                    `onclick="
+                    ModActions.disconnectUser('${targetUserId}');
                     ContextMenu.classList.remove('visible');
                     "`);
             });

@@ -1,4 +1,6 @@
 class Logger {
+    static logDebug = false;
+
     static colors = {
         reset: "\x1b[0m",
         bright: "\x1b[1m",
@@ -32,30 +34,37 @@ class Logger {
         if (message instanceof Error) {
             console.log(`${color}${Logger.displayDate()}[${level}] ${message.message}\n${message.stack}${Logger.colors.reset}`);
         } else if (typeof message === 'object') {
-            console.log(`${color}${Logger.displayDate()}[${level}] ${JSON.stringify(message, null, 2)}${Logger.colors.reset}`);
+            console.log(`${color}${Logger.displayDate()}[${level}]\n${JSON.stringify(message, null, 4)}${Logger.colors.reset}`);
         } else {
             console.log(`${color}${Logger.displayDate()}[${level}] ${message}${Logger.colors.reset}`);
         }
     }
 
+    static space(amount = 1){
+        for(let i = 0; i < amount; i++) {
+            console.log(" ");
+        }
+    }
+
     static info(message, color = "") {
-        Logger.log("INFO", message, color ? color + Logger.colors.fgCyan : Logger.colors.fgCyan);
+        Logger.log("INFO", message, color ? Logger.colors.fgCyan + color : Logger.colors.fgCyan);
     }
 
     static success(message, color = "") {
-        Logger.log("SUCCESS", message, color ? color + Logger.colors.fgGreen : Logger.colors.fgGreen);
+        Logger.log("SUCCESS", message, color ? Logger.colors.fgGreen + color : Logger.colors.fgGreen);
     }
 
     static warn(message, color = "") {
-        Logger.log("WARN", message, color ? color + Logger.colors.fgYellow : Logger.colors.fgYellow);
+        Logger.log("WARN", message, color ? Logger.colors.fgYellow + color : Logger.colors.fgYellow);
     }
 
     static error(message, color = "") {
-        Logger.log("ERROR", message, color ? color + Logger.colors.fgRed : Logger.colors.fgRed);
+        Logger.log("ERROR", message, color ? Logger.colors.fgRed + color : Logger.colors.fgRed);
     }
 
     static debug(message, color = "") {
-        Logger.log("DEBUG", message, color ? color + Logger.colors.bright + Logger.colors.fgBlack : Logger.colors.bright + Logger.colors.fgBlack);
+        if(!Logger.logDebug) return;
+        Logger.log("DEBUG", message, color ? Logger.colors.bright + Logger.colors.fgBlack + color : Logger.colors.bright + Logger.colors.fgBlack);
     }
 
     static displayDate() {

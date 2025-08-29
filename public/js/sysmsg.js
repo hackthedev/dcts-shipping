@@ -201,4 +201,17 @@
     window.showSystemMessage = function({ title, text, icon = '', img = '', type = 'neutral', duration = 3000, onClick = null }) {
         displayMessage({ title, text, icon, img, type, duration, onClick });
     };
+
+    window.closeSystemMessage = function() {
+        const promptContainer = document.getElementById("prompt-container");
+        if (promptContainer && isMessageVisible) {
+            clearTimeout(currentTimeout); // Stop any existing timeout
+            promptContainer.style.animation = "fadeout 0.5s forwards";
+            setTimeout(() => {
+                promptContainer.remove();
+                isMessageVisible = false;
+            }, 500); // Match fadeout animation duration
+        }
+    };
+
 })();

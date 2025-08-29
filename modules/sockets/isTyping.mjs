@@ -1,9 +1,9 @@
-import { io, serverconfig, typingMembers, typingMembersTimeout, xssFilters } from "../../index.mjs";
+import { serverconfig, typingMembers, typingMembersTimeout, xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('isTyping', function (member) {
         // todo : check for perms to view channel

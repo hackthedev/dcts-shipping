@@ -64,6 +64,38 @@
 }
 
 #channeltree details ul li {
-    margin-left: 25px;
+    margin-left: 15px;
     /*  list-style-image: url("img/hashtag.png"); */
+}
+
+#channeltree details ul {
+    list-style-type: none;
+}
+
+a.channelTrigger.markChannelMessage{
+    color: white;
+    font-style: italic;
+}
+
+#channeltree li.selected{
+    background-color: rgba(122, 122, 122, 0.2);
+    border-radius: 4px;
+}
+
+#channeltree ul {
+    margin: 0 0 16px 0;
+    padding: 0 0 16px 16px;
+
+    /*list-style-image: url("https://cdn-icons-png.flaticon.com/512/32/32213.png"); */
+    list-style-type: disc;
+    cursor: pointer;
+}
+
+#channeltree li {
+    padding: 4px;
+}
+
+#channeltree li:hover {
+    background-color: rgb(0, 0, 0, 0.2);
+    border-radius: 4px;
 }

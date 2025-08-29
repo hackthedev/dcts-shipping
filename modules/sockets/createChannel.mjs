@@ -1,9 +1,9 @@
-import { io, saveConfig, serverconfig, xssFilters } from "../../index.mjs";
+import { saveConfig, serverconfig, xssFilters } from "../../index.mjs";
 import { getChannelTree, hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, escapeHtml, generateId, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('createChannel', function (member, response) {
         if (validateMemberId(member.id, socket) == true &&
@@ -26,10 +26,10 @@ export default (socket) => {
                             "sortId": 0,
                             "permissions": {
                                 "0": {
-                                    "viewChannelHistory": 1,
-                                    "readMessages": 1,
-                                    "sendMessages": 1,
-                                    "viewChannel": 0
+                                    "viewChannelHistory": 0,
+                                    "readMessages": 0,
+                                    "sendMessages": 0,
+                                    "viewChannel": -1
                                 }
                             }
                         }

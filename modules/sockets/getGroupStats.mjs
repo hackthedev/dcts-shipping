@@ -2,7 +2,7 @@ import { serverconfig, xssFilters } from "../../index.mjs";
 import { copyObject, validateMemberId } from "../functions/main.mjs";
 import { queryDatabase } from "../functions/mysql/mysql.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     socket.on('getGroupStats', async function (member, response) {
         if (validateMemberId(member.id, socket) == true
             && serverconfig.servermembers[member.id].token == member.token

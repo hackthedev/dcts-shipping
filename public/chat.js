@@ -10,18 +10,22 @@ if (!String.prototype.replaceAll) {
     };
 }
 
-
-
 // IMPORTANT! By default, socket.io() connects to the host that
 // served the page, so we dont have to pass the server url
 var socket = io.connect()
 
-socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: "manageReports" }, function (response) {
-    if (response.permission == "granted") {
-        ModView.init();
-        UserReports.getReports();
-    }
-});
+// sick af in my opinion
+initPow(() => {
+    userJoined();
+
+    socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: "manageReports" }, function (response) {
+        if (response.permission == "granted") {
+            ModView.init();
+            UserReports.getReports();
+        }
+    });
+})
+
 
 socket.on('newReport', (member) => {
     UserReports.getReports();
@@ -36,100 +40,10 @@ var typingIndicator = document.getElementById("typing-indicator");
 var messageInputBox = document.querySelector('.ql-editor');
 var typetimeout;
 
-var solvedPow = false;
-
 const customPrompts = new Prompt();
 const tooltipSystem = new TooltipSystem();
 const customAlerts = new CustomAlert();
 
-function powLoadingScreen() {
-    (function loop() {
-        setTimeout(() => {
-            // Your logic here
-
-            if (solvedPow == false) {
-                console.log("Trying to solve PoW...");
-
-                loop();
-            }
-            else {
-                alert("Reached goal")
-            }
-
-        }, 1000);
-    })();
-}
-
-//socket.emit('requestPow');
-
-socket.on('powChallenge', async ({ challenge, difficulty }) => {
-    console.log('Received PoW challenge:', challenge, 'Difficulty:', difficulty);
-
-    // Check if the solution is already stored
-    const storedSolution = CookieManager.getCookie(challenge);
-    if (storedSolution) {
-        console.log('Using stored solution:', storedSolution);
-        socket.emit('verifyPow', { challenge, solution: parseInt(storedSolution) });
-    } else {
-        powLoadingScreen();
-        const solution = await solvePow(challenge, difficulty);
-        solvedPow = true;
-
-        CookieManager.setCookie(challenge, solution); // Store the solution in a cookie for 30 days
-        socket.emit('verifyPow', { challenge, solution });
-    }
-});
-
-socket.on('authSuccess', (data) => {
-    console.log(data.message);
-});
-
-socket.on('authFailure', (data) => {
-    console.log(data.message);
-});
-
-async function solvePow(challenge, difficulty) {
-    let solution = 0;
-    var currentPowLevel = 0;
-
-    const target = Array(difficulty + 1).join('0');
-
-    while (true) {
-        const hash = await sha256(challenge + solution);
-        const currentDifficulty = getCurrentDifficulty(hash, difficulty);
-
-        if (hash.substring(0, difficulty) === target) {
-            return solution;
-        }
-        solution++;
-
-        if (currentDifficulty > currentPowLevel) {
-            currentPowLevel = currentDifficulty;
-            console.log("Current Difficulty: " + currentDifficulty)
-        }
-    }
-}
-
-function getCurrentDifficulty(hash, targetDifficulty) {
-    let leadingZeros = 0;
-    for (let char of hash) {
-        if (char === '0') {
-            leadingZeros++;
-        } else {
-            break;
-        }
-    }
-    return Math.min(leadingZeros, targetDifficulty); // Ensure it doesn't exceed target difficulty
-}
-
-async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-userJoined();
 
 document.addEventListener('DOMContentLoaded', function () {
     chatlog = document.getElementById("content");
@@ -139,7 +53,13 @@ document.addEventListener('DOMContentLoaded', function () {
     memberlist = document.getElementById("infolist");
     typingIndicator = document.getElementById("typing-indicator");
     messageInputBox = document.querySelector('.ql-editor');
+
     loadPlugins();
+    
+    // kinda dirty
+    setTimeout(() => {
+        showGroupStats()
+    }, 500);
 });
 
 
@@ -360,29 +280,28 @@ async function markdown(msg, msgid) {
 var disconnected = false;
 var initConnectionCheck = false;
 let connectionAttempts = 0;
+let wasDisconnected = false;
 
 
 ChatManager.checkConnection(2000)
 
 
 
-// VC STUFF
-function joinVC() {
 
-    joinRoom(UserManager.getRoom());
 
-    document.getElementById("content").innerHTML = "";
-    getChannelTree()
-    socket.emit("getCurrentChannel", { id: UserManager.getID(), username: UserManager.getUsername(), icon: UserManager.getPFP(), group: UserManager.getGroup(), category: UserManager.getCategory(), channel: UserManager.getChannel(), token: UserManager.getToken() });
-    socket.emit("joinedVC", { id: UserManager.getID(), username: UserManager.getUsername(), icon: UserManager.getPFP(), room: UserManager.getRoom(), token: UserManager.getToken(), lastActivity: new Date().getTime() });
-    socket.emit("getVCMembers", { id: UserManager.getID(), username: UserManager.getUsername(), icon: UserManager.getPFP(), room: UserManager.getRoom(), token: UserManager.getToken() }, function (response) {
 
-        Object.keys(response.vcMembers).forEach(function (vcMember) {
-            addVCMember(response.vcMembers[vcMember])
-        })
 
-    });
-}
+
+
+
+
+
+
+
+
+
+
+
 
 function limitString(text, limit) {
     if (text.length <= limit) return text.substring(0, limit);
@@ -391,49 +310,43 @@ function limitString(text, limit) {
 
 function stopRecording() {
     socket.emit("leftVC", { id: UserManager.getID(), username: UserManager.getUsername(), icon: UserManager.getPFP(), room: UserManager.getRoom(), token: UserManager.getToken() });
-    console.log('Recording stopped');
-
-    leaveRoom(UserManager.getRoom());
+    //leaveRoom(UserManager.getRoom());
 }
 
 socket.on('userJoinedVC', (member) => {
-    addVCMember(member);
+    //addVCMember(member);
 });
 
 function addVCMember(member) {
-    var userContentCheck = document.getElementById("vc-user-container-" + member.id);
-    if (userContentCheck != null) return;
+    const grid = document.getElementById("vc-user-grid");
+    if (!grid || document.getElementById("vc-user-container-" + member.id)) return;
 
-    var contentBox = document.getElementById("content")
+    const memberName = member.name.length > 15 ? member.name.substr(0, 15) + "..." : member.name;
 
-    var memberName = member.name;
-    if (memberName.length > 15) {
-        memberName = member.name.substr(0, 15) + "...";
-    }
+    const userCardHTML = `
+        <div class="vc-user-card" id="vc-user-container-${member.id}"
+            style="background-color:rgb(66, 68, 73); border-radius: 10px; padding: 16px;
+                   display: flex; flex-direction: column; align-items: center;
+                   width: 180px; text-align: center; color: white;">
 
-    var userCode = `
-        <div id="vc-user-container-${member.id}" 
-            style="
-                margin: 20px; 
-                padding: 40px;
-                text-align: center;
-                border: 1px solid gray;
-                background-color: #2F3136;
-                border-radius: 8px;
-                width: 200px;
-                overflow: hidden;
-                float: left;
-                
-        ">
-            
-            <img id="vc-user-icon-${member.id}" title="${member.name}" 
-            onerror="this.src = '/img/default_pfp.png';" 
-            src='${member.icon}' style='width: 80px; height: 80px; border-radius: 50%;object-fit: cover;background-color: transparent;background-position: center center;'>
-            <h1 id="vc-user-name-${member.id}" style="font-size: 18px">${memberName}</h1>
-        </div>`;
+            <img src="${member.icon}" onerror="this.src='/img/default_pfp.png';"
+                alt="${member.name}" style="width: 80px; height: 80px; border-radius: 50%;
+                object-fit: cover; margin-bottom: 10px;">
 
-    contentBox.insertAdjacentHTML("beforeend", userCode);
+            <h1 style="font-size: 16px; margin: 0;">${memberName}</h1>
+
+            ${member.id == UserManager.getID() ?
+            `<div style="margin-top: 20px;">
+                    <button style="margin-bottom: 6px" id="screenShareBtn" onclick="toggleScreenShare()">Start Screen Share</button>
+                    <button onclick="toggleMute()" id="muteBtn" style="margin-left: 10px;">Mute</button>
+                </div>` : ``
+        }
+        </div>
+    `;
+
+    grid.insertAdjacentHTML("beforeend", userCardHTML);
 }
+
 
 function removeVCUser(member) {
     var userContentCheck = document.getElementById(`vc-user-container-${member.id}`);
@@ -461,8 +374,7 @@ function getMemberProfile(id, x, y, event = null) {
         y = event.clientY;
     }
 
-    console.log("Requesting profile")
-
+    //console.log("Requesting profile")
     socket.emit("getMemberProfile", { id: UserManager.getID(), token: UserManager.getToken(), target: id, posX: x, posY: y });
 }
 
@@ -552,15 +464,12 @@ function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag =
 function setTyping() {
     socket.emit("isTyping", { id: UserManager.getID(), token: UserManager.getToken(), room: UserManager.getRoom() });
 
-
     clearTimeout(typetimeout);
     typetimeout = setTimeout(() => {
 
         socket.emit("stoppedTyping", { id: UserManager.getID(), token: UserManager.getToken(), room: UserManager.getRoom() });
 
     }, 2 * 1000);
-
-
 }
 
 
@@ -573,7 +482,7 @@ function getUrlParams(param) {
     return urlChannel;
 }
 
-function getChannelTree(){
+function getChannelTree() {
     ChannelTree.getTree();
 }
 
@@ -679,34 +588,6 @@ function isURL(text) {
         return false;
     }
 }
-
-function generateMetaTags() {
-    getServerInfo();
-
-    if (UserManager.getGroup() != null && UserManager.getCategory() != null && UserManager.getChannel() != null) {
-        return `<meta http-equiv="content-Type" content="text/html; utf-8" />
-                <meta http-equiv="Pragma" content="cache" />
-                <meta name="robots" content="INDEX,FOLLOW" />
-                <meta http-equiv="content-Language" content="en" />
-                <meta name="description" content="You have been invited to chat in ${UserManager.getChannel()} ! Join the discussion on ${serverName} !" />
-                <meta name="keywords" content="" />
-                <meta name="author" content="Default Server" />
-                <meta name="publisher" content="" />
-                <meta name="copyright" content="" />
-                <meta name="audience" content="Alle" />
-                <meta name="page-type" content="Anleitung" />
-                <meta name="page-topic" content="Bauen Wohnen" />
-                <meta http-equiv="Reply-to" content="" />
-                <meta name="expires" content="" />
-                <meta name="revisit-after" content="2 days" />
-                <title>Chat in General » chat</title>`
-    }
-}
-
-
-
-
-
 
 var lastKey = "";
 var test = 0;
@@ -818,6 +699,13 @@ function resolveMentions() {
     })
 }
 
+var audio = new Audio();
+function playSound(sound, volume = 0.1) {
+    audio.src = `/sounds/${sound}.mp3`;
+    audio.volume = volume;
+    audio.play();
+}
+
 function convertMention(text, playSoundOnMention = false, showMsg = false) {
 
     try {
@@ -831,19 +719,19 @@ function convertMention(text, playSoundOnMention = false, showMsg = false) {
 
                 showSystemMessage({
                     title: text.name,
-                    text: "",
+                    text: text.message,
                     icon: text.icon,
                     img: null,
                     type: "neutral",
-                    duration: 1000
+                    duration: 6000,
+                    onClick: () => {
+                        closeSystemMessage();
+                    }
                 });
             }
 
-
             if (playSoundOnMention == true) {
                 playSound("message", 0.5);
-
-
             }
         }
 
@@ -889,14 +777,18 @@ socket.on('messageEdited', async function (message) {
 
 
 socket.on('messageCreate', async function (message) {
-    message.message = text2Emoji(message.message);
+    message.message = await text2Emoji(message.message);
     message.message = await markdown(message.message, message.messageId);
     let lastEditedCode = `<pre class="editedMsg">Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}</pre>`;
 
     if (message.lastEdited == null)
         lastEditedCode = "";
 
-    // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
+    // this means we just created a message
+    if (message.id == UserManager.getID()) {
+        CookieManager.setCookie(`message-marker_${UserManager.getChannel()}`, parseInt(CookieManager.getCookie(`message-marker_${UserManager.getChannel()}`)) + 1)
+    }
+
     var messagecode = `<div class="message-container" id="${message.messageId}">
             <div class="message-profile-img-container">
                 <img class="message-profile-img" src="${message.icon}"  id="${message.id}" onerror="this.src = '/img/default_pfp.png';">
@@ -913,7 +805,6 @@ socket.on('messageCreate', async function (message) {
                 ${lastEditedCode}
             </div>
         </div>`;
-
 
     var childDivs = document.getElementById("content").lastElementChild;
 
@@ -945,8 +836,10 @@ socket.on('messageCreate', async function (message) {
         var diff = today - lastMessage;
         var minutesPassed = Math.round(diff / 60);
         if (authorDivs[0].id == message.id && minutesPassed < 5) {
+
+            let convertedEmojiText = await text2Emoji(message.message);
             messagecontent[0].insertAdjacentHTML("beforeend",
-                `<div class="message-profile-content-message" style="display: block !important;" id="msg-${message.messageId}">${text2Emoji(message.message).replaceAll("\n", "<br>")}</div>
+                `<div class="message-profile-content-message" style="display: block !important;" id="msg-${message.messageId}">${convertedEmojiText ? convertedEmojiText.replaceAll("\n", "<br>") : convertedEmojiText}</div>
                 ${lastEditedCode}`
                 //`<p class="message-profile-content-message-appended" id="msg-${message.messageId}">${message.message}</p>`
             );
@@ -1236,12 +1129,7 @@ document.addEventListener('mousedown', (event) => {
 /* Quill Size End */
 
 /* Quill Emoji Autocomplete */
-try {
-    initializeEmojiAutocomplete(document.querySelector('.ql-editor'), quill);
-}
-catch (err) {
-    console.log(err)
-}
+initializeEmojiAutocomplete(document.querySelector('.ql-editor'), quill);
 /* Quill Emoji resize End */
 
 
@@ -1273,19 +1161,24 @@ function deleteMessageFromChat(id) {
 
 socket.on('receiveDeleteMessage', function (id) {
 
-    var message = document.querySelectorAll(`div .message-profile-content #msg-${id}`);
-    if (message == null)
-        message = document.querySelectorAll(`div .message-profile-content-message #msg-${id}`);
+    try {
+        var message = document.querySelectorAll(`div .message-profile-content #msg-${id}`);
+        if (message == null)
+            message = document.querySelectorAll(`div .message-profile-content-message #msg-${id}`);
 
-    var parentContainer = message[0].parentNode.parentNode;
-    var parent = message[0].parentNode;
+        var parentContainer = message[0].parentNode.parentNode;
+        var parent = message[0].parentNode;
 
-    message.forEach(msg => {
-        msg.remove();
-    });
+        message.forEach(msg => {
+            msg.remove();
+        });
 
-    if (parentContainer.querySelector(".message-profile-content-message") == null) {
-        parentContainer.remove();
+        if (parentContainer.querySelector(".message-profile-content-message") == null) {
+            parentContainer.remove();
+        }
+    }
+    catch (err) {
+        console.log(err)
     }
 
 
@@ -1330,46 +1223,7 @@ socket.on('memberTyping', function (members) {
 
 
 socket.on('receiveChannelTree', function (data) {
-
     getChannelTree()
-    return;
-
-    channeltree.innerHTML = data;
-    try {
-        document.querySelector("div #channeltree #channel-" + UserManager.getChannel()).style.color = "white";
-        document.querySelector("div #channeltree #category-" + UserManager.getCategory()).style.color = "white";
-
-        var markedMessage3 = [];
-        markedMessage3 = CookieManager.getCookie("unmarkedMessages");
-    }
-    catch (Ex) {
-        //console.log(Ex)
-    }
-
-
-});
-
-socket.on('markChannelMessage', function (data) {
-
-    /*
-    console.log("A new message has been created");
-    console.log(data);
-
-    var group = data.group;
-    var cat = data.category;
-    var chan = data.channel;
-
-    var groupMarkerElement = document.querySelector(`#group-marker-${group}`);
-    groupMarkerElement.style.display = "block";
-
-    var catElement = document.querySelector(`#category-${cat}`);
-    catElement.style.color = "orange";
-
-    var chanElement = document.querySelector(`#channel-${chan}`);
-    chanElement.style.color = "orange";
-
-    */
-
 });
 
 socket.on('receiveChatlog', async function (data) {
@@ -1380,8 +1234,6 @@ socket.on('receiveChatlog', async function (data) {
     var previousMessageID = 0;
 
     for (let message of data) {
-
-
         try {
 
             let lastEditCode = `<pre alt='receiveChatlog' class="editedMsg">Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}</pre>`;
@@ -1391,7 +1243,7 @@ socket.on('receiveChatlog', async function (data) {
             if (compareTimestamps(message.timestamp, getLastMessage(true)) <= 5 && previousMessageID == message.id) {
                 message.message = await markdown(message.message, message.messageId);
 
-                getLastMessage().insertAdjacentHTML("beforeend", `<div class='message-profile-content-message' style="display: block !important; float: left !important;" id="msg-${message.messageId}">${text2Emoji(message.message)}</div>${lastEditCode}`);
+                getLastMessage().insertAdjacentHTML("beforeend", `<div class='message-profile-content-message' style="display: block !important; float: left !important;" id="msg-${message.messageId}">${await text2Emoji(message.message)}</div>${lastEditCode}`);
                 previousMessageID = message.id;
             } else {
                 message.message = await markdown(message.message, message.messageId);
@@ -1403,8 +1255,99 @@ socket.on('receiveChatlog', async function (data) {
         }
     }
 
+    // mark channel as read
+    markChannel(UserManager.getChannel(), true)
+
     scrollDown();
     resolveMentions();
+});
+
+function markCurrentChannelStyle(channelId) {
+    let channels = document.querySelectorAll("#channellist a");
+
+    channels.forEach(channel => {
+        if (channel.classList.contains("selected")) {
+            channel.classList.remove("selected")
+        }
+    });
+
+    let targetChannel = document.querySelector("#channellist li#channel-" + channelId);
+    if (targetChannel) targetChannel.classList.add("selected");
+
+}
+
+function markChannel(channelId, read = false, msgCount = null) {
+    if (UserManager.getChannel() == channelId) read = true;
+
+    let currentChannelInTree = getChannelObjectFromTree(channelId)
+    if (!currentChannelInTree) return;
+
+    // dont highlight voice channels
+    let channelType = currentChannelInTree.getAttribute("channelType");
+    if (channelType == "voice") {
+        currentChannelInTree.classList.remove("markChannelMessage");
+        return;
+    }
+
+    const msgCountClass = [...currentChannelInTree?.classList].find(cls => cls.startsWith("msgCount_"));
+
+    if (read) {
+        if (msgCountClass) {
+            let count = msgCount !== null ? parseInt(msgCount) : parseInt(msgCountClass.split("_")[1]);
+
+            if (!isNaN(count)) {
+                let savedChannelCount = parseInt(CookieManager.getCookie(`message-marker_${channelId}`)) || 0;
+
+                // only update cookie if the saved count is smaller than the message count
+                if (savedChannelCount < count) {
+                    CookieManager.setCookie(`message-marker_${channelId}`, count);
+                }
+                else if (savedChannelCount > count) {
+                    currentChannelInTree.classList.remove("markChannelMessage");
+                }
+
+                // we can remove the marker
+                currentChannelInTree.classList.remove("markChannelMessage");
+            }
+        }
+    }
+    else {
+        let count = parseInt(msgCountClass.split("_")[1]);
+        let savedChannelCount = parseInt(CookieManager.getCookie(`message-marker_${channelId}`)) || 0;
+        if (msgCount) count = msgCount;
+
+        if (savedChannelCount < count) {
+            // yes its a new message and we can mark it
+            if (msgCountClass) currentChannelInTree.classList.add("markChannelMessage");
+
+            // play a sound if its the same channel
+            // lets only do that when we implement stuff like dnd etc
+            if (UserManager.getChannel() == channelId) playSound("message", 0.5);
+        }
+        else if (savedChannelCount > count) {
+            currentChannelInTree.classList.remove("markChannelMessage");
+        }
+    }
+
+
+    // now lets mark the summary aka category name too if any channel is marked as unread
+    // could probably be made simpler or more compact
+    let channeltree = document.getElementById("channeltree");
+    let categories = channeltree.querySelectorAll(".category");
+
+    for (let i = 0; i < categories.length; i++) {
+        let category = categories[i];
+        let markedChannels = category.querySelectorAll(".markChannelMessage");
+
+        if (markedChannels.length > 0) {
+            category.querySelector("summary").style.color = "white";
+        }
+    }
+
+}
+
+socket.on('markChannel', function (data) {
+    markChannel(data.channelId, false, data?.count);
 });
 
 socket.on('createMessageEmbed', function (data) {
@@ -1423,16 +1366,18 @@ socket.on('receiveCurrentChannel', function (channel) {
             channel.name = "";
         }
         setChannelName(channel.name);
+        markCurrentChannelStyle(channel.id);
     }
     catch {
         setChannelName(" ");
+        markCurrentChannelStyle(null);
     }
 });
 
 socket.on('receiveMemberProfile', function (data) {
-    console.log("Received member profile")
-    data.top = parseInt(data.top)
-    data.left = parseInt(data.left)
+    console.log("Received member profile");
+    data.top = parseInt(data.top);
+    data.left = parseInt(data.left);
 
     var profileContent = document.getElementById("profile_container");
     profileContent.innerHTML = data.code;
@@ -1444,28 +1389,32 @@ socket.on('receiveMemberProfile', function (data) {
     var winWidth = window.innerWidth;
     var winHeight = window.innerHeight;
 
-    // If is out of bounds
-    if ((data.top + profileContent.offsetHeight) <= winHeight) {
-        profileContent.style.top = `${data.top}px`;
-    }
-    else {
-        if (data.top + profileContent.offsetHeight > winHeight) {
-            profileContent.style.top = `${data.top - ((data.top + profileContent.offsetHeight) - winHeight) - 20}px`;
-        }
-        else {
-            profileContent.style.top = `${data.top - (winHeight - profileContent.offsetHeight)}px`;
-        }
+    // Make sure we force a reflow so offsetWidth/offsetHeight are correct
+    profileContent.offsetWidth;
 
+    // Calculate safe position
+    let top = data.top;
+    let left = data.left;
+
+    // Adjust Y if bottom overflows
+    if (top + profileContent.offsetHeight > winHeight) {
+        top = winHeight - profileContent.offsetHeight - 20; // 20px padding
+        if (top < 10) top = 10; // minimum padding from top
     }
 
-    // If X out of bounds
-    if ((data.left + profileContent.offsetWidth) < winWidth) {
-        profileContent.style.left = `${data.left + 20}px`;
+    // Adjust X if right side overflows
+    if (left + profileContent.offsetWidth > winWidth) {
+        left = winWidth - profileContent.offsetWidth - 20; // 20px padding
+        if (left < 10) left = 10; // minimum padding from left
+    } else {
+        left = left + 20; // Small push right to not overlap mouse
     }
-    else {
-        profileContent.style.left = `${data.left - 20 - profileContent.offsetWidth}px`;
-    }
+
+    // Apply safe position
+    profileContent.style.top = `${top}px`;
+    profileContent.style.left = `${left}px`;
 });
+
 
 socket.on('updateMemberList', function (data) {
     getMemberList();
@@ -1549,6 +1498,7 @@ socket.on('modalMessage', function (data) {
 
     if (data.token != null && data.action == "register") {
         CookieManager.setCookie("token", data.token, 365);
+        CookieManager.setCookie("loginName", data.loginName, 365);
     }
     else if (data.token != null && data.action == "login") {
         CookieManager.setCookie("token", data.token, 365);
@@ -1560,13 +1510,17 @@ socket.on('modalMessage', function (data) {
         setStatus(data.status);
     }
 
+    // stop reconnecting... prompt
+    if (data?.wasDisconnected) wasDisconnected = true;
+
     showSystemMessage({
-        title: data.title ? data.title : data.msg,
-        text: data.msg || "",
+        title: data.title ? data.title : (data.message ? data.message : data.msg),
+        text: (data.message ? data.message : data.msg) || "",
         icon: data.type || "info",
         img: null,
         type: data.type || "neutral",
-        duration: data.displayTime || 4000
+        duration: data.displayTime || 4000,
+        wasDiconnected: data.wasDisconnected || null
     });
 });
 
@@ -1577,13 +1531,12 @@ function setActiveGroup(group) {
 
     let groupIcons = document.querySelectorAll(`.server-icon`)
     groupIcons.forEach(icon => {
-        if(icon.classList.contains("selectedGroup")) icon.classList.remove("selectedGroup");
+        if (icon.classList.contains("selectedGroup")) icon.classList.remove("selectedGroup");
     })
 
 
     document.querySelectorAll(`.group-icon-${group}`).forEach(icon => {
         icon.classList.add('selectedGroup')
-        console.log("added selectedGroup")
     })
 }
 
@@ -1807,17 +1760,13 @@ socket.on('receiveGroupBanner', function (data) {
     document.getElementById("mobile_groupBannerDisplay").src = data;
 });
 
+function getChannelObjectFromTree(channelId) {
+    return document.querySelector("#channellist a#channel-" + channelId);
+}
 
 function refreshValues() {
     var username = UserManager.getUsername();
-    UserManager.getID();
-    UserManager.getPFP();
-    UserManager.getStatus();
-    UserManager.getGroup();
-    UserManager.getChannel();
-    UserManager.getCategory();
     getRoles();
-    UserManager.getToken();
     userJoined();
     getServerInfo();
 
@@ -1868,9 +1817,11 @@ function getServerInfo(returnData = false) {
         servername = response.name;
         serverdesc = response.description;
 
-        headline.innerHTML = `${servername} - ${serverdesc}`;
+        headline.innerHTML = `${servername} - ${serverdesc}<div class="donators" onclick="UserManager.showDonatorList('https://shy-devil.me/app/dcts/');"></div>`;
+
     });
 }
+
 
 
 function setUrl(param, isVC = false) {
@@ -1881,7 +1832,7 @@ function setUrl(param, isVC = false) {
     let channelId = urlData[2]?.replace("channel=", "")
 
     // channel already open, dont reload it
-    if (UserManager.getChannel() == channelId && channelId && UserManager.getChannel()) return;
+    if (UserManager.getChannel() == channelId && channelId && UserManager.getChannel() && isVC == false) return;
 
     window.history.replaceState(null, null, param); // or pushState
 
@@ -1889,18 +1840,19 @@ function setUrl(param, isVC = false) {
         socket.emit("checkChannelPermission", { id: UserManager.getID(), channel: UserManager.getChannel(), token: UserManager.getToken(), permission: "useVOIP" }, function (response) {
             if (response.permission == "granted") {
                 switchLeftSideMenu(true)
-                stopRecording();
+                //stopRecording();
 
                 socket.emit("setRoom", { id: UserManager.getID(), username: UserManager.getUsername(), icon: UserManager.getPFP(), room: UserManager.getRoom(), token: UserManager.getToken() });
-
-                joinVC(param);
                 document.getElementById("messagebox").style.visibility = "hidden";
                 document.getElementById("content").innerHTML = "";
+                joinVC();
             }
         });
     }
     else {
-        stopRecording();
+        leaveVC()
+        enableScreensharing(false);
+
         socket.emit("checkChannelPermission", { id: UserManager.getID(), channel: UserManager.getChannel(), token: UserManager.getToken(), permission: "sendMessages" }, function (response) {
             if (response.permission == "granted") {
                 switchLeftSideMenu(true)
@@ -1918,6 +1870,14 @@ function setUrl(param, isVC = false) {
     }
 
 
+    // get group stats
+    showGroupStats() 
+
+    refreshValues();
+}
+
+
+function showGroupStats() {
     // If we only clicked a group and no channel etc the main windows is empty.
     // lets show some nice group home / welcome screen
     if (UserManager.getGroup() != null && UserManager.getCategory() == null && UserManager.getChannel() == null) {
@@ -1933,15 +1893,14 @@ function setUrl(param, isVC = false) {
                 contentBox = document.getElementById("content");
 
                 let code = `
-<div id="homeScreenGroupContainer">
-    <h1 style="text-align: center">${response.group.info.name}</h1><br>
-    <h2>Top 100 Active Users</h2><hr>
+                    <div id="homeScreenGroupContainer">
+                        <h1 style="text-align: center">${response.group.info.name}</h1><br>
+                        <h2>Top 100 Active Users</h2><hr>
 
-    <div id="homeGroupStatsMostActiveUserContainer">
-`;
+                        <div id="homeGroupStatsMostActiveUserContainer">
+                    `;
 
                 // Generate user entries as divs instead of table rows
-                console.log(response.mostActiveUsers);
                 for (let i = 0; i < response.mostActiveUsers.length; i++) {
                     let user = response.mostActiveUsers[i];
 
@@ -1952,12 +1911,12 @@ function setUrl(param, isVC = false) {
                     let message_count = user.message_count;
 
                     code += `
-        <div class="activeUserEntry" onclick='getMemberProfile("${user.user.id}", null, null, event)'>
-            <p class="activeUserEntryName">${username}</p>
-            <div class="activeUserEntryDivider"></div>
-            <p class="activeUserEntryName">${message_count} messages</p>
-        </div>
-    `;
+                        <div class="activeUserEntry" onclick='getMemberProfile("${user.user.id}", null, null, event)'>
+                            <p class="activeUserEntryName">${username}</p>
+                            <div class="activeUserEntryDivider"></div>
+                            <p class="activeUserEntryName">${message_count} messages</p>
+                        </div>
+                    `;
                 }
 
                 code += `</div></div>`; // Close the flex container divs
@@ -1982,15 +1941,28 @@ function setUrl(param, isVC = false) {
     else {
         messageInputBox.parentNode.parentNode.style.visibility = "visible";
     }
-
-    refreshValues();
 }
 
+function checkSEO() {
+    fetch(window.location.href)
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            const title = doc.querySelector('title')?.textContent || 'No <title> found';
+            const description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || 'No meta description';
+
+            console.log('Title:', title);
+            console.log('Description:', description);
+        })
+        .catch(err => console.error('Request failed:', err));
+}
 
 function setChannelName(name) {
-    document.getElementById("channelname").innerText = name;
+    document.title = name ? "Chat in #" + name : "{{server.name}}";
+    document.getElementById("channelname").innerText = name ? `# ${name}` : ""; // i love these inline checks
 }
-
 function getRoles() {
     socket.emit("RequestRoles", { id: UserManager.getID(), username: UserManager.getUsername(), pfp: UserManager.getPFP() });
 }
@@ -1998,6 +1970,9 @@ function getRoles() {
 let scrollTimeout;
 
 function scrollDown() {
+    let contentDiv = document.getElementById("content");
+    contentDiv.style.visibility = "hidden";
+
     if (scrollTimeout) {
         clearTimeout(scrollTimeout); // Clear any existing timeout
     }
@@ -2006,7 +1981,8 @@ function scrollDown() {
     scrollTimeout = setTimeout(() => {
         var objDiv = document.getElementById("content");
         objDiv.scrollTop = objDiv.scrollHeight;
-    }, 10); // Execute after 200ms
+        contentDiv.style.visibility = "visible";
+    }, 10);
 }
 
 
@@ -2031,6 +2007,9 @@ uploadObject.addEventListener('drop', async function (e) {
     e.preventDefault();
     uploadObject.style.backgroundColor = '';
 
+    // dont upload in vc
+    if (uploadObject.querySelector("#vc-user-grid")) return;
+
     const files = Array.from(e.dataTransfer.files); // Handle multiple files if needed
     const fileSize = files[0].size / 1024 / 1024; // Example: Display the size of the first file
     console.log(`File dropped. Size: ${fileSize.toFixed(2)} MB`);
@@ -2053,7 +2032,7 @@ uploadObject.addEventListener('drop', async function (e) {
                     window.location.origin + url
                 ); // Sending all URLs at once
 
-                
+
             }
         } else {
             console.error("Upload encountered an error:", result.error);
@@ -2087,7 +2066,7 @@ uploadObject.addEventListener('dragleave', function (e) {
 
 async function showMessageInChat(message) {
 
-    message.message = text2Emoji(message.message)
+    message.message = await text2Emoji(message.message)
     //console.log(text2Emoji(message.message))
 
     var messagecode = "";

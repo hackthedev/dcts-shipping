@@ -1,10 +1,10 @@
-import { fetch, fileTypeFromBuffer, FormData, fs, io, path, serverconfig, xssFilters } from "../../index.mjs";
+import { fetch, fileTypeFromBuffer, FormData, fs, path, serverconfig, xssFilters } from "../../index.mjs";
 import { getMemberHighestRole } from "../functions/chat/helper.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, sendMessageToUser, validateMemberId, sanitizeFilename, getFolderSize, mimeTypesCache, fileSizeCache, generateId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on("fileUpload", async ({ chunk, metadata }, response) => {
 

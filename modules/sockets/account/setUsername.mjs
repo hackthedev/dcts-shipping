@@ -1,7 +1,7 @@
 import { io, saveConfig, serverconfig, xssFilters } from "../../../index.mjs";
 import { copyObject, escapeHtml, limitString, sendMessageToUser, validateMemberId } from "../../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('setUsername', function (member) {
         if (validateMemberId(member.id, socket) == true

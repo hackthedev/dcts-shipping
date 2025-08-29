@@ -5,7 +5,7 @@ import Logger from "../../functions/logger.mjs";
 import { validateMemberId } from "../../functions/main.mjs";
 import { deleteReport, getChatMessagesFromDb, getReports, saveReport } from "../../functions/mysql/helper.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
 
     // socket.on code here
     socket.on('deleteReport', async function (member, response) {

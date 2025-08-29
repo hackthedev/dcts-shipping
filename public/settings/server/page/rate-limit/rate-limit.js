@@ -9,7 +9,7 @@ var serverconfigName;
 var serverconfigDesc;
 
 
-socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageRateLimit" }, function (response) {
+socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageRateSettings" }, function (response) {
 
     if(response.permission == "denied"){
         window.location.href = window.location.origin + "/settings/server";

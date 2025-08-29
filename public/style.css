@@ -37,17 +37,17 @@
     --primary-text: #F0F0F0;
 
     --transition-all: all 200ms;
-
-
-
+    --input-border: 1px solid rgb(98, 98, 98);
 }
 
-.sortable-chosen, sortable-chosen.sortable-ghost {
+.sortable-chosen,
+sortable-chosen.sortable-ghost {
     opacity: 0;
 }
+
 .sortable-ghost {
-  background-color: var(--primary);
-  opacity: 1;
+    background-color: var(--primary);
+    opacity: 1;
 }
 
 html,
@@ -56,6 +56,7 @@ body {
     padding: 0;
     width: 100%;
     height: 100%;
+    background-color: #33373b;
 }
 
 * {
@@ -73,6 +74,22 @@ body {
 
     position: relative;
     display: block;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+#header {
+    width: calc(100% - 16px);
+    overflow: hidden;
+
+    padding: 8px;
+
+    background-color: #1E2124;
+    color: white;
+
+    position: relative;
 }
 
 #serverlist {
@@ -109,7 +126,7 @@ body {
     border-top-left-radius: 6px;
 }
 
-#channelname {
+#channelname-bar {
     height: 20px;
     width: calc(100% - 32px) !important;
 
@@ -123,6 +140,37 @@ body {
     font-size: 20px;
 
     box-shadow: 0 4px 8px -2px black !important;
+    position: relative;
+    /* should fix overlapping issue */
+}
+
+#channelname {
+    float: left;
+}
+
+#channelname-icons .icon {
+    float: right;
+
+    background-color: red;
+    border-radius: 50%;
+
+    width: 25px !important;
+    height: 25px !important;
+    margin-left: 10px;
+
+    position: relative;
+
+    background-size: cover;
+
+    object-fit: cover;
+    background-color: transparent;
+    background-position: center center;
+}
+
+.screenshare-view-current{
+    width: 400px !important;
+    height: auto;
+    float: left;
 }
 
 #content {
@@ -155,7 +203,7 @@ body {
     overflow-y: hidden;
 }
 
-.message-container p{
+.message-container p {
     line-height: 150% !important;
 }
 
@@ -274,6 +322,9 @@ body {
     width: 50px;
     height: 50px;
 
+    box-sizing: border-box;
+    border: 4px solid transparent;
+
     border-radius: 50%;
     cursor: pointer;
 }
@@ -285,6 +336,11 @@ body {
     transform: scale(1.1);
 
     transition: all 400ms;
+}
+
+#profile-qa-img.talking {
+    border-color: #aa1515;
+    outline-offset: 6px;
 }
 
 #profile-qa-img:not(:hover) {
@@ -330,24 +386,6 @@ body {
     height: calc(45px - 24px);
     width: auto;
     cursor: pointer;
-}
-
-ul {
-    margin: 0 0 16px 0;
-    padding: 0 0 16px 16px;
-
-    /*list-style-image: url("https://cdn-icons-png.flaticon.com/512/32/32213.png"); */
-    list-style-type: disc;
-    cursor: pointer;
-}
-
-li {
-    padding: 4px;
-}
-
-li:hover {
-    background-color: rgb(0, 0, 0, 0.2);
-    border-radius: 4px;
 }
 
 .memberlist-container {
@@ -597,22 +635,22 @@ pre.markdown {
     position: fixed;
     z-index: 10000;
     width: 150px;
-    background: #1b1a1a;
+    background: #171A1D;
     border-radius: 6px;
     display: none;
-
 }
 
 #context-menu .item {
-    padding: 8px 10px;
-    font-size: 14px;
+    margin: 8px 4px;
+    padding: 6px !important;
+    font-size: 14px !important;
     color: #eee;
     cursor: pointer;
 }
 
 #context-menu .item:hover {
     background: #343434;
-    border-radius: 6px;
+    border-radius: 4px;
 }
 
 #context-menu.visible {
@@ -1041,131 +1079,6 @@ label.mention {
 }
 
 
-
-/* Media query for mobile and other mobile css!!! */
-
-#leftSideMenu {
-    float: left;
-    height: calc(100% - 40px);
-    width: auto;
-    background-color: #1E2124;
-
-    display: none;
-}
-
-#rightSideMenu {
-    float: left;
-    height: calc(100% - 40px);
-    width: auto;
-    background-color: #1E2124;
-
-    display: none;
-}
-
-#mobile_GroupAndChannelContainer {
-    z-index: 9999999;
-    width: calc(100% - 40px) !important;
-    margin-left: 35px;
-    height: calc(100% - 40px);
-    max-width: 420px;
-
-    background-color: rgb(49, 53, 60);
-    position: absolute;
-    display: none;
-    float: left;
-}
-
-#mobile_memberlist {
-    width: calc(100% - 60px) !important;
-    /*margin-left: calc(-100% + 35px + 420p);*/
-
-    height: calc(100% - 40px - 20px);
-    max-width: 420px;
-
-    background-color: rgb(37, 41, 47);
-    position: absolute;
-    display: none;
-    float: left;
-    padding: 10px;
-    overflow-x: auto;
-
-}
-
-#mobile_GroupList {
-    width: calc(45px + 20px);
-    height: calc(100%);
-
-    float: left;
-    background-color: rgb(37, 41, 47);
-}
-
-#mobile_GroupList .server-entry {
-    margin: 10px;
-}
-
-#mobile_groupBanner {
-    margin-bottom: 20px;
-}
-
-#mobile_groupBanner img {
-    width: calc(100% - 65px);
-    height: 160px;
-    float: left;
-
-    background-repeat: no-repeat;
-  background-attachment: fixed; 
-  background-size: 100% 100%;
-}
-
-
-#mobile_channelList {
-    display: block;
-    float: left;
-    padding: 8px;
-
-    width: calc(100% - 16px - 65px);
-    height: calc(100% - 160px - 16px);
-    overflow-y: auto;
-}
-
-#mobile_channelList h2 {
-    font-size: 18px;
-    color: #ABB8BB;
-    margin-bottom: 2px;
-}
-
-#mobile_channelList details {
-    margin-top: 10px !important;
-}
-
-#mobile_channelList details ul {
-    margin-left: 14px;
-}
-
-#mobile-channellist-trigger {
-    width: 35px;
-    height: 35px;
-
-    background-color: transparent;
-    background-image: url("img/sandwich.png");
-    background-size: contain;
-
-    float: left;
-    display: block;
-}
-
-#mobile-memberlist-trigger {
-    width: 35px;
-    height: 35px;
-
-    background-color: transparent;
-    background-image: url("img/sandwich.png");
-    background-size: contain;
-
-    float: left;
-    display: block;
-}
-
 .editor-container {
     margin-top: -60px;
 }
@@ -1182,90 +1095,38 @@ label.mention {
     cursor: pointer;
 }
 
-@media (max-width: 1050px) {
+.donators {
+    background-image: url('/img/heart_white.webp');
+    background-size: cover;
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+    float: right;
+    cursor: pointer;
+}
 
-    body {
-        overflow-x: hidden;
-    }
+li.info {
+    font-size: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: gray;
+    font-style: italic;
+    list-style: none;
+    /* remove real bullet */
+}
 
-    #serverbanner-container,
-    #profile-qa,
-    #channeltree,
-    #channellist,
-    #infolist,
-    #serverlist {
-        display: none !important;
-    }
+li.info .bullet {
+    color: gray;
+    font-size: 1.5em;
+    line-height: 1;
+}
 
-    img {
-        width: 100%; /* Forces it to scale */
-        height: auto; /* Maintains aspect ratio */
-        max-width: none; /* Allows resizing beyond parent limits */
-    }
+li.info span.bullet::before {
+    content: "•";
+}
 
-    #channelname {
-        padding: 8px 8px 4px 8px;
-        font-size: 14px;
-    }
 
-    #content-container {
-        width: calc(100% - 35px - 35px) !important;
-        border-radius: 0;
-    }
-
-    #header {
-        width: calc(100% - 16px);
-    }
-
-    #leftSideMenu,
-    #rightSideMenu {
-        display: block;
-    }
-
-    .editor-container {
-        margin-top: -40px;
-    }
-
-    .message-container {
-        margin: 0 0 30px 0;
-        padding: 0;
-        width: 100%;
-    }
-
-    .message-container .editedMsg {
-        margin-top: 0;
-        padding-top: 0;
-    }
-
-    .message-container .message-profile-img,
-    .message-profile-img-container {
-        width: 30px;
-        height: 30px;
-        margin: 0;
-        padding: 0;
-    }
-
-    .message-container .message-profile-info-name {
-        font-size: 14px;
-    }
-
-    .message-container .message-profile-content {
-        padding: 0 20px 0 30px !important;
-        margin: 0;
-        width: calc(100% - 50px);
-    }
-
-    pre.ql-syntax {
-        width: calc(100%) !important;
-    }
-
-    .ql-formats {
-        display: none !important;
-        width: 0;
-        height: 0;
-    }
-
-    #emoji-box-container {
-        width: 70%;
-    }
+li.info:hover {
+    background-color: transparent !important
 }

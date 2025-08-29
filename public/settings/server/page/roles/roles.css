@@ -29,38 +29,20 @@
     max-width: 400px;
 }
 
-#permissionlist hr {
-    border: 1px solid #3c3f44;
-}
-
-#permissionlist p {
-    font-weight: bold;
-}
-
-#permissionlist label {
-    font-style: italic;
-    font-size: 12px;
-
-    color: #828a8d;
-}
-
-#permissionlist input[type=checkbox]{
-    float: right;
-}
-
 .role-entry {
     width: calc(100% - 60px);
+    padding: 8px !important;
 }
 
-.role-entry, #permissionlist p {
+.role-entry, #permList div.entry {
     display: block;
-    padding: 8px;
+    padding: 2px;
     margin: 2px;
 
     border-radius: 6px;
 }
 
-.role-entry:hover, #permissionlist p:hover{
+.role-entry:hover{
     background-color: #292B2F;
 }
 
@@ -159,7 +141,7 @@ input[type=number] {
 
 .memberlist-actions input{
     float: right;
-    margin: 18px 0 -25px 0;
+    margin: 18px 8px -25px 0;
 
     background-color: indianred;
     color: white;
@@ -167,4 +149,32 @@ input[type=number] {
     border: 1px solid transparent;
 
     border-radius: 2px;
+}
+
+.permStateBox {
+    width: 10px;
+    height: 10px;
+    border-radius: 4px;
+    border: 2px solid #ccc;
+    background-color: #888; /* default: inherited */
+    transition: background-color 0.3s ease;
+    float: right;
+}
+
+/* Green = allowed */
+.permStateBox[data-state="1"] {
+    background-color: #1ce397;
+    border-color: #1ce397;
+}
+
+/* Gray = inherited */
+.permStateBox[data-state="0"] {
+    background-color: #888;
+    border-color: #aaa;
+}
+
+/* Red = denied */
+.permStateBox[data-state="-1"] {
+    background-color: indianred;
+    border-color: indianred;
 }

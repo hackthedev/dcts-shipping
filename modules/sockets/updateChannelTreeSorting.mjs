@@ -1,9 +1,9 @@
-import { io, saveConfig, serverconfig, xssFilters } from "../../index.mjs";
+import { saveConfig, serverconfig, xssFilters } from "../../index.mjs";
 import { findInJson, hasPermission } from "../functions/chat/main.mjs";
 import { saveChatMessage } from "../functions/io.mjs";
 import { copyObject, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('updateChannelTreeSorting', function (member, response) {
             if (validateMemberId(member.id, socket) == true

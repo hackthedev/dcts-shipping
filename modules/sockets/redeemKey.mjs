@@ -1,8 +1,8 @@
-import { io, saveConfig, serverconfig, xssFilters } from "../../index.mjs";
+import { saveConfig, serverconfig, xssFilters } from "../../index.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('redeemKey', function (member) {
         if (validateMemberId(member.id, socket) == true

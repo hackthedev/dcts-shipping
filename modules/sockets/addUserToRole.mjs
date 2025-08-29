@@ -1,10 +1,10 @@
-import { io, saveConfig, serverconfig, usersocket, xssFilters } from "../../index.mjs";
+import { saveConfig, serverconfig, usersocket, xssFilters } from "../../index.mjs";
 import { getMemberHighestRole } from "../functions/chat/helper.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('addUserToRole', function (member, response) {
         if (validateMemberId(member.id, socket) == true

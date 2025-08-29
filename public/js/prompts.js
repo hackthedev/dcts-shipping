@@ -24,12 +24,13 @@ class Prompt {
 
             .prompt-input {
                 width: 100%;
-                padding: 5px;
+                padding: 10px;
                 font-size: 14px;
-                border: 1px solid #ccc;
-                border-radius: 2px;
+                border: 1px solid rgb(98, 98, 98) !important;
+                border-radius: 4px;
                 box-sizing: border-box;                
-                background-color: #F0F0F0;
+                background-color: transparent;
+                color: #ccc;
             }
 
             .prompt-input[type="checkbox"] {
@@ -38,19 +39,21 @@ class Prompt {
             }
 
             .prompt-input:focus {
-                border-color:hsl(204, 4.70%, 41.60%);
+                border-color:rgb(98, 98, 98);
+                border: 1px solid rgb(98, 98, 98) !important;
                 outline: none;
             }
 
             .prompt-button {
-                padding: 10px 20px;
-                background-color: #34383C; 
+                padding: 10px 20px; 
                 color: white;
                 border: none;
                 border-radius: 2px;
                 width: calc(100% - 20px);
                 cursor: pointer;
                 font-size: 14px;
+                border: 1px solid rgb(98, 98, 98);
+                background-color: transparent;
             }
 
             .prompt-button.submit{
@@ -98,13 +101,13 @@ class Prompt {
                 width: 100px;
                 height: 100px;
                 border-radius: 50%;
-                background-color: #f0f0f0;
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 overflow: hidden;
                 cursor: pointer;
-                border: 2px solid #ccc;
+                border: 1px solid rgb(98, 98, 98);
+                background-color: transparent;
             }
 
             .profile-image-preview {
@@ -121,7 +124,8 @@ class Prompt {
             /* Style for the select dropdown */
             .prompt-select {
                 appearance: none; /* Remove default browser styling */
-                background-color: #F0F0F0;
+                background-color:rgb(207, 205, 205);
+                color: black;
                 padding: 5px;
                 font-size: 14px;
                 border: 1px solid #ccc;
@@ -134,7 +138,7 @@ class Prompt {
 
             /* Add focus effect for better UX */
             .prompt-select:focus {
-                border-color: hsl(204, 4.7%, 41.6%);
+                border-color: rgb(98, 98, 98);
                 outline: none;
             }
 
@@ -156,6 +160,7 @@ class Prompt {
         this.modal = document.createElement('div');
         this.modal.id = 'promptContainer';
         this.modal.style.display = 'none';
+        this.modal.style.overflowY = 'auto';
         this.modal.style.position = 'fixed';
         this.modal.style.top = '0';
         this.modal.style.left = '0';
@@ -237,7 +242,7 @@ class Prompt {
     }
     
 
-    showPrompt(title = 'Prompt', htmlContent, callback, customSubmitText = null, multiSelect = false, customMinWidth = null, helpAction = null, afterSubmitAction = null) {
+    showPrompt(title = 'Prompt', htmlContent, callback, customSubmitText = null, multiSelect = false, customMinWidth = null, helpAction = null, afterSubmitAction = null, disableSubmit = false, disableExit = false) {
         this.currentCallback = callback;
         this.afterSubmitAction = afterSubmitAction; // Store the afterSubmitAction function
         this.multiSelect = multiSelect;
@@ -262,6 +267,9 @@ class Prompt {
         this.submitButton.style.display = "block";
         this.closeButton.style.display = "block";
         this.helpButton.style.display = "block";
+        
+        if(disableSubmit) this.submitButton.style.display = "none";
+        if(disableExit) this.closeButton.style.display = "none";
     
         // Update the title
         const titleElement = this.modal.querySelector('h2');
@@ -275,7 +283,9 @@ class Prompt {
             this.helpButton.onclick = helpAction;
         } else {
             this.helpButton.style.display = 'none';
-        }
+        }        
+
+        if(customSubmitText) if(!customSubmitText[1]) applyHoverEffect(this.submitButton, [["white", "#2492c9"], ["white", "#4bc732"]])
     }
 
     showConfirm(titleText, options, callback, afterSubmitAction = null) {

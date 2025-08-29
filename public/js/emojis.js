@@ -2,16 +2,29 @@ let emojiList = []; // Store emoji names with IDs
 let suggestionsIndex = -1; // Tracks the currently selected suggestion
 let matches = []; // Stores the filtered emoji list
 
+let emojiElement;
+
+function fetchEmojis() {
+    return new Promise((resolve, reject) => {
+        socket.emit("getEmojis",
+            { id: UserManager.getID(), token: UserManager.getToken() },
+            function (response) {
+                if (response.type === "success") {
+                    emojiList = response.data;
+                    resolve(emojiList); 
+                } else {
+                    console.log("Failed to fetch emojis:", response.msg);
+                    reject(response.msg);
+                }
+            }
+        );
+    });
+}
+
+
 function initializeEmojiAutocomplete(element, quill) {
 
-    // Fetch emojis
-    socket.emit("getEmojis", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
-        if (response.type === "success") {
-            emojiList = response.data; // Store full emoji names
-        } else {
-            console.error("Failed to fetch emojis:", response.msg);
-        }
-    });   
+    fetchEmojis()
 
     // Listen for text-change events from Quill
     quill.on('text-change', function (delta, oldDelta, source) {
@@ -73,7 +86,7 @@ function initializeEmojiAutocomplete(element, quill) {
             suggestion.style.cursor = "pointer";
             suggestion.style.display = "flex";
             suggestion.style.alignItems = "center";
-            suggestion.className  = "emoji-suggestion-entry";
+            suggestion.className = "emoji-suggestion-entry";
             suggestion.setAttribute("data-index", index);
 
             // Extract Emoji Details
@@ -133,7 +146,6 @@ function initializeEmojiAutocomplete(element, quill) {
     }
 
     // Insert selected emoji
-    // Insert selected emoji
     function insertEmoji(emojiFullName, quill, cursorPosition) {
         const inputValue = quill.getText();
         const textBeforeCursor = inputValue.slice(0, cursorPosition);
@@ -160,7 +172,11 @@ function initializeEmojiAutocomplete(element, quill) {
     }
 }
 
-function text2Emoji(text, returnCodeOnly = false) {
+async function text2Emoji(text, returnCodeOnly = false) {
+
+    if (emojiList.length == 0) {
+        await fetchEmojis()
+    }
 
     // Helper function to find emoji filename by ID
     function findEmojiByID(emojiId) {
@@ -171,7 +187,6 @@ function text2Emoji(text, returnCodeOnly = false) {
     // Check if the message contains only emoji codes
     function isOnlyEmoji(message) {
         const textWithoutEmoji = message.replace(/:(\d+):/g, "").trim().replaceAll(" ", "").replace("<p></p>", "");
-        console.log(`msg is: '${textWithoutEmoji}'`)
         return textWithoutEmoji.length === 0;
     }
 

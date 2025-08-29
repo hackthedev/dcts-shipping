@@ -1,10 +1,10 @@
-import { fs, io, serverconfig, xssFilters } from "../../index.mjs";
+import { fs, serverconfig, xssFilters } from "../../index.mjs";
 import { findEmojiByID } from "../functions/chat/helper.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('updateEmoji', async function (member, response) {
         checkRateLimit(socket);

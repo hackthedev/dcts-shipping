@@ -28,20 +28,6 @@
     max-width: 500px;
 }
 
-#permissionlist hr {
-    border: 1px solid #3c3f44;
-}
-
-#permissionlist p {
-    font-weight: bold;
-}
-
-#permissionlist label {
-    font-style: italic;
-    font-size: 12px;
-
-    color: #828a8d;
-}
 
 #permissionlist input[type=checkbox]{
     float: right;

@@ -26,7 +26,6 @@ class ChannelTree {
             let tempContainer = document.createElement("div");
             tempContainer.insertAdjacentHTML("beforeend", `<h2>${response.data.groups[group].info.name}</h2><hr>`);
 
-            console.log(catCollection)
             sortedCats.forEach(cat => {
                 let category = catCollection[cat];
 
@@ -53,16 +52,31 @@ class ChannelTree {
     
                     sortedChans.forEach(chan => {
                         let channel = chanCollection[chan];
+
+                        let hasNewMessages = false;
+
+                        let savedCount = parseInt(CookieManager.getCookie(`message-marker_${channel.id}`)) || 0;
+
+                        // dont mark voice channels. there is no point in it
+                        if(channel.msgCount != savedCount && channel.type != "voice"){
+                            hasNewMessages = true;
+                            // we only wanna set it once we actually read the message in the channel or clicked the channel.
+                            // so we mark the messages as read when we request the chat messages
+                            // CookieManager.setCookie(`message-marker_${chan.id}`, chan.msgCount);
+                        }
     
                         let channelHTML = `
-                            <li draggable="true" id="channel-${channel.id}" style="color: #ABB8BE; cursor: pointer;user-select: none;" data-channel-id="${channel.id}">
-                                <a class="channelTrigger" id="channel-${channel.id}" onclick="setUrl('?group=${group}&category=${category.info.id}&channel=${channel.id}'${channel.type == "voice" ? `, true` : ""})" 
+                            <li draggable="true" channelType="${channel.type}" id="channel-${channel.id}" style="color: #ABB8BE; cursor: pointer;user-select: none;" data-channel-id="${channel.id}">
+                                <a channelType="${channel.type}" class="channelTrigger msgCount_${channel.msgCount} ${hasNewMessages ? `markChannelMessage` : ""}" id="channel-${channel.id}" onclick="setUrl('?group=${group}&category=${category.info.id}&channel=${channel.id}'${channel.type == "voice" ? `, true` : ""})" 
                                    style="display: block;">
                                     ${channel.type == "text" ? "⌨" : "🎙️"} ${channel.name}
                                 </a>
                             </li>
                         `;
                         categoryElement.insertAdjacentHTML("beforeend", channelHTML);
+
+                        if(!hasNewMessages) markChannel(channel.id, true)
+                        if(hasNewMessages) markChannel(channel.id, false, channel.msgCoun)
                     });
                 }                
             });

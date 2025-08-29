@@ -2,7 +2,7 @@ import { loginAttempts, serverconfig, xssFilters } from "../../index.mjs";
 import { banIp, getNewDate, unbanIp } from "../functions/chat/main.mjs";
 import { copyObject, findAndVerifyUser, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('userLogin', function (member, response) {
         member.id = xssFilters.inHTMLData(member.id)

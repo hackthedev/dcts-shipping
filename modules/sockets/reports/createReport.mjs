@@ -5,7 +5,7 @@ import Logger from "../../functions/logger.mjs";
 import { validateMemberId } from "../../functions/main.mjs";
 import { getChatMessagesFromDb, saveReport, decodeFromBase64 } from "../../functions/mysql/helper.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
 
     function notifyReportAdmins() {
 
@@ -48,6 +48,10 @@ export default (socket) => {
                             let room = message[0]?.room; // 1-2-3
                             let channelId = room.split("-")[2]; // 3
                             let channelObj = resolveChannelById(channelId) // json obj of channel
+
+                            if(!serverconfig.servermembers[messageAuthorId]){
+                                return response({ type: "error", msg: "User is not in the server anymore" });
+                            }
 
                             Logger.info(`User ${serverconfig.servermembers[reportCreatorId].name} reported user ${serverconfig.servermembers[messageAuthorId].name}`)
                             await saveReport(

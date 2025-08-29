@@ -1,10 +1,10 @@
-import { io, serverconfig, usersocket, xssFilters } from "../../index.mjs";
+import { serverconfig, usersocket, xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import { getSavedChatMessage } from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
 
     socket.on('getChatlog', async function (member) {

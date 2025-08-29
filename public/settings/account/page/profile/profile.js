@@ -51,17 +51,21 @@ async function handleUpload(files, id) {
 
 
 function resetAccount() {
-    var reset = confirm("Do you really want to reset your account? EVERYTHING will be reset.")
+    var reset = confirm("Do you really want to reset your account? EVERYTHING will be reset and you will be logged out.")
 
     if (reset) {
         CookieManager.setCookie("id", null, 365);
         CookieManager.setCookie("username", null, 365);
         CookieManager.setCookie("status", null, 365);
+        CookieManager.setCookie("aboutme", null, 365);
         CookieManager.setCookie("pfp", null, 365);
         CookieManager.setCookie("token", null, 365);
         CookieManager.setCookie("banner", null, 365);
+        CookieManager.setCookie("pow_challenge", null, 365);
+        CookieManager.setCookie("pow_solution", null, 365);
+        CookieManager.setCookie("loginName", null, 365);
 
-        alert("Your account has been reset. Please refresh the page if you want to continue");
+        alert("Your account has been reset and you have been logged out. Please refresh the page if you want to continue");
     }
 }
 
@@ -71,7 +75,7 @@ function setPreview() {
 
     settings_username.value = `${limitString(UserManager.getUsername(), 30)}`;
     settings_status.value = `${limitString(UserManager.getStatus(), 100)}`;
-    settings_aboutme.innerText = `${limitString(UserManager.getAboutme(), 500)}`;
+    settings_aboutme.value = `${limitString(UserManager.getAboutme(), 500)}`;
 
     settings_icon.value = `${UserManager.getPFP()}`;
     settings_banner.value = `${UserManager.getBanner()}`;
@@ -80,8 +84,52 @@ function setPreview() {
     preview_status.innerText = `${limitString(UserManager.getStatus(), 100)}`;
     preview_aboutme.innerText = `${limitString(UserManager.getAboutme(), 500)}`;
     settings_loginName.value = `${limitString(UserManager.getLoginName(), 500)}`;
+}
 
+async function exportAccount() {
+    let data = {
+        icon: await FileManager.fileToBase64(UserManager.getPFP()),
+        banner: await FileManager.fileToBase64(UserManager.getBanner()),
+        loginName: UserManager.getLoginName(),
+        displayName: UserManager.getUsername(),
+        status: UserManager.getStatus(),
+        aboutme: UserManager.getAboutme(),
+        pow: {
+            challenge: CookieManager.getCookie("pow_challenge"),
+            solution: CookieManager.getCookie("pow_solution")
+        }
+    }
+    
+    await FileManager.saveFile(JSON.stringify(data, null, 4), "identity_" + UserManager.getUsername() + ".json")
+}
 
+function importAccount() {
+    FileManager.readFile(function (content) {
+
+        try {
+            let data = JSON.parse(content)
+
+            if (data?.icon) UserManager.setPFP(data.icon);
+            if (data?.banner) UserManager.setBanner(data.banner);
+            if (data?.displayName) UserManager.setUsername(data.displayName);
+            if (data?.status) UserManager.setStatus(data.status);
+            if (data?.aboutme) UserManager.setAboutme(data.aboutme);
+
+            // refresh ui
+            setPreview()
+        }
+        catch (err) {
+            console.log(err)
+            showSystemMessage({
+                title: "Error while importing account",
+                text: err.message,
+                icon: "error",
+                img: null,
+                type: "error",
+                duration: 20000
+            });
+        }
+    });
 }
 
 function saveSettings() {

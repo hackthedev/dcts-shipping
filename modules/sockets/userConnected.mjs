@@ -1,10 +1,10 @@
-import { io, saveConfig, serverconfig, socketToIP, usersocket, xssFilters } from "../../index.mjs";
-import { formatDateTime, resolveCategoryByChannelId, resolveChannelById, resolveGroupByChannelId } from "../functions/chat/main.mjs";
+import { saveConfig, serverconfig, socketToIP, usersocket, xssFilters } from "../../index.mjs";
+import { formatDateTime, getJson, resolveCategoryByChannelId, resolveChannelById, resolveGroupByChannelId } from "../functions/chat/main.mjs";
 import { saveChatMessage } from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
 import { checkMemberBan, checkMemberMute, copyObject, escapeHtml, generateId, getCastingMemberObject, hashPassword, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('userConnected', async function (member, response) {
         member.id = xssFilters.inHTMLData(member.id)
@@ -34,7 +34,7 @@ export default (socket) => {
             }
             else {
                 banText = `banned until <br>${formatDateTime(new Date(banResult.timestamp))}`
-            } 
+            }
         }
 
         if (banResult?.reason) {
@@ -81,6 +81,17 @@ export default (socket) => {
 
                 var userToken = generateId(48);
 
+                // if the user login name already exists we just append an id to the login name.
+                // we then emit it to the user so they can save it.
+                let existingUsernames = getJson(serverconfig.servermembers, ["*.id", "*.loginName"]);
+                existingUsernames.forEach(user => {
+                    let userId = user[0];
+                    let loginName = user[1];
+
+                    if(loginName == member.loginName) member.loginName += generateId(4);
+                });
+
+
                 // setup member
                 serverconfig.servermembers[member.id] = JSON.parse(
                     `{
@@ -120,6 +131,7 @@ export default (socket) => {
                             "banner": "${serverconfig.servermembers[member.id].banner}",
                             "status": "${serverconfig.servermembers[member.id].status}",
                             "aboutme": "${serverconfig.servermembers[member.id].aboutme}",
+                            "loginName": "${serverconfig.servermembers[member.id].loginName}",
                             "type": "success"
                         }`));
                 }
@@ -200,12 +212,12 @@ export default (socket) => {
 
                     if (minutesPassed > 5) {
                         io.emit("updateMemberList");
-                        io.emit("memberOnline", member);
+                        io.emit("memberOnline", getCastingMemberObject(member));
                     }
                 }
                 else {
                     io.emit("updateMemberList");
-                    io.emit("memberPresent", member);
+                    io.emit("memberPresent", getCastingMemberObject(member));
                 }
 
                 response({ finishedOnboarding: true })

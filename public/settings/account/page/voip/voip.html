@@ -1,0 +1,41 @@
+<div id="vc-settings" class="vc-card">
+  <h2>Voice Chat Settings</h2>
+
+  <div class="vc-row">
+    <label for="vc-mic">Microphone</label>
+    <div class="vc-inline">
+      <select id="vc-mic" style="width: calc(100% - 60px); margin-right: 10px; margin-top: 10px;" class="vc-select">
+        <option>Loading…</option>
+      </select>
+      <button id="vc-refresh" class="vc-btn" title="Neu laden">↻</button>
+    </div>
+    <label class="vc-check"><input id="vc-mic-default" type="checkbox"> use as default</label>
+  </div>
+
+  <div class="vc-row" style="margin: 40px 0 40px 0;">
+    
+    <label for="vc-mic">Effects</label>
+    <label class="vc-check"><input id="vc-mic-echoCancellation" type="checkbox"> Echo cancellation</label>
+    <label class="vc-check"><input id="vc-mic-noiseSuppression" type="checkbox"> Noise Suppression</label>
+  </div>
+
+  <div class="vc-row">
+    <label for="vc-br">Bitrate</label>
+    <div class="vc-range">
+      <input id="vc-br" type="range" min="100" max="192" step="1">
+      <output id="vc-br-val">128</output><span>kbps</span>
+    </div>
+    
+    <div class="vc-note">
+      <li>Bitrate setting wont be applied during Mic test</li>
+      <li>Make sure your internet connection can handle your desired bitrate</li>
+    </div>
+  </div>
+
+  <div class="vc-row vc-actions">
+    <button id="vc-test" class="vc-btn">Mic Test</button>
+    <button id="vc-save" class="vc-btn primary" disabled>Save</button>
+  </div>
+
+  <audio id="vc-loopback" autoplay style="display:none"></audio>
+</div>

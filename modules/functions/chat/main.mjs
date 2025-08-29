@@ -1,11 +1,11 @@
 /*
     The functions here are basically the "core" of the chat app on the server side.
  */
-import { serverconfig, xssFilters, colors, saveConfig } from "../../../index.mjs"
+import { serverconfig, xssFilters, colors, saveConfig, usersocket } from "../../../index.mjs"
 import { consolas } from "../io.mjs";
 import { io } from "../../../index.mjs";
 import { getMemberHighestRole, getUserBadges } from "./helper.mjs";
-import { checkBool, checkEmptyConfigVar, copyObject } from "../main.mjs";
+import { checkBool, checkEmptyConfigVar, copyObject, sendMessageToUser } from "../main.mjs";
 
 var serverconfigEditable = serverconfig;
 
@@ -19,97 +19,86 @@ export function getMemberLastOnlineTime(memberID) {
     return minutesPassed
 }
 
-export function hasPermission(userId, permissions, channelOrGroupId = null) {
-    const userRoles = resolveRolesByUserId(userId);
-
-    // Ensure permissions is an array
+export function hasPermission(userId, permissions, channelOrGroupId = null, mode = "any") {
     const permissionsToCheck = Array.isArray(permissions) ? permissions : [permissions];
 
-    // Sort roles by their sortId in descending order (highest priority first)
+    if (permissionsToCheck.length > 1) {
+        if (mode === "all") {
+            return permissionsToCheck.every(perm =>
+                hasPermission(userId, perm, channelOrGroupId)
+            );
+        } else if (mode === "any") {
+            return permissionsToCheck.some(perm =>
+                hasPermission(userId, perm, channelOrGroupId)
+            );
+        }
+    }
+
+    const perm = permissionsToCheck[0];
+    const userRoles = resolveRolesByUserId(userId);
+
     const sortedRoles = userRoles
-        .map((roleId) => ({
+        .map(roleId => ({
             id: roleId,
-            sortId: serverconfig.serverroles[roleId]?.info?.sortId || 0,
+            sortId: serverconfig.serverroles?.[roleId]?.info?.sortId || 0
         }))
-        .sort((a, b) => b.sortId - a.sortId);
+        .sort((a, b) => b.sortId - a.sortId); // Highest role first
 
-    // Helper to check permissions for sorted roles in a permissions object
-    function checkPermissions(sortedRoles, permissionsObj) {
-        let result = null; // Tracks whether permissions are granted or denied
-
-        for (const { id: role } of sortedRoles) {
-            const rolePermissions = permissionsObj[role];
-            if (rolePermissions) {
-                // Deny takes precedence in conflicts
-                if (permissionsToCheck.some((perm) => rolePermissions[perm] === 0)) {
-                    result = false;
-                }
-                // Grant if allowed
-                if (permissionsToCheck.every((perm) => rolePermissions[perm] === 1)) {
-                    result = true;
-                }
-            }
-        }
-        return result; // Return the final decision (true/false) based on precedence
-    }
-
-    // 1. Check if the user has "administrator" permission at the server level (global bypass)
+    // admin Bypass
     for (const role of userRoles) {
-        const roleConfig = serverconfig.serverroles[role];
-        if (roleConfig?.permissions?.administrator === 1) {
-            return true; // Administrator bypasses all checks
-        }
+        const perms = serverconfig.serverroles?.[role]?.permissions;
+        if (perms?.administrator === 1) return true;
     }
 
-    // 2. Check if the provided ID is a channel or a group
-    const group = resolveGroupByChannelId(channelOrGroupId);
-    if (group) {
-        // Handle channel permissions
+    // CHANNEL PERMISSIONS - EXPLICIT OVERRIDES
+    let channelResult = null;
+    const groupId = resolveGroupByChannelId(channelOrGroupId);
+    let channelPerms = null;
+
+    if (groupId) {
         const category = resolveCategoryByChannelId(channelOrGroupId);
-        if (category) {
-            const channelPermissions =
-                serverconfig.groups[group]?.channels?.categories[category]?.channel[channelOrGroupId]?.permissions;
-
-            if (channelPermissions) {
-                const channelResult = checkPermissions(sortedRoles, channelPermissions);
-                if (channelResult !== null) return channelResult; // Return if permissions are explicitly set
-            }
-        }
-    } else if (serverconfig.groups[channelOrGroupId]) {
-        // Handle group permissions if the ID corresponds to a valid group
-        const groupPermissions = serverconfig.groups[channelOrGroupId]?.permissions;
-
-        if (groupPermissions) {
-            const groupResult = checkPermissions(sortedRoles, groupPermissions);
-            if (groupResult !== null) return groupResult; // Return if permissions are explicitly set
-        }
+        channelPerms = serverconfig.groups?.[groupId]?.channels?.categories?.[category]?.channel?.[channelOrGroupId]?.permissions;
     }
 
-    // 3. Check group permissions for all groups (middle priority)
-    for (const groupId in serverconfig.groups) {
-        const groupPermissions = serverconfig.groups[groupId]?.permissions || {};
-        const groupResult = checkPermissions(sortedRoles, groupPermissions);
-        if (groupResult !== null) return groupResult; // Return if permissions are explicitly set
+    for (const { id: roleId } of sortedRoles) {
+        const perms = channelPerms?.[roleId];
+        if (!perms || !(perm in perms)) continue;
+
+        const val = perms[perm];
+        if (val === 1) return true;    // allow overrides all
+        if (val === -1) return false;  // explicit deny
     }
 
-    // 4. Check server role permissions (lowest priority)
-    for (const { id: role } of sortedRoles) {
-        const roleConfig = serverconfig.serverroles[role];
-        if (roleConfig?.permissions) {
-            // Deny if any permission is explicitly set to 0
-            if (permissionsToCheck.some((perm) => roleConfig.permissions[perm] === 0)) {
-                return false;
-            }
-            // Grant if all permissions are explicitly allowed
-            if (permissionsToCheck.every((perm) => roleConfig.permissions[perm] === 1)) {
-                return true;
-            }
+    // SERVER ROLE PERMISSIONS - DENY OVERRIDES
+    for (const { id: roleId } of sortedRoles) {
+        const rolePerm = serverconfig.serverroles?.[roleId]?.permissions?.[perm];
+
+        // 👇 this is the fix: treat missing channel perms as inherited, allow server deny
+        if (rolePerm === -1) return false;
+        if (rolePerm === 1 && channelPerms?.[roleId] === undefined) {
+            // allowed only if channel doesn't override this role at all
+            channelResult = true;
         }
     }
 
-    // Explicitly deny if no permissions are set
+    // GROUP FALLBACK
+    if (channelResult !== null) return channelResult;
+
+    for (const gid in serverconfig.groups) {
+        const groupPerms = serverconfig.groups?.[gid]?.permissions || {};
+        for (const { id: roleId } of sortedRoles) {
+            const perms = groupPerms[roleId];
+            if (!perms) continue;
+            const val = perms[perm];
+            if (val === -1) return false;
+            if (val === 1) return true;
+        }
+    }
+
     return false;
 }
+
+
 
 
 
@@ -295,8 +284,9 @@ export async function getMemberProfile(id) {
             
             <h2 class="profile_headline">About Me</h2>
             <div class="profile_aboutme">            
-                ${memberAboutme}<br><br>
-                <code class="joined">Joined ${new Date(memberJoined).toLocaleString("narrow")}</code><br>
+                ${memberAboutme}<br>
+                <hr>
+                <code class="joined">Joined ${new Date(memberJoined).toLocaleString("narrow")}</code>
                 <code class="joined">Last Online ${new Date(memberLastOnline).toLocaleString("narrow")}</code>
                 ${mutedBadge} ${banBadge}
             </div>
@@ -393,9 +383,9 @@ export function getMemberList(member, channel) {
 
                 // Do not show banned users
                 if (serverconfig.servermembers[member].isBanned == 1) {
-                    if(!bannedMember.includes(member)) bannedMember.push(member);
+                    if (!bannedMember.includes(member)) bannedMember.push(member);
 
-                    if(checkBool(serverconfig.serverinfo.moderation.bans.memberListHideBanned, "bool") == true) return;
+                    if (checkBool(serverconfig.serverinfo.moderation.bans.memberListHideBanned, "bool") == true) return;
                 }
 
                 // check here for highest role
@@ -478,8 +468,8 @@ export function getMemberList(member, channel) {
 
                         if (members[member].isMuted || members[member].isBanned) {
                             let displayColor = "white";
-                            if(members[member].isMuted) displayColor = "grey";
-                            if(members[member].isBanned) displayColor = "indianred";
+                            if (members[member].isMuted) displayColor = "grey";
+                            if (members[member].isBanned) displayColor = "indianred";
 
                             nameStyle = `<s style="color: ${displayColor};"><span style="font-style: italic;color:${displayColor}">${members[member].name}</span></s>`;
                             statusStyle = `<s style="color: ${displayColor};"><span style="font-style: italic;color:${displayColor}">${members[member].status}</span></s>`;
@@ -577,13 +567,88 @@ function setJson(obj, path, value) {
 
     for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]] || typeof current[keys[i]] !== "object") {
-            current[keys[i]] = {}; // Ensure parent object exists
+            current[keys[i]] = {}; 
         }
         current = current[keys[i]];
     }
 
     current[keys[keys.length - 1]] = copyObject(value); // Deep copy before setting
 }
+
+export function getJson(obj, pathOrPaths) {
+    if (!Array.isArray(pathOrPaths)) {
+        const parts = String(pathOrPaths).split(".");
+        function rec(current, i) {
+            if (i === parts.length) return [current];
+            const key = parts[i];
+            if (key === "*") {
+                if (typeof current !== "object" || current === null) return [];
+                return Object.values(current).flatMap(child => rec(child, i + 1));
+            } else {
+                if (current == null || !(key in current)) return [];
+                return rec(current[key], i + 1);
+            }
+        }
+        return rec(obj, 0);
+    }
+
+    const partsList = pathOrPaths.map(p => String(p).split("."));
+    const maxLen = Math.max(...partsList.map(p => p.length));
+
+    function recSync(currents, depth) {
+        if (depth === maxLen) {
+            if (currents.every(v => v !== undefined)) return [currents];
+            return [];
+        }
+
+        const needWildcard = partsList.map(p => p[depth]).map(k => k === "*");
+        const nextKeys = new Set();
+
+        for (let i = 0; i < partsList.length; i++) {
+            const key = partsList[i][depth];
+            const cur = currents[i];
+            if (key === "*") {
+                if (cur && typeof cur === "object") {
+                    for (const k of Object.keys(cur)) nextKeys.add(k);
+                }
+            }
+        }
+
+        if (nextKeys.size === 0) {
+            const nextCurrents = [];
+            for (let i = 0; i < partsList.length; i++) {
+                const key = partsList[i][depth];
+                const cur = currents[i];
+                if (cur == null) return [];
+                if (!(key in cur)) return [];
+                nextCurrents.push(cur[key]);
+            }
+            return recSync(nextCurrents, depth + 1);
+        }
+
+        const out = [];
+        for (const k of nextKeys) {
+            const nextCurrents = [];
+            let valid = true;
+            for (let i = 0; i < partsList.length; i++) {
+                const key = partsList[i][depth];
+                const cur = currents[i];
+                if (key === "*") {
+                    if (!cur || !(k in cur)) { valid = false; break; }
+                    nextCurrents.push(cur[k]);
+                } else {
+                    if (!cur || !(key in cur)) { valid = false; break; }
+                    nextCurrents.push(cur[key]);
+                }
+            }
+            if (valid) out.push(...recSync(nextCurrents, depth + 1));
+        }
+        return out;
+    }
+
+    return recSync(Array(partsList.length).fill(obj), 0);
+}
+
 
 
 export function getChannelTree(member) {
@@ -632,11 +697,6 @@ export function getChannelTree(member) {
             // show group name etc if allowed to
             //if(!addedInitialCode) treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`; addedInitialCode = true;
 
-            // Add Category
-            treecode += "<details open draggable='true'>";
-            treecode += `<summary class="categoryTrigger" id="category-${cat.info.id}" style="color: #ABB8BE;">${cat.info.name}</summary>`;
-            treecode += `<ul>`
-
             // change flag that it was already showed
             showedCategory = true;
 
@@ -664,14 +724,11 @@ export function getChannelTree(member) {
                 hasPermission(member.id, ["viewChannel"], chan.id)
             ) {
                 // show group name etc if allowed to
-                if(!addedInitialCode) treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`; addedInitialCode = true;
+                if (!addedInitialCode) treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`; addedInitialCode = true;
 
                 // Add Category
-                treecode += "<details open>";
-                treecode += `<summary class="categoryTrigger" id="category-${cat.info.id}" style="color: #ABB8BE;">${cat.info.name}</summary>`;
-                treecode += `<ul>`
                 showedCategory = true;
-                
+
                 setJson(channeltree, `groups.${group}.info`, serverconfig.groups[group].info)
                 setJson(channeltree, `groups.${group}.categories.${cat.info.id}.info`, serverconfig.groups[group].channels.categories[cat.info.id].info)
             }
@@ -685,19 +742,16 @@ export function getChannelTree(member) {
                     // if the user has the permission to either view the channel or manage channels
                     if (hasPermission(member.id, "viewChannel", chan.id) || hasPermission(member.id, "manageChannels", member.group)) {
 
-                        
+
                         setJson(channeltree, `groups.${group}.categories.${cat.info.id}.channel.${chan.id}`, serverconfig.groups[group].channels.categories[cat.info.id].channel[chan.id])
 
                         if (added_channels.includes(chan.id + "_" + chan.name) == false) {
 
                             // if text channel
                             if (chan.type == "text") {
-                                treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}')"><li class="channelTrigger sortable-channels" draggable='true' id="channel-${chan.id}" style="color: #ABB8BE;">⌨ ${chan.name}</li></a>`;
-
                                 added_channels.push(chan.id + "_" + chan.name)
                             }
                             else if (chan.type == "voice") {
-                                treecode += `<a onclick="setUrl('?group=${group}&category=${cat.info.id}&channel=${chan.id}', true);"><li class="channelTrigger sortable-channels" draggable='true' id="channel-${chan.id}" style="color: #ABB8BE;">🎤 ${chan.name}</li></a>`;
                                 added_channels.push(chan.id + "_" + chan.name)
                             }
                         }
@@ -710,10 +764,6 @@ export function getChannelTree(member) {
             });
 
         });
-
-
-        treecode += "</ul>";
-        treecode += "</details>";
 
     });
 
@@ -752,7 +802,7 @@ export function banUser(socket, member) {
 
 export function banIp(socket, durationTimestamp) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
-    
+
     // Ban IP of User
     let ip = socket.handshake.address;
     if (!serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
@@ -767,13 +817,13 @@ export function banIp(socket, durationTimestamp) {
 
 export function unbanIp(socket) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
-    
+
     let ip = socket.handshake.address;
     if (serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
         delete serverconfigEditable.ipblacklist[ip];
         saveConfig(serverconfigEditable);
     }
-    else{
+    else {
         console.log("does not have property " + ip)
     }
 }
@@ -792,7 +842,7 @@ export function findInJson(obj, keyToFind, valueToFind, returnPath = false) {
 
             if (key === keyToFind && currentObj[key] === valueToFind) {
                 if (currentPath.includes("channel")) { // ✅ Ensure it's a CHANNEL path
-                    result = currentObj; 
+                    result = currentObj;
                     foundPath = currentPath; // ✅ Fix: Store only the path without `.id`
                     return;
                 }
@@ -892,12 +942,39 @@ export function getNewDate(offset) {
     return now;
 }
 
+export function disconnectUser(socketId, reason = null) {
+
+    try { 
+        sendMessageToUser(socketId, JSON.parse(
+            `{
+            "title": "You've been disconnected",
+            "message": "${reason ? `Reason:<br>${reason}` : ""}",
+            "buttons": {
+                "0": {
+                    "text": "Ok",
+                    "events": "onclick='closeModal()'"
+                }
+            },
+            "type": "error",
+            "displayTime": 600000,
+            "wasDisconnected": true
+        }`));
+
+        io.sockets.sockets.get(socketId).disconnect();
+    }
+    catch (ex) {
+        return {error: ex}
+    }
+
+    return { error: null };
+}
+
 export function muteUser(member) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);    
+    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     let muteDate;
     let jsonObj;
-    try{
+    try {
         muteDate = getNewDate(member.time).getTime();
         jsonObj = JSON.parse(`
             {
@@ -907,7 +984,7 @@ export function muteUser(member) {
             }
             `);
     }
-    catch (err){
+    catch (err) {
         return { error: err }
     }
 
@@ -919,7 +996,7 @@ export function muteUser(member) {
         serverconfigEditable.mutelist[member.target] = jsonObj;
 
         saveConfig(serverconfigEditable);
-        return { duration: muteDate};
+        return { duration: muteDate };
     }
     else {
         serverconfigEditable.servermembers[member.target].isMuted = 1;
@@ -928,6 +1005,6 @@ export function muteUser(member) {
 
         io.emit("updateMemberList");
 
-        return { duration: muteDate};
+        return { duration: muteDate };
     }
 }

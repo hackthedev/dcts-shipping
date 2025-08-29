@@ -1,7 +1,7 @@
 /*
     Author: HackTheDev
 */
-class ModActions{
+class ModActions {
     static unmuteUser(id) {
         socket.emit("unmuteUser", { id: UserManager.getID(), token: UserManager.getToken(), target: id }, function (response) {
             showSystemMessage({
@@ -14,9 +14,9 @@ class ModActions{
             });
         });
     }
-    
+
     static banUser(id, afterSubmitAction = null) {
-    
+
         customPrompts.showPrompt(
             "Ban User",
             `
@@ -43,10 +43,10 @@ class ModActions{
             `,
             (values) => {
                 console.log('Submitted Values:', values);
-    
+
                 let banReason = values.banReason;
                 let banDuration = `${Math.floor(values.banDurationNumber)} ${values.banDurationType}`
-    
+
                 socket.emit("banUser", {
                     id: UserManager.getID(),
                     token: UserManager.getToken(),
@@ -84,9 +84,9 @@ class ModActions{
                 <input class="prompt-input" id="tt_kickUserDialog_kickReason" type="text" name="kickReason">
             </div>
             `,
-            (values) => {                
+            (values) => {
                 let kickReason = values.kickReason || "No reason provided";
-    
+
                 // Default kick action
                 socket.emit("kickUser", {
                     id: UserManager.getID(),
@@ -102,14 +102,51 @@ class ModActions{
             afterSubmitAction // This ensures the afterSubmitAction is called
         );
     }
-    
-    
+
+    static disconnectUser(id, afterSubmitAction = null) {
+        customPrompts.showPrompt(
+            "Disconnect User",
+            `
+            <div class="prompt-form-group">
+                <label class="prompt-label" for="disconnectReason">Reason (optional)</label>
+                <input class="prompt-input" id="tt_disconnectUserDialog_disconnectReason" type="text" name="disconnectReason">
+            </div>
+            `,
+            (values) => {
+                let disconnectReason = values.disconnectReason || "No reason provided";
+
+                // Default kick action
+                socket.emit("disconnectUser", {
+                    id: UserManager.getID(),
+                    token: UserManager.getToken(),
+                    target: id,
+                    reason: disconnectReason
+                }, function (response) {
+                    showSystemMessage({
+                        title: response.msg,
+                        text: "",
+                        icon: response.type,
+                        img: null,
+                        type: response.type,
+                        duration: 1000
+                    });
+                });
+            },
+            ["Disconnect", "error"],
+            false,
+            null,
+            null,  // No help function
+            afterSubmitAction // This ensures the afterSubmitAction is called
+        );
+    }
+
+
     static muteUser(id, afterSubmitAction = null) {
         //var reason = prompt("Reason: (empty for none)");
         //var duration = prompt("Duration in minutes: (empty for permanent until unmuted)");
         //socket.emit("muteUser", { id: UserManager.getID(), token: UserManager.getToken(), target: id, reason: reason, time: duration });
-    
-    
+
+
         customPrompts.showPrompt(
             "Mute User",
             `
@@ -136,10 +173,10 @@ class ModActions{
             `,
             (values) => {
                 console.log('Submitted Values:', values);
-    
+
                 let muteReason = values.muteReason;
                 let muteDuration = `${Math.floor(values.muteDurationNumber)} ${values.muteDurationType}`
-    
+
                 socket.emit("muteUser", {
                     id: UserManager.getID(),
                     token: UserManager.getToken(),
@@ -170,48 +207,57 @@ class ModActions{
 
     static addRoleFromProfile(userId) {
         socket.emit("getAllRoles", { id: UserManager.getID(), token: UserManager.getToken(), group: UserManager.getGroup(), targetUser: userId }, function (response) {
-    
+
             var roleList = document.getElementById("profile-role-menu").querySelector("#role-menu-list");
             roleList.innerHTML = "";
-    
+
             var roles = response.data
             Object.keys(roles).forEach(function (role) {
-    
+
                 var roleObj = roles[role]
-    
+
                 var roleId = roleObj.info.id;
                 var roleName = roleObj.info.name;
                 var roleColor = roleObj.info.color;
                 var hasRole = roleObj.info.hasRole;
-    
-                var displayChecked = "";
-                if (hasRole == 1) {
-                    displayChecked = "checked";
-                }
-                else {
-                    displayChecked = "";
-                }
-    
-                roleList.insertAdjacentHTML("beforeend", `<div class="role-menu-entry" onclick="ModActions.checkCheckedRoleMenu(this.querySelector('input'))">
+
+                // no point in showing Member and Offline role to be choosen.
+                // it would only mess up things temporarily, therefore no need to
+                // fix it on the server side of things.
+                if (roleId != "0" && roleId != "1") {
+
+                    var displayChecked = "";
+                    if (hasRole == 1) {
+                        displayChecked = "checked";
+                    }
+                    else {
+                        displayChecked = "";
+                    }
+
+                    roleList.insertAdjacentHTML("beforeend", 
+                        `<div class="role-menu-entry" onclick="ModActions.checkCheckedRoleMenu(this.querySelector('input'))">
                             <input type="checkbox" ${displayChecked} class="role-menu-entry-checkbox" id="role-menu-entry_${roleId}_${userId}" onclick="ModActions.checkCheckedRoleMenu(this)">
                             <label style="color: ${roleColor};" class="role-menu-entry-roleName">${roleName}</label>
                         </div>`)
+                }
+
+
             });
-    
+
         });
     }
-    
+
     static checkCheckedRoleMenu(element) {
         socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: "manageMembers" }, function (response) {
             if (response.permission == "granted") {
                 element.checked = !element.checked;
                 var roleId = element.id.split("_")[1];
                 var userId = element.id.split("_")[2];
-    
+
                 if (element.checked == true) {
                     // Assign role
                     socket.emit("addUserToRole", { id: UserManager.getID(), token: UserManager.getToken(), role: roleId, target: userId }, function (response) {
-    
+
                         if (response.type != "success") {
                             showSystemMessage({
                                 title: response.msg,
@@ -249,7 +295,7 @@ class ModActions{
         roleMenu.style.top = `${mouseY - roleMenu.offsetHeight}px`
         roleMenu.style.left = `${mouseX - roleMenu.offsetWidth - 20}px`;
     }
-    
+
     static hideRoleMenu() {
         var roleMenu = document.getElementById("profile-role-menu");
         roleMenu.style.display = "none"

@@ -14,10 +14,15 @@
             crossorigin="anonymous"
     ></script>
     
+    <script src="../../js/core/PermUI.js"></script>
     <script src="../../js/core/UserManager.js"></script>
     <script src="../../js/core/CookieManager.js"></script>
+    <script src="../../js/core/PoW.js"></script>
+    <script src="../../js/prompts.js"></script>
+    <script src="../../js/hover.js"></script>
 
     <script defer src="settings.js"></script>
+    <script defer src="../utility.js"></script>
     <script defer src="../../notify.js"></script>
 
     <script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
@@ -163,7 +168,7 @@
             <div id="general">
                 <h2>General Settings</h2>
                 <a href='?page=server-info' id="manageServerInfo">Server Info</a><br id="manageServerInfo-br">
-                <a href='?page=rate-limit' id="manageRateLimit">Rate Limit</a><br id="manageRateLimit-br">
+                <a href='?page=rate-limit' id="manageRateSettings">Rate Limit</a><br id="manageRateSettings-br">
                 <hr id="general-hr">
             </div>
 
@@ -172,12 +177,6 @@
                 <a href='?page=server-info' id="manageServerInfo">Automod</a><br id="manageServerInfo-br">
                 <hr id="moderation-hr">
             </div>-->
-
-            <div id="groups-etc">
-                <h2>Groups & Channels</h2>
-                <a href='?page=channeltree-sorting' id="manageChannels">Channel Sorting</a><br id="manageChannels-br">
-                <hr id="groups-etc-hr">
-            </div>
 
             <div id="users">
                 <h2>User Management</h2>

@@ -1,0 +1,71 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>VoIP Demo</title>
+<style>
+  body{font-family:system-ui;margin:16px}
+  .row{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+  #videos{display:flex;gap:8px;flex-wrap:wrap}
+  video,audio{max-width:320px;background:#000}
+</style>
+
+<div class="row">
+  <input id="room" value="meinRaum">
+  <button id="join">Join</button>
+  <button id="leave">Leave</button>
+  <select id="mic"></select>
+  <button id="setMic">Set Mic</button>
+  <button id="share">Share Screen</button>
+</div>
+
+<img id="thumb" style="max-width:360px;display:block;margin:6px 0" alt="screen frame preview">
+<div id="videos"></div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="/voip/voip.js"></script>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const voip = new Voip({ socketUrl:  "http://localhost:2052"}); // location.origin.replace(/^http/, 'ws').replace(/^ws/, 'http')
+
+  voip.onTrack = ({ id, stream, kind, isScreen }) => {
+    const key = "v_"+id+"_"+(isScreen?"screen":kind);
+    let el = document.getElementById(key);
+    if (!el) {
+      el = document.createElement(kind === "audio" ? "audio" : "video");
+      el.id = key; el.autoplay = true; el.playsInline = true;
+      if (kind === "video") el.muted = (id === voip.selfId);
+      $("videos").appendChild(el);
+    }
+    el.srcObject = stream;
+    el.play?.().catch(()=>{});
+  };
+
+  $("join").onclick = async () => {
+    alert($("room").value.trim() )
+    await voip.joinRoom($("room").value.trim() || "default");
+    const mics = await voip.listMics();
+    $("mic").innerHTML = mics.map(d => `<option value="${d.deviceId}">${d.label}</option>`).join("");
+  };
+
+  $("leave").onclick = () => { voip.leaveRoom(); $("videos").innerHTML=""; $("thumb").src=""; };
+
+  $("setMic").onclick = async () => {
+    const id = $("mic").value; if (id) await voip.setMic(id);
+  };
+
+  let stopShare = null;
+  $("share").onclick = async () => {
+    if (!stopShare) {
+      stopShare = await voip.shareScreen({
+        audio: true,
+        frameType: "dataURL",
+        fps: 8,
+        onFrame: (frame) => { if (typeof frame === "string") $("thumb").src = frame; }
+      });
+    } else {
+      stopShare(); stopShare = null; $("thumb").src = "";
+      const me = voip.selfId, el = document.getElementById("v_"+me+"_screen");
+      if (el) el.remove();
+    }
+  };
+</script>

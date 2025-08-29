@@ -9,7 +9,7 @@ import {
     isURL,
 } from "../functions/mysql/helper.mjs"
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('checkMediaUrlCache', async function (member, response) {
         if (validateMemberId(member.id, socket) == true

@@ -14,14 +14,14 @@ import {
     setRatelimit,
     usersocket,
     sanitizeHtml,
-    powVerifiedUsers,
     bcrypt,
     fs
 } from "../../index.mjs"
-import { banIp, getNewDate } from "./chat/main.mjs";
+import { banIp, getNewDate, hasPermission, resolveRolesByUserId } from "./chat/main.mjs";
 import { consolas } from "./io.mjs";
 import Logger from "./logger.mjs";
 import path from "path";
+import { powVerifiedUsers } from "../sockets/pow.mjs";
 
 var serverconfigEditable;
 
@@ -29,6 +29,15 @@ var serverconfigEditable;
     conf = The Variable to check for
     value = Value to fill the variable if null
  */
+
+export function removeFromArray(array, value) {
+    const index = array.indexOf(value);
+    if (index !== -1) {
+        array.splice(index, 1);
+    }
+}
+
+
 export function checkEmptyConfigVar(conf, value) {
     if (conf == null) return value;
     else return conf;
@@ -153,7 +162,7 @@ export async function checkVersionUpdate() {
     return prom;
 }
 
-export function handleTerminalCommands(command, args) {
+export async function handleTerminalCommands(command, args) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     try {
@@ -171,7 +180,9 @@ export function handleTerminalCommands(command, args) {
             if (args[1] == null) {
                 consolas(`No Event Specified. Allowed Events:`.yellow);
                 console.log(allowedDebugEvents);
+                return;
             }
+            
             flipDebug();
             consolas(`Debug Mode set to ${debugmode} with event ${args[1]}`.cyan);
         }
@@ -248,6 +259,24 @@ export function handleTerminalCommands(command, args) {
                 consolas("Syntax error: delete <option> <value> ".cyan + command);
             }
         }
+        else if (command == 'passwd') {
+            if (args.length == 3) {
+                if (args[1].length == 12) {
+                    if (args[2]) {                        
+                        serverconfig.servermembers[args[1]].password = await hashPassword(args[2])
+                        saveConfig(serverconfigEditable);
+
+                        Logger.success(`Password for user ${serverconfig.servermembers[args[1]].name} (${args[1]}) was changed`);
+                    }
+                    else {
+                        Logger.warn("Missing User. passwd <user id> <new password>")
+                    }
+                }
+            }
+            else {
+                Logger.warn("SyntaxError. passwd <user id> <new password>")
+            }
+        }
         else {
             consolas("Unkown command: ".cyan + command);
         }
@@ -257,6 +286,88 @@ export function handleTerminalCommands(command, args) {
         consolas(colors.red(e))
     }
 }
+export function checkConnectionLimit(socket, token = null, id = null){
+
+        // get the connected clients
+        const connectedClients = io.engine.clientsCount;
+
+        // remote client ip
+        let ip = socket.handshake.address;
+
+        // if a token and id is provided
+        let canBypassWithRoles = false;
+
+        if(token !== null && id !== null){
+
+            // lets make sure the account data is correct
+            if (validateMemberId(id, socket, true) == true
+            && serverconfig.servermembers[id].token == token) {
+
+                // check if user is allowed to bypass based on roles
+                if(hasPermission(id, ["bypassSlots"])) canBypassWithRoles = true;
+            }       
+        }
+
+        // get the actual slot limits for the user / admin case
+        let userSlotLimit = parseInt(serverconfig.serverinfo.slots.limit)
+        let reservedSlotLimit = parseInt(serverconfig.serverinfo.slots.limit) + parseInt(serverconfig.serverinfo.slots.reserved)
+    
+        // logic to check for normal members
+        if(connectedClients > userSlotLimit && 
+            (!serverconfig.serverinfo.slots.ipWhitelist.includes(ip) &&
+            canBypassWithRoles == false)
+        ){
+            // if we did let them know
+            sendMessageToUser(socket.id, JSON.parse(
+                `{
+                    "title": "Slot Limit reached!",
+                    "message": "The slot limit of ${serverconfig.serverinfo.slots.limit} members was reached!",
+                    "buttons": {
+                        "0": {
+                            "text": "Ok",
+                            "events": "onclick='closeModal()'"
+                        }
+                    },
+                    "type": "error",
+                    "displayTime": 60000
+                }`));
+    
+            Logger.debug(`Denied connection for ${ip} due to slot limit`)
+    
+            // disconnect them and stop execution
+            socket.disconnect();
+            return;
+        }
+
+        // logic to check for admins that could bypass the normal slot limit
+        // and are allowed to use up the reserved ones
+        if(connectedClients > reservedSlotLimit && 
+            (serverconfig.serverinfo.slots.ipWhitelist.includes(ip) ||
+            canBypassWithRoles == true)
+        ){
+            // if we did let them know
+            sendMessageToUser(socket.id, JSON.parse(
+                `{
+                            "title": "Reserved Slot Limit reached!",
+                            "message": "The reserved slot limit of ${serverconfig.serverinfo.slots.reserved} members was reached!",
+                            "buttons": {
+                                "0": {
+                                    "text": "Ok",
+                                    "events": "onclick='closeModal()'"
+                                }
+                            },
+                            "type": "error",
+                            "displayTime": 60000
+                        }`));
+    
+            Logger.debug(`Denied connection for ${ip} due to reserved slot limit`)
+    
+            // disconnect them and stop execution
+            socket.disconnect();
+            return;
+        }
+}
+
 
 export function copyObject(obj) {
     if (!obj) {
@@ -334,10 +445,29 @@ export function checkBool(value, type) {
 
 export function checkConfigAdditions() {
 
+    // TURN SERVER SETTINGS
+    checkObjectKeys(serverconfig, "serverinfo.app.url", "http://your-ip-or-domain:port")    // without slash at end!
+
+    checkObjectKeys(serverconfig, "serverinfo.turn.enabled", false)         // use turn or no
+    checkObjectKeys(serverconfig, "serverinfo.turn.secret", "north")        // static-auth-secret
+    checkObjectKeys(serverconfig, "serverinfo.turn.host", "PUBLIC_IP")      // public ip or domain
+    checkObjectKeys(serverconfig, "serverinfo.turn.port", 3489)             // listening-port
+
+
+    checkObjectKeys(serverconfig, "groups.*.channels.categories.*.channel.*.msgCount", 0)
+    checkObjectKeys(serverconfig, "servermembers.*.pow", "")
+    checkObjectKeys(serverconfig, "serverinfo.slots.limit", 100)
+    checkObjectKeys(serverconfig, "serverinfo.slots.reserved", 4)
+    checkObjectKeys(serverconfig, "serverinfo.slots.ipWhitelist", [
+        "::1",
+        "::ffff:127.0.0.1"
+    ])
 
     /*
         Account Login Update & Security
     */
+    checkObjectKeys(serverconfig, "serverinfo.pow.difficulty", 4)
+
     checkObjectKeys(serverconfig, "serverinfo.registration.enabled", true)
     checkObjectKeys(serverconfig, "serverinfo.registration.accessCodes", [])
 
@@ -368,12 +498,6 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.channels", [])
     checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.userprofile", true)
     checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.bypassers", [])
-    //
-    // AI API
-    checkObjectKeys(serverconfig, "serverinfo.moderation.ai.profanity_check_enabled", true)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.ai.spam_check_enabled", true)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.ai.spam_api_key", "")
-    checkObjectKeys(serverconfig, "serverinfo.moderation.ai.profanity_api_key", "")
 
 
     /*
@@ -411,18 +535,30 @@ export function checkConfigAdditions() {
 
 export function checkObjectKeys(obj, path, defaultValue) {
     const keys = path.split('.');
-    let current = obj;
 
-    for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        if (!current[key]) {
-            current[key] = (i === keys.length - 1) ? defaultValue : {};
+    function recursiveCheck(currentObj, keyIndex) {
+        const key = keys[keyIndex];
+
+        if (key === '*') {
+            for (const k in currentObj) {
+                if (currentObj.hasOwnProperty(k)) {
+                    recursiveCheck(currentObj[k], keyIndex + 1);
+                }
+            }
+        } else {
+            if (!(key in currentObj)) {
+                currentObj[key] = (keyIndex === keys.length - 1) ? defaultValue : {};
+            }
+            if (keyIndex < keys.length - 1) {
+                recursiveCheck(currentObj[key], keyIndex + 1);
+            }
         }
-        current = current[key];
     }
 
+    recursiveCheck(obj, 0);
     saveConfig(obj);
 }
+
 
 export function checkRateLimit(socket) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
@@ -496,8 +632,6 @@ export function generateId(length) {
 }
 
 export function validateMemberId(id, socket, bypass = false) {
-
-    /* Future Feature
     if(!powVerifiedUsers.includes(socket.id)){
 
         sendMessageToUser(socket.id, JSON.parse(
@@ -516,7 +650,6 @@ export function validateMemberId(id, socket, bypass = false) {
 
         return false;
     }
-        */
 
     if (bypass == false) {
         checkRateLimit(socket);
@@ -751,7 +884,7 @@ export function getCastingMemberObject(member) {
         return;
     }
 
-    const keysToDelete = ["password", "token", "loginName"]; // Keys to always delete
+    const keysToDelete = ["password", "token", "loginName", "pow"]; // Keys to always delete
 
     keysToDelete.forEach(key => {
         if (key in member) {
@@ -775,10 +908,10 @@ export function findAndVerifyUser(loginName, password) {
             // Verify the password hash
             const isPasswordValid = bcrypt.compareSync(password, member.password);
             if (isPasswordValid) {
-                console.log("User found and password verified:", member);
+                //console.log("User found and password verified:", member);
                 return { result: true, member: member }; // Return the matched user
             } else {
-                console.log("Password incorrect for user:", loginName);
+                Logger.debug("Password incorrect for user:", loginName);
                 return { result: false, member: null };
             }
         }

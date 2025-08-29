@@ -7,11 +7,13 @@ var currentRoleId = "";
 
 currentChannelId = getUrlParams("id");
 
-socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
-    aboutme: getAboutme(), banner: getBanner()});
+socket.emit("userConnected", {
+    id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
+    aboutme: getAboutme(), banner: getBanner()
+});
 
-socket.emit("getChannelInfo", {id: getID(), token: getToken(), channel: currentChannelId}, function (response) {
-    try{
+socket.emit("getChannelInfo", { id: getID(), token: getToken(), channel: currentChannelId }, function (response) {
+    try {
 
         editChannel = response.data;
 
@@ -22,14 +24,14 @@ socket.emit("getChannelInfo", {id: getID(), token: getToken(), channel: currentC
 
 
     }
-    catch(err){
+    catch (err) {
         console.log("Unable to get Channel Information");
         console.log(err);
     }
 
 });
 
-socket.emit("getServerRoles", {id:getID(), token: getToken() }, function (response) {
+socket.emit("getServerRoles", { id: getID(), token: getToken() }, function (response) {
 
     //console.log(response);
     serverRoleResponse = response;
@@ -44,7 +46,7 @@ socket.emit("getServerRoles", {id:getID(), token: getToken() }, function (respon
     console.log(editChannel)
 
     // Foreach role in the channel permissions
-    Object.keys(editChannel.permissions).forEach(function(perm) {
+    Object.keys(editChannel.permissions).forEach(function (perm) {
 
         //console.log("Role " + perm + " has the following permissions");
 
@@ -95,51 +97,84 @@ socket.emit("getServerRoles", {id:getID(), token: getToken() }, function (respon
     rolelist.insertAdjacentHTML("beforeend", code);
 });
 
-function removeRole(){
+function removeRole() {
 
     console.log(currentRoleId);
 
-    socket.emit("removeRoleFromChannel", {id:getID(), token: getToken(), role: currentRoleId, channel: currentChannelId }, function (response) {
+    socket.emit("removeRoleFromChannel", { id: getID(), token: getToken(), role: currentRoleId, channel: currentChannelId }, function (response) {
         alert(response.msg);
         window.location.reload();
     });
 }
 
-function addRole(){
+function addRole() {
 
-    var roleId = prompt("Please enter the role id you want to add");
+    chooseRole().then(result => {
+        Object.values(result.roles).forEach(role => {
+            console.log(role);
 
-    if(roleId != 0){
-        if(roleId.length != 4 || isNaN(roleId) == true){
-            alert("The role id (4 character long number) you've entered is incorrect.");
-            return;
+            let roleId = role.id;
+
+            if (roleId != 0) {
+                if (String(roleId).length != 4) {
+                    alert("The role id (4 character long number) you've entered is incorrect.");
+                    return;
+                }
+            }
+            if (isNaN(roleId) == true) {
+                alert("The role id has to be a number");
+                return;
+            }
+
+
+            socket.emit("addRoleToChannel", { id: getID(), token: getToken(), role: roleId, channel: currentChannelId }, function (response) {
+                alert(response.msg);
+                window.location.reload();
+            });
+        });
+    });
+}
+
+function moveRoleUp(id) {
+    document.getElementById("saveSortingButton").style.display = "inline-block";
+    document.getElementById("cancelSortingButton").style.display = "inline-block";
+
+    var roles = document.querySelectorAll(`.role-entry-container`);
+
+    for (let i = 0; i < roles.length; i++) {
+
+        if (roles[i].id == id) {
+            roles[i - 1].before(roles[i]);
         }
     }
-    if(isNaN(roleId) == true){
-        alert("The role id has to be a number");
-        return;
-    }
-
-
-    socket.emit("addRoleToChannel", {id:getID(), token: getToken(), role: roleId, channel: currentChannelId }, function (response) {
-        alert(response.msg);
-        window.location.reload();
-    });
 }
 
-function savePermissions(){
+function moveRoleDown(id) {
+    document.getElementById("saveSortingButton").style.display = "inline-block";
+    document.getElementById("cancelSortingButton").style.display = "inline-block";
 
-    console.log(editChannel);
+    var roles = document.querySelectorAll(`.role-entry-container`);
+
+    for (let i = 0; i < roles.length; i++) {
+
+        if (roles[i].id == id) {
+            roles[i + 1].after(roles[i]);
+        }
+    }
+}
+
+function savePermissions() {
+
     console.log(editChannel.permissions);
-    console.log(editChannel.permissions[currentRoleId]);
 
-    socket.emit("saveChannelPermissions", {id:getID(), token: getToken(), channel: currentChannelId, role: currentRoleId, permission: editChannel.permissions[currentRoleId] }, function (response) {
+    socket.emit("saveChannelPermissions", { id: getID(), token: getToken(), channel: currentChannelId, role: currentRoleId, permission: editChannel.permissions[currentRoleId] }, function (response) {
         alert(response.msg);
         console.log(response)
         //window.location.reload();
     });
 }
 
+/*
 function tickSetting(element){
     document.getElementById("saveButton").style.display = "inline-block";
     document.getElementById("cancelButton").style.display = "inline-block";
@@ -159,9 +194,9 @@ function tickSetting(element){
     }
 
     //console.log(editChannel.permissions);
-}
+}*/
 
-function loadRolePerms(roleId){
+function loadRolePerms(roleId) {
 
     currentRoleId = roleId;
     console.log("Role id: " + currentRoleId);
@@ -175,25 +210,47 @@ function loadRolePerms(roleId){
     document.getElementById("permheader").innerText = "Channel Permissions - " + editChannel.name;
     document.getElementById("removeRole").style.display = "block";
     document.getElementById("permissionlist").style.display = "block";
-
+    document.getElementById("permissionlistEntries").innerHTML = "";
 
     // Uncheck everything before checking the permissions for the specific role
     permListPage = document.querySelectorAll(`#permissionlist p input`);
-    permListPage.forEach(perm =>{
+    permListPage.forEach(perm => {
         perm.checked = false;
     })
 
-    // Set the permissions in the view
-    Object.keys(channelperms).forEach(function(perm) {
-
-        children = document.querySelectorAll(`#${perm} input`);
-        console.log(perm);
-
-        if (channelperms[perm] == 1){
-            children[0].checked = true;
+    socket.emit("getPermissions", { id: UserManager.getID(), token: UserManager.getToken(), categories: ["channelPerms"] }, function (response) {
+        if (response.error !== null) {
+            showSystemMessage({
+                title: response.error || "",
+                text: response.msg || "",
+                icon: "error",
+                img: null,
+                type: "error",
+                duration: response.displayTime || 3000
+            });
         }
-        else{
-            children[0].checked = false;
+        else {
+            Object.entries(response.permissions).forEach(([permName, permission]) => {
+                const currentValue = editChannel.permissions[currentRoleId][permName] ?? 0;
+
+                const callback = (value) => {
+                    // Always show save/cancel buttons
+                    editChannel.permissions[currentRoleId][permName] = value;
+
+                    document.getElementById("saveButton").style.display = "inline-block";
+                    document.getElementById("cancelButton").style.display = "inline-block";
+                };
+
+                PermUI.showSetting(
+                    document.getElementById("permissionlistEntries"),
+                    permName,
+                    permission.name,
+                    permission.type,
+                    permission.description,
+                    currentValue,
+                    callback
+                );
+            });
         }
     });
 

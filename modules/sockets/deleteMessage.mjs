@@ -1,10 +1,10 @@
-import { fs, io, serverconfig, usersocket, xssFilters } from "../../index.mjs";
+import { fs, serverconfig, usersocket, xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 import { deleteChatMessagesFromDb, getChatMessagesFromDb } from "../functions/mysql/helper.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('deleteMessage', async function (member) {
         if (validateMemberId(member.id, socket) == true && serverconfig.servermembers[member.id].token == member.token) {

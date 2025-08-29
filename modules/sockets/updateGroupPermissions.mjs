@@ -1,10 +1,10 @@
-import { io, saveConfig, serverconfig, xssFilters } from "../../index.mjs";
+import { saveConfig, serverconfig, xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import { saveChatMessage } from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('updateGroupPermissions', function (member, response) {
         if (validateMemberId(member.id, socket) == true &&
@@ -30,11 +30,11 @@ export default (socket) => {
 
             try {
 
-                var groupPerms = xssFilters.inHTMLData(member.perms);
+                var groupPerms = xssFilters.inHTMLData(JSON.stringify(member.perms));
                 var groupId =  xssFilters.inHTMLData(member.groupId);
                 var role =  xssFilters.inHTMLData(member.roleId);
 
-                serverconfig.groups[groupId].permissions[role] = groupPerms;
+                serverconfig.groups[groupId].permissions[role] = JSON.parse(groupPerms);
                 saveConfig(serverconfig);
 
                 io.emit("updateGroupList");

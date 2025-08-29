@@ -1,4 +1,4 @@
-import { io, serverconfig, typingMembers, xssFilters } from "../../index.mjs";
+import { serverconfig, typingMembers, xssFilters } from "../../index.mjs";
 import { convertMention } from "../functions/chat/helper.mjs";
 import { formatDateTime, hasPermission } from "../functions/chat/main.mjs";
 import { saveChatMessage } from "../functions/io.mjs";
@@ -6,7 +6,7 @@ import Logger from "../functions/logger.mjs";
 import { checkMemberMute, checkRateLimit, copyObject, escapeHtml, generateId, getCastingMemberObject, sanitizeInput, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 import { decodeFromBase64, getChatMessagesFromDb } from "../functions/mysql/helper.mjs";
 
-export default (socket) => {
+export default (io) => (socket) => {
     // socket.on code here
     socket.on('messageSend', async function (memberOriginal) {
         checkRateLimit(socket);
@@ -61,12 +61,12 @@ export default (socket) => {
                 Logger.debug("Category was not a number");
                 return;
             }
-            if (member.message.length <= 0) {
+            if (member.message.replaceAll(" ").length <= 0) {
                 Logger.debug("Message is shorter than 1 charachter");
                 return;
             }
 
-            if (!hasPermission(member.id, ["sendMessages", "viewChannel"], member.channel)) {
+            if (!hasPermission(member.id, ["sendMessages", "viewChannel"], member.channel, "all")) {
                 sendMessageToUser(socket.id, JSON.parse(
                     `{
                                         "title": "You cant chat here",
@@ -117,27 +117,6 @@ export default (socket) => {
                         return;
                     }
 
-                    /*
-                    The following performs the same replace function with the only
-                    difference to check if any text is left after converting the emojis.
-                    If not, make the emoji bigger if no text is present.
-                     */
-
-                    var reg = /(:)\w+/ig;
-                    var sendBigEmoji = "";
-                    member.message.replace(reg, function (emoji) {
-                        try {
-                            var text = emptyMessageContent.replaceAll(emoji + ":", ``)
-
-                            if (text.length == 0) {
-                                sendBigEmoji = "big"
-                            }
-                        }
-                        catch (err) {
-                            consolas(colors.red("Emoji Convertion test error"));
-                        }
-                    });
-
                     // Display role color of the highest role
                     var userRoleArr = [];
                     Object.keys(serverconfig.serverroles).forEach(function (role) {
@@ -183,6 +162,7 @@ export default (socket) => {
 
                     member = getCastingMemberObject(member);
 
+                    let memberMessageCount = serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel].msgCount + 1;
                     // Save the Chat Message to file
                     saveChatMessage(member, member.editedMsgId);                    
 
@@ -197,7 +177,9 @@ export default (socket) => {
                     if (member.editedMsgId == null) {
                         // New message
                         io.in(member.room).emit("messageCreate", member);
-                        io.emit("markChannelMessage", { group: member.group, category: member.category, channel: member.channel });
+
+
+                        io.emit("markChannel", { channelId: parseInt(member.channel), count:  memberMessageCount});
                     }
                     // emit edit event of msg
                     else {

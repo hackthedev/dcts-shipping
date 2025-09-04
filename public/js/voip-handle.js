@@ -501,6 +501,7 @@ async function enableScreensharing(mode) {
     // get rid of icons
     if (mode === false && channelIcons.querySelector(".screenshare")) {
         channelIcons.querySelector(".screenshare").remove();
+        channelIcons.querySelector(".muteMic").remove();
         channelIcons.querySelector(".ss-qual-btn").remove();
     }
 }

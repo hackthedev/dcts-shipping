@@ -1,4 +1,7 @@
 class ChatManager{
+
+    static showedGlitch = false;
+
     static async checkConnection(delay) {
         if (initConnectionCheck == false) {
     
@@ -45,6 +48,21 @@ class ChatManager{
         else {
             if (socket.connected == false && initConnectionCheck == true && !wasDisconnected) {
                 disconnected = true;
+
+                if(!this.showedGlitch && !wasDisconnected){
+                    hackerGlitch(
+                        document.body,
+                        {
+                            text: "Connection lost",
+                            intensity: 0.5,
+                            bgAlpha: 1,
+                            useSnapshot: true
+                        }
+                    )
+
+                    this.showedGlitch = true;
+                }
+
                 showSystemMessage({
                     title: "Connection Lost",
                     text: "",

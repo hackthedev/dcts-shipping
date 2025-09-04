@@ -1,6 +1,7 @@
 import { queryDatabase } from "./mysql.mjs";
 import { XMLHttpRequest, fetch } from "../../../index.mjs";
 import { report } from "process";
+import Logger from "../logger.mjs";
 
 export async function cacheMediaUrl(url, mediaType) {
   const query = `INSERT INTO url_cache (url, media_type) VALUES (?, ?)`;
@@ -40,10 +41,21 @@ export async function saveChatMessageInDb(message) {
   return await queryDatabase(query, [message.id, message.messageId, encodedMessage, message.room]);
 }
 
-export function leaveAllRooms(socket) {
-  const rooms = socket.rooms;            
+export async function logEditedChatMessageInDb(message) {
+  const query = `
+    INSERT INTO message_logs (authorId, messageId, message, room) 
+    VALUES (?, ?, ?, ?)
+  `;
+
+  message.editedTimestamp = new Date().getTime();
+  const encodedMessage = encodeToBase64(JSON.stringify(message));
+  return await queryDatabase(query, [message.id, message.messageId, encodedMessage, message.room]);
+}
+
+export function leaveAllRooms(socket, memberId = null) {
+  const rooms = socket.rooms;
   rooms.forEach((room) => {
-    if (room !== socket.id) { // Exclude the socket's own room
+    if (room !== socket.id && room != memberId) { // Exclude the socket's own room
       socket.leave(room);
     }
   });
@@ -59,10 +71,10 @@ export function decodeFromBase64(base64String) {
 
 export function escapeJSONString(str) {
   return str.replace(/\\/g, '\\\\')  // Escape backslashes
-            .replace(/"/g, '\\"')    // Escape double quotes
-            .replace(/\n/g, '\\n')   // Escape newlines
-            .replace(/\r/g, '\\r')   // Escape carriage returns
-            .replace(/\t/g, '\\t');  // Escape tabs
+    .replace(/"/g, '\\"')    // Escape double quotes
+    .replace(/\n/g, '\\n')   // Escape newlines
+    .replace(/\r/g, '\\r')   // Escape carriage returns
+    .replace(/\t/g, '\\t');  // Escape tabs
 }
 
 export async function getChatMessagesFromDb(roomId, index, msgId = null) {
@@ -80,7 +92,39 @@ export async function getChatMessagesFromDb(roomId, index, msgId = null) {
   return await queryDatabase(query, [roomId, index]);
 }
 
+export async function getChatMessageById(msgId) {
+  // SQL FEATURE ONLY obvously
+
+  // nothing was supplied
+  if (!msgId) {
+    Logger.warn("Cannot get message without message id")
+    return;
+  }
+
+  const query = `SELECT * FROM messages WHERE messageId = ?`;
+  return await queryDatabase(query, [msgId]);
+}
+
+export async function getMessageLogsFromDb(msgId) {
+
+  // nothing was supplied
+  if (!msgId) {
+    Logger.warn("Cannot get message logs without message id")
+    return;
+  }
+
+  const query = `SELECT * FROM message_logs WHERE messageId = ?`;
+  return await queryDatabase(query, [msgId]);
+}
+
 export async function deleteChatMessagesFromDb(messageId) {
+
+  // dm message
+  if (messageId.startsWith("m_")) {
+    const query = `DELETE FROM dms_messages WHERE messageId = ?`;
+    return await queryDatabase(query, [messageId]);
+  }
+
   const query = `DELETE FROM messages WHERE messageId = ?`;
   return await queryDatabase(query, [messageId]);
 }

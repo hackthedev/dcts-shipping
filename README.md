@@ -2,7 +2,7 @@
 ![Version](https://img.shields.io/static/v1?label=State&message=Early%20Access&color=orange) 
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG)
-<!-- ![GitHub all releases](https://img.shields.io/github/downloads/hackthedev/dcts-shipping/total?color=success&label=Downloads) -->
+
 [Visit our new subreddit](https://www.reddit.com/r/dcts/) • [Feature list](/docs/Feature List.md)
 
 

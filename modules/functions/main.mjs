@@ -1,4 +1,3 @@
-import { error } from "console";
 import {
     debugmode,
     serverconfig,
@@ -17,11 +16,12 @@ import {
     bcrypt,
     fs
 } from "../../index.mjs"
-import { banIp, getNewDate, hasPermission, resolveRolesByUserId } from "./chat/main.mjs";
-import { consolas } from "./io.mjs";
+import {banIp, getNewDate, hasPermission, resolveRolesByUserId} from "./chat/main.mjs";
+import {consolas} from "./io.mjs";
 import Logger from "./logger.mjs";
 import path from "path";
-import { powVerifiedUsers } from "../sockets/pow.mjs";
+import {powVerifiedUsers} from "../sockets/pow.mjs";
+import {sendSystemMessage} from "../sockets/home/general.mjs";
 
 var serverconfigEditable;
 
@@ -37,6 +37,42 @@ export function removeFromArray(array, value) {
     }
 }
 
+export function emitBasedOnPermission(perms, event, payload) {
+    const needed = Array.isArray(perms) ? perms : [perms];
+    const roles = serverconfig.serverroles || {};
+    const membersObj = serverconfig.servermembers || {};
+    const target = new Set();
+
+    for (const roleId in roles) {
+        const role = roles[roleId];
+        if (!role) continue;
+        const rp = role.permissions || {};
+
+        if (rp.administrator == 1) {
+            for (const m of role.members || []) if (m) target.add(String(m));
+            continue;
+        }
+
+        const ok = needed.every(p => rp[p] == 1);
+        if (!ok) continue;
+        for (const m of role.members || []) if (m) target.add(String(m));
+    }
+
+    const sent = [];
+    for (const memberId of target) {
+        if (!membersObj[memberId] || memberId === "system") continue;
+
+        try {
+            io.to(String(memberId)).emit(event, payload);
+            sent.push(memberId);
+        } catch (err) {
+            console.error('emitBasedOnPermission emit error for', memberId, err);
+        }
+    }
+
+    return sent;
+}
+
 
 export function checkEmptyConfigVar(conf, value) {
     if (conf == null) return value;
@@ -50,6 +86,10 @@ export function removeFileExtension(filename) {
 }
 
 export function sanitizeInput(input) {
+
+    // ignore files
+    if (Buffer.isBuffer(input)) return input;
+
     return sanitizeHtml(input, {
         allowedTags: [
             'div',
@@ -75,6 +115,7 @@ export function sanitizeInput(input) {
             'blockquote',
             'strong',
             'em',
+            'em',
             'u',
             's',
             'img'
@@ -91,7 +132,7 @@ export function sanitizeInput(input) {
             '*': ['class', 'style']
         },
         transformTags: {
-            'a': sanitizeHtml.simpleTransform('a', { target: '_blank', rel: 'noopener noreferrer' })
+            'a': sanitizeHtml.simpleTransform('a', {target: '_blank', rel: 'noopener noreferrer'})
         },
         allowedSchemesByTag: {
             img: ['http', 'https', 'data'] // Erlaubt das data-Schema für img-Tags
@@ -119,7 +160,7 @@ export const fileSizeCache = new Map(); // Cache to track file sizes by file ID
 export const getFolderSize = (folderPath) => {
     const files = fs.readdirSync(folderPath);
     return files.reduce((total, file) => {
-        const { size } = fs.statSync(path.join(folderPath, file));
+        const {size} = fs.statSync(path.join(folderPath, file));
         return total + size;
     }, 0);
 };
@@ -182,11 +223,10 @@ export async function handleTerminalCommands(command, args) {
                 console.log(allowedDebugEvents);
                 return;
             }
-            
+
             flipDebug();
             consolas(`Debug Mode set to ${debugmode} with event ${args[1]}`.cyan);
-        }
-        else if (command == 'roles') {
+        } else if (command == 'roles') {
             var serverroles = serverconfig.serverroles;
             var serverRolesSorted = []
 
@@ -210,8 +250,7 @@ export async function handleTerminalCommands(command, args) {
                 console.log("   - Role Name: " + role.info.name);
                 console.log("");
             })
-        }
-        else if (command == "token") {
+        } else if (command == "token") {
 
             if (args.length == 2) {
 
@@ -225,19 +264,16 @@ export async function handleTerminalCommands(command, args) {
 
                         consolas(colors.cyan(`Redeem key generated for role ${serverconfigEditable.serverroles[roleIdArg].info.name}`));
                         consolas(colors.cyan(roleToken))
-                    }
-                    catch (Err) {
+                    } catch (Err) {
                         consolas("Couldnt save or generate key".yellow);
                         consolas(colors.red(Err));
                     }
                 }
-            }
-            else {
+            } else {
                 consolas(colors.yellow(`Missing Argument: Role ID`));
             }
 
-        }
-        else if (command == 'delete') {
+        } else if (command == 'delete') {
             if (args.length == 3) {
                 if (args[1] == "user") {
                     if (args[2].length == 12) {
@@ -245,81 +281,116 @@ export async function handleTerminalCommands(command, args) {
                             delete serverconfigEditable.servermembers[args[2]];
                             consolas(`Deleting user ${args[2]}`.cyan);
                             saveConfig(serverconfigEditable);
-                        }
-                        else {
+                        } else {
                             consolas(`Couldnt find user ${args[2]}`.yellow);
                         }
-                    }
-                    else {
+                    } else {
                         consolas(`${args[2]} seems to be a invalid id`.yellow);
                     }
                 }
-            }
-            else {
+            } else {
                 consolas("Syntax error: delete <option> <value> ".cyan + command);
             }
-        }
-        else if (command == 'passwd') {
+        } else if (command == 'passwd') {
             if (args.length == 3) {
                 if (args[1].length == 12) {
-                    if (args[2]) {                        
+                    if (args[2]) {
                         serverconfig.servermembers[args[1]].password = await hashPassword(args[2])
                         saveConfig(serverconfigEditable);
 
                         Logger.success(`Password for user ${serverconfig.servermembers[args[1]].name} (${args[1]}) was changed`);
-                    }
-                    else {
+                    } else {
                         Logger.warn("Missing User. passwd <user id> <new password>")
                     }
                 }
-            }
-            else {
+            } else {
                 Logger.warn("SyntaxError. passwd <user id> <new password>")
             }
-        }
-        else {
+        } else if (command == 'msg') {
+            if (args.length >= 3) {
+                if (args[1].length == 12 || args[1] == "*") {
+                    if (args[2]) {
+
+                        let message = "";
+                        for (let i = 2; i < args.length; i++) {
+                            message += `${args[i]} `;
+                        }
+
+                        // message all users
+                        if (args[1] == "*") {
+                            const ids = Object.keys(serverconfig.servermembers);
+                            for (const uid of ids) {
+                                if (uid == "system") continue;
+
+                                try {
+                                    await sendSystemMessage(uid, message);
+                                    Logger.success(`System Message sent to ${serverconfig.servermembers[uid]?.name} (${uid})`);
+                                } catch (err) {
+                                    Logger.warn(`Failed to send to ${uid}:`, err);
+                                }
+                            }
+                        } else {
+                            await sendSystemMessage(args[1], message);
+                            Logger.success(`System Message send to ${serverconfig.servermembers[args[1]].name} (${args[1]})`);
+                        }
+                    } else {
+                        Logger.warn("Missing User. passwd <user id> <new password>")
+                    }
+                }
+            } else {
+                Logger.warn("SyntaxError. msg < userid | * > < your message >")
+            }
+        } else if (command == "rooms") {
+            listRoomsMembers(io);
+        } else {
             consolas("Unkown command: ".cyan + command);
         }
-    }
-    catch (e) {
+    } catch (e) {
         consolas("Couldnt handle command input".red)
         consolas(colors.red(e))
     }
 }
-export function checkConnectionLimit(socket, token = null, id = null){
 
-        // get the connected clients
-        const connectedClients = io.engine.clientsCount;
 
-        // remote client ip
-        let ip = socket.handshake.address;
+async function listRoomsMembers(io, usersocket = {}) {
+    console.log(io.sockets.adapter.rooms)
+}
 
-        // if a token and id is provided
-        let canBypassWithRoles = false;
 
-        if(token !== null && id !== null){
+export function checkConnectionLimit(socket, token = null, id = null) {
 
-            // lets make sure the account data is correct
-            if (validateMemberId(id, socket, true) == true
+    // get the connected clients
+    const connectedClients = io.engine.clientsCount;
+
+    // remote client ip
+    let ip = socket.handshake.address;
+
+    // if a token and id is provided
+    let canBypassWithRoles = false;
+
+    if (token !== null && id !== null) {
+
+        // lets make sure the account data is correct
+        if (validateMemberId(id, socket, true) == true
             && serverconfig.servermembers[id].token == token) {
 
-                // check if user is allowed to bypass based on roles
-                if(hasPermission(id, ["bypassSlots"])) canBypassWithRoles = true;
-            }       
+            // check if user is allowed to bypass based on roles
+            if (hasPermission(id, ["bypassSlots"])) canBypassWithRoles = true;
         }
+    }
 
-        // get the actual slot limits for the user / admin case
-        let userSlotLimit = parseInt(serverconfig.serverinfo.slots.limit)
-        let reservedSlotLimit = parseInt(serverconfig.serverinfo.slots.limit) + parseInt(serverconfig.serverinfo.slots.reserved)
-    
-        // logic to check for normal members
-        if(connectedClients > userSlotLimit && 
-            (!serverconfig.serverinfo.slots.ipWhitelist.includes(ip) &&
+    // get the actual slot limits for the user / admin case
+    let userSlotLimit = parseInt(serverconfig.serverinfo.slots.limit)
+    let reservedSlotLimit = parseInt(serverconfig.serverinfo.slots.limit) + parseInt(serverconfig.serverinfo.slots.reserved)
+
+    // logic to check for normal members
+    if (connectedClients > userSlotLimit &&
+        (!serverconfig.serverinfo.slots.ipWhitelist.includes(ip) &&
             canBypassWithRoles == false)
-        ){
-            // if we did let them know
-            sendMessageToUser(socket.id, JSON.parse(
-                `{
+    ) {
+        // if we did let them know
+        sendMessageToUser(socket.id, JSON.parse(
+            `{
                     "title": "Slot Limit reached!",
                     "message": "The slot limit of ${serverconfig.serverinfo.slots.limit} members was reached!",
                     "buttons": {
@@ -331,23 +402,23 @@ export function checkConnectionLimit(socket, token = null, id = null){
                     "type": "error",
                     "displayTime": 60000
                 }`));
-    
-            Logger.debug(`Denied connection for ${ip} due to slot limit`)
-    
-            // disconnect them and stop execution
-            socket.disconnect();
-            return;
-        }
 
-        // logic to check for admins that could bypass the normal slot limit
-        // and are allowed to use up the reserved ones
-        if(connectedClients > reservedSlotLimit && 
-            (serverconfig.serverinfo.slots.ipWhitelist.includes(ip) ||
+        Logger.debug(`Denied connection for ${ip} due to slot limit`)
+
+        // disconnect them and stop execution
+        socket.disconnect();
+        return;
+    }
+
+    // logic to check for admins that could bypass the normal slot limit
+    // and are allowed to use up the reserved ones
+    if (connectedClients > reservedSlotLimit &&
+        (serverconfig.serverinfo.slots.ipWhitelist.includes(ip) ||
             canBypassWithRoles == true)
-        ){
-            // if we did let them know
-            sendMessageToUser(socket.id, JSON.parse(
-                `{
+    ) {
+        // if we did let them know
+        sendMessageToUser(socket.id, JSON.parse(
+            `{
                             "title": "Reserved Slot Limit reached!",
                             "message": "The reserved slot limit of ${serverconfig.serverinfo.slots.reserved} members was reached!",
                             "buttons": {
@@ -359,13 +430,13 @@ export function checkConnectionLimit(socket, token = null, id = null){
                             "type": "error",
                             "displayTime": 60000
                         }`));
-    
-            Logger.debug(`Denied connection for ${ip} due to reserved slot limit`)
-    
-            // disconnect them and stop execution
-            socket.disconnect();
-            return;
-        }
+
+        Logger.debug(`Denied connection for ${ip} due to reserved slot limit`)
+
+        // disconnect them and stop execution
+        socket.disconnect();
+        return;
+    }
 }
 
 
@@ -377,8 +448,7 @@ export function copyObject(obj) {
 
     try {
         return JSON.parse(JSON.stringify(obj));
-    }
-    catch (parseerror) {
+    } catch (parseerror) {
         Logger.error("Unable to copy json object;")
         Logger.error(parseerror)
         console.log(obj)
@@ -444,6 +514,34 @@ export function checkBool(value, type) {
 
 
 export function checkConfigAdditions() {
+
+    // cool ass system messaging thx to dms
+    checkObjectKeys(serverconfig, "serverinfo.system.welcome.enabled", true)
+    checkObjectKeys(serverconfig, "serverinfo.system.welcome.message",
+        `<h3>Welcome to the server!</h3>
+        <p>
+            We hope you'll like it here! 
+            If you ever need help press the <b>Support</b> button on the top!
+        </p>
+        
+        <p>
+            <a style="font-size: 10px;color: gray;" href="https://ko-fi.com/shydevil/tip" target="_blank">Donate <3</a>
+        </p>    
+    `)
+
+    // system user account
+    checkObjectKeys(serverconfig, "servermembers.system.id", "system")
+    checkObjectKeys(serverconfig, "servermembers.system.displayName", "System")
+    checkObjectKeys(serverconfig, "servermembers.system.avatar", "/img/default_icon.png")
+    checkObjectKeys(serverconfig, "servermembers.system.token", "")
+
+    // home settings
+    checkObjectKeys(serverconfig, "serverinfo.home.banner_url", "")
+    checkObjectKeys(serverconfig, "serverinfo.home.title", "Default Server Title")
+    checkObjectKeys(serverconfig, "serverinfo.home.subtitle", "Default Server Sub-Title")
+    checkObjectKeys(serverconfig, "serverinfo.home.about", "This is the <i>default server</i> about me")
+
+    checkObjectKeys(serverconfig, "serverinfo.reports.enabled", true)
 
     // TURN SERVER SETTINGS
     checkObjectKeys(serverconfig, "serverinfo.app.url", "http://your-ip-or-domain:port")    // without slash at end!
@@ -532,6 +630,64 @@ export function checkConfigAdditions() {
         ])
 }
 
+export function setLongInterval(fn, ms) {
+    const MAX = 2147483647; // ~24.8 days
+
+    function run() {
+        if (ms > MAX) {
+            setTimeout(run, MAX);
+            ms -= MAX;
+        } else {
+            setTimeout(() => {
+                fn();
+                run(); // redo
+            }, ms);
+        }
+    }
+
+    run();
+}
+
+
+export function toSeconds(input) {
+    if (typeof input === "number") return input; // bereits Sekunden
+    const str = String(input).toLowerCase().trim().replace(/,/g, " ");
+
+    const UNITS = {
+        s: 1, sec: 1, secs: 1, second: 1, seconds: 1,
+        m: 60, min: 60, mins: 60, minute: 60, minutes: 60,
+        h: 3600, hr: 3600, hrs: 3600, hour: 3600, hours: 3600,
+        d: 86400, day: 86400, days: 86400,
+        w: 604800, week: 604800, weeks: 604800,
+        mo: 2592000, month: 2592000, months: 2592000,          // 30 days
+        y: 31536000, yr: 31536000, year: 31536000, years: 31536000 // 365 days
+    };
+
+    const re = /(\d+(?:\.\d+)?)\s*(years?|yrs?|y|months?|mos?|mo|weeks?|w|days?|d|hours?|hrs?|h|minutes?|mins?|m|seconds?|secs?|s)\b/g;
+    let total = 0, m;
+
+    while ((m = re.exec(str))) {
+        const val = parseFloat(m[1]);
+        const unit = m[2];
+
+        const key =
+            unit.startsWith("sec") || unit === "s" ? "s" :
+                unit.startsWith("min") || unit === "m" ? "m" :
+                    unit.startsWith("hour") || unit.startsWith("hr") || unit === "h" ? "h" :
+                        unit.startsWith("day") || unit === "d" ? "d" :
+                            unit.startsWith("week") || unit === "w" ? "w" :
+                                unit.startsWith("month") || unit === "mo" || unit === "mos" ? "mo" :
+                                    unit.startsWith("year") || unit.startsWith("yr") || unit === "y" ? "y" :
+                                        unit;
+
+        if (!UNITS[key]) continue;
+        total += val * UNITS[key];
+    }
+
+    if (!total) throw new Error(`Invalid interval: ${input}`);
+    return Math.round(total);
+}
+
 
 export function checkObjectKeys(obj, path, defaultValue) {
     const keys = path.split('.');
@@ -609,7 +765,8 @@ export function checkRateLimit(socket) {
 
         try {
             setRatelimit(ip, ratelimit[ip] - 1);
-        } catch { }
+        } catch {
+        }
 
     }, serverconfig.serverinfo.dropInterval * 1000);
 }
@@ -632,7 +789,7 @@ export function generateId(length) {
 }
 
 export function validateMemberId(id, socket, bypass = false) {
-    if(!powVerifiedUsers.includes(socket.id)){
+    if (!powVerifiedUsers.includes(socket.id)) {
 
         sendMessageToUser(socket.id, JSON.parse(
             `{
@@ -657,8 +814,7 @@ export function validateMemberId(id, socket, bypass = false) {
 
     if (id.length == 12 && isNaN(id) == false) {
         return true;
-    }
-    else {
+    } else {
         return false;
     }
 }
@@ -678,7 +834,9 @@ export function escapeHtml(text) {
         "'": '&#039;'
     };
 
-    return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+    return text.replace(/[&<>"']/g, function (m) {
+        return map[m];
+    });
 }
 
 export function httpGetAsync(theUrl, callback, id) {
@@ -722,7 +880,10 @@ export function tenorCallback_search(responsetext, id) {
 
     top_10_gifs.forEach(gif => {
 
-        io.to(usersocket[id]).emit("receiveGifImage", { gif: gif.media_formats.gif.url, preview: gif.media_formats.gifpreview.url });
+        io.to(usersocket[id]).emit("receiveGifImage", {
+            gif: gif.media_formats.gif.url,
+            preview: gif.media_formats.gifpreview.url
+        });
         /*
         document.getElementById("emoji-entry-container").insertAdjacentHTML("beforeend",
             `<img
@@ -732,7 +893,6 @@ export function tenorCallback_search(responsetext, id) {
                 style="padding: 1%;border-radius: 20px;float: left;width: 48%; height: fit-content;">`
             */
     })
-
 
 
     //document.getElementById("share_gif").src = top_10_gifs[0]["media_formats"]["gif"]["url"]; top_10_gifs[0]["media_formats"]["gif"]["url"]
@@ -795,9 +955,8 @@ export function checkMemberMute(socket, member) {
             saveConfig(serverconfigEditable);
 
             consolas(colors.yellow("Automatically unmuted user " + member.name + ` (${member.id})`));
-        }
-        else {
-            return { result: true, timestamp: durationStamp, reason: muteReason };
+        } else {
+            return {result: true, timestamp: durationStamp, reason: muteReason};
         }
     }
 
@@ -806,13 +965,12 @@ export function checkMemberMute(socket, member) {
         if (Date.now() >= serverconfigEditable.ipblacklist[ip]) {
             delete serverconfigEditable.ipblacklist[ip];
             saveConfig(serverconfigEditable);
-        }
-        else {
-            return { result: true, timestamp: serverconfigEditable.ipblacklist[ip] }
+        } else {
+            return {result: true, timestamp: serverconfigEditable.ipblacklist[ip]}
         }
     }
 
-    return { result: false };
+    return {result: false};
 }
 
 export function checkMemberBan(socket, member) {
@@ -844,9 +1002,8 @@ export function checkMemberBan(socket, member) {
             saveConfig(serverconfigEditable);
 
             consolas(colors.yellow("Automatically unbanned user " + member.name + ` (${member.id})`));
-        }
-        else {
-            return { result: true, timestamp: durationStamp, reason: banReason };
+        } else {
+            return {result: true, timestamp: durationStamp, reason: banReason};
         }
     }
 
@@ -855,13 +1012,12 @@ export function checkMemberBan(socket, member) {
         if (Date.now() >= serverconfigEditable.ipblacklist[ip]) {
             delete serverconfigEditable.ipblacklist[ip];
             saveConfig(serverconfigEditable);
-        }
-        else {
-            return { result: true, timestamp: serverconfigEditable.ipblacklist[ip] }
+        } else {
+            return {result: true, timestamp: serverconfigEditable.ipblacklist[ip]}
         }
     }
 
-    return { result: false };
+    return {result: false};
 }
 
 export async function hashPassword(password) {
@@ -909,14 +1065,14 @@ export function findAndVerifyUser(loginName, password) {
             const isPasswordValid = bcrypt.compareSync(password, member.password);
             if (isPasswordValid) {
                 //console.log("User found and password verified:", member);
-                return { result: true, member: member }; // Return the matched user
+                return {result: true, member: member}; // Return the matched user
             } else {
                 Logger.debug("Password incorrect for user:", loginName);
-                return { result: false, member: null };
+                return {result: false, member: null};
             }
         }
     }
 
     console.log("User not found for loginName:", loginName);
-    return { result: null, membeR: null }; // Return null if no user matches
+    return {result: null, membeR: null}; // Return null if no user matches
 }

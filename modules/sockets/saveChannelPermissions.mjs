@@ -15,8 +15,6 @@ export default (io) => (socket) => {
 
             if (hasPermission(member.id, "manageChannels")) {
                 try {
-                    //console.log(member.role);
-
                     var memberChannel = member.channel.replace("channel-", "");
                     var group = resolveGroupByChannelId(memberChannel);
                     var category = resolveCategoryByChannelId(memberChannel);
@@ -24,6 +22,7 @@ export default (io) => (socket) => {
                     serverconfig.groups[group].channels.categories[category].channel[memberChannel].permissions[member.role] = member.permission;
                     saveConfig(serverconfig);
 
+                    io.emit("updateChatlog");
                     io.emit("receiveChannelTree");
                     response({ type: "success", msg: "Channel permissions have been updated" });
                 }

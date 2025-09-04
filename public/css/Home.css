@@ -1,0 +1,22 @@
+#homeScreen {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 80px;
+    
+    background: #24292E;
+    z-index: 99990;
+    display: none;
+    transition: left 180ms ease, right 180ms ease;
+}
+
+#homeScreen.visible {
+    display: block;
+    transition: left 180ms ease, right 180ms ease;
+}
+
+.homeDivider{
+    margin: 10px !important;
+    display: block;
+}

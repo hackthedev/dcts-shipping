@@ -4,6 +4,7 @@ class ChatManager{
     
             if (socket.connected == true) {
                 if (connectionAttempts > 3 && !wasDisconnected) {
+                    window.location.reload()
                     showSystemMessage({
                         title: "Connected!",
                         text: "",
@@ -55,6 +56,9 @@ class ChatManager{
             }
             else if (socket.connected == true && initConnectionCheck == true && disconnected == true) {
                 disconnected = false;
+                window.location.reload()
+                return;
+
                 showSystemMessage({
                     title: "Successfully reconnected!",
                     text: "Refreshing data...",

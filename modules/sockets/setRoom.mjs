@@ -10,7 +10,7 @@ export default (io) => (socket) => {
         if (validateMemberId(member.id, socket) == true
 
         ) {
-            leaveAllRooms(socket);
+            leaveAllRooms(socket, member.id);
 
             var room = member.room.split('-');
             var group = room[0];

@@ -108,12 +108,20 @@ class Prompt {
                 cursor: pointer;
                 border: 1px solid rgb(98, 98, 98);
                 background-color: transparent;
+
+                object-fit: cover;
+                background-size: cover;
+                background-position: center center;
             }
 
             .profile-image-preview {
                 width: 100%;
                 height: 100%;
+
                 object-fit: cover;
+                background-size: cover;
+                background-position: center center;
+
                 display: none;
             }
 
@@ -151,11 +159,17 @@ class Prompt {
             .prompt-select:hover {
                 background-color: #E0E0E0;
             }
+
+            .prompt-note{
+                font-size: 12px;
+                font-style: italic;
+                color: #727272ff
+            }
         `;
         document.head.appendChild(style);
     }
 
-  
+
     createModal() {
         this.modal = document.createElement('div');
         this.modal.id = 'promptContainer';
@@ -170,8 +184,9 @@ class Prompt {
         this.modal.style.display = 'flex';
         this.modal.style.justifyContent = 'center';
         this.modal.style.alignItems = 'center';
+        this.modal.style.zIndex = '99999';
         document.body.appendChild(this.modal);
-    
+
         const modalContent = document.createElement('div');
         modalContent.style.backgroundColor = '#24292E';
         modalContent.style.color = '#F0F0F0';
@@ -179,26 +194,26 @@ class Prompt {
         modalContent.style.borderRadius = '10px';
         modalContent.style.textAlign = 'left';
         modalContent.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.1)';
-    
+
         const headerContainer = document.createElement('div');
         headerContainer.style.display = 'flex';
         headerContainer.style.justifyContent = 'space-between';
         headerContainer.style.alignItems = 'center';
         headerContainer.style.marginBottom = '10px';
-    
+
         // Title and Help Button Container
         const titleContainer = document.createElement('div');
         titleContainer.style.display = 'flex';
         titleContainer.style.alignItems = 'center';
         titleContainer.style.gap = '10px'; // Space between title and help button
-    
+
         // Title
         const title = document.createElement('h2');
         title.style.margin = '0';
         title.style.fontSize = '18px';
         title.innerText = 'Create a Channel'; // Default title
         titleContainer.appendChild(title);
-    
+
         // Help Button (?)
         this.helpButton = document.createElement('span');
         this.helpButton.innerHTML = '?';
@@ -211,9 +226,9 @@ class Prompt {
         this.helpButton.title = 'Help';
         this.helpButton.style.display = 'none'; // Initially hidden
         titleContainer.appendChild(this.helpButton);
-    
+
         headerContainer.appendChild(titleContainer);
-    
+
         // Close Button (X)
         this.closeButton = document.createElement('span');
         this.closeButton.innerHTML = '&times;';
@@ -221,14 +236,14 @@ class Prompt {
         this.closeButton.style.fontSize = '20px';
         this.closeButton.onclick = () => this.closePrompt();
         headerContainer.appendChild(this.closeButton);
-    
+
         modalContent.appendChild(headerContainer);
-    
+
         this.promptContent = document.createElement('div');
         this.promptContent.id = 'promptContent';
         this.promptContent.style.marginTop = '20px';
         modalContent.appendChild(this.promptContent);
-    
+
         // submit button
         this.submitButton = document.createElement('button');
         this.submitButton.className = 'prompt-button submit';
@@ -237,10 +252,10 @@ class Prompt {
         this.submitButton.style.marginTop = '20px';
         this.submitButton.onclick = () => this.submitPrompt();
         modalContent.appendChild(this.submitButton);
-    
+
         this.modal.appendChild(modalContent);
     }
-    
+
 
     showPrompt(title = 'Prompt', htmlContent, callback, customSubmitText = null, multiSelect = false, customMinWidth = null, helpAction = null, afterSubmitAction = null, disableSubmit = false, disableExit = false) {
         this.currentCallback = callback;
@@ -250,11 +265,11 @@ class Prompt {
         this.promptContent.innerHTML = htmlContent;
         this.modal.style.display = 'flex';
         this.promptContent.style.minWidth = `${customMinWidth}px` || "";
-    
+
         // Custom submit button color and text
         let submitButtonColor = customSubmitText ? customSubmitText[1] : "#2492c9";
         this.submitButton.innerText = customSubmitText ? customSubmitText[0] : "Submit";
-    
+
         if (submitButtonColor === "success") {
             this.submitButton.style.backgroundColor = "#5CCD5C"; // Green for success
         } else if (submitButtonColor === "error") {
@@ -262,63 +277,67 @@ class Prompt {
         } else {
             this.submitButton.style.backgroundColor = submitButtonColor;
         }
-    
+
         // Show buttons
         this.submitButton.style.display = "block";
         this.closeButton.style.display = "block";
         this.helpButton.style.display = "block";
-        
-        if(disableSubmit) this.submitButton.style.display = "none";
-        if(disableExit) this.closeButton.style.display = "none";
-    
+
+        if (disableSubmit) this.submitButton.style.display = "none";
+        if (disableExit) this.closeButton.style.display = "none";
+
         // Update the title
         const titleElement = this.modal.querySelector('h2');
         if (titleElement) {
             titleElement.innerText = title;
         }
-    
+
         // Set up the help button
         if (helpAction) {
             this.helpButton.style.display = 'inline';
             this.helpButton.onclick = helpAction;
         } else {
             this.helpButton.style.display = 'none';
-        }        
+        }
 
-        if(customSubmitText) if(!customSubmitText[1]) applyHoverEffect(this.submitButton, [["white", "#2492c9"], ["white", "#4bc732"]])
+        if (customSubmitText) {
+            if (!customSubmitText[1]) applyHoverEffect(this.submitButton, [["white", "#2492c9"], ["white", "#4bc732"]])
+
+            //this.submitButton.style.width = "100%";
+        }
     }
 
     showConfirm(titleText, options, callback, afterSubmitAction = null) {
         this.currentCallback = callback;
         this.afterSubmitAction = afterSubmitAction;
-    
+
         // Update the title
         const titleElement = this.modal.querySelector('h2');
         if (titleElement) {
             titleElement.innerText = titleText;
         }
-    
+
         // Clear the previous content
         this.promptContent.innerHTML = '';
-    
+
         // Hide the submit button for the confirm dialog
         this.submitButton.style.display = 'none';
         this.helpButton.style.display = 'none';
         this.closeButton.style.display = 'none';
-    
+
         // Create a container for the buttons with flex display
         const buttonContainer = document.createElement('div');
         buttonContainer.style.display = 'flex';
         buttonContainer.style.gap = '10px'; // Add space between buttons
         buttonContainer.style.justifyContent = 'center'; // Center-align the buttons
         buttonContainer.style.marginTop = '20px';
-    
+
         // Create buttons for each option
         options.forEach(([label, color]) => {
             const button = document.createElement('button');
             button.className = 'prompt-button';
             button.innerText = label;
-    
+
             // Apply custom color
             if (color) {
                 if (color === "success") {
@@ -332,32 +351,32 @@ class Prompt {
                     button.style.color = "#fff";
                 }
             }
-    
+
             button.onclick = () => {
                 this.closePrompt(false); // Indicate that this was a valid selection
-    
+
                 // Ensure callback is executed only once
                 if (this.currentCallback) {
                     this.currentCallback(label.toLowerCase());
                     this.currentCallback = null; // Prevent duplicate execution
                 }
-    
+
                 if (this.afterSubmitAction) {
                     this.afterSubmitAction({ canceled: false, selectedOption: label.toLowerCase() });
                 }
             };
-    
+
             buttonContainer.appendChild(button);
         });
-    
+
         this.promptContent.appendChild(buttonContainer);
         this.modal.style.display = 'flex';
     }
-    
-    
-    
-    
-    
+
+
+
+
+
 
     handleSelect(element, value) {
         if (this.multiSelect) {
@@ -370,56 +389,56 @@ class Prompt {
             }
         } else {
             if (this.selectedValues === value) return;
-    
+
             this.selectedValues = value;
             document.querySelectorAll('.prompt-click-select').forEach(opt => opt.classList.remove('selected'));
             element.classList.add('selected');
         }
     }
-    
+
 
     closePrompt(canceled = true) {
         this.modal.style.display = 'none';
-    
+
         if (!canceled && this.currentCallback) {
             this.currentCallback({ canceled });
         }
-    
+
         if (this.afterSubmitAction) {
             this.afterSubmitAction({ canceled, values: null });
         }
-    
+
         // Only reset the callback if it wasn't from `showConfirm()`
         if (canceled) {
             this.currentCallback = null;
         }
     }
-    
-    
-    
-    
+
+
+
+
 
     previewImage(event) {
-		const inputId = event.target.id;
-		const imagePreviewId = inputId + 'Preview';  // Assuming the preview element has the id matching the input id with "Preview" suffix
-		const imagePreview = document.getElementById(imagePreviewId);
-		const file = event.target.files[0];
+        const inputId = event.target.id;
+        const imagePreviewId = inputId + 'Preview';  // Assuming the preview element has the id matching the input id with "Preview" suffix
+        const imagePreview = document.getElementById(imagePreviewId);
+        const file = event.target.files[0];
 
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = (e) => {
-				imagePreview.src = e.target.result;
-				imagePreview.style.display = 'block';
-			}
-			reader.readAsDataURL(file);
-		}
-	}
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    }
 
 
     submitPrompt() {
         const inputs = this.promptContent.querySelectorAll('input, select, textarea');
         let values = { selected: this.selectedValues };
-    
+
         inputs.forEach(input => {
             if (input.type === 'checkbox') {
                 values[input.name] = input.checked;
@@ -429,19 +448,19 @@ class Prompt {
                 values[input.name] = input.value;
             }
         });
-    
+
         // Ensure callback is executed only once
         if (this.currentCallback) {
             this.currentCallback(values);
             this.currentCallback = null; // Prevent duplicate execution
         }
-    
+
         if (this.afterSubmitAction) {
             this.afterSubmitAction({ canceled: false, values });
         }
-    
+
         this.closePrompt(false);
     }
-    
-    
+
+
 }

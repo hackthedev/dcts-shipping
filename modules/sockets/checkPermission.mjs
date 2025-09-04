@@ -160,6 +160,18 @@ let permList = {
         category: ["serverRoles"],
         description: "Can edit and delete reported messages"
     },
+    "manageTickets": {
+        name: "Manage Tickets",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: "Can manage support tickets. Tickets are more general."
+    },
+    "managePosts": {
+        name: "Manage Posts",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: "Can manage server home posts."
+    },
     "viewChannelHistory": {
         name: "View Channel History",
         type: "checkbox",

@@ -1,4 +1,4 @@
-import { serverconfig, typingMembers, xssFilters } from "../../index.mjs";
+import { serverconfig, typingMembers, usersocket, xssFilters } from "../../index.mjs";
 import { convertMention } from "../functions/chat/helper.mjs";
 import { formatDateTime, hasPermission } from "../functions/chat/main.mjs";
 import { saveChatMessage } from "../functions/io.mjs";
@@ -10,7 +10,7 @@ export default (io) => (socket) => {
     // socket.on code here
     socket.on('messageSend', async function (memberOriginal) {
         checkRateLimit(socket);
-        
+
         if (validateMemberId(memberOriginal.id, socket) == true
             && serverconfig.servermembers[memberOriginal.id].token == memberOriginal.token
         ) {
@@ -102,17 +102,9 @@ export default (io) => (socket) => {
                     member.message = convertMention(member.message);
 
                     // replace empty lines
-                    const regex = /<p\s+id="msg-\d+">\s*<br\s*\/?>\s*<\/p>/g;
-                    member.message = member.message.replaceAll(regex, '').replaceAll(/<p\s+id="msg-\d+">\s*<\/p>/g, "<p id='msg-" + messageid + "'><br></p>")
+                    member.message = clearMessage(member.message, messageid)
 
-                    if (member.message.replaceAll(" ", "") == null) {
-                        consolas(colors.red("Message was null"))
-                        return
-                    }
-
-                    var emptyMessageContent = member.message.replaceAll(" ", "").replaceAll("<p>", "").replaceAll("</p>", "").replaceAll(/^\uFEFF/g, '');
-
-                    if (emptyMessageContent == "") {
+                    if (member.message == "" || member.message.length == 0) {
                         console.log("Message was empty")
                         return;
                     }
@@ -146,7 +138,7 @@ export default (io) => (socket) => {
 
                         // Check if the user who wants to edit the msg is even the original author lol
                         if (originalMsgObj.id != member.id) {
-                            Logger.warn("Unauthorized user tried to edit another users message");
+                            Logger.warn(`Unauthorized user (${member.name} - ${member.id}) tried to edit another users message`);
                             return;
                         }
 
@@ -163,8 +155,9 @@ export default (io) => (socket) => {
                     member = getCastingMemberObject(member);
 
                     let memberMessageCount = serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel].msgCount + 1;
+
                     // Save the Chat Message to file
-                    saveChatMessage(member, member.editedMsgId);                    
+                    saveChatMessage(member, member.editedMsgId);
 
                     // Remove user from typing
                     var username = serverconfig.servermembers[member.id].name;
@@ -179,7 +172,7 @@ export default (io) => (socket) => {
                         io.in(member.room).emit("messageCreate", member);
 
 
-                        io.emit("markChannel", { channelId: parseInt(member.channel), count:  memberMessageCount});
+                        io.emit("markChannel", { channelId: parseInt(member.channel), count: memberMessageCount });
                     }
                     // emit edit event of msg
                     else {
@@ -241,4 +234,28 @@ export default (io) => (socket) => {
             Logger.warn("ID: " + member.id);
         }
     });
+
+    function clearMessage(html, messageid) {
+        html = html.replace(/<span[^>]*class=(['"])ql-cursor\1[^>]*>[\s\u200B-\u200D\uFEFF]*<\/span>/gi, "");
+
+        html = html.replace(/[\u200B-\u200D\uFEFF]/g, "");
+
+        const emptyInline = /<(?:span|em|strong|i|b|u)[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/(?:span|em|strong|i|b|u)>/gi;
+        const emptyP = /<p[^>]*>(?:\s|&nbsp;|<br\s*\/?>|<(?:span|em|strong|i|b|u)[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/(?:span|em|strong|i|b|u)>)*<\/p>/gi;
+
+        let prev;
+        do {
+            prev = html;
+            html = html.replace(emptyInline, "");
+            html = html.replace(emptyP, "");
+        } while (html !== prev);
+
+        html = html.replace(/(?:<br\s*\/?>\s*){2,}/gi, "<br>");
+
+        if (!html || !html.replace(/<[^>]*>/g, "").trim()) {
+            html = `<p id="msg-${messageid}"><br></p>`;
+        }
+        return html;
+    }
+
 }

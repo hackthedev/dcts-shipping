@@ -1,0 +1,3123 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js" crossorigin="anonymous"></script>
+
+    <script src="js/core/PoW.js"></script>
+    <script src="js/core/CookieManager.js"></script>
+    <script src="js/core/UserManager.js"></script>
+
+    <script src="js/tooltips.js"></script>
+    <script src="js/hover.js"></script>
+    <script src="js/prompts.js"></script>
+    <script src="js/sysmsg.js"></script>
+    <script src="js/upload.js"></script>
+
+    <script src="js/tooltips/dialogs/introduceServerHome.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+
+    <title>{{server.name}} – Server Home & DMs</title>
+    <style>
+        /* width */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            background: #424549;
+            border-radius: 12px;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #424549;
+        }
+
+        :root {
+            /* Your palette */
+            --c-171A1D: #171A1D;
+            --c-24292E: #24292E;
+            --c-2B3137: #292e34;
+            --c-4F555C: #4F555C;
+            --c-ABB8BE: #ABB8BE;
+
+            --bg: var(--c-171A1D);
+            --bg2: var(--c-24292E);
+            --card: var(--c-2B3137);
+            --border: rgba(79, 85, 92, 0.8);
+            --text: #E8EDF1;
+            --muted: var(--c-ABB8BE);
+            --accent: var(--c-ABB8BE);
+            --accent-2: #c6d2d8;
+
+            --radius: 12px;
+            --r-sm: 9px;
+            --col-left: 280px;
+            --col-right: 320px;
+            --header-h: 56px;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        #ticketIdentity option {
+            background-color: var(--c-2B3137);
+            border: 2px solid var(--c-171A1D);
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0
+        }
+
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: linear-gradient(180deg, var(--bg), var(--bg2));
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Header */
+        .appHeader {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            height: var(--header-h);
+            background: var(--c-24292E);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 14px;
+        }
+
+        .brand {
+            font-weight: 800;
+            letter-spacing: .4px;
+        }
+
+        .brand small {
+            opacity: .7;
+            font-weight: 600;
+            color: var(--muted)
+        }
+
+        .topSearch {
+            flex: 1;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            max-width: 680px
+        }
+
+        .topSearch input {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 10px;
+            cursor: text;
+        }
+
+        .topActions {
+            display: flex;
+            gap: 8px
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn.accent {
+            background: linear-gradient(180deg, var(--accent), var(--accent-2));
+            color: #1b2227;
+            border: none
+        }
+
+        .btn.ghost {
+            background: transparent
+        }
+
+        .btn:active {
+            transform: translateY(1px)
+        }
+
+        /* Layout */
+        .appWrap {
+            display: grid;
+            grid-template-columns: var(--col-left) 1fr var(--col-right);
+            gap: 14px;
+            padding: 14px;
+            align-items: stretch;
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }
+
+        .panelHeader {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .panelBody {
+            padding: 12px
+        }
+
+        /* Avatar + presence */
+        .avatar {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #3a434b, #242c33);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #cfd7dd;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .avatar.small {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            font-size: 11px
+        }
+
+        .avatar.tiny {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            font-size: 10px
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block
+        }
+
+        .statusDot {
+            position: absolute;
+            right: -2px;
+            bottom: -2px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid var(--card);
+            background: #7a7f86;
+        }
+
+        .online {
+            background: #3ad2a4
+        }
+
+        .idle {
+            background: #f5c451
+        }
+
+        .dnd {
+            background: #ff6b6b
+        }
+
+        .offline {
+            background: #7a7f86
+        }
+
+        /* Avatar */
+        .avatarStack {
+            position: relative;
+            width: 52px;
+            height: 40px
+        }
+
+        .avatarStack .a1 {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 2
+        }
+
+        .avatarStack .a2 {
+            position: absolute;
+            /*left: 20px;*/
+            top: 0;
+            z-index: 1;
+            filter: brightness(.9)
+        }
+
+        .avatarStack.small {
+            width: 36px;
+            height: 24px
+        }
+
+        .avatarStack.small .a2 {
+            /*left: 14px;*/
+        }
+
+        /* Author chip */
+        .authorChip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* dms */
+        .dmList {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 8px
+        }
+
+        .dmItem {
+            display: grid;
+            grid-template-columns: 52px 1fr auto;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            align-items: center;
+        }
+
+        .dmItem:hover {
+            background: rgba(255, 255, 255, 0.04)
+        }
+
+        .dmItem.active {
+            outline: 1px solid var(--accent);
+            background: rgba(171, 184, 190, 0.12)
+        }
+
+        .dmName {
+            font-weight: 700;
+            font-size: 13px
+        }
+
+        .dmPreview {
+            color: var(--muted);
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 170px
+        }
+
+        .dmBadge {
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+
+            background-color: indianred;
+            border-radius: 50%;
+            padding: 2px 6px;
+        }
+
+        /* center */
+        .centerWrap {
+            height: calc(100vh - var(--header-h) - 28px);
+            display: flex;
+            flex-direction: column
+        }
+
+        .threadHeader {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.06)
+        }
+
+        .threadTitle {
+            font-weight: 800
+        }
+
+        .threadMeta {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 12px
+        }
+
+        .threadArea {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 12px;
+            overflow: auto;
+            height: 100%
+        }
+
+        .msg {
+            max-width: 70%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 12px
+        }
+
+        .mine {
+            margin-left: auto;
+            background: rgba(171, 184, 190, 0.18);
+            border-color: rgba(171, 184, 190, 0.5)
+        }
+
+        .meta {
+            color: var(--muted);
+            font-size: 11px;
+            margin-top: 6px
+        }
+
+        .sendRow {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            border-top: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.06)
+        }
+
+        .sendRow input {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text)
+        }
+
+        .claimTicket {
+            background-color: white;
+            color: black;
+        }
+
+        .sendRow .btn {
+            padding: 10px 14px
+        }
+
+        /* Server Home */
+        .hero {
+            position: relative;
+            height: 220px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-end;
+            padding: 16px;
+            background: var(--c-2B3137) center/cover no-repeat;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(1200px 240px at 20% 0%, rgba(171, 184, 190, 0.22), transparent 60%);
+            mix-blend-mode: screen;
+        }
+
+        .heroContent {
+            position: relative;
+            z-index: 1
+        }
+
+        .heroContent h1 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: .4px
+        }
+
+        .heroContent p {
+            margin: 6px 0 0 0;
+            color: white;
+        }
+
+        .heroContent h1,
+        .heroContent p {
+            -webkit-text-stroke: .075em rgba(0, 0, 0, .55);
+            paint-order: stroke fill;
+            text-shadow: 0 0 .6em rgba(255, 255, 255, 0.3),
+            0 0 1.4em rgba(0, 0, 0, .22),
+            0 0 2.2em rgba(0, 0, 0, .18);
+        }
+
+
+        .homeGrid {
+            display: grid;
+            grid-template-columns: 1.2fr .8fr;
+            gap: 14px;
+            padding: 14px
+        }
+
+        .homeCard {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: 12px
+        }
+
+        .homeCard.aboutThisServer {
+            line-height: 150%;
+        }
+
+        .homeCard.aboutThisServer li {
+            margin-left: 20px;
+        }
+
+        a {
+            color: #E8EDF1;
+            font-style: italic;
+        }
+
+        .post {
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 10px;
+            cursor: pointer
+        }
+
+        .post h4 {
+            margin: 0 0 6px 0;
+            font-size: 14px
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: rgba(171, 184, 190, 0.18);
+            color: #1b2227;
+            font-size: 11px;
+            margin-left: 8px
+        }
+
+        .tag.pinned {
+            color: var(--c-ABB8BE) !important;
+        }
+
+        .adminRow {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px
+        }
+
+        /* RIGHT */
+        .sideSection {
+            padding: 10px
+        }
+
+        .newsItem,
+        .helpItem {
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .newsItem h5 {
+            margin: 0 0 6px 0
+        }
+
+        .helpItem strong {
+            display: block;
+            margin-bottom: 4px
+        }
+
+        .rowTop {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px
+        }
+
+        .rowActions {
+            display: flex;
+            gap: 4px
+        }
+
+        .iconBtn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .iconBtn svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--muted)
+        }
+
+        .iconBtn:hover {
+            background: rgba(255, 255, 255, 0.08)
+        }
+
+        /* Modals */
+        #modalOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            z-index: 1000;
+            display: none
+        }
+
+        /* Create/Edit Modal */
+        #postModal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+            padding: 28px
+        }
+
+        .modalCard {
+            width: 920px;
+            max-width: 96vw;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 22px 80px rgba(0, 0, 0, 0.55);
+            overflow: hidden;
+        }
+
+        .modalHeader {
+            padding: 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .modalBody {
+            padding: 14px
+        }
+
+        .modalFooter {
+            padding: 14px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end
+        }
+
+        .formRow {
+            margin-bottom: 12px
+        }
+
+        .formRow label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 6px
+        }
+
+        .input,
+        .textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+        }
+
+        .textarea {
+            min-height: 220px;
+            resize: vertical
+        }
+
+        .radioRow {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap
+        }
+
+        .radioRow label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600
+        }
+
+        .error {
+            color: #ff9a9a;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none
+        }
+
+        /* Search Modal */
+        #searchModal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            z-index: 1002;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 60px 16px 16px
+        }
+
+        .searchCard {
+            width: 980px;
+            max-width: 96vw;
+            max-height: 80vh;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 22px 80px rgba(0, 0, 0, 0.55);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .searchTop {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .searchTop input {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+        }
+
+        .chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        .chip {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .chip.active {
+            background: rgba(171, 184, 190, 0.18);
+            color: #1b2227
+        }
+
+        .searchBody {
+            display: flex;
+            gap: 16px;
+            overflow: auto;
+            padding: 12px
+        }
+
+        .group {
+            min-width: 260px;
+            flex: 1
+        }
+
+        .group h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px
+        }
+
+        .result {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 8px;
+            cursor: pointer
+        }
+
+        .resultText {
+            min-width: 0
+        }
+
+        .result small {
+            color: var(--muted)
+        }
+
+        .linkBtn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 11px;
+            text-decoration: underline;
+            color: var(--muted);
+            padding: 0 4px;
+        }
+
+        .linkBtn:hover {
+            opacity: .9
+        }
+
+
+        mark {
+            background: rgba(171, 184, 190, 0.35);
+            color: #1b2227;
+            border-radius: 4px;
+            padding: 0 2px
+        }
+
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            :root {
+                --col-right: 0px
+            }
+
+            .appWrap {
+                grid-template-columns: var(--col-left) 1fr
+            }
+
+            .panel.right {
+                display: none
+            }
+
+            .homeGrid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        @media (max-width: 860px) {
+            :root {
+                --col-left: 76px
+            }
+
+            .dmItem .dmPreview,
+            .dmItem .dmBadge {
+                display: none
+            }
+        }
+
+        @media (max-width: 640px) {
+            .appWrap {
+                grid-template-columns: 1fr
+            }
+
+            .panel.left {
+                display: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="appHeader">
+    <div class="brand">{{server.name}} <small>• Home</small></div>
+    <div class="topSearch">
+        <input id="headerSearch" placeholder="Search DMs, members, news, help, posts …"/>
+    </div>
+    <div class="topActions">
+        <button class="btn" id="btnHome">Home</button>
+        <button class="btn" id="btnNewTicket">Support</button>
+        <button class="btn" style="background-color: white; color: black; display: none;"
+                id="btnCreatePost">Create
+        </button>
+    </div>
+</header>
+
+<main class="appWrap">
+    <!-- LEFT: DMs -->
+    <section class="panel left" aria-label="Direct Messages">
+        <div class="panelHeader"><strong>Direct Messages</strong></div>
+        <div class="dmList" id="dmList"></div>
+    </section>
+
+    <!-- CENTER -->
+    <section class="panel center">
+        <div id="centerMount" class="centerWrap"></div>
+    </section>
+
+    <!-- RIGHT -->
+    <aside class="panel right" aria-label="News & Help">
+        <div class="panelHeader"><strong>Server News</strong></div>
+        <div class="sideSection" id="newsList"></div>
+        <div class="panelHeader"><strong>Help</strong></div>
+        <div class="sideSection" id="helpList"></div>
+    </aside>
+</main>
+
+<!-- Shared overlay for modals -->
+<div id="modalOverlay"></div>
+
+<!-- Create/Edit Modal -->
+<div id="postModal" role="dialog" aria-modal="true" aria-labelledby="postModalTitle">
+    <div class="modalCard">
+        <div class="modalHeader">
+            <strong id="postModalTitle">Create new</strong>
+            <button class="btn ghost" type="button" id="postModalClose">Close</button>
+        </div>
+        <form id="postForm" novalidate>
+            <div class="modalBody">
+                <div class="formRow">
+                    <label>Type</label>
+                    <div class="radioRow" role="radiogroup" aria-label="Type">
+                        <label><input type="radio" name="postType" value="post" checked> Post (server home)</label>
+                        <label><input type="radio" name="postType" value="news"> News (right sidebar)</label>
+                        <label><input type="radio" name="postType" value="help"> Help (right sidebar)</label>
+                    </div>
+                </div>
+                <div class="formRow">
+                    <label for="postTitle">Title</label>
+                    <input id="postTitle" class="input" placeholder="Title" required/>
+                    <div id="errTitle" class="error">Title required.</div>
+                </div>
+                <div class="formRow">
+                    <label for="postBody">Text</label>
+                    <textarea id="postBody" class="textarea" placeholder="Write your text …" required></textarea>
+                    <div id="errBody" class="error">Text required.</div>
+                </div>
+                <div class="formRow" style="display:flex;align-items:center;gap:10px;">
+                    <label style="font-weight:600"><input type="checkbox" id="postNotify"/> Notify everyone (mark
+                        unread)</label>
+                </div>
+
+            </div>
+            <div class="modalFooter">
+                <button class="btn ghost" type="button" id="postCancel">Cancel</button>
+                <button class="btn accent" type="submit" id="postSubmitBtn">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Search Modal -->
+<div id="searchModal" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+    <div class="searchCard">
+        <div class="searchTop">
+            <input id="searchInput" placeholder="Type to search…"/>
+            <div class="chips" id="chips">
+                <span class="chip active" data-kind="all">All</span>
+                <span class="chip" data-kind="members">Members</span>
+                <span class="chip" data-kind="dms">DMs</span>
+                <span class="chip" data-kind="news">News</span>
+                <span class="chip" data-kind="help">Help</span>
+                <span class="chip" data-kind="posts">Posts</span>
+            </div>
+        </div>
+        <div class="searchBody" id="searchBody"></div>
+    </div>
+</div>
+
+<script>
+    const socket = io({
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 20000
+    });
+
+    const tooltipSystem = new TooltipSystem();
+
+    const CURRENT_USER_ID = UserManager.getID()
+
+    const customPrompts = new Prompt();
+
+    function selfStatus() {
+        return UserManager.getStatus()
+    }
+
+    function selfAvatar() {
+        return UserManager.getPFP()
+    }
+
+    function selfBanner() {
+        return UserManager.getBanner()
+    }
+
+    let isAdmin = false;
+
+    const SANITIZE_OPTIONS = {
+        ALLOWED_TAGS: ['div', 'span', 'p', 'br', 'b', 'i', 'u', 's', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'pre', 'code', 'blockquote', 'strong', 'em', 'img', 'mark'],
+        ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'class', 'style']
+    };
+
+    // empty initial CONFIG
+    const CONFIG = {
+        serverName: `{{server.name}}`,
+        bannerUrl: `{{server.home.banner_url}}`,
+        heroTitle: `{{server.home.title}}`,
+        heroSubtitle: `{{server.home.subtitle}}`,
+        aboutHtml: encodePlainText(`{{server.home.about}}`),
+        members: [],
+        posts: [],
+        news: [],
+        help: [],
+        threads: []
+    };
+
+    let STATE = {
+        activeThreadId: null,
+        modal: {mode: "create", type: "post", editId: null, editSlug: null},
+        searchKinds: new Set(['members', 'dms', 'news', 'help', 'posts']),
+        ticketsExpanded: true,
+        unreadCounter: 0,
+        unreadContent: new Set()
+    };
+
+    const ICONS = {
+        edit_black: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#000" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.33H5v-.92L14.06 7.5l.92.92L5.92 19.58zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`,
+        edit: `<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.33H5v-.92L14.06 7.5l.92.92L5.92 19.58zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`,
+        pin: `<svg viewBox="0 0 24 24"><path d="M16 9V3H8v6l-2 4v2h6v7l2-7h4v-2l-2-4z"/></svg>`,
+        unpin: `<svg viewBox="0 0 24 24"><path d="M3 5.27 4.28 4l15.5 15.5L18.5 21l-6.5-6.5L9 21v-7H5v-2l2-4V5h1.73L3 5.27zM16 9l2 4v2h-2.73l-5-5H16V3h-2v4h2v2z"/></svg>`,
+        del: `<svg viewBox="0 0 24 24"><path d="M6 7h12v2H6V7zm2 3h8l-1 9H9L8 10zm3-6h2l1 1h4v2H6V5h4l1-1z"/></svg>`
+    };
+
+
+    function sanitizeHtmlForRender(html) {
+        if (html == null) return '';
+
+        let raw = unescapeHtmlEntities(String(html || '')).trim();
+
+        const hasTags = /<\/?[a-z][\s\S]*?>/i.test(raw);
+        if (!hasTags) {
+            const paras = raw.replace(/\r/g, '').split(/\n{2,}/)
+                .map(s => s.trim())
+                .filter(Boolean);
+
+            let out = paras.map(p => {
+                const withBreaks = encodePlainText(p).replace(/\n/g, '<br>');
+                return `<p>${withBreaks}</p>`;
+            }).join('');
+
+            const clean = DOMPurify.sanitize(out, SANITIZE_OPTIONS);
+            return `<div class="sanitized-content">${clean}</div>`;
+        }
+
+        let clean = DOMPurify.sanitize(raw, SANITIZE_OPTIONS);
+
+        clean = clean.replace(/<p[^>]*>\s*(?:&nbsp;|\s|\u00A0)*<\/p>/gi, '');
+
+        clean = clean.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');
+
+        return `<div class="sanitized-content">${clean.trim()}</div>`;
+    }
+
+    function encodePlainText(s) {
+        return String(s || '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    function unescapeHtmlEntities(str) {
+        if (str == null) return '';
+        const txt = document.createElement('textarea');
+        txt.innerHTML = String(str);
+        return txt.value;
+    }
+
+    function hl(text, query) {
+        text = String(text || '');
+        if (!query) return sanitizeHtmlForRender(encodePlainText(text));
+        const q = String(query || '').toLowerCase();
+        const idx = text.toLowerCase().indexOf(q);
+        if (idx === -1) return sanitizeHtmlForRender(encodePlainText(text));
+        const before = encodePlainText(text.slice(0, idx));
+        const match = encodePlainText(text.slice(idx, idx + q.length));
+        const after = encodePlainText(text.slice(idx + q.length));
+        return sanitizeHtmlForRender(`${before}<mark>${match}</mark>${after}`);
+    }
+
+    function listByType(type) {
+        return type === 'posts' ? CONFIG.posts : type === 'news' ? CONFIG.news : CONFIG.help;
+    }
+
+    function keyFor(type, itemOrId) {
+        return (typeof itemOrId === 'object')
+            ? (itemOrId.id != null ? String(itemOrId.id) : String(itemOrId.slug || ''))
+            : String(itemOrId);
+    }
+
+
+    socket.on('receiveHydrate', (p) => {
+        CONFIG.members = Array.isArray(p.members) ? p.members.map(normalizeMember) : [];
+
+        upsertMember({
+            id: CURRENT_USER_ID,
+            name: UserManager.getUsername ? UserManager.getUsername() : 'You',
+            status: selfStatus(),
+            avatar: selfAvatar(),
+            banner: selfBanner(),
+            lastOnline: new Date().getTime(),
+            isOnline: true
+        });
+
+        CONFIG.posts = Array.isArray(p?.posts) ? p.posts
+            : Array.isArray(p?.content?.posts) ? p.content.posts : [];
+
+        CONFIG.news = Array.isArray(p?.news) ? p.news
+            : Array.isArray(p?.content?.news) ? p.content.news : [];
+
+        CONFIG.help = Array.isArray(p?.help) ? p.help
+            : Array.isArray(p?.content?.help) ? p.content.help : [];
+
+        STATE.unreadContent = new Set(Array.isArray(p.unreadContent) ? p.unreadContent.map(String) : []);
+
+
+        CONFIG.threads = Array.isArray(p.threads)
+            ? p.threads.map(t => ({
+                id: t.id,
+                type: t.type,
+                title: t.title || null,
+                participants: t.participants || [],
+                last: t.last || '',
+                lastAt: t.lastAt || null,
+                unread: t.unread || 0,
+                status: t.status || t.ticketStatus || null,
+                messages: []
+            }))
+            : [];
+
+        const localSet = loadLocalUnread();
+        STATE.unreadContent = new Set([...(STATE.unreadContent || []), ...Array.from(localSet)]);
+
+
+        sortThreads();
+        renderDMs();
+        renderRight();
+        showServerHome();
+    });
+
+    socket.on('ticket:new', ({thread}) => {
+        upsertThread(thread);
+        renderDMs();
+    });
+
+    socket.on('ticket:message', ({threadId, message}) => {
+        const t = CONFIG.threads.find(x => x.id === threadId);
+        if (t && t.participants?.includes(CURRENT_USER_ID)) return;
+
+        if (!t) {
+            upsertThread({
+                id: threadId,
+                type: 'ticket',
+                participants: [],
+                messages: [message],
+                last: message.text,
+                lastAt: message.ts,
+                unread: 1
+            });
+        } else {
+            addMessage(threadId, message);
+            if (STATE.activeThreadId !== threadId) t.unread = (t.unread || 0) + 1;
+            if (STATE.activeThreadId === threadId) renderMessages(t);
+        }
+        renderDMs();
+    });
+
+    socket.on('ticket:update', ({thread}) => {
+        upsertThread(thread);
+        renderDMs();
+    });
+
+
+    function fetchTickets() {
+        socket.emit("checkPermission", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            permission: ["manageTickets"]
+        }, function (response) {
+            if (response.permission === "granted") {
+                socket.emit('fetchTickets', {
+                    status: 'open',
+                    asStaff: true,
+                    token: UserManager.getToken(),
+                    id: UserManager.getID()
+                }, (res) => {
+                    if (res?.type === 'success' && Array.isArray(res.tickets)) {
+                        res.tickets.forEach(upsertThread);
+                        sortThreads();
+                        renderDMs();
+                    }
+                });
+            }
+        });
+    }
+
+    function sortThreads() {
+        CONFIG.threads.sort((a, b) => {
+            const ua = a.unread > 0, ub = b.unread > 0;
+            if (ua !== ub) return ua ? -1 : 1;
+            const la = a.lastActivity || 0, lb = b.lastActivity || 0;
+            return lb - la;
+        });
+    }
+
+    socket.on('receiveThreadNew', ({thread}) => {
+        upsertThread(thread);
+        renderDMs();
+    });
+
+    function addMessage(threadId, message) {
+        const t = CONFIG.threads.find(x => x.id === threadId);
+        if (!t) return;
+        t.messages = t.messages || [];
+        if (t.messages.some(m => m.id === message.id)) return;
+        t.messages.push(message);
+        t.last = message.text || '';
+        t.lastAt = message.ts || new Date().toISOString();
+    }
+
+    socket.on('receiveMessage', ({threadId, message}) => {
+        const t = CONFIG.threads.find(x => x.id === threadId);
+        if (!t) return;
+        addMessage(threadId, message);
+        if (message.authorId !== CURRENT_USER_ID && STATE.activeThreadId !== threadId) {
+            t.unread = (t.unread || 0) + 1;
+        }
+        if (STATE.activeThreadId === threadId) renderMessages(t);
+
+        renderDMs();
+    });
+
+    socket.on('receiveMessageEdit', ({threadId, message}) => {
+        const t = CONFIG.threads.find(x => x.id === threadId);
+        if (!t) return;
+        const i = (t.messages || []).findIndex(m => m.id === message.id);
+        if (i > -1) t.messages[i] = message;
+        if (STATE.activeThreadId === threadId) {
+            renderMessages(t);
+        }
+    });
+    socket.on('receiveMessageDelete', ({threadId, messageId}) => {
+        const t = CONFIG.threads.find(x => x.id === threadId);
+        if (!t) return;
+        const i = (t.messages || []).findIndex(m => m.id === messageId);
+        if (i > -1) t.messages.splice(i, 1);
+        if (STATE.activeThreadId === threadId) {
+            renderMessages(t);
+        }
+    });
+
+    // content posts/news/help
+    socket.on('receiveContentNew', ({type, item}) => {
+        const list = listByType(type);
+        list.unshift(item);
+
+        if (item?.notifyAll && String(item.authorId) !== String(CURRENT_USER_ID)) {
+            addLocalUnread(type, item.id);
+            STATE.unreadContent.add(`${type}:${item.id}`);
+        }
+
+        if (type === 'posts') {
+            renderPosts();
+        } else {
+            renderRight();
+        }
+    });
+
+
+    socket.on('contentReadUpdate', ({type, contentId, unreadCount}) => {
+        const key = `${type}:${contentId}`;
+        const card = document.querySelector(`.content-card[data-content-key="${key}"]`);
+        if (card) {
+            const badge = card.querySelector('.contentUnreadBadge');
+            if (unreadCount > 0) {
+                if (badge) badge.textContent = unreadCount;
+                else {
+                    const b = document.createElement('div');
+                    b.className = 'dmBadge contentUnreadBadge';
+                    b.style.position = 'absolute';
+                    b.style.right = '12px';
+                    b.style.top = '12px';
+                    b.textContent = unreadCount;
+                    card.style.position = 'relative';
+                    card.appendChild(b);
+                }
+            } else {
+                if (badge) badge.remove();
+            }
+        }
+    });
+
+
+    socket.on('receiveContentUpdate', ({type, item}) => {
+        const list = listByType(type);
+        const key = keyFor(type, item);
+        const i = list.findIndex(x => keyFor(type, x) === key);
+        if (i > -1) list[i] = item; else list.unshift(item);
+        if (type === 'posts') {
+            renderPosts(); /*openPostFull(item.id);*/
+        } else if (type === 'news') {
+            renderRight(); /*openNewsFull(item.id);*/
+        } else {
+            renderRight(); /*showHelpDoc(item);*/
+        }
+    });
+    socket.on('receiveContentDelete', ({type, id}) => {
+        try {
+            const list = listByType(type);
+            const idStr = String(id ?? '');
+
+            const i = list.findIndex(x => keyFor(type, x) === idStr);
+            if (i > -1) list.splice(i, 1);
+
+            const contentKey = `${type}:${idStr}`;
+            if (STATE.unreadContent && STATE.unreadContent.has(contentKey)) {
+                STATE.unreadContent.delete(contentKey);
+            }
+
+            try {
+                removeLocalUnread(type, id);
+            } catch (e) { /* ignore */
+            }
+
+            document.querySelectorAll(`[data-content-key="${contentKey}"]`).forEach(el => el.remove());
+
+            // Refresh UI where needed
+            renderRight();
+            renderPosts();
+
+            const center = document.getElementById('centerMount');
+            if (center) {
+                showServerHome();
+            }
+        } catch (e) {
+            console.error('receiveContentDelete handler failed', e);
+        }
+    });
+
+
+    function normalizeMember(raw) {
+        if (!raw) return null;
+        return {
+            id: String(raw.id ?? raw.userId ?? raw.uid ?? ''),
+            name: raw.name ?? raw.nickname ?? raw.loginName ?? String(raw.id ?? ''),
+            status: raw.status ?? "",
+            avatar: raw.avatar ?? raw.icon ?? null,
+            banner: raw.banner ?? null,
+            lastOnline: raw.lastOnline ?? null,
+            isOnline: isWithinTime(raw.lastOnline, 300, "past")
+        };
+    }
+
+    function isWithinTime(ts, seconds, mode = "past") {
+        const t = new Date(ts).getTime();
+        if (isNaN(t)) return false;
+
+        const now = Date.now();
+        const diff = t - now;
+
+        if (mode === "past") {
+            return diff <= 0 && Math.abs(diff) <= seconds * 1000;
+        }
+        if (mode === "future") {
+            return diff >= 0 && diff <= seconds * 1000;
+        }
+        return false;
+    }
+
+    function normalizeThread(raw) {
+        if (!raw) return null;
+        return {
+            id: raw.id,
+            type: raw.type || 'dm',
+            title: raw.title || null,
+            participants: Array.isArray(raw.participants) ? raw.participants : [],
+            last: raw.last || '',
+            lastAt: raw.lastAt || raw.updatedAt || raw.last_ts || null,
+            unread: raw.unread || 0,
+            status: raw.status || raw.ticketStatus || null,
+            messages: Array.isArray(raw.messages) ? raw.messages : []
+        };
+    }
+
+    function upsertThread(raw) {
+        const t = normalizeThread(raw);
+        if (!t) return;
+        const i = CONFIG.threads.findIndex(x => x.id === t.id);
+
+        if (i > -1) {
+            const prev = CONFIG.threads[i];
+            CONFIG.threads[i] = {
+                ...prev,
+                ...t,
+                participants: Array.from(new Set([...(prev.participants || []), ...(t.participants || [])])),
+                messages: (t.messages && t.messages.length ? t.messages : prev.messages) || [],
+                lastReadAt: t.lastReadAt || prev.lastReadAt || null,
+                unread: (t.unread != null ? t.unread : prev.unread) || 0
+            };
+        } else {
+            CONFIG.threads.push({...t, messages: t.messages || []});
+        }
+    }
+
+    function upsertMember(mem) {
+        const m = normalizeMember(mem);
+        if (!m) return;
+        const i = CONFIG.members.findIndex(x => x.id === m.id);
+        if (i > -1) CONFIG.members[i] = {...CONFIG.members[i], ...m};
+        else CONFIG.members.push(m);
+    }
+
+    function getMember(id) {
+        const m = CONFIG.members.find(m => m.id === id);
+        if (!m) return {
+            id,
+            name: String(id),
+            status: '',
+            avatar: null,
+            isOnline: false,
+            lastOnline: new Date().getTime()
+        };
+        return {...m, avatar: m.avatar ?? m.icon ?? null};
+    }
+
+    function otherParticipant(thread) {
+        const others = thread.participants.filter(p => p !== CURRENT_USER_ID);
+        return getMember(others[0] || thread.participants[0]);
+    }
+
+    function initials(name) {
+        const parts = String(name).trim().split(/\s+/).slice(0, 2);
+        return parts.map(p => p[0]?.toUpperCase() || '').join('');
+    }
+
+    function avatarHTML(member, size = 'normal') {
+        const cls = size === 'small' ? 'avatar small' : size === 'tiny' ? 'avatar tiny' : 'avatar';
+        const dot = `<span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span>`;
+        if (member.avatar) {
+            return `<div class="${cls}"><img src="${member.avatar}" alt=""><span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span></div>`;
+        }
+        return `<div class="${cls}" aria-label="${encodePlainText(member.name)}">${initials(member.name)}${dot}</div>`;
+    }
+
+    function avatarStackHTML(ids, size = 'normal') {
+        const a = getMember(ids[0] || '');
+        const b = getMember(ids[1] || '');
+        const small = size !== 'normal';
+
+        let code = "";
+        if (ids[0] != UserManager.getID()) code += `<div class="a1">${avatarHTML(a, small ? 'small' : 'normal')}</div>`;
+        if (ids[1] != UserManager.getID()) code += `<div class="a2">${avatarHTML(b, small ? 'small' : 'normal')}</div>`;
+
+        return `
+      <div class="avatarStack ${small ? 'small' : ''}">
+        ${code}
+      </div>`;
+    }
+
+    function authorChip(authorId, small = false) {
+        const m = getMember(authorId);
+        return `<span class="authorChip">
+        ${avatarHTML(m, small ? 'tiny' : 'small')}
+        <span>${encodePlainText(m.name)}</span>
+      </span>`;
+    }
+
+    // dms
+    function renderDMs() {
+        if (!socket.connected) return;
+
+        STATE.unreadCounter = 0;
+
+        const wrap = document.getElementById('dmList');
+        if (!wrap) return;
+        wrap.innerHTML = "";
+
+        const makeTicketHeader = (titleText, countOpen, expanded) => {
+            const head = document.createElement('div');
+            head.className = 'dmItem';
+            head.dataset.section = 'tickets';
+            head.style.cursor = 'pointer';
+            head.style.background = 'rgba(171,184,190,0.08)';
+            head.style.border = '1px solid var(--border)';
+            head.style.marginBottom = '4px';
+            head.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:center;font-weight:800;">🎫</div>
+          <div style="font-weight:800;">${encodePlainText(titleText)} <span style="opacity:.7;font-weight:600">(${countOpen} open)</span></div>
+          <div style="font-size:12px;color:var(--muted)">${expanded ? '▾' : '▸'}</div>
+        `;
+            return head;
+        };
+
+        const renderTicketItems = (tickets) => {
+            if (!tickets || !tickets.length) return;
+            tickets.forEach(t => {
+                const title = t.title ? `🎫 ${t.title}` : `🎫 Ticket ${t.id}`;
+                const row = document.createElement('div');
+                row.className = 'dmItem' + (STATE.activeThreadId === t.id ? ' active' : '');
+                row.innerHTML = `
+          ${avatarStackHTML(t.participants)}
+          <div>
+            <div class="dmName">${encodePlainText(title)}</div>
+            <div class="dmPreview">${encodePlainText(decodeFromBase64(t.last) || "")}</div>
+          </div>
+
+          ${t.unread > 0 ?
+                    `<div class="dmBadge">${t.unread ? `<span>${t.unread}</span>` : ''}</div>` : ""
+                }
+          `;
+                if (t.unread > 0) STATE.unreadCounter += t.unread
+
+                row.onclick = () => openThread(t.id);
+                wrap.appendChild(row);
+            });
+        };
+
+        const renderSeparator = () => {
+            const sep = document.createElement('div');
+            sep.style.height = '8px';
+            wrap.appendChild(sep);
+        };
+
+        const myTicketsAll = CONFIG.threads.filter(t => t.type === 'ticket' && (t.participants || []).includes(CURRENT_USER_ID));
+        const openTickets = myTicketsAll.filter(t => (t.status || 'open') === 'open');
+
+        socket.emit("checkPermission", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            permission: ["manageTickets"]
+        }, function (response) {
+            const viewerIsStaff = (response?.permission === "granted");
+
+            const ticketListForPanel = viewerIsStaff
+                ? CONFIG.threads.filter(t => t.type === 'ticket' && ((t.status || 'open') === 'open')) // staff: all open tickets
+                : myTicketsAll;
+
+            const openCount = CONFIG.threads.filter(t => t.type === 'ticket' && ((t.status || 'open') === 'open')).length;
+
+            if (ticketListForPanel.length > 0) {
+                if (!wrap.querySelector('[data-section="tickets"]')) {
+                    const head = makeTicketHeader('Tickets', openCount, STATE.ticketsExpanded);
+                    head.onclick = () => {
+                        STATE.ticketsExpanded = !STATE.ticketsExpanded;
+                        renderDMs();
+                    };
+                    wrap.appendChild(head);
+
+                    if (STATE.ticketsExpanded) {
+                        renderTicketItems(ticketListForPanel);
+                    }
+
+                    renderSeparator();
+                } else {
+                    const existingHead = wrap.querySelector('[data-section="tickets"]');
+                    if (existingHead) {
+                        existingHead.querySelector('div:nth-child(2)').innerHTML = `Tickets <span style="opacity:.7;font-weight:600">(${openCount} open)</span>`;
+                        existingHead.querySelector('div:nth-child(3)').textContent = STATE.ticketsExpanded ? '▾' : '▸';
+                    }
+                }
+            }
+
+            // normal dms
+            const sorted = CONFIG.threads
+                .filter(t => {
+                    // hide open ticket threads from the normal list
+                    if (viewerIsStaff && t.type === 'ticket' && ((t.status || 'open') === 'open')) return false;
+                    // otherwise include
+                    return true;
+                })
+                .slice()
+                .sort((a, b) => {
+                    const ta = a.lastAt ? new Date(a.lastAt).getTime() : 0;
+                    const tb = b.lastAt ? new Date(b.lastAt).getTime() : 0;
+                    return tb - ta;
+                });
+
+            // show normal dms
+            sorted.forEach(t => {
+                if (t.type != "ticket") { // dont show tickets in normal dms
+                    const target = otherParticipant(t);
+                    const title = t.type === 'ticket' ? (t.title || target.name || `Ticket ${t.id}`) : (t.title || target.name || `Chat ${t.id}`);
+                    const row = document.createElement('div');
+
+                    row.className = 'dmItem' + (STATE.activeThreadId === t.id ? ' active' : '');
+                    row.innerHTML = `
+            ${avatarStackHTML(t.participants)}
+            <div>
+              <div class="dmName">${encodePlainText(title)}</div>
+              <div class="dmPreview">${encodePlainText(decodeFromBase64(t.last) || "")}</div>
+            </div>
+            ${t.unread > 0 ?
+                        `<div class="dmBadge">${t.unread ? `<span>${t.unread}</span>` : ''}</div>` : ""
+                    }`;
+                    if (t.unread > 0) STATE.unreadCounter += t.unread
+
+                    row.onclick = () => openThread(t.id);
+                    wrap.appendChild(row);
+                }
+            });
+
+            setUnreadTitle();
+        });
+    }
+
+    function setUnreadTitle() {
+        socket.emit("getAllUnread",
+            {id: UserManager.getID(), token: UserManager.getToken()},
+            function (response) {
+                let unread = Number(response?.unread ?? 0);
+
+                // glory to the template system
+                unread > 0 ? document.title = `(${unread}) {{server.name}} – Server Home & DMs` : document.title = "{{server.name}} – Server Home & DMs"
+            }
+        );
+    }
+
+    function truncateText(text, length) {
+        text = String(text || '');
+        if (text.length <= length) return text;
+        return text.substr(0, length) + '\u2026';
+    }
+
+    function renderRight() {
+        const news = document.getElementById('newsList');
+        if (news) news.innerHTML = "";
+        CONFIG.news
+            .slice()
+            .sort((a, b) => (Number(b.pinned) - Number(a.pinned)) || (new Date(b.createdAt) - new Date(a.createdAt)))
+            .forEach(n => {
+                const el = document.createElement('div');
+                el.className = 'newsItem';
+                const contentKey = `news:${n.id}`;
+                el.setAttribute('data-content-key', contentKey);
+
+                el.innerHTML = `
+          <div class="rowTop">
+            <h5 style="margin:0;display:flex;align-items:center;gap:8px">
+              ${encodePlainText(n.title)} ${n.pinned ? '<span class="tag pinned">Pinned</span>' : ''}
+            </h5>
+            ${isAdmin ? `<div class="rowActions">
+              <button class="iconBtn" title="Edit" onclick="onEditNews(${Number(n.id)})">${ICONS.edit}</button>
+              <button class="iconBtn" title="${n.pinned ? 'Unpin' : 'Pin'}" onclick="onTogglePinNews(${Number(n.id)})">${n.pinned ? ICONS.unpin : ICONS.pin}</button>
+              <button class="iconBtn" title="Delete" onclick="onDeleteNews(${Number(n.id)})">${ICONS.del}</button>
+            </div>` : ''}
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin:6px 0 4px 0">${authorChip(n.authorId, true)}<span class="meta">${fmtDate(n.createdAt)}</span></div>
+          <div style="color:var(--muted);font-size:13px">${sanitizeHtmlForRender(truncateText(n.body, 100) || '')}</div>`;
+
+                if (STATE.unreadContent.has(contentKey)) {
+                    const badge = document.createElement('div');
+                    badge.className = 'dmBadge contentUnreadBadge';
+                    badge.style.position = 'absolute';
+                    badge.style.right = '12px';
+                    badge.style.top = '12px';
+                    badge.style.color = 'white';
+                    badge.style.width = '15px';
+                    badge.style.height = '15px';
+                    badge.textContent = '';
+                    el.style.position = 'relative';
+                    el.appendChild(badge);
+                }
+
+                el.addEventListener('click', () => openNewsFull(Number(n.id)));
+                news?.appendChild(el);
+            });
+
+        const help = document.getElementById('helpList');
+        if (help) help.innerHTML = "";
+        CONFIG.help
+            .slice()
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .forEach(h => {
+                const el = document.createElement('div');
+                el.className = 'helpItem';
+                const contentKey = `help:${h.id}`;
+                el.setAttribute('data-content-key', contentKey);
+
+                el.innerHTML = `
+            <div class="rowTop">
+              <h5 style="margin:0;display:flex;align-items:center;gap:8px">
+                ${encodePlainText(h.title)} ${h.pinned ? '<span class="tag pinned">Pinned</span>' : ''}
+              </h5>
+              ${isAdmin ? `<div class="rowActions">
+                <button class="iconBtn" title="Edit" onclick="onEditHelp('${h.slug}')">${ICONS.edit}</button>
+                <button class="iconBtn" title="${h.pinned ? 'Unpin' : 'Pin'}" onclick="onTogglePinHelp('${h.slug}')">${h.pinned ? ICONS.unpin : ICONS.pin}</button>
+                <button class="iconBtn" title="Delete" onclick="onDeleteHelp('${h.slug}')">${ICONS.del}</button>
+              </div>` : ''}
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;margin:6px 0 4px 0">
+              ${authorChip(h.authorId, true)}<span class="meta">${fmtDate(h.createdAt)}</span>
+            </div>
+
+            <div style="color:var(--muted);font-size:13px">
+              ${sanitizeHtmlForRender(truncateText(h.body, 100) || '')}
+            </div>
+          `;
+
+                if (STATE.unreadContent.has(contentKey)) {
+                    const badge = document.createElement('div');
+                    badge.className = 'dmBadge contentUnreadBadge';
+                    badge.style.position = 'absolute';
+                    badge.style.right = '12px';
+                    badge.style.top = '12px';
+                    badge.style.color = 'white';
+                    badge.style.width = '15px';
+                    badge.style.height = '15px';
+                    badge.textContent = '';
+                    el.style.position = 'relative';
+                    el.appendChild(badge);
+                }
+
+                el.addEventListener('click', (e) => {
+                    if (e.target.closest('.rowActions')) return;
+                    showHelpDoc(h);
+                });
+                help?.appendChild(el);
+            });
+    }
+
+    function editHero() {
+        customPrompts.showPrompt(
+            "Edit Home",
+            `
+          <div style="margin: 20px 0;">
+            <label class="prompt-label">Title</label>
+            <input type="text" class="prompt-input" name="homeTitle" value="${encodePlainText(CONFIG.heroTitle)}">
+          </div>
+
+          <div style="margin: 20px 0;">
+            <label class="prompt-label">Subtitle</label>
+            <input type="text" class="prompt-input" name="homeSubtitle" value="${encodePlainText(CONFIG.heroSubtitle)}">
+          </div>
+
+          <div style="margin: 20px 0;">
+             <div class="prompt-form-group">
+                  <label class="prompt-label" for="bannerImage">Banner Image</label>
+
+                  <div class="profile-image-container" id="bannerImageContainer" onclick="document.getElementById('bannerImage').click()" style="width: 100% !important; border-radius: 8px !important;${CONFIG.bannerUrl ? `background-image: url('${CONFIG.bannerUrl}` : ""}'); background-size: cover;">
+                      <img id="bannerImagePreview" src="${CONFIG.bannerUrl ? `${CONFIG.bannerUrl}` : ""}" alt="Banner Image" class="profile-image-preview">
+                  </div>
+                  <input class="prompt-input" type="file" name="bannerImage" id="bannerImage" accept="image/*" style="display: none;" onchange="customPrompts.previewImage(event)">
+              </div>
+          </div>
+
+          <li class="prompt-note">Click to choose a image and upload it automatically</li>
+          <li class="prompt-note">Changes will apply upon pressing "Save"</li>
+        `,
+
+            async (values) => {
+
+                let homeTitle = values.homeTitle;
+                let homeSubtitle = values.homeSubtitle;
+                let homeBannerUrl = "";
+
+                // check banner and upload new one
+                if (values.bannerImage) {
+                    const bannerUrl = await upload(values.bannerImage);
+
+                    if (!bannerUrl.error) {
+                        console.log('Banner Image :', bannerUrl.urls);
+                        homeBannerUrl = bannerUrl.urls;
+                    }
+                }
+
+                socket.emit("updateHero", {
+                    token: UserManager.getToken(), id: UserManager.getID(),
+                    bannerUrl: homeBannerUrl, title: values.homeTitle, subtitle: values.homeSubtitle
+                }, async (response) => {
+                    if (response?.type !== "success") {
+                        showSystemMessage({
+                            title: response.title || "",
+                            text: response.msg || response.error || "",
+                            icon: response.type,
+                            img: null,
+                            type: response.type,
+                            duration: response.displayTime || 3000
+                        });
+                    }
+
+                    // title
+                    if (homeTitle) {
+                        CONFIG.heroTitle = homeTitle;
+                    }
+
+                    // subtitle
+                    if (homeSubtitle) {
+                        CONFIG.heroSubtitle = homeSubtitle;
+                    }
+
+                    // banner
+                    if (homeBannerUrl) {
+                        CONFIG.bannerUrl = homeBannerUrl;
+                    }
+
+                    showServerHome();
+                });
+            },
+            ["Save", null],
+            false,
+            400
+        );
+    }
+
+    function editHeroAbout() {
+        customPrompts.showPrompt(
+            "Edit Home",
+            `
+          <div style="margin: 20px 0;">
+            <label class="prompt-label">About</label>
+            <textarea rows=10 type="text" class="prompt-input" name="homeAbout" >${CONFIG.aboutHtml}</textarea
+          </div>         
+        `,
+
+            async (values) => {
+
+                // convert plain text back to html.
+                // would be hard to edit if already rendered as html am i right
+                let homeAbout = values.homeAbout;
+
+                socket.emit("updateHeroAbout", {
+                    token: UserManager.getToken(), id: UserManager.getID(),
+                    about: homeAbout
+                }, (response) => {
+
+                    if (response?.type !== "success") {
+                        showSystemMessage({
+                            title: response.title || "",
+                            text: response.msg || response.error || "",
+                            icon: response.type,
+                            img: null,
+                            type: response.type,
+                            duration: response.displayTime || 3000
+                        });
+
+                        return;
+                    }
+
+                    // about
+                    if (homeAbout) {
+                        CONFIG.aboutHtml = homeAbout;
+                    }
+
+                    showServerHome();
+
+                });
+            },
+            ["Save", null],
+            false,
+            400
+        );
+    }
+
+    // ===== CENTER: Home & Posts
+    function showServerHome() {
+        STATE.activeThreadId = null;
+        const m = document.getElementById('centerMount');
+        if (!m) return;
+        m.innerHTML = `
+        <div class="hero" style="${CONFIG.bannerUrl ? `background-image:url('${CONFIG.bannerUrl}')` : ''}">
+          <div class="heroContent">
+            ${isAdmin ? `<button class="iconBtn" style="float: right; background-color: #E8EDF1; " title="Edit" onclick="editHero()">${ICONS.edit_black}</button>` : ""}
+            <h1>${encodePlainText(CONFIG.heroTitle || '')}</h1>
+            <p>${encodePlainText(CONFIG.heroSubtitle || '')}</p>
+          </div>
+        </div>
+        <div class="homeGrid">
+          <div>
+            <div class="homeCard aboutThisServer">
+              <h3 style="margin:0 0 8px 0">About this server 
+                ${isAdmin ? `<button class="iconBtn" style="float: right;" title="Edit" onclick="editHeroAbout()">${ICONS.edit}</button>` : ""}
+              </h3>
+              
+              <div style="color:var(--muted)">${sanitizeHtmlForRender(CONFIG.aboutHtml) || ''}</div>
+            </div>
+            <div style="height:12px"></div>
+            <div class="homeCard">
+              <h3 style="margin:0 0 8px 0">Posts</h3>
+              <div id="postList"></div>
+            </div>
+          </div>
+          <div>
+            <div class="homeCard">
+              <h3 style="margin:0 0 8px 0">Quick actions</h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">          
+                <button class="btn" onclick="openFirstUnread()">First unread</button>
+                <button class="btn" onclick="scrollToPosts()">Scroll to posts</button>
+                <button class="btn" onclick="document.getElementById('headerSearch').focus()">Search</button>
+                <button class="btn" onclick="startTicket()">New ticket</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+        renderPosts();
+    }
+
+    function renderPosts() {
+        if (!socket.connected) return;
+
+        const postWrap = document.getElementById('postList');
+        if (!postWrap) return;
+        postWrap.innerHTML = "";
+        CONFIG.posts
+            .slice()
+            .sort((a, b) => (Number(b.pinned) - Number(a.pinned)) || (new Date(b.createdAt) - new Date(a.createdAt)))
+            .forEach(p => {
+                const el = document.createElement('div');
+                el.className = 'post';
+                const contentKey = `posts:${p.id}`;
+                el.setAttribute('data-content-key', contentKey);
+
+                el.innerHTML = `
+            <div class="rowTop">
+              <h4 style="display:flex;align-items:center;gap:8px; margin:0">
+                <span>${encodePlainText(p.title)}</span> ${p.pinned ? '<span class="tag pinned">Pinned</span>' : ''}
+              </h4>
+              ${isAdmin ? `<div class="rowActions">
+                <button class="iconBtn" title="Edit" onclick="onEditPost(${Number(p.id)})">${ICONS.edit}</button>
+                <button class="iconBtn" title="${p.pinned ? 'Unpin' : 'Pin'}" onclick="onTogglePinPost(${Number(p.id)})">${p.pinned ? ICONS.unpin : ICONS.pin}</button>
+                <button class="iconBtn" title="Delete" onclick="onDeletePost(${Number(p.id)})">${ICONS.del}</button>
+              </div>` : ''}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin:6px 0 4px 0">${authorChip(p.authorId, true)}<span class="meta">${fmtDate(p.createdAt)} • ${encodePlainText(p.tag || '')}</span></div>
+            <div style="color:var(--muted);font-size:13px; margin-top:4px">${sanitizeHtmlForRender(truncateText(p.body, 100) || '')}</div>`;
+
+                // append element
+                postWrap.appendChild(el);
+
+                // add small unread badge if needed
+                if (STATE.unreadContent.has(contentKey)) {
+                    const badge = document.createElement('div');
+                    badge.className = 'dmBadge contentUnreadBadge';
+                    badge.style.position = 'absolute';
+                    badge.style.right = '12px';
+                    badge.style.top = '12px';
+                    badge.style.color = 'white';
+                    badge.style.width = '15px';
+                    badge.style.height = '15px';
+                    badge.textContent = '';
+                    el.style.position = 'relative';
+                    el.appendChild(badge);
+                }
+
+                el.addEventListener('click', () => openPostFull(Number(p.id)));
+            });
+    }
+
+    const LOCAL_UNREAD_KEY = (serverName) => `srv_unread:${serverName || CONFIG.serverName || 'default'}`;
+
+    function loadLocalUnread() {
+        try {
+            const raw = localStorage.getItem(LOCAL_UNREAD_KEY(CONFIG.serverName));
+            if (!raw) return new Set();
+            return new Set(JSON.parse(raw));
+        } catch (e) {
+            return new Set();
+        }
+    }
+
+    function saveLocalUnread(set) {
+        try {
+            localStorage.setItem(LOCAL_UNREAD_KEY(CONFIG.serverName), JSON.stringify(Array.from(set)));
+        } catch (e) {
+        }
+    }
+
+    function addLocalUnread(type, id) {
+        const s = loadLocalUnread();
+        s.add(`${type}:${id}`);
+        saveLocalUnread(s);
+    }
+
+    function removeLocalUnread(type, id) {
+        const s = loadLocalUnread();
+        if (s.has(`${type}:${id}`)) {
+            s.delete(`${type}:${id}`);
+            saveLocalUnread(s);
+        }
+    }
+
+    function hasLocalUnread(type, id) {
+        const s = loadLocalUnread();
+        return s.has(`${type}:${id}`);
+    }
+
+    // ===== CENTER: Full views (News/Post/Help)
+    function openNewsFull(id) {
+        const n = CONFIG.news.find(x => Number(x.id) === Number(id));
+        if (!n) {
+            showServerHome();
+            return;
+        }
+        const m = document.getElementById('centerMount');
+        m.innerHTML = `
+      <div class="threadHeader">
+        <div style="display:flex;align-items:center;gap:10px">${avatarHTML(getMember(n.authorId), 'small')} <div class="threadTitle">${encodePlainText(getMember(n.authorId).name)}</div></div>
+        <div class="threadMeta">${fmtDate(n.createdAt)}</div>
+      </div>
+      <div class="threadArea" id="newsFull" style="padding:24px">
+        <h2 style="margin-top:0">${encodePlainText(n.title)} ${n.pinned ? '<span class="tag pinned">Pinned</span>' : ''}</h2>
+        <div style="display:flex;align-items:center;gap:8px;margin:6px 0 14px 0">${authorChip(n.authorId)} </div>
+        <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(n.body || '')}</div>
+        ${isAdmin ? `<div class="adminRow">
+          <button class="btn ghost" onclick="onEditNews(${Number(n.id)})">Edit</button>
+          <button class="btn" onclick="onTogglePinNews(${Number(n.id)})">${n.pinned ? 'Unpin' : 'Pin'}</button>
+          <button class="btn" onclick="onDeleteNews(${Number(n.id)})">Delete</button>
+        </div>` : ''}
+      </div>`;
+
+        // mark post as read
+        const key = `news:${n.id}`;
+        if (STATE.unreadContent.has(key)) {
+            STATE.unreadContent.delete(key);
+            removeLocalUnread('news', n.id);
+            const card = document.querySelector(`.content-card[data-content-key="${key}"]`) || document.querySelector(`[data-content-key="${key}"]`);
+            if (card) {
+                const badge = card.querySelector('.contentUnreadBadge');
+                if (badge) badge.remove();
+            }
+
+            socket.emit('markContentRead', {
+                type: "news",
+                contentId: n.id,
+                userId: CURRENT_USER_ID,
+                token: UserManager.getToken(),
+                id: UserManager.getID()
+            }, (ack) => {
+                // not really needed
+                console.log(ack)
+            });
+        }
+    }
+
+    function openPostFull(id) {
+        const p = CONFIG.posts.find(x => Number(x.id) === Number(id));
+        if (!p) {
+            showServerHome();
+            return;
+        }
+        const m = document.getElementById('centerMount');
+        m.innerHTML = `
+        <div class="threadHeader">
+          <div style="display:flex;align-items:center;gap:10px">${avatarHTML(getMember(p.authorId), 'small')} <div class="threadTitle">${encodePlainText(getMember(p.authorId).name)}</div></div>
+          <div class="threadMeta">${fmtDate(p.createdAt)}</div>
+        </div>
+        <div class="threadArea" id="postFull" style="padding:24px">
+          <h2 style="margin-top:0">${encodePlainText(p.title)} ${p.pinned ? '<span class="tag pinned">Pinned</span>' : ''}</h2>
+          <div style="display:flex;align-items:center;gap:8px;margin:6px 0 14px 0">${authorChip(p.authorId)}</div>
+          <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(p.body || '')}</div>
+          ${isAdmin ? `<div class="adminRow">
+            <button class="btn ghost" onclick="onEditPost(${Number(p.id)})">Edit</button>
+            <button class="btn" onclick="onTogglePinPost(${Number(p.id)})">${p.pinned ? 'Unpin' : 'Pin'}</button>
+            <button class="btn" onclick="onDeletePost(${Number(p.id)})">Delete</button>
+          </div>` : ''}
+        </div>`;
+
+        // mark post as read
+        const key = `posts:${id}`;
+        if (STATE.unreadContent.has(key)) {
+            STATE.unreadContent.delete(key);
+            removeLocalUnread('posts', id);
+
+            const card = document.querySelector(`.content-card[data-content-key="${key}"]`) || document.querySelector(`[data-content-key="${key}"]`);
+            if (card) {
+                const badge = card.querySelector('.contentUnreadBadge');
+                if (badge) badge.remove();
+            }
+
+            socket.emit('markContentRead', {
+                type: "posts",
+                contentId: id,
+                userId: CURRENT_USER_ID,
+                token: UserManager.getToken(),
+                id: UserManager.getID()
+            }, (ack) => {
+                // not really needed
+                console.log(ack)
+            });
+        }
+    }
+
+    function showHelpDoc(doc) {
+        const m = document.getElementById('centerMount');
+        m.innerHTML = `
+      <div class="threadHeader">
+        <div style="display:flex;align-items:center;gap:10px">
+          ${avatarHTML(getMember(doc.authorId), 'small')}
+          <div class="threadTitle">${encodePlainText(getMember(doc.authorId).name)}</div>
+        </div>
+        <div class="threadMeta">${fmtDate(doc.createdAt)}</div>
+      </div>
+      <div class="threadArea" id="helpArea" style="padding:24px">
+        <h2 style="margin-top:0">${encodePlainText(doc.title)}</h2>
+        <div style="display:flex;align-items:center;gap:8px;margin:6px 0 14px 0">${authorChip(doc.authorId)}</div>
+        <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(doc.body || '')}</div>
+        ${isAdmin ?
+            `<div class="adminRow">
+            <button class="btn ghost" onclick="onEditHelp('${doc.slug}')">Edit</button>
+            <button class="btn" onclick="onTogglePinHelp('${doc.slug}')">${doc.pinned ? 'Unpin' : 'Pin'}</button>
+            <button class="btn" onclick="onDeleteHelp('${doc.slug}')">Delete</button>
+          </div>` : ''}
+
+      </div>`;
+
+        // mark post as read
+        const key = `help:${doc.id}`;
+        if (STATE.unreadContent.has(key)) {
+            STATE.unreadContent.delete(key);
+            removeLocalUnread('help', doc.id);
+            const card = document.querySelector(`.content-card[data-content-key="${key}"]`) || document.querySelector(`[data-content-key="${key}"]`);
+            if (card) {
+                const badge = card.querySelector('.contentUnreadBadge');
+                if (badge) badge.remove();
+            }
+
+            socket.emit('markContentRead', {
+                type: "help",
+                contentId: doc.id,
+                userId: CURRENT_USER_ID,
+                token: UserManager.getToken(),
+                id: UserManager.getID()
+            }, (ack) => {
+                // not really needed
+                console.log(ack)
+            });
+        }
+    }
+
+
+    // ===== CENTER: Thread (DM/Ticket)
+    function openThread(id) {
+        STATE.activeThreadId = id;
+        const t = CONFIG.threads.find(x => x.id === id);
+        if (!t) {
+            showServerHome();
+            return;
+        }
+        const target = otherParticipant(t);
+        const title = t.type === 'ticket' ? (t.title || 'Support Ticket') : (t.title || target.name);
+
+        const amParticipant = (t.participants || []).includes(CURRENT_USER_ID);
+        const takeBtn = (isAdmin && t.type === 'ticket' && !amParticipant)
+            ? `<button class="btn claimTicket" onclick="joinTicket('${t.id}')">Take ticket</button>`
+            : '';
+
+
+        // Identity-Auswahl nur für Staff in Ticket-Threads anzeigen
+        const identityControl = (t.type === 'ticket' && isAdmin) ? `
+        <select id="ticketIdentity" class="input" style="width:auto">
+          <option value="self">Me: ${encodePlainText(UserManager.getUsername() || 'Me')}</option>
+          <option value="support_tagged">[Support Team] ${encodePlainText(UserManager.getUsername() || '')}</option>
+          <option value="support_anon" selected>Support Team</option>
+        </select>` : '';
+
+        const m = document.getElementById('centerMount');
+        m.innerHTML = `
+      <div class="threadHeader">
+        ${avatarStackHTML(t.participants, 'small')}
+        <div class="threadTitle">${encodePlainText(title)}</div>
+        <div class="threadMeta"></div>
+        <button class="btn ghost" style="margin-left:auto" onclick="onDeleteThread('${t.id}')">Delete chat</button>
+        ${takeBtn}
+
+      </div>
+      <div class="threadArea" id="threadArea"></div>
+      <div class="sendRow">
+        ${identityControl}
+        <input id="sendInput" placeholder="Message ${encodePlainText(title)} …" autocomplete="off" />
+        <button class="btn accent" id="sendBtn">Send</button>
+      </div>`;
+
+        document.getElementById('sendBtn').onclick = sendMessage;
+        document.getElementById('sendInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+
+        function mergeMessages(thread, incoming) {
+            const map = new Map();
+            (thread.messages || []).forEach(m => map.set(m.id, m));
+            (incoming || []).forEach(m => map.set(m.id, m));
+            thread.messages = Array.from(map.values()).sort((a, b) => +new Date(a.ts) - +new Date(b.ts));
+        }
+
+        socket.emit('fetchMessages', {
+            threadId: t.id,
+            limit: 500,
+            token: UserManager.getToken(),
+            id: UserManager.getID()
+        }, (res) => {
+            if (res?.type === 'success') mergeMessages(t, res.messages || []);
+            renderMessages(t);
+
+            t.unread = 0;
+            renderDMs();
+
+            socket.emit('markRead', {
+                threadId: t.id,
+                memberId: CURRENT_USER_ID,
+                token: UserManager.getToken(),
+                id: UserManager.getID()
+            }, (ack) => {
+                if (ack?.type === 'success') {
+                    t.lastReadAt = ack.last_read_at; // für Divider
+                    t.unread = 0;
+                }
+            });
+        });
+    }
+
+    function onDeleteThread(threadId) {
+        customPrompts.showConfirm(
+            "Are you sure you want to delete this chat and all messages?",
+            [["Yes", "success"], ["No", "error"]],
+            (selectedOption) => {
+
+                if (selectedOption == "yes") {
+                    socket.emit('deleteThread', {
+                        threadId,
+                        memberId: CURRENT_USER_ID,
+                        token: UserManager.getToken(),
+                        id: UserManager.getID()
+                    }, (ack) => {
+
+                        if (ack?.type !== 'success') {
+                            console.warn('deleteThread failed', ack);
+                            return;
+                        }
+                        const i = CONFIG.threads.findIndex(t => t.id === threadId);
+
+                        if (i > -1) CONFIG.threads.splice(i, 1);
+                        setTimeout(() => {
+                            showServerHome();
+                            renderDMs();
+                        }, 50); // hehe
+                    });
+                }
+            }
+        )
+    }
+
+    function joinTicket(threadId) {
+        socket.emit('joinTicket', {threadId, token: UserManager.getToken(), id: UserManager.getID()}, (ack) => {
+            if (ack?.type === 'success') {
+                if (ack.thread) upsertThread(ack.thread);
+                else {
+                    // Fallback: lokal eintragen, falls Server nur OK zurückgibt
+                    const t = CONFIG.threads.find(x => x.id === threadId);
+                    if (t && !t.participants.includes(CURRENT_USER_ID)) {
+                        t.participants.push(CURRENT_USER_ID);
+                    }
+                }
+                renderDMs();
+                openThread(threadId);
+            } else {
+                alert('Konnte Ticket nicht übernehmen.');
+            }
+        });
+    }
+
+
+    socket.on('threadDeleted', ({threadId}) => {
+        const i = CONFIG.threads.findIndex(t => t.id === threadId);
+        if (i > -1) CONFIG.threads.splice(i, 1);
+        if (STATE.activeThreadId === threadId) showServerHome();
+        renderDMs();
+    });
+
+    function displayNameForMessage(m) {
+        if (m.displayName) return m.displayName;                 // <- neu
+        if (m.supportIdentity === 'support_anon') return 'Support Team';
+        if (m.supportIdentity === 'support_tagged') return `[Support Team] ${(m.authorName || '').trim()}`.trim();
+        const mem = getMember(m.authorId);
+        return mem?.name || (m.authorName || 'Unknown');
+    }
+
+
+    function renderMessages(thread) {
+        if (!socket.connected) return;
+        const area = document.getElementById('threadArea');
+        if (!area) return;
+        area.innerHTML = "";
+
+        const cutoff = thread.lastReadAt ? +new Date(thread.lastReadAt) : null;
+        let dividerPlaced = false;
+
+        (thread.messages || []).forEach(m => {
+            const ts = m.ts ? +new Date(m.ts) : 0;
+
+            if (!dividerPlaced && cutoff && ts > cutoff && m.authorId !== CURRENT_USER_ID) {
+                const divi = document.createElement('div');
+                divi.style.cssText = "text-align:center;opacity:.7;font-size:11px;margin:8px 0;";
+                divi.textContent = "— New —";
+                area.appendChild(divi);
+                dividerPlaced = true;
+            }
+
+            const mine = m.authorId === CURRENT_USER_ID;
+            const name = displayNameForMessage(m);
+            const div = document.createElement('div');
+            div.className = 'msg' + (mine ? ' mine' : '');
+
+            const canEdit = m.authorId === CURRENT_USER_ID;
+            const canDelete = m.authorId === CURRENT_USER_ID;
+            const isSystem = m.authorId === "system";
+
+            // system is allowed to use html messages hehehe
+            let text = isSystem ? sanitizeHtmlForRender(encodePlainText(decodeFromBase64(m.text))) : encodePlainText(decodeFromBase64(m.text))
+
+            div.innerHTML = `
+          <div style="font-weight:700;font-size:12px;opacity:.9">${encodePlainText(name)}</div>
+          <div>${text || ''}</div>
+          <div class="meta">
+            ${encodePlainText(new Date(m.ts).toLocaleString() || '')}
+            <span style="margin-left:8px; opacity:.8;">
+              ${canEdit ? `<button class="linkBtn" onclick="onEditMsg('${thread.id}','${m.id}')">Edit</button>` : ''}
+              ${canDelete ? `<button class="linkBtn" onclick="onDeleteMsg('${thread.id}','${m.id}')">Delete</button>` : ''}
+              ${mine == false && isSystem == false ? `<button class="linkBtn" onclick="onReportMsg('${thread.id}','${m.id}')">Report</button>` : ""}
+            </span>
+          </div>`;
+
+            area.appendChild(div);
+        });
+
+        area.scrollTop = area.scrollHeight;
+
+        socket.emit('markRead', {
+            threadId: thread.id,
+            memberId: CURRENT_USER_ID,
+            token: UserManager.getToken(),
+            id: UserManager.getID()
+        }, (ack) => {
+            if (ack?.type === 'success') {
+                thread.lastReadAt = ack.last_read_at; // für Divider
+                thread.unread = 0;
+            }
+        });
+    }
+
+    function decodeFromBase64(base64String) {
+        return decodeURIComponent(atob(base64String));
+    }
+
+    function onEditMsg(threadId, messageId) {
+        const t = CONFIG.threads.find(x => x.id === threadId);
+        const m = (t?.messages || []).find(x => x.id === messageId);
+        if (!m) return;
+
+        const decoded = decodeFromBase64(m.text || '');
+
+        customPrompts.showPrompt(
+            "Edit Message",
+            `
+      <div style="margin: 10px 0;">
+        <textarea rows=10 class="prompt-input" type="text" name="editText">${encodePlainText(decoded)}</textarea>
+      </div>
+    `,
+            async (values) => {
+                const text = values.editText;
+                if (!text || text.length <= 0) return;
+
+                socket.emit("editMessage", {
+                    messageId,
+                    newText: text,
+                    token: UserManager.getToken(),
+                    id: UserManager.getID()
+                }, (ack) => {
+                    if (ack?.type !== "success") alert("Edit failed");
+                });
+            },
+            ["Update", null],
+            false,
+            400
+        );
+    }
+
+    function onDeleteMsg(threadId, messageId) {
+        if (!confirm("Delete this message?")) return;
+        socket.emit("deleteDMMessage", {messageId, token: UserManager.getToken(), id: UserManager.getID()}, (ack) => {
+            if (ack?.type !== "success") alert("Delete failed");
+        });
+    }
+
+    function onReportMsg(threadId, messageId) {
+
+        customPrompts.showPrompt(
+            "Report Message",
+            `
+            <div style="margin: 10px 0;">
+              <p>Reason</p>
+              <textarea rows=10 class="prompt-input" type="text" name="reportReason"></textarea>
+            </div>
+
+            <li class="prompt-note">Abuse will be punished and will get you banned</li>
+          `,
+            async (values) => {
+                console.log(values)
+
+                const reason = values.reportReason;
+
+                if (!reason || reason.length <= 0) {
+                    showSystemMessage({
+                        title: "Report canceled",
+                        text: "You need to specify a report reason",
+                        icon: "error",
+                        img: null,
+                        type: "error",
+                        duration: 4000
+                    });
+                    return;
+                }
+
+                socket.emit("reportMessage", {
+                    messageId,
+                    reason,
+                    token: UserManager.getToken(),
+                    id: UserManager.getID()
+                }, (ack) => {
+                    if (ack?.type === "success") {
+                        showSystemMessage({
+                            title: "Report created",
+                            text: "",
+                            icon: "success",
+                            img: null,
+                            type: "success",
+                            duration: 1000
+                        });
+                    } else {
+                        showSystemMessage({
+                            title: "Report failed",
+                            text: "Please reach out to admins",
+                            icon: "error",
+                            img: null,
+                            type: "error",
+                            duration: 4000
+                        });
+                    }
+                });
+            },
+            ["Report", null],
+            false,
+            400
+        )
+    }
+
+
+    socket.on('threadRead', ({threadId, last_read_at}) => {
+        const t = CONFIG.threads.find(x => x.id === threadId);
+        if (!t) return;
+        t.lastReadAt = last_read_at;
+        t.unread = 0;
+        renderDMs();
+    });
+
+    function sendMessage() {
+        const identity = document.getElementById("ticketIdentity")?.value || "self";
+        const inp = document.getElementById("sendInput");
+        const txt = (inp?.value || "").trim();
+        if (!txt) return;
+
+        socket.emit("sendMessage", {
+            threadId: STATE.activeThreadId,
+            authorId: CURRENT_USER_ID,
+            text: txt,
+            supportIdentity: identity,
+            authorName: UserManager.getUsername(),
+            token: UserManager.getToken(),
+            id: UserManager.getID()
+        }, (ack) => {
+            if (ack?.type === "success") inp.value = "";
+        });
+    }
+
+    // ===== Member full (from search)
+    function openMember(memberId) {
+        const mem = getMember(memberId);
+        const mount = document.getElementById('centerMount');
+        mount.innerHTML = `
+      <div class="threadHeader">
+        <div style="display:flex;align-items:center;gap:10px">${avatarHTML(mem, 'small')} <div class="threadTitle">${encodePlainText(mem.name)}</div></div>
+        <div class="threadMeta"></div>
+      </div>
+      <div class="threadArea" style="padding:24px">
+        <h2 style="margin-top:0">${encodePlainText(mem.name)}</h2>
+        <div style="color:var(--muted);margin-bottom:16px">Status: ${encodePlainText(mem.status || '')}</div>
+        <button class="btn" onclick="startDmWith('${mem.id}','${encodePlainText(mem.name)}')">Start DM</button>
+      </div>`;
+    }
+
+    function startDmWith(id, name) {
+        // find an existing 1:1 DM (explicitly exclude tickets and group threads)
+        const existing = CONFIG.threads.find(t => {
+            if (!t || t.type === 'ticket') return false;
+            const parts = Array.isArray(t.participants) ? t.participants.map(String) : [];
+            // only consider true 1:1 threads
+            if (parts.length !== 2) return false;
+            return parts.includes(String(id)) && parts.includes(String(CURRENT_USER_ID));
+        });
+
+        if (existing) {
+            openThread(existing.id);
+            return;
+        }
+
+        // no existing 1:1 DM -> create a new DM thread
+        socket.emit('createThread', {
+            type: 'dm',
+            title: null,
+            participants: [CURRENT_USER_ID, id],
+            token: UserManager.getToken(),
+            id: UserManager.getID()
+        }, (ack) => {
+            if (ack?.type !== 'success' || !ack.threadId) {
+                console.warn('createThread failed', ack);
+                return;
+            }
+            openThread(ack.threadId);
+        });
+    }
+
+
+    // ===== Header actions
+    // Header actions
+    document.getElementById('btnHome').onclick = showServerHome;
+    document.getElementById('btnCreatePost').onclick = () => openPostModal();
+
+    const btnNewTicket = document.getElementById('btnNewTicket');
+    if (btnNewTicket) btnNewTicket.onclick = startTicket;
+
+    function startTicket() {
+
+        /*
+        showPrompt(title = 'Prompt',
+          htmlContent,
+          callback,
+          customSubmitText = null,
+          multiSelect = false,
+          customMinWidth = null,
+          helpAction = null,
+          afterSubmitAction = null,
+          disableSubmit = false,
+          disableExit = false) {*/
+
+        customPrompts.showPrompt(
+            "Create Support Ticket",
+            `
+            <div style="margin: 10px 0;">
+              <p>Ticket Subject<p>
+              <input class="prompt-input" type="text" name="ticketSubject">
+            </div>
+
+            <div style="margin: 10px 0;">
+              <p>Ticket Message</p>
+              <textarea rows=10 class="prompt-input" type="text" name="ticketText"></textarea>
+            </div>
+
+            <li class="prompt-note">Abuse will be punished and will get you banned</li>
+          `,
+            async (values) => {
+                console.log(values)
+
+                const subject = values.ticketSubject
+                if (subject === null) return;
+
+                // create the ticket
+                socket.emit('createThread', {
+                    type: 'ticket',
+                    title: subject.trim(),
+                    participants: [CURRENT_USER_ID],
+                    token: UserManager.getToken(),
+                    id: UserManager.getID()
+                }, (ack) => {
+                    if (ack?.type !== 'success' || !ack.threadId) {
+                        alert("Konnte Ticket nicht erstellen.");
+                        return;
+                    }
+
+                    // open the ticket and send the first message
+                    openThread(ack.threadId);
+                    const first = values.ticketText;
+                    if (first && first.trim()) {
+                        socket.emit('sendMessage', {
+                            threadId: ack.threadId,
+                            authorId: CURRENT_USER_ID,
+                            text: first.trim(),
+                            supportIdentity: 'self',
+                            authorName: UserManager.getUsername(),
+                            token: UserManager.getToken(),
+                            id: UserManager.getID()
+                        }, () => {
+                        });
+                    }
+                });
+
+            },
+            ["Submit Ticket", null],
+            false,
+            400
+        )
+    }
+
+    function newDM() {
+        const candidate = CONFIG.members.find(m => m.id !== CURRENT_USER_ID);
+        if (!candidate) {
+            showServerHome();
+            return;
+        }
+        startDmWith(candidate.id, candidate.name);
+    }
+
+    function openFirstUnread() {
+        const t = CONFIG.threads.find(x => x.unread > 0) || CONFIG.threads[0];
+        if (t) openThread(t.id);
+    }
+
+    function scrollToPosts() {
+        document.getElementById('postList')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
+
+    const $ = (id) => document.getElementById(id);
+
+    function openPostModal(opts = {}) {
+
+        socket.emit("checkPermission", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            permission: ["managePosts"]
+        }, function (response) {
+            if (response.permission == "granted") {
+
+                STATE.modal.mode = opts.mode || "create";
+                STATE.modal.type = opts.type || "post";
+                STATE.modal.editId = opts.editId || null;
+                STATE.modal.editSlug = opts.editSlug || null;
+
+                const titleEl = $('postTitle');
+                const bodyEl = $('postBody');
+                const radios = document.querySelectorAll('input[name="postType"]');
+
+                if (STATE.modal.mode === "edit") {
+                    radios.forEach(r => {
+                        r.checked = (r.value === STATE.modal.type);
+                        r.disabled = true;
+                    });
+
+                    if (STATE.modal.type === "post") {
+                        const p = CONFIG.posts.find(x => x.id === STATE.modal.editId);
+                        titleEl.value = p?.title || "";
+                        bodyEl.innerHTML = p?.body || "";
+                        $('postModalTitle').textContent = "Edit post";
+                        $('postSubmitBtn').textContent = "Save";
+
+                    } else if (STATE.modal.type === "news") {
+                        const n = CONFIG.news.find(x => x.id === STATE.modal.editId);
+                        titleEl.value = n?.title || "";
+                        bodyEl.innerHTML = n?.body || "";
+                        $('postModalTitle').textContent = "Edit news";
+                        $('postSubmitBtn').textContent = "Save";
+                    } else {
+                        const h = CONFIG.help.find(x => x.slug === STATE.modal.editSlug);
+                        titleEl.value = h?.title || "";
+                        bodyEl.innerHTML = h?.body || "";
+                        $('postModalTitle').textContent = "Edit help";
+                        $('postSubmitBtn').textContent = "Save";
+                    }
+
+                } else {
+                    radios.forEach(r => {
+                        r.disabled = false;
+                        r.checked = (r.value === STATE.modal.type);
+                    });
+                    titleEl.value = "";
+                    bodyEl.value = "";
+                    $('postModalTitle').textContent = "Create new";
+                    $('postSubmitBtn').textContent = "Create";
+                }
+
+                $('errTitle').style.display = 'none';
+                $('errBody').style.display = 'none';
+                $('modalOverlay').style.display = 'block';
+                $('postModal').style.display = 'flex';
+                titleEl.focus();
+            } else {
+                alert("Denied");
+            }
+        });
+    }
+
+    function closePostModal() {
+        $('modalOverlay').style.display = 'none';
+        $('postModal').style.display = 'none';
+        $('postForm').reset();
+        document.querySelectorAll('input[name="postType"]').forEach(r => r.disabled = false);
+        $('errTitle').style.display = 'none';
+        $('errBody').style.display = 'none';
+    }
+
+    $('postModalClose').onclick = closePostModal;
+    $('postCancel').onclick = closePostModal;
+    window.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            closePostModal();
+            closeSearch();
+        }
+    });
+
+    $('postForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const typeUI = (document.querySelector('input[name="postType"]:checked') || {}).value || 'post';
+        const type = (typeUI === 'post' ? 'posts' : typeUI);
+        const title = $('postTitle').value.trim();
+        const body = $('postBody').value.trim();
+        const notifyAll = document.getElementById('postNotify')?.checked || false;
+        let ok = true;
+        if (!title) {
+            $('errTitle').style.display = 'block';
+            ok = false;
+        } else {
+            $('errTitle').style.display = 'none';
+        }
+        if (!body) {
+            $('errBody').style.display = 'block';
+            ok = false;
+        } else {
+            $('errBody').style.display = 'none';
+        }
+        if (!ok) return;
+
+        if (STATE.modal.mode === "edit") {
+            const idOrSlug = (type === 'help') ? STATE.modal.editSlug : STATE.modal.editId;
+            socket.emit('editContent', {
+                type,
+                idOrSlug,
+                title,
+                body,
+                token: UserManager.getToken(),
+                id: UserManager.getID()
+            }, () => {
+            });
+        } else {
+            socket.emit('createContent', {
+                type,
+                title,
+                body,
+                authorId: CURRENT_USER_ID,
+                notifyAll,
+                token: UserManager.getToken(),
+                id: UserManager.getID()
+            }, () => {
+            });
+        }
+        closePostModal();
+    });
+
+    // Admin Actions (sockets)
+    function onEditPost(id) {
+        openPostModal({mode: "edit", type: "post", editId: id});
+    }
+
+    function onDeletePost(id) {
+        if (!confirm("Delete this post?")) return;
+        socket.emit('deleteContent', {
+            type: 'posts',
+            idOrSlug: id,
+            token: UserManager.getToken(),
+            id: UserManager.getID()
+        }, (response) => {
+            if (response.type == "success") renderAll()
+        });
+    }
+
+    function onTogglePinPost(id) {
+        const p = CONFIG.posts.find(x => Number(x.id) === Number(id));
+        if (!p) return;
+        socket.emit('editContent', {
+            type: 'posts',
+            idOrSlug: id,
+            pinned: !p.pinned,
+            token: UserManager.getToken(),
+            id: UserManager.getID()
+        }, () => {
+        });
+    }
+
+    function onEditNews(id) {
+        openPostModal({mode: "edit", type: "news", editId: id});
+    }
+
+    function onDeleteNews(id) {
+        if (!confirm("Delete this news item?")) return;
+        socket.emit('deleteContent', {
+            type: 'news',
+            idOrSlug: id,
+            token: UserManager.getToken(),
+            id: UserManager.getID()
+        }, (response) => {
+            if (response.type == "success") renderAll()
+        });
+    }
+
+    function onTogglePinNews(id) {
+        const n = CONFIG.news.find(x => Number(x.id) === Number(id));
+        if (!n) return;
+        socket.emit('editContent', {
+            type: 'news',
+            idOrSlug: id,
+            pinned: !n.pinned,
+            token: UserManager.getToken(),
+            id: UserManager.getID()
+        }, () => {
+        });
+    }
+
+    function onEditHelp(slug) {
+        openPostModal({mode: "edit", type: "help", editSlug: slug});
+    }
+
+    function onDeleteHelp(slug) {
+        if (!confirm("Delete this help article?")) return;
+        socket.emit('deleteContent', {
+            type: 'help',
+            idOrSlug: slug,
+            token: UserManager.getToken(),
+            id: UserManager.getID()
+        }, (response) => {
+            if (response.type == "success") renderAll()
+        });
+    }
+
+    function onTogglePinHelp(slug) {
+        const h = CONFIG.help.find(x => x.slug === slug);
+        if (!h) return;
+        socket.emit('editContent', {
+            type: 'help',
+            idOrSlug: slug,
+            pinned: !h.pinned,
+            token: UserManager.getToken(),
+            id: UserManager.getID()
+        }, () => {
+        });
+    }
+
+
+    // Search Modal
+    const chipsEl = document.getElementById('chips');
+    chipsEl.addEventListener('click', (e) => {
+        const chip = e.target.closest('.chip');
+        if (!chip) return;
+        const kind = chip.dataset.kind;
+        if (kind === 'all') {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            STATE.searchKinds = new Set(['members', 'dms', 'news', 'help', 'posts']);
+        } else {
+            document.querySelector('[data-kind="all"]').classList.remove('active');
+            chip.classList.toggle('active');
+            const activeKinds = Array.from(document.querySelectorAll('.chip.active')).map(c => c.dataset.kind);
+            if (activeKinds.length === 0) {
+                document.querySelector('[data-kind="all"]').classList.add('active');
+                STATE.searchKinds = new Set(['members', 'dms', 'news', 'help', 'posts']);
+            } else {
+                STATE.searchKinds = new Set(activeKinds);
+            }
+        }
+        runSearch(document.getElementById('searchInput').value);
+    });
+
+    document.getElementById('headerSearch').addEventListener('focus', () => openSearch(''));
+    document.getElementById('headerSearch').addEventListener('keydown', (e) => {
+        if (e.key.length === 1 || e.key === 'Enter' || e.key === 'Backspace') openSearch(e.target.value);
+    });
+
+    // close search when clicking background
+    (() => {
+        const modal = document.getElementById('searchModal');
+        if (!modal) return;
+
+        modal.addEventListener('click', (e) => {
+            if (!e.target.closest('.searchCard')) {
+                closeSearch();
+            }
+        });
+    })();
+
+    function openSearch(prefill) {
+        document.getElementById('modalOverlay').style.display = 'block';
+        const sm = document.getElementById('searchModal');
+        sm.style.display = 'flex';
+        const si = document.getElementById('searchInput');
+        si.value = prefill || '';
+        si.focus();
+        si.select();
+        runSearch(si.value);
+    }
+
+    function closeSearch() {
+        document.getElementById('searchModal').style.display = 'none';
+        if (document.getElementById('postModal').style.display !== 'flex') {
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+    }
+
+    document.getElementById('modalOverlay').addEventListener('click', () => {
+        if (document.getElementById('searchModal').style.display === 'flex') closeSearch();
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => runSearch(e.target.value));
+    document.getElementById('searchInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const first = document.querySelector('#searchBody .result');
+            if (first) {
+                first.click();
+            }
+        }
+    });
+
+    function runSearch(q) {
+        const body = document.getElementById('searchBody');
+        body.innerHTML = '';
+        const query = (q || '').trim().toLowerCase();
+
+        const showGroup = (title, items, clicker) => {
+            if (!items.length) return;
+            const group = document.createElement('div');
+            group.className = 'group';
+            group.innerHTML = `<h4>${title}</h4>`;
+            items.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'result';
+                el.innerHTML = item.html;
+                el.addEventListener('click', () => {
+                    closeSearch();
+                    clicker(item.raw);
+                });
+                group.appendChild(el);
+            });
+            body.appendChild(group);
+        };
+
+        if (STATE.searchKinds.has('members')) {
+            const members = CONFIG.members
+                .filter(m =>
+                    m.id !== 'system' &&
+                    (q === '' ||
+                        (m.name && m.name.toLowerCase().includes(q)) ||
+                        (m.id && m.id.toLowerCase().includes(q))
+                    )
+                )
+                .slice(0, 12)
+                .map(m => ({
+                    raw: m,
+                    html: `${avatarHTML(m, 'small')}<div class="resultText"><div><strong>${hl(m.name || '', query)}</strong></div><small>Status: ${encodePlainText(truncateText(m.status, 50) || '')}</small></div>`
+                }));
+            showGroup('Members', members, (m) => openMember(m.id));
+        }
+
+        if (STATE.searchKinds.has('dms')) {
+            const dms = CONFIG.threads
+                .filter(t => {
+                    const q = (query || '').toLowerCase();
+                    if (Array.isArray(t.participants) && t.participants.includes('system')) return false;
+                    const other = otherParticipant(t);
+                    const title = (t.title || (other && other.name) || '').toLowerCase();
+                    const last = (t.last || '').toLowerCase();
+                    return !q || (other && title.includes(q)) || last.includes(q);
+                })
+                .slice(0, 12)
+                .map(t => {
+                    const title = t.title || otherParticipant(t).name || '';
+                    return {
+                        raw: t,
+                        html: `${avatarStackHTML(t.participants, 'small')}<div class="resultText"><div><strong>${hl(title, query)}</strong></div><small>${encodePlainText(truncateText(decodeFromBase64(t.last), 50) || '', query)}</small></div>`
+                    };
+                });
+            showGroup('DMs', dms, (t) => openThread(t.id));
+        }
+
+        if (STATE.searchKinds.has('news')) {
+            const news = CONFIG.news
+                .filter(n => !query || (n.title || '').toLowerCase().includes(query) || (n.body || '').toLowerCase().includes(query))
+                .slice(0, 12)
+                .map(n => ({
+                    raw: n,
+                    html: `${authorChip(n.authorId, true)}<div class="resultText"><div><strong>${hl(n.title || '', query)}</strong></div><small>${encodePlainText(truncateText(n.body, 50) || '', query)}</small></div>`
+                }));
+            showGroup('News', news, (n) => openNewsFull(Number(n.id)));
+        }
+
+        if (STATE.searchKinds.has('help')) {
+            const help = CONFIG.help
+                .filter(h => !query || (h.title || '').toLowerCase().includes(query) || (h.body || '').toLowerCase().includes(query))
+                .slice(0, 12)
+                .map(h => ({
+                    raw: h,
+                    html: `${authorChip(h.authorId, true)}<div class="resultText"><div><strong>${hl(h.title || '', query)}</strong></div><small>${encodePlainText(truncateText(h.body, 50) || '', query)}</small></div>`
+                }));
+            showGroup('Help', help, (h) => showHelpDoc(h));
+        }
+
+        if (STATE.searchKinds.has('posts')) {
+            const posts = CONFIG.posts
+                .filter(p => !query || (p.title || '').toLowerCase().includes(query) || (p.body || '').toLowerCase().includes(query))
+                .slice(0, 12)
+                .map(p => ({
+                    raw: p,
+                    html: `${authorChip(p.authorId, true)}<div class="resultText"><div><strong>${hl(p.title || '', query)}</strong></div><small>${encodePlainText(truncateText(p.body, 100) || '', query)}</small></div>`
+                }));
+            showGroup('Posts', posts, (p) => openPostFull(Number(p.id)));
+        }
+
+        if (!body.children.length) {
+            const empty = document.createElement('div');
+            empty.style.cssText = "opacity:.7;padding:12px";
+            empty.textContent = query ? 'No results.' : 'Type to search…';
+            body.appendChild(empty);
+        }
+    }
+
+    // Utils
+    function slugify(str) {
+        return (str || '').toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').substring(0, 60);
+    }
+
+    function uniqueSlug(title) {
+        let base = slugify(title) || 'doc';
+        let slug = base;
+        let i = 2;
+        const exists = (sl) => CONFIG.help.some(h => h.slug === sl);
+        while (exists(slug)) {
+            slug = `${base}-${i++}`;
+        }
+        return slug;
+    }
+
+    function fmtDate(ts) {
+        const d = new Date(ts);
+        if (isNaN(d)) return '';
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const da = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${da}`;
+    }
+
+    // main thing were everything begins
+    function renderAll() {
+        renderDMs();
+        renderRight();
+        showServerHome();
+        fetchTickets();
+
+        setInterval(fetchTickets, 30000)
+    }
+
+    // basically entry point
+    initPow(() => {
+        socket.emit('joinServer', {id: CURRENT_USER_ID, token: UserManager.getToken()}, () => {
+        });
+
+        socket.emit("userConnected", {
+            id: UserManager.getID(), name: UserManager.getUsername(), icon: UserManager.getPFP(),
+            status: UserManager.getStatus(), token: UserManager.getToken(),
+            aboutme: UserManager.getAboutme(), banner: UserManager.getBanner()
+        }, function (response) {
+        });
+
+        socket.emit("checkPermission", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            permission: ["manageTickets", "managePosts"]
+        }, function (response) {
+            if (response.permission == "granted") {
+                socket.emit('joinStaff', {userId: CURRENT_USER_ID, token: UserManager.getToken()}, () => {
+                });
+
+                // just for ui and inline stuff
+                isAdmin = true;
+
+                // show create post button
+                document.getElementById("btnCreatePost").style.display = "block";
+
+                setTimeout(() => {
+                    renderAll();
+                }, 50);
+            }
+        });
+
+        socket.on('connect', () => console.info('socket connected', socket.id));
+        socket.on('reconnect', (attempt) => console.info('reconnect attempt', attempt, 'socket', socket.id));
+        socket.on('disconnect', (reason) => console.warn('socket disconnected', reason));
+        socket.on('connect_error', (err) => console.error('connect_error', err));
+
+        // update config on the fly if something changes
+        socket.on('updatedHome', (data) => {
+            CONFIG.aboutHtml = data.about;
+            CONFIG.heroTitle = data.title;
+            CONFIG.heroSubtitle = data.subtitle;
+            CONFIG.bannerUrl = data.bannerUrl;
+
+            console.log(data)
+
+            // if server home is activly open, refresh it
+            let centerMount = document.getElementById("centerMount");
+            if (centerMount.querySelector(".heroContent")) showServerHome();
+
+            console.log("updated home")
+        });
+
+
+        introduceNewHome();
+    });
+
+
+</script>
+</body>
+
+</html>

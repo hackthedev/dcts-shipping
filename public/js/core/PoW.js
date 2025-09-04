@@ -330,7 +330,7 @@ function verifyPow(challenge, solution) {
             icon: response.type,
             img: null,
             type: response.type,
-            duration: response.displayTime || 3000
+            duration: response.displayTime || 10000
         });
 
         if(response.error == "invalidIdentity"){

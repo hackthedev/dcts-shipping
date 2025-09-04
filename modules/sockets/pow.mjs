@@ -1,7 +1,7 @@
 import { crypto, saveConfig, serverconfig, useridFromSocket, xssFilters } from "../../index.mjs";
-import { getJson } from "../functions/chat/main.mjs";
+import { formatDateTime, getJson } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
-import { checkConnectionLimit, checkRateLimit, copyObject, removeFromArray, validateMemberId } from "../functions/main.mjs";
+import { checkConnectionLimit, checkMemberBan, checkRateLimit, copyObject, removeFromArray, validateMemberId } from "../functions/main.mjs";
 import { estimatePoWDuration, formatTimeDifference } from "../functions/pow.mjs";
 
 export let powVerifiedUsers = [];
@@ -32,7 +32,7 @@ export function listenToPow(socket) {
                     && serverconfig.servermembers[data?.id].token == data?.token) {
 
                     // if someone uses the same pow kick em!
-                    const members = Object.values(serverconfig.servermembers ||{});
+                    const members = Object.values(serverconfig.servermembers || {});
                     const duplicatePowMember = members.find(member => member.pow === powString);
 
                     if (duplicatePowMember && serverconfig.servermembers[data.id].token != data.token) {
@@ -44,10 +44,30 @@ export function listenToPow(socket) {
 
                     serverconfig.servermembers[data.id].pow = powString;
                     saveConfig(serverconfig);
+
+                    
+                    let banResult = checkMemberBan(socket, serverconfig.servermembers[data.id]);
+                    let banText = "";
+                    if (banResult?.timestamp) {
+                        if (new Date(banResult.timestamp).getFullYear() == "9999") {
+                            banText = "banned permanently";
+                        }
+                        else {
+                            banText = `banned until <br>${formatDateTime(new Date(banResult.timestamp))}`
+                        }
+                    }
+
+                    if (banResult?.reason) {
+                        banText += `<br><br>Reason:<br>${banResult.reason}`
+                    }
+
+                    if (banResult.result == true) {
+                        response({ error: `You've been ${banText}`, type: "error", msg: `You've been ${banText}`, msgDisplayDuration: 1000 * 60 })
+                        socket.disconnect();
+                        return;
+                    }
                 }
             }
-
-
 
             response({ type: "success", msg: "Authenticated" })
         } else {

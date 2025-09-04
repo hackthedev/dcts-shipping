@@ -45,6 +45,23 @@ class TooltipSystem {
                 border-color: #333 transparent transparent transparent;
             }
 
+            .tooltip-system-arrow.left {
+                right: 100%;
+                top: 50%;
+                transform: translateY(-50%);
+                border-width: 5px 0 5px 5px;
+                border-color: transparent transparent transparent #333;
+            }
+
+            .tooltip-system-arrow.right {
+                left: 100%;
+                top: 50%;
+                transform: translateY(-50%);
+                border-width: 5px 5px 5px 0;
+                border-color: transparent #333 transparent transparent;
+            }
+
+
             .tooltip-system-button {
                 background-color: #5865F2;
                 color: white;
@@ -102,47 +119,64 @@ class TooltipSystem {
 
     // Function to show the tooltip
     showTooltip(targetElement, id, message, buttonText = 'OK', onNext) {
-        // If the tooltip has already been shown, don't show it again
-        if (this.hasTooltipBeenShown(id)) return;
+    if (this.hasTooltipBeenShown(id) && !onNext) return;
+    if (this.hasTooltipBeenShown(id) && onNext) { onNext(); return; }
 
-        const tooltip = document.createElement('div');
-        tooltip.className = 'tooltip-system-tooltip';
-        tooltip.innerHTML = `
-            ${message}
-            <div class="tooltip-system-arrow"></div>
-            <button class="tooltip-system-button">${buttonText}</button>
-        `;
-        document.body.appendChild(tooltip);
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip-system-tooltip';
+    tooltip.innerHTML = `${message}<div class="tooltip-system-arrow"></div><button class="tooltip-system-button">${buttonText}</button>`;
+    document.body.appendChild(tooltip);
 
-        const arrow = tooltip.querySelector('.tooltip-system-arrow');
+    const arrow = tooltip.querySelector('.tooltip-system-arrow');
 
-        // Save the original border style to restore it later
-        const originalBorderStyle = targetElement.style.border;
+    const rect = targetElement.getBoundingClientRect();
+    const scrollX = window.scrollX || window.pageXOffset;
+    const scrollY = window.scrollY || window.pageYOffset;
+    const computed = window.getComputedStyle(targetElement);
 
-        // Add the rainbow border animation
-        targetElement.classList.add('tooltip-system-rainbow-border');
+    const highlight = document.createElement('div');
+    highlight.className = 'tooltip-system-highlight';
+    highlight.style.position = 'absolute';
+    highlight.style.pointerEvents = 'none';
+    highlight.style.zIndex = '999';
+    highlight.style.boxSizing = 'border-box';
 
-        // Position the tooltip based on available space
-        this.positionTooltip(tooltip, targetElement, arrow);
+    highlight.style.left = `${Math.round(rect.left + scrollX)}px`;
+    highlight.style.top = `${Math.round(rect.top + scrollY)}px`;
+    highlight.style.width = `${Math.round(rect.width)}px`;
+    highlight.style.height = `${Math.round(rect.height)}px`;
 
-        // Show the tooltip
-        setTimeout(() => {
-            tooltip.classList.add('tooltip-system-show-tooltip');
-        }, 100);
+    const bw = parseFloat(computed.borderLeftWidth) || parseFloat(computed.borderTopWidth) || 0;
+    highlight.style.borderWidth = `${Math.max(2, Math.round(bw || 3))}px`;
+    highlight.style.borderStyle = 'solid';
+    highlight.style.borderColor = 'transparent';
+    highlight.style.animation = 'rainbow-border 4s linear infinite';
 
-        // Add click listener to the button
-        const button = tooltip.querySelector('.tooltip-system-button');
-        button.addEventListener('click', () => {
-            if (onNext) onNext(); // Call the onNext function if provided
-            this.hideTooltip(tooltip);
+    highlight.style.borderTopLeftRadius = computed.getPropertyValue('border-top-left-radius') || computed.borderRadius || '0px';
+    highlight.style.borderTopRightRadius = computed.getPropertyValue('border-top-right-radius') || computed.borderRadius || '0px';
+    highlight.style.borderBottomRightRadius = computed.getPropertyValue('border-bottom-right-radius') || computed.borderRadius || '0px';
+    highlight.style.borderBottomLeftRadius = computed.getPropertyValue('border-bottom-left-radius') || computed.borderRadius || '0px';
 
-            // Restore the original border style or remove the rainbow border
-            targetElement.classList.remove('tooltip-system-rainbow-border');
-            targetElement.style.border = originalBorderStyle;
+    document.body.appendChild(highlight);
+    targetElement._tooltipHighlight = highlight;
 
-            this.markTooltipAsShown(id); // Mark this tooltip as shown
-        });
-    }
+    this.positionTooltip(tooltip, targetElement, arrow);
+
+    setTimeout(() => tooltip.classList.add('tooltip-system-show-tooltip'), 100);
+
+    const button = tooltip.querySelector('.tooltip-system-button');
+    button.addEventListener('click', () => {
+        if (onNext) onNext();
+        this.hideTooltip(tooltip);
+        const h = targetElement._tooltipHighlight;
+        if (h && h.parentElement) h.parentElement.removeChild(h);
+        try { delete targetElement._tooltipHighlight; } catch (e) { targetElement._tooltipHighlight = undefined; }
+        this.markTooltipAsShown(id);
+    });
+}
+
+
+
 
     // Function to hide the tooltip
     hideTooltip(tooltip) {
@@ -156,41 +190,54 @@ class TooltipSystem {
 
     // Method to dynamically position the tooltip based on available space
     positionTooltip(tooltip, targetElement, arrow) {
-        const rect = targetElement.getBoundingClientRect(); // Get the element's position relative to the viewport
+        const rect = targetElement.getBoundingClientRect();
         const tooltipRect = tooltip.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
         const viewportWidth = window.innerWidth;
-
         const topOffset = rect.top + window.scrollY;
         const leftOffset = rect.left + window.scrollX;
 
-        // Try to place tooltip below the element
+        // clear previous position classes
+        arrow.className = 'tooltip-system-arrow';
+
         if (viewportHeight - rect.bottom > tooltipRect.height) {
             tooltip.style.left = `${leftOffset}px`;
             tooltip.style.top = `${topOffset + rect.height + 10}px`;
             arrow.classList.add('top');
+            arrow.style.left = '10px';
+            arrow.style.top = '';
+            arrow.style.transform = '';
         } else if (rect.top > tooltipRect.height) {
-            // Place tooltip above the element
             tooltip.style.left = `${leftOffset}px`;
             tooltip.style.top = `${topOffset - tooltipRect.height - 10}px`;
             arrow.classList.add('bottom');
+            arrow.style.left = '10px';
+            arrow.style.top = '';
+            arrow.style.transform = '';
         } else if (viewportWidth - rect.right > tooltipRect.width) {
-            // Place tooltip to the right
             tooltip.style.left = `${leftOffset + rect.width + 10}px`;
             tooltip.style.top = `${topOffset}px`;
             arrow.classList.add('left');
+            arrow.style.top = `${Math.round((tooltipRect.height / 2) - 5)}px`;
+            arrow.style.left = '';
+            arrow.style.transform = 'none';
         } else if (rect.left > tooltipRect.width) {
-            // Place tooltip to the left
             tooltip.style.left = `${leftOffset - tooltipRect.width - 10}px`;
             tooltip.style.top = `${topOffset}px`;
             arrow.classList.add('right');
+            arrow.style.top = `${Math.round((tooltipRect.height / 2) - 5)}px`;
+            arrow.style.left = '';
+            arrow.style.transform = 'none';
         } else {
-            // Default to below
             tooltip.style.left = `${leftOffset}px`;
             tooltip.style.top = `${topOffset + rect.height + 10}px`;
             arrow.classList.add('top');
+            arrow.style.left = '10px';
+            arrow.style.top = '';
+            arrow.style.transform = '';
         }
     }
+
 
     // Method to attach the tooltip system to elements
     attachTooltip(elementId, id, message, buttonText, onNext) {

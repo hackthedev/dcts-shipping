@@ -19,85 +19,117 @@ export function getMemberLastOnlineTime(memberID) {
     return minutesPassed
 }
 
+
 export function hasPermission(userId, permissions, channelOrGroupId = null, mode = "any") {
-    const permissionsToCheck = Array.isArray(permissions) ? permissions : [permissions];
+  const permsToCheck = Array.isArray(permissions) ? permissions : [permissions];
 
-    if (permissionsToCheck.length > 1) {
-        if (mode === "all") {
-            return permissionsToCheck.every(perm =>
-                hasPermission(userId, perm, channelOrGroupId)
-            );
-        } else if (mode === "any") {
-            return permissionsToCheck.some(perm =>
-                hasPermission(userId, perm, channelOrGroupId)
-            );
+  if (permsToCheck.length > 1) {
+    if (mode === "all") return permsToCheck.every(p => hasPermission(userId, p, channelOrGroupId));
+    return permsToCheck.some(p => hasPermission(userId, p, channelOrGroupId));
+  }
+
+  const perm = permsToCheck[0];
+  const uid = String(userId);
+
+  const rolesObj = serverconfig.serverroles || {};
+  const groupsObj = serverconfig.groups || {};
+
+  function getUserRoles() {
+    const out = [];
+    for (const rid in rolesObj) {
+      const members = rolesObj[rid]?.members || [];
+      if (members.map(String).includes(uid)) out.push(String(rid));
+    }
+    return out;
+  }
+
+  function getRoleSort(rid) {
+    return Number(rolesObj[String(rid)]?.info?.sortId || 0);
+  }
+
+  function decideByHighestRole(permsMap) {
+    if (!permsMap) return null;
+    let bestSort = -Infinity;
+    let chosen = null;
+    for (const rid of userRoles) {
+      const entry = permsMap[String(rid)];
+      if (!entry || !(perm in entry)) continue;
+      const s = getRoleSort(rid);
+      if (s > bestSort) {
+        bestSort = s;
+        chosen = entry[perm]; 
+      }
+    }
+    return chosen;
+  }
+
+  // check channels
+  function findChannelPath(chId) {
+    const idStr = String(chId);
+    for (const gid in groupsObj) {
+      const cats = groupsObj[gid]?.channels?.categories || {};
+      for (const cid in cats) {
+        const chs = cats[cid]?.channel || {};
+        if (chs[idStr]) {
+          return {
+            groupId: String(gid),
+            categoryId: String(cid),
+            channel: chs[idStr]
+          };
         }
+      }
     }
+    return null;
+  }
 
-    const perm = permissionsToCheck[0];
-    const userRoles = resolveRolesByUserId(userId);
+  const userRoles = getUserRoles();
+  if (userRoles.length === 0) return false;
 
-    const sortedRoles = userRoles
-        .map(roleId => ({
-            id: roleId,
-            sortId: serverconfig.serverroles?.[roleId]?.info?.sortId || 0
-        }))
-        .sort((a, b) => b.sortId - a.sortId); // Highest role first
+  // admin bypass
+  for (const rid of userRoles) {
+    if (rolesObj[String(rid)]?.permissions?.administrator === 1) return true;
+  }
 
-    // admin Bypass
-    for (const role of userRoles) {
-        const perms = serverconfig.serverroles?.[role]?.permissions;
-        if (perms?.administrator === 1) return true;
+  let groupId = null;
+  let channelPath = null;
+
+  if (channelOrGroupId != null) {
+    // check if channel
+    channelPath = findChannelPath(channelOrGroupId);
+    if (!channelPath) {
+      // check if group
+      const gidStr = String(channelOrGroupId);
+      if (groupsObj[gidStr]) groupId = gidStr;
+    } else {
+      groupId = channelPath.groupId;
     }
+  }
 
-    // CHANNEL PERMISSIONS - EXPLICIT OVERRIDES
-    let channelResult = null;
-    const groupId = resolveGroupByChannelId(channelOrGroupId);
-    let channelPerms = null;
+  // channel overrides
+  if (channelPath) {
+    const chPerms = channelPath.channel?.permissions || null;
+    const chDecision = decideByHighestRole(chPerms);
+    if (chDecision !== null) return chDecision === 1;
+  }
 
-    if (groupId) {
-        const category = resolveCategoryByChannelId(channelOrGroupId);
-        channelPerms = serverconfig.groups?.[groupId]?.channels?.categories?.[category]?.channel?.[channelOrGroupId]?.permissions;
-    }
+  // group overrides
+  if (groupId) {
+    const grpPerms = groupsObj[groupId]?.permissions || null;
+    const gDecision = decideByHighestRole(grpPerms);
+    if (gDecision !== null) return gDecision === 1;
+  }
 
-    for (const { id: roleId } of sortedRoles) {
-        const perms = channelPerms?.[roleId];
-        if (!perms || !(perm in perms)) continue;
+  // server roles
+  const sorted = [...userRoles].sort((a, b) => getRoleSort(b) - getRoleSort(a));
+  for (const rid of sorted) {
+    const val = rolesObj[String(rid)]?.permissions?.[perm];
+    if (val === 1) return true;
+    if (val === -1) return false;
+  }
 
-        const val = perms[perm];
-        if (val === 1) return true;    // allow overrides all
-        if (val === -1) return false;  // explicit deny
-    }
-
-    // SERVER ROLE PERMISSIONS - DENY OVERRIDES
-    for (const { id: roleId } of sortedRoles) {
-        const rolePerm = serverconfig.serverroles?.[roleId]?.permissions?.[perm];
-
-        // 👇 this is the fix: treat missing channel perms as inherited, allow server deny
-        if (rolePerm === -1) return false;
-        if (rolePerm === 1 && channelPerms?.[roleId] === undefined) {
-            // allowed only if channel doesn't override this role at all
-            channelResult = true;
-        }
-    }
-
-    // GROUP FALLBACK
-    if (channelResult !== null) return channelResult;
-
-    for (const gid in serverconfig.groups) {
-        const groupPerms = serverconfig.groups?.[gid]?.permissions || {};
-        for (const { id: roleId } of sortedRoles) {
-            const perms = groupPerms[roleId];
-            if (!perms) continue;
-            const val = perms[perm];
-            if (val === -1) return false;
-            if (val === 1) return true;
-        }
-    }
-
-    return false;
+  //default deny
+  return false;
 }
-
 
 
 
@@ -507,7 +539,14 @@ export function getGroupList(member) {
     member.id = xssFilters.inHTMLData(member.id)
     member.token = xssFilters.inHTMLData(member.token)
 
-    var code = "";
+    var code = `<a onclick="showHome()">
+                        <div class="group-entry-marker"></div>
+                        <div class="server-entry home">
+                           <img title="Home" class="server-icon" src="/img/home.jpg">    
+                           <span class="home-indicator"></span>                       
+                        </div>
+                    </a><hr class="homeDivider">`;
+
     var groups = serverconfig.groups;
     var addedGroups = []
 
@@ -567,7 +606,7 @@ function setJson(obj, path, value) {
 
     for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]] || typeof current[keys[i]] !== "object") {
-            current[keys[i]] = {}; 
+            current[keys[i]] = {};
         }
         current = current[keys[i]];
     }
@@ -944,7 +983,7 @@ export function getNewDate(offset) {
 
 export function disconnectUser(socketId, reason = null) {
 
-    try { 
+    try {
         sendMessageToUser(socketId, JSON.parse(
             `{
             "title": "You've been disconnected",
@@ -963,7 +1002,7 @@ export function disconnectUser(socketId, reason = null) {
         io.sockets.sockets.get(socketId).disconnect();
     }
     catch (ex) {
-        return {error: ex}
+        return { error: ex }
     }
 
     return { error: null };

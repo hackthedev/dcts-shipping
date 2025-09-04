@@ -9,8 +9,7 @@ class ChannelTree {
             username: UserManager.getUsername(),
             icon: UserManager.getPFP(),
             group: UserManager.getGroup()
-        }, function (response) {
-    
+        }, function (response) {    
             let group = UserManager.getGroup();
 
             const catCollection = response.data.groups[group].categories;

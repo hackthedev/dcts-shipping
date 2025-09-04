@@ -30,7 +30,7 @@ class Logger {
         bgWhite: "\x1b[47m"
     };
 
-    static log(level, message, color) {
+    static log(level, message, color = Logger.colors.fgWhite) {
         if (message instanceof Error) {
             console.log(`${color}${Logger.displayDate()}[${level}] ${message.message}\n${message.stack}${Logger.colors.reset}`);
         } else if (typeof message === 'object') {

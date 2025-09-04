@@ -69,7 +69,7 @@ body {
 
     padding: 8px;
 
-    background-color: #1E2124;
+    background-color: #171A1D;
     color: white;
 
     position: relative;
@@ -78,18 +78,6 @@ body {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-}
-
-#header {
-    width: calc(100% - 16px);
-    overflow: hidden;
-
-    padding: 8px;
-
-    background-color: #1E2124;
-    color: white;
-
-    position: relative;
 }
 
 #serverlist {
@@ -167,7 +155,7 @@ body {
     background-position: center center;
 }
 
-.screenshare-view-current{
+.screenshare-view-current {
     width: 400px !important;
     height: auto;
     float: left;
@@ -252,7 +240,10 @@ body {
     width: 45px;
     height: 45px;
 
-
+    background-size: cover !important;
+    object-fit: cover;
+     background-position: center center;
+     
     filter: grayscale(100%);
     background-color: transparent;
 }
@@ -551,14 +542,14 @@ body {
 }
 
 .systemAnnouncementChat {
-    background-color: #2F3136;
+    background-color: #24292E;
     width: calc(100% - 10px - 60px);
     padding: 8px 8px 8px 8px;
     font-style: italic;
 
     margin: 4px 20px 4px 20px;
 
-    border-left: 4px solid greenyellow;
+    border-left: 4px solid #ABB8BE;
     border-radius: 4px;
     margin-bottom: 40px;
 
@@ -569,7 +560,7 @@ body {
 }
 
 .systemAnnouncementChatUsername {
-    color: greenyellow;
+    color: #ABB8BE;
 }
 
 code.markdown {
@@ -728,6 +719,36 @@ pre.markdown {
     filter: grayscale(0%) !important;
 }
 
+.home-indicator {
+    position: absolute;
+    display: none;
+
+    font-size: 14px;
+    color: white;
+    font-weight: bold;
+
+    background-color: indianred;
+    border-radius: 50%;
+    border: 2px solid black;
+
+    z-index: 2;
+    text-align: center;
+
+    top: 40px;
+    left: 46px;
+
+    margin: 0;
+    padding: 2px 6px;
+}
+
+#mobile_GroupList .home-indicator{
+    top: 2px !important;
+    left: 38px !important;
+}
+
+.home-indicator.visible {
+    display: inline-block !important;
+}
 
 #profile-qa-settings {
     width: 20px;
@@ -1095,14 +1116,21 @@ label.mention {
     cursor: pointer;
 }
 
-.donators {
-    background-image: url('/img/heart_white.webp');
+.headerIcon {
     background-size: cover;
     width: 25px;
     height: 25px;
     margin-right: 10px;
     float: right;
     cursor: pointer;
+}
+
+.headerIcon.donators{    
+    background-image: url('/img/heart_white.webp');
+}
+
+.headerIcon.help{    
+    background-image: url('/img/help.png');
 }
 
 li.info {

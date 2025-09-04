@@ -1,24 +1,83 @@
 class AdminActions {
     static changeGroupIcon(id) {
-        var catname = prompt("Group Icon URL:");
+        let currentIcon = document.querySelector(`img.server-icon.group-icon-${id}`).src;
+        customPrompts.showPrompt(
+            "Change Group Icon",
+            `
+                <div style="margin: 20px 0;">
+                    <div class="prompt-form-group">
+                        <label class="prompt-label" for="profileImage">Profile Image</label>
+                        <div class="profile-image-container" id="profileImageContainer" onclick="document.getElementById('profileImage').click()" 
+                        ${currentIcon ? `style="background-image: url('${currentIcon}` : ""}');">
+                            <img id="profileImagePreview" src="${currentIcon ? `${currentIcon}` : ""}" alt="Profile Image" class="profile-image-preview">
+                        </div>
+                        <input class="prompt-input" type="file" name="profileImage" id="profileImage" accept="image/*" style="display: none;" onchange="customPrompts.previewImage(event)">
+                    </div>
+                </div>
 
-        if (catname == null || catname.length <= 0) {
-            return;
-        }
-        else {
-            socket.emit("updateGroupIcon", { id: UserManager.getID(), value: catname, token: UserManager.getToken(), group: id });
-        }
+                <li class="prompt-note">Click to choose a image and upload it automatically</li>
+                <li class="prompt-note">Changes will apply upon pressing "Save"</li>
+                `,
+
+            async (values) => {
+                let homeBannerUrl = "";
+
+                // check banner and upload new one
+                if (values.profileImage) {
+                    const bannerUrl = await upload(values.profileImage);
+
+                    if (!bannerUrl.error) {
+                        console.log('Banner Image :', bannerUrl.urls);
+                        homeBannerUrl = bannerUrl.urls;
+
+                        socket.emit("updateGroupIcon", { id: UserManager.getID(), value: homeBannerUrl, token: UserManager.getToken(), group: id });
+                    }
+                }
+            },
+            ["Save", null],
+            false,
+            400
+        );
     }
 
     static changeGroupBanner() {
-        var catname = prompt("Group Banner URL:");
+        let currentBanner = document.querySelector(`#serverbanner-image`).src;
 
-        if (catname == null || catname.length <= 0) {
-            return;
-        }
-        else {
-            socket.emit("updateGroupBanner", { id: UserManager.getID(), value: catname, token: UserManager.getToken(), group: UserManager.getGroup() });
-        }
+        customPrompts.showPrompt(
+            "Change Group Banner",
+            `
+          <div style="margin: 20px 0;">
+             <div class="prompt-form-group">
+                  <label class="prompt-label" for="bannerImage">Banner Image</label>
+
+                  <div class="profile-image-container" id="bannerImageContainer" onclick="document.getElementById('bannerImage').click()" style="width: 300px; height: 160px; !important; border-radius: 8px !important;${currentBanner ? `background-image: url('${currentBanner}` : ""}');">
+                      <img id="bannerImagePreview" src="${currentBanner ? `${currentBanner}` : ""}" alt="Banner Image" class="profile-image-preview">
+                  </div>
+                  <input class="prompt-input" type="file" name="bannerImage" id="bannerImage" accept="image/*" style="display: none;" onchange="customPrompts.previewImage(event)">
+              </div>
+          </div>
+
+          <li class="prompt-note">Click to choose a image and upload it automatically</li>
+          <li class="prompt-note">Changes will apply upon pressing "Save"</li>
+        `,
+
+            async (values) => {
+                let homeBannerUrl = "";
+
+                // check banner and upload new one
+                if (values.bannerImage) {
+                    const bannerUrl = await upload(values.bannerImage);
+
+                    if (!bannerUrl.error) {
+                        console.log('Banner Image :', bannerUrl.urls);
+                        homeBannerUrl = bannerUrl.urls;
+
+                        socket.emit("updateGroupBanner", { id: UserManager.getID(), value: homeBannerUrl, token: UserManager.getToken(), group: UserManager.getGroup() });
+                    }
+                }
+            },
+            ["Save", null]
+        );
     }
 
     static createGroup() {
@@ -60,7 +119,7 @@ class AdminActions {
         `,
             (values) => {
 
-                socket.emit("createCategory", { 
+                socket.emit("createCategory", {
                     id: UserManager.getID(),
                     value: values.categoryName,
                     token: UserManager.getToken(),

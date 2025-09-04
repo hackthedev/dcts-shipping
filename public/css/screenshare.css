@@ -1,80 +1,90 @@
-  #screenshareList {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 10px;
-  }
+#screenshareList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+}
 
-  .ss-tile {
-      position: relative;
-      background: #111;
-      border: 2px solid #2f3542;
-      border-radius: 8px;
-      overflow: hidden;
-      cursor: pointer;
-  }
+.ss-tile {
+    position: relative;
+    background: #111;
+    border: 2px solid #2f3542;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+}
 
-  .ss-tile video,
-  .ss-tile img {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      display: block;
-  }
+.ss-tile video,
+.ss-tile img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    display: block;
+}
 
-  .ss-tile .ss-label {
-      position: absolute;
-      left: 6px;
-      bottom: 6px;
-      padding: 2px 6px;
-      background: rgba(0, 0, 0, .6);
-      color: #fff;
-      font: 12px/1 system-ui;
-      border-radius: 4px;
-  }
+.ss-tile .ss-label {
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    padding: 2px 6px;
+    background: rgba(0, 0, 0, .6);
+    color: #fff;
+    font: 12px/1 system-ui;
+    border-radius: 4px;
+}
 
-  /* Modal */
-  .ss-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-  }
+/* Modal */
+.ss-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
 
-  .ss-modal.open {
-      display: flex;
-  }
+.ss-modal.open {
+    display: flex;
+}
 
-  .ss-modal-content {
-      position: relative;
-      max-width: 95vw;
-      max-height: 90vh;
-      width: 100%;
-  }
+.ss-modal-content {
+    position: relative;
+    max-width: 95vw;
+    max-height: 90vh;
+    width: 100%;
+}
 
-  .ss-modal-content video {
-      width: 100%;
-      height: auto;
-      max-height: 90vh;
-      background: #000;
-      display: block;
-  }
+.ss-modal-content video {
+    width: 100%;
+    height: auto;
+    max-height: 90vh;
+    background: #000;
+    display: block;
+}
 
-  .ss-modal-close {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: #000;
-      color: #fff;
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 6px 10px;
-      cursor: pointer;
-  }
+.ss-modal-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #000;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
 
-  #channelname-icons .screenshare {
+#channelname-icons .screenshare {
     background-image: url("/img/screenshare.png");
+    cursor: pointer;
+}
+
+#channelname-icons .muteMic {
+    background-image: url("/img/microphone.png");
+    cursor: pointer;
+}
+
+#channelname-icons .muteMic.muted {
+    background-image: url("/img/muted.png");
     cursor: pointer;
 }

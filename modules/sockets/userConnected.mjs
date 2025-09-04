@@ -3,27 +3,31 @@ import { formatDateTime, getJson, resolveCategoryByChannelId, resolveChannelById
 import { saveChatMessage } from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
 import { checkMemberBan, checkMemberMute, copyObject, escapeHtml, generateId, getCastingMemberObject, hashPassword, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { sendSystemMessage } from "./home/general.mjs";
+
+function normaliseString(v) {
+    if (v === null || v === undefined) return "";
+    if (typeof v === "string" && (v.toLowerCase() === "null" || v.toLowerCase() === "undefined")) return null;
+    return String(v);
+};
 
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('userConnected', async function (member, response) {
-        member.id = xssFilters.inHTMLData(member.id)
-        member.name = xssFilters.inHTMLData(member.name)
-        member.loginName = xssFilters.inHTMLData(member.loginName)
-        member.status = xssFilters.inHTMLData(member.status)
-        member.aboutme = xssFilters.inHTMLData(member.aboutme)
-        member.icon = xssFilters.inHTMLData(member.icon)
-        member.banner = xssFilters.inHTMLData(member.banner)
-        member.token = xssFilters.inHTMLData(member.token)
-        member.onboarding = xssFilters.inHTMLData(member.onboarding) === "true";
-        member.password = xssFilters.inHTMLData(member.password) || null;
-        member.group = xssFilters.inHTMLData(member.group);
-        member.category = xssFilters.inHTMLData(member.category);
-        member.channel = xssFilters.inHTMLData(member.channel);
-        member.room = xssFilters.inHTMLData(member.room);
-
-        //var ip = socket.handshake.headers["x-real-ip"];
-        //var port = socket.handshake.headers["x-real-port"];
+        member.id = xssFilters.inHTMLData(normaliseString(member.id))
+        member.name = xssFilters.inHTMLData(normaliseString(member.name))
+        member.loginName = xssFilters.inHTMLData(normaliseString(member.loginName))
+        member.status = xssFilters.inHTMLData(normaliseString(member.status))
+        member.aboutme = xssFilters.inHTMLData(normaliseString(member.aboutme))
+        member.icon = xssFilters.inHTMLData(normaliseString(member.icon))
+        member.banner = xssFilters.inHTMLData(normaliseString(member.banner))
+        member.token = xssFilters.inHTMLData(normaliseString(member.token))
+        member.onboarding = xssFilters.inHTMLData(normaliseString(member.onboarding)) === "true";
+        member.password = xssFilters.inHTMLData(normaliseString(member.password)) || null;
+        member.group = xssFilters.inHTMLData(normaliseString(member.group));
+        member.category = xssFilters.inHTMLData(normaliseString(member.category));
+        member.channel = xssFilters.inHTMLData(normaliseString(member.channel));
+        member.room = xssFilters.inHTMLData(normaliseString(member.room));
 
         // check member ban
         let banResult = checkMemberBan(socket, member);
@@ -65,6 +69,8 @@ export default (io) => (socket) => {
             if (serverconfig.servermembers[member.id] == null) {
                 // New Member joined the server
 
+                Logger.debug("New member connected");
+
                 // handle onboarding 
                 if (member.onboarding === false) {
                     // cant proceed as the user needs to setup their account with a password
@@ -76,6 +82,7 @@ export default (io) => (socket) => {
                         text: "Finish your account setup to continue",
                         type: "success"
                     })
+
                     return;
                 }
 
@@ -88,7 +95,7 @@ export default (io) => (socket) => {
                     let userId = user[0];
                     let loginName = user[1];
 
-                    if(loginName == member.loginName) member.loginName += generateId(4);
+                    if (loginName == member.loginName) member.loginName += generateId(4);
                 });
 
 
@@ -134,6 +141,12 @@ export default (io) => (socket) => {
                             "loginName": "${serverconfig.servermembers[member.id].loginName}",
                             "type": "success"
                         }`));
+
+                    // if a new member joins lets send a system welcome DM. 
+                    // can be edited in config and is enabled on default.
+                    if (serverconfig.serverinfo.system.welcome.enabled
+                        && serverconfig.serverinfo.system.welcome.message.length > 0) sendSystemMessage(member.id, serverconfig.serverinfo.system.welcome.message)
+                    //msg * <h3>Welcome to the server!</h3><p>We hope you'll like it here!<br>If you ever need help press the <b>Support</b> button on the top!</p>
                 }
                 catch (e) {
                     Logger.error("Error on token message sending");
@@ -159,6 +172,10 @@ export default (io) => (socket) => {
                 saveChatMessage(castingMember);
 
                 io.emit("updateMemberList");
+
+                socket.join(member.id)
+                socket.data.memberId = member.id
+                console.log(io.sockets.adapter.rooms)
 
                 // Save System Message and emit join event
                 io.emit("newMemberJoined", castingMember);
@@ -187,16 +204,18 @@ export default (io) => (socket) => {
                     response({ error: "Invalid Token", finishedOnboarding: true })
                     socket.disconnect();
                     return;
-                }
+                }            
 
-                usersocket[member.id] = socket.id;
+                if(member.banner == "data:image/jpeg") member.banner = "";
+                if(member.icon == "data:image/jpeg") member.icon = "/img/default_pfp.png";
 
                 serverconfig.servermembers[member.id].name = xssFilters.inHTMLData(member.name);
                 serverconfig.servermembers[member.id].status = xssFilters.inHTMLData(member.status);
                 serverconfig.servermembers[member.id].aboutme = xssFilters.inHTMLData(member.aboutme);
                 serverconfig.servermembers[member.id].icon = xssFilters.inHTMLData(member.icon);
                 serverconfig.servermembers[member.id].banner = xssFilters.inHTMLData(member.banner);
-                serverconfig.servermembers[member.id].lastOnline = new Date().getTime();
+                serverconfig.servermembers[member.id].lastOnline = new Date().getTime();                
+
                 saveConfig(serverconfig);
 
                 if (serverconfig.servermembers[member.id].isOnline == 0) {
@@ -220,12 +239,16 @@ export default (io) => (socket) => {
                     io.emit("memberPresent", getCastingMemberObject(member));
                 }
 
+                
+                usersocket[member.id] = socket.id;    
+                socket.join(member.id)
+                socket.data.memberId = member.id;
                 response({ finishedOnboarding: true })
             }
         }
         else {
             socket.disconnect();
-            Logger.debug("ID WAS WRONG ON USER JOIN ");
+            Logger.error("ID WAS WRONG ON USER JOIN ");
         }
     });
 }

@@ -192,8 +192,17 @@ class ModView {
 
             .reported-message {
                 background: rgba(255, 255, 255, 0.1);
-                padding: 5px;
                 border-radius: 4px;
+            }
+
+            .reported-message span{
+                display: block;
+                padding: 10px;
+            }
+
+            .reported-message p{
+                padding: 0;
+                margin: 0;
             }
 
             /* Buttons */
@@ -376,16 +385,21 @@ class ModView {
     static showReports(reports) {
         let messageReports = reports.filter(r => r.reportType === "message");
         let userReports = reports.filter(r => r.reportType === "user");
+        let dmReports = reports.filter(r => r.reportType === "dm_message");
         this.reports = reports
 
         let html = `
             <div class="modview_tabs">
                 <div class="modview_tab active" onclick="ModView.switchTab('messageReports')">Message Reports <span class="modview_tabnumber active">${messageReports.length || 0}</span></div>
-                <div class="modview_tab" onclick="ModView.switchTab('userReports')">User Reports <span class="modview_tabnumber">${userReports.length || 0}</span></div>
+                <div class="modview_tab" onclick="ModView.switchTab('dmReports')">DM Reports <span class="modview_tabnumber active">${dmReports.length || 0}</span></div>
+                <!--<div class="modview_tab" onclick="ModView.switchTab('userReports')">User Reports <span class="modview_tabnumber">${userReports.length || 0}</span></div>-->
             </div>
     
             <div id="messageReports" class="modview_tab-content active">
                 ${this.generateTable(messageReports)}
+            </div>
+             <div id="dmReports" class="modview_tab-content">
+                ${this.generateTable(dmReports)}
             </div>
             <div id="userReports" class="modview_tab-content">
                 ${this.generateTable(userReports)}
@@ -443,8 +457,8 @@ class ModView {
             table += `
                 <tr class="modview_" onclick="ModView.showReportDetails(${report.id})">
                     <td class="modview_">${report.id}</td>
-                    <td class="modview_">${reportCreator ? reportCreator.loginName : "Unknown"}</td>
-                    <td class="modview_">${reportedUser ? reportedUser.loginName : "Unknown"}</td>
+                    <td class="modview_">${reportCreator ? reportCreator.name : "Unknown"}</td>
+                    <td class="modview_">${reportedUser ? reportedUser.name : "Unknown"}</td>
                     <td class="modview_">${report.reportStatus}</td>
                 </tr>
             `;
@@ -480,7 +494,7 @@ class ModView {
         this.modViewBadge.style.display = count > 0 ? "flex" : "none";
     }
 
-    static showReportDetails(reportId) {
+    static async showReportDetails(reportId) {
         let report = this.reports.find(r => r.id === reportId);
         if (!report) return;
 
@@ -489,7 +503,9 @@ class ModView {
         let reportData = report.reportData ? JSON.parse(report.reportData) : null;
         console.log(reportData)
 
-        console.log(reportedUser)
+
+        let messageHistory = await UserReports.showMessageLogs(reportData.messageId)
+
         this.modViewDivContent.innerHTML = `
         <label id="closeModView" class="icon danger" onclick="ModView.close()">&times;</label>
         <label id="refreshModView" class="icon danger" onclick='ModView.refresh()'>&#x21bb;</label>
@@ -559,22 +575,59 @@ class ModView {
             <h3>Reported Message</h3>
             <div class="modview_message-box">
                 <p><strong>User:</strong> ${reportData.name} (${reportData.id})</p>
-                <p><strong>Message:</strong></p> <div class="reported-message">${reportData.message}</div>
+                <p><strong>Message:</strong></p> <div class="reported-message"><span>${report.reportType == "dm_message" ? decodeFromBase64(reportData.message) : reportData.message}</span></div>
                 <p><strong>Time:</strong> ${new Date(reportData.timestamp).toLocaleString()}</p>
             </div>
+
+            ${messageHistory.length > 0 ?
+                    `<div class="modview_message-box" style="margin-top: 20px;">
+                        <details>
+                            <summary>Message Edit History</summary>
+                    
+                            <div class="history-container" style="margin-top: 10px;">
+                            ${messageHistory // some crazy bullshittery
+                        .map(msg => {
+
+                            let clean = msg.message.replace(/^<p>([\s\S]*)<\/p>$/i, "$1");
+
+                            // check if the reported message isnt there anymore but logged
+                            let messageColorhint = "";
+                            if (reportData.message == msg.message) {
+                                messageColorhint = "background:rgba(236, 105, 105, 0.6);"
+                            }
+                            else {
+                                messageColorhint = "background:rgba(96,102,109,1);";
+                            }
+
+                            return `<div class="history-item" style="margin-top: 20px; background-color: #4F555C !important;padding: 10px; width: calc(100% - 20px);">
+                                        <span class="history-title" style="font-style: italic;">${msg.name} (${msg.id}) @</span>
+                                        <span class="history-time" style="font-style: italic;">${new Date(msg.editedTimestamp).toLocaleString()}:</span>
+
+                                        <div class="history-msg" style="margin: 10px 0 0px 0; padding:10px; width:calc(100% - 20px);${messageColorhint}">
+                                            ${clean}
+                                        </div>
+                                    </div>`;
+                        })
+                        .join("")}
+                            </div>
+
+
+                        </details>
+                    </div>`
+                    : ""}
         </div>
         ` : ''}
 
         <div class="modview_action-buttons center">
             <button class="delete-btn" onclick="ModView.deleteReport('${report.id}')">Delete Report</button>
-            <button class="kick-btn" onclick="ModView.deleteMessage('${reportData.messageId}')">Delete Reported Message</button>
+            <button class="kick-btn" onclick="ModView.deleteMessage('${reportData.messageId}', '${reportCreator.id}', '${reportedUser.id}')">Delete Reported Message</button>
         </div>
 
         <button class="back-button" onclick="ModView.showReports(ModView.reports)">Back</button>
     `;
     }
 
-    static refresh(){
+    static refresh() {
         UserReports.getReports();
     }
 
@@ -599,7 +652,7 @@ class ModView {
         })
     }
 
-    static deleteMessage(messageId){
+    static deleteMessage(messageId, reporterId, reportedId) {
         ModView.close();
 
         customPrompts.showConfirm(
@@ -612,6 +665,8 @@ class ModView {
                         id: UserManager.getID(),
                         token: UserManager.getToken(),
                         messageId: messageId,
+                        reporterId: reporterId,
+                        reportedId: reportedId,
                     }, function (response) {
                         showSystemMessage({
                             title: response.msg,

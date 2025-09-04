@@ -1,5 +1,9 @@
 let ContextMenu;
 
+function openInNewTab(url) {
+    window.open(url, '_blank').focus();
+}
+
 document.addEventListener("DOMContentLoaded", function () {
 
 
@@ -124,6 +128,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (UserManager.getID() == msgAuthor) {
                     addContextMenuItem(ContextMenu, "Edit Message",
                         `onclick="editMessage('${clickedElement.id}');
+                        ContextMenu.classList.remove('visible');
+                        "`);
+
+                    addContextMenuItem(ContextMenu, "Copy Message Id",
+                        `onclick="navigator.clipboard.writeText('${clickedElement.id.replaceAll("msg-", "")}');
                         ContextMenu.classList.remove('visible');
                         "`);
 
@@ -365,8 +374,17 @@ document.addEventListener("DOMContentLoaded", function () {
                     ContextMenu.classList.remove('visible');
                     "`);
             });
-        }
-        else if (clickedElement.classList.contains("server-icon")) {
+        }// home icon
+        else if (clickedElement.classList.contains("server-icon") && clickedElement.parentNode.classList.contains("home")) {
+            resetContextMenuItem(ContextMenu);
+
+            addContextMenuItem(ContextMenu, "Open in new window",
+                    `onclick="openInNewTab('/home.html');
+                    ContextMenu.classList.remove('visible');
+                    "`);
+
+        } // group icon
+        else if (clickedElement.classList.contains("server-icon") && !clickedElement.parentNode.classList.contains("home")) {
 
             resetContextMenuItem(ContextMenu);
 

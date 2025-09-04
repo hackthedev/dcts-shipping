@@ -7,12 +7,15 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
 
-    socket.on('getChatlog', async function (member) {
+    socket.on('getChatlog', async function (member, response) {
         if (validateMemberId(member.id, socket) == true
             && serverconfig.servermembers[member.id].token == member.token) {
 
             if (hasPermission(member.id, ["viewChannel", "viewChannelHistory"], member.channelId)) {
                 io.to(usersocket[member.id]).emit("receiveChatlog", await getSavedChatMessage(member.groupId, member.categoryId, member.channelId, member.index));
+            }
+            else{
+                response?.({type: "error", error: "denied"})
             }
         }
     });

@@ -1,3 +1,4 @@
+import { getFreshConfig, reloadConfig } from "../../index.mjs";
 import Logger from "./logger.mjs";
 
 // templateMiddleware.mjs
@@ -61,13 +62,21 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
 
     function renderTemplate(template, query) {
         const { group, category, channel } = query;
-        const placeholders = [
+
+        let config = getFreshConfig();
+
+        let placeholders = [
+            ["server.home.banner_url", () => config.serverinfo.home.banner_url],
+            ["server.home.title", () => config.serverinfo.home.title],
+            ["server.home.subtitle", () => config.serverinfo.home.subtitle],
+            ["server.home.about", () => config.serverinfo.home.about],
+
             ["meta.page.title", () => getMetaTitle(group, category, channel)],
             ["meta.page.description", () => getMetaDescription(group, category, channel)],
-            ["server.name", () => serverconfig.serverinfo.name || "No Server Name found"],
-            ["group", () => serverconfig.groups[group].info.name || "No Group Provided"],
-            ["category", () => serverconfig.groups[group].channels.categories[category].info.name || "No Category Provided"],
-            ["channel", () => serverconfig.groups[group].channels.categories[category].channel[channel].name || "No Channel Provided"],
+            ["server.name", () => config.serverinfo.name || "No Server Name found"],
+            ["group", () => config.groups[group].info.name || "No Group Provided"],
+            ["category", () => config.groups[group].channels.categories[category].info.name || "No Category Provided"],
+            ["channel", () => config.groups[group].channels.categories[category].channel[channel].name || "No Channel Provided"],
         ];
 
         return template.replace(/{{\s*([^{}\s]+)\s*}}/g, (match, key) => {

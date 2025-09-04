@@ -24,12 +24,32 @@ initPow(() => {
             UserReports.getReports();
         }
     });
+
 })
 
+socket.on('receiveThreadNew', ({ }) => {
+    console.log("receiveThreadNew")
+    displayHomeUnread()
+});
 
-socket.on('newReport', (member) => {
+socket.on('updateUnread', () => {
+    displayHomeUnread()
+});
+
+socket.on('receiveMessage', ({ }) => {
+    displayHomeUnread()
+});
+
+socket.on('receiveContentNew', ({ type, item }) => {
+    if (item?.notifyAll && String(item.authorId) !== String(UserManager.getID())) {
+        displayHomeUnread()
+    }
+});
+
+socket.on('newReport', () => {
     UserReports.getReports();
 });
+
 
 var chatlog = document.getElementById("content");
 var channeltree = document.getElementById("channeltree");
@@ -55,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
     messageInputBox = document.querySelector('.ql-editor');
 
     loadPlugins();
-    
+
     // kinda dirty
     setTimeout(() => {
         showGroupStats()
@@ -456,9 +476,6 @@ function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag =
 
         });
     }
-    else {
-
-    }
 }
 
 function setTyping() {
@@ -486,9 +503,10 @@ function getChannelTree() {
     ChannelTree.getTree();
 }
 
-
 function getChatlog(index = -1) {
-    socket.emit("getChatlog", { id: UserManager.getID(), token: UserManager.getToken(), groupId: UserManager.getGroup(), categoryId: UserManager.getCategory(), channelId: UserManager.getChannel(), startIndex: index });
+    socket.emit("getChatlog", { id: UserManager.getID(), token: UserManager.getToken(), groupId: UserManager.getGroup(), categoryId: UserManager.getCategory(), channelId: UserManager.getChannel(), startIndex: index }, (response) => {
+        if(response?.error == "denied") document.getElementById("content").innerHTML = ""; // fuck em
+    });
 }
 
 function createYouTubeEmbed(url, messageid) {
@@ -1226,6 +1244,11 @@ socket.on('receiveChannelTree', function (data) {
     getChannelTree()
 });
 
+
+socket.on('updateChatlog', async function (data) {
+    getChatlog();
+});
+
 socket.on('receiveChatlog', async function (data) {
     if (data == null) {
         console.log("Data was null history");
@@ -1255,6 +1278,11 @@ socket.on('receiveChatlog', async function (data) {
         }
     }
 
+    if (data.length == 0 && UserManager.getChannel() && !document.getElementById("screenshareList")) {
+        document.getElementById("content").insertAdjacentHTML("beforeend", `<div class='message-profile-content-message' style="text-align: center; color: gray; font-style: italic;display: block !important; float: left !important;" id="msg-0">No messages yet... be the first one!</div>`);
+    }
+
+
     // mark channel as read
     markChannel(UserManager.getChannel(), true)
 
@@ -1277,6 +1305,7 @@ function markCurrentChannelStyle(channelId) {
 }
 
 function markChannel(channelId, read = false, msgCount = null) {
+
     if (UserManager.getChannel() == channelId) read = true;
 
     let currentChannelInTree = getChannelObjectFromTree(channelId)
@@ -1298,36 +1327,28 @@ function markChannel(channelId, read = false, msgCount = null) {
             if (!isNaN(count)) {
                 let savedChannelCount = parseInt(CookieManager.getCookie(`message-marker_${channelId}`)) || 0;
 
-                // only update cookie if the saved count is smaller than the message count
                 if (savedChannelCount < count) {
                     CookieManager.setCookie(`message-marker_${channelId}`, count);
-                }
-                else if (savedChannelCount > count) {
-                    currentChannelInTree.classList.remove("markChannelMessage");
+                    console.log("Set count to " + count);
                 }
 
-                // we can remove the marker
                 currentChannelInTree.classList.remove("markChannelMessage");
             }
         }
-    }
-    else {
+    } else {
         let count = parseInt(msgCountClass.split("_")[1]);
         let savedChannelCount = parseInt(CookieManager.getCookie(`message-marker_${channelId}`)) || 0;
         if (msgCount) count = msgCount;
 
-        if (savedChannelCount < count) {
-            // yes its a new message and we can mark it
-            if (msgCountClass) currentChannelInTree.classList.add("markChannelMessage");
-
-            // play a sound if its the same channel
-            // lets only do that when we implement stuff like dnd etc
-            if (UserManager.getChannel() == channelId) playSound("message", 0.5);
-        }
-        else if (savedChannelCount > count) {
+        if (count > savedChannelCount) {
+            CookieManager.setCookie(`message-marker_${channelId}`, count);
+            console.log("Set unread count to " + count);
+            currentChannelInTree.classList.add("markChannelMessage");
+        } else {
             currentChannelInTree.classList.remove("markChannelMessage");
         }
     }
+
 
 
     // now lets mark the summary aka category name too if any channel is marked as unread
@@ -1431,6 +1452,8 @@ socket.on('receiveGroupList', function (data) {
     let mobileGroupList = document.getElementById("mobile_GroupList");
     mobileGroupList.innerHTML = data;
     setActiveGroup(UserManager.getGroup())
+
+    displayHomeUnread();
 });
 
 
@@ -1540,9 +1563,32 @@ function setActiveGroup(group) {
     })
 }
 
+function displayHomeUnread() {
 
+    socket.emit("getAllUnread",
+        { id: UserManager.getID(), token: UserManager.getToken() },
+        function (response) {
+            let unread = Number(response?.unread ?? 0);
 
+            let indicators = document.querySelectorAll('.home-indicator');
+            if (!indicators) return console.warn('.home-indicator not found');
 
+            indicators.forEach(indicator => {
+                if (unread > 0) {
+                    if (unread >= 10) indicator.style.borderRadius = "6px";
+
+                    indicator.innerHTML = `${unread > 1000 ? "Too many :o" : unread}`;
+                    indicator.classList.add('visible');
+                    indicator.setAttribute('aria-label', `${unread} ungelesene Nachrichten`);
+                } else {
+                    indicator.innerHTML = '';
+                    indicator.classList.remove('visible');
+                    indicator.removeAttribute('aria-label');
+                }
+            })
+        }
+    );
+}
 
 document.getElementById("message-actions-image").onclick = function (e) {
     var x = e.clientX;
@@ -1687,7 +1733,6 @@ function changeGIFSrc(url, element) {
     element.src = url;
 }
 
-
 function getGifs() {
 
     var emojiContainer = document.getElementById("emoji-box-container");
@@ -1817,7 +1862,11 @@ function getServerInfo(returnData = false) {
         servername = response.name;
         serverdesc = response.description;
 
-        headline.innerHTML = `${servername} - ${serverdesc}<div class="donators" onclick="UserManager.showDonatorList('https://shy-devil.me/app/dcts/');"></div>`;
+        headline.innerHTML = `${servername} - ${serverdesc}
+        
+        <div class="headerIcon help" onclick="newUserExplainUI()"></div>
+        <div class="headerIcon donators" onclick="UserManager.showDonatorList('https://shy-devil.me/app/dcts/');"></div>
+        `;
 
     });
 }
@@ -1830,6 +1879,8 @@ function setUrl(param, isVC = false) {
     let groupId = urlData[0]?.replace("?group=", "")
     let categoryId = urlData[1]?.replace("category=", "")
     let channelId = urlData[2]?.replace("channel=", "")
+
+    showHome(true)
 
     // channel already open, dont reload it
     if (UserManager.getChannel() == channelId && channelId && UserManager.getChannel() && isVC == false) return;
@@ -1871,7 +1922,7 @@ function setUrl(param, isVC = false) {
 
 
     // get group stats
-    showGroupStats() 
+    showGroupStats()
 
     refreshValues();
 }

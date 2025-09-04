@@ -21,6 +21,8 @@ If you value the vision of DCTS and want to see it grow, consider making a donat
 
 [Donate via PayPal](https://www.paypal.me/devilsstore) | [Donate via Ko-fi](https://ko-fi.com/shydevil)
 
+<br>
+
 > [!TIP]
 >
 > You can also support the project by regularly sharing the project and letting as many people know as possible!

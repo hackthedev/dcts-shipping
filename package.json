@@ -17,6 +17,7 @@
     "file-type": "^18.2.1",
     "fs-extra": "^11.2.0",
     "get-folder-size": "^2.0.0",
+    "htmlparser2": "^10.0.0",
     "install": "^0.13.0",
     "mysql2": "^3.10.2",
     "node": "^19.8.1",

@@ -3,30 +3,36 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG)
 <!-- ![GitHub all releases](https://img.shields.io/github/downloads/hackthedev/dcts-shipping/total?color=success&label=Downloads) -->
-[Visit our new subreddit](https://www.reddit.com/r/dcts/)
+[Visit our new subreddit](https://www.reddit.com/r/dcts/) • [Feature list](/docs/Feature List.md)
 
 
-This project was made with the goal to combine TeamSpeak and Discord. The goal: A platform that looks modern like Discord but runs the server like TeamSpeak. DCTS allows you to run your own Discord Server like a TeamSpeak server, in simple words.
+This project was made with the goal to provide a platform that aims to fix issues with existing solutions like Discord, TeamSpeak, Revolt, Fosscord, Matrix, TeaSpeak and all others out there and to create new, advanced and easy to use features while creating as little friction as possible and keeping things intuitive.
 
-Since you can host the server yourself you're also the one in control of the data. This could be important for people who value their data privacy.
+![image-20250904184002475](./assets/image-20250904184002475.png)
+
+![image-20250904184210525](./assets/image-20250904184210525.png)
 
 <br>
 
-## Support the Project ❤️
-DCTS is an open-source project created to give users full control over their communication platforms. However, without community support, development may slow down significantly and could even come to a halt over time.
+## Support the Project <3
+Without community support, development may slow down significantly and could even come to a halt over time :(
 
 If you value the vision of DCTS and want to see it grow, consider making a donation. Every contribution helps accelerate development and ensures the project's future. Thank you for helping us keep DCTS alive and thriving!
 
 [Donate via PayPal](https://www.paypal.me/devilsstore) | [Donate via Ko-fi](https://ko-fi.com/shydevil)
+
+> [!TIP]
+>
+> You can also support the project by regularly sharing the project and letting as many people know as possible!
 
 <br>
 
 ## Why DCTS?
 
 > [!NOTE]
-> DCTS is still in development and in an early stage. Some features may not yet be fully refined.
+> DCTS is still in development. Some features may not yet be fully refined.
 
-Modern communication platforms have limitations that DCTS is designed to overcome. Here's why DCTS exists and how it stands out:
+Modern communication platforms have limitations and issues that DCTS is designed to overcome and fix. Here's why DCTS exists and how it stands out:
 
 - **Full Data Control**: Self-host your server and take complete control of your data and privacy.
 
@@ -40,13 +46,17 @@ Modern communication platforms have limitations that DCTS is designed to overcom
 
 - **Efficient Media Handling**: Supports advanced features like a Cloudflare image CDN for fast and smooth media uploads.
 
-- **No Paywalls**: Enjoy full functionality without subscriptions or hidden costs—DCTS is made for everyone.
+- **No Paywalls**: Enjoy full functionality without subscriptions or hidden costs - DCTS is made for everyone.
 
 - **User-Focused**: Designed to prioritize users, not corporations.
 
 - **Future-Proof**: Built with scalability and future features in mind.
 
-DCTS isn't just a chat platform; it's a vision for better communication, driven by simplicity, freedom, and innovation.
+DCTS isn't just a chat platform, it's a vision for better communication, driven by simplicity, freedom, and innovation.
+
+> [!TIP]
+>
+> Checkout the Feature list in `/docs/Feature List.md` if you're curious about more
 
 <br>
 
@@ -62,8 +72,10 @@ curl -L -O https://github.com/hackthedev/dcts-shipping/raw/main/docker/docker-co
 sudo docker compose up -d
 ```
 
+<br>
 
 ### NPM
+
 Requires node.js to be installed, see [Tested Versions](https://github.com/hackthedev/dcts-shipping?tab=readme-ov-file#tested-node-versions). Clone the git repository and execute the following commands inside the app's directory.
 ```
 git clone https://github.com/hackthedev/dcts-shipping --depth 1
@@ -88,10 +100,3 @@ Depending on your configuration the port may vary
 - ✔️ v18.20.2
 - ✔️ v16.16.0
 - 🚫 v12.22.9
-
-<br>
-
-## Screenshots
-![image](https://github.com/user-attachments/assets/68806ef4-c7ca-489e-8d3b-690f5e43d737)
-
- 

@@ -14,9 +14,13 @@ if (!String.prototype.replaceAll) {
 // served the page, so we dont have to pass the server url
 var socket = io.connect()
 
+// very important
+ensureDomPurify()
+
 // sick af in my opinion
 initPow(() => {
     userJoined();
+    showGroupStats();
 
     socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: "manageReports" }, function (response) {
         if (response.permission == "granted") {
@@ -75,11 +79,6 @@ document.addEventListener('DOMContentLoaded', function () {
     messageInputBox = document.querySelector('.ql-editor');
 
     loadPlugins();
-
-    // kinda dirty
-    setTimeout(() => {
-        showGroupStats()
-    }, 500);
 });
 
 
@@ -116,7 +115,7 @@ async function updateMarkdownLinks(delay) {
 
                     var marked = await markdown(elements[i].innerText, elements[i].id);
 
-                    if (marked != null && marked != elements[i].innerText) {
+                    if (marked.message != null && marked != elements[i].innerText) {
 
                         if (bypassCounter[elements[i].id] == null) {
                             bypassCounter[elements[i].id] = 0;
@@ -130,7 +129,7 @@ async function updateMarkdownLinks(delay) {
                         }
 
                         if (bypassElement[elements[i].id] == null) {
-                            elements[i].innerHTML = marked;
+                            elements[i].innerHTML = sanitizeHtmlForRender(marked.message);
                             setTimeout(() => scrollDown(), 10)
                         }
                     }
@@ -245,7 +244,7 @@ function decodeFromBase64(base64String) {
 
 async function markdown(msg, msgid) {
     if (msg == null) {
-        return msg;
+        return {isMarkdown: false, message: msg};
     }
 
 
@@ -259,7 +258,7 @@ async function markdown(msg, msgid) {
         else {
             // Markdown Text formatting
             if (!isURL(msg) && mediaType != "video" && mediaType != "audio" && mediaType != "image" && msg.length != 0) {
-                return msg;
+                return {isMarkdown: false, message: msg};
             }
         }
 
@@ -269,30 +268,39 @@ async function markdown(msg, msgid) {
             if (isURL(url)) {
 
                 if (mediaType == "audio") {
-                    msg = msg.replace(url, createAudioPlayerHTML(url));
+                    msg = msg.replace(url, createAudioPlayerHTML(url)).replaceAll("\n", "");
+                    return {isMarkdown: true, message: msg}
+
                 } else if (mediaType == "image") {
                     msg = msg.replace(url, `<div class="image-embed-container">
                                                 <img class="image-embed" id="msg-${msgid.replace("msg-", "")}" alt="${url}" src="${url}" onerror="this.src = '/img/error.png';" >
                                             </div>`);
+                    return {isMarkdown: true, message: msg}
+
                 } else if (mediaType == "video") {
                     msg = msg.replace(url, `<video data-id="${url}" preload="auto" onloadedmetadata="this.currentTime = 5" onclick="handleVideoClick(this)" style="background-color: black;" max-width="600" height="355" class="video-embed" controls onloadedmetadata="this.currentTime = 5" onclick="if (this.paused) { this.currentTime = 0; this.play(); } else { this.pause(); }">>
                                                 <source src="${url}">
                                             </video></div>`);
+                    return {isMarkdown: true, message: msg}
+
                 } else {
                     if (url.toLowerCase().includes("youtube") || url.toLowerCase().includes("youtu.be")) {
                         msg = msg.replace(url, createYouTubeEmbed(url, msgid));
+                        return {isMarkdown: true, message: msg}
+
                     } else {
                         msg = msg.replace(url, `<a href="${url}" target="_blank">${url}</a>`);
+                        return {isMarkdown: true, message: msg}
                     }
                 }
             }
 
         }
 
-        return msg;
+        return {isMarkdown: false, message: msg};
     } catch (error) {
         console.error('Error in markdown function:', error);
-        return msg;
+        return {isMarkdown: false, message: msg};
     }
 }
 
@@ -682,7 +690,7 @@ function sendMessageToServer(authorId, authorUsername, pfp, message) {
     if (editMessageId != null)
         editMessageId = editMessageId.replaceAll("msg-", "")
 
-    message = message.replaceAll("<p><br></p>", "");
+    //message = message.replaceAll("<p><br></p>", "");
     socket.emit("messageSend", {
         id: authorId, name: authorUsername, icon: pfp, token: UserManager.getToken(),
         message: message, group: UserManager.getGroup(), category: UserManager.getCategory(),
@@ -765,7 +773,11 @@ socket.on('doAccountOnboarding', async function (message) {
 
 
 socket.on('messageEdited', async function (message) {
-    message.message = await markdown(message.message, message.messageId);
+    let markdownResult = await markdown(message.message, message.messageId);
+    if(!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
+    if(markdownResult.isMarkdown) message.message = markdownResult.message;
+
+    console.log(markdownResult)
 
     let editElement = document.querySelector(`div.message-profile-content-message#msg-${message.messageId}`);
     if (editElement.tagName.toLowerCase() != "div") {
@@ -796,7 +808,11 @@ socket.on('messageEdited', async function (message) {
 
 socket.on('messageCreate', async function (message) {
     message.message = await text2Emoji(message.message);
-    message.message = await markdown(message.message, message.messageId);
+
+    let markdownResult = await markdown(message.message, message.messageId);
+    if(!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
+    if(markdownResult.isMarkdown) message.message = markdownResult.message;
+
     let lastEditedCode = `<pre class="editedMsg">Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}</pre>`;
 
     if (message.lastEdited == null)
@@ -1118,8 +1134,9 @@ editor.addEventListener('keydown', function (event) {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
 
+
         let msgContent = quill.root.innerHTML
-            .replace(/<p><br><\/p>/g, "")
+        //    .replace(/<p><br><\/p>/g, "")
             .replace(/<p\s+id="msg-\d+">\s*<br\s*\/?>\s*<\/p>/g, ""); // Clean up empty lines
 
         sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), msgContent);
@@ -1264,12 +1281,17 @@ socket.on('receiveChatlog', async function (data) {
                 lastEditCode = ``
 
             if (compareTimestamps(message.timestamp, getLastMessage(true)) <= 5 && previousMessageID == message.id) {
-                message.message = await markdown(message.message, message.messageId);
+                let markdownResult = await markdown(message.message, message.messageId);
+                if(!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
+                if(markdownResult.isMarkdown) message.message = markdownResult.message;
 
                 getLastMessage().insertAdjacentHTML("beforeend", `<div class='message-profile-content-message' style="display: block !important; float: left !important;" id="msg-${message.messageId}">${await text2Emoji(message.message)}</div>${lastEditCode}`);
                 previousMessageID = message.id;
             } else {
-                message.message = await markdown(message.message, message.messageId);
+                let markdownResult = await markdown(message.message, message.messageId);
+                if(!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
+                if(markdownResult.isMarkdown) message.message = markdownResult.message;
+
                 await showMessageInChat(message);
                 previousMessageID = message.id;
             }
@@ -1305,67 +1327,73 @@ function markCurrentChannelStyle(channelId) {
 }
 
 function markChannel(channelId, read = false, msgCount = null) {
+    setTimeout(() => {
+        const idStr = String(channelId);
+        if (String(UserManager.getChannel()) === idStr) read = true;
 
-    if (UserManager.getChannel() == channelId) read = true;
+        const el = getChannelObjectFromTree(idStr);
 
-    let currentChannelInTree = getChannelObjectFromTree(channelId)
-    if (!currentChannelInTree) return;
+        const channelType = el?.getAttribute?.("channelType");
+        if (channelType === "voice") {
+            el?.classList?.remove("markChannelMessage");
+            return;
+        }
 
-    // dont highlight voice channels
-    let channelType = currentChannelInTree.getAttribute("channelType");
-    if (channelType == "voice") {
-        currentChannelInTree.classList.remove("markChannelMessage");
-        return;
-    }
-
-    const msgCountClass = [...currentChannelInTree?.classList].find(cls => cls.startsWith("msgCount_"));
-
-    if (read) {
-        if (msgCountClass) {
-            let count = msgCount !== null ? parseInt(msgCount) : parseInt(msgCountClass.split("_")[1]);
-
-            if (!isNaN(count)) {
-                let savedChannelCount = parseInt(CookieManager.getCookie(`message-marker_${channelId}`)) || 0;
-
-                if (savedChannelCount < count) {
-                    CookieManager.setCookie(`message-marker_${channelId}`, count);
-                    console.log("Set count to " + count);
-                }
-
-                currentChannelInTree.classList.remove("markChannelMessage");
+        let count = Number.isFinite(msgCount) ? Number(msgCount) : NaN;
+        if (!Number.isFinite(count) && el) {
+            const cls = Array.from(el.classList || []).find(c => c.startsWith("msgCount_"));
+            if (cls) {
+                const maybe = parseInt(cls.split("_")[1], 10);
+                if (Number.isFinite(maybe)) count = maybe;
             }
         }
-    } else {
-        let count = parseInt(msgCountClass.split("_")[1]);
-        let savedChannelCount = parseInt(CookieManager.getCookie(`message-marker_${channelId}`)) || 0;
-        if (msgCount) count = msgCount;
 
-        if (count > savedChannelCount) {
-            CookieManager.setCookie(`message-marker_${channelId}`, count);
-            console.log("Set unread count to " + count);
-            currentChannelInTree.classList.add("markChannelMessage");
-        } else {
-            currentChannelInTree.classList.remove("markChannelMessage");
+        const cookieKey = `message-marker_${idStr}`;
+        const saved = parseInt(CookieManager.getCookie(cookieKey), 10) || 0;
+
+        if (read) {
+            if (Number.isFinite(count) && saved < count) {
+                CookieManager.setCookie(cookieKey, count);
+            }
+            el?.classList?.remove("markChannelMessage");
+            return;
         }
-    }
 
-
-
-    // now lets mark the summary aka category name too if any channel is marked as unread
-    // could probably be made simpler or more compact
-    let channeltree = document.getElementById("channeltree");
-    let categories = channeltree.querySelectorAll(".category");
-
-    for (let i = 0; i < categories.length; i++) {
-        let category = categories[i];
-        let markedChannels = category.querySelectorAll(".markChannelMessage");
-
-        if (markedChannels.length > 0) {
-            category.querySelector("summary").style.color = "white";
+        if (Number.isFinite(count)) {
+            if (count > saved) {
+                CookieManager.setCookie(cookieKey, count);
+                el?.classList?.add("markChannelMessage");
+            } else {
+                el?.classList?.remove("markChannelMessage");
+            }
         }
-    }
-
+    }, 200)
 }
+
+function reapplyUnreadFromCookies() {
+    const nodes = document.querySelectorAll('#channellist a[id^="channel-"], #channellist li[id^="channel-"]');
+    nodes.forEach(el => {
+        const id = el.id.replace("channel-", "");
+        const cls = Array.from(el.classList || []).find(c => c.startsWith("msgCount_"));
+        if (!cls) return;
+
+        const count = parseInt(cls.split("_")[1], 10);
+        const saved = parseInt(CookieManager.getCookie(`message-marker_${id}`), 10) || 0;
+
+        if (Number.isFinite(count)) {
+            if (String(UserManager.getChannel()) === String(id)) {
+                markChannel(id, true, count);
+            } else if (count > saved) {
+                el.classList.add("markChannelMessage");
+            } else {
+                el.classList.remove("markChannelMessage");
+            }
+        }
+    });
+}
+
+
+
 
 socket.on('markChannel', function (data) {
     markChannel(data.channelId, false, data?.count);
@@ -1453,6 +1481,7 @@ socket.on('receiveGroupList', function (data) {
     mobileGroupList.innerHTML = data;
     setActiveGroup(UserManager.getGroup())
 
+    reapplyUnreadFromCookies();
     displayHomeUnread();
 });
 
@@ -1806,8 +1835,13 @@ socket.on('receiveGroupBanner', function (data) {
 });
 
 function getChannelObjectFromTree(channelId) {
-    return document.querySelector("#channellist a#channel-" + channelId);
+    const id = String(channelId);
+    return (
+        document.querySelector(`#channellist a#channel-${id}`) ||
+        document.querySelector(`#channellist li#channel-${id}`)
+    );
 }
+
 
 function refreshValues() {
     var username = UserManager.getUsername();
@@ -1931,7 +1965,7 @@ function setUrl(param, isVC = false) {
 function showGroupStats() {
     // If we only clicked a group and no channel etc the main windows is empty.
     // lets show some nice group home / welcome screen
-    if (UserManager.getGroup() != null && UserManager.getCategory() == null && UserManager.getChannel() == null) {
+    if (UserManager.getGroup() !== null && UserManager.getCategory() === null && UserManager.getChannel() === null) {
 
         messageInputBox.parentNode.parentNode.style.visibility = "hidden";
         socket.emit("getGroupStats", { id: UserManager.getID(), token: UserManager.getToken(), group: UserManager.getGroup() }, function (response) {

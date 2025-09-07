@@ -1,10 +1,20 @@
-import { serverconfig, typingMembers, usersocket, xssFilters } from "../../index.mjs";
-import { convertMention } from "../functions/chat/helper.mjs";
-import { formatDateTime, hasPermission } from "../functions/chat/main.mjs";
-import { saveChatMessage } from "../functions/io.mjs";
+import {serverconfig, typingMembers, usersocket, xssFilters} from "../../index.mjs";
+import {convertMention} from "../functions/chat/helper.mjs";
+import {formatDateTime, hasPermission} from "../functions/chat/main.mjs";
+import {saveChatMessage} from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
-import { checkMemberMute, checkRateLimit, copyObject, escapeHtml, generateId, getCastingMemberObject, sanitizeInput, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
-import { decodeFromBase64, getChatMessagesFromDb } from "../functions/mysql/helper.mjs";
+import {
+    checkMemberMute,
+    checkRateLimit,
+    copyObject,
+    escapeHtml,
+    generateId,
+    getCastingMemberObject,
+    sanitizeInput,
+    sendMessageToUser,
+    validateMemberId
+} from "../functions/main.mjs";
+import {decodeFromBase64, getChatMessagesFromDb} from "../functions/mysql/helper.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
@@ -24,8 +34,7 @@ export default (io) => (socket) => {
             if (muteResult?.timestamp) {
                 if (new Date(muteResult.timestamp).getFullYear() == "9999") {
                     muteText = "muted permanently";
-                }
-                else {
+                } else {
                     muteText = `muted until <br>${formatDateTime(new Date(muteResult.timestamp))}`
                 }
             }
@@ -172,15 +181,14 @@ export default (io) => (socket) => {
                         io.in(member.room).emit("messageCreate", member);
 
 
-                        io.emit("markChannel", { channelId: parseInt(member.channel), count: memberMessageCount });
+                        io.emit("markChannel", {channelId: parseInt(member.channel), count: memberMessageCount});
                     }
                     // emit edit event of msg
                     else {
                         io.in(member.room).emit("messageEdited", member);
                     }
 
-                }
-                else {
+                } else {
                     Logger.debug("Couldnt find message channel");
 
                     var msg = `We were unable to send the message because the 
@@ -200,8 +208,7 @@ export default (io) => (socket) => {
                             "popup_type": "confirm"
                         }`));
                 }
-            }
-            catch (err) {
+            } catch (err) {
                 Logger.warn("Couldnt send message because room didnt exist");
                 Logger.warn(`Group was ${member.group}`);
                 Logger.warn(`Category  was ${member.category}`);
@@ -228,8 +235,7 @@ export default (io) => (socket) => {
                         }`));
                 return;
             }
-        }
-        else {
+        } else {
             Logger.warn("Cant send message because member id wasnt valid");
             Logger.warn("ID: " + member.id);
         }
@@ -237,8 +243,10 @@ export default (io) => (socket) => {
 
     function clearMessage(html, messageid) {
         html = html.replace(/<span[^>]*class=(['"])ql-cursor\1[^>]*>[\s\u200B-\u200D\uFEFF]*<\/span>/gi, "");
-
         html = html.replace(/[\u200B-\u200D\uFEFF]/g, "");
+
+        const BRP_TOKEN = `__BRP_${messageid}__`;
+        html = html.replace(/<p\b[^>]*>\s*(?:<br\s*\/?>\s*)<\/p>/gi, BRP_TOKEN);
 
         const emptyInline = /<(?:span|em|strong|i|b|u)[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/(?:span|em|strong|i|b|u)>/gi;
         const emptyP = /<p[^>]*>(?:\s|&nbsp;|<br\s*\/?>|<(?:span|em|strong|i|b|u)[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/(?:span|em|strong|i|b|u)>)*<\/p>/gi;
@@ -252,10 +260,27 @@ export default (io) => (socket) => {
 
         html = html.replace(/(?:<br\s*\/?>\s*){2,}/gi, "<br>");
 
-        if (!html || !html.replace(/<[^>]*>/g, "").trim()) {
-            html = `<p id="msg-${messageid}"><br></p>`;
+        const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const tokenRe = new RegExp(escapeRegExp(BRP_TOKEN), "g");
+
+        const withoutBRP = html.replace(tokenRe, "");
+        const hasImage = /<img\b[^>]*>/i.test(withoutBRP);
+        const hasText = !!withoutBRP
+            .replace(/<[^>]*>/g, "")
+            .replace(/&nbsp;|\s/gi, "")
+            .trim();
+
+        if (!hasImage && !hasText) {
+            return "";
         }
+
+        const trailingTokensRe = new RegExp("(?:\\s*" + escapeRegExp(BRP_TOKEN) + ")+\\s*$");
+        html = html.replace(trailingTokensRe, "");
+
+        html = html.replace(tokenRe, "<p><br></p>");
+
         return html;
     }
+
 
 }

@@ -1,4 +1,4 @@
-import { getFreshConfig, reloadConfig } from "../../index.mjs";
+import {getFreshConfig, reloadConfig, versionCode} from "../../index.mjs";
 import Logger from "./logger.mjs";
 
 // templateMiddleware.mjs
@@ -70,6 +70,8 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
             ["server.home.title", () => config.serverinfo.home.title],
             ["server.home.subtitle", () => config.serverinfo.home.subtitle],
             ["server.home.about", () => config.serverinfo.home.about],
+
+            ["version", () => versionCode],
 
             ["meta.page.title", () => getMetaTitle(group, category, channel)],
             ["meta.page.description", () => getMetaDescription(group, category, channel)],

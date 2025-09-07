@@ -16,6 +16,8 @@
     <script src="js/sysmsg.js"></script>
     <script src="js/upload.js"></script>
 
+    <link href="css/themes/default.css" rel="stylesheet">
+
     <script src="js/tooltips/dialogs/introduceServerHome.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
 
@@ -43,16 +45,9 @@
         }
 
         :root {
-            /* Your palette */
-            --c-171A1D: #171A1D;
-            --c-24292E: #24292E;
-            --c-2B3137: #292e34;
             --c-4F555C: #4F555C;
             --c-ABB8BE: #ABB8BE;
 
-            --bg: var(--c-171A1D);
-            --bg2: var(--c-24292E);
-            --card: var(--c-2B3137);
             --border: rgba(79, 85, 92, 0.8);
             --text: #E8EDF1;
             --muted: var(--c-ABB8BE);
@@ -70,11 +65,6 @@
             box-sizing: border-box
         }
 
-        #ticketIdentity option {
-            background-color: var(--c-2B3137);
-            border: 2px solid var(--c-171A1D);
-        }
-
         html,
         body {
             height: 100%;
@@ -83,7 +73,6 @@
 
         body {
             font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-            background: linear-gradient(180deg, var(--bg), var(--bg2));
             color: var(--text);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -95,7 +84,6 @@
             top: 0;
             z-index: 5;
             height: var(--header-h);
-            background: var(--c-24292E);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
@@ -171,7 +159,6 @@
         }
 
         .panel {
-            background: var(--card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
@@ -234,7 +221,6 @@
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            border: 2px solid var(--card);
             background: #7a7f86;
         }
 
@@ -381,7 +367,12 @@
             gap: 10px;
             padding: 12px;
             overflow: auto;
-            height: 100%
+            height: 100%;
+            white-space: pre-line !important;
+        }
+
+        .threadArea .msg{
+            white-space: nowrap;
         }
 
         .msg {
@@ -438,7 +429,6 @@
             display: flex;
             align-items: flex-end;
             padding: 16px;
-            background: var(--c-2B3137) center/cover no-repeat;
         }
 
         .hero::before {
@@ -484,7 +474,6 @@
         }
 
         .homeCard {
-            background: var(--card);
             border: 1px solid var(--border);
             border-radius: var(--r-sm);
             padding: 12px
@@ -621,7 +610,6 @@
         .modalCard {
             width: 920px;
             max-width: 96vw;
-            background: var(--card);
             border: 1px solid var(--border);
             border-radius: 12px;
             box-shadow: 0 22px 80px rgba(0, 0, 0, 0.55);
@@ -708,7 +696,6 @@
             width: 980px;
             max-width: 96vw;
             max-height: 80vh;
-            background: var(--card);
             border: 1px solid var(--border);
             border-radius: 12px;
             box-shadow: 0 22px 80px rgba(0, 0, 0, 0.55);
@@ -1469,10 +1456,12 @@
     }
 
     // dms
+    let isHandlingDMs = false;
     function renderDMs() {
-        if (!socket.connected) return;
+        if (!socket.connected || isHandlingDMs) return;
 
         STATE.unreadCounter = 0;
+        isHandlingDMs = true;
 
         const wrap = document.getElementById('dmList');
         if (!wrap) return;
@@ -1501,16 +1490,16 @@
                 const row = document.createElement('div');
                 row.className = 'dmItem' + (STATE.activeThreadId === t.id ? ' active' : '');
                 row.innerHTML = `
-          ${avatarStackHTML(t.participants)}
-          <div>
-            <div class="dmName">${encodePlainText(title)}</div>
-            <div class="dmPreview">${encodePlainText(decodeFromBase64(t.last) || "")}</div>
-          </div>
+                      ${avatarStackHTML(t.participants)}
+                      <div>
+                        <div class="dmName">${encodePlainText(title)}</div>
+                        <div class="dmPreview">${encodePlainText(decodeFromBase64(t.last) || "")}</div>
+                      </div>
 
-          ${t.unread > 0 ?
-                    `<div class="dmBadge">${t.unread ? `<span>${t.unread}</span>` : ''}</div>` : ""
-                }
-          `;
+                      ${t.unread > 0 ?
+                                `<div class="dmBadge">${t.unread ? `<span>${t.unread}</span>` : ''}</div>` : ""
+                            }
+                      `;
                 if (t.unread > 0) STATE.unreadCounter += t.unread
 
                 row.onclick = () => openThread(t.id);
@@ -1587,14 +1576,14 @@
 
                     row.className = 'dmItem' + (STATE.activeThreadId === t.id ? ' active' : '');
                     row.innerHTML = `
-            ${avatarStackHTML(t.participants)}
-            <div>
-              <div class="dmName">${encodePlainText(title)}</div>
-              <div class="dmPreview">${encodePlainText(decodeFromBase64(t.last) || "")}</div>
-            </div>
-            ${t.unread > 0 ?
-                        `<div class="dmBadge">${t.unread ? `<span>${t.unread}</span>` : ''}</div>` : ""
-                    }`;
+                        ${avatarStackHTML(t.participants)}
+                        <div>
+                          <div class="dmName">${encodePlainText(title)}</div>
+                          <div class="dmPreview">${encodePlainText(decodeFromBase64(t.last) || "")}</div>
+                        </div>
+                        ${t.unread > 0 ?
+                                    `<div class="dmBadge">${t.unread ? `<span>${t.unread}</span>` : ''}</div>` : ""
+                                }`;
                     if (t.unread > 0) STATE.unreadCounter += t.unread
 
                     row.onclick = () => openThread(t.id);
@@ -1603,6 +1592,7 @@
             });
 
             setUnreadTitle();
+            isHandlingDMs = false;
         });
     }
 

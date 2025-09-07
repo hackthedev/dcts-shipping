@@ -1,8 +1,19 @@
-import { fetch, fileTypeFromBuffer, FormData, fs, path, serverconfig, xssFilters } from "../../index.mjs";
+import { fetch, fileTypeFromBuffer, FormData, fs, path, serverconfig, xssFilters, crypto } from "../../index.mjs";
 import { getMemberHighestRole } from "../functions/chat/helper.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, sendMessageToUser, validateMemberId, sanitizeFilename, getFolderSize, mimeTypesCache, fileSizeCache, generateId } from "../functions/main.mjs";
+
+function computeMD5(filePath) {
+    return new Promise((resolve, reject) => {
+        const hash = crypto.createHash("md5");
+        const s = fs.createReadStream(filePath);
+        s.on("data", d => hash.update(d));
+        s.on("error", reject);
+        s.on("end", () => resolve(hash.digest("hex")));
+    });
+}
+
 
 export default (io) => (socket) => {
     // socket.on code here
@@ -47,7 +58,7 @@ export default (io) => (socket) => {
             }
         }
 
-        // Track file size for this file upload
+        // track file size
         const chunkSize = chunk.length;
         const currentFileSize = (fileSizeCache.get(fileId) || 0) + chunkSize;
         fileSizeCache.set(fileId, currentFileSize);
@@ -63,12 +74,11 @@ export default (io) => (socket) => {
                         Logger.error(err)
                     }
                 });
-            }, 5000); // Delay deletion by 5 seconds
-
+            }, 5000);
             return;
         }
 
-        // Validate MIME type on the first chunk only
+        // validate MIME type on the first chunk only
         if (chunkIndex === 0) { 
             try { 
                 const { mime } = await fileTypeFromBuffer(chunk); // Check MIME type from the first chunk
@@ -108,6 +118,38 @@ export default (io) => (socket) => {
         if (chunkIndex + 1 === totalChunks) {
             mimeTypesCache.delete(fileId); // Clean up cache after upload completes
             fileSizeCache.delete(fileId); // Clean up file size cache
+
+            // find duplicate files
+            try {
+                const ext = path.extname(sanitizedFilename).toLowerCase();
+                const size = fs.statSync(tempFilePath).size;
+                const hash = await computeMD5(tempFilePath);
+
+                const files = fs.readdirSync(localUploadPath);
+                for (const name of files) {
+                    if (name === path.basename(tempFilePath)) continue;
+                    if (path.extname(name).toLowerCase() !== ext) continue;
+
+                    const candidate = path.join(localUploadPath, name);
+                    const st = fs.statSync(candidate);
+                    if (st.size !== size) continue;
+
+                    const cHash = await computeMD5(candidate);
+                    if (cHash === hash) {
+                        try { fs.unlinkSync(tempFilePath); } catch {}
+                        const existingUrl = candidate
+                            .replace(/\\/g, "/")
+                            .replace("./public", "")
+                            .replace("public", "");
+                        Logger.debug(`Duplicate MD5 ${existingUrl}`);
+                        response({ type: "success", msg: existingUrl });
+                        return;
+                    }
+                }
+            } catch (e) {
+                Logger.error(e)
+            }
+
 
             if (serverconfig.serverinfo.useCloudflareImageCDN === 1 && type !== "emoji") {
                 const form = new FormData();

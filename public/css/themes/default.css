@@ -1,0 +1,94 @@
+:root {
+    /* default: #171A1D; */
+    /* red: #2e1313;*/
+    /* green: #171e08;*/
+    /* cyan: #012724;*/
+    /* purple: #1d1635;*/
+    --main: #171A1D;
+}
+
+/* Main Server Chat */
+#context-menu,
+#header,
+#serverlist {
+    background: var(--main);
+}
+
+.audio-player{
+    /* multi color gradient !!!!! */
+    background: linear-gradient(20deg, hsl(from var(--main) h s calc(l * 1.5)), hsl(from var(--main) h s calc(l * 1.75)), hsl(from var(--main) h s calc(l * 2.75)) );
+    border: 2px solid  hsl(from var(--main) h s calc(l * 1.9))
+}
+
+#content-container,
+#channelname-bar {
+    background-color: hsl(from var(--main) h s calc(l * 1.9));
+}
+
+#infolist,
+.systemAnnouncementChat,
+#channellist {
+    background-color: hsl(from var(--main) h s calc(l * 1.61));
+}
+
+#profile-qa {
+    background-color: hsl(from var(--main) h s calc(l * 1.3));
+}
+
+.editor-container,
+.ql-container,
+.ql-editor{
+    background-color: hsl(from var(--main) h s calc(l * 1.5));
+}
+
+.ql-toolbar{
+    background-color: hsl(from var(--main) h calc(s * 0.5) calc(l * 2.6));
+}
+
+.activeUserEntry{
+    background-color: hsl(from var(--main) h s calc(l * 1.5));
+}
+
+#emoji-box-header-container, .emoji-box-header {
+    background-color: hsl(from var(--main) h s calc(l * 2.5));
+}
+
+#emoji-box-container{
+    background-color: hsl(from var(--main) h s calc(l * 2));
+    border: 2px solid hsl(from var(--main) h s calc(l * 2));
+    box-shadow: 4px 4px 14px 0.5px hsl(from var(--main) h s calc(l * 0.5));
+}
+
+.emoji-box-header:hover, .emoji-box-header.SelectedTab{
+    background-color: hsl(from var(--main) h s calc(l * 2));
+}
+
+/* Server Home Page */
+#ticketIdentity option,
+.panel,
+.homeCard,
+.modalCard,
+.searchCard {
+    background-color: hsl(from var(--main) h s calc(l * 1.7));
+}
+
+.statusDot{
+    border: 2px solid hsl(from var(--main) h s calc(l * 1.7));
+}
+
+#ticketIdentity option {
+    border: 2px solid  hsl(from var(--main) h s calc(l * 1.7));
+}
+
+body{
+    background: linear-gradient(180deg, hsl(from var(--main) h s calc(l * 0.8)), hsl(from var(--main) h s calc(l * 1.75)));
+}
+
+.appHeader{
+    background-color: hsl(from var(--main) h s calc(l * 1.7));
+}
+
+.hero{
+    background: hsl(from var(--main) h s calc(l * 1.7)) center/cover no-repeat;
+}
+

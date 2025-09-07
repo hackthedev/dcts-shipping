@@ -10,13 +10,13 @@
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    background: #424549;
+    background: hsl(from var(--main) h s calc(l * 3));
     border-radius: 12px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-    background: #424549;
+    background: hsl(from var(--main) h s calc(l * 3));
 }
 
 :root {
@@ -69,7 +69,6 @@ body {
 
     padding: 8px;
 
-    background-color: #171A1D;
     color: white;
 
     position: relative;
@@ -88,7 +87,6 @@ body {
     /*align-content: center;*/
     text-align: center;
 
-    background-color: #171a1d;
     color: white;
 
     display: block;
@@ -104,7 +102,6 @@ body {
     height: calc(100% - 40px);
     width: calc(100% - 80px - 200px - 300px);
 
-    background-color: #2B3137;
     color: white;
 
     display: block;
@@ -119,7 +116,6 @@ body {
     width: calc(100% - 32px) !important;
 
     padding: 16px;
-    background-color: #2B3137;
 
     display: block;
     float: left;
@@ -226,8 +222,6 @@ body {
     height: calc(100% - 32px - 40px);
     width: calc(200px - 32px);
     padding: 16px;
-
-    background-color: #24292E;
     color: white;
 
     display: block;
@@ -286,9 +280,6 @@ body {
     float: left;
     bottom: 0;
     position: fixed;
-
-
-    background-color: #1D2125;
 }
 
 #profile-qa-img-container {
@@ -386,13 +377,13 @@ body {
 
     background-color: transparent;
 
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     cursor: pointer;
 }
 
 .memberlist-img {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     float: left;
 
@@ -414,7 +405,6 @@ body {
 
 .memberlist-member-info.status {
     font-size: 12px;
-    width: 120px;
     width: calc(100% - 48px);
 
     overflow: hidden;
@@ -432,9 +422,10 @@ body {
     background-color: transparent;
 
     width: calc(100% - 40px);
-    padding: 20px;
+    padding: 8px 20px;
 
     margin-bottom: 0px;
+    margin-top: 0px;
 }
 
 .message-container:hover {
@@ -452,7 +443,7 @@ body {
 
 .message-profile-content-message-appended p,
 .message-profile-content-message p {
-    padding: 4px 8px 4px 8px !important;
+    padding: 0 8px 4px 8px !important;
     text-align: left !important;
 }
 
@@ -484,7 +475,6 @@ body {
 }
 
 .message-profile-info {
-    width: 150px;
     height: 30px;
     overflow: hidden;
 
@@ -542,7 +532,6 @@ body {
 }
 
 .systemAnnouncementChat {
-    background-color: #24292E;
     width: calc(100% - 10px - 60px);
     padding: 8px 8px 8px 8px;
     font-style: italic;
@@ -626,7 +615,6 @@ pre.markdown {
     position: fixed;
     z-index: 10000;
     width: 150px;
-    background: #171A1D;
     border-radius: 6px;
     display: none;
 }
@@ -792,7 +780,7 @@ details[open] summary::before {
 */
 
 pre.editedMsg {
-    margin-top: 10px;
+    margin-top: 0;
     margin-left: 6px;
     font-size: 10px;
     color: #989898;
@@ -817,10 +805,6 @@ pre.editedMsg {
 }
 
 #emoji-box-container {
-    /*background-color: #40444B; */
-    background-color: #2F3136;
-
-
     width: 30%;
     height: 40%;
     position: fixed;
@@ -828,9 +812,6 @@ pre.editedMsg {
 
     padding: 8px;
     border-radius: 8px;
-    border: 2px solid #202225;
-
-    box-shadow: 4px 4px 14px 0.5px rgb(30, 28, 28);
 
     overflow-y: auto;
     overflow-x: hidden;
@@ -885,7 +866,6 @@ pre.editedMsg {
 }
 
 #emoji-box-header-container {
-    background-color: #40444B;
     margin: -8px;
     margin-bottom: 8px;
 
@@ -919,11 +899,8 @@ pre.editedMsg {
 }
 
 .emoji-box-header {
-    background-color: green;
-
     display: block;
     float: left;
-    background-color: #40444B;
 
     padding: 6px 12px 6px 12px;
     margin-right: 8px;
@@ -931,12 +908,10 @@ pre.editedMsg {
 
 .emoji-box-header:hover {
     cursor: pointer;
-    background-color: #2F3136;
     border-radius: 8px;
 }
 
 .SelectedTab {
-    background-color: #2F3136;
     border-radius: 8px;
 }
 

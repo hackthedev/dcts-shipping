@@ -54,7 +54,7 @@ class ChatManager{
                         document.body,
                         {
                             text: "Connection lost",
-                            intensity: 0.5,
+                            intensity: 0.75,
                             bgAlpha: 1,
                             useSnapshot: true
                         }

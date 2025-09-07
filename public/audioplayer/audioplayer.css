@@ -4,9 +4,7 @@
     margin: 20px auto;
     margin-top: 0;
     padding: 10px;
-    border: 2px solid #333;
     border-radius: 10px;
-    background-color: #202225;
     text-align: center;
 }
 
@@ -17,26 +15,30 @@
     text-align: left;
 }
 
-.controls {
+.audio-player .controls {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
-button {
+.audio-player button {
     padding: 5px 10px;
-    margin: 0px 10px;
+    margin: 0 10px;
     border: none;
     border-radius: 5px;
-    background-color: #333;
+    background-color: hsl(from var(--main) h s calc(l * 2.8));
     color: #fff;
     cursor: pointer;
 }
 
-button:hover {
-    background-color: #555;
+.audio-player button:hover {
+    background-color: hsl(from var(--main) h s calc(l * 2));
 }
 
-input[type="range"] {
+.audio-player input[type="range"] {
     margin: 0 10px;
+}
+
+.audio-player input[type='range']{
+    accent-color: hsl(from var(--main) h s calc(l * 4))
 }

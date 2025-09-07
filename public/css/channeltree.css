@@ -1,7 +1,6 @@
 #serverbanner-container {
     height: calc(200px - 40px);
     width: calc(100%);
-    background-color: transparent;
     margin: 0 0 20px 0;
 
     display: block;
@@ -20,9 +19,6 @@
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: 100% 100%;
-
-    border-radius: 6px;
-
 }
 
 #serverbanner-image:hover {
@@ -44,8 +40,6 @@
 #channellist {
     height: calc(100% - 40px - 50px);
     width: calc(300px);
-
-    background-color: #24292E;
     color: white;
 
     display: block;

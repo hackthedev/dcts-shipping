@@ -618,7 +618,7 @@ class ModView {
         </div>
         ` : ''}
 
-        <div class="modview_action-buttons center">
+        <div class="modview_action-buttons action-buttons" >
             <button class="delete-btn" onclick="ModView.deleteReport('${report.id}')">Delete Report</button>
             <button class="kick-btn" onclick="ModView.deleteMessage('${reportData.messageId}', '${reportCreator.id}', '${reportedUser.id}')">Delete Reported Message</button>
         </div>

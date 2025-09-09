@@ -112,16 +112,18 @@ async function updateMarkdownLinks(delay) {
 
                 if (elements[i] != null && elements[i].innerText.length > 0) {
 
-
+                    // returns isMarked and message
                     var marked = await markdown(elements[i].innerText, elements[i].id);
 
-                    if (marked.message != null && marked != elements[i].innerText) {
+                    // if the return message isnt null
+                    if (marked.message != null &&
+                        // and is not markdown and text doesnt equal or it is in fact markdown and not equal to the innerhtml
+                        ((!marked.isMarkdown && marked.message !== elements[i].innerText) || (marked.isMarkdown && marked.message !== elements[i].innerHTML)) ) {
 
                         if (bypassCounter[elements[i].id] == null) {
                             bypassCounter[elements[i].id] = 0;
                         }
                         else {
-
                             if (bypassCounter[elements[i].id] >= 1) {
                                 bypassElement[elements[i].id] = 1;
                             }
@@ -129,7 +131,7 @@ async function updateMarkdownLinks(delay) {
                         }
 
                         if (bypassElement[elements[i].id] == null) {
-                            elements[i].innerHTML = sanitizeHtmlForRender(marked.message);
+                            elements[i].innerHTML = marked.isMarkdown ? sanitizeHtmlForRender(marked.message) : elements[i].innerText;
                             setTimeout(() => scrollDown(), 10)
                         }
                     }

@@ -84,16 +84,6 @@ export async function consolas(text, event = null) {
 }
 
 export function checkServerDirectories() {
-    // Normal Logs
-    if (!fs.existsSync("./logs")) {
-        fs.mkdirSync("./logs");
-    }
-
-    // Event Logs
-    if (!fs.existsSync("./logs/events")) {
-        fs.mkdirSync("./logs/events");
-    }
-
     // Emoji storage
     if (!fs.existsSync("./public/emojis")) {
         fs.mkdirSync("./public/emojis");
@@ -102,11 +92,6 @@ export function checkServerDirectories() {
     // Sounds used internally
     if (!fs.existsSync("./public/sounds")) {
         fs.mkdirSync("./public/sounds");
-    }
-
-    // Config Backups (created on errors)
-    if (!fs.existsSync("./config_backups")) {
-        fs.mkdirSync("./config_backups");
     }
 
     // Upload Directory
@@ -120,10 +105,24 @@ export function checkServerDirectories() {
     }
 }
 
+export function checkFile(file, autocreate = false, content = ""){
+    if (fs.existsSync(file)) {
+        return true;
+    }
+    else{
+        if(autocreate){
+            fs.writeFileSync(file, content)
+            return true
+        }
+    }
+
+    return false;
+}
+
 export function checkConfigFile() {
     // if config.json exists
     try {
-        if (fs.existsSync("./config.json")) {
+        if (checkFile("./config.json") === true) {
             consolas("Config file config.json did exist".yellow, "Debug");
         }
         else {
@@ -131,7 +130,7 @@ export function checkConfigFile() {
             consolas("Checking for template file...".yellow, "Debug");
 
             // config.json didnt exist. Does template config exist?
-            if (fs.existsSync("./config.example.json")) {
+            if (checkFile("./config.example.json") === true) {
 
                 consolas("Trying to copy template file".yellow, "Debug");
 

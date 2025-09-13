@@ -1,1 +1,1 @@
-screen -dmSL dcts node /home/dcts
+cd /home/dcts && screen -dmSL dcts node /home/dcts

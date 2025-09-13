@@ -6,17 +6,21 @@ This document will explain how to use the chat software and setup a reverse prox
 
 ## nginx Setup
 
-The following configuration is a example on how you can use the chat app using the reverse proxy. It will change the address from https://you-domain.com:2086 to https://your-domain.com/app
+The following configuration is a example on how you can use the chat app using the reverse proxy. It will change the address from https://you-domain.com:2086 to https://your-domain.com/app. 
+
+Since i couldnt find out how to make it work on a existing domain with `location /servers` i tested subdomains and worked right away. The issue was while the html was served correctly, all the endpoints kept going to `/` which was wrong.
 
 ```nginx
-location /app/ {
-	proxy_pass http://127.0.0.1:2086/;
-	proxy_set_header Host $host;
-}
+location / {
+	proxy_pass http://127.0.0.1:3000/;
+	proxy_http_version 1.1;
 
-location /socket.io/ {
-	proxy_pass http://127.0.0.1:2086/socket.io/;
+	proxy_set_header Upgrade $http_upgrade;
+	proxy_set_header Connection "upgrade";
 	proxy_set_header Host $host;
+	proxy_set_header X-Real-IP $remote_addr;
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	proxy_set_header X-Forwarded-Proto $scheme;
 }
 ```
 

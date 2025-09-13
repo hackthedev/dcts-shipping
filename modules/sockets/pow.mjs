@@ -28,7 +28,7 @@ export function listenToPow(socket) {
             if (data?.token !== null && data?.id !== null) {
                 // lets make sure the account data is correct and save the pow
                 // so other accounts cant reuse the same id
-                if (validateMemberId(data?.id, socket, true) == true
+                if (validateMemberId(data?.id, socket, null,  true) == true
                     && serverconfig.servermembers[data?.id].token == data?.token) {
 
                     // if someone uses the same pow kick em!

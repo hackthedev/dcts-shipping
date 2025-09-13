@@ -113,7 +113,7 @@ class UserManager {
     }
 
     static getToken() {
-        var token = CookieManager.getCookie("token");
+        var token = CookieManager.getCookie("dcts_token");
 
         if (token == null || token.length <= 0) {
             return null;
@@ -247,7 +247,7 @@ class UserManager {
         }
 
         alert("Token successfully set!\nPlease save it if you havent already");
-        CookieManager.setCookie("token", token, 365);
+        CookieManager.setCookie("dcts_token", token, 365);
         CookieManager.setCookie("id", id, 365);
     }
 
@@ -259,7 +259,7 @@ class UserManager {
             CookieManager.setCookie("username", null, 365);
             CookieManager.setCookie("status", null, 365);
             CookieManager.setCookie("pfp", null, 365);
-            CookieManager.setCookie("token", null, 365);
+            CookieManager.setCookie("dcts_token", null, 365);
             CookieManager.setCookie("banner", null, 365);
             CookieManager.setCookie("pow_challenge", null, 365);
             CookieManager.setCookie("pow_solution", null, 365);
@@ -355,11 +355,12 @@ class UserManager {
                 if (values.loginName) {
 
                     if (UserManager.validateLoginname(values.loginName)) {
-                        socket.emit("userLogin", { id: UserManager.getID(), loginName: values.loginName, password: values.password }, function (response) {
+                        socket.emit("userLogin", { loginName: values.loginName, password: values.password }, function (response) {
 
                             console.log(response)
-                            if (response?.error == null && response.member) {
-                                CookieManager.setCookie("token", response.member.token, 365);
+                            if (response?.error === null && response.member) {
+                                console.log("Setting cookies")
+                                CookieManager.setCookie("dcts_token", response.member.token, 365);
                                 CookieManager.setCookie("id", response.member.id, 365);
                                 CookieManager.setCookie("username", response.member.name, 365);
 

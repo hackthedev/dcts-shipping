@@ -184,10 +184,9 @@ export default (io) => (socket) => {
             }
             else {
 
-                if (member.token == null || member.token.length != 48 ||
+                if (member.token == null || member.token.length !== 48 ||
                     serverconfig.servermembers[member.id].token == null ||
-                    serverconfig.servermembers[member.id].token != member.token) {
-
+                    serverconfig.servermembers[member.id].token !== member.token) {
 
                     try {
                         response({ error: "Invalid login", title: "Invalid Login", msg: "Something went wrong with your login.<br><a onclick='UserManager.resetAccount();'>Reset Session</a><br>", type: "error", displayTime: 1000 * 60 * 60 })

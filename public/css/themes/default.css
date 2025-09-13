@@ -81,7 +81,7 @@
 }
 
 body{
-    background: linear-gradient(180deg, hsl(from var(--main) h s calc(l * 0.8)), hsl(from var(--main) h s calc(l * 1.75)));
+    background: linear-gradient(180deg, hsl(from var(--main) h s calc(l * 0.8)), hsl(from var(--main) h s calc(l * 1.4)));
 }
 
 .appHeader{

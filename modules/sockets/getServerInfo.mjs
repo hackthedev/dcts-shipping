@@ -24,17 +24,19 @@ export default (io) => (socket) => {
             if (hasPermission(member.id, "manageServer")) {
                 // add more objects here
                 serverInfoObj.useCloudflareImageCDN = serverconfig.serverinfo.useCloudflareImageCDN,
-                    serverInfoObj.cfAccountId = serverconfig.serverinfo.cfAccountId,
-                    serverInfoObj.cfAccountToken = serverconfig.serverinfo.cfAccountToken,
-                    serverInfoObj.cfHash = serverconfig.serverinfo.cfHash,
-                    serverInfoObj.maxUploadStorage = serverconfig.serverinfo.maxUploadStorage,
-                    serverInfoObj.rateLimit = serverconfig.serverinfo.rateLimit,
-                    serverInfoObj.dropInterval = serverconfig.serverinfo.dropInterval,
-                    serverInfoObj.messageLoadLimit = serverconfig.serverinfo.messageLoadLimit,
+                serverInfoObj.cfAccountId = serverconfig.serverinfo.cfAccountId,
+                serverInfoObj.cfAccountToken = serverconfig.serverinfo.cfAccountToken,
+                serverInfoObj.cfHash = serverconfig.serverinfo.cfHash,
+                serverInfoObj.maxUploadStorage = serverconfig.serverinfo.maxUploadStorage,
+                serverInfoObj.rateLimit = serverconfig.serverinfo.rateLimit,
+                serverInfoObj.dropInterval = serverconfig.serverinfo.dropInterval,
+                serverInfoObj.messageLoadLimit = serverconfig.serverinfo.messageLoadLimit,
 
-                    serverInfoObj.moderation = serverconfig.serverinfo.moderation,
-                    serverInfoObj.registration = serverconfig.serverinfo.registration,
-                    serverInfoObj.login = serverconfig.serverinfo.login
+                serverInfoObj.moderation = serverconfig.serverinfo.moderation,
+                serverInfoObj.registration = serverconfig.serverinfo.registration,
+                serverInfoObj.login = serverconfig.serverinfo.login
+
+                serverInfoObj.discovery = serverconfig.serverinfo.discovery
             }
 
             response(serverInfoObj);

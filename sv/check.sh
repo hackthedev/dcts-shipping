@@ -4,5 +4,5 @@
 sleep 4
 if ! screen -list | grep -q "dcts"; then
     echo "is not running"
-    sh /home/dcts/start.sh
+    sh /home/dcts/sv/start.sh
 fi

@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+
+    <link href="css/review.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/dropdown.css" rel="stylesheet">
+
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+    <meta http-equiv="pragma" content="no-cache" />
+
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+          rel="stylesheet">
+
+    <script src="js/purify.js"></script>
+    <script src="js/escape.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/prompts.js"></script>
+    <script src="js/hover.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/messages.js"></script>
+    <script src="js/review.js"></script>
+    <script src="js/report.js"></script>
+
+    <title>DCTS Server List</title>
+</head>
+<body>
+
+
+<div id="header">
+
+    <div class="left">
+        <label id="headline">DCTS Server List</label>
+
+        <input id="search" name="search" placeholder="Search.." type="text">
+        <input id="searchBtn" onclick="search(document.getElementById('search').value)" type="button" value="Search">
+        <input id="allServerButton" type="button" value="All servers">
+    </div>
+
+    <div class="right">
+        <input id="addServerButton" onclick="" style="display: none;" type="button" value="Add Server">
+
+        <div class="dropdown">
+            <button onclick="toggleDropdown()" class="dropbtn">Menu</button>
+
+            <div id="myDropdown" class="dropdown-content">
+                <input id="pendingServersButton" onclick="" style="display:none;" type="button" value="Pending">
+                <input id="registerButton" onclick="" style="display: none;" type="button" value="Register">
+                <input id="loginButton" onclick="" style="display: none;" type="button" value="Login">
+
+                <input id="myServersButton" onclick="" style="display: none;" type="button" value="My Servers">
+                <input id="settingsButton" onclick="" type="button" value="Settings">
+                <input id="logoutButton" onclick="" style="display: none;" type="button" value="Logout">
+            </div>
+        </div>
+    </div>
+</div>
+
+<h1 id="pageTitle">All Servers</h1>
+<div id="publicList"></div>
+
+
+<script>
+
+    function toggleDropdown() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
+
+    // close the dropdown if the user clicks outside of it
+    window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+
+    let customPrompts = new Prompt();
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const addServerButton = document.getElementById("addServerButton");
+        const myServersButton = document.getElementById("myServersButton");
+        const loginButton = document.getElementById("loginButton");
+        const registerButton = document.getElementById("registerButton");
+        const logoutButton = document.getElementById("logoutButton");
+        const pendingServersButton = document.getElementById("pendingServersButton");
+        const allServerButton = document.getElementById("allServerButton");
+
+        const settingsBtn = document.getElementById("settingsButton");
+        if (settingsBtn) settingsBtn.onclick = openSettingsPrompt;
+
+        const me = await getAuthInfo();
+        if (me.ok) { // if logged in
+            setAdminFlag(me.user?.role === "admin");
+            myServersButton.style.display = "inline-flex";
+            logoutButton.style.display = "inline-flex";
+            addServerButton.style.display = "inline-flex";
+            myServersButton.onclick = fetchMyServers;
+            addServerButton.onclick = addServerPrompt;
+            logoutButton.onclick = logoutAccount;
+
+            if (isAdmin()) {
+                pendingServersButton.style.display = "inline-flex";
+                pendingServersButton.onclick = fetchPendingServers;
+            }
+        } else { // not logged in
+            loginButton.style.display = "inline-flex";
+            loginButton.onclick = loginAccount;
+
+            registerButton.style.display = "inline-flex";
+            registerButton.onclick = registerAccount;
+
+            setAdminFlag(false);
+        }
+
+        allServerButton.onclick = () => fetchServers();
+
+        fetchServers();
+
+        document.getElementById("publicList").addEventListener("click", async (e) => {
+            const adminBtn = e.target.closest(".admin-btn");
+            if (adminBtn && !adminBtn.hasAttribute("data-inline-action") && !adminBtn.hasAttribute("onclick")) {
+                const id = adminBtn.dataset.id;
+                const action = adminBtn.dataset.action;
+                const endpoint =
+                    action === "approve" ? `servers/${id}/approve` :
+                        action === "unapprove" ? `servers/${id}/unapprove` :
+                            action === "deny" ? `servers/${id}/deny` :
+                                action === "block" ? `servers/${id}/block` : null;
+
+                if (!endpoint) return;
+                await apiRequest(endpoint, "POST", {}, true);
+                const v = getView();
+                if (v === "pending") return fetchPendingServers();
+                if (v === "mine") return fetchMyServers();
+                return fetchServers();
+            }
+
+            const ownerBtn = e.target.closest(".action-btn");
+            if (ownerBtn && !ownerBtn.hasAttribute("data-inline-action") && !ownerBtn.hasAttribute("onclick")) {
+                const id = ownerBtn.dataset.id;
+                const action = ownerBtn.dataset.action;
+                if (action === "edit") return editServerPrompt(id);
+                if (action === "delete") return deleteServerPrompt(id);
+            }
+        });
+
+
+    });
+
+
+    async function search(tag) {
+        if (!tag) return;
+
+        let response = await apiRequest(`servers/search/${tag.toLowerCase()}`, "GET", null, true);
+        renderServersList(response.servers)
+    }
+
+    async function renderServersList(servers, {showOwnerActions = false, compact} = {}) {
+        if (compact === undefined) compact = getSettings().compactView;
+
+        const list = document.getElementById("publicList");
+        if (!list) return;
+        list.innerHTML = "";
+
+        if (!servers || servers.length <= 0) {
+            list.innerHTML = "<p>No servers found :(</p>"
+            return;
+        }
+
+        // compact
+        if (compact) {
+            const table = document.createElement("table");
+            table.className = "server-table";
+            table.innerHTML = `
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Join URL</th>
+                  <th>Online</th>
+                  <th>Version</th>
+                  <th>Features</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>`;
+            list.appendChild(table);
+            const tbody = table.querySelector("tbody");
+
+            for (const server of servers) {
+                let sd = await getServerData(server.url);
+                if (!sd) {
+                    sd = {
+                        serverinfo: {
+                            name: "Unkown",
+                            about: "",
+                            version: 0,
+                            ssl: false,
+                            tenor: false,
+                            turn: false,
+                            slots: {
+                                online: 0,
+                                limit: 0,
+                                reserved: 0
+                            },
+                            connection_error: true
+                        }
+                    }
+                }
+
+                const versionText = String(String(sd.serverinfo.version).split("")).replaceAll(",", ".");
+
+                // admin stuff
+                const adminBtns = makeAdminButtonsInline(server);
+
+                const ownerBtns = makeOwnerButtonsInline(server, showOwnerActions, false);
+
+                const featuresInline = `
+                    ${sd.serverinfo.ssl ? `<span id="ssl"   onclick="showHint(this)" class="feature" style="display:inline-block">TLS</span>` : ""}
+                    ${sd.serverinfo.tenor ? `<span id="tenor" onclick="showHint(this)" class="feature" style="display:inline-block">GIFs</span>` : ""}
+                    ${sd.serverinfo.turn ? `<span id="turn-vc" onclick="showHint(this)" class="feature" style="display:inline-block">VC</span>` : ""}
+                    ${sd.serverinfo.turn ? `<span id="turn-ss" onclick="showHint(this)" class="feature" style="display:inline-block">SS</span>` : ""}
+                    ${sd.serverinfo?.connection_error ? `<span id="ce" onclick="showHint(this)" class="feature" style="display:inline-block">Connection error</span>` : ""}
+                  `;
+
+                const tr = document.createElement("tr");
+
+                const rating = await fetchRating(server.id);
+                const ratingHtml = renderStars(rating.avg || 0, rating.count || 0, server.id);
+
+
+                tr.innerHTML = `
+                    <td class="col-name">${truncateString(sd.serverinfo.name, 40)}<br>${ratingHtml}</td>
+                    <td class="col-url"><a href="${server.url}" target="_blank">${server.url}</a></td>
+                    <td class="col-online">${sd.serverinfo.slots.online} / ${sd.serverinfo.slots.limit}</td>
+                    <td class="col-version">${versionText}</td>
+                    <td class="col-features">${featuresInline}</td>
+                    <td class="col-actions">
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            ${adminBtns}${ownerBtns}
+                            ${showOwnerActions ? "" : getReportButton(server, true)}
+                        </div>
+                    </td>
+                  `;
+                tbody.appendChild(tr);
+            }
+            return;
+        }
+
+        // grid
+        for (const server of servers) {
+            const idx = list.children.length;
+            const sd = await getServerData(server.url);
+            if (!sd) continue;
+
+            if(sd?.serverinfo?.error && !showOwnerActions) continue;
+
+            const versionText = String(String(sd.serverinfo.version).split("")).replaceAll(",", ".");
+
+            const adminControls = makeAdminControls(server);
+
+            const ownerControls = makeOwnerControls(server, showOwnerActions, true);
+
+            const card = document.createElement("div");
+
+            const rating = await fetchRating(server.id);
+            const ratingHtml = renderStars(rating.avg || 0, rating.count || 0, server.id);
+
+
+            card.className = "server-card";
+            card.style.setProperty("--reveal-delay", `${idx * 200}ms`);
+            card.innerHTML = `
+             <div class="banner" style="background-image:url('${(sd.serverinfo.banner.includes(server.url) || sd.serverinfo.banner.includes("://")) ? sd.serverinfo.banner : server.url + sd.serverinfo.banner}')">
+                ${adminControls}
+                ${ownerControls}
+                ${getReportButton(server)}
+                <p class="name">${truncateString(sd.serverinfo.name, 25)}</p>
+              </div>
+
+
+              <div class="rating" style="margin: 10px 0 0 0;">${ratingHtml}</div>
+              <div class="about">${sanitizeHtmlForRender(sd.serverinfo.about)}</div>
+
+              <div class="features">
+                <label>Features</label>
+                ${sd.serverinfo.ssl ? `<div id="ssl" onclick="showHint(this)" class="feature">TLS Encryption</div>` : ""}
+                ${sd.serverinfo.tenor ? `<div id="tenor" onclick="showHint(this)" class="feature">Tenor GIFs</div>` : ""}
+                ${sd.serverinfo.turn ? `<div id="turn-vc" onclick="showHint(this)" class="feature">VC</div>` : ""}
+                ${sd.serverinfo.turn ? `<div id="turn-ss" onclick="showHint(this)" class="feature">Screensharing</div>` : ""}
+                <div class="feature">Version ${versionText}</div>
+              </div>
+
+              <div class="footer">
+                ${sd.serverinfo.slots.online} / ${sd.serverinfo.slots.limit} Online • ${sd.serverinfo.slots.reserved} reserved
+                <a class="joinButton" href="${server.url}" target="_blank">Join</a>
+              </div>
+            `;
+            list.appendChild(card);
+            const aboutEl = card.querySelector(".about");
+            setTimeout(() => card.classList.add("reveal"), idx * 200);
+        }
+    }
+
+    function showHint(element) {
+        if (element.id === "ssl") {
+            customPrompts.showPrompt(element.innerText,
+                `
+                TLS means that the traffic between client and server is encrypted.`,
+                null,
+                ["Close", ""]
+            )
+        } else if (element.id === "tenor") {
+            customPrompts.showPrompt(element.innerText,
+                `
+                Tenor is a website and service where users can search for GIFs.<br>
+                On this server you can search and post GIFs in the server from Tenor,<br>
+                given the server roles allow you to actually use GIFs.`,
+                null,
+                ["Close", ""]
+            )
+        } else if (element.id === "turn-vc") {
+            customPrompts.showPrompt(element.innerText,
+                `
+                A TURN Server makes voice chatting more reliable and compatible for<br>
+                more users that are behind a strict network or NAT.`,
+                null,
+                ["Close", ""]
+            )
+        } else if (element.id === "turn-ss") {
+            customPrompts.showPrompt(element.innerText,
+                `
+                A TURN Server makes Screensharing more reliable and compatible for<br>
+                more users that are behind a strict network or NAT.`,
+                null,
+                ["Close", ""]
+            )
+        } else if (element.id === "ce") {
+            customPrompts.showPrompt(element.innerText,
+                `
+                We were unable to connect to your server. Check your URL`,
+                null,
+                ["Close", "error"]
+            )
+        }
+    }
+
+    function truncateString(value, length) {
+        // should update it at some point to use .substring instead lol was easier when i think about it
+        if (typeof value === "string" && value.length > 0 && length > 0) {
+            let splitted = value.split("")
+            let newText = "";
+
+            let difference = value.length - length;
+            let iterateLength = 0;
+
+            if (difference <= 0) iterateLength = value.length;
+            if (difference > 0) iterateLength = value.length - difference;
+
+            for (let i = 0; i < iterateLength; i++) {
+                newText += `${splitted[i]}`
+            }
+
+            if (iterateLength !== value.length) {
+                newText += "..";
+            }
+
+            return newText;
+        }
+
+        return value;
+    }
+
+    async function getServerData(baseUrl) {
+        const url = `${baseUrl}${baseUrl.endsWith("/") ? "discover/ping" : "/discover/ping"}`;
+        try {
+            const response = await fetch(url, {
+                method: "GET",
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result?.serverinfo) return result;
+            return null;
+        } catch (error) {
+            console.error(error.message);
+
+            return {
+                serverinfo: {
+                    name: "Unknown",
+                    about: `Cant connect! Did you add <a style="cursor: pointer">${window.location.origin}</a> to your discovery host list?`,
+                    banner: "",
+                    version: 0,
+                    ssl: false,
+                    tenor: false,
+                    turn: false,
+                    slots: {
+                        online: 0,
+                        limit: 0,
+                        reserved: 0
+                    },
+                    error: `Cant connect! Did you add ${window.location.origin} to your discovery host list?`
+                }
+            };
+        }
+    }
+
+</script>
+
+</body>
+</html>

@@ -1,8 +1,8 @@
 [program:dcts]
-directory=/home/dcts
+directory=/home/dcts/sv
 command=sh check.sh
 autostart=true
 autorestart=true
-stderr_logfile=/home/dcts/err.log
-stdout_logfile=/home/dcts/out.log
+stderr_logfile=/home/dcts/sv/err.log
+stdout_logfile=/home/dcts/sv/out.log
 stopsignal=QUIT

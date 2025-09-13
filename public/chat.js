@@ -1528,7 +1528,7 @@ socket.on('receiveGifImage', function (response) {
 
 
 socket.on('receiveToken', function (data) {
-    CookieManager.setCookie("token", data, 365);
+    CookieManager.setCookie("dcts_token", data, 365);
 });
 
 socket.on('modalMessage', function (data) {
@@ -1551,17 +1551,8 @@ socket.on('modalMessage', function (data) {
     }
 
     if (data.token != null && data.action == "register") {
-        CookieManager.setCookie("token", data.token, 365);
+        CookieManager.setCookie("dcts_token", data.token, 365);
         CookieManager.setCookie("loginName", data.loginName, 365);
-    }
-    else if (data.token != null && data.action == "login") {
-        CookieManager.setCookie("token", data.token, 365);
-        CookieManager.setCookie("id", data.id, 365);
-
-        setPFP(data.icon);
-        setBanner(data.banner);
-        setAboutme(data.aboutme);
-        setStatus(data.status);
     }
 
     // stop reconnecting... prompt
@@ -2015,7 +2006,7 @@ function showGroupStats() {
             }
             else {
                 showSystemMessage({
-                    title: response.msg,
+                    title: response.msg || response.error,
                     text: "",
                     icon: response.type,
                     img: null,
@@ -2026,7 +2017,7 @@ function showGroupStats() {
         });
     }
     else {
-        messageInputBox.parentNode.parentNode.style.visibility = "visible";
+        if(messageInputBox.parentNode.parentNode) messageInputBox.parentNode.parentNode.style.visibility = "visible";
     }
 }
 
@@ -2072,7 +2063,7 @@ function scrollDown() {
     }, 10);
 }
 
-
+// todo Fetch messages and dont use fixed limit in sql
 // Add scroll event listener to the scroll container
 /*
 let scrollMessageCount = 0;

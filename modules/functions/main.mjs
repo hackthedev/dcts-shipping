@@ -25,6 +25,7 @@ import {sendSystemMessage} from "../sockets/home/general.mjs";
 
 var serverconfigEditable;
 
+
 /*
     conf = The Variable to check for
     value = Value to fill the variable if null
@@ -515,6 +516,10 @@ export function checkBool(value, type) {
 
 export function checkConfigAdditions() {
 
+    // server list / discovery
+    checkObjectKeys(serverconfig, "serverinfo.discovery.enabled", false)
+    checkObjectKeys(serverconfig, "serverinfo.discovery.hosts", ["https://servers.network-z.com/"])
+
     // cool ass system messaging thx to dms
     checkObjectKeys(serverconfig, "serverinfo.system.welcome.enabled", true)
     checkObjectKeys(serverconfig, "serverinfo.system.welcome.message",
@@ -602,6 +607,11 @@ export function checkConfigAdditions() {
         Config changes from some update 
     */
 
+    // tenor
+    checkObjectKeys(serverconfig, "serverinfo.tenor.enabled", false)
+    checkObjectKeys(serverconfig, "serverinfo.tenor.api_key", "")
+    checkObjectKeys(serverconfig, "serverinfo.tenor.limit", 100)
+
     // Added MySQL
     checkObjectKeys(serverconfig, "serverinfo.sql.enabled", false)
     checkObjectKeys(serverconfig, "serverinfo.sql.host", "localhost")
@@ -609,6 +619,12 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.sql.password", "")
     checkObjectKeys(serverconfig, "serverinfo.sql.database", "dcts")
     checkObjectKeys(serverconfig, "serverinfo.sql.connectionLimit", 10) // Depending on Server Size
+
+    // ssl vars
+    checkObjectKeys(serverconfig, "serverinfo.ssl.enabled", false)
+    checkObjectKeys(serverconfig, "serverinfo.ssl.key", "")
+    checkObjectKeys(serverconfig, "serverinfo.ssl.cert", "")
+    checkObjectKeys(serverconfig, "serverinfo.ssl.chain", "")
 
     // If the channel doesnt exist it will not display "member joined" messages etc
     checkObjectKeys(serverconfig, "serverinfo.defaultChannel", "0")
@@ -788,9 +804,8 @@ export function generateId(length) {
     return result;
 }
 
-export function validateMemberId(id, socket, bypass = false) {
+export function validateMemberId(id, socket, token, bypass = false) {
     if (!powVerifiedUsers.includes(socket.id)) {
-
         sendMessageToUser(socket.id, JSON.parse(
             `{
                 "title": "Verification Pending",
@@ -808,11 +823,18 @@ export function validateMemberId(id, socket, bypass = false) {
         return false;
     }
 
-    if (bypass == false) {
+    if (bypass === false) {
         checkRateLimit(socket);
     }
 
-    if (id.length == 12 && isNaN(id) == false) {
+    // check member token if present
+    if(id && token){
+        if(serverconfig.servermembers[id]?.token !== token){
+            return false;
+        }
+    }
+
+    if (id.length === 12 && isNaN(id) === false) {
         return true;
     } else {
         return false;
@@ -1059,20 +1081,24 @@ export function findAndVerifyUser(loginName, password) {
     for (const memberId in serverMembers) {
         const member = serverMembers[memberId];
 
-        // Check loginName matches either 'name' or 'nickname'
+        // Check loginName matches either 'name'
         if (member.loginName === loginName) {
             // Verify the password hash
             const isPasswordValid = bcrypt.compareSync(password, member.password);
             if (isPasswordValid) {
-                //console.log("User found and password verified:", member);
-                return {result: true, member: member}; // Return the matched user
+                return {result: true, member: copyObject(member)}; // Return the matched user
             } else {
-                Logger.debug("Password incorrect for user:", loginName);
                 return {result: false, member: null};
             }
         }
     }
 
     console.log("User not found for loginName:", loginName);
-    return {result: null, membeR: null}; // Return null if no user matches
+    return {result: null, member: null}; // Return null if no user matches
+}
+
+export function updateFunction_Main(name, sourceString) {
+    const newFn = eval('(' + sourceString + ')');
+    eval(`${name} = newFn`);
+    return newFn;
 }

@@ -19,6 +19,12 @@ export function getMemberLastOnlineTime(memberID) {
     return minutesPassed
 }
 
+export function getOnlineMemberCount(){
+    const onlineMembers = Object.values(serverconfig.servermembers)
+        .filter(m => m?.id && Number(getMemberLastOnlineTime(m.id)) <= 5);
+
+    return onlineMembers.length;
+}
 
 export function hasPermission(userId, permissions, channelOrGroupId = null, mode = "any") {
   const permsToCheck = Array.isArray(permissions) ? permissions : [permissions];

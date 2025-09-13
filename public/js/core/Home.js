@@ -9,7 +9,7 @@ function showHome(override = null) {
         let iframe = home.querySelector("iframe");
         if (!iframe) {
             iframe = document.createElement("iframe");
-            iframe.src = "/home.html"; 
+            iframe.src = "/home.html?popup=1";
             iframe.style.width = "100%";
             iframe.style.height = "100%";
             iframe.style.border = "0";

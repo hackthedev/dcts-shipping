@@ -1,5 +1,4 @@
 console.clear();
-
 import express from 'express';
 
 export const app = express();
@@ -32,6 +31,8 @@ import xssFilters from 'xss-filters';
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
+
+
 
 // improved now
 export {
@@ -83,7 +84,6 @@ let savedState = null; // In-memory config state
 let writeQueue = Promise.resolve(); // Queue for write operations
 let isClosing = false; // Flag to prevent multiple close attempts
 
-
 // handle startup args
 let nodeArgs = process.argv;
 
@@ -101,6 +101,7 @@ if (nodeArgs.includes("--debug")) {
 checkServerDirectories()
 
 // check if config file exists
+checkFile("./plugins/settings.json", true, "{}")
 checkConfigFile()
 /*
     Holy Server config file.
@@ -145,7 +146,7 @@ import {
 
 // IO related functions
 import {
-    checkConfigFile,
+    checkConfigFile, checkFile,
     checkServerDirectories,
     consolas,
     getSavedChatMessage,
@@ -170,6 +171,7 @@ import {fileURLToPath, pathToFileURL} from "url";
 import {offload} from './modules/functions/offload.mjs';
 import {registerTemplateMiddleware} from './modules/functions/template.mjs';
 import {listenToPow, powVerifiedUsers, sendPow, waitForPowSolution} from './modules/sockets/pow.mjs';
+import {Addon} from "./modules/functions/addon.mjs";
 
 
 /*
@@ -187,7 +189,14 @@ const registerPluginSocketEvents = async (socket, pluginSocketsDir) => {
             const filePath = path.join(pluginSocketsDir, file);
             const fileUrl = pathToFileURL(filePath).href;
             const {default: handler} = await import(fileUrl);
-            handler(socket);
+
+            try{
+                handler(socket);
+            }
+            catch(e){
+                Logger.error(fileUrl)
+                Logger.error(e)
+            }
         }
     }
 };
@@ -224,10 +233,34 @@ const processPlugins = async () => {
     const pluginDirs = fs.readdirSync(pluginsDir);
 
     for (const pluginName of pluginDirs) {
+
+        // ignore files
+        if(fs.lstatSync(path.join(pluginsDir, pluginName)).isFile() === true) continue;
+
         const pluginDir = path.join(pluginsDir, pluginName);
         const pluginFunctionsDir = path.join(pluginDir, 'functions');
         const pluginSocketsDir = path.join(pluginDir, 'sockets');
         const pluginWebDir = path.join(pluginDir, 'web');
+
+        let pluginConfigPath = path.join(pluginDir, 'config.json');
+        let pluginConfig = null;
+
+        if(fs.existsSync(pluginConfigPath)) {
+            pluginConfig = JSON.parse(fs.readFileSync(pluginConfigPath));
+        }
+
+        // some plugin meta
+        let pluginTitle = pluginConfig?.title || false;
+        let pluginEnabled = pluginConfig?.enabled || false;
+        let pluginAuthor = pluginConfig?.author || "";
+        let pluginVersion = pluginConfig?.version || 0;
+
+        // skip disabled plugin
+        if(pluginEnabled !== true) {
+            Logger.warn(`Skipped loading plugin ${pluginTitle} (${pluginName}) because its not enabled`)
+            continue;
+        }
+
 
         // Load and execute plugin functions
         if (fs.existsSync(pluginFunctionsDir)) {
@@ -537,7 +570,7 @@ Logger.info(`♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥�
 Logger.info(`Support the project » https://ko-fi.com/shydevil`, Logger.colors.blink + Logger.colors.bright + Logger.colors.fgMagenta);
 Logger.info(`♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥`, Logger.colors.blink + Logger.colors.bright + Logger.colors.fgMagenta);
 Logger.space();
-
+Logger.space();
 Logger.info(`You're running version ` + versionCode);
 
 // Check if new Version exists
@@ -566,14 +599,6 @@ process.on('uncaughtException', function (err) {
     date = date.replace(", ", "_");
     date = date.replaceAll(":", "-");
     date = date.replaceAll(".", "-");
-
-    // Create the log file
-    fs.writeFile("./logs/error_" + date + ".txt", err.message + "\n" + err.stack, function (err) {
-        if (err) {
-            return console.log(err);
-        }
-        Logger.debug("The log file ./logs/error_" + date + ".txt was saved!");
-    });
 })
 
 

@@ -59,7 +59,7 @@ function resetAccount() {
         CookieManager.setCookie("status", null, 365);
         CookieManager.setCookie("aboutme", null, 365);
         CookieManager.setCookie("pfp", null, 365);
-        CookieManager.setCookie("token", null, 365);
+        CookieManager.setCookie("dcts_token", null, 365);
         CookieManager.setCookie("banner", null, 365);
         CookieManager.setCookie("pow_challenge", null, 365);
         CookieManager.setCookie("pow_solution", null, 365);

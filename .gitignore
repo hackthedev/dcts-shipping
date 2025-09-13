@@ -5,3 +5,5 @@
 config.json
 /public/uploads/
 /plugins
+/discover/node_modules/
+/discover/config.json

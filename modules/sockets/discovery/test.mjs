@@ -1,5 +1,5 @@
 import {app, serverconfig, versionCode} from "../../../index.mjs";
-import {getOnlineMemberCount} from "../../functions/chat/main.mjs";
+import {getOnlineMemberCount, resolveGroupByChannelId} from "../../functions/chat/main.mjs";
 import Logger from "../../functions/logger.mjs";
 import {rateLimit} from "../../functions/ratelimit.mjs";
 
@@ -14,10 +14,7 @@ const pingLimiter = rateLimit({
 app.use((req, res, next) => {
     const origin = req.headers.origin;
 
-    if (serverconfig.serverinfo.discovery.hosts.includes(origin)) {
-        res.header("Access-Control-Allow-Origin", origin);
-    }
-
+    res.header("Access-Control-Allow-Origin", "*");
     res.header("Vary", "Origin");
     res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
@@ -31,24 +28,31 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/discover/ping", pingLimiter, (req, res) => {
+app.get("/discover", pingLimiter, (req, res) => {
     res.set("Cache-Control", "no-store");
 
     try {
 
         if (serverconfig.serverinfo?.discovery?.enabled === true) {
+
+            let groupId = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);
+            let group = null;
+            if(groupId !== null){
+                group = serverconfig.groups[groupId];
+            }
+
             res.json({
                 serverinfo: {
-                    name: serverconfig.serverinfo.name,
-                    about: serverconfig.serverinfo.home.about,
-                    banner: serverconfig.serverinfo.home.banner_url,
+                    name: serverconfig.serverinfo.name || null,
+                    about: serverconfig.serverinfo.home.about || null,
+                    banner: serverconfig.serverinfo.home.banner_url || null,
+                    icon: group?.info?.icon || null,
                     slots: {
                         online: getOnlineMemberCount(),
                         limit: serverconfig.serverinfo.slots.limit,
                         reserved: serverconfig.serverinfo.slots.reserved,
                     },
                     registration: serverconfig.serverinfo.registration.enabled,
-                    ssl: serverconfig.serverinfo.ssl.enabled,
                     tenor: serverconfig.serverinfo.tenor.enabled,
                     uploadFileTypes: serverconfig.serverinfo.uploadFileTypes,
                     turn: serverconfig.serverinfo.turn.enabled,

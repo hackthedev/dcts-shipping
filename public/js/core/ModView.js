@@ -3,6 +3,7 @@ class ModView {
     static modViewDivContent;
     static modViewBadge;
     static reports;
+    static didInit = false;
 
     static addStyles() {
         const style = document.createElement('style');
@@ -119,7 +120,6 @@ class ModView {
                 cursor: pointer;
             }
 
-           /* Report Details */
             .report-section {
                 background: #2a2e35;
                 padding: 15px;
@@ -133,7 +133,6 @@ class ModView {
                 color: #ddd;
             }
 
-            /* User Sections - Compact & Side by Side */
             .user-container {
                 display: flex;
                 justify-content: space-between;
@@ -159,7 +158,6 @@ class ModView {
                 cursor: pointer;
             }
 
-            /* Reported Message Styling */
             .report-info {
                 background: #2a2e35;
                 padding: 15px;
@@ -193,6 +191,7 @@ class ModView {
             .reported-message {
                 background: rgba(255, 255, 255, 0.1);
                 border-radius: 4px;
+                overflow: auto;
             }
 
             .reported-message span{
@@ -210,6 +209,7 @@ class ModView {
                 display: flex;
                 gap: 10px;
                 margin-top: 10px;
+                user-select: none;
             }
 
             .action-buttons.center {
@@ -278,9 +278,6 @@ class ModView {
                 background: #777;
             }
 
-
-
-            /* popup badges*/
             #modViewBadge {
                 position: fixed;
                 top: 20px;
@@ -301,15 +298,13 @@ class ModView {
                 z-index: 10000;
                 transition: transform 0.2s ease-in-out, background-color 0.3s;
                 padding: 10px 5px;
-                /*gap: 5px;*7
+                /*gap: 5px;*/
             }
 
-            /* Hover effect */
             #modViewBadge:hover {
                 transform: scale(1.05);
             }
 
-            /* Number (Aligned to Top) */
             #modViewBadgeIcon {
                 font-size: 16px;
                 font-weight: bold;
@@ -323,7 +318,6 @@ class ModView {
                 user-select: none;
             }
 
-            /* Reports Text (Properly Rotated & Centered) */
             #modViewBadgeText {
                 writing-mode: sideways-lr;
                 transform-origin: center;
@@ -344,6 +338,8 @@ class ModView {
     }
 
     static init() {
+        if(this.didInit) return;
+
         this.addStyles();
 
         this.modViewDiv = document.createElement("div");
@@ -363,6 +359,7 @@ class ModView {
         this.modViewBadge.style.display = "none"; // Hide initially
 
         document.body.appendChild(this.modViewBadge);
+        this.didInit = true; // important flag, else will hang
     }
 
     static open() {
@@ -496,13 +493,27 @@ class ModView {
 
     static async showReportDetails(reportId) {
         let report = this.reports.find(r => r.id === reportId);
-        if (!report) return;
+        if (!report) {
+            console.warn("Report not found");
+            return;
+        }
 
         let reportCreator = this.parseJson(report.reportCreator);
         let reportedUser = this.parseJson(report.reportedUser);
-        let reportData = report.reportData ? JSON.parse(report.reportData) : null;
+        let reportData = report.reportData
         console.log(reportData)
 
+        let reportMessage = "";
+        if(report.reportType === "dm_message") {
+            // if is string parse it
+            if(typeof reportData.message === "string") reportData.message = JSON.parse(reportData.message);
+            reportMessage = reportData.message.content
+        }
+        else{
+            if(reportData.message.substring(0, 4).includes(("{"))){
+                reportMessage = reportData.message = (JSON.parse(reportData.message)).content;
+            }
+        }
 
         let messageHistory = await UserReports.showMessageLogs(reportData.messageId)
 
@@ -575,7 +586,7 @@ class ModView {
             <h3>Reported Message</h3>
             <div class="modview_message-box">
                 <p><strong>User:</strong> ${reportData.name} (${reportData.id})</p>
-                <p><strong>Message:</strong></p> <div class="reported-message"><span>${report.reportType == "dm_message" ? decodeFromBase64(reportData.message) : reportData.message}</span></div>
+                <p><strong>Message:</strong></p> <div class="reported-message"><span>${reportMessage}</span></div>
                 <p><strong>Time:</strong> ${new Date(reportData.timestamp).toLocaleString()}</p>
             </div>
 

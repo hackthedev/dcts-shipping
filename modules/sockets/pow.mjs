@@ -148,7 +148,7 @@ export function waitForPow(socket, timeoutSeconds = 10) {
 }
 
 export async function waitForPowSolution(socket) {
-    const timeoutSeconds = await calculateTimeoutBasedOnDifficulty(serverconfig.serverinfo.pow.difficulty);
+    const timeoutSeconds = await calculateTimeoutBasedOnDifficulty(serverconfig.serverinfo.pow.difficulty) + Number(600);
     try {
         Logger.debug(`Waiting ${formatTimeDifference(Date.now(), new Date().getTime() + (timeoutSeconds * 1000))} for ${socket.id} to solve POW`)
 

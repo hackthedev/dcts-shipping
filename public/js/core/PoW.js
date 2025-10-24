@@ -56,6 +56,23 @@ function formatTimeDifference(startTimestamp, endTimestamp) {
     return parts.join(', ');
 }
 
+function setupAccountFromData(data){
+    let powChallenge = data?.pow?.split("-")[0]
+    let powSolution = data?.pow?.split("-")[1]
+
+    if (data?.icon) UserManager.setPFP(data?.icon);
+    if (data?.banner) UserManager.setBanner(data?.banner);
+    if (data?.name) UserManager.setUsername(data?.name);
+    if (data?.status) UserManager.setStatus(data?.status);
+    if (data?.aboutme) UserManager.setAboutme(data?.aboutme);
+
+    if (powChallenge) CookieManager.setCookie("pow_challenge", powChallenge);
+    if (powSolution) CookieManager.setCookie("pow_solution", powSolution);
+
+    if (data?.loginName) CookieManager.setCookie("dcts_token", data?.loginName, 365);
+    if (data?.id) CookieManager.setCookie("id", data?.id, 365);
+    if (data?.token) CookieManager.setCookie("dcts_token", data?.token, 365);
+}
 
 async function setupAccount(challenge, difficulty) {
     customPrompts.showPrompt(
@@ -106,10 +123,11 @@ async function setupAccount(challenge, difficulty) {
 
                 try {
                     let data = JSON.parse(content);
-                    //console.log(data)
-                    //console.log(data.pow)
 
-                    if (!data?.pow?.challenge || !data?.pow?.solution) {
+                    let powChallenge = data?.pow?.split("-")[0]
+                    let powSolution = data?.pow?.split("-")[1]
+
+                    if (!powChallenge || !powSolution) {
                         showSystemMessage({
                             title: "Import Error",
                             text: "It seems like the imported data is missing identity data",
@@ -121,16 +139,16 @@ async function setupAccount(challenge, difficulty) {
                         return;
                     }
 
-                    if (data?.icon) UserManager.setPFP(data.icon);
-                    if (data?.banner) UserManager.setBanner(data.banner);
-                    if (data?.displayName) UserManager.setUsername(data.displayName);
-                    if (data?.status) UserManager.setStatus(data.status);
-                    if (data?.aboutme) UserManager.setAboutme(data.aboutme);
+                    socket.emit("importAccount", { account: data }, function (response) {
+                        if (response?.error === null) {
+                            setupAccountFromData(data);
 
-                    if (data?.pow?.challenge) CookieManager.setCookie("pow_challenge", data.pow.challenge);
-                    if (data?.pow?.solution) CookieManager.setCookie("pow_solution", data.pow.solution);
-
-                    window.location.reload();
+                            window.location.reload();
+                        }
+                        else {
+                            customAlerts.showAlert("error", response.error)
+                        }
+                    });
                 }
                 catch (importError) {
                     console.log(importError)
@@ -303,9 +321,6 @@ function initPow(onAcceptedCallback) {
 
         if (storedSolution && storedChallenge) {
             challenge = storedChallenge;
-            //console.log('Using stored solution:', storedSolution);
-            //console.log('Using stored challenge:', storedChallenge);
-
             verifyPow(challenge, storedSolution)
         } else {
             setupAccount(pow.challenge, pow.difficulty)

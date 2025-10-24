@@ -1,29 +1,9 @@
-/* width */
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-    background: hsl(from var(--main) h s calc(l * 3));
-    border-radius: 12px;
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-    background: hsl(from var(--main) h s calc(l * 3));
-}
 
 :root {
-    --primary: #34383C;
-    --primary-bright: #898d93;
-    --primary-hover: color-mix(in srgb, var(--primary) 80%, white 20%);
-    --primary-selected: color-mix(in srgb, var(--primary) 80%, white 40%);
+    --primary: hsl(from var(--main) h s calc(l * 1));
+    --primary-bright: hsl(from var(--main) h s calc(l * 2.5));
+    --primary-hover: hsl(from var(--main) h s calc(l * 10));
+    --primary-selected: hsl(from var(--main) h s calc(l * 12));
 
     --secondary: #2492c9;
     --secondary-hover: color-mix(in srgb, var(--secondary) 80%, white 20%);
@@ -38,6 +18,14 @@
 
     --transition-all: all 200ms;
     --input-border: 1px solid rgb(98, 98, 98);
+}
+
+*{
+    box-sizing: border-box;
+
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(from var(--main) h s calc(l * 3)) transparent;
 }
 
 #homeScreen {
@@ -59,6 +47,7 @@
 }
 
 .homeDivider{
+    width: 80%;
     margin: 10px !important;
     display: block;
 }
@@ -80,6 +69,7 @@ body {
     width: 100%;
     height: 100%;
     background-color: #33373b;
+    overflow: hidden;
 }
 
 * {
@@ -87,61 +77,98 @@ body {
 }
 
 #header {
-    height: calc(40px - 16px);
-    width: calc(100% - 16px);
-
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
     padding: 8px;
-
     color: white;
+}
+
+#header #badges {
+    justify-self: center;
+    display: flex;
+    gap: 6px;
+}
+
+#header #badges .profile_badge {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+}
+
+#header #headerRight {
+    justify-self: end;
+}
+
+
+#mainLayout{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    height: 100%;
+    width: 100%;
 
     position: relative;
-    display: block;
+}
 
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+#contentLayout{
+    display: flex;
+    flex-direction: row;
+
+    flex: 1;
+    min-height: 0;
 }
 
 #serverlist {
-    height: calc(100% - 16px - 40px);
-    width: calc(80px - 16px);
+    display: flex;
+    height: 100%;
+    width: 80px;
+    flex-shrink: 0;
 
     padding: 8px;
-    /*align-content: center;*/
-    text-align: center;
+
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+    justify-content: flex-start;
 
     color: white;
-
-    display: block;
-    float: left;
-
+    overflow-x: hidden;
     overflow-y: auto;
+
+    position: relative;
 }
 
-
-
-
 #content-container {
-    height: calc(100% - 40px);
-    width: calc(100% - 80px - 200px - 300px);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 
     color: white;
-
-    display: block;
-    float: left;
+    max-width: 100%;
 
     border-top-right-radius: 6px;
     border-top-left-radius: 6px;
 }
 
+#content {
+    height: auto;
+    width: 100%;
+    flex-grow: 1;
+    padding: 16px;
+    margin-bottom: 4px;
+
+    color: white;
+    overflow-y: auto;
+}
+
 #channelname-bar {
-    height: 20px;
-    width: calc(100% - 32px) !important;
+    height: fit-content;
+    width: 100%;
+    flex-direction: row;
 
     padding: 16px;
-
-    display: block;
-    float: left;
 
     font-weight: bold;
     font-size: 20px;
@@ -178,20 +205,6 @@ body {
     width: 400px !important;
     height: auto;
     float: left;
-}
-
-#content {
-    height: calc(100% - 40px - 40px - 32px - 32px - 60px);
-    width: calc(100% - 16px - 15px);
-    padding: 16px;
-    margin-bottom: 65px;
-
-    color: white;
-
-    display: block;
-    float: left;
-
-    overflow-y: auto;
 }
 
 #messagebox-content {
@@ -242,14 +255,14 @@ body {
 }
 
 #infolist {
-    height: calc(100% - 32px - 40px);
-    width: calc(200px - 32px);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0 !important;
+
+    height: 100%;
+    width: 200px;
     padding: 16px;
     color: white;
-
-    display: block;
-    float: left;
-
     overflow-y: auto;
 }
 
@@ -294,15 +307,13 @@ body {
 }
 
 #profile-qa {
-    height: calc(50px);
-    width: calc(300px - 20px);
+    height: fit-content;
+    width: 100%;
 
     padding: 10px;
 
-    display: block;
-    float: left;
+    display: flex;
     bottom: 0;
-    position: fixed;
 }
 
 #profile-qa-img-container {
@@ -312,15 +323,11 @@ body {
     border-radius: 50%;
     overflow: hidden;
 
-    display: block;
-    float: left;
-
     -webkit-transition: transform .5s ease;
 }
 
 #profile-qa-img {
     background-size: cover;
-
     object-fit: cover;
     background-position: center center;
 
@@ -335,11 +342,7 @@ body {
 }
 
 #profile-qa-img:hover {
-    -webkit-transform: scale(1.1);
-    -moz-transform: scale(1.1);
-    -o-transform: scale(1.1);
     transform: scale(1.1);
-
     transition: all 400ms;
 }
 
@@ -349,25 +352,18 @@ body {
 }
 
 #profile-qa-img:not(:hover) {
-    -webkit-transform: scale(1);
-    -moz-transform: scale(1);
-    -o-transform: scale(1);
     transform: scale(1);
-
     transition: all 400ms;
 }
 
 #profile-qa-info {
     padding: 10px;
 
-    display: block;
-    float: left;
-
     overflow: hidden;
     background-color: transparent;
 
     width: 60%;
-    height: 28px;
+    height: fit-content;
     cursor: pointer;
 }
 
@@ -377,29 +373,25 @@ body {
 
     overflow: hidden;
     background-color: transparent;
-    display: block;
-    float: left;
 }
 
 #profile-qa #webrtc-controls {
-    display: block;
-    float: left;
     background-color: transparent;
 
     padding: 12px 12px 0 32px;
 
-    height: calc(45px - 24px);
+    height: 45px;
     width: auto;
     cursor: pointer;
 }
 
 .memberlist-container {
-    display: block;
-    float: left;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+
     width: 100%;
-
     background-color: transparent;
-
     margin-bottom: 12px;
     cursor: pointer;
 }
@@ -408,7 +400,6 @@ body {
     width: 35px;
     height: 35px;
     border-radius: 50%;
-    float: left;
 
     background-size: cover;
     object-fit: cover;
@@ -418,17 +409,14 @@ body {
 .memberlist-member-info {
     height: 20px;
     overflow: hidden;
-
-    float: left;
     margin-left: 8px;
-
     background-color: transparent;
     width: 100px;
 }
 
 .memberlist-member-info.status {
     font-size: 12px;
-    width: calc(100% - 48px);
+    width: 100%;
 
     overflow: hidden;
     text-overflow: ellipsis;
@@ -436,7 +424,8 @@ body {
 }
 
 .infolist-role {
-    margin-bottom: 8px;
+    margin-bottom: 0;
+    margin-top: 8px;
 }
 
 .message-container {
@@ -477,6 +466,12 @@ body {
 .message-profile-info-name {
     font-weight: normal;
     cursor: pointer;
+    margin-left: 8px;
+}
+
+.sanitized-content p{
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .message-profile-img-container,
@@ -498,7 +493,7 @@ body {
 }
 
 .message-profile-info {
-    height: 30px;
+    height: auto;
     overflow: hidden;
 
     display: block;
@@ -507,7 +502,7 @@ body {
     background-color: transparent;
     width: calc(100% - 50px - 12px);
 
-    margin: 4px 0 0 8px;
+    margin: 4px 0 8px 8px;
     font-size: 16px;
     font-weight: bold;
 
@@ -615,7 +610,7 @@ pre.markdown {
 
 .image-embed,
 .message-profile-content .message-profile-content-message img {
-    max-width: 400px;
+    max-width: 300px;
     height: auto;
     text-align: left;
     margin: 8px 0 8px 0;
@@ -657,28 +652,6 @@ pre.markdown {
 
 #context-menu.visible {
     display: block;
-}
-
-#typing-indicator {
-    font-style: italic;
-    font-size: 14px;
-    margin-bottom: -2px !important;
-    display: none;
-
-    float: left;
-    width: 100%;
-    bottom: 4px;
-
-    overflow: hidden;
-}
-
-#typing-indicator-container {
-    float: left;
-    display: block;
-
-    position: fixed;
-    bottom: 10px;
-    margin-left: 20px;
 }
 
 .message-profile-info .timestamp,
@@ -745,8 +718,8 @@ pre.markdown {
     z-index: 2;
     text-align: center;
 
-    top: 40px;
-    left: 46px;
+    top: 0px;
+    left: 50px;
 
     margin: 0;
     padding: 2px 6px;
@@ -805,8 +778,8 @@ details[open] summary::before {
 pre.editedMsg {
     margin-top: 0;
     margin-left: 6px;
-    font-size: 10px;
-    color: #989898;
+    font-size: 8px;
+    color: #8e8e8e;
     display: block;
     float: left;
     font-style: italic;
@@ -1025,10 +998,13 @@ label.mention {
     height: 150px;
 
     padding: 8px;
-    background: #2F3136;
-    color: white;
+
+    background-color: hsl(from var(--main) h s calc(l * 2.5));
+    border: 2px solid hsl(from var(--main) h s calc(l * 4));
+    color: hsl(from var(--main) h s calc(l * 10));
+
+
     border-radius: 6px;
-    border: 1px solid gray;
 
     text-overflow: ellipsis;
     overflow-y: auto;
@@ -1083,7 +1059,7 @@ label.mention {
 }
 
 .role-menu-entry:hover {
-    background: #484545;
+    background: hsl(from var(--main) h s calc(l * 3));;
 }
 
 #role-menu-search-input:hover,
@@ -1097,9 +1073,37 @@ label.mention {
     user-select: none;
 }
 
+#messagebox {
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 10px 0;
+    margin: auto;
+}
 
 .editor-container {
-    margin-top: -60px;
+    display: flex;
+    margin-bottom: 10px;
+}
+
+#typing-indicator {
+    font-style: italic;
+    font-size: 10px;
+    width: 100%;
+    overflow: hidden;
+    color: transparent;
+    user-select: none;
+}
+
+#typing-indicator-container {
+    display: flex;
+    margin-left: 20px;
+
+    margin-top: 0;
+    margin-bottom: 0;
+    overflow: hidden;
 }
 
 #editMsgHint {

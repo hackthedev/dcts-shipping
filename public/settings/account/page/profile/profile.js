@@ -51,22 +51,7 @@ async function handleUpload(files, id) {
 
 
 function resetAccount() {
-    var reset = confirm("Do you really want to reset your account? EVERYTHING will be reset and you will be logged out.")
-
-    if (reset) {
-        CookieManager.setCookie("id", null, 365);
-        CookieManager.setCookie("username", null, 365);
-        CookieManager.setCookie("status", null, 365);
-        CookieManager.setCookie("aboutme", null, 365);
-        CookieManager.setCookie("pfp", null, 365);
-        CookieManager.setCookie("dcts_token", null, 365);
-        CookieManager.setCookie("banner", null, 365);
-        CookieManager.setCookie("pow_challenge", null, 365);
-        CookieManager.setCookie("pow_solution", null, 365);
-        CookieManager.setCookie("loginName", null, 365);
-
-        alert("Your account has been reset and you have been logged out. Please refresh the page if you want to continue");
-    }
+    UserManager.resetAccount();
 }
 
 function setPreview() {
@@ -87,6 +72,22 @@ function setPreview() {
 }
 
 async function exportAccount() {
+
+    socket.emit("exportAccount", { id: UserManager.getID(), token: UserManager.getToken(), }, async function (response) {
+        console.log(response)
+
+        if(response.account.icon.substring(0, 1).includes("/")){
+            response.account.icon = await elementImageToBase64(preview_icon)
+        }
+
+        if(response.account.banner.substring(0, 1).includes("/")){
+            response.account.banner = await elementImageToBase64(preview_banner)
+        }
+
+        await FileManager.saveFile(JSON.stringify(response.account, null, 4), "identity_" + UserManager.getUsername() + ".json")
+    });
+
+    /*
     let data = {
         icon: await FileManager.fileToBase64(UserManager.getPFP()),
         banner: await FileManager.fileToBase64(UserManager.getBanner()),
@@ -101,6 +102,8 @@ async function exportAccount() {
     }
     
     await FileManager.saveFile(JSON.stringify(data, null, 4), "identity_" + UserManager.getUsername() + ".json")
+
+     */
 }
 
 function importAccount() {
@@ -154,10 +157,9 @@ function saveSettings() {
         }
 
         // About me
-        if (settings_aboutme.value != null && settings_aboutme.value.length > 0) {
-            UserManager.setAboutme(settings_aboutme.value);
-            console.log("Saved about me");
-        }
+        // no check so we can allow it to be null
+        UserManager.setAboutme(settings_aboutme.value);
+        console.log("Saved about me");
 
 
         // Username
@@ -187,8 +189,10 @@ function saveSettings() {
 }
 
 function limitString(text, limit) {
-    if (text.length <= limit) return text.substring(0, limit);
-    else return text.substring(0, limit) + "...";
+    if(!text) return "";
+
+    if (text?.length <= limit) return text?.substring(0, limit);
+    else return text?.substring(0, limit) + "...";
 }
 
 function updatePreview(id) {

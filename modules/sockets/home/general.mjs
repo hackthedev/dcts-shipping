@@ -1,4 +1,4 @@
-import { io, serverconfig, usersocket, xssFilters } from "../../../index.mjs";
+import {io, serverconfig, signer, usersocket, xssFilters} from "../../../index.mjs";
 import { hasPermission } from "../../functions/chat/main.mjs";
 import Logger from "../../functions/logger.mjs";
 import { copyObject, emitBasedOnPermission, getCastingMemberObject, sanitizeInput, sendMessageToUser, validateMemberId } from "../../functions/main.mjs";
@@ -170,12 +170,24 @@ async function buildThreadOut(threadId, memberId = null) {
         unread = Number(uRow?.unread || 0);
     }
 
+    let lastDecoded = '';
+    try {
+        if (last?.lastText) {
+            const decoded = decodeFromBase64(last.lastText);
+            const parsed = JSON.parse(decoded);
+            lastDecoded = parsed?.content || '';
+        }
+    } catch (e) {
+        lastDecoded = '';
+    }
+
+
     return {
         id: t.threadId,
         type: t.type,
         title: t.title,
         participants: parts.map(p => p.memberId),
-        last: last?.lastText || '',
+        last: lastDecoded || '',
         lastAt: last?.lastAt || t.tCreated || null,
         unread,
         status: t.status || 'open',
@@ -285,7 +297,7 @@ export default (io) => (socket) => {
                 const messages = rows.map(r => ({
                     id: r.messageId,
                     authorId: r.authorId,
-                    text: r.message,
+                    text: JSON.parse(decodeFromBase64(r.message)),
                     ts: r.createdAt || null,
                     supportIdentity: r.supportIdentity || 'self',
                     displayName: r.displayName || null
@@ -358,7 +370,15 @@ export default (io) => (socket) => {
             ) : [];
 
             const lastMap = Object.fromEntries(
-                lastRows.map(r => [r.threadId, { lastText: r.lastText, lastAt: r.lastAt }])
+                lastRows.map(r => {
+                    let decoded = '';
+                    try {
+                        const raw = decodeFromBase64(r.lastText || '');
+                        const parsed = JSON.parse(raw);
+                        decoded = parsed?.content || '';
+                    } catch {}
+                    return [r.threadId, { lastText: decoded, lastAt: r.lastAt }];
+                })
             );
 
             // WICHTIG: eigene Nachrichten ausschließen (d.authorId != ?)
@@ -519,7 +539,9 @@ export default (io) => (socket) => {
             const messageId = "m_" + Date.now();
             const now = nowISO();
 
-            data.text = sanitizeInput(data.text);
+            data.text.content = sanitizeInput(data.text.content);
+            data.text.sender = sanitizeInput(data.text.sender);
+            data.text.plainSig = sanitizeInput(data.text.plainSig);
             data.authorName = sanitizeInput(data.authorName);
 
             const [isMember] = await queryDatabase(
@@ -546,13 +568,10 @@ export default (io) => (socket) => {
                 Potential automod text checking
             */
 
-            // encode text so its not plain for now
-            data.text = encodeToBase64(data.text)
-
             await queryDatabase(
                 `INSERT INTO dms_messages (messageId, threadId, authorId, message, createdAt, supportIdentity, displayName)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                [messageId, data.threadId, me, data.text, now, data.supportIdentity || "self", displayName]
+                [messageId, data.threadId, me, encodeToBase64(sanitizeInput(JSON.stringify(data.text))), now, data.supportIdentity || "self", displayName]
             );
 
             // mark as read for sender
@@ -571,6 +590,8 @@ export default (io) => (socket) => {
                 supportIdentity: data.supportIdentity || "self",
                 displayName
             };
+
+            console.log(message);
 
             await emitToThread(data.threadId, "receiveMessage", { threadId: data.threadId, message });
 
@@ -622,7 +643,7 @@ export default (io) => (socket) => {
                 const me = socket.data.memberId;
                 if (!me) return cb?.({ type: "error", msg: "unauthorized" });
 
-                const { messageId, reason = "" } = data || {};
+                const { messageId, reason = "", plainText = "" } = data || {};
                 if (!messageId) return cb?.({ type: "error", msg: "missing messageId" });
 
                 const [msg] = await queryDatabase(
@@ -641,6 +662,7 @@ export default (io) => (socket) => {
                     name: reportedObj?.name ?? String(msg.authorId),
                     icon: reportedObj?.icon ?? reportedObj?.avatar ?? null,
                     message: msg.message,
+                    plainText: sanitizeInput(plainText),
                     group: "0",
                     category: "0",
                     channel: "0",
@@ -764,9 +786,25 @@ export default (io) => (socket) => {
         if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
             try {
                 const me = socket.data.memberId;
-                const { messageId, newText } = data || {};
+                const { messageId, payload } = data || {};
                 if (!messageId) return response?.({ type: "error", msg: "missing messageId" });
-                if (typeof newText !== "string") return response?.({ type: "error", msg: "missing newText" });
+                if (typeof payload.content !== "string") return response?.({ type: "error", msg: "missing content" });
+
+                // check if data is set ofc
+                if (payload.encrypted === true && !payload.sender) return response?.({ type: "error", msg: "Missing sender while using encryption" });
+                if (payload.encrypted === true && !payload.plainSig) return response?.({ type: "error", msg: "Missing plainSig while using encryption" });
+                if (payload.encrypted === true && !payload.sig) return response?.({ type: "error", msg: "Missing sig while using encryption" });
+
+                // next we fockin' check if da data is valid, shall we?
+                let publicKey = serverconfig.servermembers[me]?.publicKey;
+                let isVaildSig = await signer.verifyJson(payload, publicKey);
+
+                // if somehow that silly wanker signed his own message but
+                // its wrong he may be using a wrong key and didnt share
+                // his new public key. odd innit
+                if(!isVaildSig){
+                    return response?.({ type: "error", msg: "Message signature was invalid!" });
+                }
 
                 const rows = await queryDatabase(
                     `SELECT authorId, messageId, threadId, message FROM dms_messages WHERE messageId = ? LIMIT 1`,
@@ -786,7 +824,11 @@ export default (io) => (socket) => {
                     [cur.messageId, cur.threadId, cur.authorId, cur.message, nowISO()]
                 );
 
-                const encoded = encodeToBase64(newText);
+                payload.content = sanitizeInput(payload.content);
+                payload.sender = sanitizeInput(payload.sender);
+                payload.plainSig = sanitizeInput(payload.plainSig);
+                payload.sig = sanitizeInput(payload.sig);
+                const encoded = encodeToBase64(JSON.stringify(payload))
 
                 await queryDatabase(
                     `UPDATE dms_messages SET message = ? WHERE messageId = ?`,
@@ -795,7 +837,7 @@ export default (io) => (socket) => {
 
                 await emitToThread(cur.threadId, "receiveMessageEdit", {
                     threadId: cur.threadId,
-                    message: { id: cur.messageId, authorId: cur.authorId, text: encoded, ts: nowISO() }
+                    message: { id: cur.messageId, authorId: cur.authorId, text: payload, ts: nowISO() }
                 });
 
                 response?.({ type: "success" });

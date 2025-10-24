@@ -49,7 +49,6 @@ class UserReports {
                 id: UserManager.getID(),
                 token: UserManager.getToken(),
                 msgId: id
-
             }, function (response) {
                 if (response.type === "success") {
                     let parsedLogs = response.logs.map(log => {

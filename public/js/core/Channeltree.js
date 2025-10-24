@@ -75,7 +75,7 @@ class ChannelTree {
                         categoryElement.insertAdjacentHTML("beforeend", channelHTML);
 
                         if(!hasNewMessages) markChannel(channel.id, true)
-                        if(hasNewMessages) markChannel(channel.id, false, channel.msgCoun)
+                        if(hasNewMessages) markChannel(channel.id, false, channel.msgCount)
                     });
                 }                
             });
@@ -95,15 +95,7 @@ class ChannelTree {
     }
 
     static makeSortable(element, group, handle = null) {
-        if (!ChannelTree.sortableInstances) {
-            ChannelTree.sortableInstances = {};
-        }
-
-        if (ChannelTree.sortableInstances[element.id]) {
-            ChannelTree.sortableInstances[element.id].destroy();
-        }
-
-        ChannelTree.sortableInstances[element.id] = new Sortable(element, {
+        new Sortable(element, {
             group: group,
             animation: 150,
             ghostClass: 'sortable-ghost',

@@ -1,14 +1,206 @@
 class UserManager {
 
+    static isLoadingDonators = false;
+
     static updateUsernameOnUI(username, sync = false) {
         try {
             document.getElementById("profile-qa-info-username").innerText = username;
 
             if (sync == true) {
-                socket.emit("setUsername", { token: UserManager.getToken(), id: UserManager.getID(), username: UserManager.getUsername(), icon: UserManager.getPFP() });
+                socket.emit("setUsername", {
+                    token: UserManager.getToken(),
+                    id: UserManager.getID(),
+                    username: UserManager.getUsername(),
+                    icon: UserManager.getPFP()
+                });
             }
-        } catch { }
+        } catch {
+        }
 
+    }
+
+    static async getMemberProfileHTML(memberObj) {
+
+        let roleCode = "";
+        for (let i = 0; i < memberObj?.roles.length; i++) {
+            var role = memberObj?.roles[i];
+            var roleColor = role.color;
+            var roleName = role.name;
+
+            roleCode += `<code class="role" id="profile-role-entry-${role.id}"><div class="role_color" style="background-color: ${roleColor};"></div>${roleName}</code>`;
+        }
+
+        let isMuted = memberObj?.isMuted;
+        let isBanned = memberObj?.isBanned;
+
+
+        // if someone is muted etc
+        let mutedCode = "";
+        let bannedCode = "";
+
+        if (isMuted) {
+            mutedCode = `<div style="color: indianred; border: 1px solid indianred;" class="info">
+                            <h1>Muted</h1>
+                        </div>`
+        }
+        if (isBanned) {
+            bannedCode = `<div style="color: indianred; border: 1px solid indianred;" class="info">
+                            <h1>Banned</h1>
+                        </div>`
+        }
+
+        return `
+            <div id="profile_banner" style="background-image: url('${memberObj?.banner}')"></div>
+        
+            <div id="profile_pfp_container">
+                <div id="profile_icon" style="background-image: url('${memberObj?.icon}');"></div>
+                <div class="profile_meta">
+                    <div class="info">
+                        <h1>Joined</h1>
+                        <div class="value">
+                            ${new Date(memberObj?.joined).toLocaleString("narrow", {
+                                dateStyle: "short",
+                                timeStyle: "short",
+                                hour12: true
+                            }).replace(",", "<br>")}
+                            </div>
+                        </div>
+                                                
+                        <div class="info">
+                            <h1>Last online</h1>
+                            <div class="value">
+                                ${new Date(memberObj?.lastOnline).toLocaleString("narrow", {
+                                    dateStyle: "short",
+                                    timeStyle: "short",
+                                    hour12: true
+                                }).replace(",", "<br>")}
+                        </div>
+                    </div>                 
+                </div>
+            </div>
+            
+        
+            <div id="profile_content">       
+                <div id="profile_username"><h2 style="margin-bottom: 0 !important;">${memberObj?.name}</h2></div>                
+                <div id="profile_status"><i>${memberObj?.status}</i></div>                
+                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(memberObj?.publicKey) : ""}"></div> 
+                
+                <div class="profile_aboutme">       
+                    ${memberObj?.aboutme?.trim()?.length > 0 ? `<hr><h2 class="profile_headline">About Me</h2>${memberObj.aboutme}` : ""}
+                    
+                    
+                    <div class="profile_meta_container">
+                        ${
+                            mutedCode || bannedCode ?
+                                `<div class="profile_meta">
+                                    ${mutedCode}
+                                    ${bannedCode}   
+                                </div>` : ""
+                        }   
+                    </div>        
+                </div>
+            <hr>
+           
+            <div id="profile_roles">
+                <h2 class="profile_headline">Roles</h2>
+                ${roleCode}
+                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${this.getID()}');" class="role" id="addRole-${this.getID()}">+</code>
+            </div>`;
+    }
+
+    static async getPublicKey() {
+        return await Crypto.getPublicKey();
+    }
+
+    static async getUserBadges(id, beta = false) {
+        if (!id) return null;
+        return await getBadges("users", id, beta)
+    }
+
+    static async getServerBadges(id, beta = false) {
+        if (!id) return null;
+        return await getBadges("servers", id, beta)
+    }
+
+    static async getServerGid() {
+        return Crypto.GenerateGid(window.location.host)
+    }
+
+    static async displayServerBadges(beta = false) {
+        if (!isLauncher()) return
+
+        let badgeElement = document.querySelector("#header #badges");
+        if (!badgeElement) {
+            console.warn("Couldnt find badge element")
+            return;
+        }
+
+        let gid = await this.getServerGid();
+        if (!gid) return;
+
+        return await this.getServerBadges(gid, beta).then(result => {
+            if (result != null) {
+                var badges = JSON.parse(result);
+
+                if (badges && Object.keys(badges).length > 0) {
+                    localStorage.setItem("serverBadges", JSON.stringify(badges));
+                } else if (!badges && localStorage.getItem("serverBadges")) {
+                    badges = localStorage.getItem("serverBadges");
+                }
+
+                Object.keys(badges).forEach(function (badge) {
+                    badgeElement.insertAdjacentHTML('beforeend',
+                        `<img 
+                                    class="profile_badge" 
+                                    src="https://raw.githubusercontent.com/hackthedev/dcts-shipping/${beta ? "beta" : "main"}/badges/${badges[badge].icon}.png" 
+                                    title="${badges[badge].display}" 
+                                />`
+                    );
+                });
+            }
+        });
+    }
+
+    static async displayUserBadges(beta = false) {
+        if (!isLauncher()) return
+
+        let badgeElement = document.querySelector("#profile_container #profile_badge_container");
+        badgeElement.innerHTML = "";
+
+        if (!badgeElement) {
+            console.warn("Couldnt find badge element")
+            return null;
+        }
+
+        let gid = badgeElement.getAttribute("data-gid");
+        if (!gid || gid === "null") {
+            console.warn("Couldnt find gid")
+            return null;
+        }
+
+        return await this.getUserBadges(gid, beta).then(result => {
+            if (result != null) {
+                var badges = JSON.parse(result);
+
+                if (badges && Object.keys(badges).length > 0) {
+                    localStorage.setItem("userBadges", JSON.stringify(badges));
+                } else if (!badges && localStorage.getItem("userBadges")) {
+                    badges = localStorage.getItem("userBadges");
+                }
+
+                Object.keys(badges).forEach(function (badge) {
+                    badgeElement.insertAdjacentHTML('beforeend',
+                        `<img 
+                                    class="profile_badge" 
+                                    src="https://raw.githubusercontent.com/hackthedev/dcts-shipping/${beta ? "beta" : "main"}/badges/${badges[badge].icon}.png" 
+                                    title="${badges[badge].display}" 
+                                />`
+                    );
+                });
+
+                return true;
+            }
+        });
     }
 
     static updateStatusOnUI(status, sync = false) {
@@ -16,9 +208,15 @@ class UserManager {
             document.getElementById("profile-qa-info-status").innerText = status;
 
             if (sync == true) {
-                socket.emit("setStatus", { id: UserManager.getID(), username: UserManager.getUsername(), icon: UserManager.getPFP(), status: UserManager.getStatus() });
+                socket.emit("setStatus", {
+                    id: UserManager.getID(),
+                    username: UserManager.getUsername(),
+                    icon: UserManager.getPFP(),
+                    status: UserManager.getStatus()
+                });
             }
-        } catch { }
+        } catch {
+        }
     }
 
     static updatePFPOnUI(url, sync = false) {
@@ -26,9 +224,14 @@ class UserManager {
             document.getElementById("profile-qa-img").src = url;
 
             if (sync == true) {
-                socket.emit("setPFP", { id: UserManager.getID(), username: UserManager.getUsername(), icon: UserManager.getPFP() });
+                socket.emit("setPFP", {
+                    id: UserManager.getID(),
+                    username: UserManager.getUsername(),
+                    icon: UserManager.getPFP()
+                });
             }
-        } catch { }
+        } catch {
+        }
     }
 
     static changeStatus() {
@@ -37,8 +240,7 @@ class UserManager {
         if (status.length > 0) {
             CookieManager.setCookie("status", status, 360);
             UserManager.updateStatusOnUI(status, true);
-        }
-        else {
+        } else {
             alert("Your status was too short");
         }
     }
@@ -49,16 +251,14 @@ class UserManager {
         if (pfp.length > 0) {
             CookieManager.setCookie("pfp", pfp, 360);
             UserManager.updatePFPOnUI(pfp, true);
-        }
-        else {
+        } else {
 
             var reset = confirm("Your pfp url was too short. Want to reset your pfp?");
 
             if (reset) {
                 pfp = "/img/default_pfp.png";
                 setPFP(pfp);
-            }
-            else {
+            } else {
                 return;
             }
         }
@@ -87,8 +287,7 @@ class UserManager {
 
         if (urlChannel == null) {
             return null;
-        }
-        else {
+        } else {
             return urlChannel;
         }
     }
@@ -101,8 +300,7 @@ class UserManager {
 
         if (urlChannel == null) {
             return null;
-        }
-        else {
+        } else {
             return urlChannel;
         }
     }
@@ -117,8 +315,7 @@ class UserManager {
 
         if (token == null || token.length <= 0) {
             return null;
-        }
-        else {
+        } else {
             return token;
         }
     }
@@ -130,14 +327,13 @@ class UserManager {
             id = UserManager.generateId(12);
             CookieManager.setCookie("id", id, 360);
             return id;
-        }
-        else {
+        } else {
             return id;
         }
     }
 
     static getPFP() {
-        var pfp = CookieManager.getCookie("pfp");
+        var pfp = localStorage.getItem("pfp");
 
         if (pfp == null || pfp.length <= 0) {
             //pfp = prompt("Please enter the url to your profile picture.");
@@ -161,8 +357,7 @@ class UserManager {
             CookieManager.setCookie("status", "Hey im new!", 360);
             UserManager.updateStatusOnUI(status);
             return status;
-        }
-        else {
+        } else {
             UserManager.updateStatusOnUI(status);
             return status;
         }
@@ -176,8 +371,7 @@ class UserManager {
 
         if (urlChannel == null) {
             return "0";
-        }
-        else {
+        } else {
             return urlChannel;
         }
     }
@@ -187,9 +381,11 @@ class UserManager {
 
         if (username == null || username.length <= 0) {
             return "User";
-        }
-        else {
-            try { UserManager.updateUsernameOnUI(username); } catch { }
+        } else {
+            try {
+                UserManager.updateUsernameOnUI(username);
+            } catch {
+            }
             return username;
         }
     }
@@ -199,21 +395,25 @@ class UserManager {
 
         if (aboutme == null || aboutme.length <= 0) {
             return "";
-        }
-        else {
-            try { updateUsernameOnUI(aboutme); } catch { }
+        } else {
+            try {
+                updateUsernameOnUI(aboutme);
+            } catch {
+            }
             return aboutme;
         }
     }
 
     static getBanner() {
-        var banner = CookieManager.getCookie("banner");
+        var banner = localStorage.getItem("banner");
 
         if (banner == null || banner.length <= 0) {
             return "";
-        }
-        else {
-            try { updateUsernameOnUI(aboutme); } catch { }
+        } else {
+            try {
+                updateUsernameOnUI(aboutme);
+            } catch {
+            }
             return banner;
         }
     }
@@ -265,6 +465,8 @@ class UserManager {
             CookieManager.setCookie("pow_solution", null, 365);
 
             alert("Your account has been reset. Please refresh the page if you want to continue");
+
+            window.location.reload();
         }
     }
 
@@ -280,6 +482,7 @@ class UserManager {
 
     static setBanner(banner) {
         CookieManager.setCookie("banner", banner, 360);
+        localStorage.setItem("banner", banner);
     }
 
     static setStatus(status) {
@@ -288,7 +491,7 @@ class UserManager {
     }
 
     static setPFP(pfp) {
-        CookieManager.setCookie("pfp", pfp, 360);
+        localStorage.setItem("pfp", pfp);
         UserManager.updateUsernameOnUI(pfp);
     }
 
@@ -355,7 +558,10 @@ class UserManager {
                 if (values.loginName) {
 
                     if (UserManager.validateLoginname(values.loginName)) {
-                        socket.emit("userLogin", { loginName: values.loginName, password: values.password }, function (response) {
+                        socket.emit("userLogin", {
+                            loginName: values.loginName,
+                            password: values.password
+                        }, function (response) {
 
                             console.log(response)
                             if (response?.error === null && response.member) {
@@ -370,16 +576,14 @@ class UserManager {
                                 UserManager.setStatus(response.member.status);
 
                                 window.location.reload();
-                            }
-                            else {
+                            } else {
                                 customAlerts.showAlert("error", response.error)
                                 if (response.error) {
                                     UserManager.doAccountLogin();
                                 }
                             }
                         });
-                    }
-                    else {
+                    } else {
                         customAlerts.showAlert("error", "Your login name contains illegal characters")
                         customPrompts.closePrompt();
                         return;
@@ -393,7 +597,6 @@ class UserManager {
         applyHoverEffect(document.getElementById("doAccountLoginButton"), [["black", "gold"], ["black", "white"]])
     }
 
-    static isLoadingDonators = false;
     static async showDonatorList(urlBase) {
         try {
             if (UserManager.isLoadingDonators) return;
@@ -422,8 +625,7 @@ class UserManager {
                     mp3Url = urlBase + lines[i].split(";")[0].replace("# ", "");
                     effect = lines[i].split(";")[1] || "confetti";
                     console.log("Music found!")
-                }
-                else if (!lines[i].startsWith("#")) {
+                } else if (!lines[i].startsWith("#")) {
                     const parts = lines[i].split(',').map(part => part.trim());
                     const user = parts[0];
                     const amount = parseFloat(parts[1]) || 0;
@@ -442,7 +644,8 @@ class UserManager {
             try {
                 const audioTest = await fetch(mp3Url);
                 hasAudio = audioTest.ok;
-            } catch (e) { }
+            } catch (e) {
+            }
 
             // make array
             let donators = Object.keys(totals).map(user => ({
@@ -529,12 +732,11 @@ class UserManager {
                 }
             );
 
-            try{
+            try {
                 if (typeof window[effect] === "function") {
                     stopEffect = window[effect](document.getElementById('promptContainer').querySelector('div'));
                 }
-            }
-            catch(effectErr){
+            } catch (effectErr) {
                 console.log("Effect error");
                 console.log(effectErr)
             }
@@ -578,7 +780,7 @@ class UserManager {
                             // Wait until audio is loaded enough to play
                             if (audio.readyState < 2) {
                                 await new Promise((res) => {
-                                    audio.addEventListener("loadeddata", res, { once: true });
+                                    audio.addEventListener("loadeddata", res, {once: true});
                                 });
                             }
 
@@ -609,9 +811,6 @@ class UserManager {
             UserManager.isLoadingDonators = false;
         }
     }
-
-
-
 
 
     static doAccountOnboarding(defaultValues = null) {
@@ -656,6 +855,8 @@ class UserManager {
                         <input class="prompt-input" type="password" name="repeatedPassword" id="repeatedPassword" placeholder="Repeat password">
                     </div>
                 </div>
+                
+                <!--
                 <div style="float: left; width: 250px;">
                     <div class="prompt-form-group">
                         <label class="prompt-label" for="profileImage">Profile Image</label>
@@ -672,7 +873,7 @@ class UserManager {
                         </div>
                         <input class="prompt-input" type="file" name="bannerImage" id="bannerImage" accept="image/*" style="display: none;" onchange="customPrompts.previewImage(event)">
                     </div>
-                </div>
+                </div>-->
             </div>
             `,
             async (values) => {
@@ -688,6 +889,7 @@ class UserManager {
                     return;
                 }
 
+                /*
                 // check profile picture
                 if (values.profileImage) {
                     const profileUrl = await upload(values.profileImage);
@@ -712,6 +914,8 @@ class UserManager {
                     console.log('No banner image selected.');
                 }
 
+                 */
+
                 // check username
                 if (values.username) {
                     CookieManager.setCookie("username", values.username, 360);
@@ -726,8 +930,7 @@ class UserManager {
 
                     if (UserManager.validateLoginname(values.loginName)) {
                         CookieManager.setCookie("loginName", values.loginName, 360);
-                    }
-                    else {
+                    } else {
                         await customAlerts.showAlert("error", "Your login name contains illegal characters")
                         await UserManager.doAccountOnboarding(values);
                         return;
@@ -773,4 +976,17 @@ class UserManager {
         return regex.test(loginName);
     }
 
+
+    static async requestPublicKey(target) {
+        return new Promise((resolve, reject) => {
+            socket.emit("getMemberPublicKey", {
+                id: UserManager.getID(),
+                token: UserManager.getToken(),
+                target: target,
+            }, async function (response) {
+                resolve(response);
+            });
+
+        })
+    }
 }

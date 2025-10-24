@@ -18,28 +18,31 @@
     <script defer src="../../js/core/PoW.js"></script>   
     <script defer src="../../js/core/CookieManager.js"></script>   
     <script defer src="../../js/prompts.js"></script>   
-    <script defer src="../../js/hover.js"></script>   
-    <script defer src="settings.js"></script>
+    <script defer src="../../js/hover.js"></script>
     <script defer src="../utility.js"></script>
     <script defer src="../../notify.js"></script>
-
+    <script defer src="settings.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
-    <title>Channel Settings</title>
+    <title>Group Settings</title>
 </head>
 <body id="pagebody" style="display: none;">
 
 <script>
 
-    try{
-        var groupId = getUrlParams('id');
-    }
-    catch(e){
-        if(groupId == null || isNaN(groupId)){
-            console.log("The group was not found.");
+    document.addEventListener("DOMContentLoaded", function() {
+        try{
+            var groupId = getUrlParams('id');
         }
-    }
+        catch(e){
+            console.log(e);
+
+            if(groupId == null || isNaN(groupId)){
+                console.log("The group was not found.");
+            }
+        }
+    })
 
 </script>
 
@@ -170,7 +173,7 @@
     <div id="navigation">
 
         <div id="nav_settings">
-            <h2>Channel Settings</h2>
+            <h2>Group Settings</h2>
             <a onclick="this.href = '/settings/group/?id=' + getUrlParams('id') + '&page=group-info';">Info</a><br>
             <a onclick="this.href = '/settings/group/?id=' + getUrlParams('id') + '&page=group-permissions';">Permissions</a>
             <hr>

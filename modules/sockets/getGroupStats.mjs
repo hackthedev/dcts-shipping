@@ -4,8 +4,8 @@ import { queryDatabase } from "../functions/mysql/mysql.mjs";
 
 export default (io) => (socket) => {
     socket.on('getGroupStats', async function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+        if (validateMemberId(member?.id, socket) == true
+            && serverconfig.servermembers[member?.id]?.token == member?.token
         ) {
             if (member.group == undefined || member.group == null) {
                 response({ type: "error", msg: "No group id passed." })

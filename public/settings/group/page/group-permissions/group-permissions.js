@@ -9,12 +9,7 @@ setupNotify();
 
 currentGroupId = getUrlParams("id");
 
-socket.emit("userConnected", {
-    id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
-    aboutme: getAboutme(), banner: getBanner()
-});
-
-socket.emit("getGroupInfo", { id: getID(), token: getToken(), group: currentGroupId }, function (response) {
+socket.emit("getGroupInfo", { id: UserManager.getID(), token: UserManager.getToken(), group: currentGroupId }, function (response) {
     try {
 
         editGroup = response.data;
@@ -33,7 +28,7 @@ socket.emit("getGroupInfo", { id: getID(), token: getToken(), group: currentGrou
 
 });
 
-socket.emit("getServerRoles", { id: getID(), token: getToken() }, function (response) {
+socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
 
     //console.log(response);
     serverRoleResponse = response;

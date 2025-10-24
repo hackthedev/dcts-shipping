@@ -1,3 +1,5 @@
+import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
+
 console.clear();
 import express from 'express';
 
@@ -18,15 +20,16 @@ import crypto from 'crypto';
 export let server; // = http.createServer(app);
 import {Server} from 'socket.io';
 
-import FormData from 'form-data';
-import fetch from 'node-fetch';
+import nodefetch from "node-fetch";
+const { FormData, fileFrom } = nodefetch;
+const fetch = nodefetch.default;
+
 import getSize from 'get-folder-size';
 
 import {fileTypeFromBuffer} from 'file-type';
 import XMLHttpRequest from 'xhr2';
 
 import colors from 'colors';
-import request from 'request';
 import xssFilters from 'xss-filters';
 
 export const __filename = fileURLToPath(import.meta.url);
@@ -47,17 +50,16 @@ export {
     sanitizeHtml,
     bcrypt,
     FormData,
+    fileFrom,
     fetch,
     getSize,
     fileTypeFromBuffer,
     XMLHttpRequest,
     colors,
-    request,
     crypto
 };
 
 import Logger from "./modules/functions/logger.mjs";
-
 
 export let checkedMediaCacheUrls = {};
 export let usersocket = []
@@ -75,7 +77,22 @@ export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = false;
-export let versionCode = 543;
+export let versionCode = 720;
+
+// dSync Libs
+import dSyncAuth from '@hackthedev/dsync-auth';
+//import dSyncAuth from '../../../dSyncAuth/index.mjs';
+import { dSyncSign } from "@hackthedev/dsync-sign";
+//import { dSyncSign } from "../dSyncSign/index.mjs"
+import dSync from "@hackthedev/dsync";
+
+export let syncer = new dSync("dcts", app)
+export const signer = new dSyncSign();
+export const auther = new dSyncAuth(app, signer, async function(data) {
+    if(data.valid === true){
+        changeKeyVerification(data.publicKey, data.valid);
+    }
+});
 
 
 // config file saving
@@ -159,7 +176,7 @@ import {checkSSL} from "./modules/functions/http.mjs"
 import {
     unbanIp,
     formatDateTime,
-    findInJson
+    findInJson, changeKeyVerification
 } from "./modules/functions/chat/main.mjs";
 
 import {
@@ -507,8 +524,22 @@ if (serverconfig.serverinfo.sql.enabled == true) {
                 {name: 'INDEX idx_content', type: '(contentType, contentId)'}
             ],
             autoIncrement: 'id BIGINT NOT NULL AUTO_INCREMENT'
+        },
+        {
+            name: 'network_servers',
+            columns: [
+                {name: 'id', type: 'int(11) NOT NULL'},
+                {name: 'address', type: 'varchar(255) NOT NULL'},
+                {name: 'status', type: 'varchar(255) NOT NULL'},
+                {name: 'data', type: 'longtext'},
+                {name: 'last_sync', type: 'datetime NULL'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(id)'},
+                {name: 'UNIQUE KEY', type: 'address (address)'}
+            ],
+            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
         }
-
 
     ];
 
@@ -624,10 +655,9 @@ export const io = new Server(server, {
     pingTimeout: 60000,
 });
 
-// Star the app server
+// Start the app server
 var port = serverconfig.serverinfo.port;
 server.listen(port, function () {
-    // Wir geben einen Hinweis aus, dass der Webserer läuft.
 
     Logger.info('Server is running on port ' + port);
 
@@ -656,6 +686,7 @@ server.listen(port, function () {
         allowLogging = true;
     }
 
+    syncDiscoveredHosts(true)
 });
 
 app.use(express.urlencoded({extended: true})); // Parses URL-encoded data
@@ -740,17 +771,16 @@ const registerSocketEvents = (socket) => {
     }
 })();
 
-
-io.on('connection', async function (socket) {
-
-    // socket ip
-    var ip = socket.handshake.address;
+export async function checkPow(socket){
+    if (powVerifiedUsers.includes(socket.id)) {
+        socket.powValidated = true;
+        return;
+    }
 
     listenToPow(socket);
     sendPow(socket);
 
     let powResult = await waitForPowSolution(socket);
-
     if (!powResult) {
         // send error to user?
         sendMessageToUser(socket.id, JSON.parse(
@@ -772,6 +802,12 @@ io.on('connection', async function (socket) {
         // let client know pow was successful.
         socket.emit("powAccepted");
     }
+}
+
+io.on('connection', async function (socket) {
+
+    // socket ip
+    var ip = socket.handshake.address;
 
     registerSocketEvents(socket);
 
@@ -827,7 +863,6 @@ io.on('connection', async function (socket) {
             unbanIp(socket);
         }
     }
-
 });
 
 // Function to initialize and read the file into memory
@@ -920,6 +955,7 @@ export function saveConfig(config) {
                 // Write the updated content to the file
                 fs.ftruncateSync(fileHandle); // Clear the file
                 fs.writeSync(fileHandle, fileContent, 0); // Write updated content
+                reloadConfig()
                 resolve();
             } catch (error) {
                 console.error("Error saving config:", error);

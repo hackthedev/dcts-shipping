@@ -18,19 +18,6 @@
         <input type="checkbox" id="enableDiscovery" name="enableDiscovery" onclick="updatePreview();">
     </div>
 
-    <div class="profile_input_container">
-
-        <div>
-            <label for="allowedHosts">Allowed Discovery Hosts</label><br>
-            <input type="text" id="allowedHosts" name="allowedHosts" oninput="updatePreview();">
-            <input type="button" id="addAllowedHost" name="addAllowedHost" value="Add host" onclick="addAllowedHost(document.getElementById('allowedHosts').value);">
-        </div>
-
-        <div id="allowedHosts_list">
-
-        </div>
-    </div>
-
 
     <div id="settings_profile_save" onclick="saveSettings();" style="display: none;">Save</div>
 </div>

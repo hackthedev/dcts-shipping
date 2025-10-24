@@ -1,10 +1,17 @@
 :root {
-    /* default: #171A1D; */
+    /* old default: #171A1D; */
+    /* new default: #131415; */
     /* red: #2e1313;*/
     /* green: #171e08;*/
     /* cyan: #012724;*/
     /* purple: #1d1635;*/
-    --main: #171A1D;
+    --main: #131415;
+}
+
+*{
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(from var(--main) h s calc(l * 3)) transparent;
 }
 
 /* Main Server Chat */
@@ -92,3 +99,28 @@ body{
     background: hsl(from var(--main) h s calc(l * 1.7)) center/cover no-repeat;
 }
 
+blockquote {
+    padding: 8px;
+    margin: 8px 0 8px 8px;
+
+
+    border-left: 3px solid hsl(from var(--main) h s calc(l * 7));
+    color: hsl(from var(--main) h s calc(l * 7));
+    background-color: hsla(from var(--main) h s calc(l * 6) / 10%);
+
+    font-style: italic;
+}
+
+.video-embed {
+    /*
+        Man i love css sometimes. the following two lines are just
+        so amazing to me. works perfectly
+     */
+    width: 100%;
+    max-width: 500px;
+    outline: none;
+}
+
+.homeDivider{
+    border: 1px solid hsl(from var(--main) h s calc(l * 5) / 50%);
+}

@@ -1,11 +1,11 @@
 #serverbanner-container {
-    height: calc(200px - 40px);
+    display: flex;
+    flex-shrink: 0;
+    height: 150px;
     width: calc(100%);
     margin: 0 0 20px 0;
 
-    display: block;
-    float: left;
-
+    border-radius: 4px;
 
     overflow: hidden;
     box-shadow: 0 8px 8px -2px black;
@@ -21,37 +21,30 @@
     background-size: 100% 100%;
 }
 
+
 #serverbanner-image:hover {
-    -webkit-transform: scale(1.1);
-    -moz-transform: scale(1.1);
-    -o-transform: scale(1.1);
     transform: scale(1.1);
-
-
 }
 
 #serverbanner-image:not(:hover) {
-    -webkit-transform: scale(1);
-    -moz-transform: scale(1);
-    -o-transform: scale(1);
     transform: scale(1);
 }
 
 #channellist {
-    height: calc(100% - 40px - 50px);
-    width: calc(300px);
-    color: white;
+    display: flex;
+    flex-direction: column;
 
-    display: block;
-    float: left;
+    height: 100%;
+    width: calc(300px);
+    color: hsl(from var(--main) h s calc(l * 12)) !important;
 }
 
 #channeltree {
     display: block;
     float: left;
 
-    height: calc(100% - 32px - 175px - 32px);
-    width: calc(100% - 32px);
+    height: 100%;
+    width: 100%;
 
     padding: 16px;
     overflow-y: auto;
@@ -67,12 +60,12 @@
 }
 
 a.channelTrigger.markChannelMessage{
-    color: white;
+    color: hsl(from var(--main) h s calc(l * 10));
     font-style: italic;
 }
 
 #channeltree li.selected{
-    background-color: rgba(122, 122, 122, 0.2);
+    background-color: hsl(from var(--main) h s calc(l * 2.5));
     border-radius: 4px;
 }
 
@@ -82,7 +75,6 @@ a.channelTrigger.markChannelMessage{
 
     /*list-style-image: url("https://cdn-icons-png.flaticon.com/512/32/32213.png"); */
     list-style-type: disc;
-    cursor: pointer;
 }
 
 #channeltree li {

@@ -7,3 +7,4 @@ config.json
 /plugins
 /discover/node_modules/
 /discover/config.json
+privatekey.json

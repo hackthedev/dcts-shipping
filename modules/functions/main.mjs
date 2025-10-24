@@ -14,14 +14,15 @@ import {
     usersocket,
     sanitizeHtml,
     bcrypt,
-    fs
+    fs, signer
 } from "../../index.mjs"
-import {banIp, getNewDate, hasPermission, resolveRolesByUserId} from "./chat/main.mjs";
+import {banIp, generateGid, getNewDate, hasPermission, resolveRolesByUserId} from "./chat/main.mjs";
 import {consolas} from "./io.mjs";
 import Logger from "./logger.mjs";
 import path from "path";
 import {powVerifiedUsers} from "../sockets/pow.mjs";
 import {sendSystemMessage} from "../sockets/home/general.mjs";
+import {encodeToBase64} from "./mysql/helper.mjs";
 
 var serverconfigEditable;
 
@@ -35,6 +36,12 @@ export function removeFromArray(array, value) {
     const index = array.indexOf(value);
     if (index !== -1) {
         array.splice(index, 1);
+    }
+}
+
+export function emitBasedOnMemberId(memberId, event, payload){
+    if(serverconfig.servermembers[memberId] !== null){
+        io.to(String(memberId)).emit(event, payload);
     }
 }
 
@@ -298,7 +305,6 @@ export async function handleTerminalCommands(command, args) {
                     if (args[2]) {
                         serverconfig.servermembers[args[1]].password = await hashPassword(args[2])
                         saveConfig(serverconfigEditable);
-
                         Logger.success(`Password for user ${serverconfig.servermembers[args[1]].name} (${args[1]}) was changed`);
                     } else {
                         Logger.warn("Missing User. passwd <user id> <new password>")
@@ -343,7 +349,17 @@ export async function handleTerminalCommands(command, args) {
             }
         } else if (command == "rooms") {
             listRoomsMembers(io);
-        } else {
+        }
+        else if (command == 'gid') {
+            if (args.length == 2) {
+                if (args[1]?.length == 12) {
+                    Logger.success(generateGid(args[1]))
+                }
+            } else {
+                Logger.warn("SyntaxError. gid <user id>")
+            }
+        }
+        else {
             consolas("Unkown command: ".cyan + command);
         }
     } catch (e) {
@@ -479,13 +495,13 @@ export function moveJson(obj, fromPath, toPath) {
 
     const value = getNestedObject(obj, fromPath);
     if (value === undefined) {
-        console.error(`❌ Path not found: ${fromPath}`);
+        console.error(`Path not found: ${fromPath}`);
         return;
     }
 
     setNestedObject(obj, toPath, value);
     deleteNestedObject(obj, fromPath);
-    console.log(`✅ Moved data from ${fromPath} to ${toPath}`);
+    console.log(`Moved data from ${fromPath} to ${toPath}`);
 
     return obj;
 }
@@ -513,12 +529,13 @@ export function checkBool(value, type) {
     }
 }
 
-
 export function checkConfigAdditions() {
 
+
     // server list / discovery
-    checkObjectKeys(serverconfig, "serverinfo.discovery.enabled", false)
-    checkObjectKeys(serverconfig, "serverinfo.discovery.hosts", ["https://servers.network-z.com/"])
+    checkObjectKeys(serverconfig, "serverinfo.discovery.enabled", true)
+    checkObjectKeys(serverconfig, "serverinfo.discovery.networkSyncing", true)
+    checkObjectKeys(serverconfig, "serverinfo.discovery.defaultStatus", "verified")
 
     // cool ass system messaging thx to dms
     checkObjectKeys(serverconfig, "serverinfo.system.welcome.enabled", true)
@@ -805,7 +822,10 @@ export function generateId(length) {
 }
 
 export function validateMemberId(id, socket, token, bypass = false) {
+
     if (!powVerifiedUsers.includes(socket.id)) {
+
+        /*
         sendMessageToUser(socket.id, JSON.parse(
             `{
                 "title": "Verification Pending",
@@ -818,7 +838,7 @@ export function validateMemberId(id, socket, token, bypass = false) {
                 },
                 "type": "error",
                 "popup_type": "confirm"
-            }`));
+            }`)); */
 
         return false;
     }
@@ -1054,7 +1074,6 @@ export async function validatePassword(password, hash) {
 }
 
 export function getCastingMemberObject(member) {
-
     member = copyObject(member);
 
     if (!member || typeof member !== "object") {

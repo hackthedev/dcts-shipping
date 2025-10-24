@@ -57,16 +57,15 @@ document.addEventListener("DOMContentLoaded", function () {
         else {
 
             // dont close the profile popup when we click somewhere on the profile
-            const all = profileContent.querySelectorAll("*");
-            for (const el of all) {
-                if (
-                    el === clickedElement ||
-                    (el.id && el.id === clickedElement.id) ||
-                    (el.className && el.className === clickedElement.className) ||
-                    [...el.classList].some(cls => clickedElement.classList.contains(cls))
-                ) {
-                    return;
-                }
+            if (profileContent.contains(clickedElement)){
+                // we pressed on the profile so we can close the role menu again
+                document.getElementById("profile-role-menu").style.display = "none";
+                return;
+            }
+
+            // and dont close it when we click around on the role menu
+            if (document.getElementById("profile-role-menu").contains(clickedElement)) {
+                return;
             }
 
             // otherwise on default close it
@@ -474,6 +473,22 @@ document.addEventListener("DOMContentLoaded", function () {
                     ContextMenu.classList.remove('visible');
                     "`);
             });
+        } // network server list favourite handler
+        else if (clickedElement.classList.contains("networkServerEntryImage")) {
+
+            let host = clickedElement.getAttribute("data-host");
+            let isFav = clickedElement.getAttribute("data-fav") === "true";
+            let text = isFav ? "Remove from favourites" : "Mark as favourite";
+
+            console.log(isFav)
+
+            resetContextMenuItem(ContextMenu);
+
+            addContextMenuItem(ContextMenu, text,
+                `onclick="
+                    changeFavouriteNetworkServer('${host}');
+                    ContextMenu.classList.remove('visible');
+                    "`);
         }
         else {
             resetContextMenuItem(ContextMenu);

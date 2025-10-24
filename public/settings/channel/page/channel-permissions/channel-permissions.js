@@ -7,12 +7,7 @@ var currentRoleId = "";
 
 currentChannelId = getUrlParams("id");
 
-socket.emit("userConnected", {
-    id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
-    aboutme: getAboutme(), banner: getBanner()
-});
-
-socket.emit("getChannelInfo", { id: getID(), token: getToken(), channel: currentChannelId }, function (response) {
+socket.emit("getChannelInfo", { id: UserManager.getID(), token: UserManager.getToken(), channel: currentChannelId }, function (response) {
     try {
 
         editChannel = response.data;
@@ -31,7 +26,7 @@ socket.emit("getChannelInfo", { id: getID(), token: getToken(), channel: current
 
 });
 
-socket.emit("getServerRoles", { id: getID(), token: getToken() }, function (response) {
+socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
 
     //console.log(response);
     serverRoleResponse = response;
@@ -101,7 +96,7 @@ function removeRole() {
 
     console.log(currentRoleId);
 
-    socket.emit("removeRoleFromChannel", { id: getID(), token: getToken(), role: currentRoleId, channel: currentChannelId }, function (response) {
+    socket.emit("removeRoleFromChannel", { id: UserManager.getID(), token: UserManager.getToken(), role: currentRoleId, channel: currentChannelId }, function (response) {
         alert(response.msg);
         window.location.reload();
     });
@@ -127,7 +122,7 @@ function addRole() {
             }
 
 
-            socket.emit("addRoleToChannel", { id: getID(), token: getToken(), role: roleId, channel: currentChannelId }, function (response) {
+            socket.emit("addRoleToChannel", { id: UserManager.getID(), token: UserManager.getToken(), role: roleId, channel: currentChannelId }, function (response) {
                 alert(response.msg);
                 window.location.reload();
             });
@@ -167,7 +162,7 @@ function savePermissions() {
 
     console.log(editChannel.permissions);
 
-    socket.emit("saveChannelPermissions", { id: getID(), token: getToken(), channel: currentChannelId, role: currentRoleId, permission: editChannel.permissions[currentRoleId] }, function (response) {
+    socket.emit("saveChannelPermissions", { id: UserManager.getID(), token: UserManager.getToken(), channel: currentChannelId, role: currentRoleId, permission: editChannel.permissions[currentRoleId] }, function (response) {
         alert(response.msg);
         console.log(response)
         //window.location.reload();

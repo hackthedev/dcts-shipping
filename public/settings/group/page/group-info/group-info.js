@@ -5,13 +5,8 @@ var serverconfigName;
 var editGroup = {};
 setupNotify()
 
-socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
-    aboutme: getAboutme(), banner: getBanner()});
-
-
-socket.emit("getGroupInfo", {id: getID(), token: getToken(), group: getUrlParams("id").replace("group-", "")}, function (response) {
+socket.emit("getGroupInfo", {id: UserManager.getID(), token: UserManager.getToken(), group: getUrlParams("id").replace("group-", "")}, function (response) {
     try{
-
         console.log(response)
         channelname = document.getElementById("channel_name");
         saveButton = document.getElementById("settings_channel_save");
@@ -19,8 +14,6 @@ socket.emit("getGroupInfo", {id: getID(), token: getToken(), group: getUrlParams
         serverconfigName = response.data.info.name;
         channelname.value = serverconfigName;
         editGroup = response;
-
-        console.log(response);
     }
     catch(err){
         console.log("Unable to get Group Information");
@@ -31,30 +24,6 @@ socket.emit("getGroupInfo", {id: getID(), token: getToken(), group: getUrlParams
 
 });
 
-
-function getToken(){
-    var token = getCookie("token");
-
-    if(token == null || token.length <= 0){
-        return null;
-    }
-    else{
-        return token;
-    }
-}
-
-function getID(){
-    var id = getCookie("id");
-
-    if(id == null || id.length != 12){
-        id = generateId(12);
-        setCookie("id", id, 360);
-        return id;
-    }
-    else{
-        return id;
-    }
-}
 function updatePreview(){
 
     try{

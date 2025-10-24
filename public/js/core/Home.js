@@ -5,6 +5,11 @@ function showHome(override = null) {
     const header = document.getElementById("header");
     const home = document.getElementById("homeScreen");
 
+    if(isLauncher() && override !== true){
+        window.location.href = "/home.html";
+        return;
+    }
+
     if (!isShown) {
         let iframe = home.querySelector("iframe");
         if (!iframe) {
@@ -15,7 +20,7 @@ function showHome(override = null) {
             iframe.style.border = "0";
             home.appendChild(iframe);
         } else {
-            iframe.src = iframe.src;
+
         }
 
         setTimeout(() => {

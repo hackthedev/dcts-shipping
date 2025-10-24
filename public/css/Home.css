@@ -310,9 +310,15 @@ body {
     padding: 10px 12px;
     border-bottom: 1px solid var(--border);
     display: flex;
+    flex-direction: column;
     gap: 10px;
     align-items: center;
     background: rgba(0, 0, 0, 0.06);
+}
+
+.threadHeader .row{
+    display: flex;
+    width: 100%;
 }
 
 .threadTitle {
@@ -338,7 +344,9 @@ body {
 }
 
 .threadArea .msg {
-    white-space: nowrap;
+    display: inline-block;
+    white-space: wrap;
+    word-break: break-word;
 }
 
 .msg {
@@ -376,6 +384,7 @@ body {
     border: 1px solid var(--border);
     background: transparent;
     color: var(--text);
+    outline: none;
 }
 
 .claimTicket {
@@ -425,7 +434,7 @@ body {
 .heroContent p {
     -webkit-text-stroke: .075em rgba(0, 0, 0, .55);
     paint-order: stroke fill;
-    text-shadow: 0 0 .6em rgba(255, 255, 255, 0.3), 0 0 1.4em rgba(0, 0, 0, .22), 0 0 2.2em rgba(0, 0, 0, .18);
+    text-shadow: 0 0 .6em rgb(0, 0, 0), 0 0 1.4em rgb(0, 0, 0), 0 0 2.2em rgb(0, 0, 0), 0 0 .6em rgb(0, 0, 0), 0 0 .6em rgba(255, 255, 255, 0.3), 0 0 .6em rgba(255, 255, 255, 0.3);
 }
 
 .homeGrid {
@@ -647,7 +656,7 @@ a {
 }
 
 .searchCard {
-    width: 980px;
+    width: 80vw;
     max-width: 96vw;
     max-height: 80vh;
     border: 1px solid var(--border);
@@ -673,6 +682,7 @@ a {
     border: 1px solid var(--border);
     background: rgba(255, 255, 255, 0.04);
     color: var(--text);
+    outline: none;
 }
 
 .chips {
@@ -694,7 +704,6 @@ a {
 
 .chip.active {
     background: rgba(171, 184, 190, 0.18);
-    color: #1b2227;
 }
 
 .searchBody {
@@ -728,10 +737,16 @@ a {
 
 .resultText {
     min-width: 0;
+    overflow: hidden;
 }
 
 .result small {
     color: var(--muted);
+}
+
+.resultText p {
+    margin-top: 0;
+    margin-bottom: 2px;
 }
 
 .linkBtn {
@@ -792,4 +807,41 @@ mark {
 .panel.right {
     min-height: 0;
     overflow: auto;
+}
+
+.threadNotice.success{
+    background-color: rgba(0, 255, 0, 0.3);
+}
+
+.threadNotice.warning{
+    background-color: rgba(255, 165, 0, 0.3);
+}
+
+.threadNotice.error{
+    background-color: rgba(205, 92, 92, 0.3);
+}
+
+.threadNotice a.action{
+    justify-content: flex-end;
+    align-content: flex-end;
+    text-decoration: underline;
+
+    margin-left: auto;
+    cursor: pointer;
+}
+
+.threadNotice p{
+    margin: 0;
+}
+
+.threadNotice{
+    display: flex;
+    flex-direction: row;
+
+    padding: 10px;
+    margin: -10px -12px;
+    margin-top: 4px;
+
+    width: calc(100% + 24px);
+    user-select: none;
 }

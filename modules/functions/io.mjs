@@ -166,7 +166,7 @@ export async function getSavedChatMessage(group, category, channel, index = -1) 
     // add setting for checking if db storage should be used
     var sortedMessages = [];
 
-    if (serverconfig.serverinfo.sql.enabled == true) {
+    if (serverconfig.serverinfo.sql.enabled === true) {
         var loadedMessages = await getChatMessagesFromDb(`${group}-${category}-${channel}`, index);
 
         for (let i = 0; i < loadedMessages.length; i++) {

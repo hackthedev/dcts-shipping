@@ -1,0 +1,22 @@
+{
+	"platform_developer": {
+		"display": "Platform Developer",
+		"icon": "dev"
+	},
+	"platform_staff": {
+		"display": "Official Platform Admin",
+		"icon": "admin"
+	},
+    "platform_donator": {
+      "display": "Platform Donator",
+      "icon": "donator"
+    },
+    "platform_verified": {
+      "display": "Verified Human",
+      "icon": "verified"
+    },
+    "platform_tester": {
+      "display": "Platform Tester",
+      "icon": "bug"
+    }
+}

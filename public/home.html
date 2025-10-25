@@ -1539,10 +1539,10 @@
     async function getMessageText(message, isMine, targetUserId){
         if(isEncryptedMessage(message, isMine)){
             if(isMine){
-                return getDecryptedMessage(message?.text?.sender, message, await UserManager.requestPublicKey(targetUserId));
+                return getDecryptedMessage(isMine, message?.text?.sender, message, await UserManager.requestPublicKey(targetUserId));
             }
             else{
-                return getDecryptedMessage(message?.text?.content, message, await UserManager.requestPublicKey(targetUserId));
+                return getDecryptedMessage(isMine, message?.text?.content, message, await UserManager.requestPublicKey(targetUserId));
             }
         }
         else{
@@ -1550,7 +1550,7 @@
         }
     }
 
-    async function getDecryptedMessage(text, message, targetPublicKey){
+    async function getDecryptedMessage(isMine, text, message, targetPublicKey){
         if(isLauncher()){
             let decryptedPlain = await Crypto.DecryptEnvelope(text);
             let decrypted = encodePlainText(decryptedPlain);
@@ -1565,6 +1565,13 @@
                 // verify the signature of the decrypted text.
                 // only call it if the key is present, else mark as failed
                 let publicKey = targetPublicKey?.publicKey;
+
+                // if its out message we need to use OUR public key to verify
+                // the message. Theoretically we could just return true but lets
+                // keep it just in case.
+                if(isMine) publicKey = await Crypto.getPublicKey();
+
+
                 let isValidPlainTextSig = publicKey ? await Client().VerifyString(decryptedPlain, message?.text?.plainSig, publicKey) : false;
 
                 // for my next magic trick, we shall verify the entire message object too

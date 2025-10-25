@@ -77,7 +77,7 @@ export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = false;
-export let versionCode = 720;
+export let versionCode = 721;
 
 // dSync Libs
 import dSyncAuth from '@hackthedev/dsync-auth';

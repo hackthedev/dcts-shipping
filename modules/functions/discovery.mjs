@@ -6,6 +6,8 @@ import logger from "./logger.mjs";
 
 
 async function syncHosts(){
+    if(serverconfig.serverinfo?.sql?.enabled !== true) return; // sql needed
+
     let existingServerRows = await queryDatabase(
         `
                     SELECT * FROM network_servers 
@@ -58,6 +60,8 @@ export async function discoverHosts(clientKnownHosts){
 }
 
 async function checkHostDiscovery(address, forceSync = false){
+    if(serverconfig.serverinfo?.sql?.enabled !== true) return; // sql needed
+
     let existingServerRows = await queryDatabase(`SELECT * FROM network_servers WHERE address = ? and status <> "blocked"`, [extractHost(address)]);
 
     // we dont know this server so lets check it

@@ -5,10 +5,8 @@ import { copyObject, findAndVerifyUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('userLogin', function (member, response) {
-        member.id = xssFilters.inHTMLData(member.id)
         member.password = xssFilters.inHTMLData(member.password)
-        member.name = xssFilters.inHTMLData(member.name)
-        member.duration = 0.1;
+        member.loginName = xssFilters.inHTMLData(member.loginName)
 
         // Handling ip ban
         var ip = socket.handshake.address;
@@ -19,7 +17,6 @@ export default (io) => (socket) => {
                 unbanIp(socket)
             }
         }
-
 
         // initiate login counter
         if (!loginAttempts.hasOwnProperty(ip)) {
@@ -40,14 +37,14 @@ export default (io) => (socket) => {
             return;
         }
 
+        console.log(member)
         let loginCheck = findAndVerifyUser(member.loginName, member.password);
 
-        if (loginCheck.result == true) {
+        if (loginCheck.result === true) {
             response({ error: null, member: loginCheck.member })
-
         }
-        else if (loginCheck.result == false) {
-            response({ error: "Invalid login" })
+        else if (loginCheck.result === false) {
+            response({ error: "Invalid login on sign up" })
         }
         else {
             response({ error: "Account not found" })

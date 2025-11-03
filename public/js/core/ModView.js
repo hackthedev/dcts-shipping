@@ -3,6 +3,7 @@ class ModView {
     static modViewDivContent;
     static modViewBadge;
     static reports;
+    static didInit = false;
 
     static addStyles() {
         const style = document.createElement('style');
@@ -14,8 +15,8 @@ class ModView {
                 top: 10%;
                 left: 100%;
                 transform: translateX(0);
-                z-index: 9999;
-                background: #34383C;
+                z-index: 30;
+                background: hsl(from var(--main) h s calc(l * 3) / 90%);
                 color: white;
                 padding: 20px;
                 transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
@@ -27,6 +28,8 @@ class ModView {
                 border-left: 2px solid var(--primary-bright);
                 overflow-y: auto;
                 overflow-x: hidden;
+                
+                backdrop-filter: blur(6px);
             }
 
             #modViewDiv.show {
@@ -54,16 +57,17 @@ class ModView {
                 display: inline-block;
                 padding: 10px;
                 cursor: pointer;
-                background: #444;
+                background: hsl(from var(--main) h s calc(l * 5));
                 color: white;
                 margin-right: 5px;
                 border-radius: 5px 5px 0 0;
             }
 
             .modview_tab.active {
-                background: white;
+                background: hsl(from var(--main) h s calc(l * 12));
                 color: black;
                 border: 1px solid #ccc;
+                border-bottom: 0;
             }
 
             .modview_tabnumber {
@@ -78,16 +82,18 @@ class ModView {
             }
 
             .modview_tabnumber.active{
-                background-color:rgb(77, 83, 90);
+                background-color: hsl(from var(--main) h s calc(l * 3));
                 color: white;
             }
 
             .modview_tab-content {
                 display: none;
-                background: #222;
+                background: hsl(from var(--main) h s calc(l * 12));
                 color: white;
                 padding: 10px;
                 border-radius: 5px;
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
             }
 
             .modview_tab-content.active {
@@ -98,6 +104,7 @@ class ModView {
                 width: 100%;
                 border-collapse: collapse;
                 margin-top: 10px;
+                background-color: hsl(from var(--main) h s calc(l * 3.5));
             }
 
             th.modview_, td.modview_ {
@@ -107,11 +114,11 @@ class ModView {
             }
 
             th.modview_ {
-                background: #666;
+                background-color: hsl(from var(--main) h s calc(l * 3.5));
             }
 
             tr.modview_:nth-child(even) {
-                background: #444;
+                background-color: hsl(from var(--main) h s calc(l * 2));
             }
 
             tr.modview_:hover {
@@ -119,7 +126,6 @@ class ModView {
                 cursor: pointer;
             }
 
-           /* Report Details */
             .report-section {
                 background: #2a2e35;
                 padding: 15px;
@@ -133,7 +139,6 @@ class ModView {
                 color: #ddd;
             }
 
-            /* User Sections - Compact & Side by Side */
             .user-container {
                 display: flex;
                 justify-content: space-between;
@@ -159,7 +164,6 @@ class ModView {
                 cursor: pointer;
             }
 
-            /* Reported Message Styling */
             .report-info {
                 background: #2a2e35;
                 padding: 15px;
@@ -192,8 +196,18 @@ class ModView {
 
             .reported-message {
                 background: rgba(255, 255, 255, 0.1);
-                padding: 5px;
                 border-radius: 4px;
+                overflow: auto;
+            }
+
+            .reported-message span{
+                display: block;
+                padding: 10px;
+            }
+
+            .reported-message p{
+                padding: 0;
+                margin: 0;
             }
 
             /* Buttons */
@@ -201,6 +215,9 @@ class ModView {
                 display: flex;
                 gap: 10px;
                 margin-top: 10px;
+                user-select: none;
+                outline: none;
+                border: none;
             }
 
             .action-buttons.center {
@@ -257,21 +274,19 @@ class ModView {
                 display: block;
                 width: 100%;
                 text-align: center;
-                background: #555;
+                background: hsl(from var(--main) h s calc(l * 5));
                 color: white;
                 padding: 10px 15px;
                 border-radius: 5px;
                 cursor: pointer;
                 margin-top: 15px;
+                border: none;
             }
 
             .back-button:hover {
                 background: #777;
             }
 
-
-
-            /* popup badges*/
             #modViewBadge {
                 position: fixed;
                 top: 20px;
@@ -292,15 +307,13 @@ class ModView {
                 z-index: 10000;
                 transition: transform 0.2s ease-in-out, background-color 0.3s;
                 padding: 10px 5px;
-                /*gap: 5px;*7
+                /*gap: 5px;*/
             }
 
-            /* Hover effect */
             #modViewBadge:hover {
                 transform: scale(1.05);
             }
 
-            /* Number (Aligned to Top) */
             #modViewBadgeIcon {
                 font-size: 16px;
                 font-weight: bold;
@@ -314,7 +327,6 @@ class ModView {
                 user-select: none;
             }
 
-            /* Reports Text (Properly Rotated & Centered) */
             #modViewBadgeText {
                 writing-mode: sideways-lr;
                 transform-origin: center;
@@ -335,6 +347,8 @@ class ModView {
     }
 
     static init() {
+        if(this.didInit) return;
+
         this.addStyles();
 
         this.modViewDiv = document.createElement("div");
@@ -354,6 +368,7 @@ class ModView {
         this.modViewBadge.style.display = "none"; // Hide initially
 
         document.body.appendChild(this.modViewBadge);
+        this.didInit = true; // important flag, else will hang
     }
 
     static open() {
@@ -376,16 +391,21 @@ class ModView {
     static showReports(reports) {
         let messageReports = reports.filter(r => r.reportType === "message");
         let userReports = reports.filter(r => r.reportType === "user");
+        let dmReports = reports.filter(r => r.reportType === "dm_message");
         this.reports = reports
 
         let html = `
             <div class="modview_tabs">
                 <div class="modview_tab active" onclick="ModView.switchTab('messageReports')">Message Reports <span class="modview_tabnumber active">${messageReports.length || 0}</span></div>
-                <div class="modview_tab" onclick="ModView.switchTab('userReports')">User Reports <span class="modview_tabnumber">${userReports.length || 0}</span></div>
+                <div class="modview_tab" onclick="ModView.switchTab('dmReports')">DM Reports <span class="modview_tabnumber active">${dmReports.length || 0}</span></div>
+                <!--<div class="modview_tab" onclick="ModView.switchTab('userReports')">User Reports <span class="modview_tabnumber">${userReports.length || 0}</span></div>-->
             </div>
     
             <div id="messageReports" class="modview_tab-content active">
                 ${this.generateTable(messageReports)}
+            </div>
+             <div id="dmReports" class="modview_tab-content">
+                ${this.generateTable(dmReports)}
             </div>
             <div id="userReports" class="modview_tab-content">
                 ${this.generateTable(userReports)}
@@ -443,8 +463,8 @@ class ModView {
             table += `
                 <tr class="modview_" onclick="ModView.showReportDetails(${report.id})">
                     <td class="modview_">${report.id}</td>
-                    <td class="modview_">${reportCreator ? reportCreator.loginName : "Unknown"}</td>
-                    <td class="modview_">${reportedUser ? reportedUser.loginName : "Unknown"}</td>
+                    <td class="modview_">${reportCreator ? reportCreator.name : "Unknown"}</td>
+                    <td class="modview_">${reportedUser ? reportedUser.name : "Unknown"}</td>
                     <td class="modview_">${report.reportStatus}</td>
                 </tr>
             `;
@@ -480,16 +500,34 @@ class ModView {
         this.modViewBadge.style.display = count > 0 ? "flex" : "none";
     }
 
-    static showReportDetails(reportId) {
+    static async showReportDetails(reportId) {
         let report = this.reports.find(r => r.id === reportId);
-        if (!report) return;
+        if (!report) {
+            console.warn("Report not found");
+            return;
+        }
 
         let reportCreator = this.parseJson(report.reportCreator);
         let reportedUser = this.parseJson(report.reportedUser);
-        let reportData = report.reportData ? JSON.parse(report.reportData) : null;
+        let reportData = report.reportData
         console.log(reportData)
 
-        console.log(reportedUser)
+        let reportMessage = "";
+        if(report.reportType === "dm_message") {
+            // if is string parse it
+            if(typeof reportData.message === "string") reportData.message = JSON.parse(reportData.message);
+            reportMessage = reportData.message.content
+        }
+        else{
+            if(reportData.message.substring(0, 4).includes(("{"))){
+                reportMessage = reportData.message = (JSON.parse(reportData.message)).content;
+            }
+            else{
+                reportMessage = reportData.message;
+            }
+        }
+        let messageHistory = await UserReports.showMessageLogs(reportData.messageId)
+
         this.modViewDivContent.innerHTML = `
         <label id="closeModView" class="icon danger" onclick="ModView.close()">&times;</label>
         <label id="refreshModView" class="icon danger" onclick='ModView.refresh()'>&#x21bb;</label>
@@ -559,22 +597,59 @@ class ModView {
             <h3>Reported Message</h3>
             <div class="modview_message-box">
                 <p><strong>User:</strong> ${reportData.name} (${reportData.id})</p>
-                <p><strong>Message:</strong></p> <div class="reported-message">${reportData.message}</div>
+                <p><strong>Message:</strong></p> <div class="reported-message"><span>${reportMessage}</span></div>
                 <p><strong>Time:</strong> ${new Date(reportData.timestamp).toLocaleString()}</p>
             </div>
+
+            ${messageHistory.length > 0 ?
+                    `<div class="modview_message-box" style="margin-top: 20px;">
+                        <details>
+                            <summary>Message Edit History</summary>
+                    
+                            <div class="history-container" style="margin-top: 10px;">
+                            ${messageHistory // some crazy bullshittery
+                        .map(msg => {
+
+                            let clean = msg.message.replace(/^<p>([\s\S]*)<\/p>$/i, "$1");
+
+                            // check if the reported message isnt there anymore but logged
+                            let messageColorhint = "";
+                            if (reportData.message == msg.message) {
+                                messageColorhint = "background:rgba(236, 105, 105, 0.6);"
+                            }
+                            else {
+                                messageColorhint = "background:rgba(96,102,109,1);";
+                            }
+
+                            return `<div class="history-item" style="margin-top: 20px; background-color: #4F555C !important;padding: 10px; width: calc(100% - 20px);">
+                                        <span class="history-title" style="font-style: italic;">${msg.name} (${msg.id}) @</span>
+                                        <span class="history-time" style="font-style: italic;">${new Date(msg.editedTimestamp).toLocaleString()}:</span>
+
+                                        <div class="history-msg" style="margin: 10px 0 0px 0; padding:10px; width:calc(100% - 20px);${messageColorhint}">
+                                            ${clean}
+                                        </div>
+                                    </div>`;
+                        })
+                        .join("")}
+                            </div>
+
+
+                        </details>
+                    </div>`
+                    : ""}
         </div>
         ` : ''}
 
-        <div class="modview_action-buttons center">
+        <div class="modview_action-buttons action-buttons" >
             <button class="delete-btn" onclick="ModView.deleteReport('${report.id}')">Delete Report</button>
-            <button class="kick-btn" onclick="ModView.deleteMessage('${reportData.messageId}')">Delete Reported Message</button>
+            <button class="kick-btn" onclick="ModView.deleteMessage('${reportData.messageId}', '${reportCreator.id}', '${reportedUser.id}')">Delete Reported Message</button>
         </div>
 
         <button class="back-button" onclick="ModView.showReports(ModView.reports)">Back</button>
     `;
     }
 
-    static refresh(){
+    static refresh() {
         UserReports.getReports();
     }
 
@@ -599,7 +674,7 @@ class ModView {
         })
     }
 
-    static deleteMessage(messageId){
+    static deleteMessage(messageId, reporterId, reportedId) {
         ModView.close();
 
         customPrompts.showConfirm(
@@ -612,6 +687,8 @@ class ModView {
                         id: UserManager.getID(),
                         token: UserManager.getToken(),
                         messageId: messageId,
+                        reporterId: reporterId,
+                        reportedId: reportedId,
                     }, function (response) {
                         showSystemMessage({
                             title: response.msg,

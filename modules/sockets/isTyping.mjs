@@ -7,7 +7,7 @@ export default (io) => (socket) => {
     // socket.on code here
     socket.on('isTyping', function (member) {
         // todo : check for perms to view channel
-        if (validateMemberId(member.id, socket, true) == true
+        if (validateMemberId(member.id, socket, null, true) == true
             && serverconfig.servermembers[member.id].token == member.token) {
 
             //consolas("Typing room: " + member.room);

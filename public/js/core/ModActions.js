@@ -1,6 +1,3 @@
-/*
-    Author: HackTheDev
-*/
 class ModActions {
     static unmuteUser(id) {
         socket.emit("unmuteUser", { id: UserManager.getID(), token: UserManager.getToken(), target: id }, function (response) {
@@ -216,25 +213,24 @@ class ModActions {
 
                 var roleObj = roles[role]
 
-                var roleId = roleObj.info.id;
+                var roleId = Number(roleObj.info.id);
                 var roleName = roleObj.info.name;
                 var roleColor = roleObj.info.color;
-                var hasRole = roleObj.info.hasRole;
+                var hasRole = Number(roleObj.info.hasRole);
 
                 // no point in showing Member and Offline role to be choosen.
                 // it would only mess up things temporarily, therefore no need to
                 // fix it on the server side of things.
-                if (roleId != "0" && roleId != "1") {
+                var displayChecked = "";
+                if (hasRole === 1) {
+                    displayChecked = "checked";
+                }
+                else {
+                    displayChecked = "";
+                }
 
-                    var displayChecked = "";
-                    if (hasRole == 1) {
-                        displayChecked = "checked";
-                    }
-                    else {
-                        displayChecked = "";
-                    }
-
-                    roleList.insertAdjacentHTML("beforeend", 
+                if(roleId !== 0 && roleId !== 1){
+                    roleList.insertAdjacentHTML("beforeend",
                         `<div class="role-menu-entry" onclick="ModActions.checkCheckedRoleMenu(this.querySelector('input'))">
                             <input type="checkbox" ${displayChecked} class="role-menu-entry-checkbox" id="role-menu-entry_${roleId}_${userId}" onclick="ModActions.checkCheckedRoleMenu(this)">
                             <label style="color: ${roleColor};" class="role-menu-entry-roleName">${roleName}</label>
@@ -249,16 +245,16 @@ class ModActions {
 
     static checkCheckedRoleMenu(element) {
         socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: "manageMembers" }, function (response) {
-            if (response.permission == "granted") {
+            if (response.permission === "granted") {
                 element.checked = !element.checked;
                 var roleId = element.id.split("_")[1];
                 var userId = element.id.split("_")[2];
 
-                if (element.checked == true) {
+                if (element.checked === true) {
                     // Assign role
                     socket.emit("addUserToRole", { id: UserManager.getID(), token: UserManager.getToken(), role: roleId, target: userId }, function (response) {
 
-                        if (response.type != "success") {
+                        if (response.type !== "success") {
                             showSystemMessage({
                                 title: response.msg,
                                 text: "",
@@ -282,6 +278,10 @@ class ModActions {
                                 type: response.type,
                                 duration: 1000
                             });
+                        }
+                        else{
+                            let roleBadge = document.querySelector(`#profile_roles #profile-role-entry-${roleId}`);
+                            if(roleBadge) roleBadge.remove();
                         }
                     });
                 }

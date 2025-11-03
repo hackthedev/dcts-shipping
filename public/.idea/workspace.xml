@@ -1,77 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="d055b26f-cdb9-4567-97eb-7ab0136f9bea" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/../config.json" beforeDir="false" afterPath="$PROJECT_DIR$/../config.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../index.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/../index.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../modules/functions/chat/main.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/../modules/functions/chat/main.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../modules/functions/main.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/../modules/functions/main.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chat.js" beforeDir="false" afterPath="$PROJECT_DIR$/chat.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings/server/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/settings/server/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings/server/page/easter.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings/server/page/rate-limit/rate-limit.js" beforeDir="false" afterPath="$PROJECT_DIR$/settings/server/page/rate-limit/rate-limit.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings/server/page/roles/roles.html" beforeDir="false" afterPath="$PROJECT_DIR$/settings/server/page/roles/roles.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings/server/page/roles/roles.js" beforeDir="false" afterPath="$PROJECT_DIR$/settings/server/page/roles/roles.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/account/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/account/page/profile/profile.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/account/page/profile/profile.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/account/page/profile/profile.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/account/settings.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/channel/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/channel/page/channel-info/channel-info.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/channel/page/channel-info/channel-info.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/channel/page/channel-info/channel-info.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/channel/page/channel-permissions/channel-permissions.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/channel/page/channel-permissions/channel-permissions.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/channel/page/channel-permissions/channel-permissions.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/channel/settings.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/group/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/group/page/group-info/group-info.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/group/page/group-info/group-info.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/group/page/group-info/group-info.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/group/page/group-permissions/group-permissions.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/group/page/group-permissions/group-permissions.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/group/page/group-permissions/group-permissions.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/group/settings.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/about/about.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/about/about.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/about/about.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/banlist/banlist.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/banlist/banlist.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/banlist/banlist.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/channeltree-sorting/channeltree-sorting.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/channeltree-sorting/channeltree-sorting.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/channeltree-sorting/channeltree-sorting.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/easter.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/emojis/emojis.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/emojis/emojis.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/emojis/emojis.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/file-uploads/file-uploads.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/file-uploads/file-uploads.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/file-uploads/file-uploads.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/planned-features/planned-features.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/planned-features/planned-features.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/planned-features/planned-features.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/rate-limit/rate-limit.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/rate-limit/rate-limit.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/rate-limit/rate-limit.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/roles/roles.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/roles/roles.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/roles/roles.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/server-info/server-info.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/server-info/server-info.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/server-info/server-info.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/support/support.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/support/support.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/support/support.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/whats-new/whats-new.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/whats-new/whats-new.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/page/whats-new/whats-new.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../settings/server/settings.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/discovery.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/discovery.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,17 +22,31 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="2issZpRlQ13I34Ezl8dXXb8e1CN" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="vue.rearranger.settings.migration" value="true" />
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-PS-252.25557.128" />
+        <option value="bundled-php-predefined-a98d8de5180a-ce40d0652d34-com.jetbrains.php.sharedIndexes-PS-252.25557.128" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -107,6 +59,9 @@
       <workItem from="1720290681095" duration="29000" />
       <workItem from="1721510076235" duration="3000" />
       <workItem from="1721510085979" duration="1000" />
+      <workItem from="1760821442495" duration="2400000" />
+      <workItem from="1761888605012" duration="1881000" />
+      <workItem from="1761970325922" duration="694000" />
     </task>
     <servers />
   </component>

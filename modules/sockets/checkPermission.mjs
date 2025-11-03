@@ -46,6 +46,18 @@ let permList = {
         category: ["serverRoles"],
         description: "Allows changing server name and description"
     },
+    "viewAuditLog": {
+        name: "View Audit Log",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: ""
+    },
+    "manageInvites": {
+        name: "Manage Invites",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: "Manage invite codes"
+    },
     "manageServer": {
         name: "Manage Server",
         type: "checkbox",
@@ -160,6 +172,18 @@ let permList = {
         category: ["serverRoles"],
         description: "Can edit and delete reported messages"
     },
+    "manageTickets": {
+        name: "Manage Tickets",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: "Can manage support tickets. Tickets are more general."
+    },
+    "managePosts": {
+        name: "Manage Posts",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: "Can manage server home posts."
+    },
     "viewChannelHistory": {
         name: "View Channel History",
         type: "checkbox",
@@ -226,7 +250,7 @@ let permList = {
 export default (io) => (socket) => {
 
     socket.on('getPermissions', function (member, response) {
-        if (validateMemberId(member.id, socket) === true && serverconfig.servermembers[member.id].token === member.token) {
+        if (validateMemberId(member?.id, socket) === true && serverconfig.servermembers[member?.id].token === member?.token) {
             const categories = member.categories || []; // optional filter
 
             let filteredPerms = {};
@@ -248,7 +272,7 @@ export default (io) => (socket) => {
 
     // socket.on code here
     socket.on('checkPermission', function (member, response) {
-        if (validateMemberId(member.id, socket) == true && serverconfig.servermembers[member.id].token == member.token) {
+        if (validateMemberId(member?.id, socket, member?.token) === true) {
 
             var userObj = getCastingMemberObject(serverconfig.servermembers[member.id]);
 

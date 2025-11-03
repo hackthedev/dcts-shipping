@@ -25,7 +25,7 @@ class UserReports {
                     type: "message",
                     description: values.reportDescription
                 }, function (response) {
-        
+
                     showSystemMessage({
                         title: response.msg,
                         text: "",
@@ -41,6 +41,28 @@ class UserReports {
             250
         );
     }
+
+    static async showMessageLogs(id) {
+        return new Promise((resolve, reject) => {
+
+            socket.emit("getMessageLogs", {
+                id: UserManager.getID(),
+                token: UserManager.getToken(),
+                msgId: id
+            }, function (response) {
+                if (response.type === "success") {
+                    let parsedLogs = response.logs.map(log => {
+                        return JSON.parse(decodeURIComponent(atob(log.message)));
+                    });
+
+                    resolve(parsedLogs.reverse());
+                } else {
+                    reject(response.error);
+                }
+            });
+        });
+    }
+
 
     static getReports() {
         socket.emit("fetchReports", {

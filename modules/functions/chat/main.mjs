@@ -1,11 +1,13 @@
 /*
     The functions here are basically the "core" of the chat app on the server side.
  */
-import { serverconfig, xssFilters, colors, saveConfig, usersocket } from "../../../index.mjs"
-import { consolas } from "../io.mjs";
-import { io } from "../../../index.mjs";
-import { getMemberHighestRole, getUserBadges } from "./helper.mjs";
-import { checkBool, checkEmptyConfigVar, copyObject, sendMessageToUser } from "../main.mjs";
+import {serverconfig, xssFilters, colors, saveConfig, usersocket} from "../../../index.mjs"
+import {consolas} from "../io.mjs";
+import {io} from "../../../index.mjs";
+import {getMemberHighestRole} from "./helper.mjs";
+import {checkBool, checkEmptyConfigVar, copyObject, getCastingMemberObject, sendMessageToUser} from "../main.mjs";
+import {encodeToBase64} from "../mysql/helper.mjs";
+import {signer} from "../../../index.mjs"
 
 var serverconfigEditable = serverconfig;
 
@@ -19,87 +21,123 @@ export function getMemberLastOnlineTime(memberID) {
     return minutesPassed
 }
 
-export function hasPermission(userId, permissions, channelOrGroupId = null, mode = "any") {
-    const permissionsToCheck = Array.isArray(permissions) ? permissions : [permissions];
+export function getOnlineMemberCount() {
+    const onlineMembers = Object.values(serverconfig.servermembers)
+        .filter(m => m?.id && Number(getMemberLastOnlineTime(m.id)) <= 5);
 
-    if (permissionsToCheck.length > 1) {
-        if (mode === "all") {
-            return permissionsToCheck.every(perm =>
-                hasPermission(userId, perm, channelOrGroupId)
-            );
-        } else if (mode === "any") {
-            return permissionsToCheck.some(perm =>
-                hasPermission(userId, perm, channelOrGroupId)
-            );
-        }
-    }
-
-    const perm = permissionsToCheck[0];
-    const userRoles = resolveRolesByUserId(userId);
-
-    const sortedRoles = userRoles
-        .map(roleId => ({
-            id: roleId,
-            sortId: serverconfig.serverroles?.[roleId]?.info?.sortId || 0
-        }))
-        .sort((a, b) => b.sortId - a.sortId); // Highest role first
-
-    // admin Bypass
-    for (const role of userRoles) {
-        const perms = serverconfig.serverroles?.[role]?.permissions;
-        if (perms?.administrator === 1) return true;
-    }
-
-    // CHANNEL PERMISSIONS - EXPLICIT OVERRIDES
-    let channelResult = null;
-    const groupId = resolveGroupByChannelId(channelOrGroupId);
-    let channelPerms = null;
-
-    if (groupId) {
-        const category = resolveCategoryByChannelId(channelOrGroupId);
-        channelPerms = serverconfig.groups?.[groupId]?.channels?.categories?.[category]?.channel?.[channelOrGroupId]?.permissions;
-    }
-
-    for (const { id: roleId } of sortedRoles) {
-        const perms = channelPerms?.[roleId];
-        if (!perms || !(perm in perms)) continue;
-
-        const val = perms[perm];
-        if (val === 1) return true;    // allow overrides all
-        if (val === -1) return false;  // explicit deny
-    }
-
-    // SERVER ROLE PERMISSIONS - DENY OVERRIDES
-    for (const { id: roleId } of sortedRoles) {
-        const rolePerm = serverconfig.serverroles?.[roleId]?.permissions?.[perm];
-
-        // 👇 this is the fix: treat missing channel perms as inherited, allow server deny
-        if (rolePerm === -1) return false;
-        if (rolePerm === 1 && channelPerms?.[roleId] === undefined) {
-            // allowed only if channel doesn't override this role at all
-            channelResult = true;
-        }
-    }
-
-    // GROUP FALLBACK
-    if (channelResult !== null) return channelResult;
-
-    for (const gid in serverconfig.groups) {
-        const groupPerms = serverconfig.groups?.[gid]?.permissions || {};
-        for (const { id: roleId } of sortedRoles) {
-            const perms = groupPerms[roleId];
-            if (!perms) continue;
-            const val = perms[perm];
-            if (val === -1) return false;
-            if (val === 1) return true;
-        }
-    }
-
-    return false;
+    return onlineMembers.length;
 }
 
+export function hasPermission(userId, permissions, channelOrGroupId = null, mode = "any") {
+    const permsToCheck = Array.isArray(permissions) ? permissions : [permissions];
 
+    if (permsToCheck.length > 1) {
+        if (mode === "all") return permsToCheck.every(p => hasPermission(userId, p, channelOrGroupId));
+        return permsToCheck.some(p => hasPermission(userId, p, channelOrGroupId));
+    }
 
+    const perm = permsToCheck[0];
+    const uid = String(userId);
+
+    const rolesObj = serverconfig.serverroles || {};
+    const groupsObj = serverconfig.groups || {};
+
+    function getUserRoles() {
+        const out = [];
+        for (const rid in rolesObj) {
+            const members = rolesObj[rid]?.members || [];
+            if (members.map(String).includes(uid)) out.push(String(rid));
+        }
+        return out;
+    }
+
+    function getRoleSort(rid) {
+        return Number(rolesObj[String(rid)]?.info?.sortId || 0);
+    }
+
+    function decideByHighestRole(permsMap) {
+        if (!permsMap) return null;
+        let bestSort = -Infinity;
+        let chosen = null;
+        for (const rid of userRoles) {
+            const entry = permsMap[String(rid)];
+            if (!entry || !(perm in entry)) continue;
+            const s = getRoleSort(rid);
+            if (s > bestSort) {
+                bestSort = s;
+                chosen = entry[perm];
+            }
+        }
+        return chosen;
+    }
+
+    // check channels
+    function findChannelPath(chId) {
+        const idStr = String(chId);
+        for (const gid in groupsObj) {
+            const cats = groupsObj[gid]?.channels?.categories || {};
+            for (const cid in cats) {
+                const chs = cats[cid]?.channel || {};
+                if (chs[idStr]) {
+                    return {
+                        groupId: String(gid),
+                        categoryId: String(cid),
+                        channel: chs[idStr]
+                    };
+                }
+            }
+        }
+        return null;
+    }
+
+    const userRoles = getUserRoles();
+    if (userRoles.length === 0) return false;
+
+    // admin bypass
+    for (const rid of userRoles) {
+        if (rolesObj[String(rid)]?.permissions?.administrator === 1) return true;
+    }
+
+    let groupId = null;
+    let channelPath = null;
+
+    if (channelOrGroupId != null) {
+        // check if channel
+        channelPath = findChannelPath(channelOrGroupId);
+        if (!channelPath) {
+            // check if group
+            const gidStr = String(channelOrGroupId);
+            if (groupsObj[gidStr]) groupId = gidStr;
+        } else {
+            groupId = channelPath.groupId;
+        }
+    }
+
+    // channel overrides
+    if (channelPath) {
+        const chPerms = channelPath.channel?.permissions || null;
+        const chDecision = decideByHighestRole(chPerms);
+        if (chDecision !== null) return chDecision === 1;
+    }
+
+    // group overrides
+    if (groupId) {
+        const grpPerms = groupsObj[groupId]?.permissions || null;
+        const gDecision = decideByHighestRole(grpPerms);
+        if (gDecision !== null) return gDecision === 1;
+    }
+
+    // server roles
+    const sorted = [...userRoles].sort((a, b) => getRoleSort(b) - getRoleSort(a));
+    for (const rid of sorted) {
+        const val = rolesObj[String(rid)]?.permissions?.[perm];
+        if (val === 1) return true;
+        if (val === -1) return false;
+    }
+
+    //default deny
+    return false;
+}
 
 
 export function checkUserChannelPermission(channel, userId, perms) {
@@ -167,7 +205,6 @@ export function checkUserChannelPermission(channel, userId, perms) {
 }
 
 
-
 export function resolveGroupByChannelId(id) {
     for (const group of Object.keys(serverconfig.groups).reverse()) {
         const categories = serverconfig.groups[group].channels.categories;
@@ -224,122 +261,81 @@ export function resolveChannelById(id) {
     return null; // Return null if no channel is found
 }
 
+export function generateGid(id) {
+    return (encodeToBase64(signer.canonicalize(serverconfig.servermembers[id]?.publicKey))).substring(0, 20);
+}
+
+export function getMemberFromKey(publicKey){
+    const members = Object.values(serverconfig.servermembers);
+    let found = members.filter(m => m.publicKey === publicKey);
+
+    if(Array.isArray(found)){
+        return found[0];
+    }
+    else{
+        return found;
+    }
+}
+
+export async function changeKeyVerification(publicKey, value){
+    if(value !== true && value !== false){
+        return;
+    }
+
+    let member = getMemberFromKey(publicKey);
+    if(!member) return;
+
+    let gid = generateGid(member.id)
+    if(!gid) return;
+
+    member.isVerifiedKey = value;
+}
+
+export async function hasVerifiedKey(id){
+    if(!id) return null;
+
+    let member = serverconfig.servermembers[id];
+    if(!member) return null;
+
+    let publicKey = member?.publicKey;
+    let keyIsVerified = member?.isVerifiedKey;
+
+    // user isnt using public keys
+    if(!publicKey){
+        return null;
+    }
+
+    // if the public key exists but the verified field doesnt
+    // or isnt set, return false;
+    if(publicKey && !keyIsVerified){
+        publicKey = false;
+        return false;
+    }
+
+    // has key and is verified
+    if(publicKey && keyIsVerified === true){
+        return true;
+    }
+}
 
 export async function getMemberProfile(id) {
 
-    var memberUsername = xssFilters.inHTMLData(serverconfig.servermembers[id].name);
-    var memberStatus = xssFilters.inHTMLData(serverconfig.servermembers[id].status);
-    var memberAboutme = xssFilters.inHTMLData(serverconfig.servermembers[id].aboutme);
-    var memberIcon = xssFilters.inHTMLData(serverconfig.servermembers[id].icon);
-    var memberBanner = xssFilters.inHTMLData(serverconfig.servermembers[id].banner);
-    var memberJoined = xssFilters.inHTMLData(serverconfig.servermembers[id].joined);
-    var memberLastOnline = xssFilters.inHTMLData(serverconfig.servermembers[id].lastOnline);
-    var isMuted = xssFilters.inHTMLData(serverconfig.servermembers[id].isMuted);
-    var isBanned = xssFilters.inHTMLData(serverconfig.servermembers[id].isBanned);
-
-    // Important mhm
-    memberJoined = Number(memberJoined);
-    memberLastOnline = Number(memberLastOnline);
-    isMuted = Number(isMuted);
-
-    // Show a small badge if the user is muted
-    var mutedBadge = "";
-    if (isMuted == 1)
-        mutedBadge = `<br><code class="joined" style="color: indianred; border: 1px solid indianred;">Muted</code>`
-
-    var banBadge = "";
-    if (isBanned == 1)
-        banBadge = `<br><code class="joined" style="color: indianred; border: 1px solid indianred;">Banned</code>`
-
-    // Handle User Badges
-    return await getUserBadges(id).then(result => {
-
-        var badgeCode = "";
-        if (result != null) {
-
-            var badges = JSON.parse(result);
-
-
-            Object.keys(badges).forEach(function (badge) {
-                badgeCode += `<img class="profile_badge" src="https://raw.githubusercontent.com/hackthedev/dcts-shipping/main/badges/${badges[badge].icon}.png" title="${badges[badge].display}" />`;
-            });
-        }
-
-        var profile = `
-        <div id="profile_banner" style="background-image: url('${memberBanner}')"></div>
-    
-        <div id="profile_pfp_container">
-            <div id="profile_icon" style="background-image: url('${memberIcon}');"></div>
-            
-            <div id="profile_badge_container">
-                ${badgeCode}
-            </div>
-        
-    
-        <div id="profile_content">
-            <div id="profile_username"><h2 style="margin-bottom: 0 !important;">${memberUsername}</h2></div>
-            <div id="profile_status">${memberStatus}</div>
-            <hr>
-    
-            
-            <h2 class="profile_headline">About Me</h2>
-            <div class="profile_aboutme">            
-                ${memberAboutme}<br>
-                <hr>
-                <code class="joined">Joined ${new Date(memberJoined).toLocaleString("narrow")}</code>
-                <code class="joined">Last Online ${new Date(memberLastOnline).toLocaleString("narrow")}</code>
-                ${mutedBadge} ${banBadge}
-            </div>
-            <hr>
-            
-    
-            <h2 class="profile_headline">Roles</h2>
-            <div id="profile_roles">`;
-
-
-        // Collect roles into an array
+    if(serverconfig.servermembers[id]){
         let roles = Object.keys(serverconfig.serverroles).map(role => ({
             id: role,
-            ...serverconfig.serverroles[role].info
+            ...serverconfig.serverroles[role].info,
+            members: serverconfig.serverroles[role].members
         }));
 
-        // Sort roles by sortId
-        roles.sort((a, b) => a.sortId - b.sortId);
-        roles = roles.reverse(); // otherwise its shown upside down
+        roles.sort((a, b) => b.sortId - a.sortId);
+        roles = roles.filter(role => role.members.includes(id));
 
-        // Iterate through sorted roles and build profile HTML string
-        for (let i = 0; i < roles.length; i++) {
-            var role = roles[i];
-            var roleColor = role.color;
-            var roleName = role.name;
+        let memberObj = await getCastingMemberObject(serverconfig.servermembers[id]);
+        memberObj.roles = roles;
 
-            if (serverconfig.serverroles[role.id].members.includes(id)) {
-                profile += `<code class="role" id="${role.id}"><div class="role_color" style="background-color: ${roleColor};"></div>${roleName}</code>`;
-            }
-        }
-
-
-        /*
-    Object.keys(serverconfig.serverroles).reverse().forEach(function (role) {
-        var roleColor = serverconfig.serverroles[role].info.color;
-        var roleName = serverconfig.serverroles[role].info.name;
-
-        if (serverconfig.serverroles[role].members.includes(id)) {
-            profile += `<code class="role" id="${role}"><div class="role_color" style="background-color: ${roleColor};"></div>${roleName}</code>`;
-        }
-    });
-    */
-
-        // Add Role Button
-        profile += `<code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${id}');" class="role" id="addRole-${id}">+</code>`;
-        profile += `</div>
-            </div>
-        </div>`;
-
-        return profile;
-    });
-
-    return codi;
+        return memberObj
+    }
+    return null;
 }
 
 export function getMemberList(member, channel) {
@@ -374,6 +370,8 @@ export function getMemberList(member, channel) {
 
             // Foreach Role Member
             Object.keys(members).forEach(function (member) {
+
+                if(serverconfig.servermembers[member].onboarding === false) return
 
                 // Member ID:
                 // member
@@ -420,12 +418,10 @@ export function getMemberList(member, channel) {
                             if (getMemberLastOnlineTime(member) > 5) {
                                 return;
                             }
-                        }
-                        else {
+                        } else {
                             if (getMemberLastOnlineTime(member) < 5) {
                                 return;
-                            }
-                            else {
+                            } else {
                                 extraClassOffline = "offline_pfp";
                             }
                         }
@@ -479,16 +475,19 @@ export function getMemberList(member, channel) {
                         }
 
 
-                        code += `<div class="memberlist-container" id="${members[member].id}">
-                                <img class="memberlist-img ${extraClassOffline}" id="${members[member].id}" src="${members[member].icon}" onerror="this.src = '/img/default_pfp.png'">
-                                <div class="memberlist-member-info name" 
-                                onclick="getMemberProfile('${members[member].id}');" id="${members[member].id}" 
-                                style="color: ${role.info.color};">
-                                    ${nameStyle}
-                                </div>
-                                <div class="memberlist-member-info status" id="${members[member].id}" style="color: ${role.info.color};">
-                                    ${statusStyle}
-                                </div>
+                        code += `<div class="memberlist-container" data-member-id="${members[member].id}">
+                                    <img class="memberlist-img ${extraClassOffline}" data-member-id="${members[member].id}" src="${members[member].icon}" onerror="this.src = '/img/default_pfp.png'">
+                                    
+                                    <div>
+                                        <div class="memberlist-member-info name" 
+                                            onclick="getMemberProfile('${members[member].id}');" data-member-id="${members[member].id}"" 
+                                            style="color: ${role.info.color};">
+                                            ${nameStyle}
+                                        </div>
+                                        <div class="memberlist-member-info status" data-member-id="${members[member].id}" style="color: ${role.info.color};">
+                                            ${statusStyle}
+                                        </div>
+                                    </div>
                             </div>`;
 
                     }
@@ -507,7 +506,14 @@ export function getGroupList(member) {
     member.id = xssFilters.inHTMLData(member.id)
     member.token = xssFilters.inHTMLData(member.token)
 
-    var code = "";
+    var code = `<a onclick="showHome()">
+                        <div class="group-entry-marker"></div>
+                        <div class="server-entry home">
+                           <img title="Home" class="server-icon" src="/img/home.jpg">    
+                           <span class="home-indicator"></span>                       
+                        </div>
+                    </a><hr class="homeDivider">`;
+
     var groups = serverconfig.groups;
     var addedGroups = []
 
@@ -531,11 +537,10 @@ export function getGroupList(member) {
                     <a onclick="setUrl('?group=${group.info.id}');" id="group-entry-${group.info.id}">
                         <div class="group-entry-marker" id="group-marker-${group.info.id}"></div>
                         <div class="server-entry">
-                           <img title="${group.info.name}" id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
+                           <img title="${group.info.name}" id="${group.info.id}" data-group-id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
                         </div>
                     </a>`;
-        }
-        else {
+        } else {
             //reverse()
 
             // Normal user
@@ -546,7 +551,7 @@ export function getGroupList(member) {
                     ) {
                         addedGroups.push(group.info.id);
                         code += `<a onclick="setUrl('?group=${group.info.id}');"><div class="server-entry">
-                                    <img title="${group.info.name}" id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
+                                    <img title="${group.info.name}" data-group-id="${group.info.id}" id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
                                 </div></a>`;
                     }
                 } catch {
@@ -567,7 +572,7 @@ function setJson(obj, path, value) {
 
     for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]] || typeof current[keys[i]] !== "object") {
-            current[keys[i]] = {}; 
+            current[keys[i]] = {};
         }
         current = current[keys[i]];
     }
@@ -578,6 +583,7 @@ function setJson(obj, path, value) {
 export function getJson(obj, pathOrPaths) {
     if (!Array.isArray(pathOrPaths)) {
         const parts = String(pathOrPaths).split(".");
+
         function rec(current, i) {
             if (i === parts.length) return [current];
             const key = parts[i];
@@ -589,6 +595,7 @@ export function getJson(obj, pathOrPaths) {
                 return rec(current[key], i + 1);
             }
         }
+
         return rec(obj, 0);
     }
 
@@ -634,10 +641,16 @@ export function getJson(obj, pathOrPaths) {
                 const key = partsList[i][depth];
                 const cur = currents[i];
                 if (key === "*") {
-                    if (!cur || !(k in cur)) { valid = false; break; }
+                    if (!cur || !(k in cur)) {
+                        valid = false;
+                        break;
+                    }
                     nextCurrents.push(cur[k]);
                 } else {
-                    if (!cur || !(key in cur)) { valid = false; break; }
+                    if (!cur || !(key in cur)) {
+                        valid = false;
+                        break;
+                    }
                     nextCurrents.push(cur[key]);
                 }
             }
@@ -648,7 +661,6 @@ export function getJson(obj, pathOrPaths) {
 
     return recSync(Array(partsList.length).fill(obj), 0);
 }
-
 
 
 export function getChannelTree(member) {
@@ -724,7 +736,8 @@ export function getChannelTree(member) {
                 hasPermission(member.id, ["viewChannel"], chan.id)
             ) {
                 // show group name etc if allowed to
-                if (!addedInitialCode) treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`; addedInitialCode = true;
+                if (!addedInitialCode) treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`;
+                addedInitialCode = true;
 
                 // Add Category
                 showedCategory = true;
@@ -750,14 +763,12 @@ export function getChannelTree(member) {
                             // if text channel
                             if (chan.type == "text") {
                                 added_channels.push(chan.id + "_" + chan.name)
-                            }
-                            else if (chan.type == "voice") {
+                            } else if (chan.type == "voice") {
                                 added_channels.push(chan.id + "_" + chan.name)
                             }
                         }
 
-                    }
-                    else {
+                    } else {
                         //console.log(`User ${serverconfig.servermembers[member.id].name} was denied`)
                     }
                 }
@@ -822,8 +833,7 @@ export function unbanIp(socket) {
     if (serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
         delete serverconfigEditable.ipblacklist[ip];
         saveConfig(serverconfigEditable);
-    }
-    else {
+    } else {
         console.log("does not have property " + ip)
     }
 }
@@ -860,10 +870,6 @@ export function findInJson(obj, keyToFind, valueToFind, returnPath = false) {
 
     return returnPath ? foundPath : result; // ✅ Return full JSON path if requested
 }
-
-
-
-
 
 
 export function formatDateTime(date) {
@@ -944,7 +950,7 @@ export function getNewDate(offset) {
 
 export function disconnectUser(socketId, reason = null) {
 
-    try { 
+    try {
         sendMessageToUser(socketId, JSON.parse(
             `{
             "title": "You've been disconnected",
@@ -961,12 +967,11 @@ export function disconnectUser(socketId, reason = null) {
         }`));
 
         io.sockets.sockets.get(socketId).disconnect();
-    }
-    catch (ex) {
+    } catch (ex) {
         return {error: ex}
     }
 
-    return { error: null };
+    return {error: null};
 }
 
 export function muteUser(member) {
@@ -983,9 +988,8 @@ export function muteUser(member) {
                 "duration": ${muteDate}
             }
             `);
-    }
-    catch (err) {
-        return { error: err }
+    } catch (err) {
+        return {error: err}
     }
 
     if (!serverconfig.mutelist.hasOwnProperty(member.target)) {
@@ -996,15 +1000,14 @@ export function muteUser(member) {
         serverconfigEditable.mutelist[member.target] = jsonObj;
 
         saveConfig(serverconfigEditable);
-        return { duration: muteDate };
-    }
-    else {
+        return {duration: muteDate};
+    } else {
         serverconfigEditable.servermembers[member.target].isMuted = 1;
         serverconfigEditable.mutelist[member.target].duration = muteDate;
         saveConfig(serverconfigEditable);
 
         io.emit("updateMemberList");
 
-        return { duration: muteDate };
+        return {duration: muteDate};
     }
 }

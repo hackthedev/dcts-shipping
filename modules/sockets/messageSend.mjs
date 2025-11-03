@@ -1,19 +1,28 @@
-import { serverconfig, typingMembers, xssFilters } from "../../index.mjs";
-import { convertMention } from "../functions/chat/helper.mjs";
-import { formatDateTime, hasPermission } from "../functions/chat/main.mjs";
-import { saveChatMessage } from "../functions/io.mjs";
+import {serverconfig, typingMembers, usersocket, xssFilters} from "../../index.mjs";
+import {convertMention} from "../functions/chat/helper.mjs";
+import {formatDateTime, hasPermission} from "../functions/chat/main.mjs";
+import {saveChatMessage} from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
-import { checkMemberMute, checkRateLimit, copyObject, escapeHtml, generateId, getCastingMemberObject, sanitizeInput, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
-import { decodeFromBase64, getChatMessagesFromDb } from "../functions/mysql/helper.mjs";
+import {
+    checkMemberMute,
+    checkRateLimit,
+    copyObject,
+    escapeHtml,
+    generateId,
+    getCastingMemberObject,
+    sanitizeInput,
+    sendMessageToUser,
+    validateMemberId
+} from "../functions/main.mjs";
+import {decodeFromBase64, getChatMessagesFromDb} from "../functions/mysql/helper.mjs";
+import {signer} from "../../index.mjs"
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('messageSend', async function (memberOriginal) {
+    socket.on('messageSend', async function (memberOriginal, response) {
         checkRateLimit(socket);
-        
-        if (validateMemberId(memberOriginal.id, socket) == true
-            && serverconfig.servermembers[memberOriginal.id].token == memberOriginal.token
-        ) {
+
+        if (validateMemberId(memberOriginal?.id, socket, memberOriginal?.token) === true) {
 
             // Remove token from cloned object so we dont broadcast it
             let member = copyObject(memberOriginal);
@@ -21,18 +30,20 @@ export default (io) => (socket) => {
             // check member mute
             let muteResult = checkMemberMute(socket, member);
             let muteText = "";
+
             if (muteResult?.timestamp) {
                 if (new Date(muteResult.timestamp).getFullYear() == "9999") {
                     muteText = "muted permanently";
-                }
-                else {
+                } else {
                     muteText = `muted until <br>${formatDateTime(new Date(muteResult.timestamp))}`
                 }
             }
+
             if (muteResult?.reason) {
                 muteText += `<br><br>Reason:<br>${muteResult.reason}`
             }
-            if (muteResult.result == true) {
+
+            if (muteResult.result === true) {
                 sendMessageToUser(socket.id, JSON.parse(
                     `{
                                         "title": "You have been ${muteText}",
@@ -46,18 +57,20 @@ export default (io) => (socket) => {
                                         "type": "error",
                                         "popup_type": "confirm"
                                     }`));
+
+                response({error: `You cant chat here! You have been ${muteText}`})
                 return;
             }
 
-            if (isNaN(member.group) == true) {
+            if (isNaN(member.group) === true) {
                 Logger.debug("Group was not a number");
                 return;
             }
-            if (isNaN(member.channel) == true) {
+            if (isNaN(member.channel) === true) {
                 Logger.debug("Channel was not a number");
                 return;
             }
-            if (isNaN(member.category) == true) {
+            if (isNaN(member.category) === true) {
                 Logger.debug("Category was not a number");
                 return;
             }
@@ -66,20 +79,46 @@ export default (io) => (socket) => {
                 return;
             }
 
+            // if message is signed, verify the signature
+            if(member?.sig !== null && member?.sig?.length > 10 && serverconfig.servermembers[member?.id]?.isVerifiedKey === true){
+                let signCheckResult = await signer.verifyJson(member, serverconfig.servermembers[member?.id]?.publicKey);
+
+                if(signCheckResult !== true){
+                    sendMessageToUser(socket.id, JSON.parse(
+                        `{
+                                "title": "Message rejected!",
+                                "message": "The signature in your message wasnt valid. The message was not sent",
+                                "buttons": {
+                                    "0": {
+                                        "text": "Ok",
+                                        "events": ""
+                                    }
+                                },
+                                "type": "error",
+                                "popup_type": "confirm"
+                            }`));
+
+                    response({error: "Message rejected! Signature wasnt valid!"})
+                    return;
+                }
+            }
+
             if (!hasPermission(member.id, ["sendMessages", "viewChannel"], member.channel, "all")) {
                 sendMessageToUser(socket.id, JSON.parse(
-                    `{
-                                        "title": "You cant chat here",
-                                        "message": "You cant send a message in this channel, sorry.",
-                                        "buttons": {
-                                            "0": {
-                                                "text": "Ok",
-                                                "events": ""
-                                            }
-                                        },
-                                        "type": "error",
-                                        "popup_type": "confirm"
-                                    }`));
+                `{
+                        "title": "You cant chat here",
+                        "message": "You cant send a message in this channel, sorry.",
+                        "buttons": {
+                            "0": {
+                                "text": "Ok",
+                                "events": ""
+                            }
+                        },
+                        "type": "error",
+                        "popup_type": "confirm"
+                   }`));
+
+                response({error: "You cant chat here!"})
 
                 return;
             }
@@ -87,10 +126,6 @@ export default (io) => (socket) => {
             // Check if room exists
             try {
                 if (serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel] != null) {
-
-                    // bug
-                    // editing message makes new id and timestamp
-                    // fetch existing object and load it?
                     let messageid = generateId(12);
                     member.timestamp = new Date().getTime();
                     member.messageId = messageid;
@@ -102,17 +137,9 @@ export default (io) => (socket) => {
                     member.message = convertMention(member.message);
 
                     // replace empty lines
-                    const regex = /<p\s+id="msg-\d+">\s*<br\s*\/?>\s*<\/p>/g;
-                    member.message = member.message.replaceAll(regex, '').replaceAll(/<p\s+id="msg-\d+">\s*<\/p>/g, "<p id='msg-" + messageid + "'><br></p>")
+                    member.message = clearMessage(member.message, messageid)
 
-                    if (member.message.replaceAll(" ", "") == null) {
-                        consolas(colors.red("Message was null"))
-                        return
-                    }
-
-                    var emptyMessageContent = member.message.replaceAll(" ", "").replaceAll("<p>", "").replaceAll("</p>", "").replaceAll(/^\uFEFF/g, '');
-
-                    if (emptyMessageContent == "") {
+                    if (member.message == "" || member.message.length == 0) {
                         console.log("Message was empty")
                         return;
                     }
@@ -145,8 +172,8 @@ export default (io) => (socket) => {
                         let originalMsgObj = JSON.parse(decodeFromBase64(originalMsg[0].message));
 
                         // Check if the user who wants to edit the msg is even the original author lol
-                        if (originalMsgObj.id != member.id) {
-                            Logger.warn("Unauthorized user tried to edit another users message");
+                        if (originalMsgObj.id !== member.id) {
+                            Logger.warn(`Unauthorized user (${member.name} - ${member.id}) tried to edit another users message`);
                             return;
                         }
 
@@ -163,12 +190,13 @@ export default (io) => (socket) => {
                     member = getCastingMemberObject(member);
 
                     let memberMessageCount = serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel].msgCount + 1;
+
                     // Save the Chat Message to file
-                    saveChatMessage(member, member.editedMsgId);                    
+                    saveChatMessage(member, member.editedMsgId);
 
                     // Remove user from typing
                     var username = serverconfig.servermembers[member.id].name;
-                    if (typingMembers.includes(username) == true) {
+                    if (typingMembers.includes(username) === true) {
                         typingMembers.pop(username);
                     }
                     io.in(member.room).emit("memberTyping", typingMembers);
@@ -179,15 +207,14 @@ export default (io) => (socket) => {
                         io.in(member.room).emit("messageCreate", member);
 
 
-                        io.emit("markChannel", { channelId: parseInt(member.channel), count:  memberMessageCount});
+                        io.emit("markChannel", {channelId: parseInt(member.channel), count: memberMessageCount});
                     }
                     // emit edit event of msg
                     else {
                         io.in(member.room).emit("messageEdited", member);
                     }
 
-                }
-                else {
+                } else {
                     Logger.debug("Couldnt find message channel");
 
                     var msg = `We were unable to send the message because the 
@@ -207,8 +234,7 @@ export default (io) => (socket) => {
                             "popup_type": "confirm"
                         }`));
                 }
-            }
-            catch (err) {
+            } catch (err) {
                 Logger.warn("Couldnt send message because room didnt exist");
                 Logger.warn(`Group was ${member.group}`);
                 Logger.warn(`Category  was ${member.category}`);
@@ -235,10 +261,52 @@ export default (io) => (socket) => {
                         }`));
                 return;
             }
-        }
-        else {
+        } else {
             Logger.warn("Cant send message because member id wasnt valid");
             Logger.warn("ID: " + member.id);
         }
     });
+
+    function clearMessage(html, messageid) {
+        html = html.replace(/<span[^>]*class=(['"])ql-cursor\1[^>]*>[\s\u200B-\u200D\uFEFF]*<\/span>/gi, "");
+        html = html.replace(/[\u200B-\u200D\uFEFF]/g, "");
+
+        const BRP_TOKEN = `__BRP_${messageid}__`;
+        html = html.replace(/<p\b[^>]*>\s*(?:<br\s*\/?>\s*)<\/p>/gi, BRP_TOKEN);
+
+        const emptyInline = /<(?:span|em|strong|i|b|u)[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/(?:span|em|strong|i|b|u)>/gi;
+        const emptyP = /<p[^>]*>(?:\s|&nbsp;|<br\s*\/?>|<(?:span|em|strong|i|b|u)[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/(?:span|em|strong|i|b|u)>)*<\/p>/gi;
+
+        let prev;
+        do {
+            prev = html;
+            html = html.replace(emptyInline, "");
+            html = html.replace(emptyP, "");
+        } while (html !== prev);
+
+        html = html.replace(/(?:<br\s*\/?>\s*){2,}/gi, "<br>");
+
+        const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const tokenRe = new RegExp(escapeRegExp(BRP_TOKEN), "g");
+
+        const withoutBRP = html.replace(tokenRe, "");
+        const hasImage = /<img\b[^>]*>/i.test(withoutBRP);
+        const hasText = !!withoutBRP
+            .replace(/<[^>]*>/g, "")
+            .replace(/&nbsp;|\s/gi, "")
+            .trim();
+
+        if (!hasImage && !hasText) {
+            return "";
+        }
+
+        const trailingTokensRe = new RegExp("(?:\\s*" + escapeRegExp(BRP_TOKEN) + ")+\\s*$");
+        html = html.replace(trailingTokensRe, "");
+
+        html = html.replace(tokenRe, "<p><br></p>");
+
+        return html;
+    }
+
+
 }

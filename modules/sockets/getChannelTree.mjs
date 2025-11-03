@@ -13,7 +13,8 @@ export default (io) => (socket) => {
             member.token = xssFilters.inHTMLData(member.token)
             member.group = xssFilters.inHTMLData(member.group)
 
-            if (!hasPermission(member.id, "viewGroup", member.group)) {
+            if (!hasPermission(member.id, ["viewGroup", "manageChannels"], member.group)) {
+                response({ type: "error", error: "Your access to this group was denied" });
                 return;
             }
 

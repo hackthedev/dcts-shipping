@@ -1,3 +1,42 @@
+var socket = io.connect();
+
+function doInit(callback){
+    socket.emit("userConnected", {
+        id: UserManager.getID(), name: UserManager.getUsername(), icon: UserManager.getPFP(),
+        status: UserManager.getStatus(), token: UserManager.getToken(),
+        aboutme: UserManager.getAboutme(), banner: UserManager.getBanner()
+    }, function (response) { });
+
+    initPow(() => {
+        if(callback){ callback(); }
+    });
+}
+
+async function elementImageToBase64(el) {
+    let url = null;
+
+    if (el.tagName === "IMG") {
+        url = el.src;
+    } else {
+        const bg = window.getComputedStyle(el).backgroundImage;
+        const match = bg.match(/url\(["']?(.*?)["']?\)/);
+        if (match && match[1]) url = match[1];
+    }
+
+    if (!url) return null;
+
+    const res = await fetch(url);
+    const blob = await res.blob();
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+
 async function loadPageContent(page = "server-info", { force = false } = {}) {
   try {
     const cssHref = `page/${page}/${page}.css`;
@@ -35,7 +74,6 @@ async function loadPageContent(page = "server-info", { force = false } = {}) {
 }
 
 function chooseRole({ multi = false } = {}) {
-
   return new Promise((resolve) => {
     socket.emit("getAllRoles", {
       id: UserManager.getID(),
@@ -73,7 +111,6 @@ function chooseRole({ multi = false } = {}) {
         </div>`;
 
       const p = window.__prompt || (window.__prompt = new Prompt());
-
       p.showPrompt(`Choose ${multi ? "roles" : " a role"}`, html, (vals) => {
 
         const out = { roles: {} };

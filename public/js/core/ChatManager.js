@@ -1,9 +1,13 @@
 class ChatManager{
+
+    static showedGlitch = false;
+
     static async checkConnection(delay) {
         if (initConnectionCheck == false) {
     
             if (socket.connected == true) {
                 if (connectionAttempts > 3 && !wasDisconnected) {
+                    window.location.reload()
                     showSystemMessage({
                         title: "Connected!",
                         text: "",
@@ -44,6 +48,21 @@ class ChatManager{
         else {
             if (socket.connected == false && initConnectionCheck == true && !wasDisconnected) {
                 disconnected = true;
+
+                if(!this.showedGlitch && !wasDisconnected){
+                    hackerGlitch(
+                        document.body,
+                        {
+                            text: "Connection lost",
+                            intensity: 0.75,
+                            bgAlpha: 1,
+                            useSnapshot: true
+                        }
+                    )
+
+                    this.showedGlitch = true;
+                }
+
                 showSystemMessage({
                     title: "Connection Lost",
                     text: "",
@@ -55,6 +74,9 @@ class ChatManager{
             }
             else if (socket.connected == true && initConnectionCheck == true && disconnected == true) {
                 disconnected = false;
+                window.location.reload()
+                return;
+
                 showSystemMessage({
                     title: "Successfully reconnected!",
                     text: "Refreshing data...",

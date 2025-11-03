@@ -3,51 +3,49 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="expires" content="" />
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <meta content="" name="expires"/>
 
     <!-- <meta name="description" content="{{meta.page.description}}" /> -->
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js" crossorigin="anonymous"></script>
-
-    <script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
+    <script src="js/core/socket.io.js"></script>
+    <script src="js/core/sortable.js"></script>
 
     <!-- New to-be-implement features-->
-    <script src="js/alerts.js"></script>
-    <script src="js/prompts.js"></script>
-    <script src="js/tooltips.js"></script>
-    <script src="js/sysmsg.js?v=1"></script>
-    <script src="js/upload.js?v=1"></script>
+    <script src="js/alerts.js?v={{version}}"></script>
+    <script src="js/prompts.js?v={{version}}"></script>
+    <script src="js/tooltips.js?v={{version}}"></script>
+    <script src="js/sysmsg.js?v={{version}}"></script>
+    <script src="js/upload.js?v={{version}}"></script>
+
+    <script src="audioplayer/audioplayer.js?v={{version}}"></script>
 
 
-    <!--<script src="popup.js"></script>    -->
-    <!--<link rel="stylesheet" href="popup.css">-->
+    <link href="/settings/account/page/profile/profile.css?v={{version}}" rel="stylesheet">
 
-    <script src="audioplayer/audioplayer.js"></script>
-
-
-
-    <link href="/settings/account/page/profile/profile.css?v=1" rel="stylesheet">
-    <!--<link href="prompt.css" rel="stylesheet">-->
-    <!--<link href="popup.css" rel="stylesheet">-->
-    <link href="highlight.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="css/messages.css?v={{version}}" rel="stylesheet">
+    <link href="highlight.css?v={{version}}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="css/channeltree.css">
-    <link rel="stylesheet" href="css/mobile.css">
-    <link rel="stylesheet" href="css/screenshare.css">
-    <link rel="stylesheet" href="audioplayer/audioplayer.css">
-    <link rel="stylesheet" href="css/groups/groupHomeDisplay.css">
-    <link rel="stylesheet" href="css/emoji-autocomplete.css">
+    <link href="css/themes/default.css?v={{version}}" rel="stylesheet">
+    <link href="css/message_actions.css?v={{version}}" rel="stylesheet">
+    <link href="css/contextmenu.css?v={{version}}" rel="stylesheet">
+    <link href="style.css?v={{version}}" rel="stylesheet">
+    <link href="css/network-servers.css?v={{version}}" rel="stylesheet">
+    <link href="css/channeltree.css?v={{version}}" rel="stylesheet">
+    <link href="css/mobile.css?v={{version}}" rel="stylesheet">
+    <link href="css/screenshare.css?v={{version}}" rel="stylesheet">
+    <link href="audioplayer/audioplayer.css?v={{version}}" rel="stylesheet">
+    <link href="css/groups/groupHomeDisplay.css?v={{version}}" rel="stylesheet">
+    <link href="css/emoji-autocomplete.css?v={{version}}" rel="stylesheet">
 
 
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <script defer src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css" rel="stylesheet">
 
@@ -62,419 +60,397 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
     <!-- tooltips -->
-    <script src="js/tooltips/dialogs/createChannel.js"></script>
-    <script src="js/tooltips/dialogs/banUser.js"></script>
-    <script src="js/tooltips/dialogs/muteUser.js"></script>
-    <script src="js/tooltips/dialogs/accountOnboarding.js"></script>
+    <script src="js/tooltips/dialogs/createChannel.js?v={{version}}"></script>
+    <script src="js/tooltips/dialogs/banUser.js?v={{version}}"></script>
+    <script src="js/tooltips/dialogs/muteUser.js?v={{version}}"></script>
+    <script src="js/tooltips/dialogs/newUserExplainUI.js?v={{version}}"></script>
+    <script src="js/tooltips/dialogs/accountOnboarding.js?v={{version}}"></script>
 
     <!-- general chat functions -->
+    <script src="js/discovery.js?v={{version}}"></script>
+    <script src="js/escape.js"></script>
     <script src="js/hover.js"></script>
-    <script src="js/core/FileManager.js"></script>
-    <script src="js/core/ModView.js"></script>
-    <script src="js/core/UserReports.js"></script>
-    <script src="js/core/ContextMenu.js"></script>
-    <script src="js/emojis.js"></script>
-    <script src="js/core/CookieManager.js"></script>
-    <script src="js/core/ModActions.js"></script>
-    <script src="js/core/AdminActions.js"></script>
-    <script src="js/core/ChatManager.js"></script>
-    <script src="js/core/UserManager.js"></script>
-    <script src="js/core/Channeltree.js"></script>
+    <script src="js/vc-handler.js"></script>
 
-    <script src="js/effects/confetti.js"></script>
-    <script src="js/effects/party.js"></script>
-    <script src="js/effects/pixel.js"></script>
+    <script src="js/core/livekit.js?v={{version}}"></script>
+    <script src="js/core/FileManager.js?v={{version}}"></script>
+    <script src="js/core/ModView.js?v={{version}}"></script>
+    <script src="js/core/UserReports.js?v={{version}}"></script>
+    <script src="js/core/ContextMenu.js?v={{version}}"></script>
+    <script src="js/emojis.js?v={{version}}"></script>
+    <script src="js/core/Badges.js?v={{version}}"></script>
+    <script src="js/core/CookieManager.js?v={{version}}"></script>
+    <script src="js/core/ModActions.js?v={{version}}"></script>
+    <script src="js/core/AdminActions.js?v={{version}}"></script>
+    <script src="js/core/ChatManager.js?v={{version}}"></script>
+    <script src="js/core/UserManager.js?v={{version}}"></script>
+    <script src="js/core/Channeltree.js?v={{version}}"></script>
+    <script src="js/core/Home.js?v={{version}}"></script>
+    <script src="js/core/Crypto.js?v={{version}}"></script>
+    <script src="js/core/Client.js?v={{version}}"></script>
 
-    <script src="/plugins/loader.js?v=1234"></script>
+    <script src="js/effects/confetti.js?v={{version}}"></script>
+    <script src="js/effects/party.js?v={{version}}"></script>
+    <script src="js/effects/pixel.js?v={{version}}"></script>
+    <script src="js/effects/glitch.js?v={{version}}"></script>
+
+    <script src="/plugins/loader.js?v={{version}}"></script>
 
 
-    <script src="js/core/PoW.js"></script>
-    <script src="voip/voip.js"></script>
-    <script src="js/voip-handle.js"></script>
+    <script src="js/core/PoW.js?v={{version}}"></script>
+    <script src="js/core/voip.js?v={{version}}"></script>
 
-    
-    <script defer src="chat.js?v=df5415465448df"></script>
 
-    <meta name="description" content="{{meta.page.description}}">
+    <script defer src="chat.js?v={{version}}"></script>
+    <script defer src="js/messages/server/messages.js?v={{version}}"></script>
+    <script defer src="js/channels/channels.js?v={{version}}"></script>
+    <script defer src="js/groups/groups.js?v={{version}}"></script>
+
+    <meta content="{{meta.page.description}}" name="description">
     <title>{{meta.page.title}}</title> <!-- {{meta.page.title}} -->
 </head>
 
 <body>
 
+<div id="mainLayout">
     <div id="header">
-    </div>
-
-    <!--
-<div id="emoji-box-container">
-
-</div>
--->
-
-
-    <div id="modalBox">
-        <h1 id="modalBoxTitle">-</h1>
-        <p id="modalBoxText">-</p>
-        <div id="modalBoxButtons"></div>
-    </div>
-
-    <div id="popup-container" style="z-index: 99999;"></div>
-
-
-    <div id="context-menu">
-        <!-- <div class="item">Copy ID</div> -->
-    </div>
-
-
-
-    <!-- Markdown Editor -->
-    <style>
-        .editor-container {
-            width: calc(100% - 40px) !important;
-            background-color: #23272a;
-            border-radius: 8px;
-            /*box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);*/
-            padding: 0px;
-
-
-            margin-left: -8px !important;
-            border-radius: 8px;
-
-            display: block;
-            float: left;
-
-            transition: height 0.3s ease, transform 0.3s ease, margin 0.3s ease;
-            margin-left: 0px;
-        }
-
-        .ql-toolbar {
-            background-color: #34383c;
-            border: none;
-        }
-
-        .ql-container {
-            background-color: #23272a;
-            color: #ffffff;
-            border: none;
-            transition: height 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .ql-editor {
-            background-color: #23272a;
-            color: #ffffff;
-            overflow-y: auto;
-            /* Make it scrollable */
-            flex: 1;
-            /* Ensure it grows to fill the container */
-            max-height: 400px;
-            /* Limit max height */
-            padding-bottom: 8px;
-            overflow-y: auto;
-            /* Make it scrollable */
-        }
-
-        .ql-toolbar button {
-            color: #ffffff !important;
-        }
-
-        .ql-toolbar button:hover {
-            color: #7289da !important;
-        }
-
-        .ql-toolbar .ql-stroke {
-            fill: none;
-            stroke: lightgray;
-        }
-
-        .ql-toolbar .ql-picker {
-            color: white;
-        }
-
-        .ql-toolbar .ql-even {
-            color: lightgray;
-        }
-
-        .ql-toolbar .ql-blockquote {
-            color: lightgray;
-        }
-
-        .ql-toolbar .ql-video {
-            stroke: lightgray;
-            fill: none;
-        }
-
-        .ql-toolbar .ql-image {
-            color: lightgray;
-            stroke: lightgray;
-            fill: none;
-        }
-
-        .ql-toolbar .ql-strike {
-            stroke: lightgray;
-            fill: none;
-        }
-
-        .ql-toolbar .ql-list {
-            stroke: lightgray;
-            fill: none;
-        }
-
-        .ql-toolbar .ql-formula {
-            stroke: lightgray;
-            fill: none;
-        }
-
-        .ql-toolbar button:hover {
-            color: red !important;
-        }
-    </style>
-
-
-    <div id="profile-role-menu">
-
-        <div id="role-menu-header">
-            <input type="text" id="role-menu-search-input" placeholder="Search Role"
-                oninput="searchForRoleInList(this.value)">
-            <div id="role-menu-search-icon"></div>
-        </div>
-        <div id="role-menu-list">
-
-            <!--
-        <div class="role-menu-entry" id="role-menu-entry-ROLEID" onclick="this.querySelector('input').checked = !this.querySelector('input').checked;">
-            <input type="checkbox" class="role-menu-entry-checkbox" onchange="getParentCheckCheckedAddOrRemoveRole()">
-            <label class="role-menu-entry-roleName">Administrator</label>
-        </div>
-        -->
-
-        </div>
-    </div>
-
-    <script>
-        function searchForRoleInList(search) {
-            var roles = document.getElementById("role-menu-list").querySelectorAll(".role-menu-entry")
-
-
-            roles.forEach(role => {
-                var roleName = role.querySelector("label").innerText.toLowerCase();
-
-                if (roleName.includes(search.toLowerCase())) {
-                    console.log("Found " + roleName)
-                    role.style.display = "block";
-                }
-                else {
-                    console.log("Didnt find " + roleName)
-                    role.style.display = "none"
-                }
-            })
-        }
-    </script>
-
-
-
-    <!-- Mobile HTML-->
-
-    <div id="leftSideMenu">
-        <div id="mobile-channellist-trigger" onclick="switchLeftSideMenu()"></div>
-
-        <div id="mobile_GroupAndChannelContainer">
-            <div id="mobile_GroupList"></div>
-            <div id="mobile_groupBanner"><img id="mobile_groupBannerDisplay" /></div>
-            <div id="mobile_channelList"></div>
-        </div>
-    </div>
-
-
-    <div id="profile_container" style="display: none;position: fixed;z-index: 10000;">
-        <div id="profile_banner"></div>
-
-        <div id="profile_pfp_container">
-            <div id="profile_pfp"></div>
-        </div>
-
-        <div id="profile_content">
-            <div id="profile_username">
-                <h2></h2>
-            </div>
-            <div id="profile_status"></div>
-            <hr>
-
-            <h2 class="profile_headline"></h2>
-            <div id="profile_aboutme">
-            </div>
-            <hr>
-
-            <h2 id="profile_headline"></h2>
-            <div id="profile_roles">
-                <code class="role"><div class="role_color"></div>+</code>
-            </div>
-        </div>
-    </div>
-
-
-    <div id="serverlist">
 
         <!--
-    <div class="server-entry" style="margin-bottom: 16px;">
-        <img title="Home" class="server-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Flat_tick_icon.svg/1024px-Flat_tick_icon.svg.png">
-        <Label>Home</Label>
-    </div><hr> -->
+            This is defined here but pretty much replaced once domloaded fires.
+            Why bother putting it here you may ask? To stop the header from collapsing
+            and then going back to its proper size again, as i dont wanna hardcode a min. height
+            for it to potentially change if elements or font sizes change and have problem all over
+            again.
 
-        <!-- Used for adding new servers
-    <div class="server-entry">
-        <img title="Add new Server" class="server-icon" src="https://as1.ftcdn.net/v2/jpg/02/01/58/70/1000_F_201587024_jEB8rsvrFtd0jwBF2A7oUnZ2KGYYddmC.jpg">
-    </div> -->
+            The empty divs are here to keep the grid layout from breaking.
+        -->
+        <div></div>
+        <div></div>
 
-
+        <div id="headerRight">
+            <div class="headerIcon help"></div>
+        </div>
     </div>
 
-    <div id="channellist">
+    <div id="contentLayout">
+        <div id="networkServers">
 
-        <div id="serverbanner-container">
-            <img id="serverbanner-image" src="/img/loading.gif">
-        </div>
-
-        <div id="channeltree"></div>
-
-        <div id="profile-qa">
-
-            <div id="profile-qa-img-container">
-                <img id="profile-qa-img" onerror="this.src = '/img/default_pfp.png';">
+            <div id="networkActivatorUi">
+                <div class="networkIndicator">1</div>
+                <span class="networkIndicatorIcon">&#127760;</span>
             </div>
 
-            <div id="profile-qa-info">
-                <Label title="Edit your username" id="profile-qa-info-username">-</Label><br>
-                <Label title="Edit your status" id="profile-qa-info-status">-</Label>
+            <div id="networkServerList">
+                <div class="networkServerEntry">
+                    <img src="/uploads/upload_167339467293_astolfo_shrug.png">
+                    <div class="networkIndicator">1</div>
+                </div>
+
+                <div class="networkServerEntry">
+                    <img src="/uploads/upload_167339467293_astolfo_shrug.png">
+                    <div class="networkIndicator">99</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="serverlist"></div>
+        <div id="channellist">
+
+            <div id="serverbanner-container">
+                <img id="serverbanner-image" src="/img/loading.gif">
             </div>
 
+            <div id="channeltree"></div>
 
+            <div id="profile-qa">
+                <div id="profile-qa-img-container">
+                    <img id="profile-qa-img" onerror="this.src = '/img/default_pfp.png';">
+                </div>
 
-            <a href="/settings/account">
-                <div id="profile-qa-settings"></div>
-            </a>
+                <div id="profile-qa-info">
+                    <Label id="profile-qa-info-username" title="Edit your username">-</Label><br>
+                    <Label id="profile-qa-info-status" title="Edit your status">-</Label>
+                </div>
 
+                <a href="/settings/account">
+                    <div id="profile-qa-settings"></div>
+                </a>
+            </div>
         </div>
 
-    </div>
 
+        <div id="content-container">
 
-    <div id="content-container">
+            <div id="channelname-bar">
+                <div id="channelname"></div>
+                <div id="channelname-icons"></div>
+            </div>
 
-        <div id="channelname-bar">
-            <div id="channelname"></div>
-            <div id="channelname-icons"></div>
-        </div>
+            <div id="content"></div>
 
-        <div id="content">
+            <div id="message-actions">
+                <div id="emoji-box-container" style="display: none;">
 
-        </div>
-
-        <div id="message-actions">
-
-            <div id="emoji-box-container" style="display: none;">
-
-                <div id="emoji-box-header-container">
-                    <div class='emoji-box-header' id="emoji-box-emojis" onclick="getEmojis(); selectEmojiTab(this);">
-                        <h2>Emojis</h2>
+                    <div id="emoji-box-header-container">
+                        <div class='emoji-box-header' id="emoji-box-emojis"
+                             onclick="getEmojis(); selectEmojiTab(this);">
+                            <h2>Emojis</h2>
+                        </div>
+                        <div class='emoji-box-header' id="emoji-box-gifs" onclick="getGifs(); selectEmojiTab(this);">
+                            <h2>GIFs</h2>
+                        </div>
                     </div>
-                    <div class='emoji-box-header' id="emoji-box-gifs" onclick="getGifs(); selectEmojiTab(this);">
-                        <h2>GIFs</h2>
+
+                    <div id="gif-searchbar"><input autocomplete="off" id="gif-searchbar-input"
+                                                   placeholder="Search anything, then press enter" type="text"></div>
+
+                    <div id="emoji-entry-container"></div>
+                </div>
+            </div>
+
+            <div id="messagebox">
+                <div>
+                    <div id="messagebox-media"></div>
+                    <div class="editor-container" style="z-index: 200 !important;">
+                        <div id="editor-toolbar" style="border: none !important;">
+                            <!-- Add toolbar buttons as needed -->
+                            <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
+                        <button class="ql-bold" title="Bold"></button>
+                        <button class="ql-italic" title="Italic"></button>
+                        <button class="ql-underline" title="Underline"></button>
+                        <button class="ql-strike" title="Strikeout"></button>
+                    </span>
+
+                            <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
+                        <button class="ql-link" title="Link"></button>
+                                <!--<button title="Image" class="ql-image"></button>
+                                <button title="Video" class="ql-video"></button>-->
+                    </span>
+
+                            <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
+                        <button class="ql-code" title="Inline Code"></button>
+                        <button class="ql-code-block" title="Code Block"></button>
+                        <button class="ql-blockquote" title="Blockquote"></button>
+                    </span>
+
+                            <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
+                        <button class="ql-list" title="Numbered List" value="ordered"></button>
+                        <button class="ql-list" title="Bullet List" value="bullet"></button>
+                        <button class="ql-formula" title="Formula"></button>
+                    </span>
+
+                            <img id="message-actions-image" src="/img/emoji.png">
+                        </div>
+                        <div id="editor" style="border: none !important;"></div>
                     </div>
                 </div>
-                <div id="gif-searchbar"><input autocomplete="off" placeholder="Search anything, then press enter"
-                        type="text" id="gif-searchbar-input"></div>
-
-                <div id="emoji-entry-container"></div>
-            </div>
-        </div>
-
-        <div id="messagebox">
-            <div id="messagebox-media"></div>
-
-            <!--
-        <textarea id="messagebox-content" style="margin-top: -8px;" autocomplete="off" placeholder="Enter your text message here"
-               onclick="closeEmojiBox()"
-               type="text" onkeydown="sendMessage(this)"></textarea> -->
-
-            <div class="editor-container" style="z-index: 9999999 !important;">
-                <div id="editor-toolbar" style="border: none !important;">
-                    <!-- Add toolbar buttons as needed -->
-                    <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
-                        <button title="Bold" class="ql-bold"></button>
-                        <button title="Italic" class="ql-italic"></button>
-                        <button title="Underline" class="ql-underline"></button>
-                        <button title="Strikeout" class="ql-strike"></button>
-                    </span>
-
-                    <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
-                        <button title="Link" class="ql-link"></button>
-                        <!--<button title="Image" class="ql-image"></button>
-                        <button title="Video" class="ql-video"></button>-->
-                    </span>
-
-                    <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
-                        <button title="Inline Code" class="ql-code"></button>
-                        <button title="Code Block" class="ql-code-block"></button>
-                        <button title="Blockquote" class="ql-blockquote"></button>
-                    </span>
-
-                    <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
-                        <button title="Numbered List" class="ql-list" value="ordered"></button>
-                        <button title="Bullet List" class="ql-list" value="bullet"></button>
-                        <button title="Formula" class="ql-formula"></button>
-                    </span>
 
 
-                    <img id="message-actions-image" src="/img/emoji.png">
-
-
-                </div>
-                <div id="editor" style="border: none !important;"></div>
+                <div id="typing-indicator-container"><label id="typing-indicator">H</label></div>
             </div>
 
-
-
-
-
-
-            <div id="typing-indicator-container" style="display: block;"><label id="typing-indicator">Shy Devil is
-                    typing...</label></div>
         </div>
+        <div id="infolist"></div>
+    </div>
+</div>
 
 
+<div id="modalBox">
+    <h1 id="modalBoxTitle">-</h1>
+    <p id="modalBoxText">-</p>
+    <div id="modalBoxButtons"></div>
+</div>
+
+<div id="popup-container" style="z-index: 99999;"></div>
+
+
+<div id="context-menu"></div>
+
+
+<!-- Markdown Editor -->
+<style>
+    .editor-container {
+        width: calc(100% - 40px) !important;
+        border-radius: 8px;
+        /*box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);*/
+        padding: 0px;
+
+
+        margin-left: -8px !important;
+        border-radius: 8px;
+
+        display: block;
+        float: left;
+
+        transition: height 0.3s ease, transform 0.3s ease, margin 0.3s ease;
+        margin-left: 0px;
+    }
+
+    .ql-toolbar {
+        border: none;
+    }
+
+    .ql-container {
+        color: #ffffff;
+        border: none;
+        transition: height 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ql-editor {
+        color: #ffffff;
+        overflow-y: auto;
+        /* Make it scrollable */
+        flex: 1;
+        /* Ensure it grows to fill the container */
+        max-height: 400px;
+        /* Limit max height */
+        padding-bottom: 8px;
+        overflow-y: auto;
+        /* Make it scrollable */
+    }
+
+    .ql-toolbar button {
+        color: #ffffff !important;
+    }
+
+    .ql-toolbar button:hover {
+        color: #7289da !important;
+    }
+
+    .ql-toolbar .ql-stroke {
+        fill: none;
+        stroke: lightgray;
+    }
+
+    .ql-toolbar .ql-picker {
+        color: white;
+    }
+
+    .ql-toolbar .ql-even {
+        color: lightgray;
+    }
+
+    .ql-toolbar .ql-blockquote {
+        color: lightgray;
+    }
+
+    .ql-toolbar .ql-video {
+        stroke: lightgray;
+        fill: none;
+    }
+
+    .ql-toolbar .ql-image {
+        color: lightgray;
+        stroke: lightgray;
+        fill: none;
+    }
+
+    .ql-toolbar .ql-strike {
+        stroke: lightgray;
+        fill: none;
+    }
+
+    .ql-toolbar .ql-list {
+        stroke: lightgray;
+        fill: none;
+    }
+
+    .ql-toolbar .ql-formula {
+        stroke: lightgray;
+        fill: none;
+    }
+
+    .ql-toolbar button:hover {
+        color: red !important;
+    }
+</style>
+
+
+<div id="profile-role-menu">
+
+    <div id="role-menu-header">
+        <input id="role-menu-search-input" oninput="searchForRoleInList(this.value)" placeholder="Search Role"
+               type="text">
+        <div id="role-menu-search-icon"></div>
+    </div>
+    <div id="role-menu-list"></div>
+</div>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+        ContextMenu.init();
+    })
+
+    function searchForRoleInList(search) {
+        var roles = document.getElementById("role-menu-list").querySelectorAll(".role-menu-entry")
+
+
+        roles.forEach(role => {
+            var roleName = role.querySelector("label").innerText.toLowerCase();
+
+            if (roleName.includes(search.toLowerCase())) {
+                console.log("Found " + roleName)
+                role.style.display = "block";
+            } else {
+                console.log("Didnt find " + roleName)
+                role.style.display = "none"
+            }
+        })
+    }
+</script>
+
+
+<!-- Mobile HTML-->
+
+<div id="leftSideMenu">
+    <div id="mobile-channellist-trigger" onclick="switchLeftSideMenu()"></div>
+
+    <div id="mobile_GroupAndChannelContainer">
+        <div id="mobile_GroupList"></div>
+        <div id="mobile_groupBanner"><img id="mobile_groupBannerDisplay"/></div>
+        <div id="mobile_channelList"></div>
+    </div>
+</div>
+
+
+<div id="profile_container" style="display: none;position: fixed;z-index: 10000;">
+    <div id="profile_banner"></div>
+
+    <div id="profile_pfp_container">
+        <div id="profile_pfp"></div>
     </div>
 
-    <div id="infolist">
-
-        <!-- Default role entry
-    <div class="infolist-role" title="Admin">
-        Admin
-        <hr style="margin-bottom: 16px;">
-
-
-    </div>
-    -->
-
-        <!-- Default Member List Code
-    <div class="memberlist-container">
-        <img class="memberlist-img" src="https://avatars.githubusercontent.com/u/40896559?v=4">
-        <div class="memberlist-member-info">
-            Shy Devil
+    <div id="profile_content">
+        <div id="profile_username">
+            <h2></h2>
         </div>
-        <div class="memberlist-member-info">
-            Party Hardy
+        <div id="profile_status"></div>
+        <hr>
+
+        <h2 class="profile_headline"></h2>
+        <div id="profile_aboutme">
+        </div>
+        <hr>
+
+        <h2 id="profile_headline"></h2>
+        <div id="profile_roles">
+            <code class="role">
+                <div class="role_color"></div>
+                +</code>
         </div>
     </div>
-    -->
+</div>
+
+<div id="rightSideMenu">
+    <div id="mobile-memberlist-trigger" onclick="switchRightSideMenu()"></div>
+    <div id="mobile_memberlist"></div>
+</div>
 
 
-    </div>
-
-    <div id="rightSideMenu">
-        <div id="mobile-memberlist-trigger" onclick="switchRightSideMenu()"></div>
-        <div id="mobile_memberlist"></div>
-    </div>
-
+<div id="homeScreen"></div>
 </body>
-
 </html>

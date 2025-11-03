@@ -77,6 +77,16 @@ function uploadFileInChunks(file, fileIndex) {
                         sendChunk(); // Send the next chunk
                     } else {
                         console.log(`File ${fileIndex + 1} upload complete`);
+
+                        showSystemMessage({
+                            title: "Uploaded file!",
+                            text: ``,
+                            icon: "success",
+                            img: null,
+                            type: "success",
+                            duration: 2000
+                        });
+
                         resolve(response.msg); // Resolve with the URL after all chunks are sent
                     }
                 } else {
@@ -104,7 +114,7 @@ function showUploadProgress(fileIndex, progressPercent) {
         text: ``,
         icon: "info",
         type: "neutral",
-        duration: 0
+        duration: 10000
     });
 }
 

@@ -1,0 +1,10 @@
+keys:
+  dev: Minimum32CharacterLongKeyForSecurity
+
+turn:
+  enabled: false
+  domain: domain.com
+  cert_file: /etc/letsencrypt/live/domain.com/fullchain.pem
+  key_file: /etc/letsencrypt/live/domain.com/privkey.pem
+  tls_port: 5349
+  udp_port: 3478

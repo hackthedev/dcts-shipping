@@ -38,6 +38,7 @@ export default (io) => (socket) => {
                 saveConfig(serverconfig);
 
                 io.emit("updateGroupList");
+                io.emit("receiveChannelTree");
                 response({ type: "success", msg: "Group Permissions Updated" });
 
             }

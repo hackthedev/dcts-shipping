@@ -74,12 +74,9 @@ import { validateMemberId } from "../../../modules/functions/main.mjs";
 import { serverconfig } from "../../../index.mjs";
 
 export default (socket) => {    
-    socket.on('test', (member, response) => {
+    socket.on('test', (oMember, response) => {
         // Always include this if block for security!
-        if (
-            validateMemberId(member.id, socket) === true &&
-            serverconfig.servermembers[member.id].token === member.token
-        ) {
+        if (validateMemberId(oMember?.id, socket, oMember?.token) === true) {
             /* Add your custom code here */
             response({ type: 'success', message: "Worked!" });
             
@@ -102,7 +99,7 @@ socket.removeAllListeners('messageSend');
 
 > [!CAUTION]
 >
-> Its absolutely important to keep the structure of the socket example file. Its recommended to add your code after line 11 as in the example for security reasons!
+> Its absolutely important to keep the structure of the socket example file. Its recommended to add your code after line 7 as in the example for security reasons!
 
 ### Adding Client-side Code
 

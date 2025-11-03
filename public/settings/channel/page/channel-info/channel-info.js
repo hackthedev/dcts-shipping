@@ -4,11 +4,8 @@ var saveButton = document.getElementById("settings_channel_save");
 var serverconfigName;
 var editChannel = {};
 
-socket.emit("userConnected", { id: getID(), name: getUsername(), icon: getPFP(), status: getStatus(), token: getToken(),
-    aboutme: getAboutme(), banner: getBanner()});
 
-
-socket.emit("getChannelInfo", {id: getID(), token: getToken(), channel: getUrlParams("id").replace("channel-", "")}, function (response) {
+socket.emit("getChannelInfo", {id: UserManager.getID(), token: UserManager.getToken(), channel: getUrlParams("id").replace("channel-", "")}, function (response) {
     try{
 
         console.log(response)
@@ -79,7 +76,7 @@ function updatePreview(){
 function saveSettings(){
     try{
         if(channelname.value != null && channelname.value.length > 0 && channelname.value != serverconfigName){
-            socket.emit("updateChannelName", {id:getID(), token: getToken(), channel: getUrlParams("id").split("-")[1], name: channelname.value }, function (response) {
+            socket.emit("updateChannelName", {id: UserManager.getID(), token: UserManager.getToken(), channel: getUrlParams("id").split("-")[1], name: channelname.value }, function (response) {
                 console.log(response);
 
                 alert(response.msg);

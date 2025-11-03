@@ -129,7 +129,7 @@ async function renderMicOptions() {
       voiceDefaultcheck.checked = false;
     }
   } catch {
-    micSelect.innerHTML = '<option>Kein Mikro gefunden</option>';
+    micSelect.innerHTML = '<option>No devices found</option>';
     voiceDefaultcheck.checked = false;
   }
 }

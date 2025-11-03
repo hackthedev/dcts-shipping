@@ -1,0 +1,43 @@
+.message-profile-content-message .modActions{
+    visibility: hidden;
+    height: 0;
+    background-color: rgba(89, 93, 96, 0.3);
+    border-radius: 6px;
+    padding-top: 20px !important;
+}
+
+.message-profile-content-message .modActions button{
+    border: 2px solid white;
+    background-color: #2C3137;
+    color: white;
+
+    font-size: 8px;
+    font-weight: bold;
+
+    padding: 3px 6px;
+    margin: 6px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.message-profile-content-message:hover .modActions {
+    visibility: visible;
+    height: auto;
+}
+.message-profile-content-message.pending{
+    background-color: rgba(255, 165, 0, 0.57);
+    padding: 8px;
+    border-radius: 6px;
+}
+
+.message-profile-content-message .modActions button.approve{
+    background-color: rgba(61, 244, 61, 0.53);
+}
+
+.message-profile-content-message .modActions button.reject{
+    background-color: rgba(250, 172, 0, 0.76);
+}
+
+.message-profile-content-message .modActions button.delete{
+    background-color: indianred;
+}

@@ -3,38 +3,6 @@
  */
 import {serverconfig, fetch, fs} from "../../../index.mjs"
 
-export async function getUserBadges(id) {
-    return null;
-    return new Promise((resolve, reject) => {
-        var badgeUrl = 'https://raw.githubusercontent.com/hackthedev/dcts-shipping/main/badges/' + serverconfig.servermembers[id].id;
-
-
-        (async function () {
-            const res = await fetch(badgeUrl)
-            //console.log(res);
-
-            if(res.status == 404){
-                resolve(null);
-                return null;
-            }
-            else if(res.status == 200){
-                const html = await res.text()
-                //console.log(html)
-                resolve(html);
-                return html;
-            }
-            else{
-                resolve(null);
-                return null;
-            }
-        })()
-
-
-    });
-
-    return prom;
-}
-
 export function convertMention(text) {
     var pingedUsers;
     var userId;
@@ -52,7 +20,7 @@ export function convertMention(text) {
             try {
                 userId = pingedUsers[i];
 
-                text = text.replace(`&lt;@${userId}&gt;`, `<label class="mention" id="mention-${serverconfig.servermembers[userId].id}">@${serverconfig.servermembers[userId].name}</label>`);
+                text = text.replace(`&lt;@${userId}&gt;`, `<label class="mention" data-member-id="${serverconfig.servermembers[userId].id}" id="mention-${serverconfig.servermembers[userId].id}">@${serverconfig.servermembers[userId].name}</label>`);
             } catch (lolz) {
                 // Handle error if necessary
                 console.log(lolz);

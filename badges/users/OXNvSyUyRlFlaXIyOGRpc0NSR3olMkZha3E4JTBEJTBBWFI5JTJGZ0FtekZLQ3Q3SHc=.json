@@ -1,0 +1,10 @@
+{
+    "platform_verified": {
+      "display": "Verified",
+      "icon": "verified"
+    },
+    "platform_tester": {
+      "display": "Platform Tester",
+      "icon": "bug"
+    }
+}

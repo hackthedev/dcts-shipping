@@ -1,6 +1,8 @@
-console.clear();
+import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
 
+console.clear();
 import express from 'express';
+
 export const app = express();
 
 import https from 'https';
@@ -16,17 +18,18 @@ import crypto from 'crypto';
 
 // Depending on the SSL setting, this will switch.
 export let server; // = http.createServer(app);
-import { Server } from 'socket.io';
+import {Server} from 'socket.io';
 
-import FormData from 'form-data';
-import fetch from 'node-fetch';
+import nodefetch from "node-fetch";
+const { FormData, fileFrom } = nodefetch;
+const fetch = nodefetch.default;
+
 import getSize from 'get-folder-size';
 
-import { fileTypeFromBuffer } from 'file-type';
+import {fileTypeFromBuffer} from 'file-type';
 import XMLHttpRequest from 'xhr2';
 
 import colors from 'colors';
-import request from 'request';
 import xssFilters from 'xss-filters';
 
 export const __filename = fileURLToPath(import.meta.url);
@@ -45,17 +48,16 @@ export {
     sanitizeHtml,
     bcrypt,
     FormData,
+    fileFrom,
     fetch,
     getSize,
     fileTypeFromBuffer,
     XMLHttpRequest,
     colors,
-    request,
     crypto
 };
 
 import Logger from "./modules/functions/logger.mjs";
-
 
 export let checkedMediaCacheUrls = {};
 export let usersocket = []
@@ -73,7 +75,22 @@ export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = false;
-export let versionCode = 543;
+export let versionCode = 745;
+
+// dSync Libs
+import dSyncAuth from '@hackthedev/dsync-auth';
+//import dSyncAuth from '../../../dSyncAuth/index.mjs';
+import { dSyncSign } from "@hackthedev/dsync-sign";
+//import { dSyncSign } from "../dSyncSign/index.mjs"
+import dSync from "@hackthedev/dsync";
+
+export let syncer = new dSync("dcts", app)
+export const signer = new dSyncSign();
+export const auther = new dSyncAuth(app, signer, async function(data) {
+    if(data.valid === true){
+        changeKeyVerification(data.publicKey, data.valid);
+    }
+});
 
 
 // config file saving
@@ -81,9 +98,6 @@ let fileHandle = null; // File handle for the config file
 let savedState = null; // In-memory config state
 let writeQueue = Promise.resolve(); // Queue for write operations
 let isClosing = false; // Flag to prevent multiple close attempts
-
-
-
 
 // handle startup args
 let nodeArgs = process.argv;
@@ -98,17 +112,17 @@ if (nodeArgs.includes("--debug")) {
 }
 
 
-
 // check if needed directories are setup
 checkServerDirectories()
 
 // check if config file exists
+checkFile("./plugins/settings.json", true, "{}")
 checkConfigFile()
 /*
     Holy Server config file.
     needs to be above the imports else serverconfig will be undefined
  */
-export var serverconfig = JSON.parse(fs.readFileSync("./config.json", { encoding: "utf-8" }));
+export var serverconfig = JSON.parse(fs.readFileSync("./config.json", {encoding: "utf-8"}));
 initConfig("./config.json");
 
 checkConfigAdditions();
@@ -140,39 +154,42 @@ import {
     findAndVerifyUser,
     checkMemberMute,
     moveJson,
-    removeFromArray
+    removeFromArray,
+    toSeconds,
+    setLongInterval
 } from "./modules/functions/main.mjs"
 
 // IO related functions
 import {
-    checkConfigFile,
+    checkConfigFile, checkFile,
     checkServerDirectories,
     consolas,
     getSavedChatMessage,
     saveChatMessage
 } from "./modules/functions/io.mjs"
 
-import { checkSSL } from "./modules/functions/http.mjs"
+import {checkSSL} from "./modules/functions/http.mjs"
 
 // Chat functions
 import {
     unbanIp,
     formatDateTime,
-    findInJson
+    findInJson, changeKeyVerification
 } from "./modules/functions/chat/main.mjs";
 
 import {
     checkAndCreateTable,
+    queryDatabase,
 } from "./modules/functions/mysql/mysql.mjs";
 
-import { fileURLToPath, pathToFileURL } from "url";
-import { offload } from './modules/functions/offload.mjs';
-import { registerTemplateMiddleware } from './modules/functions/template.mjs';
-import { listenToPow, powVerifiedUsers, sendPow, waitForPowSolution } from './modules/sockets/pow.mjs';
+import {fileURLToPath, pathToFileURL} from "url";
+import {offload} from './modules/functions/offload.mjs';
+import {registerTemplateMiddleware} from './modules/functions/template.mjs';
+import {listenToPow, powVerifiedUsers, sendPow, waitForPowSolution} from './modules/sockets/pow.mjs';
+import {Addon} from "./modules/functions/addon.mjs";
 
-
-
-
+// vs
+import {AccessToken, WebhookReceiver} from "livekit-server-sdk";
 
 
 /*
@@ -189,8 +206,15 @@ const registerPluginSocketEvents = async (socket, pluginSocketsDir) => {
         if (file.endsWith('.mjs')) {
             const filePath = path.join(pluginSocketsDir, file);
             const fileUrl = pathToFileURL(filePath).href;
-            const { default: handler } = await import(fileUrl);
-            handler(socket);
+            const {default: handler} = await import(fileUrl);
+
+            try{
+                handler(socket);
+            }
+            catch(e){
+                Logger.error(fileUrl)
+                Logger.error(e)
+            }
         }
     }
 };
@@ -219,7 +243,7 @@ const loadAndExecutePluginFunctions = async (pluginFunctionsDir) => {
 const moveWebFolders = async (pluginWebDir, pluginName) => {
     const destinationDir = path.join(publicPluginsDir, pluginName);
     await fse.ensureDir(destinationDir); // Ensure the destination directory exists
-    await fse.copy(pluginWebDir, destinationDir, { overwrite: true });
+    await fse.copy(pluginWebDir, destinationDir, {overwrite: true});
 };
 
 // Iterate over each plugin and process it
@@ -227,10 +251,34 @@ const processPlugins = async () => {
     const pluginDirs = fs.readdirSync(pluginsDir);
 
     for (const pluginName of pluginDirs) {
+
+        // ignore files
+        if(fs.lstatSync(path.join(pluginsDir, pluginName)).isFile() === true) continue;
+
         const pluginDir = path.join(pluginsDir, pluginName);
         const pluginFunctionsDir = path.join(pluginDir, 'functions');
         const pluginSocketsDir = path.join(pluginDir, 'sockets');
         const pluginWebDir = path.join(pluginDir, 'web');
+
+        let pluginConfigPath = path.join(pluginDir, 'config.json');
+        let pluginConfig = null;
+
+        if(fs.existsSync(pluginConfigPath)) {
+            pluginConfig = JSON.parse(fs.readFileSync(pluginConfigPath));
+        }
+
+        // some plugin meta
+        let pluginTitle = pluginConfig?.title || false;
+        let pluginEnabled = pluginConfig?.enabled || false;
+        let pluginAuthor = pluginConfig?.author || "";
+        let pluginVersion = pluginConfig?.version || 0;
+
+        // skip disabled plugin
+        if(pluginEnabled !== true) {
+            Logger.warn(`Skipped loading plugin ${pluginTitle} (${pluginName}) because its not enabled`)
+            continue;
+        }
+
 
         // Load and execute plugin functions
         if (fs.existsSync(pluginFunctionsDir)) {
@@ -274,55 +322,282 @@ if (serverconfig.serverinfo.sql.enabled == true) {
         {
             name: 'messages',
             columns: [
-                { name: 'authorId', type: 'varchar(100) NOT NULL' },
-                { name: 'messageId', type: 'varchar(100) NOT NULL' },
-                { name: 'room', type: 'text NOT NULL' },
-                { name: 'message', type: 'longtext NOT NULL' }
+                {name: 'authorId', type: 'varchar(100) NOT NULL'},
+                {name: 'messageId', type: 'varchar(100) NOT NULL'},
+                {name: 'room', type: 'text NOT NULL'},
+                {name: 'message', type: 'longtext NOT NULL'}
             ],
             keys: [
-                { name: 'UNIQUE KEY', type: 'messageId (messageId)' }
+                {name: 'UNIQUE KEY', type: 'messageId (messageId)'}
             ]
+        },
+        {
+            name: 'message_logs',
+            columns: [
+                {name: 'id', type: 'int(100) NOT NULL'},
+                {name: 'authorId', type: 'varchar(100) NOT NULL'},
+                {name: 'messageId', type: 'varchar(100) NOT NULL'},
+                {name: 'room', type: 'text NOT NULL'},
+                {name: 'message', type: 'longtext NOT NULL'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(id)'},
+                {name: 'UNIQUE KEY', type: 'id (id)'},
+            ],
+            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55'
         },
         {
             name: 'url_cache',
             columns: [
-                { name: 'id', type: 'int(11) NOT NULL' },
-                { name: 'url', type: 'longtext NOT NULL' },
-                { name: 'media_type', type: 'text NOT NULL' }
+                {name: 'id', type: 'int(11) NOT NULL'},
+                {name: 'url', type: 'longtext NOT NULL'},
+                {name: 'media_type', type: 'text NOT NULL'}
             ],
             keys: [
-                { name: 'PRIMARY KEY', type: '(id)' },
-                { name: 'UNIQUE KEY', type: 'id (id)' },
-                { name: 'UNIQUE KEY', type: 'url (url) USING HASH' }
+                {name: 'PRIMARY KEY', type: '(id)'},
+                {name: 'UNIQUE KEY', type: 'id (id)'},
+                {name: 'UNIQUE KEY', type: 'url (url) USING HASH'}
             ],
             autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55'
         },
         {
             name: "reports",
             columns: [
-                { "name": "id", "type": "int(11) NOT NULL" },
-                { "name": "reportCreator", "type": "longtext NOT NULL" },
-                { "name": "reportedUser", "type": "longtext NOT NULL" },
-                { "name": "reportType", "type": "text NOT NULL" },
-                { "name": "reportData", "type": "longtext NULL" },
-                { "name": "reportNotes", "type": "longtext NULL" },
-                { "name": "reportStatus", "type": "varchar(100) NOT NULL DEFAULT 'pending'" }
+                {"name": "id", "type": "int(11) NOT NULL"},
+                {"name": "reportCreator", "type": "longtext NOT NULL"},
+                {"name": "reportedUser", "type": "longtext NOT NULL"},
+                {"name": "reportType", "type": "text NOT NULL"},
+                {"name": "reportData", "type": "longtext NULL"},
+                {"name": "reportNotes", "type": "longtext NULL"},
+                {"name": "reportStatus", "type": "varchar(100) NOT NULL DEFAULT 'pending'"}
             ],
             keys: [
-                { "name": "PRIMARY KEY", "type": "(id)" }
+                {"name": "PRIMARY KEY", "type": "(id)"}
             ],
             autoIncrement: "id int(11) NOT NULL AUTO_INCREMENT"
+        }, // home section stuff
+        {
+            name: 'dms_threads',
+            columns: [
+                {name: 'threadId', type: 'varchar(100) NOT NULL'},
+                {name: 'type', type: 'varchar(50) NOT NULL'},
+                {name: 'title', type: 'text NULL'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(threadId)'}
+            ]
+        },
+        {
+            name: 'dms_participants',
+            columns: [
+                {name: 'threadId', type: 'varchar(100) NOT NULL'},
+                {name: 'memberId', type: 'varchar(100) NOT NULL'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(threadId, memberId)'},
+                {name: 'KEY', type: 'memberId (memberId)'} // <— neu
+            ]
+        },
+        {
+            name: 'dms_message_logs',
+            columns: [
+                {name: 'id', type: 'int(11) NOT NULL'},
+                {name: 'messageId', type: 'varchar(100) NOT NULL'},
+                {name: 'threadId', type: 'varchar(100) NOT NULL'},
+                {name: 'authorId', type: 'varchar(100) NOT NULL'},
+                {name: 'message', type: 'longtext NOT NULL'},
+                {name: 'loggedAt', type: 'datetime NOT NULL'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(id)'},
+                {name: 'UNIQUE KEY', type: 'id (id)'}
+            ],
+            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
+        },
+        {
+            name: 'dms_messages',
+            columns: [
+                {name: 'messageId', type: 'varchar(100) NOT NULL'},
+                {name: 'threadId', type: 'varchar(100) NOT NULL'},
+                {name: 'authorId', type: 'varchar(100) NOT NULL'},
+                {name: 'message', type: 'longtext NOT NULL'},
+                {name: 'createdAt', type: 'datetime NOT NULL'},
+
+                {name: 'supportIdentity', type: "varchar(20) NOT NULL DEFAULT 'self'"}, // 'self' | 'support_tagged' | 'support_anon'
+                {name: 'displayName', type: 'text NULL'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(messageId)'},
+                {name: 'KEY', type: 'threadId (threadId)'}
+            ]
+        },
+        {
+            name: 'tickets',
+            columns: [
+                {name: 'threadId', type: 'varchar(100) NOT NULL'},
+                {name: 'creatorId', type: 'varchar(100) NOT NULL'},
+                {name: 'status', type: "varchar(20) NOT NULL DEFAULT 'open'"},
+                {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'},
+                {name: 'updatedAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(threadId)'},
+                {name: 'KEY', type: 'status (status)'},
+                {name: 'KEY', type: 'creatorId (creatorId)'}
+            ]
+        },
+
+        {
+            name: 'posts',
+            columns: [
+                {name: 'id', type: 'int(11) NOT NULL'},
+                {name: 'title', type: 'text NOT NULL'},
+                {name: 'body', type: 'longtext NOT NULL'},
+                {name: 'authorId', type: 'varchar(100) NOT NULL'},
+                {name: 'tag', type: 'varchar(100) NULL'},
+                {name: 'pinned', type: 'tinyint(1) NOT NULL DEFAULT 0'},
+                {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(id)'}
+            ],
+            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
+        },
+        {
+            name: 'news',
+            columns: [
+                {name: 'id', type: 'int(11) NOT NULL'},
+                {name: 'title', type: 'text NOT NULL'},
+                {name: 'body', type: 'longtext NOT NULL'},
+                {name: 'authorId', type: 'varchar(100) NOT NULL'},
+                {name: 'pinned', type: 'tinyint(1) NOT NULL DEFAULT 0'},
+                {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(id)'}
+            ],
+            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
+        },
+        {
+            name: 'help',
+            columns: [
+                {name: 'id', type: 'int(11) NOT NULL'},
+                {name: 'slug', type: 'varchar(120) NOT NULL'},
+                {name: 'title', type: 'text NOT NULL'},
+                {name: 'body', type: 'longtext NOT NULL'},
+                {name: 'authorId', type: 'varchar(100) NOT NULL'},
+                {name: 'pinned', type: 'tinyint(1) NOT NULL DEFAULT 0'},
+                {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(id)'},
+                {name: 'UNIQUE KEY', type: 'slug (slug)'}
+            ],
+            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
+        },
+        {
+            name: 'dms_reads',
+            columns: [
+                {name: 'threadId', type: 'varchar(100) NOT NULL'},
+                {name: 'memberId', type: 'varchar(100) NOT NULL'},
+                {name: 'last_read_at', type: 'text NOT NULL'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(threadId, memberId)'},
+                {name: 'KEY', type: 'threadId (threadId)'},
+                {name: 'KEY', type: 'memberId (memberId)'}
+            ]
+        },
+        {
+            name: 'content_reads',
+            columns: [
+                {name: 'id', type: 'bigint NOT NULL'},
+                {name: 'contentType', type: 'varchar(32) NOT NULL'},
+                {name: 'contentId', type: 'bigint NOT NULL'},
+                {name: 'userId', type: 'varchar(128) NOT NULL'},
+                {name: 'readAt', type: 'datetime NULL'},
+                {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(id)'},
+                {name: 'UNIQUE KEY uq_content_user', type: '(contentType, contentId, userId)'},
+                {name: 'INDEX idx_user_unread', type: '(userId, readAt)'},
+                {name: 'INDEX idx_content', type: '(contentType, contentId)'}
+            ],
+            autoIncrement: 'id BIGINT NOT NULL AUTO_INCREMENT'
+        },
+        {
+            name: 'network_servers',
+            columns: [
+                {name: 'id', type: 'int(11) NOT NULL'},
+                {name: 'address', type: 'varchar(255) NOT NULL'},
+                {name: 'status', type: 'varchar(255) NOT NULL'},
+                {name: 'data', type: 'longtext'},
+                {name: 'last_sync', type: 'datetime NULL'}
+            ],
+            keys: [
+                {name: 'PRIMARY KEY', type: '(id)'},
+                {name: 'UNIQUE KEY', type: 'address (address)'}
+            ],
+            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
+        },
+        {
+            name: 'auditlog',
+            columns: [
+                {name: 'text', type: 'longtext NOT NULL'},
+                {name: 'datetime', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+            ]
+        }
+
+    ];
+
+    const dbTasks = [
+        {
+            name: "Purge Old Message Logs",
+            enabled: serverconfig.serverinfo.reports.enabled,
+            interval: toSeconds("12 hours"),
+            query: `
+                DELETE ml
+                FROM message_logs ml
+                LEFT JOIN messages m
+                  ON m.messageId = ml.messageId
+                LEFT JOIN reports r
+                  ON JSON_UNQUOTE(JSON_EXTRACT(r.reportData, '$.messageId')) = ml.messageId
+                WHERE m.messageId IS NULL
+                  AND r.id IS NULL;
+            `
         }
     ];
+
+    async function runDbTask(task) {
+        if (task.enabled !== true) return;
+
+        try {
+            Logger.log("DB TASK", `[${task.name}] starting...`, Logger.colors.fgCyan);
+            await queryDatabase(task?.query);
+            Logger.log("DB TASK", `[${task.name}] done.`, Logger.colors.fgGreen);
+        } catch (err) {
+            Logger.log("DB TASK", `[${task.name}] error:`, Logger.colors.fgRed);
+            Logger.log("DB TASK", err, Logger.colors.fgRed);
+        }
+    }
+
+    function scheduleDbTasks(tasks) {
+        for (const task of tasks) {
+            const ms = task.interval * 1000; // second to ms
+            setLongInterval(() => runDbTask(task), ms);
+        }
+    }
 
     (async () => {
         for (const table of tables) {
             await checkAndCreateTable(table);
         }
+
+        // after the tables exist etc we will fire up our awesome new job(s)
+        scheduleDbTasks(dbTasks);
     })();
 }
-
-
 
 
 Logger.success(`Welcome to DCTS`);
@@ -334,7 +609,7 @@ Logger.info(`♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥�
 Logger.info(`Support the project » https://ko-fi.com/shydevil`, Logger.colors.blink + Logger.colors.bright + Logger.colors.fgMagenta);
 Logger.info(`♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥`, Logger.colors.blink + Logger.colors.bright + Logger.colors.fgMagenta);
 Logger.space();
-
+Logger.space();
 Logger.info(`You're running version ` + versionCode);
 
 // Check if new Version exists
@@ -363,14 +638,6 @@ process.on('uncaughtException', function (err) {
     date = date.replace(", ", "_");
     date = date.replaceAll(":", "-");
     date = date.replaceAll(".", "-");
-
-    // Create the log file
-    fs.writeFile("./logs/error_" + date + ".txt", err.message + "\n" + err.stack, function (err) {
-        if (err) {
-            return console.log(err);
-        }
-        Logger.debug("The log file ./logs/error_" + date + ".txt was saved!");
-    });
 })
 
 
@@ -391,13 +658,14 @@ process.stdin.on('data', function (text) {
 // Setup socket.io
 export const io = new Server(server, {
     maxHttpBufferSize: 1e8,
-    secure: true
+    secure: true,
+    pingInterval: 25000,
+    pingTimeout: 60000,
 });
 
-// Star the app server
+// Start the app server
 var port = serverconfig.serverinfo.port;
 server.listen(port, function () {
-    // Wir geben einen Hinweis aus, dass der Webserer läuft.
 
     Logger.info('Server is running on port ' + port);
 
@@ -414,8 +682,7 @@ server.listen(port, function () {
 
         Logger.info(`Server Admin Token:`);
         Logger.info(adminToken);
-    }
-    else if (serverconfig.serverroles["1111"].token.length > 0) {
+    } else if (serverconfig.serverroles["1111"].token.length > 0) {
         Logger.info(`To obtain the admin role in your server, copy the following token.`);
         Logger.info(`You can use it if prompted or if you right click on the server icon and press "Redeem Key"`);
 
@@ -427,14 +694,58 @@ server.listen(port, function () {
         allowLogging = true;
     }
 
+    syncDiscoveredHosts(true)
 });
 
-app.use(express.urlencoded({ extended: true })); // Parses URL-encoded data
-app.use(express.json()); // Parses JSON bodies
 
+
+const API_KEY = serverconfig.serverinfo.livekit.key;
+const API_SECRET = serverconfig.serverinfo.livekit.secret;
+
+const webhookReceiver = new WebhookReceiver(API_KEY, API_SECRET);
+
+// --- Token Endpoint ---
+app.post("/token",  async (req, res) => {
+    const { roomName, participantName } = req.body;
+
+    if (!roomName || !participantName) {
+        res.status(400).json({ errorMessage: "roomName and participantName are required" });
+        return;
+    }
+
+    const at = new AccessToken(API_KEY, API_SECRET, { identity: participantName });
+    at.addGrant({ roomJoin: true, room: roomName });
+    const token = await at.toJwt();
+
+    res.json({ token });
+});
+
+// --- Webhook Endpoint ---
+app.post("/livekit/webhook", express.raw({ type: "*/*" }), async (req, res) => {
+    try {
+        const event = await webhookReceiver.receive(req.body, req.get("Authorization"));
+        console.log(event);
+    } catch (error) {
+        console.error("Error validating webhook event", error);
+    }
+    res.status(200).send();
+});
+
+
+
+//app.use(express.urlencoded({extended: true})); // Parses URL-encoded data
 registerTemplateMiddleware(app, __dirname, fs, path, serverconfig);
+app.use(
+    express.static(__dirname + '/public', {
+        setHeaders: (res, path) => {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+            res.setHeader('Surrogate-Control', 'no-store');
+        }
+    })
+);
 
-app.use(express.static(__dirname + '/public'));
 
 
 // Process plugins at server start
@@ -449,7 +760,7 @@ const loadSocketHandlers = async (mainHandlersDir, io) => {
     const fileList = [];
 
     const scanDir = (dir) => {
-        const files = fs.readdirSync(dir, { withFileTypes: true });
+        const files = fs.readdirSync(dir, {withFileTypes: true});
         for (const file of files) {
             const filePath = path.join(dir, file.name);
             if (file.isDirectory()) {
@@ -465,7 +776,7 @@ const loadSocketHandlers = async (mainHandlersDir, io) => {
     for (const filePath of fileList) {
         const fileUrl = pathToFileURL(filePath).href;
         try {
-            const { default: handlerFactory } = await import(fileUrl);
+            const {default: handlerFactory} = await import(fileUrl);
 
             // NEU: handlerFactory(io) erzeugt den eigentlichen Socket-Handler
             const handler = handlerFactory(io);
@@ -482,7 +793,6 @@ const loadSocketHandlers = async (mainHandlersDir, io) => {
         }
     }
 };
-
 
 
 // **Register Handlers for Each Connection Using `socket.id`**
@@ -512,17 +822,16 @@ const registerSocketEvents = (socket) => {
     }
 })();
 
-
-io.on('connection', async function (socket) {
-
-    // socket ip
-    var ip = socket.handshake.address;
+export async function checkPow(socket){
+    if (powVerifiedUsers.includes(socket.id)) {
+        socket.powValidated = true;
+        return;
+    }
 
     listenToPow(socket);
     sendPow(socket);
 
     let powResult = await waitForPowSolution(socket);
-
     if (!powResult) {
         // send error to user?
         sendMessageToUser(socket.id, JSON.parse(
@@ -538,18 +847,19 @@ io.on('connection', async function (socket) {
                         "type": "error",
                         "displayTime": 600000
                     }`));
+
         socket.disconnect(true);
-    }
-    else {
+    } else {
         // let client know pow was successful.
         socket.emit("powAccepted");
     }
+}
 
-    /*
-        Improved socket handler
-        Old one caused memory leak
-    */
-    //Logger.info(`New socket connected: ${socket.id}`);
+io.on('connection', async function (socket) {
+
+    // socket ip
+    var ip = socket.handshake.address;
+
     registerSocketEvents(socket);
 
     socket.on('disconnect', () => {
@@ -562,9 +872,7 @@ io.on('connection', async function (socket) {
         // clean up stuff
         try {
             removeFromArray(powVerifiedUsers, socket.id);
-
-        }
-        catch (cleanupError) {
+        } catch (cleanupError) {
             Logger.error(cleanupError);
         }
     });
@@ -599,16 +907,13 @@ io.on('connection', async function (socket) {
                         }`));
 
 
-
             socket.disconnect();
 
             Logger.debug("Disconnected user because ip is blacklisted");
-        }
-        else if (Date.now() > serverconfig.ipblacklist[ip]) {
+        } else if (Date.now() > serverconfig.ipblacklist[ip]) {
             unbanIp(socket);
         }
     }
-
 });
 
 // Function to initialize and read the file into memory
@@ -616,7 +921,7 @@ function initConfig(filePath) {
     try {
         // Open the file in read-write mode
         fileHandle = fs.openSync(filePath, "r+");
-        const fileContent = fs.readFileSync(filePath, { encoding: "utf-8" });
+        const fileContent = fs.readFileSync(filePath, {encoding: "utf-8"});
         savedState = JSON.parse(fileContent);
         //console.log("Config initialized and loaded into memory.");
     } catch (error) {
@@ -673,7 +978,6 @@ function applyChanges(target, changes) {
 }
 
 
-
 // Function to save changes to the file
 export function saveConfig(config) {
     if (!config) {
@@ -702,6 +1006,7 @@ export function saveConfig(config) {
                 // Write the updated content to the file
                 fs.ftruncateSync(fileHandle); // Clear the file
                 fs.writeSync(fileHandle, fileContent, 0); // Write updated content
+                reloadConfig()
                 resolve();
             } catch (error) {
                 console.error("Error saving config:", error);
@@ -736,7 +1041,12 @@ process.on("SIGTERM", closeConfigFile); // Handle termination
 
 export function reloadConfig() {
     // reread config (update in program)
-    serverconfig = JSON.parse(fs.readFileSync("./config.json", { encoding: "utf-8" }));
+    serverconfig = JSON.parse(fs.readFileSync("./config.json", {encoding: "utf-8"}));
+}
+
+export function getFreshConfig() {
+    // used for edge cases
+    return JSON.parse(fs.readFileSync("./config.json", {encoding: "utf-8"}));
 }
 
 export function setServer(content) {
@@ -750,53 +1060,3 @@ export function setRatelimit(ip, value) {
 export function flipDebug() {
     debugmode = !debugmode;
 }
-
-
-
-const SECRET = serverconfig.serverinfo.turn.secret     // = static-auth-secret
-const TURN_HOST = serverconfig.serverinfo.turn.host; // oder DNS
-const TURN_PORT = serverconfig.serverinfo.turn.port;
-const TTL = 300;
-
-// --- /ice Endpoint ---
-function makeCreds(userId = "web") {
-    const exp = Math.floor(Date.now() / 1000) + TTL;
-    const username = `${exp}:${userId}`;
-    const credential = crypto.createHmac("sha1", SECRET).update(username).digest("base64");
-    return {
-        iceServers: [{
-            urls: [
-                `turn:${TURN_HOST}:${TURN_PORT}?transport=udp`,
-                //`turn:${TURN_HOST}:${TURN_PORT}?transport=tcp`,
-                //`turns:${TURN_HOST}:5349?transport=tcp`
-            ],
-            username,
-            credential
-        }]
-    };
-}
-
-app.get("/ice", /* requireLogin, rateLimit maybe */(req, res) => {
-    const userId = (req.user?.id) || (req.query.u || "web"); // setup quota per user on turn server!
-    Logger.debug("ICE User is " + userId);
-    res.set("Cache-Control", "no-store");                   
-
-    if (serverconfig.serverinfo.turn.enabled != true) {
-        res.json({
-            iceServers: [{
-                urls: [
-                ],
-                username: "",
-                credential: ""
-            }]
-        })
-
-        Logger.warn("[VOIP ICE] Turn Server used for voice chat and screen sharing is not enabled or configurated!");
-        Logger.warn("[VOIP ICE] Users behind firewalls and or strict NATs may not be able to talk or listen.");
-        Logger.warn("[VOIP ICE] Checkout /docs/network/ folder on how to setup a turn server");
-
-        return;
-    }
-
-    res.json(makeCreds(userId));
-});

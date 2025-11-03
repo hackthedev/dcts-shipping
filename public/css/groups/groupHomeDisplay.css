@@ -1,33 +1,44 @@
 #homeScreenGroupContainer {
-    float: left;
-    width: calc(100% - 64px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+
+    width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 32px;
+
+    text-align: center;
+}
+
+#homeScreenGroupContainer h1{
+    margin-bottom: 0;
+}
+
+#homeScreenGroupContainer hr{
+    width: 100%;
 }
 
 #homeGroupStatsMostActiveUserContainer {
-    float: left;
     max-height: 320px;
     width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
 
-    display: flex; /* Use flexbox for better layout */
-    flex-wrap: wrap; /* Allows items to wrap if not enough space */
-    gap: 8px; /* Spacing between items */
-    align-content: flex-start; /* Ensures proper alignment */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-content: center;
+    justify-content: center;
 }
 
 .activeUserEntry {
-    background-color: #24292E;
     border-radius: 8px;
     cursor: pointer;
 
-    float: none; /* Remove float to use flexbox properly */
-    flex: 1 1 calc(33.33% - 16px); /* Allows 3 per row, wraps on smaller screens */
-    min-width: 180px; /* Prevents shrinking too small */
-    max-width: 250px; /* Prevents items from stretching too wide */
+    min-width: 180px;
+    max-width: 250px;
 
     margin: 8px;
     padding: 2px 16px;

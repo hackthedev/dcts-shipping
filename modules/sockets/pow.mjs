@@ -1,7 +1,7 @@
 import { crypto, saveConfig, serverconfig, useridFromSocket, xssFilters } from "../../index.mjs";
-import { getJson } from "../functions/chat/main.mjs";
+import { formatDateTime, getJson } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
-import { checkConnectionLimit, checkRateLimit, copyObject, removeFromArray, validateMemberId } from "../functions/main.mjs";
+import { checkConnectionLimit, checkMemberBan, checkRateLimit, copyObject, removeFromArray, validateMemberId } from "../functions/main.mjs";
 import { estimatePoWDuration, formatTimeDifference } from "../functions/pow.mjs";
 
 export let powVerifiedUsers = [];
@@ -16,8 +16,10 @@ export default (io) => (socket) => {
 export function listenToPow(socket) {
     socket.on('verifyPow', async function (data, response) {
         checkRateLimit(socket); // cant call validateMember so we manually check rate limit
-        if (isValidProof(data.challenge, data.solution)) {
 
+        let powResult = isValidProof(data.challenge, data.solution);
+
+        if (powResult?.valid === true) {
             let powString = data.challenge + "-" + data.solution;
 
             powVerifiedUsers.push(socket.id);
@@ -28,14 +30,12 @@ export function listenToPow(socket) {
             if (data?.token !== null && data?.id !== null) {
                 // lets make sure the account data is correct and save the pow
                 // so other accounts cant reuse the same id
-                if (validateMemberId(data?.id, socket, true) == true
-                    && serverconfig.servermembers[data?.id].token == data?.token) {
-
+                if (validateMemberId(data?.id, socket, data?.token,  true) === true) {
                     // if someone uses the same pow kick em!
-                    const members = Object.values(serverconfig.servermembers ||{});
+                    const members = Object.values(serverconfig.servermembers || {});
                     const duplicatePowMember = members.find(member => member.pow === powString);
 
-                    if (duplicatePowMember && serverconfig.servermembers[data.id].token != data.token) {
+                    if (duplicatePowMember && serverconfig.servermembers[data.id].token !== data.token) {
                         removeFromArray(powVerifiedUsers, socket.id);
                         Logger.warn(`Duplicate PoW detected: ${serverconfig.servermembers[data.id].name} uses the same POW as ${duplicatePowMember.name} !!`);
                     }
@@ -44,14 +44,43 @@ export function listenToPow(socket) {
 
                     serverconfig.servermembers[data.id].pow = powString;
                     saveConfig(serverconfig);
+
+                    
+                    let banResult = checkMemberBan(socket, serverconfig.servermembers[data.id]);
+                    let banText = "";
+                    if (banResult?.timestamp) {
+                        if (new Date(banResult.timestamp).getFullYear() === "9999") {
+                            banText = "banned permanently";
+                        }
+                        else {
+                            banText = `banned until <br>${formatDateTime(new Date(banResult.timestamp))}`
+                        }
+                    }
+
+                    if (banResult?.reason) {
+                        banText += `<br><br>Reason:<br>${banResult.reason}`
+                    }
+
+                    if (banResult.result === true) {
+                        response({ error: `You've been ${banText}`, type: "error", msg: `You've been ${banText}`, msgDisplayDuration: 1000 * 60 })
+                        socket.disconnect();
+                        return;
+                    }
                 }
             }
 
-
-
             response({ type: "success", msg: "Authenticated" })
         } else {
-            response({ type: "error", msg: "Identity proof is invalid", error: "invalidIdentity" })
+            response({
+                type: "error",
+                msg: `
+                    Identity proof is invalid!<br>
+                    - Your level: ${powResult.level}<br>
+                    - Required: ${powResult.required}`,
+                error: "invalidIdentity",
+                displayTime: 100 * 60000,
+                powResult
+            })
         }
     });
 
@@ -59,7 +88,11 @@ export function listenToPow(socket) {
         const hash = crypto.createHash('sha256').update(challenge + solution).digest('hex');
         const requiredBits = serverconfig.serverinfo.pow.difficulty * 4; // each hex digit = 4 bits
         const actualBits = countLeadingZeroBits(hash);
-        return actualBits >= requiredBits;
+        return {
+            level: Math.floor(actualBits / 4),
+            required: Math.floor(requiredBits / 4),
+            valid: actualBits >= requiredBits
+        };
     }
 
     function countLeadingZeroBits(hash) {
@@ -128,7 +161,7 @@ export function waitForPow(socket, timeoutSeconds = 10) {
 }
 
 export async function waitForPowSolution(socket) {
-    const timeoutSeconds = await calculateTimeoutBasedOnDifficulty(serverconfig.serverinfo.pow.difficulty);
+    const timeoutSeconds = await calculateTimeoutBasedOnDifficulty(serverconfig.serverinfo.pow.difficulty) + Number(600);
     try {
         Logger.debug(`Waiting ${formatTimeDifference(Date.now(), new Date().getTime() + (timeoutSeconds * 1000))} for ${socket.id} to solve POW`)
 

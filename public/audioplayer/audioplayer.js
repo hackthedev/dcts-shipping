@@ -20,13 +20,40 @@ function createAudioPlayerHTML(src) {
 }
 
 window.togglePlayPause = function(button) {
+
+    // get all playing player buttons and their player and stop em before starting a new one
+    let playingButtons = document.querySelectorAll(".audio-player .playing")
+    if(playingButtons){
+
+        // for each currently playing audio
+        playingButtons.forEach((playingButton) => {
+
+            // if its not the current one
+            if(playingButton !== button){
+
+                // get the parent node to then get the audio element
+                let parent = playingButton.parentElement.parentElement;
+                let oldAudio = parent.querySelector('audio');
+
+                // if its not paused, pause it and reset the track
+                if(!oldAudio.paused) {
+                    oldAudio.pause();
+                    oldAudio.currentTime = 0;
+                }
+            }
+        })
+    }
+
+    // then we continue with enabling the current player or pausing it
     const audio = button.parentElement.parentElement.querySelector('audio');
     if (audio.paused) {
         audio.play();
         button.textContent = 'Pause';
+        button.classList.add('playing');
     } else {
         audio.pause();
         button.textContent = 'Play';
+        button.classList.remove('playing');
     }
 };
 

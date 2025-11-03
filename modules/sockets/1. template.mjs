@@ -5,16 +5,11 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('MyEvent', function (member) {
-        if (validateMemberId(member.id, socket) == true
-        ) {
-            try{
-                // some funky code here
-            }
-            catch (exception){
-                Logger.log(exception);
-            }
-        };
 
+    socket.on('MyEvent', function (member, response) {
+        // some code
+        if(validateMemberId(member?.id, socket, member?.token) === true){
+            response({ error: null })
+        }
     });
 }

@@ -2,7 +2,7 @@ import { io, serverconfig, usersocket, xssFilters } from "../../../index.mjs";
 import { hasPermission, resolveChannelById } from "../../functions/chat/main.mjs";
 import { getSavedChatMessage } from "../../functions/io.mjs";
 import Logger from "../../functions/logger.mjs";
-import { validateMemberId } from "../../functions/main.mjs";
+import { emitBasedOnPermission, validateMemberId } from "../../functions/main.mjs";
 import { getChatMessagesFromDb, saveReport, decodeFromBase64 } from "../../functions/mysql/helper.mjs";
 
 export default (io) => (socket) => {
@@ -49,7 +49,7 @@ export default (io) => (socket) => {
                             let channelId = room.split("-")[2]; // 3
                             let channelObj = resolveChannelById(channelId) // json obj of channel
 
-                            if(!serverconfig.servermembers[messageAuthorId]){
+                            if (!serverconfig.servermembers[messageAuthorId]) {
                                 return response({ type: "error", msg: "User is not in the server anymore" });
                             }
 
@@ -62,9 +62,11 @@ export default (io) => (socket) => {
                                 reportDescription
                             )
 
-                            notifyReportAdmins();
+                            emitBasedOnPermission("manageReports", "newReport")
                         }
-                        break;
+                    case "dm_message":
+                        emitBasedOnPermission("manageReports", "newReport")
+                    break;
                 }
 
                 response({ type: "success", msg: "Report was created" });

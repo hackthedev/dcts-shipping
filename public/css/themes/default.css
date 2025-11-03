@@ -5,25 +5,47 @@
     /* green: #171e08;*/
     /* cyan: #012724;*/
     /* purple: #1d1635;*/
-    --main: #131415;
+    --main: rgb(19, 20, 21);
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: hsl(from var(--main) h s calc(l * 1));
+    color: hsl(from var(--main) h s calc(l * 12));
+    overflow: hidden;
 }
 
 *{
+    box-sizing: border-box;
+
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: hsl(from var(--main) h s calc(l * 3)) transparent;
+    font-family: 'Roboto', sans-serif;
+}
+
+.message-container a {
+    color: hsl(from var(--main) h s calc(l * 12));
+    font-style: italic;
 }
 
 /* Main Server Chat */
-#context-menu,
 #header,
 #serverlist {
     background: var(--main);
 }
 
+#context-menu{
+    background: hsl(from var(--main) h s calc(l * 1) / 60%);
+}
+
 .audio-player{
     /* multi color gradient !!!!! */
-    background: linear-gradient(20deg, hsl(from var(--main) h s calc(l * 1.5)), hsl(from var(--main) h s calc(l * 1.75)), hsl(from var(--main) h s calc(l * 2.75)) );
+    background: linear-gradient(90deg, hsl(from var(--main) h s calc(l * 2.25)), hsl(from var(--main) h s calc(l * 3)), hsl(from var(--main) h s calc(l * 2.75)) );
     border: 2px solid  hsl(from var(--main) h s calc(l * 1.9))
 }
 
@@ -100,15 +122,9 @@ body{
 }
 
 blockquote {
-    padding: 8px;
-    margin: 8px 0 8px 8px;
-
-
-    border-left: 3px solid hsl(from var(--main) h s calc(l * 7));
-    color: hsl(from var(--main) h s calc(l * 7));
+    border-left: 3px solid hsl(from var(--main) h s calc(l * 9));
+    color: hsl(from var(--main) h s calc(l * 9));
     background-color: hsla(from var(--main) h s calc(l * 6) / 10%);
-
-    font-style: italic;
 }
 
 .video-embed {
@@ -123,4 +139,10 @@ blockquote {
 
 .homeDivider{
     border: 1px solid hsl(from var(--main) h s calc(l * 5) / 50%);
+}
+
+p.note{
+    font-size: 12px;
+    color: hsl(from var(--main) h s calc(l * 10));
+    font-style: italic;
 }

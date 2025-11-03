@@ -15,8 +15,8 @@ class ModView {
                 top: 10%;
                 left: 100%;
                 transform: translateX(0);
-                z-index: 9999;
-                background: #34383C;
+                z-index: 30;
+                background: hsl(from var(--main) h s calc(l * 3) / 90%);
                 color: white;
                 padding: 20px;
                 transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
@@ -28,6 +28,8 @@ class ModView {
                 border-left: 2px solid var(--primary-bright);
                 overflow-y: auto;
                 overflow-x: hidden;
+                
+                backdrop-filter: blur(6px);
             }
 
             #modViewDiv.show {
@@ -55,16 +57,17 @@ class ModView {
                 display: inline-block;
                 padding: 10px;
                 cursor: pointer;
-                background: #444;
+                background: hsl(from var(--main) h s calc(l * 5));
                 color: white;
                 margin-right: 5px;
                 border-radius: 5px 5px 0 0;
             }
 
             .modview_tab.active {
-                background: white;
+                background: hsl(from var(--main) h s calc(l * 12));
                 color: black;
                 border: 1px solid #ccc;
+                border-bottom: 0;
             }
 
             .modview_tabnumber {
@@ -79,16 +82,18 @@ class ModView {
             }
 
             .modview_tabnumber.active{
-                background-color:rgb(77, 83, 90);
+                background-color: hsl(from var(--main) h s calc(l * 3));
                 color: white;
             }
 
             .modview_tab-content {
                 display: none;
-                background: #222;
+                background: hsl(from var(--main) h s calc(l * 12));
                 color: white;
                 padding: 10px;
                 border-radius: 5px;
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
             }
 
             .modview_tab-content.active {
@@ -99,6 +104,7 @@ class ModView {
                 width: 100%;
                 border-collapse: collapse;
                 margin-top: 10px;
+                background-color: hsl(from var(--main) h s calc(l * 3.5));
             }
 
             th.modview_, td.modview_ {
@@ -108,11 +114,11 @@ class ModView {
             }
 
             th.modview_ {
-                background: #666;
+                background-color: hsl(from var(--main) h s calc(l * 3.5));
             }
 
             tr.modview_:nth-child(even) {
-                background: #444;
+                background-color: hsl(from var(--main) h s calc(l * 2));
             }
 
             tr.modview_:hover {
@@ -210,6 +216,8 @@ class ModView {
                 gap: 10px;
                 margin-top: 10px;
                 user-select: none;
+                outline: none;
+                border: none;
             }
 
             .action-buttons.center {
@@ -266,12 +274,13 @@ class ModView {
                 display: block;
                 width: 100%;
                 text-align: center;
-                background: #555;
+                background: hsl(from var(--main) h s calc(l * 5));
                 color: white;
                 padding: 10px 15px;
                 border-radius: 5px;
                 cursor: pointer;
                 margin-top: 15px;
+                border: none;
             }
 
             .back-button:hover {
@@ -513,8 +522,10 @@ class ModView {
             if(reportData.message.substring(0, 4).includes(("{"))){
                 reportMessage = reportData.message = (JSON.parse(reportData.message)).content;
             }
+            else{
+                reportMessage = reportData.message;
+            }
         }
-
         let messageHistory = await UserReports.showMessageLogs(reportData.messageId)
 
         this.modViewDivContent.innerHTML = `

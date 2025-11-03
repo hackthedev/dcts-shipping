@@ -1,11 +1,14 @@
 .audio-player {
-    float: left;
+    display: flex;
+    flex-direction: column;
+
     width: auto;
     margin: 20px auto;
+    margin-left: 0;
     margin-top: 0;
+
     padding: 10px;
     border-radius: 10px;
-    text-align: center;
 }
 
 .audio-info {

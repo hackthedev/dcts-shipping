@@ -2,6 +2,7 @@ import {app, serverconfig, versionCode} from "../../../index.mjs";
 import {getOnlineMemberCount, resolveGroupByChannelId} from "../../functions/chat/main.mjs";
 import Logger from "../../functions/logger.mjs";
 import {rateLimit} from "../../functions/ratelimit.mjs";
+import express from "express";
 
 const pingLimiter = rateLimit({
     windowMs: 60_000,
@@ -28,7 +29,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/discover", pingLimiter, (req, res) => {
+app.get("/discover", pingLimiter, express.json(), (req, res) => {
     res.set("Cache-Control", "no-store");
 
     try {

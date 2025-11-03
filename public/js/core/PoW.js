@@ -56,7 +56,7 @@ function formatTimeDifference(startTimestamp, endTimestamp) {
     return parts.join(', ');
 }
 
-function setupAccountFromData(data){
+function setupAccountFromData(data) {
     let powChallenge = data?.pow?.split("-")[0]
     let powSolution = data?.pow?.split("-")[1]
 
@@ -139,18 +139,16 @@ async function setupAccount(challenge, difficulty) {
                         return;
                     }
 
-                    socket.emit("importAccount", { account: data }, function (response) {
+                    socket.emit("importAccount", {account: data}, function (response) {
                         if (response?.error === null) {
                             setupAccountFromData(data);
 
                             window.location.reload();
-                        }
-                        else {
+                        } else {
                             customAlerts.showAlert("error", response.error)
                         }
                     });
-                }
-                catch (importError) {
+                } catch (importError) {
                     console.log(importError)
                     showSystemMessage({
                         title: "Import Error",
@@ -172,12 +170,7 @@ async function setupAccount(challenge, difficulty) {
             const solution = await solvePow(challenge, difficulty);
             solvedPow = true;
 
-            CookieManager.setCookie(challenge, solution); // Store the solution in a cookie for 30 days
             verifyPow(challenge, solution)
-
-            //console.log("Solution:")
-            //console.log(solution)
-
             CookieManager.setCookie("pow_challenge", challenge)
             CookieManager.setCookie("pow_solution", solution)
 
@@ -193,7 +186,7 @@ async function showPowProgressPrompt(challenge, currentLevel = 0, targetLevel = 
         `
 
         <div style="margin-bottom: 15px; font-size: 14px; word-break: break-all;">
-            <b style="margin-bottom: 6px !important;width: 100%; display: block;">Challenge:</b>${challenge}
+            <b style="margin-bottom: 6px !important;width: 100%; display: block;">Challenge:</b><label id="challenge">${challenge || "Loading..."}</label>
         </div>
 
         <div style="margin-bottom: 10px;">
@@ -278,7 +271,8 @@ async function showPowProgressPrompt(challenge, currentLevel = 0, targetLevel = 
     etaPow = Date.now() + estimatedSeconds * 1000;
 }
 
-async function updatePowProgress(currentBits, targetLevel) {
+async function updatePowProgress(currentBits, targetLevel, challenge = null) {
+    const challengeString = document.getElementById('challenge');
     const bar = document.getElementById('powProgress');
     const labelLeft = document.getElementById('powCurrentLevelLeft');
     const labelRight = document.getElementById('powCurrentLevelRight');
@@ -306,9 +300,13 @@ async function updatePowProgress(currentBits, targetLevel) {
         bar.style.width = `${progressPercent}%`;
         labelLeft.innerText = `Level: ${Math.round(currentBits / 4)} / ${Math.round(targetLevel)}`;
         labelRight.innerText = `${currentBits} / ${targetBits} bits`;
+
+        // update challenge
+        if(challenge && challengeString) {
+            challengeString.innerText = `${challenge}`;
+        }
     }
 }
-
 
 
 function initPow(onAcceptedCallback) {
@@ -333,11 +331,66 @@ function initPow(onAcceptedCallback) {
         }
     });
 }
+async function upgradeIdentity(challenge, currentLevel, targetLevel) {
+    if(challenge === "null") {
+        challenge = null;
+    }
+
+
+    await showPowProgressPrompt(challenge, currentLevel, targetLevel);
+
+    let solution = 0;
+    let currentPowLevel = 0;
+    const bitsTarget = targetLevel * 4;
+    const startTime = Date.now();
+
+    if (!powHashRate) {
+        const result = await estimatePoWDuration(1);
+        powHashRate = result.hashRate;
+    }
+
+    async function processChunk() {
+        for (let i = 0; i < 2000; i++) {
+            const hash = await sha256(challenge + solution);
+            const currentDifficulty = getCurrentBitDifficulty(hash);
+
+            if (currentDifficulty > currentPowLevel) {
+                currentPowLevel = currentDifficulty;
+                updatePowProgress(currentDifficulty, targetLevel, challenge);
+                console.log(
+                    `Upgrade progress: Level ${Math.round(currentDifficulty / 4)} / ${targetLevel} (${currentDifficulty} / ${bitsTarget} bits)`
+                );
+            }
+
+            if (currentDifficulty >= bitsTarget) {
+                const endTime = Date.now();
+                console.log(`Identity upgraded successfully in ${formatTimeDifference(startTime, endTime)}`);
+                updatePowProgress(bitsTarget, targetLevel, challenge);
+                return solution;
+            }
+
+            solution++;
+        }
+
+        // unlock ui
+        await new Promise(r => setTimeout(r, 0));
+
+        return await processChunk();
+    }
+
+    return await processChunk();
+}
+
 
 
 function verifyPow(challenge, solution) {
-    socket.emit('verifyPow', { challenge: challenge, solution: parseInt(solution), token: UserManager.getToken(), id: UserManager.getID() }, function (response) {
-        if (response.type == "success") return;
+    socket.emit('verifyPow', {
+        challenge: challenge,
+        solution: parseInt(solution),
+        token: UserManager.getToken(),
+        id: UserManager.getID()
+    }, function (response) {
+        if (response.type === "success") return;
 
         showSystemMessage({
             title: response.title || "",
@@ -348,18 +401,58 @@ function verifyPow(challenge, solution) {
             duration: response.displayTime || 10000
         });
 
-        if(response.error == "invalidIdentity"){
-            customPrompts.showConfirm(
-            `It seems like your submitted identity was wrong.
-            It helps to reset your account for this specific server.<br>
-            Do you want to continue?`,
-            [["Yes", "success"], ["No", "error"]],
-            (selectedOption) => {
-                if (selectedOption == "yes") {
-                    UserManager.resetAccount();
+        console.log(response)
+        if (response.error === "invalidIdentity") {
+            if (response?.powResult) {
+                if (response.powResult?.level !== null && response.powResult?.required !== null) {
+                    customPrompts.showConfirm(
+                        `Your current identity level is ${response.powResult.level},
+                                the server requires a level of ${response.powResult.required}.
+                                
+                                Do you want to upgrade your identity level?`,
+                        [["Yes", "success"], ["No", "error"]],
+                        null,
+                        (values) => {
+                            if (values.selectedOption === "yes") {
+
+                                (async () => {
+                                    const challenge = CookieManager.getCookie("pow_challenge");
+                                    const oldSolution = CookieManager.getCookie("pow_solution");
+                                    const currentLevel = response.powResult.level;
+                                    const targetLevel = response.powResult.required;
+
+                                    if (!challenge || !oldSolution) {
+                                        setupAccount();
+                                        console.error("error", "Missing existing identity data");
+                                        return;
+                                    }
+
+                                    const newSolution = await upgradeIdentity(challenge, currentLevel, targetLevel);
+                                    verifyPow(challenge, newSolution);
+
+                                    CookieManager.setCookie("pow_challenge", challenge);
+                                    CookieManager.setCookie("pow_solution", newSolution);
+                                })();
+                            }
+                        }
+                    )
+
+                    return;
                 }
             }
-        )
+
+            customPrompts.showConfirm(
+                `It seems like your submitted identity was wrong.
+                It helps to reset your account for this specific server.
+                
+                Do you want to continue?`,
+                [["Yes", "success"], ["No", "error"]],
+                (selectedOption) => {
+                    if (selectedOption === "yes") {
+                        UserManager.resetAccount();
+                    }
+                }
+            )
         }
     });
 }
@@ -368,29 +461,45 @@ function verifyPow(challenge, solution) {
 async function solvePow(challenge, difficulty) {
     let solution = 0;
     let currentPowLevel = 0;
-
-    const bitsTarget = difficulty * 4; // 4 bits per difficulty level
+    const bitsTarget = difficulty * 4;
 
     await showPowProgressPrompt(challenge, currentPowLevel, difficulty);
 
-    while (true) {
-        const hash = await sha256(challenge + solution);
-        const currentDifficulty = getCurrentBitDifficulty(hash);
-
-        if (currentDifficulty >= bitsTarget) {
-            updatePowProgress(currentDifficulty, difficulty);
-            return solution;
-        }
-        solution++;
-
-        if (currentDifficulty > currentPowLevel) {
-            currentPowLevel = currentDifficulty;
-            console.log(`Level: ${Math.round(currentDifficulty / 4)} / ${Math.round(difficulty)} (${currentDifficulty} / ${bitsTarget} bits)`);
-            updatePowProgress(currentDifficulty, difficulty);
-        }
-
+    if (!powHashRate) {
+        const result = await estimatePoWDuration(1);
+        powHashRate = result.hashRate;
     }
+
+    const startTime = Date.now();
+
+    async function processChunk() {
+        for (let i = 0; i < 2000; i++) {
+            const hash = await sha256(challenge + solution);
+            const currentDifficulty = getCurrentBitDifficulty(hash);
+
+            if (currentDifficulty > currentPowLevel) {
+                currentPowLevel = currentDifficulty;
+                updatePowProgress(currentDifficulty, difficulty);
+                console.log(`Level: ${Math.round(currentDifficulty / 4)} / ${Math.round(difficulty)} (${currentDifficulty} / ${bitsTarget} bits)`);
+            }
+
+            if (currentDifficulty >= bitsTarget) {
+                const endTime = Date.now();
+                console.log(`Solved identity in ${formatTimeDifference(startTime, endTime)}`);
+                updatePowProgress(bitsTarget, difficulty);
+                return solution;
+            }
+
+            solution++;
+        }
+
+        await new Promise(r => setTimeout(r, 0));
+        return await processChunk();
+    }
+
+    return await processChunk();
 }
+
 
 function getCurrentBitDifficulty(hash) {
     let bits = 0;

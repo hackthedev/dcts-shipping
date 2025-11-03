@@ -4,7 +4,7 @@ import { report } from "process";
 import Logger from "../logger.mjs";
 
 export async function cacheMediaUrl(url, mediaType) {
-  const query = `INSERT INTO url_cache (url, media_type) VALUES (?, ?)`;
+  const query = `INSERT IGNORE INTO url_cache (url, media_type) VALUES (?, ?)`;
   return await queryDatabase(query, [url, mediaType]);
 }
 
@@ -118,9 +118,14 @@ export async function getMessageLogsFromDb(msgId) {
 }
 
 export async function deleteChatMessagesFromDb(messageId) {
+    if(!messageId){
+        Logger.warn("Tried to delete a message from the db but the message id was null");
+        Logger.warn(messageId)
+        return;
+    }
 
   // dm message
-  if (messageId.startsWith("m_")) {
+  if (messageId?.startsWith("m_")) {
     const query = `DELETE FROM dms_messages WHERE messageId = ?`;
     return await queryDatabase(query, [messageId]);
   }

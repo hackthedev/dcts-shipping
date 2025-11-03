@@ -1,18 +1,22 @@
 # Reverse Proxy Setup
 
-This document will explain how to use the chat software and setup a reverse proxy. This will result in the url being https://your-domain.com/app instead of https://your-domain.com:2086/ [^portnote] .
+This document will explain how to use the chat software and setup a reverse proxy. This will result in the url being https://app.your-domain.com instead of https://your-domain.com:2086/ [^portnote] , depending on the subdomain you choose or how you've setup your reverse proxy.
+
+> [!TIP]
+>
+> Its recommended to use a reverse proxy as you wont have to manually deal with cert files inside the `config.json` file if your domain already uses a letsencrypt certificate.
 
 ------
 
 ## nginx Setup
 
-The following configuration is a example on how you can use the chat app using the reverse proxy. It will change the address from https://you-domain.com:2086 to https://your-domain.com/app. 
+The following configuration is a example on how you can use the chat app using the reverse proxy. It will change the address from https://you-domain.com:2086 to https://app.your-domain.com. 
 
 Since i couldnt find out how to make it work on a existing domain with `location /servers` i tested subdomains and worked right away. The issue was while the html was served correctly, all the endpoints kept going to `/` which was wrong.
 
 ```nginx
 location / {
-	proxy_pass http://127.0.0.1:3000/;
+	proxy_pass http://127.0.0.1:2086/;
 	proxy_http_version 1.1;
 
 	proxy_set_header Upgrade $http_upgrade;
@@ -63,17 +67,9 @@ This is a untested apache configuration and a example on how to setup the revers
 </VirtualHost>
 ```
 
-> [!NOTE]
+> [!WARNING]
 >
 > The apache setup was not tested yet and is only a rough example on how it could work.
-
-> [!IMPORTANT]
->
-> Its important to change the socket.io path as well because otherwise the client will run into 404 errors trying to find the socket.io endpoint. Both for nginx and apache!
-
-> [!CAUTION]
->
-> Currently there is issue where the nginx proxy would work but its unable to properly serve images. Until a fix is found its not recommended to use this. If you know what you're doing and find a fix yourself feel free to share it [on the subreddit](https://www.reddit.com/r/dcts/) or [create a issue on github](https://github.com/hackthedev/dcts-shipping/).
 
 [^portnote]: The port configured inside of your config.json file
 

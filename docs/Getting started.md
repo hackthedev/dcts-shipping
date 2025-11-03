@@ -8,14 +8,15 @@ This document explains how to get started with the chat application and explain 
 
 ## Requirements & Recommendations
 
-The software was designed to be setup and run as simple as possible. Using the *`config.json`* file you can manage additional settings that are not present in the web client. For example you could configurate a SQL server compatible with MySQL/MariaDB to improve overall functionality.
+The software was designed to be setup and run as simple as possible. Using the *`config.json`* file you can manage additional settings that are not present in the web client. For example you could configurate a SQL server compatible with MySQL/MariaDB to improve overall functionality **and unlock all the features**.
 
 | Feature                 | Description                                                  |
 | ----------------------- | ------------------------------------------------------------ |
 | NodeJS                  | Required v16.16.0 and above [^testedNodeVersions]            |
 | MySQL-compatible Server | Optional but ***highly*** recommended! Checkout SQL Docs     |
 | Tenor                   | Optional, used for GIF search                                |
-| SSL                     | Optional for localhost, but ***required for public use***! Checkout SSL Docs |
+| SSL                     | Optional for localhost, but ***required for public use***! Checkout SSL Docs<br / |
+| LiveKit                 | Used for voice chatting and screen sharing                   |
 
 ------
 
@@ -23,7 +24,7 @@ The software was designed to be setup and run as simple as possible. Using the *
 
 ### Installing on Windows
 
-You can easily install NodeJS by going to the official website at https://nodejs.org/en/download and downloading the *.msi* installer. Once you're done installing you should be able to open a command prompt and entering *`node -v`* should return a version like like *`v18.20.5`*.
+You can easily install NodeJS by going to the official website at https://nodejs.org/en/download and downloading the *.msi* installer. Once you're done installing you should be able to open a command prompt and entering *`node -v`* should return a version like like *`v18.20.5`*. 
 
 ```cmd
 Microsoft Windows [Version 10.0.67198.5894]
@@ -35,25 +36,23 @@ v18.20.5
 
 ### Installing on Linux
 
-Linux too has more the one way of installing NodeJS. The following commands use nvm (node version manager) to install NodeJS. You can also use nvm to manage node versions *~~(as the name might already suggest)~~*.
+Linux too has more the one way of installing NodeJS. The following commands use nvm (node version manager) to install NodeJS. You can also use nvm to manage node versions. Please check https://nodejs.org/en/download as you can select `linux` to get the latest install instructions.
 
 ```bash
 # Download and install nvm:
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# in lieu of restarting the shell
+\. "$HOME/.nvm/nvm.sh"
 
 # Download and install Node.js:
-nvm install v18.20.2
+nvm install 24
 
 # Verify the Node.js version:
-node -v # Should print "v18.20.2".
-
-nvm current # Should print "v18.20.2".
+node -v # Should print "v24.11.0".
 
 # Verify npm version:
-npm -v # Should print "10.9.2".
-
-# Set Default Node Version, optional
-nvm alias default v18.20.2
+npm -v # Should print "11.6.1".
 ```
 
 All install instructions can be found on the [NodeJS website](https://nodejs.org/en/download) if you need different instructions or if you're having issues installing NodeJS.
@@ -77,9 +76,9 @@ npm i
 node .
 ```
 
-As you can see all you really need is one command to launch the chat app if NodeJS is already installed. This was made with the goal to be very user friendly and easy to setup and use.
+As you can see all you really need is one command to launch the chat app if the requirements are already installed. This was made with the goal to be very user friendly and easy to setup and use.
 
-Its possible to use more advanced and better starting methods, such as using docker or supervisor and screen. Information about these can be found in the other documents.
+Its possible to use more advanced and better starting methods, such as using docker, a sytem service or supervisor and screen. Information about these can be found in the other documents.
 
 ------
 

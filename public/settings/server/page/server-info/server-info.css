@@ -141,33 +141,3 @@
     text-align: center;
     width: 100%;
 }
-
-
-
-#allowedHosts_list{
-    background-color: #292B2F;
-    padding: 10px;
-
-    margin-top: 10px;
-    border-radius: 10px;
-
-    height: fit-content;
-    width: fit-content;
-
-    display: block;
-}
-
-#allowedHosts_list .host{
-    color: white;
-    background-color: #404349;
-    padding: 8px;
-    border-radius: 6px;
-
-    width: fit-content;;
-
-    margin: 6px;
-    outline: none;
-    display: inline-block;
-    user-select: none;
-    cursor: pointer;
-}

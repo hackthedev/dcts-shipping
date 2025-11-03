@@ -42,6 +42,7 @@ class Prompt {
                 border-color:rgb(98, 98, 98);
                 border: 1px solid rgb(98, 98, 98) !important;
                 outline: none;
+                user-select: none;
             }
 
             .prompt-button {
@@ -54,10 +55,13 @@ class Prompt {
                 font-size: 14px;
                 border: 1px solid rgb(98, 98, 98);
                 background-color: transparent;
+                user-select: none;
+                outline: none;
             }
 
             .prompt-button.submit{
                 background-color: #2492c9; 
+                width: 100%;
             }
 
             .prompt-button.submit:hover{

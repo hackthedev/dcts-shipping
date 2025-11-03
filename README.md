@@ -1,7 +1,7 @@
 # DCTS - Direct Communication Through Sockets
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
 
-[Visit our subreddit](https://www.reddit.com/r/dcts/) • [Feature list](https://github.com/hackthedev/dcts-shipping/blob/beta/docs/Feature%20List.md) • [Discord for convenience](https://discord.gg/AYq8hbRHNR)
+[Visit our subreddit](https://www.reddit.com/r/dcts/) • [Feature list](https://github.com/hackthedev/dcts-shipping/blob/beta/docs/Feature%20List.md) • [Discord for convenience](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [To-Do list](https://github.com/users/hackthedev/projects/6/views/1?filterQuery=-changelog-status%3AAdded+-status%3ACanceled)
 
 This project was made with the goal to provide a platform that aims to fix issues with existing solutions like Discord, TeamSpeak, Revolt, Fosscord, Matrix, TeaSpeak and all others out there and to create new, advanced and easy to use features while creating as little friction as possible and keeping things intuitive.
 
@@ -23,7 +23,7 @@ If you value the vision of DCTS and want to see it grow, consider making a donat
 
 > [!TIP]
 >
-> You can also support the project by regularly sharing the project and letting as many people know as possible!
+> You can also **support the project by** regularly **sharing it and letting** as many **people know**  about it as possible!
 
 ------
 
@@ -56,6 +56,8 @@ Modern communication platforms have limitations and issues that DCTS is designed
 
 - **Future-Proof**: Built with scalability and future features in mind.
 
+- **Rapid Development**: Fast bug resolution, continuous feature delivery, and ongoing improvements enabled by a modern and efficient tech stack.
+
 DCTS isn't just a chat platform, it's a vision for better communication, driven by simplicity, freedom, and innovation. Its one step out of many to create a new, better web.
 
 > [!TIP]
@@ -81,26 +83,47 @@ sudo docker compose up -d
 ### NPM
 
 Requires node.js to be installed, see [Tested Versions](https://github.com/hackthedev/dcts-shipping?tab=readme-ov-file#tested-node-versions). Clone the git repository and execute the following commands inside the app's directory.
-```
-git clone https://github.com/hackthedev/dcts-shipping --depth 1
+```bash
+# assuming the directory/user exists already. 
+# you can pick any directory.
+cd /home/dcts
+
+# install the voice chat and screensharing server. livekit comes with
+# a turn server as well which is important for strict NAT etc
+curl -sSL https://raw.githubusercontent.com/hackthedev/initra-shipping/refs/heads/main/apps/livekit/install.sh | bash
+
+# get the lastest stable version of DCTS.
+# Beta has new features early but may be unstable.
+git clone https://github.com/hackthedev/dcts-shipping
+
+# install dependencies
 npm install
+
+# run the server
 node .
 ```
 
 > [!TIP]
 > Install tutorial: https://www.youtube.com/watch?v=N8ILWcW8vGQ
 >
-> Auto Installer (wip): https://github.com/hackthedev/initra-shipping
+> Auto Installer App (wip): https://github.com/hackthedev/initra-shipping
+>
+> **If you need help** feel free to create a **post on** the **subreddit or message** me **on discord**.
 
 > [!NOTE]
 >
 > To be able to use all features its required to connect DCTS with MySQL/MariaDB.
 
+> [!IMPORTANT]
+>
+> The installer for LiveKit  will create a config file inside `/home/livekit` called `livekit.yaml`. For public access over the internet, you will need to link TLS certificate files. You can use LetsEncrypt etc
+
 ------
 
 ## Connecting to your server
 Once you've installed the server and its running, you can open your browser and enter the server's ip and add the port 2052.<br>
-Example: http://localhost:2052<br>
+Example: http://localhost:2052
+
 Depending on your configuration the port may vary
 
 ------

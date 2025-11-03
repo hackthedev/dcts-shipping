@@ -35,8 +35,6 @@ import xssFilters from 'xss-filters';
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
 
-
-
 // improved now
 export {
     https,
@@ -77,7 +75,7 @@ export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = false;
-export let versionCode = 721;
+export let versionCode = 745;
 
 // dSync Libs
 import dSyncAuth from '@hackthedev/dsync-auth';
@@ -189,6 +187,9 @@ import {offload} from './modules/functions/offload.mjs';
 import {registerTemplateMiddleware} from './modules/functions/template.mjs';
 import {listenToPow, powVerifiedUsers, sendPow, waitForPowSolution} from './modules/sockets/pow.mjs';
 import {Addon} from "./modules/functions/addon.mjs";
+
+// vs
+import {AccessToken, WebhookReceiver} from "livekit-server-sdk";
 
 
 /*
@@ -539,6 +540,13 @@ if (serverconfig.serverinfo.sql.enabled == true) {
                 {name: 'UNIQUE KEY', type: 'address (address)'}
             ],
             autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
+        },
+        {
+            name: 'auditlog',
+            columns: [
+                {name: 'text', type: 'longtext NOT NULL'},
+                {name: 'datetime', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+            ]
         }
 
     ];
@@ -689,12 +697,55 @@ server.listen(port, function () {
     syncDiscoveredHosts(true)
 });
 
-app.use(express.urlencoded({extended: true})); // Parses URL-encoded data
-app.use(express.json()); // Parses JSON bodies
 
+
+const API_KEY = serverconfig.serverinfo.livekit.key;
+const API_SECRET = serverconfig.serverinfo.livekit.secret;
+
+const webhookReceiver = new WebhookReceiver(API_KEY, API_SECRET);
+
+// --- Token Endpoint ---
+app.post("/token",  async (req, res) => {
+    const { roomName, participantName } = req.body;
+
+    if (!roomName || !participantName) {
+        res.status(400).json({ errorMessage: "roomName and participantName are required" });
+        return;
+    }
+
+    const at = new AccessToken(API_KEY, API_SECRET, { identity: participantName });
+    at.addGrant({ roomJoin: true, room: roomName });
+    const token = await at.toJwt();
+
+    res.json({ token });
+});
+
+// --- Webhook Endpoint ---
+app.post("/livekit/webhook", express.raw({ type: "*/*" }), async (req, res) => {
+    try {
+        const event = await webhookReceiver.receive(req.body, req.get("Authorization"));
+        console.log(event);
+    } catch (error) {
+        console.error("Error validating webhook event", error);
+    }
+    res.status(200).send();
+});
+
+
+
+//app.use(express.urlencoded({extended: true})); // Parses URL-encoded data
 registerTemplateMiddleware(app, __dirname, fs, path, serverconfig);
+app.use(
+    express.static(__dirname + '/public', {
+        setHeaders: (res, path) => {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+            res.setHeader('Surrogate-Control', 'no-store');
+        }
+    })
+);
 
-app.use(express.static(__dirname + '/public'));
 
 
 // Process plugins at server start
@@ -1009,51 +1060,3 @@ export function setRatelimit(ip, value) {
 export function flipDebug() {
     debugmode = !debugmode;
 }
-
-
-const SECRET = serverconfig.serverinfo.turn.secret     // = static-auth-secret
-const TURN_HOST = serverconfig.serverinfo.turn.host; // oder DNS
-const TURN_PORT = serverconfig.serverinfo.turn.port;
-const TTL = 300;
-
-// --- /ice Endpoint ---
-function makeCreds(userId = "web") {
-    const exp = Math.floor(Date.now() / 1000) + TTL;
-    const username = `${exp}:${userId}`;
-    const credential = crypto.createHmac("sha1", SECRET).update(username).digest("base64");
-    return {
-        iceServers: [{
-            urls: [
-                `turn:${TURN_HOST}:${TURN_PORT}?transport=udp`,
-                //`turn:${TURN_HOST}:${TURN_PORT}?transport=tcp`,
-                //`turns:${TURN_HOST}:5349?transport=tcp`
-            ],
-            username,
-            credential
-        }]
-    };
-}
-
-app.get("/ice", /* requireLogin, rateLimit maybe */(req, res) => {
-    const userId = (req.user?.id) || (req.query.u || "web"); // setup quota per user on turn server!
-    Logger.debug("ICE User is " + userId);
-    res.set("Cache-Control", "no-store");
-
-    if (serverconfig.serverinfo.turn.enabled != true) {
-        res.json({
-            iceServers: [{
-                urls: [],
-                username: "",
-                credential: ""
-            }]
-        })
-
-        Logger.warn("[VOIP ICE] Turn Server used for voice chat and screen sharing is not enabled or configurated!");
-        Logger.warn("[VOIP ICE] Users behind firewalls and or strict NATs may not be able to talk or listen.");
-        Logger.warn("[VOIP ICE] Checkout /docs/network/ folder on how to setup a turn server");
-
-        return;
-    }
-
-    res.json(makeCreds(userId));
-});

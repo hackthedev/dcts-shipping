@@ -1,4 +1,4 @@
-import {checkPow, saveConfig, serverconfig, socketToIP, usersocket, xssFilters} from "../../index.mjs";
+import {checkPow, saveConfig, server, serverconfig, socketToIP, usersocket, xssFilters} from "../../index.mjs";
 import {
     formatDateTime, generateGid, getJson, getMemberFromKey,
     hasVerifiedKey, resolveCategoryByChannelId, resolveChannelById, resolveGroupByChannelId
@@ -7,18 +7,20 @@ import { saveChatMessage } from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
 import {
     checkMemberBan,
-    checkMemberMute,
+    checkMemberMute, checkRateLimit,
     copyObject,
     emitBasedOnMemberId,
     escapeHtml,
     generateId,
     getCastingMemberObject,
-    hashPassword,
+    hashPassword, removeFromArray,
     sendMessageToUser,
     validateMemberId
 } from "../functions/main.mjs";
 import { sendSystemMessage } from "./home/general.mjs";
 import {discoverHosts} from "../functions/discovery.mjs";
+import {powVerifiedUsers} from "./pow.mjs";
+import logger from "../functions/logger.mjs";
 
 function normaliseString(v) {
     if (v === null || v === undefined) return "";
@@ -33,9 +35,85 @@ function truncateText(text, length) {
 }
 
 
+function handleInviteCode(member, socket, response){
+    // handle user registration and invite only things.
+    // if a member was on the server already he wont be prompted for codes.
+    if(serverconfig.serverinfo.registration.enabled === false && !serverconfig.servermembers[member?.id]){
+        if(!member?.code){
+            response({
+                error:
+                    `Registration is disabled on this server.<br>
+                        You need to provide an access code`,
+                displayTime: 100 * 60000,
+                registration: serverconfig.serverinfo.registration.enabled
+            })
+
+            // to be extra sure, remove users from the pow verified array
+            // so that if they try to fetch data like member list etc
+            // it'll automatically be denied
+            removeFromArray(powVerifiedUsers, socket.id)
+            return false;
+        }
+        // code was correct, so lets process its properties
+        if(serverconfig.serverinfo.registration.accessCodes[member.code]){
+            let code = serverconfig.serverinfo.registration.accessCodes[member.code];
+
+            // check if the code is expired
+            if(code.expires !== -1){
+                if(new Date().getTime() >= code.expires){
+                    response({
+                        error:
+                            `The invite code you've used has expired`,
+                        displayTime: 100 * 60000,
+                        registration: serverconfig.serverinfo.registration.enabled
+                    })
+
+                    removeFromArray(powVerifiedUsers, socket.id)
+                    return false;
+                }
+            }
+
+            // check if max uses is already used up if not infinite
+            if(code.maxUses !== -1){
+                if(code.maxUses <= 0){
+                    response({
+                        error:
+                            `The invite code you've used has been used up`,
+                        displayTime: 100 * 60000,
+                        registration: serverconfig.serverinfo.registration.enabled
+                    })
+
+                    removeFromArray(powVerifiedUsers, socket.id)
+                    return false;
+                }
+                else if(code.maxUses > 0){
+                    code.maxUses -= 1;
+                    saveConfig(serverconfig);
+                    return true;
+                }
+            }
+        }
+        else{
+            response({
+                error:
+                    `The invite code you've used is incorrect`,
+                displayTime: 100 * 60000,
+                registration: serverconfig.serverinfo.registration.enabled
+            })
+
+            removeFromArray(powVerifiedUsers, socket.id)
+            return false;
+        }
+    }
+
+    return true;
+}
+
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('userConnected', async function (member, response) {
+        checkRateLimit(socket);
+
         member.id = xssFilters.inHTMLData(normaliseString(member.id))
         member.name = xssFilters.inHTMLData(normaliseString(member.name))
         member.loginName = xssFilters.inHTMLData(normaliseString(member.loginName))
@@ -60,6 +138,30 @@ export default (io) => (socket) => {
         if(member?.knownServers && member?.knownServers?.length > 2) {
             member.knownServers = xssFilters.inHTMLData(member?.knownServers);
             discoverHosts(member.knownServers)
+        }
+
+        // check registration code and filter
+        if(member?.code && member?.code > 0) {
+            member.code = xssFilters.inHTMLData(member?.code);
+        }
+
+        // handle invites
+        let inviteResult = handleInviteCode(member, socket, response);
+        Logger.debug(`Invite result: ${inviteResult}`)
+        if(!inviteResult){
+            return;
+        }
+        else{
+            // prematurely create a servermembers object since the code was correct and the
+            // servermembers object is used to display invite code prompts or not.
+            if(!serverconfig.servermembers[member.id]){
+                serverconfig.servermembers[member.id] = {
+                    id: member.id,
+                    token: member.token,
+                    onboarding: false
+                }
+                saveConfig(serverconfig);
+            }
         }
 
         await checkPow(socket);
@@ -101,7 +203,7 @@ export default (io) => (socket) => {
             usersocket[member.id] = socket.id; // deprecated, left for legacy
 
             // if new member
-            if (serverconfig.servermembers[member.id] == null) {
+            if (!serverconfig.servermembers[member.id] || serverconfig.servermembers[member.id]?.onboarding === false) {
                 // New Member joined the server
                 Logger.debug("New member connected");
 
@@ -112,10 +214,10 @@ export default (io) => (socket) => {
                     response({
                         error: "Onboarding not completed",
                         finishedOnboarding: false,
-                        msg: "Welcome!",
-                        text: "Finish your account setup to continue",
                         type: "success"
                     })
+
+                    Logger.debug("missing onboarding");
 
                     return;
                 }
@@ -163,6 +265,7 @@ export default (io) => (socket) => {
                 serverconfig.servermembers[member.id].aboutme = member.aboutme;
                 serverconfig.servermembers[member.id].status = member.status;
                 serverconfig.servermembers[member.id].name = member.name;
+                serverconfig.servermembers[member.id].onboarding = true;
                 if(member?.publicKey) serverconfig.servermembers[member.id].publicKey = member?.publicKey;
 
                 saveConfig(serverconfig);
@@ -202,7 +305,7 @@ export default (io) => (socket) => {
                     Logger.error(e)
                 }
 
-                // create copy of server member without token
+                // create copy of server member without token etc
                 var castingMember = getCastingMemberObject(serverconfig.servermembers[member.id]);
                 delete castingMember.token;
                 delete castingMember.password;
@@ -217,7 +320,7 @@ export default (io) => (socket) => {
                 castingMember.messageId = generateId(12);
                 castingMember.isSystemMsg = true;
 
-                castingMember.message = `${member.name} joined the server!`;
+                castingMember.message = `<div><label class="username" data-member-id="msg-${castingMember.id}">${castingMember.name}</label> joined the server!</div>`;
                 saveChatMessage(castingMember);
 
                 io.emit("updateMemberList");
@@ -232,9 +335,8 @@ export default (io) => (socket) => {
                 response({ finishedOnboarding: true })
             }
             else {
-
                 if (member.token == null || member.token.length !== 48 ||
-                    serverconfig.servermembers[member.id].token == null ||
+                    serverconfig.servermembers[member.id].token === null ||
                     serverconfig.servermembers[member.id].token !== member.token) {
 
                     try {

@@ -16,7 +16,7 @@
 }
 
 #profile-role-menu{
-    z-index: 999999 !important;
+    z-index: 99999 !important;
 }
 
 #profile_banner{
@@ -57,9 +57,8 @@
     display: flex;
     flex-wrap: wrap;
 
-    justify-content: center;
-    align-items: center;
-    align-content: center;
+    justify-content: space-evenly;
+    align-content: space-evenly;
     gap: 6px;
 
     height: fit-content;
@@ -87,6 +86,7 @@
     background-size: cover;
     object-fit: cover;
     background-position: center center;
+    cursor: pointer;
 }
 
 #profile_content{

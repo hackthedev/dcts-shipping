@@ -71,6 +71,9 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
             ["server.home.subtitle", () => config.serverinfo.home.subtitle],
             ["server.home.about", () => config.serverinfo.home.about],
 
+            // vc
+            ["livekit.url", () => `${config.serverinfo.livekit.url}`],
+
             ["version", () => versionCode],
 
             ["meta.page.title", () => getMetaTitle(group, category, channel)],

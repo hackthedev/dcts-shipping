@@ -7,21 +7,20 @@ import { deleteChatMessagesFromDb, getChatMessagesFromDb } from "../functions/my
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('deleteMessage', async function (member) {
-        if (validateMemberId(member.id, socket) == true && serverconfig.servermembers[member.id].token == member.token) {
-
-            /*
-                The following code is the reason why messages written without SQL on cant be deleted
-                once SQL is enabled. Until this function is improved it will stay like this.
-            */
+        if (validateMemberId(member.id, socket) === true && serverconfig.servermembers[member.id].token === member.token) {
+            if(!member?.messageId){
+                Logger.warn("Tried deleting a message without supplying the id");
+                return;
+            }
 
             // If SQL is enabled
-            if (serverconfig.serverinfo.sql.enabled == true) {
+            if (serverconfig.serverinfo.sql.enabled === true) {
                 try { 
                     // Check if user has permission
                     let originalMessage = await getChatMessagesFromDb(null, -1, member.messageId);
                     originalMessage = originalMessage[0];
 
-                    if (originalMessage.authorId == serverconfig.servermembers[member.id].id || hasPermission(member.id, "manageMessages")) {
+                    if (originalMessage?.authorId === serverconfig.servermembers[member.id].id || hasPermission(member.id, "manageMessages")) {
                         await deleteChatMessagesFromDb(member.messageId);
                         io.emit("receiveDeleteMessage", member.messageId);
                     }
@@ -35,7 +34,7 @@ export default (io) => (socket) => {
             else {
                 try {
                     var message = JSON.parse(fs.readFileSync(`./chats/${member.group}/${member.category}/${member.channel}/${member.messageId}`));
-                    if (message.id == member.id || hasPermission(member.id, "manageMessages")) {
+                    if (message.id === member.id || hasPermission(member.id, "manageMessages")) {
 
                         let path = `${member.group}/${member.category}/${member.channel}/${member.messageId}`;
                         if (path.includes("..")) return

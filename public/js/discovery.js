@@ -21,6 +21,50 @@ async function syncHostData(){
     }
 }
 
+function extractHost(url){
+    if(!url) return null;
+    const s = String(url).trim();
+
+    const looksLikeBareIPv6 = !s.includes('://') && !s.includes('/') && s.includes(':') && /^[0-9A-Fa-f:.]+$/.test(s);
+    const withProto = looksLikeBareIPv6 ? `https://[${s}]` : (s.includes('://') ? s : `https://${s}`);
+
+    try {
+        const u = new URL(withProto);
+        const host = u.hostname; // IPv6 returned without brackets
+        const port = u.port;
+        if (host.includes(':')) {
+            return port ? `[${host}]:${port}` : host;
+        }
+        return port ? `${host}:${port}` : host;
+    } catch (e) {
+        const re = /^(?:https?:\/\/)?(?:[^@\/\n]+@)?([^:\/?#]+)(?::(\d+))?(?:[\/?#]|$)/i;
+        const m = s.match(re);
+        if (!m) return null;
+        const hostname = m[1].replace(/^\[(.*)\]$/, '$1');
+        const port = m[2];
+        if (hostname.includes(':')) return port ? `[${hostname}]:${port}` : hostname;
+        return port ? `${hostname}:${port}` : hostname;
+    }
+}
+
+async function testHost(host){
+    try{
+        // test host
+        let testHost = await fetch(`https://${extractHost(host)}/discover`);
+
+        // is a valid host so we conenct
+        if(testHost.status === 200){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }catch(e){
+        console.warn(e)
+        return false;
+    }
+}
+
 async function NavigateHome(){
     if(isLauncher()){
         Client().NavigateHome();
@@ -66,10 +110,14 @@ async function displayDiscoveredHosts(){
                 </a><hr style="width: 100%;">`)
 
 
-        discoveredHosts?.servers.forEach(server => {
+        for(let server of discoveredHosts.servers){
             let serverData = JSON.parse(server.data);
             let host = server.address;
 
+            if(await testHost(host) === false){
+                console.warn(`Host ${host} wasnt reachable`);
+                continue;
+            }
 
             if(isLauncher()){
                 Client().SaveServer(host, JSON.stringify(serverData), server?.IsFavourite);
@@ -81,7 +129,7 @@ async function displayDiscoveredHosts(){
                     <div class="networkIndicator">50</div>
                 </a>`)
 
-        })
+        }
 
         // if any server was found display the network server list
         if(discoveredHosts?.servers.length > 0){

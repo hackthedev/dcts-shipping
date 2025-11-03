@@ -1,3 +1,4 @@
+// Deprecated
 class CustomAlert {
     constructor() {
         this.addStyles();
@@ -71,21 +72,19 @@ class CustomAlert {
         document.head.appendChild(style);
     }
 
-    // Function to display the alert
     showAlert(type, message) {
         const alertBox = document.createElement('div');
         alertBox.classList.add('custom-alert', `custom-alert-${type}`);
 
         let icon;
         if (type === 'success') {
-            icon = '✔️'; // Success icon
+            icon = '✔️';
         } else if (type === 'error') {
-            icon = '❌'; // Error icon
+            icon = '❌';
         } else {
-            icon = 'ℹ️'; // Info icon
+            icon = 'ℹ️';
         }
 
-        // Alert box content
         alertBox.innerHTML = `
             <span class="custom-alert-icon">${icon}</span>
             <p class="custom-alert-message">${message}</p>
@@ -94,12 +93,10 @@ class CustomAlert {
 
         document.body.appendChild(alertBox);
 
-        // Add animation class
         setTimeout(() => {
             alertBox.classList.add('show');
         }, 10);
 
-        // Remove the alert after 5 seconds
         setTimeout(() => {
             this.removeAlert(alertBox);
         }, 5000);
@@ -111,7 +108,6 @@ class CustomAlert {
         });
     }
 
-    // Function to remove the alert
     removeAlert(alertBox) {
         alertBox.classList.remove('show');
         setTimeout(() => {

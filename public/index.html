@@ -10,9 +10,8 @@
 
     <!-- <meta name="description" content="{{meta.page.description}}" /> -->
 
-    <script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"></script>
-
-    <script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
+    <script src="js/core/socket.io.js"></script>
+    <script src="js/core/sortable.js"></script>
 
     <!-- New to-be-implement features-->
     <script src="js/alerts.js?v={{version}}"></script>
@@ -26,6 +25,7 @@
 
     <link href="/settings/account/page/profile/profile.css?v={{version}}" rel="stylesheet">
 
+    <link href="css/messages.css?v={{version}}" rel="stylesheet">
     <link href="highlight.css?v={{version}}" rel="stylesheet">
     <link href="https://fonts.googleapis.com" rel="preconnect">
     <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
@@ -33,6 +33,7 @@
 
     <link href="css/themes/default.css?v={{version}}" rel="stylesheet">
     <link href="css/message_actions.css?v={{version}}" rel="stylesheet">
+    <link href="css/contextmenu.css?v={{version}}" rel="stylesheet">
     <link href="style.css?v={{version}}" rel="stylesheet">
     <link href="css/network-servers.css?v={{version}}" rel="stylesheet">
     <link href="css/channeltree.css?v={{version}}" rel="stylesheet">
@@ -69,6 +70,9 @@
     <script src="js/discovery.js?v={{version}}"></script>
     <script src="js/escape.js"></script>
     <script src="js/hover.js"></script>
+    <script src="js/vc-handler.js"></script>
+
+    <script src="js/core/livekit.js?v={{version}}"></script>
     <script src="js/core/FileManager.js?v={{version}}"></script>
     <script src="js/core/ModView.js?v={{version}}"></script>
     <script src="js/core/UserReports.js?v={{version}}"></script>
@@ -94,11 +98,13 @@
 
 
     <script src="js/core/PoW.js?v={{version}}"></script>
-    <script src="voip/voip.js?v={{version}}"></script>
-    <script src="js/voip-handle.js?v={{version}}"></script>
+    <script src="js/core/voip.js?v={{version}}"></script>
 
 
     <script defer src="chat.js?v={{version}}"></script>
+    <script defer src="js/messages/server/messages.js?v={{version}}"></script>
+    <script defer src="js/channels/channels.js?v={{version}}"></script>
+    <script defer src="js/groups/groups.js?v={{version}}"></script>
 
     <meta content="{{meta.page.description}}" name="description">
     <title>{{meta.page.title}}</title> <!-- {{meta.page.title}} -->
@@ -374,6 +380,11 @@
 </div>
 
 <script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+        ContextMenu.init();
+    })
+
     function searchForRoleInList(search) {
         var roles = document.getElementById("role-menu-list").querySelectorAll(".role-menu-entry")
 

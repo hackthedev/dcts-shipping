@@ -67,34 +67,40 @@ async function checkHostDiscovery(address, forceSync = false){
     // we dont know this server so lets check it
     if(existingServerRows.length !== 0 && forceSync === false) return
 
-    let random = String(Math.random() * 100).split(".")[1];
-    let serverDiscoveryResponse = await fetch(`http://${extractHost(address)}/discover?ran=${random}` )
+    try{
+        let random = String(Math.random() * 100).split(".")[1];
+        let serverDiscoveryResponse = await fetch(`http://${extractHost(address)}/discover?ran=${random}` )
 
-    // seems like a valid instance!!
-    if(serverDiscoveryResponse?.status === 200){
-        // get json response
-        let jsonResponse = await serverDiscoveryResponse.json();
+        // seems like a valid instance!!
+        if(serverDiscoveryResponse?.status === 200){
+            // get json response
+            let jsonResponse = await serverDiscoveryResponse.json();
 
-        // it is a dcts instance!!
-        if(jsonResponse?.serverinfo){
-            // save it in the database
-            if(!forceSync) Logger.success(`Discovered new host! : ${extractHost(address)}`);
-            let result = await queryDatabase(
-                `INSERT IGNORE INTO network_servers (address, status, data, last_sync) VALUES (?, ?, ?, NOW())
+            // it is a dcts instance!!
+            if(jsonResponse?.serverinfo){
+                // save it in the database
+                if(!forceSync) Logger.success(`Discovered new host! : ${extractHost(address)}`);
+                let result = await queryDatabase(
+                    `INSERT IGNORE INTO network_servers (address, status, data, last_sync) VALUES (?, ?, ?, NOW())
                         ON DUPLICATE KEY UPDATE
                             data = VALUES(data),
                             last_sync = NOW()`,
-                [extractHost(address), serverconfig.serverinfo?.discovery?.defaultStatus, JSON.stringify(jsonResponse)])
+                    [extractHost(address), serverconfig.serverinfo?.discovery?.defaultStatus, JSON.stringify(jsonResponse)])
+            }
+        }
+        else{
+            if(!forceSync){
+                Logger.warn(`Unable to discover host ${address} ( ${serverDiscoveryResponse.status} )`);
+                logger.warn(serverDiscoveryResponse?.statusText);
+            }
+            else if(forceSync){
+                Logger.warn(`Unable to sync with host ${address} ( ${serverDiscoveryResponse.status} )`);
+                logger.warn("Error: ", serverDiscoveryResponse?.statusText);
+            }
         }
     }
-    else{
-        if(!forceSync){
-            Logger.warn(`Unable to discover host ${address} ( ${serverDiscoveryResponse.status} )`);
-            logger.warn(serverDiscoveryResponse?.statusText);
-        }
-        else if(forceSync){
-            Logger.warn(`Unable to sync with host ${address} ( ${serverDiscoveryResponse.status} )`);
-            logger.warn("Error: ", serverDiscoveryResponse?.statusText);
-        }
+    catch(error){
+        logger.warn(`Error while trying to discover host ${extractHost(address)} (${address}`)
+        logger.warn(error);
     }
 }

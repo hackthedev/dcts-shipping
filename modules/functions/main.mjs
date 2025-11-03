@@ -23,6 +23,7 @@ import path from "path";
 import {powVerifiedUsers} from "../sockets/pow.mjs";
 import {sendSystemMessage} from "../sockets/home/general.mjs";
 import {encodeToBase64} from "./mysql/helper.mjs";
+import {exec, spawn} from "node:child_process";
 
 var serverconfigEditable;
 
@@ -531,6 +532,11 @@ export function checkBool(value, type) {
 
 export function checkConfigAdditions() {
 
+    // livekit VC
+    checkObjectKeys(serverconfig, "serverinfo.livekit.enabled", true)
+    checkObjectKeys(serverconfig, "serverinfo.livekit.key", "dev")
+    checkObjectKeys(serverconfig, "serverinfo.livekit.secret", "testing")
+    checkObjectKeys(serverconfig, "serverinfo.livekit.url", "localhost:7880")
 
     // server list / discovery
     checkObjectKeys(serverconfig, "serverinfo.discovery.enabled", true)
@@ -568,10 +574,10 @@ export function checkConfigAdditions() {
     // TURN SERVER SETTINGS
     checkObjectKeys(serverconfig, "serverinfo.app.url", "http://your-ip-or-domain:port")    // without slash at end!
 
-    checkObjectKeys(serverconfig, "serverinfo.turn.enabled", false)         // use turn or no
+    checkObjectKeys(serverconfig, "serverinfo.turn.enabled", true)         // use turn or no
     checkObjectKeys(serverconfig, "serverinfo.turn.secret", "north")        // static-auth-secret
-    checkObjectKeys(serverconfig, "serverinfo.turn.host", "PUBLIC_IP")      // public ip or domain
-    checkObjectKeys(serverconfig, "serverinfo.turn.port", 3489)             // listening-port
+    checkObjectKeys(serverconfig, "serverinfo.turn.host", "127.0.0.1")      // public ip or domain
+    checkObjectKeys(serverconfig, "serverinfo.turn.port", 3478)             // listening-port
 
 
     checkObjectKeys(serverconfig, "groups.*.channels.categories.*.channel.*.msgCount", 0)
@@ -589,7 +595,7 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.pow.difficulty", 4)
 
     checkObjectKeys(serverconfig, "serverinfo.registration.enabled", true)
-    checkObjectKeys(serverconfig, "serverinfo.registration.accessCodes", [])
+    checkObjectKeys(serverconfig, "serverinfo.registration.accessCodes", {})
 
     checkObjectKeys(serverconfig, "serverinfo.login.maxLoginAttempts", 5)
 
@@ -757,7 +763,7 @@ export function checkRateLimit(socket) {
     //console.log("IP RATE LIMIT")
     //console.log(ip)
 
-    if (ip == "::1" || ip.includes("127.0.0.1")) {
+    if (ip === "::1" || ip.includes("127.0.0.1")) {
         return;
     }
 
@@ -822,6 +828,9 @@ export function generateId(length) {
 }
 
 export function validateMemberId(id, socket, token, bypass = false) {
+    if(!id){
+        return false;
+    }
 
     if (!powVerifiedUsers.includes(socket.id)) {
 

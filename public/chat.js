@@ -21,7 +21,227 @@ ensureDomPurify()
 userJoined();
 
 // sick af in my opinion
-initPow();
+initPow()
+
+voip = new VoIP( `${window.location.origin.includes("https") ? "wss" : "ws"}://{{livekit.url}}/`);
+
+ContextMenu.registerContextMenu(
+    "serverbanner",
+    [
+        "#serverbanner-image"
+    ],
+    [
+        {
+            icon: "&#9998;",
+            text: "Change banner",
+            callback: async () => {
+                AdminActions.changeGroupBanner()
+            },
+            condition: async () => {
+                return await (await checkPermission("manageGroups")).permission === "granted"
+            },
+            type: "ok"
+        },
+        {
+            icon: "&#10022;",
+            text: "Manage server",
+            callback: async () => {
+                AdminActions.editServer()
+            },
+            condition: async () => {
+                return await (await checkPermission(["manageServer",
+                    "manageGroups",
+                    "manageChannels",
+                    "manageUploads",
+                    "manageGroups",
+                    "viewLogs",
+                    "manageEmojis",
+                    "manageBans",
+                    "manageServerInfo",
+                    "manageRateSettings"], true)).permission === "granted"
+            },
+            type: "success"
+        }
+    ])
+
+ContextMenu.registerClickEvent(
+    "memberprofile",
+    [
+        ".memberlist-container",
+        ".memberlist-container .name",
+        ".memberlist-container .status",
+        ".memberlist-img",
+        ".mention",
+        ".vc-admin-actions",
+        ".vc-admin-actions .avatar",
+        ".message-container .icon",
+        ".message-container .username",
+    ],
+    async (data) => {
+        let memberId = data.element.getAttribute("data-member-id");
+        if (!memberId) {
+            console.warn("Couldnt get member profile from click event because memberid wasnt found");
+            return;
+        }
+        getMemberProfile(memberId, data.X, data.Y, null, true)
+    },
+    async (data) => {
+        // dont show the profile container when we click on the add role button
+        return data.element.classList.contains("addRoleMenuTrigger") === false;
+    }
+)
+
+ContextMenu.registerClickEvent(
+    "memberprofileroles",
+    [
+        ".addRoleMenuTrigger"
+    ],
+    async (data) => {
+        console.log(data)
+
+        let memberId = data.element.getAttribute("data-member-id");
+        if (!memberId) {
+            console.warn("Couldnt get member profile from click event because memberid wasnt found");
+            return;
+        }
+
+        ModActions.showRoleMenu(data.X, data.Y);
+    },
+    async (data) => {
+        // only show the role menu when we click the add button
+        return data.element.classList.contains("addRoleMenuTrigger") === true;
+    }
+)
+
+ContextMenu.registerContextMenu(
+    "memberprofile",
+    [
+        ".memberlist-container",
+        ".memberlist-container .name",
+        ".memberlist-container .status",
+        ".memberlist-img",
+        ".mention",
+        ".vc-admin-actions",
+        ".vc-admin-actions .avatar",
+        ".user-container .user-icon",
+    ],
+    [
+        {
+            icon: "&#9998;",
+            text: "Mention Member",
+            callback: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                if (!memberId) {
+                    console.warn("Couldnt mention member because memberid wasnt found");
+                    return;
+                }
+
+                mentionUser(memberId);
+            },
+            type: "ok"
+        },
+        {
+            icon: "&#9878;",
+            text: "Ban Member",
+            callback: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                if (!memberId) {
+                    console.warn("Couldnt ban member because memberid wasnt found");
+                    return;
+                }
+
+                ModActions.banUser(memberId)
+            },
+            condition: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                if (!memberId) {
+                    console.warn("Couldnt ban member because memberid wasnt found");
+                    return;
+                }
+                return (await (await checkPermission("banMember")).permission === "granted") && (memberId !== UserManager.getID())
+            },
+            type: "error"
+        },
+        {
+            icon: "&#9873;",
+            text: "Kick Member",
+            callback: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                if (!memberId) {
+                    console.warn("Couldnt kick member because memberid wasnt found");
+                    return;
+                }
+
+                ModActions.kickUser(memberId)
+            },
+            condition: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                return (await (await checkPermission("kickUsers")).permission === "granted") && (memberId !== UserManager.getID())
+            },
+            type: "error"
+        },
+        {
+            icon: "&#9741;",
+            text: "Disconnect Member",
+            callback: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                if (!memberId) {
+                    console.warn("Couldnt disconnect member because memberid wasnt found");
+                    return;
+                }
+
+                ModActions.disconnectUser(memberId)
+            },
+            condition: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                return (await (await checkPermission("disconnectUsers")).permission === "granted") && (memberId !== UserManager.getID())
+            },
+            type: "error"
+        },
+        {
+            icon: "&#10070;",
+            text: "Copy ID",
+            callback: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                if (!memberId) {
+                    console.warn("Couldnt copy member because memberid wasnt found");
+                    return;
+                }
+
+                navigator.clipboard.writeText(memberId)
+            }
+        },
+    ])
+
+
+// manual click event listener because its too general
+document.body.addEventListener("click", (event) => {
+
+    const {clientX: mouseX, clientY: mouseY} = event;
+    var clickedElement = event.target
+
+    var profileContent = document.getElementById("profile_container");
+
+
+    // dont close the profile popup when we click somewhere on the profile
+    if (profileContent.contains(clickedElement)) {
+        // we pressed on the profile so we can close the role menu again
+        document.getElementById("profile-role-menu").style.display = "none";
+        return;
+    }
+
+    // and dont close it when we click around on the role menu
+    if (document.getElementById("profile-role-menu").contains(clickedElement)) {
+        return;
+    }
+
+    // otherwise on default close it
+    profileContent.style.display = "none";
+    profileContent.innerHTML = "";
+
+    ModActions.hideRoleMenu()
+});
+
 
 socket.on('receiveThreadNew', ({}) => {
     console.log("receiveThreadNew")
@@ -85,7 +305,7 @@ var bypassCounter = [];
 // If markdown didnt get converted, this will
 async function updateMarkdownLinks(delay) {
     // await ...
-    var elements = document.querySelectorAll(".message-profile-content p");
+    var elements = document.querySelectorAll(".contentRows .content p");
 
     var lengthi = 0;
     if (elements.length <= 50) {
@@ -102,14 +322,12 @@ async function updateMarkdownLinks(delay) {
             }
 
             let videoEmbeds = elements[i].parentNode.querySelectorAll(".video-embed");
-            if(videoEmbeds.length > 0) return;
+            if (videoEmbeds.length > 0) return;
 
             try {
-
                 if (elements[i] != null && elements[i].innerText.length > 0) {
-
                     // returns isMarked and message
-                    var marked = await markdown(elements[i].innerText, elements[i].id);
+                    var marked = await markdown(elements[i].innerText, (elements[i]?.getAttribute("data-message-id") || elements[i]?.parentNode?.getAttribute("data-message-id")) );
 
                     // if the return message isnt null
                     if (marked.message != null && // and is not markdown and text doesnt equal or it is in fact markdown and not equal to the innerhtml
@@ -225,20 +443,20 @@ function handleVideoClick(videoElement) {
     })
 
     videoPlayers.forEach(player => {
-        if(player !== videoElement){
+        if (player !== videoElement) {
             player.pause();
         }
     })
 
     videoElement.currentTime = 0;
-    if(videoElement.paused === true){
+    if (videoElement.paused === true) {
         videoElement.play();
-    }
-    else{
+    } else {
         videoElement.pause();
     }
 
 }
+
 /* Debug Stuff  */
 function encodeToBase64(jsonString) {
     return btoa(encodeURIComponent(jsonString));
@@ -250,6 +468,11 @@ function decodeFromBase64(base64String) {
 
 async function markdown(msg, msgid) {
     if (msg == null) {
+        return {isMarkdown: false, message: msg};
+    }
+
+    if(!msgid){
+        console.warn("Cant check markdown because no msg id set")
         return {isMarkdown: false, message: msg};
     }
 
@@ -278,15 +501,15 @@ async function markdown(msg, msgid) {
 
                 } else if (mediaType === "image") {
                     msg = msg.replace(url, `<div class="image-embed-container">
-                                                <img class="image-embed" id="msg-${msgid.replace("msg-", "")}" alt="${url}" src="${url}" onerror="this.src = '/img/error.png';" >
+                                                <img class="image-embed" data-message-id="${msgid.replace("msg-", "")}" id="msg-${msgid.replace("msg-", "")}" alt="${url}" src="${url}" onerror="this.src = '/img/error.png';" >
                                             </div>`);
                     return {isMarkdown: true, message: msg}
 
                 } else if (mediaType === "video") {
                     msg = msg.replace(url, `
-                                            <p><a href="${url}" target="_blank">${url}</a></p>
-                                            <video data-id="${url}" preload="auto" onclick="handleVideoClick(this)" style="background-color: black;" class="video-embed" controls>
-                                                <source src="${url}">
+                                            <p data-message-id="${msgid.replace("msg-", "")}" ><a data-message-id="${msgid.replace("msg-", "")}" href="${url}" target="_blank">${url}</a></p>
+                                            <video data-message-id="${msgid.replace("msg-", "")}" data-src="${url}" preload="auto" onclick="handleVideoClick(this)" style="background-color: black;" class="video-embed" controls>
+                                                <source data-message-id="${msgid.replace("msg-", "")}" src="${url}">
                                             </video></div>`);
                     return {isMarkdown: true, message: msg}
 
@@ -296,7 +519,7 @@ async function markdown(msg, msgid) {
                         return {isMarkdown: true, message: msg}
 
                     } else {
-                        msg = msg.replace(url, `<a href="${url}" target="_blank">${url}</a>`);
+                        msg = msg.replace(url, `<a data-message-id="${msgid.replace("msg-", "")}" href="${url}" target="_blank">${url}</a>`);
                         return {isMarkdown: true, message: msg}
                     }
                 }
@@ -325,6 +548,20 @@ function limitString(text, limit) {
     if (text.length <= limit) return text.substring(0, limit); else return text.substring(0, limit) + "...";
 }
 
+async function checkPermission(perms, any = false) {
+    return new Promise(resolve => {
+        socket.emit("checkPermission", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            permission: perms,
+            any
+        }, function (response) {
+            resolve(response)
+        });
+    })
+}
+
+
 function stopRecording() {
     socket.emit("leftVC", {
         id: UserManager.getID(),
@@ -336,48 +573,6 @@ function stopRecording() {
     //leaveRoom(UserManager.getRoom());
 }
 
-socket.on('userJoinedVC', (member) => {
-    //addVCMember(member);
-});
-
-function addVCMember(member) {
-    const grid = document.getElementById("vc-user-grid");
-    if (!grid || document.getElementById("vc-user-container-" + member.id)) return;
-
-    const memberName = member.name.length > 15 ? member.name.substr(0, 15) + "..." : member.name;
-
-    const userCardHTML = `
-        <div class="vc-user-card" id="vc-user-container-${member.id}"
-            style="background-color:rgb(66, 68, 73); border-radius: 10px; padding: 16px;
-                   display: flex; flex-direction: column; align-items: center;
-                   width: 180px; text-align: center; color: white;">
-
-            <img src="${member.icon}" onerror="this.src='/img/default_pfp.png';"
-                alt="${member.name}" style="width: 80px; height: 80px; border-radius: 50%;
-                object-fit: cover; margin-bottom: 10px;">
-
-            <h1 style="font-size: 16px; margin: 0;">${memberName}</h1>
-
-            ${member.id == UserManager.getID() ? `<div style="margin-top: 20px;">
-                    <button style="margin-bottom: 6px" id="screenShareBtn" onclick="toggleScreenShare()">Start Screen Share</button>
-                    <button onclick="toggleMute()" id="muteBtn" style="margin-left: 10px;">Mute</button>
-                </div>` : ``}
-        </div>
-    `;
-
-    grid.insertAdjacentHTML("beforeend", userCardHTML);
-}
-
-
-function removeVCUser(member) {
-    var userContentCheck = document.getElementById(`vc-user-container-${member.id}`);
-    if (userContentCheck != null) userContentCheck.remove();
-}
-
-// When Receiving audio data
-socket.on('userLeftVC', (member) => {
-    removeVCUser(member)
-});
 
 
 function mentionUser(id) {
@@ -385,8 +580,8 @@ function mentionUser(id) {
     messageInputBox.focus();
 }
 
-function getMemberProfile(id, x, y, event = null) {
-    if(!event) return;
+function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
+    if (!event && bypassEventCheck === false) return;
 
     var profileContent = document.getElementById("profile_container");
 
@@ -404,16 +599,16 @@ function getMemberProfile(id, x, y, event = null) {
         target: id,
         posX: x,
         posY: y
-    }, async function(response){
+    }, async function (response) {
 
         var profileContent = document.getElementById("profile_container");
         profileContent.innerHTML = await UserManager.getMemberProfileHTML(response.member);
 
         // if no badges found remove it
         let result = await UserManager.displayUserBadges(true)
-        if(!result){
+        if (!result) {
             let profileBadgeContainer = profileContent.querySelector("#profile_badge_container");
-            if(profileBadgeContainer) profileBadgeContainer.style.display = "none"
+            if (profileBadgeContainer) profileBadgeContainer.style.display = "none"
         }
 
         profileContent.style.display = "block";
@@ -479,13 +674,13 @@ function getMessageId(element) {
 }
 
 
-async function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null) {
+async function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null) {
 
     if (UserManager.getUsername() != null) {
         var username = UserManager.getUsername();
 
         let knownServers = "";
-        if(isLauncher()){
+        if (isLauncher()) {
             await syncHostData()
             knownServers = await Client().GetServers();
         }
@@ -502,7 +697,8 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
             banner: UserManager.getBanner(),
             loginName: loginNameFlag,
             publicKey: await UserManager.getPublicKey(),
-            knownServers
+            knownServers,
+            code: accessCode
         }, function (response) {
 
             // if we finished onboarding
@@ -561,12 +757,44 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                 if (response.error) {
                     showSystemMessage({
                         title: response.title || "",
-                        text: response.msg || "",
-                        icon: response.type,
+                        text: response.msg || response.error || "",
+                        icon: "error",
                         img: null,
-                        type: response.type,
+                        type: "error",
                         duration: response.displayTime || 3000
                     });
+
+                    if (response?.registration === false) {
+                        // show registration prompt
+                        customPrompts.showPrompt(
+                            `Invite Code`,
+                            `
+                             <div class="prompt-form-group">
+                                 <p>
+                                    This server is an invite-only server. <br>
+                                    Please enter an invite code to join the server.
+                                 </p>
+                             </div>
+                             
+                             <div class="prompt-form-group">
+                                <label class="prompt-label" for="inviteCode">Invite Code</label>
+                                <input class="prompt-input" autocomplete="off" type="text" name="inviteCode" id="inviteCode" placeholder="Enter an invite code" value="">
+                                <label style="color: indianred;" class="prompt-label error-text"></label>
+                             </div>
+                            `,
+                            async function (values) {
+                                let inviteCode = values?.inviteCode;
+
+                                if (inviteCode && inviteCode.length > 0) {
+                                    userJoined(false, null, null, inviteCode);
+                                }
+
+                                if (!inviteCode) {
+                                    userJoined();
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
@@ -622,7 +850,7 @@ function createYouTubeEmbed(url, messageid) {
         videocode = url.replace("https://youtu.be/", "").replaceAll(" ", "");
     }
 
-    var code = `<p id="msg-${messageid}"><div class="iframe-container" id="msg-${messageid}" ><iframe style="border: none;" width="560" height="315" src="https://www.youtube.com/embed/${videocode}" 
+    var code = `<p data-message-id="${messageid.replace("msg-", "")}" id="msg-${messageid}"><div data-message-id="${messageid.replace("msg-", "")}" class="iframe-container" id="msg-${messageid}" ><iframe data-message-id="${messageid.replace("msg-", "")}" style="border: none;" width="560" height="315" src="https://www.youtube.com/embed/${videocode}" 
                 title="YouTube video player" frameborder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div></p>`;
 
@@ -777,9 +1005,6 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message) {
         return;
     }
 
-    // important
-    if (editMessageId != null) editMessageId = editMessageId.replaceAll("msg-", "")
-
     //message = message.replaceAll("<p><br></p>", "");
 
     let msgPayload = {
@@ -796,12 +1021,12 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message) {
     };
 
     // if we're using the client, sign the message
-    if(await isLauncher()){
+    if (await isLauncher()) {
         msgPayload = JSON.parse(await Client().SignJson(JSON.stringify(msgPayload)));
     }
 
     socket.emit("messageSend", msgPayload, async function (response) {
-        if(response.error){
+        if (response.error) {
             // do smth in the future with this
         }
     });
@@ -848,9 +1073,9 @@ function convertMention(text, playSoundOnMention = false, showMsg = false) {
         var userId = UserManager.getID();
 
 
-        if (doc.id.replace("mention-", "") == (userId)) {
+        if (doc.getAttribute("data-member-id") === (userId)) {
 
-            if (showMsg == true) {
+            if (showMsg === true) {
 
                 showSystemMessage({
                     title: text.name,
@@ -865,7 +1090,7 @@ function convertMention(text, playSoundOnMention = false, showMsg = false) {
                 });
             }
 
-            if (playSoundOnMention == true) {
+            if (playSoundOnMention === true) {
                 playSound("message", 0.5);
             }
         }
@@ -879,115 +1104,6 @@ socket.on('doAccountOnboarding', async function (message) {
     UserManager.doAccountOnboarding()
 });
 
-
-socket.on('messageEdited', async function (message) {
-    let markdownResult = await markdown(message.message, message.messageId);
-    if (!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
-    if (markdownResult.isMarkdown) message.message = markdownResult.message;
-
-    console.log(markdownResult)
-
-    let editElement = document.querySelector(`div.message-profile-content-message#msg-${message.messageId}`);
-    if (editElement.tagName.toLowerCase() != "div") {
-        editElement = document.querySelector(`div.message-profile-content-message#msg-${message.messageId}`).parentnode;
-    }
-
-    editElement.innerHTML = message.message;
-
-    // example html element: <pre class="editedMsg">Last Edited: 24.7.2024, 20:15:24</pre>
-    if (editElement.outerHTML.includes('<pre class="editedMsg">') || editElement.parentNode.outerHTML.includes('<pre class="editedMsg">')) {
-
-        let firstSearch = editElement.querySelector("pre.editedMsg");
-        let secondSearch = editElement.parentNode.querySelector("pre.editedMsg");
-
-        if (firstSearch != null) {
-            firstSearch.innerHTML = `Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}`;
-        } else if (secondSearch != null) {
-            secondSearch.innerHTML = `Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}`;
-        }
-    } else {
-        editElement.innerHTML = message.message;
-        editElement.outerHTML += `<pre class="editedMsg">Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}</pre>`;
-    }
-});
-
-
-socket.on('messageCreate', async function (message) {
-    message.message = await text2Emoji(message.message);
-
-    let markdownResult = await markdown(message.message, message.messageId);
-    if (!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
-    if (markdownResult.isMarkdown) message.message = markdownResult.message;
-
-    message.editedCode = `<pre class="editedMsg">Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}</pre>`;
-
-    if (message.lastEdited == null) message.editedCode = "";
-
-    // this means we just created a message
-    if (message.id === UserManager.getID()) {
-        CookieManager.setCookie(`message-marker_${UserManager.getChannel()}`, parseInt(CookieManager.getCookie(`message-marker_${UserManager.getChannel()}`)) + 1)
-    }
-
-    var messagecode = createMsgHTML(message);
-    /*
-    var messagecode = `<div class="message-container" id="${message.messageId}">
-            <div class="message-profile-img-container">
-                <img class="message-profile-img" src="${message.icon}"  id="${message.id}" onerror="this.src = '/img/default_pfp.png';">
-            </div>
-
-            <div class="message-profile-info" id="${message.id}">
-                <label class="message-profile-info-name"  id="${message.id}" style="color: ${message.color};">${message.name}</label>
-                <label class="timestamp" id="${message.timestamp}">${new Date(message.timestamp).toLocaleString("narrow")}</label>
-        </div>
-            <div class="message-profile-content" id="${message.timestamp}">
-                <div class="message-profile-content-message" style="display: block !important; float: left !important;" id="msg-${message.messageId}">
-                    ${message.message.replaceAll("\n", "<br>")}
-                </div>
-                ${lastEditedCode}
-            </div>
-        </div>`;*/
-
-    var childDivs = document.getElementById("content").lastElementChild;
-
-    if (childDivs != null) {
-
-        // Get Elements
-        const messagecontent = childDivs.getElementsByClassName("message-profile-content");
-        const userid = childDivs.getElementsByClassName("message-profile-info");
-
-        const messageDivs = Array.prototype.filter.call(messagecontent, (messagecontent) => messagecontent.nodeName === "DIV");
-
-        const authorDivs = Array.prototype.filter.call(userid, (userid) => userid.nodeName === "DIV");
-
-        if (messagecontent[0] == null) {
-            addToChatLog(chatlog, messagecode);
-            return;
-        }
-
-        // Calculate time passed
-        var lastMessage = messagecontent[0].parentNode.querySelector("label.timestamp").id / 1000;
-
-        var today = new Date().getTime() / 1000;
-        var diff = today - lastMessage;
-        var minutesPassed = Math.round(diff / 60);
-        if (authorDivs[0].id == message.id && minutesPassed < 5) {
-
-            let convertedEmojiText = await text2Emoji(message.message);
-            messagecontent[0].insertAdjacentHTML("beforeend", `<div class="message-profile-content-message" style="display: block !important;" id="msg-${message.messageId}">${convertedEmojiText ? convertedEmojiText.replaceAll("\n", "<br>") : convertedEmojiText}</div>
-                ${message.editedCode}`
-            );
-        } else {
-            addToChatLog(chatlog, messagecode);
-        }
-    } else {
-        addToChatLog(chatlog, messagecode);
-    }
-
-    convertMention(message, true, true)
-    resolveMentions();
-    scrollDown();
-});
-
 function addToChatLog(element, text) {
     //text = markdown(text, null);
     element.insertAdjacentHTML('beforeend', text);
@@ -995,36 +1111,39 @@ function addToChatLog(element, text) {
 }
 
 
-function getLastMessage(time = false) {
-    var childDivs = document.getElementById("content").lastElementChild;
+function getLastMessage() {
+    let lastMessageInChat = document.getElementById("content").lastElementChild;
 
-    if (childDivs != null) {
+    if (lastMessageInChat) {
 
-
-        // Get Elements
-        var messagecontent = childDivs.getElementsByClassName("message-profile-content");
-        var userid = childDivs.getElementsByClassName("message-profile-info");
-
-
-        var messageDivs = Array.prototype.filter.call(messagecontent, (messagecontent) => messagecontent.nodeName === "DIV");
-
-        const authorDivs = Array.prototype.filter.call(userid, (userid) => userid.nodeName === "DIV");
-
-        if (messagecontent[0] == null) {
-            return;
+        let usernameElement = lastMessageInChat.querySelector(".username");
+        if (!usernameElement) {
+            console.warn("Couldnt get last message because username element wasnt found")
+            return null;
         }
 
-        // Calculate time passed
-        var lastMessage = messagecontent[0].parentNode.querySelector("label.timestamp").id / 1000;
+        let userId = usernameElement.getAttribute("data-member-id");
+        if (!userId) {
+            console.warn("Couldnt get last message because user id wasnt found")
+            return null;
+        }
 
-        var today = new Date().getTime() / 1000;
-        var diff = today - lastMessage;
-        var minutesPassed = Math.round(diff / 60);
+        // Get Elements
+        let lastMessage = document.getElementById("content").lastElementChild.querySelectorAll(".content");
+        if (!lastMessage) return null;
 
-        if (time == true) {
-            return lastMessage * 1000;
-        } else {
-            return messagecontent[0];
+        if (lastMessage.length > 1) {
+            return {
+                parent: lastMessageInChat,
+                element: lastMessage[lastMessage.length - 1],
+                userId
+            }
+        }
+
+        return {
+            parent: lastMessageInChat,
+            element: lastMessage[0],
+            userId
         }
     }
 }
@@ -1079,16 +1198,9 @@ function editMessage(id) {
 
     // sneaky bug fix
     editor.focus();
-    editor.blur();
 
-    let msgContent = null;
-
-    // It is what it is.
-    try {
-        msgContent = document.querySelector(`div .message-profile-content-message #${id}`).parentNode.cloneNode(true);
-    } catch {
-        msgContent = document.querySelector(`div .message-profile-content-message #${id}`).cloneNode(true);
-    }
+    console.log(`.message-container .content [data-message-id="${id}"]`)
+    let msgContent = document.querySelector(`.message-container .content[data-message-id="${id}"]`).cloneNode(true);
 
 
     // try to find emojis and remove the big classname
@@ -1109,7 +1221,7 @@ function editMessage(id) {
     }
 
     window.quill.root.innerHTML = msgContent.innerHTML;
-    editMessageId = msgContent.id;
+    editMessageId = msgContent.getAttribute("data-message-id");
 
     setTimeout(() => {
         const regex = /<p>\s*<\/p>/gm;
@@ -1185,17 +1297,11 @@ editor.addEventListener('keydown', function (event) {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
 
-
         let msgContent = quill.root.innerHTML
             //    .replace(/<p><br><\/p>/g, "")
-            .replace(/<p\s+id="msg-\d+">\s*<br\s*\/?>\s*<\/p>/g, ""); // Clean up empty lines
+            .replace(/<p>\s*<br\s*\/?>\s*<\/p>/g, ""); // Clean up empty lines
 
         sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), msgContent);
-
-        // Reset the editor content and height after a slight delay
-        setTimeout(resetEditorHeight, 0);
-    } else if (event.key === 'Enter' && event.shiftKey) {
-        setTimeout(adjustEditorHeight, 10); // Adjust height on Shift+Enter
     }
 });
 
@@ -1226,35 +1332,12 @@ function deleteMessageFromChat(id) {
     socket.emit("deleteMessage", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
-        messageId: id.replace("msg-", ""),
+        messageId: id,
         group: UserManager.getGroup(),
         category: UserManager.getCategory(),
         channel: UserManager.getChannel()
     });
 }
-
-socket.on('receiveDeleteMessage', function (id) {
-
-    try {
-        var message = document.querySelectorAll(`div .message-profile-content #msg-${id}`);
-        if (message == null) message = document.querySelectorAll(`div .message-profile-content-message #msg-${id}`);
-
-        var parentContainer = message[0].parentNode.parentNode;
-        var parent = message[0].parentNode;
-
-        message.forEach(msg => {
-            msg.remove();
-        });
-
-        if (parentContainer.querySelector(".message-profile-content-message") == null) {
-            parentContainer.remove();
-        }
-    } catch (err) {
-        console.log(err)
-    }
-
-
-});
 
 socket.on('memberTyping', function (members) {
 
@@ -1300,49 +1383,6 @@ socket.on('updateChatlog', async function (data) {
     getChatlog();
 });
 
-socket.on('receiveChatlog', async function (data) {
-    if (data == null) {
-        console.log("Data was null history");
-        return;
-    }
-    var previousMessageID = 0;
-
-    for (let message of data) {
-        try {
-            let lastEditCode = `<pre alt='receiveChatlog' class="editedMsg">Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}</pre>`;
-            if (message.lastEdited == null) lastEditCode = ``
-
-            if (compareTimestamps(message.timestamp, getLastMessage(true)) <= 5 && previousMessageID == message.id) {
-                let markdownResult = await markdown(message.message, message.messageId);
-                if (!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
-                if (markdownResult.isMarkdown) message.message = markdownResult.message;
-
-                getLastMessage().insertAdjacentHTML("beforeend", `<div class='message-profile-content-message' style="display: block !important; float: left !important;" id="msg-${message.messageId}">${await text2Emoji(message.message)}${createMsgActions(message.id)}</div>${lastEditCode}`);
-                previousMessageID = message.id;
-            } else {
-                let markdownResult = await markdown(message.message, message.messageId);
-                if (!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
-                if (markdownResult.isMarkdown) message.message = markdownResult.message;
-
-                await showMessageInChat(message);
-                previousMessageID = message.id;
-            }
-        } catch (error) {
-            console.error(`Error processing message with ID ${message.messageId}:`, error);
-        }
-    }
-
-    if (data.length == 0 && UserManager.getChannel() && !document.getElementById("screenshareList")) {
-        document.getElementById("content").insertAdjacentHTML("beforeend", `<div class='message-profile-content-message' style="text-align: center; color: gray; font-style: italic;display: block !important; float: left !important;" id="msg-0">No messages yet... be the first one!</div>`);
-    }
-
-
-    // mark channel as read
-    markChannel(UserManager.getChannel(), true)
-
-    scrollDown();
-    resolveMentions();
-});
 
 function markCurrentChannelStyle(channelId) {
     let channels = document.querySelectorAll("#channellist a");
@@ -1903,7 +1943,6 @@ function getServerInfo(returnData = false) {
 
 }
 
-
 function setUrl(param, isVC = false) {
 
     let urlData = param.split("&")
@@ -1911,7 +1950,7 @@ function setUrl(param, isVC = false) {
     let categoryId = urlData[1]?.replace("category=", "")
     let channelId = urlData[2]?.replace("channel=", "")
 
-    showHome(true)
+    if(!isVC) showHome(true)
 
     // channel already open, dont reload it
     if (UserManager.getChannel() == channelId && channelId && UserManager.getChannel() && isVC == false) return;
@@ -1924,8 +1963,8 @@ function setUrl(param, isVC = false) {
             channel: UserManager.getChannel(),
             token: UserManager.getToken(),
             permission: "useVOIP"
-        }, function (response) {
-            if (response.permission == "granted") {
+        }, async function (response) {
+            if (response.permission === "granted") {
                 switchLeftSideMenu(true)
                 //stopRecording();
 
@@ -1936,14 +1975,16 @@ function setUrl(param, isVC = false) {
                     room: UserManager.getRoom(),
                     token: UserManager.getToken()
                 });
-                document.getElementById("messagebox").style.visibility = "hidden";
-                document.getElementById("content").innerHTML = "";
-                joinVC();
+
+                document.getElementById("messagebox").style.display = "none";
+
+                // join vc room
+                await setupVC(channelId);
             }
         });
     } else {
-        leaveVC()
-        enableScreensharing(false);
+        // leave room maybe
+        voip.leaveRoom()
 
         socket.emit("checkChannelPermission", {
             id: UserManager.getID(),
@@ -1962,11 +2003,12 @@ function setUrl(param, isVC = false) {
                     token: UserManager.getToken()
                 });
                 chatlog.innerHTML = "";
-                document.getElementById("messagebox").style.visibility = "visible";
+                document.getElementById("messagebox").style.display = "flex";
+
                 document.querySelector('.ql-editor').focus();
             } else {
                 chatlog.innerHTML = "";
-                document.getElementById("messagebox").style.visibility = "hidden";
+                document.getElementById("messagebox").style.display = "none";
             }
         });
     }
@@ -2161,69 +2203,3 @@ uploadObject.addEventListener('dragleave', function (e) {
     uploadObject.style.backgroundColor = '';
 }, false);
 
-
-async function showMessageInChat(message) {
-
-    message.message = await text2Emoji(message.message)
-    //console.log(text2Emoji(message.message))
-
-    var messagecode = "";
-    if (message.isSystemMsg == true) {
-        messagecode = `<div class="systemAnnouncementChat">
-                            <p><label class="systemAnnouncementChatUsername" id="msg-${message.id}">${message.name}</label> joined the server! <label class="timestamp" style="color: lightgray !important;">${new Date(message.timestamp).toLocaleString("narrow")}</label></p>
-                        </div>`;
-    } else {
-
-        let editCode = "";
-
-        if (message?.lastEdited != null) {
-            message.editCode = `<pre class="editedMsg">Last Edited: ${new Date(message.lastEdited).toLocaleString("narrow")}</pre>`;
-        }
-
-        messagecode = createMsgHTML(message);
-    }
-
-    addToChatLog(chatlog, messagecode);
-    convertMention(message, false)
-    scrollDown();
-}
-
-function createMsgHTML(message){
-    let isSigned = message?.sig?.length > 10;
-
-    return `<div class="message-container" id="msg-${message.messageId}">
-        <div class="message-profile-img-container">
-            <img class="message-profile-img" src="${message.icon}" id="${message.id}" onerror="this.src = '/img/default_pfp.png';">
-        </div>
-    
-        <div class="message-profile-info" id="${message.id}">
-            <label class="message-profile-info-name" id="${message.id}" style="color: ${message.color};">${message.name}</label>
-            <label class="timestamp" id="${message.timestamp}">
-                ${new Date(message.timestamp).toLocaleString("narrow")}
-                
-                <!-- fuck i love programming -->
-                <label style="filter: grayscale(75%);">
-                    ${isSigned ? `&bull; &#128272;` : ""}
-                </label>
-            </label>
-        </div>
-    
-        <div class="message-profile-content" id="msg-${message.messageId}">
-            <div class="message-profile-content-message" style="display: block !important; float: left !important;" id="msg-${message.messageId}">
-                ${message.message}
-                ${createMsgActions(message.id)}
-            </div>
-            ${message?.editCode ? message?.editCode : ""}
-        </div>
-    </div>`
-}
-
-function createMsgActions(id){
-    return ""; // this is a test feature and not done yet
-
-    return `<div class="modActions">
-                <button class="approve">&#10004;</button>
-                <button class="reject">&#10008;</button>
-                <button class="delete">&#128465;</button>
-            </div>`
-}

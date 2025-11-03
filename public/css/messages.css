@@ -1,0 +1,121 @@
+.message-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    margin: 20px 0;
+}
+
+.message-container .row.system div{
+    display: flex;
+    flex-direction: column;
+    align-content: flex-start;
+    align-self: flex-start;
+    justify-content: flex-start;
+    gap: 10px;
+}
+.message-container .row.system{
+    display: flex;
+
+    font-style: italic;
+    color: hsl(from var(--main) h s calc(l * 8));
+    padding: 8px;
+
+    border-left: 3px solid rgba(171, 184, 190, 0.62);
+    gap: 20px;
+}
+
+.message-container .row{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 10px;
+}
+
+.message-container .row .meta{
+    display: flex;
+    gap: 10px;
+
+    justify-content: flex-start;
+    align-content: center;
+    align-items: center;
+}
+
+
+.message-container .contentRows {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-container .content{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+
+    gap: 0;
+    width: 100%;
+    font-size: 14px;
+}
+
+.message-container .icon-container img{
+    background-size: cover;
+    object-fit: cover;
+    background-position: center center;
+
+    border-radius: 50%;
+    cursor: pointer;
+
+    width: 100%;
+    height: 100%;
+    user-select: none;
+}
+
+.message-container .icon-container{
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+}
+
+.message-container .timestamp{
+    color: hsl(from var(--main) h s calc(l * 8));
+    font-size: 10px;
+}
+
+.message-container p {
+    line-height: 150% !important;
+    margin: 0;
+}
+
+.message-container blockquote{
+    display: flex;
+    width: 100%;
+
+    font-style: italic;
+    margin: 6px 0;
+    padding: 6px;
+}
+
+.message-container .edit-notice{
+    display: flex;
+    flex-direction: row;
+    align-self: flex-start;
+
+    margin-top: 4px;
+    font-size: 8px;
+    font-style: italic;
+
+    color: hsl(from var(--main) h s calc(l * 8));
+    overflow: hidden;
+    cursor: pointer;
+    white-space: break-spaces;
+}
+
+.message-container .edit-notice .editedMsg{
+    max-height: 0;
+    overflow: hidden;
+    transition: all 500ms ease-in-out;
+}
+
+.message-container .edit-notice:hover .editedMsg{
+    max-height: 50px;
+}

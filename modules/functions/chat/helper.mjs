@@ -20,7 +20,7 @@ export function convertMention(text) {
             try {
                 userId = pingedUsers[i];
 
-                text = text.replace(`&lt;@${userId}&gt;`, `<label class="mention" id="mention-${serverconfig.servermembers[userId].id}">@${serverconfig.servermembers[userId].name}</label>`);
+                text = text.replace(`&lt;@${userId}&gt;`, `<label class="mention" data-member-id="${serverconfig.servermembers[userId].id}" id="mention-${serverconfig.servermembers[userId].id}">@${serverconfig.servermembers[userId].name}</label>`);
             } catch (lolz) {
                 // Handle error if necessary
                 console.log(lolz);

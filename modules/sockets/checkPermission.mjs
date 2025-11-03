@@ -46,6 +46,18 @@ let permList = {
         category: ["serverRoles"],
         description: "Allows changing server name and description"
     },
+    "viewAuditLog": {
+        name: "View Audit Log",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: ""
+    },
+    "manageInvites": {
+        name: "Manage Invites",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: "Manage invite codes"
+    },
     "manageServer": {
         name: "Manage Server",
         type: "checkbox",

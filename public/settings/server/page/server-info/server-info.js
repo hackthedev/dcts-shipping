@@ -2,13 +2,14 @@ var servername = document.getElementById("server_name");
 var serverdescription = document.getElementById("server_description");
 var saveButton = document.getElementById("settings_profile_save");
 var enableDiscovery = document.getElementById("enableDiscovery");
-var allowedHosts_list = document.getElementById("allowedHosts_list"); // container
-var allowedHosts = document.getElementById("allowedHosts"); // input
+var enableRegistration = document.getElementById("enableRegistration");
 
 var serverconfigName;
 var serverconfigDesc;
 var serverconfigDiscoveryEnabled;
-var serverconfigDiscoveryHosts;
+let serverconfigRegistrationEnabled;
+
+const customPrompts = new Prompt();
 
 socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageServer" }, function (response) {
 
@@ -32,32 +33,20 @@ socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getTok
         serverconfigName = response.name.replaceAll("&#039;", "'");
         serverconfigDesc = response.description.replaceAll("&#039;", "'");
         serverconfigDiscoveryEnabled = response.discovery.enabled;
-        serverconfigDiscoveryHosts = response.discovery.hosts;
+        serverconfigRegistrationEnabled = response.registration.enabled;
 
         servername = document.getElementById("server_name");
         serverdescription = document.getElementById("server_description");
         saveButton = document.getElementById("settings_profile_save");
 
         enableDiscovery = document.getElementById("enableDiscovery");
-        allowedHosts_list = document.getElementById("allowedHosts_list"); // container
-        allowedHosts = document.getElementById("allowedHosts"); // input
-
-
+        enableRegistration = document.getElementById("enableRegistration");
 
         servername.value = serverconfigName;
         serverdescription.value = serverconfigDesc;
 
         enableDiscovery.checked = response?.discovery?.enabled
-
-        response?.discovery?.hosts?.forEach(host => {
-            addAllowedHost(host)
-        })
-
-        if(response?.discovery?.hosts?.length === 0){
-            allowedHosts_list.style.display = "none";
-        }
-
-
+        enableRegistration.checked = response?.registration?.enabled
         console.log(response);
     }
     catch(err){
@@ -72,11 +61,15 @@ function updatePreview(){
     try{
         let changes = false;
 
-        let hostElements = document.querySelectorAll("#allowedHosts_list .host")
-        const hosts = Array.from(hostElements)
-            .map(el => el.innerText);
-
         if(serverconfigDiscoveryEnabled !== document.querySelector("#enableDiscovery").checked){
+            saveButton.style.display = "block";
+            changes = true;
+        }
+        else{
+            if(!changes) saveButton.style.display = "none";
+        }
+
+        if(serverconfigRegistrationEnabled !== document.querySelector("#enableRegistration").checked){
             saveButton.style.display = "block";
             changes = true;
         }
@@ -107,14 +100,11 @@ function saveSettings(){
         if(servername.value != null && servername.value.length > 0 && servername.value != serverconfigName){
             socket.emit("updateServerName", {id: UserManager.getID(), token: UserManager.getToken(), value: servername.value }, function (response) {
                 console.log(response);
-
-                alert(response.msg);
             });
         }
 
         socket.emit("updateServerDesc", {id: UserManager.getID(), token: UserManager.getToken(), value: serverdescription.value || "" }, function (response) {
             console.log(response);
-            alert(response.msg);
         });
 
 
@@ -122,7 +112,12 @@ function saveSettings(){
             enabled: document.querySelector("#enableDiscovery").checked || false
         }, function (response) {
             console.log(response);
-            alert(response.msg);
+        });
+
+        socket.emit("updateRegistration", {id: UserManager.getID(), token: UserManager.getToken(),
+            enabled: document.querySelector("#enableRegistration").checked || false
+        }, function (response) {
+            console.log(response);
         });
 
         saveButton.style.display = "none";

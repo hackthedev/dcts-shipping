@@ -1,13 +1,13 @@
 
 const SANITIZE_OPTIONS = {
     ALLOWED_TAGS: ['div', 'source', 'video', 'audio', 'span', 'p', 'br', 'b', 'i', 'u', 's', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'pre', 'code', 'blockquote', 'strong', 'em', 'img', 'mark'],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'class', 'style', 'data-id', 'controls']
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'class', 'style', 'data-id', 'controls', 'title', 'data-member-id', 'data-message-id']
 };
 
 function sanitizeHtmlForRender(html) {
     if (html == null) return '';
 
-    let raw = unescapeHtmlEntities(String(html || '')).trim();
+    let raw = unescapeHtmlEntities(String(html || ''), true).trim();
 
     const hasTags = /<\/?[a-z][\s\S]*?>/i.test(raw);
     if (!hasTags) {
@@ -42,11 +42,18 @@ function encodePlainText(s) {
         .replaceAll("'", '&#39;');
 }
 
-function unescapeHtmlEntities(str) {
+function unescapeHtmlEntities(str, raw = false) {
     if (str == null) return '';
-    const txt = document.createElement('textarea');
+
+    if(raw === true){
+        const txt = document.createElement('textarea');
+        txt.innerHTML = String(str);
+        return txt.value;
+    }
+
+    const txt = document.createElement('label');
     txt.innerHTML = String(str);
-    return txt.value;
+    return txt.textContent;
 }
 
 function hl(text, query) {

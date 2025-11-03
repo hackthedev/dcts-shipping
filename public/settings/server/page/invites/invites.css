@@ -1,0 +1,52 @@
+#settings_profile_save {
+    margin: 20px 0 0 0;
+    padding: 2px 4px 2px 4px;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    background-color: #ABB8BE;
+    color: black;
+    text-align: center;
+    width: 100%;
+}
+
+
+table#inviteCodes tr td{
+    padding: 10px 40px;
+}
+
+table#inviteCodes thead td{
+    background-color: hsl(from var(--main) h s calc(l * 10));
+    color: hsl(from var(--main) h s calc(l * 1));
+    font-weight: bold;
+}
+
+table#inviteCodes tr:nth-child(even){
+    background-color: hsl(from var(--main) h s calc(l * 4));
+}
+
+table#inviteCodes tr:nth-child(odd){
+    background-color: hsl(from var(--main) h s calc(l * 3));
+}
+
+
+table#inviteCodes{
+    background-color: hsl(from var(--main) h s calc(l * 3));
+    border-collapse: collapse;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.icon {
+    background-size: cover;
+
+    object-fit: cover;
+    background-color: transparent;
+    background-position: center center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    user-select: none;
+    margin: 4px auto;
+}

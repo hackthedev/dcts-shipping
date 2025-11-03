@@ -104,7 +104,7 @@ class UserManager {
             <div id="profile_roles">
                 <h2 class="profile_headline">Roles</h2>
                 ${roleCode}
-                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${this.getID()}');" class="role" id="addRole-${this.getID()}">+</code>
+                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${memberObj.id}');" class="role addRoleMenuTrigger" data-member-id="${memberObj.id}" id="addRole-${memberObj.id}">+</code>
             </div>`;
     }
 
@@ -323,7 +323,7 @@ class UserManager {
     static getID() {
         var id = CookieManager.getCookie("id");
 
-        if (id == null || id.length != 12) {
+        if (id == null || id.length !== 12) {
             id = UserManager.generateId(12);
             CookieManager.setCookie("id", id, 360);
             return id;
@@ -505,9 +505,11 @@ class UserManager {
         UserManager.updateUsernameOnUI(aboutme);
     }
 
-    static generateId(length) {
+    static generateId(length, strings = false) {
         let result = '1';
-        const characters = '0123456789';
+        let characters = '0123456789';
+        if(strings === true) characters += "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
         const charactersLength = characters.length;
         let counter = 0;
         while (counter < length - 1) {

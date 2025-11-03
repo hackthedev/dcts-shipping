@@ -9,11 +9,10 @@
     <meta name="description" content="{{meta.page.description}}" />
 
     <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
-            integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
-            crossorigin="anonymous"
+            src="../../js/core/socket.io.js"
     ></script>
 
+    <link rel="stylesheet" href="../../css/themes/default.css">
 
     <script defer src="../utility.js"></script>
     <script defer src="../../js/core/PermUI.js"></script>
@@ -24,12 +23,10 @@
     <script defer src="../../js/hover.js"></script>
 
     <script defer src="../../notify.js"></script>
-
-
     <script defer src="settings.js"></script>
 
 
-    <script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
+    <script src="../../js/core/sortable.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
@@ -39,48 +36,17 @@
 
 <style>
 
-    /* width */
-    ::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    /* Track */
-    ::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-        background: #202225;
-        border-radius: 12px;
-    }
-
-    /* Handle on hover */
-    ::-webkit-scrollbar-thumb:hover {
-        background: #202225;
-    }
-
-    html, body{
-        margin: 0;
-        padding: 0;
-
-        font-family: 'Roboto', sans-serif;
-        color: #ABB8BE;
-        background-color: #2B3137;
-
-        width: 100%;
-        height: 100%;
-    }
-
     #navigation{
-        background-color: #24292E;
+        background-color: hsl(from var(--main) h s calc(l * 1.5));
+        color: hsl(from var(--main) h s calc(l * 10));
 
         padding: 32px;
 
-        width: calc(20% - 64px);
-        height: calc(100% - 64px);
+        width: calc(20%);
+        height: calc(100%);
 
         float: left;
+        overflow-y: auto;
     }
 
     #nav_settings {
@@ -101,27 +67,25 @@
         line-height: 175%;
 
         text-decoration: none;
-        color: #ABB8BB;
+        color: hsl(from var(--main) h s calc(l * 8));
 
     }
 
     #nav_settings a:hover{
-        color: #fafcff;
+        color: hsl(from var(--main) h s calc(l * 12));
         transition: all 200ms;
     }
 
     #nav_settings hr {
-        border: 1px solid #36393F;
-        background-color: #36393F;
-        color: #36393F;
+        border: 1px solid hsl(from var(--main) h s calc(l * 8) / 10%);
+        background-color: hsl(from var(--main) h s calc(l * 8) / 10%);
 
         margin: 16px 0 16px 0;
     }
 
     #content {
-
-        width: calc(100% - 64px - 20%);
-        height: calc(100% - 64px - 50px);
+        width: calc(80% );
+        height: calc(100%);
         padding: 32px;
 
         display:block;
@@ -135,6 +99,8 @@
         height: 30px;
 
         margin: 20px 20px 0 0;
+        position: absolute;
+        right: 0;
 
         background-color: #2B3137;
         float: right;
@@ -153,6 +119,12 @@
         display: block;
         width: 100%;
         height: 100%;
+
+        background: linear-gradient(
+                90deg,
+                hsl(from var(--main) h s calc(l * 2)),
+                hsl(from var(--main) h s calc(l * 2))
+        );
     }
 
     input[type=text], input[type=number]{
@@ -176,11 +148,14 @@
                 <hr id="general-hr">
             </div>
 
-            <!--<div id="moderation">
+            <div id="moderation">
                 <h2>Moderation & Safety</h2>
-                <a href='?page=server-info' id="manageServerInfo">Automod</a><br id="manageServerInfo-br">
+                <!-- soon tm <a href='?page=server-info' id="manageServerInfo">Automod</a><br id="manageServerInfo-br">-->
+
+                <a href='?page=invites' id="manageInvites">Invites</a><br id="manageInvites-br">
+                <a href='?page=auditlog' id="viewAuditLog">Audit Log</a><br id="viewAuditLog-br">
                 <hr id="moderation-hr">
-            </div>-->
+            </div>
 
             <div id="users">
                 <h2>User Management</h2>
@@ -199,7 +174,6 @@
 
             <div id="info">
                 <h2>Information</h2>
-                <a href='?page=whats-new'>What's new!</a><br>
                 <!--<a href='?page=planned-features'>Planned Features</a><br>-->
                 <a href='?page=about'>About</a><br>
                 <a href='?page=support' style="color: #e55a72;">Support <3</a><br>

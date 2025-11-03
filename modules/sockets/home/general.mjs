@@ -20,6 +20,15 @@ export async function sendSystemMessage(targetUserId, text, opts = {}) {
 
     if (!targetUserId) throw new Error("missing targetUserId");
 
+    if(typeof text === "string"){
+        text = {
+            content: text,
+            sender: null,
+            encrypted: false,
+            plainSig: null
+        }
+    }
+
     // if target user not known in serverconfig, bail
     if (!serverconfig.servermembers[targetUserId]) {
         Logger.warn("sendSystemMessage: unknown target user", targetUserId);
@@ -68,7 +77,7 @@ export async function sendSystemMessage(targetUserId, text, opts = {}) {
     // create message
     const messageId = rid("m");
     const now = nowISO();
-    const encoded = encodeToBase64(String(text || ""));
+    const encoded = encodeToBase64(String(JSON.stringify(text) || ""));
 
     await queryDatabase(
         `INSERT INTO dms_messages (messageId, threadId, authorId, message, createdAt, supportIdentity, displayName)

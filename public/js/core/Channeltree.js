@@ -30,7 +30,7 @@ class ChannelTree {
 
                 let categoryHTML = `
                     <details class="category" open>
-                        <summary class="categoryTrigger" id="category-${category.info.id}" style="color: #ABB8BE; cursor: pointer;user-select: none;">
+                        <summary class="categoryTrigger" data-category-id="${category.info.id}" id="category-${category.info.id}" style="color: #ABB8BE; cursor: pointer;user-select: none;">
                             ${category.info.name}
                         </summary>
                         <ul class="sortable-channels" id="category-list-${category.info.id}" data-category-id="${category.info.id}">
@@ -57,7 +57,7 @@ class ChannelTree {
                         let savedCount = parseInt(CookieManager.getCookie(`message-marker_${channel.id}`)) || 0;
 
                         // dont mark voice channels. there is no point in it
-                        if(channel.msgCount != savedCount && channel.type != "voice"){
+                        if(channel.msgCount !== savedCount && channel.type !== "voice"){
                             hasNewMessages = true;
                             // we only wanna set it once we actually read the message in the channel or clicked the channel.
                             // so we mark the messages as read when we request the chat messages
@@ -66,9 +66,9 @@ class ChannelTree {
     
                         let channelHTML = `
                             <li draggable="true" channelType="${channel.type}" id="channel-${channel.id}" style="color: #ABB8BE; cursor: pointer;user-select: none;" data-channel-id="${channel.id}">
-                                <a channelType="${channel.type}" class="channelTrigger msgCount_${channel.msgCount} ${hasNewMessages ? `markChannelMessage` : ""}" id="channel-${channel.id}" onclick="setUrl('?group=${group}&category=${category.info.id}&channel=${channel.id}'${channel.type == "voice" ? `, true` : ""})" 
+                                <a channelType="${channel.type}" class="channelTrigger msgCount_${channel.msgCount} ${hasNewMessages ? `markChannelMessage` : ""}" data-channel-id="${channel.id}" id="channel-${channel.id}" onclick="setUrl('?group=${group}&category=${category.info.id}&channel=${channel.id}'${channel.type == "voice" ? `, true` : ""})" 
                                    style="display: block;">
-                                    ${channel.type == "text" ? "⌨" : "🎙️"} ${channel.name}
+                                    ${channel.type === "text" ? "⌨" : "🎙️"} ${channel.name}
                                 </a>
                             </li>
                         `;

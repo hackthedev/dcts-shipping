@@ -371,6 +371,8 @@ export function getMemberList(member, channel) {
             // Foreach Role Member
             Object.keys(members).forEach(function (member) {
 
+                if(serverconfig.servermembers[member].onboarding === false) return
+
                 // Member ID:
                 // member
                 //
@@ -473,16 +475,16 @@ export function getMemberList(member, channel) {
                         }
 
 
-                        code += `<div class="memberlist-container" id="${members[member].id}">
-                                    <img class="memberlist-img ${extraClassOffline}" id="${members[member].id}" src="${members[member].icon}" onerror="this.src = '/img/default_pfp.png'">
+                        code += `<div class="memberlist-container" data-member-id="${members[member].id}">
+                                    <img class="memberlist-img ${extraClassOffline}" data-member-id="${members[member].id}" src="${members[member].icon}" onerror="this.src = '/img/default_pfp.png'">
                                     
                                     <div>
                                         <div class="memberlist-member-info name" 
-                                            onclick="getMemberProfile('${members[member].id}');" id="${members[member].id}" 
+                                            onclick="getMemberProfile('${members[member].id}');" data-member-id="${members[member].id}"" 
                                             style="color: ${role.info.color};">
                                             ${nameStyle}
                                         </div>
-                                        <div class="memberlist-member-info status" id="${members[member].id}" style="color: ${role.info.color};">
+                                        <div class="memberlist-member-info status" data-member-id="${members[member].id}" style="color: ${role.info.color};">
                                             ${statusStyle}
                                         </div>
                                     </div>
@@ -535,7 +537,7 @@ export function getGroupList(member) {
                     <a onclick="setUrl('?group=${group.info.id}');" id="group-entry-${group.info.id}">
                         <div class="group-entry-marker" id="group-marker-${group.info.id}"></div>
                         <div class="server-entry">
-                           <img title="${group.info.name}" id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
+                           <img title="${group.info.name}" id="${group.info.id}" data-group-id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
                         </div>
                     </a>`;
         } else {
@@ -549,7 +551,7 @@ export function getGroupList(member) {
                     ) {
                         addedGroups.push(group.info.id);
                         code += `<a onclick="setUrl('?group=${group.info.id}');"><div class="server-entry">
-                                    <img title="${group.info.name}" id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
+                                    <img title="${group.info.name}" data-group-id="${group.info.id}" id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
                                 </div></a>`;
                     }
                 } catch {

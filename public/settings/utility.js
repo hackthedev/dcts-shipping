@@ -74,7 +74,6 @@ async function loadPageContent(page = "server-info", { force = false } = {}) {
 }
 
 function chooseRole({ multi = false } = {}) {
-
   return new Promise((resolve) => {
     socket.emit("getAllRoles", {
       id: UserManager.getID(),
@@ -112,7 +111,6 @@ function chooseRole({ multi = false } = {}) {
         </div>`;
 
       const p = window.__prompt || (window.__prompt = new Prompt());
-
       p.showPrompt(`Choose ${multi ? "roles" : " a role"}`, html, (vals) => {
 
         const out = { roles: {} };

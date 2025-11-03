@@ -13,19 +13,13 @@ export default (io) => (socket) => {
             member.id = xssFilters.inHTMLData(member.id)
             member.token = xssFilters.inHTMLData(member.token)
 
-            if (hasPermission(member.id, "resolveMembers")) {
-                try {
-                    var resolved = copyObject(serverconfig.servermembers[member.target]);
-
-                    response({ type: "success", msg: "User Data was resolved", data: getCastingMemberObject(resolved) });
-                }
-                catch (e) {
-                    Logger.error("Unable to resolve member");
-                    console.log(e);
-                }
+            try {
+                var resolved = copyObject(serverconfig.servermembers[member.target]);
+                response({ type: "success", msg: "User Data was resolved", data: getCastingMemberObject(resolved) });
             }
-            else {
-                response({ type: "error", msg: "denied" });
+            catch (e) {
+                Logger.error("Unable to resolve member");
+                console.log(e);
             }
         }
     });

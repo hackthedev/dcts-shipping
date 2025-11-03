@@ -1,0 +1,8 @@
+[program:dcts_discover]
+directory=/home/dcts/discover/sv
+command=sh check.sh
+autostart=true
+autorestart=true
+stderr_logfile=/home/dcts/discover/sv/err.log
+stdout_logfile=/home/dcts/discover/sv/out.log
+stopsignal=QUIT

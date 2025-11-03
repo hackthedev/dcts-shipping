@@ -1,0 +1,333 @@
+
+:root {
+    --card-radius: 20px;
+
+    /*
+        red: 401c1c
+        green: 1b3a1a
+        blue: 232633
+        cyan: 1a3a33
+        purple: 261a3a
+        pink: 3a1a2f
+        brown: 3a241a
+    */
+    --accent: #232633;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: hsl(from var(--accent) h s calc(l * 0.7));
+    color: hsl(from var(--accent) h s calc(l * 5));
+}
+
+* {
+    font-family: "Roboto", sans-serif;
+    font-optical-sizing: auto;
+}
+
+#pageTitle {
+    color: hsl(from var(--accent) h s calc(l * 5));
+    width: 100%;
+    text-align: center;
+    margin-top: 40px;
+}
+
+#publicList {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+table{
+    color: hsl(from var(--accent) h s calc(l * 5));
+}
+
+table td, table th{
+    padding: 12px 24px;
+    background-color: hsl(from var(--accent) h s calc(l * 1.5));
+}
+
+.server-card {
+    background: linear-gradient(130deg, hsl(from var(--accent) h s calc(l * 1)), hsl(from var(--accent) h s calc(l * 2.2)));
+    color: hsl(from var(--accent) h s calc(l * 5));
+    width: 350px;
+    height: fit-content;
+    float: left;
+
+    display: inline-flex;
+    flex-direction: column;
+
+    border-radius: var(--card-radius);
+    margin: 40px;
+    box-shadow: hsl(from var(--accent) h s calc(l * 4)) 0 0 10px;
+}
+
+.server-card {
+    opacity: 0;
+    transform: translateY(14px) scale(.98);
+    transition: opacity .4s ease, transform .4s ease;
+}
+
+.server-card.reveal {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+
+.banner {
+    width: 100%;
+    min-height: 100px;
+
+    background-position: center center;
+    background-size: cover !important;
+    object-fit: cover;
+    position: relative;
+
+    border-top-left-radius: var(--card-radius);
+    border-top-right-radius: var(--card-radius);
+}
+
+.name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    display: flex;
+    align-self: end;
+
+    margin: 0 0 4px 8px;
+    font-size: 20px;
+
+    font-weight: bold;
+    text-shadow:
+            -1px 0 0 #000, 1px 0 0 #000,
+            0 -1px 0 #000, 0 1px 0 #000,
+            0 0 8px #000;
+    color: hsl(from var(--accent) h s calc(l * 5.5));
+}
+
+.server-card .about {
+    padding: 10px;
+    width: calc(100% - 20px);
+    background: none;
+    font-size: 14px;
+
+    max-height: 200px !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.server-card .about a, table a {
+    color: hsl(from var(--accent) h s calc(l * 4));
+    font-style: italic;
+}
+
+.features {
+    padding: 10px;
+    width: calc(100% - 20px);
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+
+    border-top: 1px solid hsl(from var(--accent) h s calc(l * 3));
+    border-bottom: 1px solid hsl(from var(--accent) h s calc(l * 3));
+}
+
+.features label {
+    font-size: 10px;
+    width: 100%;
+}
+
+.feature {
+    margin: 4px;
+    background: hsl(from var(--accent) h s calc(l * 1));
+    color: hsl(from var(--accent) h s calc(l * 4.5));
+
+    width: fit-content;
+    white-space: nowrap;
+
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.footer {
+    padding: 10px;
+    width: calc(100% - 20px);
+
+    font-size: 12px;
+    font-weight: bold;
+
+    display: flex;
+    align-items: center;
+}
+
+.joinButton {
+    padding: 6px 20px;
+    background: linear-gradient(110deg, hsl(from var(--accent) h s calc(l * 1)), hsl(from var(--accent) h s calc(l * 1.8)));
+    border-radius: var(--card-radius);
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+
+    display: flex;
+    margin-left: auto;
+}
+
+#header {
+    width: 100%;
+    background: hsl(from var(--accent) h s calc(l * 1.5));
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#header .left {
+    margin-right: auto;
+}
+
+#header .right {
+    margin-left: auto;
+}
+
+#header #headline {
+    color: hsl(from var(--accent) h s calc(l * 5));
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 30px;
+}
+
+#header #search {
+    padding: 10px;
+    background: hsl(from var(--accent) h s calc(l * 2.5));
+    color: hsl(from var(--accent) h s calc(l * 5));
+    outline: none;
+    border: none;
+    border-radius: 4px;
+}
+
+#header #search::placeholder {
+    color: hsl(from var(--accent) h s calc(l * 5));
+}
+
+
+#header input[type="button"] {
+    padding: 10px;
+    background: hsl(from var(--accent) h s calc(l * 2.5));
+    color: hsl(from var(--accent) h s calc(l * 5));
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    margin-left: 8px;
+}
+
+.server-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+}
+
+.action-btn {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, .35);
+    backdrop-filter: blur(2px);
+    cursor: pointer;
+    border: none;
+}
+
+.action-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: #fff;
+    opacity: .9;
+}
+
+.action-btn:hover {
+    background: rgba(0, 0, 0, .55);
+}
+
+.admin-actions {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+}
+
+.admin-btn {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, .35);
+    backdrop-filter: blur(2px);
+    cursor: pointer;
+    border: none;
+}
+
+.admin-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: #fff;
+    opacity: .9;
+}
+
+.admin-btn:hover {
+    background: rgba(0, 0, 0, .55);
+}
+
+.server-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+}
+
+.action-btn {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, .35);
+    backdrop-filter: blur(2px);
+    cursor: pointer;
+    border: none;
+}
+
+.action-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: #fff;
+    opacity: .9;
+}
+
+.action-btn:hover {
+    background: rgba(0, 0, 0, .55);
+}

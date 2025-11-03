@@ -1,0 +1,17 @@
+.rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 10px;
+    color: gold;
+}
+
+.rating .star {
+    font-size: 16px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.rating .star:hover {
+    transform: scale(1.1);
+}

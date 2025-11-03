@@ -437,13 +437,15 @@ async function enableScreensharing(mode) {
 
     // add icons
     if (!channelIcons.querySelector(".screenshare") && !mode) {
-        channelIcons.insertAdjacentHTML("beforeend", `<div class="screenshare icon"></div>`);
+        channelIcons.insertAdjacentHTML("beforeend", `<div class="screenshare icon"></div><div onclick="voip.toggleMicMute(this)" class="muteMic icon"></div>`);
 
         mountScreenQualityUI();
 
         channelIcons.querySelector(".screenshare").addEventListener("click", async () => {
             if (!stopScreenSharing) {
                 // start ss with current settings
+                document.getElementById("ssQualPanel")?.querySelector("#ssApply")?.click();
+
                 stopScreenSharing = await voip.shareScreen({
                     audio: true,
                     fps: ssQuality.fps,
@@ -452,7 +454,7 @@ async function enableScreensharing(mode) {
                     maxBitrate: ssQuality.maxBitrate
                 });
 
-                // rpeview
+                // preview
                 const localStream = voip.getLocalScreenStream();
                 (function upsert(peerId, stream) {
                     const tileId = `ss-tile-${peerId}`;
@@ -499,6 +501,7 @@ async function enableScreensharing(mode) {
     // get rid of icons
     if (mode === false && channelIcons.querySelector(".screenshare")) {
         channelIcons.querySelector(".screenshare").remove();
+        channelIcons.querySelector(".muteMic").remove();
         channelIcons.querySelector(".ss-qual-btn").remove();
     }
 }

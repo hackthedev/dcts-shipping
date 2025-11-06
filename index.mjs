@@ -21,7 +21,8 @@ export let server; // = http.createServer(app);
 import {Server} from 'socket.io';
 
 import nodefetch from "node-fetch";
-const { FormData, fileFrom } = nodefetch;
+
+const {FormData, fileFrom} = nodefetch;
 const fetch = nodefetch.default;
 
 import getSize from 'get-folder-size';
@@ -75,19 +76,19 @@ export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = false;
-export let versionCode = 745;
+export let versionCode = 756;
 
 // dSync Libs
 import dSyncAuth from '@hackthedev/dsync-auth';
 //import dSyncAuth from '../../../dSyncAuth/index.mjs';
-import { dSyncSign } from "@hackthedev/dsync-sign";
+import {dSyncSign} from "@hackthedev/dsync-sign";
 //import { dSyncSign } from "../dSyncSign/index.mjs"
 import dSync from "@hackthedev/dsync";
 
 export let syncer = new dSync("dcts", app)
 export const signer = new dSyncSign();
-export const auther = new dSyncAuth(app, signer, async function(data) {
-    if(data.valid === true){
+export const auther = new dSyncAuth(app, signer, async function (data) {
+    if (data.valid === true) {
         changeKeyVerification(data.publicKey, data.valid);
     }
 });
@@ -208,10 +209,9 @@ const registerPluginSocketEvents = async (socket, pluginSocketsDir) => {
             const fileUrl = pathToFileURL(filePath).href;
             const {default: handler} = await import(fileUrl);
 
-            try{
+            try {
                 handler(socket);
-            }
-            catch(e){
+            } catch (e) {
                 Logger.error(fileUrl)
                 Logger.error(e)
             }
@@ -253,7 +253,7 @@ const processPlugins = async () => {
     for (const pluginName of pluginDirs) {
 
         // ignore files
-        if(fs.lstatSync(path.join(pluginsDir, pluginName)).isFile() === true) continue;
+        if (fs.lstatSync(path.join(pluginsDir, pluginName)).isFile() === true) continue;
 
         const pluginDir = path.join(pluginsDir, pluginName);
         const pluginFunctionsDir = path.join(pluginDir, 'functions');
@@ -263,7 +263,7 @@ const processPlugins = async () => {
         let pluginConfigPath = path.join(pluginDir, 'config.json');
         let pluginConfig = null;
 
-        if(fs.existsSync(pluginConfigPath)) {
+        if (fs.existsSync(pluginConfigPath)) {
             pluginConfig = JSON.parse(fs.readFileSync(pluginConfigPath));
         }
 
@@ -274,7 +274,7 @@ const processPlugins = async () => {
         let pluginVersion = pluginConfig?.version || 0;
 
         // skip disabled plugin
-        if(pluginEnabled !== true) {
+        if (pluginEnabled !== true) {
             Logger.warn(`Skipped loading plugin ${pluginTitle} (${pluginName}) because its not enabled`)
             continue;
         }
@@ -325,10 +325,11 @@ if (serverconfig.serverinfo.sql.enabled == true) {
                 {name: 'authorId', type: 'varchar(100) NOT NULL'},
                 {name: 'messageId', type: 'varchar(100) NOT NULL'},
                 {name: 'room', type: 'text NOT NULL'},
-                {name: 'message', type: 'longtext NOT NULL'}
+                {name: 'message', type: 'longtext NOT NULL'},
+                {name: 'createdAt', type: 'bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)'}
             ],
             keys: [
-                {name: 'UNIQUE KEY', type: 'messageId (messageId)'}
+                {name: 'UNIQUE KEY', type: 'messageId (messageId)'},
             ]
         },
         {
@@ -698,30 +699,29 @@ server.listen(port, function () {
 });
 
 
-
 const API_KEY = serverconfig.serverinfo.livekit.key;
 const API_SECRET = serverconfig.serverinfo.livekit.secret;
 
 const webhookReceiver = new WebhookReceiver(API_KEY, API_SECRET);
 
 // --- Token Endpoint ---
-app.post("/token",  async (req, res) => {
-    const { roomName, participantName } = req.body;
+app.post("/token", async (req, res) => {
+    const {roomName, participantName} = req.body;
 
     if (!roomName || !participantName) {
-        res.status(400).json({ errorMessage: "roomName and participantName are required" });
+        res.status(400).json({errorMessage: "roomName and participantName are required"});
         return;
     }
 
-    const at = new AccessToken(API_KEY, API_SECRET, { identity: participantName });
-    at.addGrant({ roomJoin: true, room: roomName });
+    const at = new AccessToken(API_KEY, API_SECRET, {identity: participantName});
+    at.addGrant({roomJoin: true, room: roomName});
     const token = await at.toJwt();
 
-    res.json({ token });
+    res.json({token});
 });
 
 // --- Webhook Endpoint ---
-app.post("/livekit/webhook", express.raw({ type: "*/*" }), async (req, res) => {
+app.post("/livekit/webhook", express.raw({type: "*/*"}), async (req, res) => {
     try {
         const event = await webhookReceiver.receive(req.body, req.get("Authorization"));
         console.log(event);
@@ -730,7 +730,6 @@ app.post("/livekit/webhook", express.raw({ type: "*/*" }), async (req, res) => {
     }
     res.status(200).send();
 });
-
 
 
 //app.use(express.urlencoded({extended: true})); // Parses URL-encoded data
@@ -745,7 +744,6 @@ app.use(
         }
     })
 );
-
 
 
 // Process plugins at server start
@@ -822,7 +820,7 @@ const registerSocketEvents = (socket) => {
     }
 })();
 
-export async function checkPow(socket){
+export async function checkPow(socket) {
     if (powVerifiedUsers.includes(socket.id)) {
         socket.powValidated = true;
         return;

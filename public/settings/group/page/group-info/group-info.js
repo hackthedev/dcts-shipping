@@ -50,7 +50,7 @@ function saveSettings(){
     try{
         if(channelname.value != null && channelname.value.length > 0 && channelname.value != serverconfigName){
 
-            socket.emit("updateGroupName", {id:getID(), token: getToken(), groupId: getUrlParams("id"), groupName: channelname.value }, function (response) {
+            socket.emit("updateGroupName", {id: UserManager.getID(), token: UserManager.getToken(), groupId: getUrlParams("id"), groupName: channelname.value }, function (response) {
 
                 if(response.type== "success"){
                     notify(response.msg, "success", null, true);

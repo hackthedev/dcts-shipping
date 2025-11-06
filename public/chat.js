@@ -18,7 +18,7 @@ var socket = io.connect()
 ensureDomPurify()
 
 // join first
-userJoined();
+userJoined(null, null, null, null, true);
 
 // sick af in my opinion
 initPow()
@@ -72,10 +72,15 @@ ContextMenu.registerClickEvent(
         ".memberlist-container .status",
         ".memberlist-img",
         ".mention",
-        ".vc-admin-actions",
-        ".vc-admin-actions .avatar",
+        // vc container
+        ".vc-container .participant",
+        ".vc-container .participant img",
+        //
         ".message-container .icon",
         ".message-container .username",
+        // channel list vc user
+        "#channeltree .category .participants .participant",
+        "#channeltree .category .participants .participant .avatar",
     ],
     async (data) => {
         let memberId = data.element.getAttribute("data-member-id");
@@ -121,9 +126,15 @@ ContextMenu.registerContextMenu(
         ".memberlist-container .status",
         ".memberlist-img",
         ".mention",
-        ".vc-admin-actions",
-        ".vc-admin-actions .avatar",
+        // vc container
+        ".vc-container .participant",
+        ".vc-container .participant img",
         ".user-container .user-icon",
+        ".message-container .icon",
+        ".message-container .username",
+        // vc user from channels
+        "#channeltree .category .participants .participant",
+        "#channeltree .category .participants .participant .avatar",
     ],
     [
         {
@@ -177,6 +188,46 @@ ContextMenu.registerContextMenu(
             condition: async (data) => {
                 let memberId = data.element.getAttribute("data-member-id");
                 return (await (await checkPermission("kickUsers")).permission === "granted") && (memberId !== UserManager.getID())
+            },
+            type: "error"
+        },
+        {
+            icon: "&#9873;",
+            text: "Mute Member",
+            callback: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                if (!memberId) {
+                    console.warn("Couldnt mute member because memberid wasnt found");
+                    return;
+                }
+
+                ModActions.muteUser(memberId)
+            },
+            condition: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                return (await (await checkPermission("muteUsers")).permission === "granted") &&
+                    (memberId !== UserManager.getID()) &&
+                    data.element.querySelectorAll(".mutedMember").length === 0
+            },
+            type: "error"
+        },
+        {
+            icon: "&#9873;",
+            text: "Unmute Member",
+            callback: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                if (!memberId) {
+                    console.warn("Couldnt mute member because memberid wasnt found");
+                    return;
+                }
+
+                ModActions.unmuteUser(memberId)
+            },
+            condition: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                return (await (await checkPermission("muteUsers")).permission === "granted") &&
+                    (memberId !== UserManager.getID()) &&
+                    data.element.querySelectorAll(".mutedMember").length !== 0
             },
             type: "error"
         },
@@ -302,6 +353,7 @@ var blockedDataCounter = [];
 var bypassElement = [];
 var bypassCounter = [];
 
+
 // If markdown didnt get converted, this will
 async function updateMarkdownLinks(delay) {
     // await ...
@@ -314,6 +366,8 @@ async function updateMarkdownLinks(delay) {
         lengthi = 50;
     }
 
+
+    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
     for (var i = elements.length; i > (elements.length - lengthi); i--) {
 
         if (elements[i] != null) {
@@ -344,7 +398,7 @@ async function updateMarkdownLinks(delay) {
 
                         if (bypassElement[elements[i].id] == null) {
                             elements[i].innerHTML = marked.isMarkdown ? sanitizeHtmlForRender(marked.message) : elements[i].innerText;
-                            setTimeout(() => scrollDown(), 10)
+                            if(isScrolledDown) scrollDown();
                         }
                     }
                 }
@@ -377,11 +431,16 @@ function escapeHtml(text) {
 
 
 async function checkMediaTypeAsync(url) {
-
     return new Promise((resolve, reject) => {
 
         if (!isURL(url)) {
             resolve("unkown");
+            return;
+        }
+
+        if(!isAllowedEmbedUrl(url)){
+            resolve("forbidden");
+            return;
         }
 
         socket.emit("checkMediaUrlCache", {
@@ -390,7 +449,7 @@ async function checkMediaTypeAsync(url) {
             url: url
         }, function (response) {
 
-            if (response.isCached == true) {
+            if (response.isCached === true) {
                 // return cached media type
                 resolve(response.mediaType);
             } else {
@@ -417,7 +476,7 @@ async function checkMediaTypeAsync(url) {
                             throw new Error('Content-Type header is missing');
                         }
                     } else {
-                        if (xhr.status == 404) return;
+                        if (xhr.status === 404) return;
 
                         throw new Error(`HTTP error! status: ${xhr.status}`);
                     }
@@ -439,22 +498,19 @@ function handleVideoClick(videoElement) {
     let videoPlayers = document.querySelectorAll(".video-embed");
 
     videoPlayers.forEach(player => {
-        console.log(player.paused)
-    })
-
-    videoPlayers.forEach(player => {
         if (player !== videoElement) {
-            player.pause();
+            if(!player.paused) player.pause();
         }
     })
 
-    videoElement.currentTime = 0;
-    if (videoElement.paused === true) {
-        videoElement.play();
-    } else {
-        videoElement.pause();
-    }
-
+    setTimeout(() => {
+        videoElement.currentTime = 0;
+        if (videoElement.paused === true) {
+            videoElement.play();
+        } else {
+            videoElement.pause();
+        }
+    }, 500)
 }
 
 /* Debug Stuff  */
@@ -464,6 +520,23 @@ function encodeToBase64(jsonString) {
 
 function decodeFromBase64(base64String) {
     return decodeURIComponent(atob(base64String));
+}
+
+function isAllowedEmbedUrl(url) {
+    const allowedDomains = [
+        "discord.com",
+        "youtu.be",
+        "youtube.com",
+        "reddit.com",
+        "redd.it",
+        "tumblr.com",
+        "tenor.com"
+    ];
+
+    const host = extractHost(url);
+    const localHost = extractHost(window.location.origin);
+    if (host === localHost) return true;
+    return allowedDomains.some(domain => host === domain || host.endsWith(`.${domain}`));
 }
 
 async function markdown(msg, msgid) {
@@ -478,22 +551,32 @@ async function markdown(msg, msgid) {
 
 
     try {
-
-        // Check if if we even have a url
+        // yes another try to keep going
         let mediaType;
-        if (isURL(msg)) {
-            mediaType = await checkMediaTypeAsync(msg);
-        } else {
-            // Markdown Text formatting
-            if (!isURL(msg) && mediaType != "video" && mediaType != "audio" && mediaType != "image" && msg.length != 0) {
-                return {isMarkdown: false, message: msg};
+        try{
+            // Check if if we even have a url
+            if (isURL(msg)) {
+                mediaType = await checkMediaTypeAsync(msg);
+            } else {
+                // Markdown Text formatting
+                if (!isURL(msg) && mediaType != "video" && mediaType != "audio" && mediaType != "image" && msg.length != 0) {
+                    return {isMarkdown: false, message: msg};
+                }
             }
+        }
+        catch(mediaTypeError) {
+            console.error(mediaTypeError);
         }
 
         const msgUrls = getUrlFromText(msg);
 
         for (const url of msgUrls) {
             if (isURL(url)) {
+
+                // ip logger protection etc
+                if(!isAllowedEmbedUrl(url)) {
+                    return {isMarkdown: false, message: msg}
+                }
 
                 if (mediaType === "audio") {
                     msg = msg.replace(url, createAudioPlayerHTML(url)).replaceAll("\n", "");
@@ -514,6 +597,7 @@ async function markdown(msg, msgid) {
                     return {isMarkdown: true, message: msg}
 
                 } else {
+                    console.log("is youtube url")
                     if (url.toLowerCase().includes("youtube") || url.toLowerCase().includes("youtu.be")) {
                         msg = msg.replace(url, createYouTubeEmbed(url, msgid));
                         return {isMarkdown: true, message: msg}
@@ -657,7 +741,24 @@ function redeemKey() {
 }
 
 function openNewTab(url) {
-    window.open(url, '_blank');
+    if (url.startsWith("data:")) {
+        const blob = dataURLtoBlob(url);
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, "_blank");
+    } else {
+        window.open(url, "_blank");
+    }
+}
+
+function dataURLtoBlob(dataUrl) {
+    const [header, base64] = dataUrl.split(',');
+    const mime = header.match(/:(.*?);/)[1];
+    const binary = atob(base64);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        array[i] = binary.charCodeAt(i);
+    }
+    return new Blob([array], { type: mime });
 }
 
 function getMessageId(element) {
@@ -674,13 +775,13 @@ function getMessageId(element) {
 }
 
 
-async function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null) {
+async function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false) {
 
     if (UserManager.getUsername() != null) {
         var username = UserManager.getUsername();
 
         let knownServers = "";
-        if (isLauncher()) {
+        if (isLauncher() && initial) {
             await syncHostData()
             knownServers = await Client().GetServers();
         }
@@ -702,7 +803,7 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
         }, function (response) {
 
             // if we finished onboarding
-            if (!response.error && response.finishedOnboarding == true) {
+            if (!response.error && response.finishedOnboarding === true && initial) {
                 socket.emit("setRoom", {
                     id: UserManager.getID(),
                     room: UserManager.getRoom(),
@@ -722,8 +823,7 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                     username: UserManager.getUsername(),
                     icon: UserManager.getPFP()
                 });
-                getMemberList()
-                getChannelTree()
+
                 socket.emit("getCurrentChannel", {
                     id: UserManager.getID(),
                     token: UserManager.getToken(),
@@ -739,16 +839,20 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                     token: UserManager.getToken()
                 });
 
-                getServerInfo();
-                getChatlog();
+                if(initial){
+                    getMemberList()
+                    getChannelTree()
+                    getServerInfo();
+                    getChatlog();
+                    showGroupStats();
+                }
 
-                showGroupStats();
                 socket.emit("checkPermission", {
                     id: UserManager.getID(),
                     token: UserManager.getToken(),
                     permission: "manageReports"
                 }, function (response) {
-                    if (response.permission == "granted") {
+                    if (response.permission === "granted" && initial) {
                         ModView.init();
                         UserReports.getReports();
                     }
@@ -828,18 +932,7 @@ function getChannelTree() {
     ChannelTree.getTree();
 }
 
-function getChatlog(index = -1) {
-    socket.emit("getChatlog", {
-        id: UserManager.getID(),
-        token: UserManager.getToken(),
-        groupId: UserManager.getGroup(),
-        categoryId: UserManager.getCategory(),
-        channelId: UserManager.getChannel(),
-        startIndex: index
-    }, (response) => {
-        if (response?.error == "denied") document.getElementById("content").innerHTML = ""; // fuck em
-    });
-}
+
 
 function createYouTubeEmbed(url, messageid) {
 
@@ -850,18 +943,19 @@ function createYouTubeEmbed(url, messageid) {
         videocode = url.replace("https://youtu.be/", "").replaceAll(" ", "");
     }
 
-    var code = `<p data-message-id="${messageid.replace("msg-", "")}" id="msg-${messageid}"><div data-message-id="${messageid.replace("msg-", "")}" class="iframe-container" id="msg-${messageid}" ><iframe data-message-id="${messageid.replace("msg-", "")}" style="border: none;" width="560" height="315" src="https://www.youtube.com/embed/${videocode}" 
-                title="YouTube video player" frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div></p>`;
-
-    /*
-    console.log("Resolving YouTube URL " + url);
-    console.log("Resolved: " + videocode);
-    console.log("Resolved URL: " + "https://www.youtube.com/embed/" + videocode);
-
-    */
+    var code = `
+                <div data-message-id="${messageid.replace("msg-", "")}" class="iframe-container" id="msg-${messageid}" >
+                    <iframe 
+                    data-message-id="${messageid.replace("msg-", "")}" 
+                    style="border: none;"
+                    src="https://www.youtube.com/embed/${videocode}" 
+                    title="YouTube video player" frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin">
+                                    
+                    </iframe>
+                </div>
+                `;
     return code;
-
 }
 
 
@@ -991,6 +1085,7 @@ function switchRightSideMenu() {
 
 
 async function sendMessageToServer(authorId, authorUsername, pfp, message) {
+    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
 
     if (UserManager.getGroup() == null || UserManager.getGroup().length <= 0 || UserManager.getCategory() == null || UserManager.getCategory().length <= 0 || UserManager.getChannel() == null || UserManager.getChannel().length <= 0) {
         showSystemMessage({
@@ -1033,6 +1128,8 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message) {
 
     editMessageId = null;
     cancelMessageEdit();
+
+    if(isScrolledDown) scrollDown(); // forgot that
 }
 
 function resolveMentions() {
@@ -1103,50 +1200,6 @@ function convertMention(text, playSoundOnMention = false, showMsg = false) {
 socket.on('doAccountOnboarding', async function (message) {
     UserManager.doAccountOnboarding()
 });
-
-function addToChatLog(element, text) {
-    //text = markdown(text, null);
-    element.insertAdjacentHTML('beforeend', text);
-    scrollDown();
-}
-
-
-function getLastMessage() {
-    let lastMessageInChat = document.getElementById("content").lastElementChild;
-
-    if (lastMessageInChat) {
-
-        let usernameElement = lastMessageInChat.querySelector(".username");
-        if (!usernameElement) {
-            console.warn("Couldnt get last message because username element wasnt found")
-            return null;
-        }
-
-        let userId = usernameElement.getAttribute("data-member-id");
-        if (!userId) {
-            console.warn("Couldnt get last message because user id wasnt found")
-            return null;
-        }
-
-        // Get Elements
-        let lastMessage = document.getElementById("content").lastElementChild.querySelectorAll(".content");
-        if (!lastMessage) return null;
-
-        if (lastMessage.length > 1) {
-            return {
-                parent: lastMessageInChat,
-                element: lastMessage[lastMessage.length - 1],
-                userId
-            }
-        }
-
-        return {
-            parent: lastMessageInChat,
-            element: lastMessage[0],
-            userId
-        }
-    }
-}
 
 
 function compareTimestamps(stamp1, stamp2) {
@@ -1251,6 +1304,16 @@ window.quill = new Quill('#editor', {
                         }
                     } else {
                         quill.format('link', false);
+                    }
+                }
+            }
+        },
+        keyboard: {
+            bindings: {
+                enter: {
+                    key: 13,
+                    handler: function(range, context) {
+                        return false;
                     }
                 }
             }
@@ -1388,8 +1451,8 @@ function markCurrentChannelStyle(channelId) {
     let channels = document.querySelectorAll("#channellist a");
 
     channels.forEach(channel => {
-        if (channel.classList.contains("selected")) {
-            channel.classList.remove("selected")
+        if (channel.parentNode.classList.contains("selected")) {
+            channel.parentNode.classList.remove("selected")
         }
     });
 
@@ -1501,11 +1564,13 @@ socket.on('updateGroupList', function (data) {
 });
 
 socket.on('receiveGroupList', function (data) {
-    serverlist.innerHTML = "";
-    serverlist.innerHTML = data;
+    if(serverlist.innerHTML !== data){
+        serverlist.innerHTML = "";
+        serverlist.innerHTML = data;
 
-    let mobileGroupList = document.getElementById("mobile_GroupList");
-    mobileGroupList.innerHTML = data;
+        let mobileGroupList = document.getElementById("mobile_GroupList");
+        mobileGroupList.innerHTML = data;
+    }
     setActiveGroup(UserManager.getGroup())
 
     reapplyUnreadFromCookies();
@@ -1841,6 +1906,7 @@ function getChannelObjectFromTree(channelId) {
 
 
 function refreshValues() {
+    return;
     var username = UserManager.getUsername();
     getRoles();
     userJoined();
@@ -1953,11 +2019,10 @@ function setUrl(param, isVC = false) {
     if(!isVC) showHome(true)
 
     // channel already open, dont reload it
-    if (UserManager.getChannel() == channelId && channelId && UserManager.getChannel() && isVC == false) return;
-
+    if (UserManager.getChannel() === channelId && channelId && UserManager.getChannel() && isVC === false) return;
     window.history.replaceState(null, null, param); // or pushState
 
-    if (isVC == true) {
+    if (isVC === true) {
         socket.emit("checkChannelPermission", {
             id: UserManager.getID(),
             channel: UserManager.getChannel(),
@@ -1966,16 +2031,7 @@ function setUrl(param, isVC = false) {
         }, async function (response) {
             if (response.permission === "granted") {
                 switchLeftSideMenu(true)
-                //stopRecording();
-
-                socket.emit("setRoom", {
-                    id: UserManager.getID(),
-                    username: UserManager.getUsername(),
-                    icon: UserManager.getPFP(),
-                    room: UserManager.getRoom(),
-                    token: UserManager.getToken()
-                });
-
+                changedChannel();
                 document.getElementById("messagebox").style.display = "none";
 
                 // join vc room
@@ -1983,8 +2039,8 @@ function setUrl(param, isVC = false) {
             }
         });
     } else {
-        // leave room maybe
-        voip.leaveRoom()
+        const channelIcons = document.getElementById("channelname-icons");
+        channelIcons.innerHTML = "";
 
         socket.emit("checkChannelPermission", {
             id: UserManager.getID(),
@@ -1992,20 +2048,22 @@ function setUrl(param, isVC = false) {
             token: UserManager.getToken(),
             permission: "sendMessages"
         }, function (response) {
-            if (response.permission == "granted") {
+            if (response.permission === "granted") {
                 switchLeftSideMenu(true)
 
-                socket.emit("setRoom", {
-                    id: UserManager.getID(),
-                    username: UserManager.getUsername(),
-                    icon: UserManager.getPFP(),
-                    room: UserManager.getRoom(),
-                    token: UserManager.getToken()
-                });
+                // update grouplist and channel tree if we only
+                // click on a group
+                if(groupId && !categoryId && !channelId){
+                    getChannelTree();
+                }
+
+                changedChannel();
+
                 chatlog.innerHTML = "";
                 document.getElementById("messagebox").style.display = "flex";
-
                 document.querySelector('.ql-editor').focus();
+
+                getChatlog();
             } else {
                 chatlog.innerHTML = "";
                 document.getElementById("messagebox").style.display = "none";
@@ -2015,9 +2073,28 @@ function setUrl(param, isVC = false) {
 
 
     // get group stats
-    showGroupStats()
+    showGroupStats();
+    getMemberList();
+}
 
-    refreshValues();
+function changedChannel(){
+    socket.emit("setRoom", {
+        id: UserManager.getID(),
+        username: UserManager.getUsername(),
+        icon: UserManager.getPFP(),
+        room: UserManager.getRoom(),
+        token: UserManager.getToken()
+    });
+
+    socket.emit("getCurrentChannel", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        username: UserManager.getUsername(),
+        icon: UserManager.getPFP(),
+        group: UserManager.getGroup(),
+        category: UserManager.getCategory(),
+        channel: UserManager.getChannel()
+    });
 }
 
 
@@ -2118,35 +2195,40 @@ function getRoles() {
     });
 }
 
-let scrollTimeout;
 
-function scrollDown() {
-    let contentDiv = document.getElementById("content");
-    contentDiv.style.visibility = "hidden";
-
-    if (scrollTimeout) {
-        clearTimeout(scrollTimeout); // Clear any existing timeout
-    }
-
-    // would jump back otherwise
-    scrollTimeout = setTimeout(() => {
-        var objDiv = document.getElementById("content");
-        objDiv.scrollTop = objDiv.scrollHeight;
-        contentDiv.style.visibility = "visible";
-    }, 10);
+function isScrolledToBottom(element) {
+    return Math.abs(element.scrollHeight - element.scrollTop - element.clientHeight) < 1;
 }
 
-// todo Fetch messages and dont use fixed limit in sql
-// Add scroll event listener to the scroll container
-/*
-let scrollMessageCount = 0;
-scrollContainer.addEventListener('scroll', function() {
-   if (scrollContainer.scrollTop === 0) {
-       
-       // We reached the top of the chat, try to load more messages
-   }
-});
-*/
+
+let scrollTimeout = null;
+
+function scrollDown() {
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        const lastMessage = getLastMessage();
+        if (lastMessage?.element) {
+            lastMessage.element.scrollIntoView({
+                behavior: "smooth",
+                block: "end",
+                inline: "nearest"
+            });
+        }
+    }, 400);
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function testDb(length){
+    for(let i = 1; i < length; i++){
+        await sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${i}`);
+        await sleep(500);
+    }
+
+}
+
 
 
 var uploadObject = document.getElementById('content');

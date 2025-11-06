@@ -9,7 +9,7 @@ class ChannelTree {
             username: UserManager.getUsername(),
             icon: UserManager.getPFP(),
             group: UserManager.getGroup()
-        }, function (response) {    
+        }, function (response) {
             let group = UserManager.getGroup();
 
             const catCollection = response.data.groups[group].categories;
@@ -44,11 +44,11 @@ class ChannelTree {
                 const chanCollection = category.channel;
 
                 // only display if category has channels
-                if(chanCollection){
+                if (chanCollection) {
                     let sortedChans = Object.keys(chanCollection).sort((a, b) => {
                         return chanCollection[b].sortId - chanCollection[a].sortId;
                     });
-    
+
                     sortedChans.forEach(chan => {
                         let channel = chanCollection[chan];
 
@@ -57,27 +57,48 @@ class ChannelTree {
                         let savedCount = parseInt(CookieManager.getCookie(`message-marker_${channel.id}`)) || 0;
 
                         // dont mark voice channels. there is no point in it
-                        if(channel.msgCount !== savedCount && channel.type !== "voice"){
+                        if (channel.msgCount !== savedCount && channel.type !== "voice") {
                             hasNewMessages = true;
                             // we only wanna set it once we actually read the message in the channel or clicked the channel.
                             // so we mark the messages as read when we request the chat messages
                             // CookieManager.setCookie(`message-marker_${chan.id}`, chan.msgCount);
                         }
-    
+
                         let channelHTML = `
                             <li draggable="true" channelType="${channel.type}" id="channel-${channel.id}" style="color: #ABB8BE; cursor: pointer;user-select: none;" data-channel-id="${channel.id}">
                                 <a channelType="${channel.type}" class="channelTrigger msgCount_${channel.msgCount} ${hasNewMessages ? `markChannelMessage` : ""}" data-channel-id="${channel.id}" id="channel-${channel.id}" onclick="setUrl('?group=${group}&category=${category.info.id}&channel=${channel.id}'${channel.type == "voice" ? `, true` : ""})" 
                                    style="display: block;">
                                     ${channel.type === "text" ? "⌨" : "🎙️"} ${channel.name}
                                 </a>
+                                ${channel.type === "voice" ?
+                            `<ul class="participants" style="display: none;"></ul>`
+                            : ""}
                             </li>
                         `;
                         categoryElement.insertAdjacentHTML("beforeend", channelHTML);
 
-                        if(!hasNewMessages) markChannel(channel.id, true)
-                        if(hasNewMessages) markChannel(channel.id, false, channel.msgCount)
+                        // get members that are in that voice channel
+                        if (channel.type === "voice") {
+                            socket.emit("getVcChannelMembers",
+                                {
+                                    id: UserManager.getID(),
+                                    token: UserManager.getToken(),
+                                    channelId: channel.id,
+                                },
+                                function (response) {
+                                    if (response.members?.length > 0) {
+                                        response.members.forEach(member => {
+                                            addVcMemberToChannel(channel.id, member);
+                                        })
+                                    }
+                                }
+                            )
+                        }
+
+                        if (!hasNewMessages) markChannel(channel.id, true)
+                        if (hasNewMessages) markChannel(channel.id, false, channel.msgCount)
                     });
-                }                
+                }
             });
 
             channeltree.innerHTML = tempContainer.innerHTML;
@@ -100,10 +121,10 @@ class ChannelTree {
             animation: 150,
             ghostClass: 'sortable-ghost',
             delay: 300,
-            dragClass: "dragging", 
+            dragClass: "dragging",
             chosenClass: "sortable-chosen",
-            swapThreshold: 0.5, 
-            handle: handle, 
+            swapThreshold: 0.5,
+            handle: handle,
             onEnd: function (evt) {
                 const movedItem = evt.item;
                 const newParent = evt.to;
@@ -131,7 +152,7 @@ class ChannelTree {
 
     static updateChannelTree() {
         console.log("Updating channel tree");
-    
+
         let channelStructure = {};
 
         channelStructure = {}
@@ -140,27 +161,32 @@ class ChannelTree {
         requestAnimationFrame(() => {
             let channeltree = document.getElementById("channeltree");
             let categories = channeltree.querySelectorAll(".categoryTrigger");
-    
-            let runner = categories.length-1;
+
+            let runner = categories.length - 1;
             categories.forEach(category => {
-                let channels = category.parentNode.querySelectorAll(".channelTrigger");                
+                let channels = category.parentNode.querySelectorAll(".channelTrigger");
                 let categoryId = category.id.replace("category-", "");
 
 
                 if (!channelStructure[categoryId]) {
-                    channelStructure[categoryId] = { channels: [], info: { sortId: runner} };
+                    channelStructure[categoryId] = {channels: [], info: {sortId: runner}};
                     runner -= 1;
-                }             
-    
+                }
+
                 channels.forEach(channel => {
-                    let channelId = channel.id.replace("channel-", "");                    
+                    let channelId = channel.id.replace("channel-", "");
                     channelStructure[categoryId].channels.push(channelId)
 
                     console.log(`   - ${channel.textContent} (${channelId})`);
                 });
             });
 
-            socket.emit("updateChannelTreeSorting", { id: UserManager.getID(), token: UserManager.getToken(), group: UserManager.getGroup(), data: JSON.stringify(channelStructure) }, function (response) {
+            socket.emit("updateChannelTreeSorting", {
+                id: UserManager.getID(),
+                token: UserManager.getToken(),
+                group: UserManager.getGroup(),
+                data: JSON.stringify(channelStructure)
+            }, function (response) {
 
                 console.log(response)
                 /*
@@ -176,5 +202,5 @@ class ChannelTree {
             });
         });
     }
-    
+
 }

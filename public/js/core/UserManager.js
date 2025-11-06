@@ -39,7 +39,7 @@ class UserManager {
         let bannedCode = "";
 
         if (isMuted) {
-            mutedCode = `<div style="color: indianred; border: 1px solid indianred;" class="info">
+            mutedCode = `<div style="color: indianred; border: 1px solid indianred;" class="info mutedMember">
                             <h1>Muted</h1>
                         </div>`
         }

@@ -1,5 +1,6 @@
 import {getFreshConfig, reloadConfig, versionCode} from "../../index.mjs";
 import Logger from "./logger.mjs";
+import {generateId} from "./main.mjs";
 
 // templateMiddleware.mjs
 export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfig) {
@@ -75,6 +76,7 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
             ["livekit.url", () => `${config.serverinfo.livekit.url}`],
 
             ["version", () => versionCode],
+            ["random", () => generateId(20)],
 
             ["meta.page.title", () => getMetaTitle(group, category, channel)],
             ["meta.page.description", () => getMetaDescription(group, category, channel)],

@@ -22,8 +22,9 @@ import Logger from "./logger.mjs";
 import path from "path";
 import {powVerifiedUsers} from "../sockets/pow.mjs";
 import {sendSystemMessage} from "../sockets/home/general.mjs";
-import {encodeToBase64} from "./mysql/helper.mjs";
+import {decodeFromBase64, encodeToBase64} from "./mysql/helper.mjs";
 import {exec, spawn} from "node:child_process";
+import {queryDatabase} from "./mysql/mysql.mjs";
 
 var serverconfigEditable;
 
@@ -216,6 +217,25 @@ export async function handleTerminalCommands(command, args) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     try {
+        if (command === 'migrateMessages') {
+            if(serverconfig.serverinfo.sql.enabled === true){
+                let messages = await queryDatabase("SELECT * FROM messages");
+                if(messages.length > 0){
+                    for(let message of messages){
+                        let decodedMessage = JSON.parse(decodeFromBase64(message.message));
+
+                        Logger.info(`Migrating message ${decodedMessage.messageId}, setting timestamp to ${decodedMessage.timestamp}`)
+                        await queryDatabase(`UPDATE messages set createdAt = ? WHERE messageId = ?`, [decodedMessage.timestamp, decodedMessage.messageId])
+                    }
+                    Logger.success("Migration done!")
+                }
+            }
+            else{
+                Logger.warn("SQL needs to be enabled and configurated inside the config.json. Its currently disabled!")
+            }
+
+            return;
+        }
         if (command == 'reload') {
             reloadConfig();
             consolas("Reloaded config".cyan);
@@ -861,13 +881,18 @@ export function validateMemberId(id, socket, token, bypass = false) {
         if(serverconfig.servermembers[id]?.token !== token){
             return false;
         }
+
+        // if is banned deny all connections
+        if(serverconfig.servermembers[id]?.isBanned === 1){
+            return false;
+        }
+
+        // update last online
+        serverconfig.servermembers[id].lastOnline = new Date().getTime();
+        saveConfig(serverconfig)
     }
 
-    if (id.length === 12 && isNaN(id) === false) {
-        return true;
-    } else {
-        return false;
-    }
+    return id.length === 12 && isNaN(id) === false;
 }
 
 export function escapeHtml(text) {
@@ -1066,6 +1091,10 @@ export function checkMemberBan(socket, member) {
         } else {
             return {result: true, timestamp: serverconfigEditable.ipblacklist[ip]}
         }
+    }
+
+    if(serverconfig.servermembers[member?.id.isBanned] === 1){
+        return {result: true, timestamp: null};
     }
 
     return {result: false};

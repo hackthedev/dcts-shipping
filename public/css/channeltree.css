@@ -85,3 +85,28 @@ a.channelTrigger.markChannelMessage{
     background-color: rgb(0, 0, 0, 0.2);
     border-radius: 4px;
 }
+
+#channeltree ul.participants img.avatar{
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+    object-fit: cover;
+    background-position: center center;
+    border-radius: 50%;
+}
+#channeltree ul.participants{
+    display: flex;
+    flex-direction: column;
+
+    margin-top: 4px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+#channeltree ul.participants li {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-content: center;
+    gap: 8px;
+    cursor: pointer;
+}

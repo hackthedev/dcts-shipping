@@ -283,14 +283,25 @@ sortable-chosen.sortable-ghost {
     filter: grayscale(100%);
 }
 
+#profile-qa #vcStatusText {
+    margin: 0;
+}
+
+
 #profile-qa {
     height: fit-content;
     width: 100%;
-
     padding: 10px;
 
     display: flex;
+    flex-direction: column;
     bottom: 0;
+}
+
+#profile-qa .row {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
 }
 
 #profile-qa-img-container {
@@ -449,9 +460,16 @@ pre.markdown {
     display: inline-block;
     float: left;
     width: 100%;
+    height: fit-content;
     border: none;
 
     /* margin: 8px 0 8px 0; */
+}
+
+.iframe-container iframe{
+    width: 500px;
+    height: 255px;
+    user-select: none;
 }
 
 .image-embed,
@@ -470,6 +488,9 @@ pre.markdown {
     margin: 8px 0 8px 0;
     border-radius: 6px;
     border: none;
+
+    width: 100%;
+    max-width: 400px;
 }
 
 #modalBox {
@@ -547,21 +568,60 @@ pre.markdown {
     display: inline-block !important;
 }
 
-#profile-qa-settings {
-    width: 20px;
-    height: 20px;
-
-    margin: 15px 15px 0 0;
-
-    background-color: transparent;
-    float: right;
-
+.profile-qa-icon.settings{
     background-image: url("/img/settings.png");
+}
+
+#profile-qa .row.voip #vcStatusChannelname {
+    font-style: italic;
+    font-weight: bold;
+}
+
+#profile-qa .row.voip.invisible{
+    padding: 0;
+    margin: 0;
+    max-height: 0;
+    opacity: 0;
+    transition: all 500ms ease-in-out;
+}
+#profile-qa .row.voip{
+    background-color: #02985f;
+    padding: 6px;
+    margin: -10px;
+    opacity: 1;
+    margin-bottom: 10px;
+    transition: all 500ms ease-in-out;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+.profile-qa-icon.voip{
+    background-image: url("/img/endcall.png");
+}
+
+.profile-qa-actions{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    align-self: center;
+}
+.profile-qa-actions.right{
+    margin-left: auto;
+}
+.profile-qa-icon{
+    display: flex;
+    width: 20px !important;
+    height: 20px !important;
     background-size: cover;
 
     object-fit: cover;
     background-color: transparent;
     background-position: center center;
+    cursor: pointer;
 }
 
 #profile-qa-info-status {

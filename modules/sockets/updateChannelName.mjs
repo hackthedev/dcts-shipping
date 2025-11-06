@@ -19,7 +19,7 @@ export default (io) => (socket) => {
                 response({ type: "success", msg: "Successfully updated channel name" });
 
                 // Let everyone know about the update
-                io.emit("receiveChannelTree", getChannelTree(member));
+                io.emit("receiveChannelTree");
             }
             else {
                 response({ type: "error", msg: "You dont have the permissions to manage channels" })

@@ -9,7 +9,7 @@ import {
     copyObject,
     escapeHtml,
     generateId,
-    getCastingMemberObject,
+    getCastingMemberObject, removeFromArray,
     sanitizeInput,
     sendMessageToUser,
     validateMemberId
@@ -26,6 +26,7 @@ export default (io) => (socket) => {
 
             // Remove token from cloned object so we dont broadcast it
             let member = copyObject(memberOriginal);
+            let oServerMember = getCastingMemberObject(serverconfig.servermembers[memberOriginal?.id]);
 
             // check member mute
             let muteResult = checkMemberMute(socket, member);
@@ -130,8 +131,8 @@ export default (io) => (socket) => {
                     member.timestamp = new Date().getTime();
                     member.messageId = messageid;
 
-                    member.icon = escapeHtml(member.icon);
-                    member.name = escapeHtml(member.name);
+                    member.icon = escapeHtml(oServerMember.icon);
+                    member.name = escapeHtml(oServerMember.name);
 
                     member.message = sanitizeInput(member.message);
                     member.message = convertMention(member.message);
@@ -139,7 +140,7 @@ export default (io) => (socket) => {
                     // replace empty lines
                     member.message = clearMessage(member.message, messageid)
 
-                    if (member.message == "" || member.message.length == 0) {
+                    if (member.message.trim() === "" || member.message.trim().length === 0) {
                         console.log("Message was empty")
                         return;
                     }
@@ -149,7 +150,7 @@ export default (io) => (socket) => {
                     Object.keys(serverconfig.serverroles).forEach(function (role) {
 
                         if (serverconfig.serverroles[role].members.includes(member.id) &&
-                            serverconfig.serverroles[role].info.displaySeperate == 1) {
+                            serverconfig.serverroles[role].info.displaySeperate === 1) {
                             userRoleArr.push(serverconfig.serverroles[role]);
                         }
                     });
@@ -197,17 +198,15 @@ export default (io) => (socket) => {
                     // Remove user from typing
                     var username = serverconfig.servermembers[member.id].name;
                     if (typingMembers.includes(username) === true) {
-                        typingMembers.pop(username);
+                        removeFromArray(typingMembers, username) // better
                     }
+
                     io.in(member.room).emit("memberTyping", typingMembers);
 
                     // Send message or update old one
                     if (member.editedMsgId == null) {
                         // New message
                         io.in(member.room).emit("messageCreate", member);
-
-
-                        io.emit("markChannel", {channelId: parseInt(member.channel), count: memberMessageCount});
                     }
                     // emit edit event of msg
                     else {
@@ -263,7 +262,6 @@ export default (io) => (socket) => {
             }
         } else {
             Logger.warn("Cant send message because member id wasnt valid");
-            Logger.warn("ID: " + member.id);
         }
     });
 

@@ -38,7 +38,6 @@ export default (io) => (socket) => {
 
             }, 4 * 1000);
 
-            //console.log(typingMembersTimeout[username]);
 
             io.in(member.room).emit("memberTyping", typingMembers);
         }

@@ -75,11 +75,11 @@ function updatePreview(){
 
 function saveSettings(){
     try{
-        if(channelname.value != null && channelname.value.length > 0 && channelname.value != serverconfigName){
-            socket.emit("updateChannelName", {id: UserManager.getID(), token: UserManager.getToken(), channel: getUrlParams("id").split("-")[1], name: channelname.value }, function (response) {
+        if(channelname.value != null && channelname.value.length > 0 && channelname.value !== serverconfigName){
+            socket.emit("updateChannelName", {id: UserManager.getID(), token: UserManager.getToken(), channel: getUrlParams("id"), name: channelname.value }, function (response) {
                 console.log(response);
 
-                alert(response.msg);
+                notify(response.msg, "success", null, true);
             });
         }
 

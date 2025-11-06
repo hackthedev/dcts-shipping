@@ -1,6 +1,6 @@
 
 const SANITIZE_OPTIONS = {
-    ALLOWED_TAGS: ['div', 'source', 'video', 'audio', 'span', 'p', 'br', 'b', 'i', 'u', 's', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'pre', 'code', 'blockquote', 'strong', 'em', 'img', 'mark'],
+    ALLOWED_TAGS: ['div', 'source', 'video', 'audio', 'span', 'p', 'br', 'b', 'i', 'u', 's', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'pre', 'code', 'blockquote', 'strong', 'em', 'img', 'mark', "iframe"],
     ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'class', 'style', 'data-id', 'controls', 'title', 'data-member-id', 'data-message-id']
 };
 

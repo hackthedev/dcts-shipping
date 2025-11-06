@@ -320,7 +320,7 @@ export default (io) => (socket) => {
                 castingMember.messageId = generateId(12);
                 castingMember.isSystemMsg = true;
 
-                castingMember.message = `<div><label class="username" data-member-id="msg-${castingMember.id}">${castingMember.name}</label> joined the server!</div>`;
+                castingMember.message = `<div><label class="username" data-member-id="${castingMember.id}">${truncateText(castingMember.name, 50)}</label> joined the server!</div>`;
                 saveChatMessage(castingMember);
 
                 io.emit("updateMemberList");
@@ -383,6 +383,7 @@ export default (io) => (socket) => {
                 serverconfig.servermembers[member.id].icon = xssFilters.inHTMLData(member.icon);
                 serverconfig.servermembers[member.id].banner = xssFilters.inHTMLData(member.banner);
                 serverconfig.servermembers[member.id].lastOnline = new Date().getTime();                
+                socket.memberId = member.id;
 
                 saveConfig(serverconfig);
 

@@ -18,7 +18,7 @@ export default (io) => (socket) => {
             var channel = room[2];
 
             // annoying
-            if (channel == "null" || category == "null" || group == "null") return;
+            if (channel === "null" || category === "null" || group === "null") return;
 
             if (!hasPermission(member.id, "viewChannel", channel)) {
                 sendMessageToUser(socket.id, JSON.parse(
@@ -42,13 +42,13 @@ export default (io) => (socket) => {
                 if (serverconfig.groups[group].channels.categories[category].channel[channel] != null) {
 
                     // If its a text channel
-                    if (serverconfig.groups[group].channels.categories[category].channel[channel].type == "text") {
+                    if (serverconfig.groups[group].channels.categories[category].channel[channel].type === "text") {
 
                         // Permission already checked above for text on default                        
                         socket.join(escapeHtml(member.room));
                     }
                     // If its a voice channel
-                    else if (serverconfig.groups[group].channels.categories[category].channel[channel].type == "voice") {
+                    else if (serverconfig.groups[group].channels.categories[category].channel[channel].type === "voice") {
 
                         // If user can use VC
                         if (!hasPermission(member.id, "useVOIP", channel)) {

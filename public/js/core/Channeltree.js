@@ -53,11 +53,12 @@ class ChannelTree {
                         let channel = chanCollection[chan];
 
                         let channelHTML = `
-                            <li draggable="true" channelType="${channel.type}" id="channel-${channel.id}" style="color: #ABB8BE; cursor: pointer;user-select: none;" data-channel-id="${channel.id}">                                
+                            <li draggable="true" channelType="${channel.type}" id="channel-${channel.id}" style="color: #ABB8BE; cursor: pointer;user-select: none;" data-category-id="${category.info.id}" data-channel-id="${channel.id}">                                
                                 <a 
                                     channelType="${channel.type}" 
                                     class="channelTrigger msgCount_${channel.msgCount}" 
                                     data-channel-id="${channel.id}" 
+                                    data-category-id="${category.info.id}"
                                     data-message-count="${channel.msgCount}"
                                     id="channel-${channel.id}" 
                                     onclick="setUrl('?group=${group}&category=${category.info.id}&channel=${channel.id}'${channel.type === "voice" ? `, true` : ""})" 

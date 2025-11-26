@@ -506,7 +506,7 @@ async function checkMediaTypeAsync(url) {
                         throw new Error(`HTTP error! status: ${xhr.status}`);
                     }
                 } catch (error) {
-                    //console.error('Error checking media type:', error);
+                    console.error('Error checking media type:', error);
                     reject('error');
                 }
             }
@@ -956,10 +956,10 @@ function getChannelTree() {
 }
 
 
-
 function createYouTubeEmbed(url, messageId) {
     let u = new URL(url.trim());
     let host = u.hostname.replace("www.", "").toLowerCase();
+
     let code = "";
     let t = "";
 
@@ -968,8 +968,18 @@ function createYouTubeEmbed(url, messageId) {
     if (u.hash.startsWith("#")) t = u.hash.replace("#", "");
 
     if (host === "youtube.com" || host === "m.youtube.com") {
-        if (u.searchParams.has("v")) code = u.searchParams.get("v");
-        else if (u.pathname.startsWith("/embed/")) code = u.pathname.replace("/embed/", "");
+        // watch?v=...
+        if (u.searchParams.has("v")) {
+            code = u.searchParams.get("v");
+        }
+        // /embed/...
+        else if (u.pathname.startsWith("/embed/")) {
+            code = u.pathname.replace("/embed/", "");
+        }
+        // /shorts/...
+        else if (u.pathname.startsWith("/shorts/")) {
+            code = u.pathname.replace("/shorts/", "").split("?")[0];
+        }
     } else if (host === "youtu.be") {
         code = u.pathname.replace("/", "");
     }
@@ -981,7 +991,7 @@ function createYouTubeEmbed(url, messageId) {
 
     return `
         <div data-message-id="${messageId.replace("msg-", "")}" class="iframe-container" id="msg-${messageId}">
-            <iframe 
+            <iframe
                 data-message-id="${messageId.replace("msg-", "")}"
                 style="border:none"
                 src="${embed}"

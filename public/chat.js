@@ -572,6 +572,7 @@ async function markdown(msg, msgid) {
         catch(mediaTypeError) {
             //console.error("Error while checking media type")
             //console.error(mediaTypeError);
+            return;
         }
 
         const msgUrls = getUrlFromText(msg);
@@ -984,13 +985,17 @@ function createYouTubeEmbed(url, messageId) {
         code = u.pathname.replace("/", "");
     }
 
-    if (!code) return "";
+    if (!code) {
+        console.warn("No youtube code found in url")
+        return;
+    }
 
     let embed = "https://www.youtube.com/embed/" + code;
     if (t) embed += "?start=" + parseInt(t);
 
     return `
         <div data-message-id="${messageId.replace("msg-", "")}" class="iframe-container" id="msg-${messageId}">
+            <a href="${url}" target="_blank">${url}</a><br>
             <iframe
                 data-message-id="${messageId.replace("msg-", "")}"
                 style="border:none"

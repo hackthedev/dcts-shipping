@@ -7,8 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
 
-    <script type="text/javascript" src="../../js/core/Client.js"></script>
-    <script type="text/javascript" src="../../js/core/Crypto.js"></script>
+    <script type="text/javascript" src="/js/core/Client.js"></script>
+    <script type="text/javascript" src="/js/core/Crypto.js"></script>
     <script
             src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
             integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
@@ -17,16 +17,18 @@
 
 
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../../css/themes/default.css">
+    <link rel="stylesheet" href="/css/themes/default/default.css">
 
-    <script src="../../js/core/CookieManager.js"></script>
-    <script src="../../js/core/UserManager.js"></script>
-    <script type="text/javascript" src="../../js/core/PoW.js"></script>
-    <script type="text/javascript" src="../../js/core/FileManager.js"></script>
-    <script type="text/javascript" src="../utility.js"></script>
-    <script type="text/javascript" src="settings.js"></script>
-    <script type="text/javascript" src="../../js/upload.js"></script>
-    <script type="text/javascript" src="../../js/sysmsg.js"></script>
+
+    <script defer src="/js/prompts.js?v={{random}}"></script>
+    <script defer src="../../js/core/CookieManager.js"></script>
+    <script defer src="../../js/core/UserManager.js"></script>
+    <script defer type="text/javascript" src="/js/core/PoW.js"></script>
+    <script defer type="text/javascript" src="/js/core/FileManager.js"></script>
+    <script defer type="text/javascript" src="../utility.js"></script>
+    <script defer type="text/javascript" src="settings.js"></script>
+    <script defer type="text/javascript" src="/js/upload.js"></script>
+    <script defer type="text/javascript" src="/js/sysmsg.js"></script>
 
     <title>User Settings</title>
 </head>
@@ -131,6 +133,7 @@
             <h2>Profile Settings</h2>
             <a onclick='setUrl("?page=profile")'>Profile</a>
             <a onclick='setUrl("?page=voip")'>Voice Chat</a>
+            <a onclick='setUrl("?page=themes")'>Themes</a>
             <hr>
         </div>
 

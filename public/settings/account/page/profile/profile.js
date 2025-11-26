@@ -12,6 +12,13 @@ var preview_icon = document.getElementById("profile_icon");
 var preview_banner = document.getElementById("profile_banner");
 var saveButton = document.getElementById("settings_profile_save");
 
+window.updatePreview = updatePreview;
+window.saveSettings = saveSettings;
+window.exportAccount = exportAccount;
+window.importAccount = importAccount;
+window.resetAccount = resetAccount;
+window.handleUpload = handleUpload;
+
 async function handleUpload(files, id) {
     try {
         // Ensure `files` is an array of `File` objects

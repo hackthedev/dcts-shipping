@@ -310,6 +310,43 @@ class UserManager {
         if (passprompt) return passprompt;
     }
 
+    static getTheme() {
+        var theme = CookieManager.getCookie("theme");
+
+        if (theme == null || theme.length <= 0) {
+            return "default.css";
+        } else {
+            return theme;
+        }
+    }
+
+    static setThemeAccent(color) {
+        CookieManager.setCookie("theme_accent", color);
+    }
+
+    static getThemeAccent() {
+        var themeAccent = CookieManager.getCookie("theme_accent");
+        if (themeAccent == null || themeAccent.length <= 0) {
+            console.error("Couldnt get theme accent")
+            return "#131415";
+        } else {
+            return CookieManager.getCookie("theme_accent");
+        }
+    }
+
+    static resetTheme() {
+        CookieManager.setCookie("theme", "default.css");
+    }
+
+    static setTheme(themeFileName) {
+        if (themeFileName == null || themeFileName.length <= 0) {
+            console.error("Couldnt set theme as theme file name wasnt supplied")
+            return null;
+        } else {
+            CookieManager.setCookie("theme", themeFileName);
+        }
+    }
+
     static getToken() {
         var token = CookieManager.getCookie("dcts_token");
 
@@ -376,11 +413,27 @@ class UserManager {
         }
     }
 
+    static pickRandomFromArray(array){
+        return array[Math.floor(Math.random() * array.length)];
+    }
+
+    static getRandomUsername(){
+        let randomUsernames = [
+            "Billy",
+            "Arnold",
+            "John Connor",
+            "Kenny"
+        ];
+
+        return UserManager.pickRandomFromArray(randomUsernames);
+    }
+
     static getUsername() {
+
         var username = CookieManager.getCookie("username");
 
         if (username == null || username.length <= 0) {
-            return "User";
+            return UserManager.getRandomUsername();
         } else {
             try {
                 UserManager.updateUsernameOnUI(username);
@@ -945,7 +998,7 @@ class UserManager {
 
 
                 // resubmit userjoin but with onboarding done
-                userJoined(true, values.password, values.loginName)
+                await userJoined(true, values.password, values.loginName)
             },
             null,
             null,

@@ -1,53 +1,87 @@
-let emojiList = []; // Store emoji names with IDs
-let suggestionsIndex = -1; // Tracks the currently selected suggestion
-let matches = []; // Stores the filtered emoji list
+let emojiList = [];
+let suggestionsIndex = -1;
+let matches = [];
 
 let emojiElement;
-
-function fetchEmojis() {
+async function fetchEmojis() {
+    if(!socket || !socket.connected){
+        console.log(socket)
+        console.log(socket?.connected)
+    }
     return new Promise((resolve, reject) => {
         socket.emit("getEmojis",
             { id: UserManager.getID(), token: UserManager.getToken() },
             function (response) {
+            console.log(response)
                 if (response.type === "success") {
                     emojiList = response.data;
-                    resolve(emojiList); 
+                    resolve(emojiList);
                 } else {
                     console.log("Failed to fetch emojis:", response.msg);
                     reject(response.msg);
+                    emojiList = [""]
                 }
             }
         );
     });
 }
 
+function getTextBeforeCursor() {
+    const range = quill.getSelection();
+    if (!range) return "";
 
-function initializeEmojiAutocomplete(element, quill) {
+    const delta = quill.getContents(0, range.index);
+    let text = "";
 
-    fetchEmojis()
+    delta.ops.forEach(op => {
+        if (typeof op.insert === "string") {
+            text += op.insert;
+        } else {
+            text += " ";
+        }
+    });
 
-    // Listen for text-change events from Quill
+    return text.replace(/\s+$/, "");
+}
+
+async function initializeEmojiAutocomplete(element) {
+    console.log("getting emojis")
+    await fetchEmojis()
+    console.log("got emojis")
+
+    let savedCursor = 0;
+
+    quill.on("selection-change", r => {
+        if (r) savedCursor = r.index;
+    });
+
     quill.on('text-change', function (delta, oldDelta, source) {
-        const inputValue = quill.getText(); // Get plain text from the editor
         const selection = quill.getSelection();
-        if (!selection) return; // If there's no cursor, skip
+        if (!selection) return;
 
-        const cursorPosition = selection.index; // Get the current cursor position
+        const cursorPosition = selection.index;
+        savedCursor = cursorPosition;
 
-        // Get text up to the cursor position
-        const textBeforeCursor = inputValue.slice(0, cursorPosition);
+        const textBeforeCursor = getTextBeforeCursor()
+        const match = textBeforeCursor.match(/:([^\s:]*)$/);
 
-        // Match the last ":term" pattern
-        const match = textBeforeCursor.match(/:(\w*)$/); // Looks for ":word"
 
         if (match) {
-            const searchTerm = match[1]; // Extract the term after ":"
+            const searchTerm = match[1];
 
             if (searchTerm.length > 0) {
-                matches = emojiList.filter(emoji => emoji.includes(`_${searchTerm}`));
+                console.log("emojiList =", emojiList.map(e => e.filename));
+                console.log("searchTerm =", searchTerm);
+
+
+                matches = emojiList.filter(emoji => {
+                    const namePart = emoji.filename.split("_").slice(1).join("_").toLowerCase();
+                    return namePart.startsWith(searchTerm.toLowerCase());
+                });
+
                 if (matches.length > 0) {
-                    suggestionsIndex = -1; // Reset selection index
-                    showSuggestions(matches, element, cursorPosition);
+                    suggestionsIndex = -1;
+                    showSuggestions(matches, element);
                 } else {
                     hideSuggestions();
                 }
@@ -59,8 +93,7 @@ function initializeEmojiAutocomplete(element, quill) {
         }
     });
 
-    // Show suggestions
-    function showSuggestions(matches, inputField, cursorPosition) {
+    function showSuggestions(matches, inputField) {
         let suggestionsContainer = document.getElementById("emoji-suggestions");
 
         if (!suggestionsContainer) {
@@ -78,7 +111,6 @@ function initializeEmojiAutocomplete(element, quill) {
             document.body.appendChild(suggestionsContainer);
         }
 
-        // Populate suggestions and ensure height consistency
         suggestionsContainer.innerHTML = "";
         matches.forEach((match, index) => {
             const suggestion = document.createElement("div");
@@ -89,31 +121,29 @@ function initializeEmojiAutocomplete(element, quill) {
             suggestion.className = "emoji-suggestion-entry";
             suggestion.setAttribute("data-index", index);
 
-            // Extract Emoji Details
             const [id, name] = extractEmojiDetails(match);
 
-            // Emoji Image
             const emojiImage = document.createElement("img");
-            emojiImage.src = `/emojis/${match}`; // Full path to the emoji image
+            emojiImage.src = `/emojis/${match.filename}`;
             emojiImage.style.width = "25px";
             emojiImage.style.height = "25px";
             emojiImage.style.marginRight = "8px";
 
-            // Emoji Name
             const emojiName = document.createElement("span");
-            emojiName.textContent = name; // Show the clean emoji name
+            emojiName.textContent = name;
 
             suggestion.appendChild(emojiImage);
             suggestion.appendChild(emojiName);
 
-            suggestion.addEventListener("click", () => {
-                insertEmoji(match, quill, cursorPosition);
+            suggestion.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                insertEmoji(match);
                 hideSuggestions();
             });
+
             suggestionsContainer.appendChild(suggestion);
         });
 
-        // Ensure the dropdown's position is updated dynamically
         adjustDropdownPosition(suggestionsContainer, inputField);
     }
 
@@ -121,114 +151,131 @@ function initializeEmojiAutocomplete(element, quill) {
         const rect = inputField.getBoundingClientRect();
         const dropdownHeight = suggestionsContainer.offsetHeight;
 
-        // Check if there’s enough space above or below
         const spaceAbove = rect.top;
         const spaceBelow = window.innerHeight - rect.bottom;
 
-        // If there's more space below, position it below; otherwise, position above
         if (spaceBelow >= dropdownHeight || spaceBelow >= spaceAbove) {
-            suggestionsContainer.style.top = `${rect.bottom + window.scrollY}px`; // Below input
+            suggestionsContainer.style.top = `${rect.bottom + window.scrollY}px`;
         } else {
-            suggestionsContainer.style.top = `${rect.top + window.scrollY - dropdownHeight - 5}px`; // Above input
+            suggestionsContainer.style.top = `${rect.top + window.scrollY - dropdownHeight - 5}px`;
         }
 
-        // Align horizontally
         suggestionsContainer.style.left = `${rect.left + window.scrollX}px`;
-        suggestionsContainer.style.width = `${rect.width}px`; // Match input field width
-    }
-
-    // Hide suggestions
-    function hideSuggestions() {
-        const suggestionsContainer = document.getElementById("emoji-suggestions");
-        if (suggestionsContainer) {
-            suggestionsContainer.remove();
-        }
-    }
-
-    // Insert selected emoji
-    function insertEmoji(emojiFullName, quill, cursorPosition) {
-        const inputValue = quill.getText();
-        const textBeforeCursor = inputValue.slice(0, cursorPosition);
-        const colonIndex = textBeforeCursor.lastIndexOf(":");
-
-        // Extract the emoji ID (e.g., "emoji_123456789_name.png" -> "123456789")
-        const emojiId = extractEmojiDetails(emojiFullName)[0];
-
-        // Replace ":term" with ":emojiid:"
-        const emojiCode = `:${emojiId}:`;
-        quill.deleteText(colonIndex, cursorPosition - colonIndex); // Delete ":term"
-        quill.insertText(colonIndex, emojiCode); // Insert ":emojiid:"
-        quill.setSelection(colonIndex + emojiCode.length); // Move cursor after the emoji code
-    }
-
-
-    // Extract emoji details
-    function extractEmojiDetails(emojiFullName) {
-        const parts = emojiFullName.split('_');
-        const id = parts[1];
-        const nameWithExtension = parts.slice(2).join('_');
-        const name = nameWithExtension.split('.')[0]; // Remove file extension
-        return [id, name];
+        suggestionsContainer.style.width = `${rect.width}px`;
     }
 }
 
-async function text2Emoji(text, returnCodeOnly = false) {
-
-    if (emojiList.length == 0) {
-        await fetchEmojis()
+function hideSuggestions() {
+    const suggestionsContainer = document.getElementById("emoji-suggestions");
+    if (suggestionsContainer) {
+        suggestionsContainer.remove();
     }
+}
 
-    // Helper function to find emoji filename by ID
-    function findEmojiByID(emojiId) {
-        const result = emojiList.find(emoji => emoji.includes(`_${emojiId}_`)) || null;
-        return result;
-    }
+function findEmojiTrigger() {
+    const range = quill.getSelection();
+    if (!range) return null;
 
-    // Check if the message contains only emoji codes
-    function isOnlyEmoji(message) {
-        const textWithoutEmoji = message.replace(/:(\d+):/g, "").trim().replaceAll(" ", "").replace("<p></p>", "");
-        return textWithoutEmoji.length === 0;
-    }
+    const index = range.index;
 
-    // Replace all :emojiid: patterns with the corresponding output
-    const replacedText = text.replace(/:(\d+):/g, (match, emojiId) => {
+    const delta = quill.getContents(0, index);
+    let text = "";
 
-        const emojiFile = findEmojiByID(emojiId);
-        if (emojiFile) {
-            const emojiName = extractEmojiDetails(emojiFile)[1]; // Extract emoji name
+    delta.ops.forEach(op => {
+        if (typeof op.insert === "string") {
+            text += op.insert;
+        } else {
+            text += " ";
+        }
+    });
 
-            // Check if the message is only emojis
-            const sendBigEmoji = isOnlyEmoji(text) ? "big" : ""; // Adjust class
+    const match = text.match(/:(\w*)$/);
+    if (!match) return null;
 
-            if (returnCodeOnly) {
-                // Return the HTML-formatted emoji code
-                return `<span><img title="${emojiName}" onerror="this.src='/img/error.png'" class="inline-text-emoji ${sendBigEmoji}" src="/emojis/${emojiFile}"></span>`;
-            }
+    return {
+        start: text.lastIndexOf(":"),
+        end: text.length,
+        search: match[1]
+    };
+}
 
-            // Return the full HTML structure for the emoji
-            return `<span><img title="${emojiName}" onerror="this.src='/img/error.png'" class="inline-text-emoji ${sendBigEmoji}" src="/emojis/${emojiFile}"></span>`;
+function insertEmoji(emojiObj, force = false) {
+    const trigger = findEmojiTrigger();
+
+    if (!trigger && !force) return;
+
+    let pos = 0;
+
+    if (force) {
+        const len = quill.getLength();
+        const sel = quill.getSelection();
+
+        if (sel && sel.index === len) {
+            pos = len - 1;
+        } else if (!sel) {
+            pos = len - 1;
+        } else {
+            pos = sel.index;
         }
 
-        console.log(`Emoji ID ${emojiId} not found, returning original text.`);
-        return match; // If not found, leave the text as is
+    } else {
+        pos = trigger.start;
+        quill.deleteText(trigger.start, trigger.end - trigger.start);
+    }
+
+    quill.insertEmbed(pos, "emoji", {
+        src: `/emojis/${emojiObj.filename}`,
+        class: "inline-text-emoji",
+        ["data-filehash"]: emojiObj.filename.split("_")[0]
+    });
+
+    quill.setSelection(pos + 1);
+    focusEditor();
+}
+
+
+
+function extractEmojiDetails(emojiObj) {
+    const filename = emojiObj.filename;
+
+    const lastUnderscore = filename.lastIndexOf("_");
+    const id = filename.slice(0, lastUnderscore);
+    const nameWithExt = filename.slice(lastUnderscore + 1);
+
+    const name = nameWithExt.replace(/\.[^.]+$/, "");
+    return [id, name];
+}
+
+function isOnlyText(html) {
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+
+    let text = temp.textContent || "";
+    text = text.replace(/\s+/g, "").replace(/:([a-fA-F0-9]+):/g, "")
+    return text.length === 0;
+}
+
+async function text2Emoji(text, returnCodeOnly = false) {
+    const replacedText = text.replace(/:([a-fA-F0-9]+):/g, (match, emojiId) => {
+        const emojiObject = findEmojiByID(emojiId);
+        if (emojiObject) {
+            const emojiName = String(emojiObject.filename.split("_")[1].split(".")[0])
+            const sendBigEmoji = isOnlyText(text) ? "big" : "";
+            let emojiFileHash = emojiObject.filename.split("_")[0];
+
+            if (returnCodeOnly) {
+                return `<img title="${emojiName}" data-filehash="${emojiFileHash}" onerror="this.src='/img/error.png'" class="inline-text-emoji ${sendBigEmoji}" src="/emojis/${emojiObject.filename}">`;
+            }
+
+            return `<img title="${emojiName}" data-filehash="${emojiFileHash}" onerror="this.src='/img/error.png'" class="inline-text-emoji ${sendBigEmoji}" src="/emojis/${emojiObject.filename}">`;
+        }
+
+        return match
     });
 
     return replacedText;
 }
 
-
-
-
-
-function extractEmojiDetails(emojiFullName) {
-    const parts = emojiFullName.split('_');
-    const id = parts[1]; // Extract the emoji ID
-    const nameWithExtension = parts.slice(2).join('_');
-    const name = nameWithExtension.split('.')[0]; // Extract the name without extension
-    return [id, name];
-}
-
-
 function findEmojiByID(emojiId) {
-    return emojiList.find(emoji => emoji.includes(`_${emojiId}_`)) || null;
+    return emojiList.find(e => e.filename.startsWith(`${emojiId}_`)) || null;
 }

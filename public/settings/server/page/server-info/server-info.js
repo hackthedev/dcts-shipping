@@ -11,6 +11,9 @@ let serverconfigRegistrationEnabled;
 
 const customPrompts = new Prompt();
 
+window.updatePreview = updatePreview;
+window.saveSettings = saveSettings;
+
 socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageServer" }, function (response) {
 
     if(response.permission == "denied"){

@@ -5,11 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d055b26f-cdb9-4567-97eb-7ab0136f9bea" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../config.json" beforeDir="false" afterPath="$PROJECT_DIR$/../config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cache/proxy/3bf03ee0783a4c9226c80c44184f0d31ee104d99" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cache/proxy/3bf03ee0783a4c9226c80c44184f0d31ee104d99.type" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cache/proxy/404aba9cb0a43c2b58be7f3adc8ff1b2e02197cb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cache/proxy/404aba9cb0a43c2b58be7f3adc8ff1b2e02197cb.type" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cache/proxy/99343205eebbf3f20f55dd5407a4575d5ea399d3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cache/proxy/99343205eebbf3f20f55dd5407a4575d5ea399d3.type" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cache/proxy/a4b9600aad658140781450deb174711659afaea5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cache/proxy/a4b9600aad658140781450deb174711659afaea5.type" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cache/proxy/b582d26be925acacd261c31190f948c4f786918d" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cache/proxy/b582d26be925acacd261c31190f948c4f786918d.type" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cache/proxy/f0de864c707703f9e44ac6cdf89a8e4b4b59ef26" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cache/proxy/f0de864c707703f9e44ac6cdf89a8e4b4b59ef26.type" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chat.js" beforeDir="false" afterPath="$PROJECT_DIR$/chat.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/discovery.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/discovery.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings/server/page/emojis/emojis.js" beforeDir="false" afterPath="$PROJECT_DIR$/settings/server/page/emojis/emojis.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,15 +47,17 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-PS-252.25557.128" />
-        <option value="bundled-php-predefined-a98d8de5180a-ce40d0652d34-com.jetbrains.php.sharedIndexes-PS-252.25557.128" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-WS-252.27397.92" />
       </set>
     </attachedChunks>
   </component>
@@ -62,6 +75,8 @@
       <workItem from="1760821442495" duration="2400000" />
       <workItem from="1761888605012" duration="1881000" />
       <workItem from="1761970325922" duration="694000" />
+      <workItem from="1763409313723" duration="850000" />
+      <workItem from="1763413895640" duration="2000" />
     </task>
     <servers />
   </component>

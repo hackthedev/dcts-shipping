@@ -1,7 +1,53 @@
 import {queryDatabase} from "./mysql.mjs";
-import {XMLHttpRequest, fetch} from "../../../index.mjs";
+import {XMLHttpRequest, fetch, serverconfig} from "../../../index.mjs";
 import {report} from "process";
 import Logger from "../logger.mjs";
+
+export async function saveMemberToDB(id, data) {
+
+    if (!data || typeof data !== "object") return console.log("[saveMemberToDB] invalid data", data);
+
+    const cols = Object.keys(data);
+    const vals = Object.values(data);
+    const placeholders = cols.map(() => "?").join(",");
+
+    const sql = `REPLACE INTO members (${cols.join(",")}) VALUES (${placeholders})`;
+
+    try {
+        await queryDatabase(sql, vals);
+    } catch (err) {
+        Logger.debug(err);
+    }
+}
+
+
+export async function loadMembersFromDB() {
+    if (!serverconfig || typeof serverconfig !== "object") serverconfig = {};
+    if (!serverconfig.servermembers || typeof serverconfig.servermembers !== "object") {
+        serverconfig.servermembers = {};
+    }
+
+    const rows = await queryDatabase("SELECT * FROM members");
+    if (!Array.isArray(rows)) return;
+
+    for (const row of rows) {
+        serverconfig.servermembers[row.id] = row;
+    }
+
+    const sys = {
+        id: "system",
+        name: "System",
+        icon: "/img/default_icon.png",
+        token: ""
+    };
+
+    await saveMemberToDB("system", sys);
+
+    const [systemRow] = await queryDatabase("SELECT * FROM members WHERE id = ?", ["system"]);
+    if (systemRow) {
+        serverconfig.servermembers["system"] = systemRow;
+    }
+}
 
 export async function cacheMediaUrl(url, mediaType) {
     const query = `INSERT IGNORE INTO url_cache (url, media_type) VALUES (?, ?)`;

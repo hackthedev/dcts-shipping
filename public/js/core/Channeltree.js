@@ -29,7 +29,7 @@ class ChannelTree {
                 let category = catCollection[cat];
 
                 let categoryHTML = `
-                    <details class="category" open>
+                    <details class="category" data-category-id="${category.info.id}" open>
                         <summary class="categoryTrigger" data-category-id="${category.info.id}" id="category-${category.info.id}" style="color: #ABB8BE; cursor: pointer;user-select: none;">
                             ${category.info.name}
                         </summary>
@@ -52,23 +52,18 @@ class ChannelTree {
                     sortedChans.forEach(chan => {
                         let channel = chanCollection[chan];
 
-                        let hasNewMessages = false;
-
-                        let savedCount = parseInt(CookieManager.getCookie(`message-marker_${channel.id}`)) || 0;
-
-                        // dont mark voice channels. there is no point in it
-                        if (channel.msgCount !== savedCount && channel.type !== "voice") {
-                            hasNewMessages = true;
-                            // we only wanna set it once we actually read the message in the channel or clicked the channel.
-                            // so we mark the messages as read when we request the chat messages
-                            // CookieManager.setCookie(`message-marker_${chan.id}`, chan.msgCount);
-                        }
-
                         let channelHTML = `
-                            <li draggable="true" channelType="${channel.type}" id="channel-${channel.id}" style="color: #ABB8BE; cursor: pointer;user-select: none;" data-channel-id="${channel.id}">
-                                <a channelType="${channel.type}" class="channelTrigger msgCount_${channel.msgCount} ${hasNewMessages ? `markChannelMessage` : ""}" data-channel-id="${channel.id}" id="channel-${channel.id}" onclick="setUrl('?group=${group}&category=${category.info.id}&channel=${channel.id}'${channel.type == "voice" ? `, true` : ""})" 
-                                   style="display: block;">
-                                    ${channel.type === "text" ? "⌨" : "🎙️"} ${channel.name}
+                            <li draggable="true" channelType="${channel.type}" id="channel-${channel.id}" style="color: #ABB8BE; cursor: pointer;user-select: none;" data-channel-id="${channel.id}">                                
+                                <a 
+                                    channelType="${channel.type}" 
+                                    class="channelTrigger msgCount_${channel.msgCount}" 
+                                    data-channel-id="${channel.id}" 
+                                    data-message-count="${channel.msgCount}"
+                                    id="channel-${channel.id}" 
+                                    onclick="setUrl('?group=${group}&category=${category.info.id}&channel=${channel.id}'${channel.type === "voice" ? `, true` : ""})" 
+                                    style="display: block;"
+                                >                                    
+                                    <span class="message-marker-icon"></span>${channel.type === "text" ? "⌨" : "🎙️"} ${channel.name}
                                 </a>
                                 ${channel.type === "voice" ?
                             `<ul class="participants" style="display: none;"></ul>`
@@ -76,6 +71,19 @@ class ChannelTree {
                             </li>
                         `;
                         categoryElement.insertAdjacentHTML("beforeend", channelHTML);
+
+                        // fix js render tick again
+                        setTimeout(() => {
+                            // important to do the message counter check AFTERWARDS
+                            if(channel.msgCount !== ChatManager.getChannelMarkerCounter(channel.id)){
+                                if(!ChatManager.getChannelMarkerCounter(channel.id)){
+                                    ChatManager.setChannelMarkerCounter(channel.id, channel.msgCount);
+                                }
+                                else{
+                                    ChatManager.setChannelMarker(channel.id, true);
+                                }
+                            }
+                        }, 1)
 
                         // get members that are in that voice channel
                         if (channel.type === "voice") {
@@ -94,9 +102,6 @@ class ChannelTree {
                                 }
                             )
                         }
-
-                        if (!hasNewMessages) markChannel(channel.id, true)
-                        if (hasNewMessages) markChannel(channel.id, false, channel.msgCount)
                     });
                 }
             });

@@ -25,6 +25,7 @@ import {sendSystemMessage} from "../sockets/home/general.mjs";
 import {decodeFromBase64, encodeToBase64} from "./mysql/helper.mjs";
 import {exec, spawn} from "node:child_process";
 import {queryDatabase} from "./mysql/mysql.mjs";
+import {checkMemberMigration} from "./migrations/memberJsonToDb.mjs";
 
 var serverconfigEditable;
 
@@ -217,6 +218,11 @@ export async function handleTerminalCommands(command, args) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     try {
+        if(command === "load"){
+            const mem = process.memoryUsage();
+            Logger.info(`RAM usage: ${(mem.heapUsed / 1024 / 1024).toFixed(1)} MB`);
+            return;
+        }
         if (command === 'migrateMessages') {
             if(serverconfig.serverinfo.sql.enabled === true){
                 let messages = await queryDatabase("SELECT * FROM messages");
@@ -236,8 +242,11 @@ export async function handleTerminalCommands(command, args) {
 
             return;
         }
+        if (command == 'migrateMembers') {
+            await checkMemberMigration(true);
+        }
         if (command == 'reload') {
-            reloadConfig();
+            await reloadConfig();
             consolas("Reloaded config".cyan);
         }
         if (command == 'debug') {
@@ -552,6 +561,8 @@ export function checkBool(value, type) {
 
 export function checkConfigAdditions() {
 
+    checkObjectKeys(serverconfig, "serverinfo.defaultTheme", "default.css")
+
     // livekit VC
     checkObjectKeys(serverconfig, "serverinfo.livekit.enabled", true)
     checkObjectKeys(serverconfig, "serverinfo.livekit.key", "dev")
@@ -577,12 +588,6 @@ export function checkConfigAdditions() {
         </p>    
     `)
 
-    // system user account
-    checkObjectKeys(serverconfig, "servermembers.system.id", "system")
-    checkObjectKeys(serverconfig, "servermembers.system.displayName", "System")
-    checkObjectKeys(serverconfig, "servermembers.system.avatar", "/img/default_icon.png")
-    checkObjectKeys(serverconfig, "servermembers.system.token", "")
-
     // home settings
     checkObjectKeys(serverconfig, "serverinfo.home.banner_url", "")
     checkObjectKeys(serverconfig, "serverinfo.home.title", "Default Server Title")
@@ -601,7 +606,6 @@ export function checkConfigAdditions() {
 
 
     checkObjectKeys(serverconfig, "groups.*.channels.categories.*.channel.*.msgCount", 0)
-    checkObjectKeys(serverconfig, "servermembers.*.pow", "")
     checkObjectKeys(serverconfig, "serverinfo.slots.limit", 100)
     checkObjectKeys(serverconfig, "serverinfo.slots.reserved", 4)
     checkObjectKeys(serverconfig, "serverinfo.slots.ipWhitelist", [
@@ -771,7 +775,6 @@ export function checkObjectKeys(obj, path, defaultValue) {
     }
 
     recursiveCheck(obj, 0);
-    saveConfig(obj);
 }
 
 
@@ -853,22 +856,6 @@ export function validateMemberId(id, socket, token, bypass = false) {
     }
 
     if (!powVerifiedUsers.includes(socket.id)) {
-
-        /*
-        sendMessageToUser(socket.id, JSON.parse(
-            `{
-                "title": "Verification Pending",
-                "message": "Your identity security is too low.#Please wait for your client to adjust",
-                "buttons": {
-                    "0": {
-                        "text": "Ok",
-                        "events": "closePrompt();"
-                    }
-                },
-                "type": "error",
-                "popup_type": "confirm"
-            }`)); */
-
         return false;
     }
 
@@ -886,10 +873,14 @@ export function validateMemberId(id, socket, token, bypass = false) {
         if(serverconfig.servermembers[id]?.isBanned === 1){
             return false;
         }
+    }
 
+    if(id){
         // update last online
         serverconfig.servermembers[id].lastOnline = new Date().getTime();
-        saveConfig(serverconfig)
+        if(serverconfig.servermembers[id]?.onboarding === false){
+            return false;
+        }
     }
 
     return id.length === 12 && isNaN(id) === false;
@@ -953,27 +944,12 @@ export function tenorCallback_search(responsetext, id) {
 
     // load the GIFs -- for our example we will load the first GIFs preview size (nanogif) and share size (gif)
 
+    const targetSocket = [...io.sockets.sockets.values()]
+        .find(s => s.data.memberId === id);
 
-    top_10_gifs.forEach(gif => {
-
-        io.to(usersocket[id]).emit("receiveGifImage", {
-            gif: gif.media_formats.gif.url,
-            preview: gif.media_formats.gifpreview.url
-        });
-        /*
-        document.getElementById("emoji-entry-container").insertAdjacentHTML("beforeend",
-            `<img
-                onclick="sendGif('${gif.media_formats.gif.url}')" src="${gif.media_formats.gifpreview.url}"
-                onmouseover="changeGIFSrc('${gif.media_formats.gif.url}', this);"
-                onmouseleave="changeGIFSrc('${gif.media_formats.gifpreview.url}', this);"
-                style="padding: 1%;border-radius: 20px;float: left;width: 48%; height: fit-content;">`
-            */
-    })
-
-
-    //document.getElementById("share_gif").src = top_10_gifs[0]["media_formats"]["gif"]["url"]; top_10_gifs[0]["media_formats"]["gif"]["url"]
-
-    return;
+    targetSocket.emit("receiveGifImage", {
+        gifs: top_10_gifs
+    });
 
 }
 
@@ -1049,8 +1025,8 @@ export function checkMemberMute(socket, member) {
     return {result: false};
 }
 
-export function checkMemberBan(socket, member) {
-    reloadConfig();
+export async function checkMemberBan(socket, member) {
+    await reloadConfig();
     serverconfigEditable = checkEmptyConfigVar(serverconfig);
     let ip = socket.handshake.address;
 
@@ -1093,7 +1069,7 @@ export function checkMemberBan(socket, member) {
         }
     }
 
-    if(serverconfig.servermembers[member?.id.isBanned] === 1){
+    if(serverconfig.servermembers[member?.id].isBanned === 1){
         return {result: true, timestamp: null};
     }
 
@@ -1111,15 +1087,44 @@ export async function validatePassword(password, hash) {
     return isMatch;
 }
 
+export function getRoleCastingObject(role) {
+    role = copyObject(role);
+
+    if (!role || typeof role !== "object") {
+        console.error("getRoleCastingObject: Invalid input: Expected an object");
+        return;
+    }
+
+    const keysToDelete = [
+        "token",
+        "members",
+        "permissions"
+    ]; // Keys to always delete
+
+    keysToDelete.forEach(key => {
+        if (key in role) {
+            delete role[key];
+        }
+    });
+
+    return role;
+}
+
 export function getCastingMemberObject(member) {
     member = copyObject(member);
 
     if (!member || typeof member !== "object") {
-        console.error("Invalid input: Expected an object");
+        console.error("getCastingMemberObject: Invalid input: Expected an object");
         return;
     }
 
-    const keysToDelete = ["password", "token", "loginName", "pow"]; // Keys to always delete
+    const keysToDelete = [
+        "password",
+        "token",
+        "loginName",
+        "pow",
+        "rowId"
+    ]; // Keys to always delete
 
     keysToDelete.forEach(key => {
         if (key in member) {
@@ -1130,8 +1135,8 @@ export function getCastingMemberObject(member) {
     return member;
 }
 
-export function findAndVerifyUser(loginName, password) {
-    reloadConfig();
+export async function findAndVerifyUser(loginName, password) {
+    await reloadConfig();
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
     let serverMembers = serverconfigEditable.servermembers;
 

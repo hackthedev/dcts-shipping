@@ -175,35 +175,14 @@ export async function getSavedChatMessage(group, category, channel, index = -1) 
             if (loadedMessages[i].message != null) {
                 var messageObj = JSON.parse((loadedMessages[i].message));
 
-                if (messageObj.message.includes("<br>") && (messageObj.message.split("<br>").length - 1) <= 1) {
-                    messageObj.message = messageObj.message.replaceAll("<br>", "")
-                }
+                //if (messageObj.message.includes("<br>") && (messageObj.message.split("<br>").length - 1) <= 1) {
+                //    messageObj.message = messageObj.message.replaceAll("<br>", "")
+                //}
 
                 sortedMessages.push(messageObj)
             }
         }
     }
-
-
-    var dir = `./chats/${group}/${category}/${channel}/`;
-
-    if (!fs.existsSync(dir)) {
-        consolas(`Directory ${dir} didnt exist`, "Debug");
-        //return;
-    }
-    else {
-        fs.readdirSync(`./chats/${group}/${category}/${channel}/`).forEach(file => {
-
-            var message = JSON.parse(fs.readFileSync(`./chats/${group}/${category}/${channel}/${file}`));
-            if (message.message.includes("<br>") && (message.message.split("<br>").length - 1) <= 1) {
-                message.message = message.message.replaceAll("<br>", "")
-            }
-
-            sortedMessages.push(message);
-        });
-    }
-
-
 
     sortedMessages = sortedMessages.sort((a, b) => {
         if (a.timestamp < b.timestamp) {

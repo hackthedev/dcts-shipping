@@ -77,6 +77,7 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
 
             ["version", () => versionCode],
             ["random", () => generateId(20)],
+            ["default_theme", () => config.serverinfo.defaultTheme || "default.css"],
 
             ["meta.page.title", () => getMetaTitle(group, category, channel)],
             ["meta.page.description", () => getMetaDescription(group, category, channel)],

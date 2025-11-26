@@ -1,3 +1,6 @@
+window.updatePreview  = updatePreview;
+window.saveSettings  = saveSettings;
+
 var channelname = document.getElementById("channel_name");
 var saveButton = document.getElementById("settings_channel_save");
 
@@ -10,6 +13,7 @@ socket.emit("getGroupInfo", {id: UserManager.getID(), token: UserManager.getToke
         console.log(response)
         channelname = document.getElementById("channel_name");
         saveButton = document.getElementById("settings_channel_save");
+
 
         serverconfigName = response.data.info.name;
         channelname.value = serverconfigName;

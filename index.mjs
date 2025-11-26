@@ -76,7 +76,7 @@ export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = false;
-export let versionCode = 756;
+export let versionCode = 805;
 
 // dSync Libs
 import dSyncAuth from '@hackthedev/dsync-auth';
@@ -94,6 +94,8 @@ export const auther = new dSyncAuth(app, signer, async function (data) {
 });
 
 
+export let pool = null;
+
 // config file saving
 let fileHandle = null; // File handle for the config file
 let savedState = null; // In-memory config state
@@ -110,6 +112,7 @@ nodeArgs.shift()
 if (nodeArgs.includes("--debug")) {
     // enable debug logging
     Logger.logDebug = true;
+    flipDebug()
 }
 
 
@@ -125,8 +128,63 @@ checkConfigFile()
  */
 export var serverconfig = JSON.parse(fs.readFileSync("./config.json", {encoding: "utf-8"}));
 initConfig("./config.json");
-
 checkConfigAdditions();
+
+// made by installer script
+if(fs.existsSync("./configs/sql.txt")){
+    const content = fs.readFileSync("./configs/sql.txt", "utf8").trim().split("\n");
+
+    function getLine(lineNumber) {
+        return content[lineNumber].replace("\r", "") || ""
+    }
+
+    const dbUser = getLine(0)
+    const dbPass = getLine(1)
+    const dbName = getLine(2)
+
+    // if anything changed, update it
+    if(serverconfig.serverinfo.sql.username !== dbUser) serverconfig.serverinfo.sql.username = dbUser
+    if(serverconfig.serverinfo.sql.password !== dbPass) serverconfig.serverinfo.sql.password = dbPass
+    if(serverconfig.serverinfo.sql.database !== dbName) serverconfig.serverinfo.sql.database = dbName
+    serverconfig.serverinfo.sql.enabled = true; // enabled it because the file doesnt exist for fun
+    saveConfig(serverconfig);
+}
+
+
+// no sql, no server. tried sqlite but pain
+if(serverconfig.serverinfo.sql.enabled !== true){
+    console.clear();
+    Logger.error("+++ SQL IS NOT ENABLED +++")
+    Logger.error("From this version going forward, SQL is absolutely required.")
+    Logger.error("Make sure the SQL info inside the config.json file are correct")
+    Logger.error("and that sql is enabled too")
+    Logger.error("")
+    Logger.error("Make sure the sql server of your choice is compatible with MySQL / MariaDB")
+    Logger.error("")
+    process.exit(1);
+}
+
+// create sql pool
+pool = mysql.createPool({
+    host: serverconfig.serverinfo.sql.host,
+    user: serverconfig.serverinfo.sql.username,
+    password: serverconfig.serverinfo.sql.password,
+    database: serverconfig.serverinfo.sql.database,
+    waitForConnections: true,
+    connectionLimit: serverconfig.serverinfo.sql.connectionLimit,
+    queueLimit: 0,
+    typeCast: function (field, next) {
+        if (field.type === "TINY" && field.length === 1) {
+            return field.string() === "1";
+        }
+        return next();
+    }
+});
+
+// backup members from config file
+await checkMemberMigration();
+
+
 
 // Import functions etc from files (= better organisation)
 // Special thanks to Kannustin <3
@@ -189,8 +247,10 @@ import {registerTemplateMiddleware} from './modules/functions/template.mjs';
 import {listenToPow, powVerifiedUsers, sendPow, waitForPowSolution} from './modules/sockets/pow.mjs';
 import {Addon} from "./modules/functions/addon.mjs";
 
-// vs
+// vc
 import {AccessToken, WebhookReceiver} from "livekit-server-sdk";
+import {loadMembersFromDB, saveMemberToDB} from "./modules/functions/mysql/helper.mjs";
+import {checkMemberMigration} from "./modules/functions/migrations/memberJsonToDb.mjs";
 
 
 /*
@@ -302,19 +362,7 @@ const processPlugins = async () => {
 };
 
 // Create a connection pool if sql is enabled
-export let pool = null;
-if (serverconfig.serverinfo.sql.enabled == true) {
-
-    pool = mysql.createPool({
-        host: serverconfig.serverinfo.sql.host,
-        user: serverconfig.serverinfo.sql.username,
-        password: serverconfig.serverinfo.sql.password,
-        database: serverconfig.serverinfo.sql.database,
-        waitForConnections: true,
-        connectionLimit: serverconfig.serverinfo.sql.connectionLimit,
-        queueLimit: 0
-    });
-
+if (serverconfig.serverinfo.sql.enabled === true) {
     // SQL Database Structure needed
     // it will create everything if missing (except database)
     // +1 convenience
@@ -548,8 +596,32 @@ if (serverconfig.serverinfo.sql.enabled == true) {
                 {name: 'text', type: 'longtext NOT NULL'},
                 {name: 'datetime', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
             ]
+        },
+        {
+            name: "members",
+            columns: [
+                { name: "rowId", type: "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
+                { name: "id", type: "varchar(100) NOT NULL UNIQUE" },
+                { name: "token", type: "varchar(255) NOT NULL" },
+                { name: "onboarding", type: "BOOLEAN DEFAULT FALSE" },
+                { name: "loginName", type: "varchar(100) NOT NULL" },
+                { name: "name", type: "varchar(100) NOT NULL" },
+                { name: "nickname", type: "varchar(100) DEFAULT NULL" },
+                { name: "status", type: "text DEFAULT ''" },
+                { name: "aboutme", type: "text DEFAULT ''" },
+                { name: "icon", type: "text DEFAULT ''" },
+                { name: "banner", type: "text DEFAULT ''" },
+                { name: "joined", type: "bigint NOT NULL" },
+                { name: "isOnline", type: "BOOLEAN DEFAULT FALSE" },
+                { name: "lastOnline", type: "bigint DEFAULT 0" },
+                { name: "isBanned", type: "BOOLEAN DEFAULT FALSE" },
+                { name: "isMuted", type: "BOOLEAN DEFAULT FALSE" },
+                { name: "password", type: "text NOT NULL" },
+                { name: "publicKey", type: "text DEFAULT ''" },
+                { name: "isVerifiedKey", type: "BOOLEAN DEFAULT FALSE" },
+                { name: "pow", type: "text DEFAULT ''" }
+            ]
         }
-
     ];
 
     const dbTasks = [
@@ -594,6 +666,8 @@ if (serverconfig.serverinfo.sql.enabled == true) {
         for (const table of tables) {
             await checkAndCreateTable(table);
         }
+
+        await loadMembersFromDB();
 
         // after the tables exist etc we will fire up our awesome new job(s)
         scheduleDbTasks(dbTasks);
@@ -656,6 +730,9 @@ process.stdin.on('data', function (text) {
 });
 
 
+startServer();
+
+
 // Setup socket.io
 export const io = new Server(server, {
     maxHttpBufferSize: 1e8,
@@ -664,39 +741,41 @@ export const io = new Server(server, {
     pingTimeout: 60000,
 });
 
-// Start the app server
-var port = serverconfig.serverinfo.port;
-server.listen(port, function () {
+export function startServer(){
+    // Start the app server
+    var port = serverconfig.serverinfo.port;
+    server.listen(port, function () {
 
-    Logger.info('Server is running on port ' + port);
+        Logger.info('Server is running on port ' + port);
 
-    if (serverconfig.serverinfo.setup == 0) {
+        if (serverconfig.serverinfo.setup == 0) {
 
-        var adminToken = generateId(64);
-        serverconfig.serverinfo.setup = 1;
-        serverconfig.serverroles["1111"].token.push(adminToken);
-        saveConfig(serverconfig);
+            var adminToken = generateId(64);
+            serverconfig.serverinfo.setup = 1;
+            serverconfig.serverroles["1111"].token.push(adminToken);
+            saveConfig(serverconfig);
 
 
-        Logger.info(`To obtain the admin role in your server, copy the following token.`);
-        Logger.info(`You can use it if prompted or if you right click on the server icon and press "Redeem Key"`);
+            Logger.info(`To obtain the admin role in your server, copy the following token.`);
+            Logger.info(`You can use it if prompted or if you right click on the server icon and press "Redeem Key"`);
 
-        Logger.info(`Server Admin Token:`);
-        Logger.info(adminToken);
-    } else if (serverconfig.serverroles["1111"].token.length > 0) {
-        Logger.info(`To obtain the admin role in your server, copy the following token.`);
-        Logger.info(`You can use it if prompted or if you right click on the server icon and press "Redeem Key"`);
+            Logger.info(`Server Admin Token:`);
+            Logger.info(adminToken);
+        } else if (serverconfig.serverroles["1111"].token.length > 0) {
+            Logger.info(`To obtain the admin role in your server, copy the following token.`);
+            Logger.info(`You can use it if prompted or if you right click on the server icon and press "Redeem Key"`);
 
-        Logger.info(colors.cyan(`Available Server Admin Token(s):`));
+            Logger.info(colors.cyan(`Available Server Admin Token(s):`));
 
-        serverconfig.serverroles["1111"].token.forEach(token => {
-            if (token) Logger.info(token)
-        })
-        allowLogging = true;
-    }
+            serverconfig.serverroles["1111"].token.forEach(token => {
+                if (token) Logger.info(token)
+            })
+            allowLogging = true;
+        }
 
-    syncDiscoveredHosts(true)
-});
+        syncDiscoveredHosts(true)
+    });
+}
 
 
 const API_KEY = serverconfig.serverinfo.livekit.key;
@@ -704,7 +783,6 @@ const API_SECRET = serverconfig.serverinfo.livekit.secret;
 
 const webhookReceiver = new WebhookReceiver(API_KEY, API_SECRET);
 
-// --- Token Endpoint ---
 app.post("/token", async (req, res) => {
     const {roomName, participantName} = req.body;
 
@@ -720,7 +798,6 @@ app.post("/token", async (req, res) => {
     res.json({token});
 });
 
-// --- Webhook Endpoint ---
 app.post("/livekit/webhook", express.raw({type: "*/*"}), async (req, res) => {
     try {
         const event = await webhookReceiver.receive(req.body, req.get("Authorization"));
@@ -749,11 +826,9 @@ app.use(
 // Process plugins at server start
 processPlugins().catch(err => console.error(err));
 
-/* Modular Socket events */
 const socketHandlers = [];
-const activeSockets = new Map(); // Track socket handlers by socket ID
+const activeSockets = new Map();
 
-// **Load Handlers Once at Startup**
 const loadSocketHandlers = async (mainHandlersDir, io) => {
     const fileList = [];
 
@@ -775,8 +850,6 @@ const loadSocketHandlers = async (mainHandlersDir, io) => {
         const fileUrl = pathToFileURL(filePath).href;
         try {
             const {default: handlerFactory} = await import(fileUrl);
-
-            // NEU: handlerFactory(io) erzeugt den eigentlichen Socket-Handler
             const handler = handlerFactory(io);
 
             if (typeof handler === 'function') {
@@ -793,19 +866,17 @@ const loadSocketHandlers = async (mainHandlersDir, io) => {
 };
 
 
-// **Register Handlers for Each Connection Using `socket.id`**
 const registerSocketEvents = (socket) => {
     try {
         const attachedHandlers = [];
 
         for (const handler of socketHandlers) {
-            const cleanup = handler(socket); // Store cleanup function if provided
+            const cleanup = handler(socket);
             if (typeof cleanup === "function") {
                 attachedHandlers.push(cleanup);
             }
         }
 
-        // Store cleanup handlers using `socket.id`
         activeSockets.set(socket.id, attachedHandlers);
     } catch (err) {
         console.error("Error registering socket events:", err);
@@ -886,7 +957,7 @@ io.on('connection', async function (socket) {
             let banListResult = findInJson(serverconfig.banlist, "ip", ip);
             if (banListResult != null) {
                 let bannedUntilDate = new Date(banListResult.until);
-                bannedUntilDate.getFullYear() == "9999" ? detailText = "permanently banned" : detailText = `banned until: <br>${formatDateTime(bannedUntilDate)}`
+                bannedUntilDate.getFullYear() === "9999" ? detailText = "permanently banned" : detailText = `banned until: <br>${formatDateTime(bannedUntilDate)}`
                 detailText += banListResult?.reason !== null ? `<br><br>Reason:<br>${banListResult.reason}` : ""
             }
 
@@ -914,25 +985,21 @@ io.on('connection', async function (socket) {
     }
 });
 
-// Function to initialize and read the file into memory
 function initConfig(filePath) {
     try {
-        // Open the file in read-write mode
         fileHandle = fs.openSync(filePath, "r+");
         const fileContent = fs.readFileSync(filePath, {encoding: "utf-8"});
         savedState = JSON.parse(fileContent);
-        //console.log("Config initialized and loaded into memory.");
     } catch (error) {
         console.error("Failed to initialize config file:", error);
         throw error;
     }
 }
 
-// Function to compare and find changes between two objects
+// probably deprecated too now
 function getChanges(original, updated) {
     const changes = {};
 
-    // Check for keys in the updated object
     Object.keys(updated).forEach((key) => {
         if (typeof updated[key] === "object" && updated[key] !== null) {
             if (!original[key] || typeof original[key] !== "object") {
@@ -948,21 +1015,20 @@ function getChanges(original, updated) {
         }
     });
 
-    // Check for keys removed in the updated object
     Object.keys(original).forEach((key) => {
         if (!(key in updated)) {
-            changes[key] = "__DELETE__"; // Mark for deletion
+            changes[key] = "__DELETE__";
         }
     });
 
     return changes;
 }
 
-// Function to apply changes to the saved state
+// potentially deprecated
 function applyChanges(target, changes) {
     Object.keys(changes).forEach((key) => {
         if (changes[key] === "__DELETE__") {
-            delete target[key]; // Remove the key entirely
+            delete target[key];
         } else if (typeof changes[key] === "object" && changes[key] !== null) {
             if (!target[key] || typeof target[key] !== "object") {
                 target[key] = changes[key];
@@ -975,48 +1041,35 @@ function applyChanges(target, changes) {
     });
 }
 
+export async function saveConfig(config) {
+    if (!config) return;
 
-// Function to save changes to the file
-export function saveConfig(config) {
-    if (!config) {
-        console.error("No Config Content passed");
-        return;
-    }
-
-    // Compare the current in-memory state with the new config
-    const changes = getChanges(savedState, config);
-
-    if (Object.keys(changes).length === 0) {
-        return;
-    }
-
-    // Add the write operation to the queue
-    writeQueue = writeQueue.then(() => {
-        return new Promise((resolve, reject) => {
-            try {
-
-                // Apply changes to the in-memory buffer
-                applyChanges(savedState, changes);
-
-                // Update only the changed parts in the file
-                const fileContent = JSON.stringify(savedState, null, 4);
-
-                // Write the updated content to the file
-                fs.ftruncateSync(fileHandle); // Clear the file
-                fs.writeSync(fileHandle, fileContent, 0); // Write updated content
-                reloadConfig()
-                resolve();
-            } catch (error) {
-                console.error("Error saving config:", error);
-                reject(error);
+    // save members only to DB
+    try{
+        if (config.servermembers && Object.keys(config.servermembers).length > 0) {
+            for (const [id, member] of Object.entries(config.servermembers)) {
+                if (member && member.id) {
+                    if(serverconfig.serverinfo.sql.enabled == true) await saveMemberToDB(id, member);
+                }
             }
-        });
-    });
+        }
+    }
+    catch(exception){
+        Logger.error("error while trying to save config")
+        Logger.error(exception);
+    }
+
+    // write config without members
+    const fileContent = JSON.stringify(config, (k, v) => (
+        k === "servermembers" ? undefined : v
+    ), 4);
+
+    fs.writeFileSync("./config.json", fileContent);
 }
 
-// Close the file descriptor when the application exits
+
 function closeConfigFile() {
-    if (isClosing) return; // Prevent multiple calls
+    if (isClosing) return;
     isClosing = true;
 
     if (fileHandle) {
@@ -1037,9 +1090,24 @@ process.on("exit", closeConfigFile);
 process.on("SIGINT", closeConfigFile); // Handle Ctrl+C
 process.on("SIGTERM", closeConfigFile); // Handle termination
 
-export function reloadConfig() {
-    // reread config (update in program)
-    serverconfig = JSON.parse(fs.readFileSync("./config.json", {encoding: "utf-8"}));
+export async function reloadConfig() {
+    return; // deprecated
+
+    try {
+        const json = fs.readFileSync("./config.json", "utf8");
+        const parsed = JSON.parse(json);
+
+        for (const key of Object.keys(serverconfig)) delete serverconfig[key];
+        Object.assign(serverconfig, parsed);
+
+        const rows = await queryDatabase("SELECT * FROM members");
+        serverconfig.servermembers = {};
+        for (const row of rows) {
+            serverconfig.servermembers[row.id] = row;
+        }
+    } catch (err) {
+        serverconfig.servermembers = {};
+    }
 }
 
 export function getFreshConfig() {

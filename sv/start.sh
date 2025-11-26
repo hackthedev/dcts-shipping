@@ -1,1 +1,3 @@
-cd /home/dcts && screen -dmSL dcts node /home/dcts
+#!/bin/bash
+name="$1"
+cd /home/dcts && screen -dmSL "$name" node /home/dcts

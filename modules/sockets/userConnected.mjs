@@ -1,6 +1,6 @@
 import {checkPow, saveConfig, server, serverconfig, socketToIP, usersocket, xssFilters} from "../../index.mjs";
 import {
-    formatDateTime, generateGid, getJson, getMemberFromKey,
+    formatDateTime, generateGid, getJson, getMemberFromKey, getMemberLastOnline,
     hasVerifiedKey, resolveCategoryByChannelId, resolveChannelById, resolveGroupByChannelId
 } from "../functions/chat/main.mjs";
 import { saveChatMessage } from "../functions/io.mjs";
@@ -21,6 +21,8 @@ import { sendSystemMessage } from "./home/general.mjs";
 import {discoverHosts} from "../functions/discovery.mjs";
 import {powVerifiedUsers} from "./pow.mjs";
 import logger from "../functions/logger.mjs";
+import {channel} from "node:diagnostics_channel";
+import {saveMemberToDB} from "../functions/mysql/helper.mjs";
 
 function normaliseString(v) {
     if (v === null || v === undefined) return "";
@@ -110,6 +112,22 @@ function handleInviteCode(member, socket, response){
 }
 
 export default (io) => (socket) => {
+
+    // handles disconnect event as the member list doesnt update
+    // currently if someone goes offline.
+    socket.on("disconnect", async () => {
+        const memberId = socket.data?.memberId;
+        if (!memberId) return;
+
+        setTimeout(() => {
+            const info = getMemberLastOnline(memberId);
+            if (info && !info.isOnline && info.minutesPassed >= 1) {
+                io.emit("updateMemberList");
+            }
+        }, 65_000);
+    });
+
+
     // socket.on code here
     socket.on('userConnected', async function (member, response) {
         checkRateLimit(socket);
@@ -147,7 +165,6 @@ export default (io) => (socket) => {
 
         // handle invites
         let inviteResult = handleInviteCode(member, socket, response);
-        Logger.debug(`Invite result: ${inviteResult}`)
         if(!inviteResult){
             return;
         }
@@ -160,14 +177,14 @@ export default (io) => (socket) => {
                     token: member.token,
                     onboarding: false
                 }
-                saveConfig(serverconfig);
+                await saveConfig(serverconfig);
             }
         }
 
         await checkPow(socket);
 
         // check member ban
-        let banResult = checkMemberBan(socket, member);
+        let banResult = await checkMemberBan(socket, member);
         let banText = "";
         if (banResult?.timestamp) {
             if (new Date(banResult.timestamp).getFullYear() == "9999") {
@@ -194,9 +211,9 @@ export default (io) => (socket) => {
         Logger.debug(`Member connected. User: ${member.name} (${member.id} - ${socketToIP[socket]})`);
 
         // Check if member is in default role
-        if (serverconfig.serverroles["0"].members.includes(member.id) == false) {
+        if (serverconfig.serverroles["0"].members.includes(member.id) === false) {
             serverconfig.serverroles["0"].members.push(member.id);
-            saveConfig(serverconfig);
+            await saveConfig(serverconfig);
         }
 
         if (member.id.length === 12 && isNaN(member.id) === false) {
@@ -206,6 +223,8 @@ export default (io) => (socket) => {
             if (!serverconfig.servermembers[member.id] || serverconfig.servermembers[member.id]?.onboarding === false) {
                 // New Member joined the server
                 Logger.debug("New member connected");
+                Logger.debug(!serverconfig.servermembers[member.id]);
+                Logger.debug(serverconfig.servermembers[member.id]?.onboarding);
 
                 // handle onboarding 
                 if (member?.onboarding === false) {
@@ -218,7 +237,6 @@ export default (io) => (socket) => {
                     })
 
                     Logger.debug("missing onboarding");
-
                     return;
                 }
 
@@ -268,7 +286,7 @@ export default (io) => (socket) => {
                 serverconfig.servermembers[member.id].onboarding = true;
                 if(member?.publicKey) serverconfig.servermembers[member.id].publicKey = member?.publicKey;
 
-                saveConfig(serverconfig);
+                await saveMemberToDB(member?.id, serverconfig.servermembers[member.id]);
 
                 try {
                     sendMessageToUser(socket.id, JSON.parse(
@@ -320,23 +338,28 @@ export default (io) => (socket) => {
                 castingMember.messageId = generateId(12);
                 castingMember.isSystemMsg = true;
 
-                castingMember.message = `<div><label class="username" data-member-id="${castingMember.id}">${truncateText(castingMember.name, 50)}</label> joined the server!</div>`;
-                saveChatMessage(castingMember);
+                castingMember.message = `<label class="username" data-member-id="${castingMember.id}">${truncateText(castingMember.name, 50)} joined the server!</label>`;
+                await saveChatMessage(castingMember);
 
                 io.emit("updateMemberList");
 
+                // better "member joined" notification
+                let channelId = serverconfig.serverinfo.defaultChannel;
+                let categoryId = resolveCategoryByChannelId(channelId);
+                let groupId = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);
+                let room = `${groupId}-${categoryId}-${channelId}`;
+                io.in(room).emit("messageCreate", castingMember);
+
                 socket.join(member.id)
                 socket.data.memberId = member.id
-                console.log(io.sockets.adapter.rooms)
-
-                // Save System Message and emit join event
-                io.emit("newMemberJoined", castingMember);
 
                 response({ finishedOnboarding: true })
             }
             else {
                 if (member.token == null || member.token.length !== 48 ||
-                    serverconfig.servermembers[member.id].token === null ||
+                    serverconfig.servermembers[member.id].token == null ||
+                    serverconfig.servermembers[member.id].loginName == null ||
+                    serverconfig.servermembers[member.id].name == null ||
                     serverconfig.servermembers[member.id].token !== member.token) {
 
                     try {
@@ -382,35 +405,14 @@ export default (io) => (socket) => {
                 serverconfig.servermembers[member.id].aboutme = xssFilters.inHTMLData(member.aboutme);
                 serverconfig.servermembers[member.id].icon = xssFilters.inHTMLData(member.icon);
                 serverconfig.servermembers[member.id].banner = xssFilters.inHTMLData(member.banner);
-                serverconfig.servermembers[member.id].lastOnline = new Date().getTime();                
+                serverconfig.servermembers[member.id].lastOnline = new Date().getTime();
                 socket.memberId = member.id;
-
-                saveConfig(serverconfig);
-
-                if (serverconfig.servermembers[member.id].isOnline == 0) {
-                    // Member is back online
-                    serverconfig.servermembers[member.id].isOnline = 1;
-
-                    var lastOnline = serverconfig.servermembers[member.id].lastOnline / 1000;
-
-                    var today = new Date().getTime() / 1000;
-                    var diff = today - lastOnline;
-                    var minutesPassed = Math.round(diff / 60);
-
-
-                    if (minutesPassed > 5) {
-                        io.emit("updateMemberList");
-                        io.emit("memberOnline", getCastingMemberObject(member));
-                    }
-                }
-                else {
-                    io.emit("updateMemberList");
-                    io.emit("memberPresent", getCastingMemberObject(member));
-                }
 
                 usersocket[member.id] = socket.id;
                 socket.data.memberId = member.id;
                 response({ finishedOnboarding: true })
+
+                io.emit("updateMemberList");
             }
         }
         else {

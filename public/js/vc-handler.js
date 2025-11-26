@@ -172,7 +172,7 @@ function getStreamContainer() {
 async function addVcMember(memberId) {
     let contentContainer = document.getElementById("content");
 
-    let member = await resolveMember(memberId);
+    let member = await ChatManager.resolveMember(memberId);
     if (!member) {
         console.error("Couldnt resovle member in vc handler");
         return;
@@ -239,7 +239,7 @@ async function removeVcMemberFromChannel(intChannelId, intMemberId){
     }
 
     if(checkResult.element){
-        let oMember = await resolveMember(intMemberId);
+        let oMember = await ChatManager.resolveMember(intMemberId);
         if(!oMember){
             console.warn("Coudlnt resolve member for vc participants list");
             return
@@ -441,16 +441,4 @@ function toggleProfileQaIndicator(showOrNah = false){
     else{
         profileQaIndicator.classList.add("invisible");
     }
-}
-
-async function resolveMember(memberId) {
-    return new Promise((resolve, reject) => {
-        socket.emit("resolveMember", {
-            id: UserManager.getID(),
-            token: UserManager.getToken(),
-            target: memberId
-        }, function (response) {
-            resolve(response?.data);
-        })
-    })
 }

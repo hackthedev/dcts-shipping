@@ -1,29 +1,38 @@
 /*
     The functions here are basically the "core" of the chat app on the server side.
  */
-import {serverconfig, xssFilters, colors, saveConfig, usersocket} from "../../../index.mjs"
+import {serverconfig, xssFilters, colors, saveConfig, usersocket, server} from "../../../index.mjs"
 import {consolas} from "../io.mjs";
 import {io} from "../../../index.mjs";
 import {getMemberHighestRole} from "./helper.mjs";
-import {checkBool, checkEmptyConfigVar, copyObject, getCastingMemberObject, sendMessageToUser} from "../main.mjs";
+import {
+    checkBool,
+    checkEmptyConfigVar,
+    copyObject,
+    getCastingMemberObject,
+    removeFromArray,
+    sendMessageToUser
+} from "../main.mjs";
 import {encodeToBase64} from "../mysql/helper.mjs";
 import {signer} from "../../../index.mjs"
 
 var serverconfigEditable = serverconfig;
 
-export function getMemberLastOnlineTime(memberID) {
-    var lastOnline = serverconfig.servermembers[memberID].lastOnline / 1000;
+export function getMemberLastOnline(memberId) {
+    if (!memberId || !serverconfig.servermembers[memberId]) return null;
 
-    var today = new Date().getTime() / 1000;
-    var diff = today - lastOnline;
-    var minutesPassed = Math.round(diff / 60);
+    const lastOnline = serverconfig.servermembers[memberId].lastOnline;
+    const now = Date.now();
+    const minutesPassed = Math.floor((now - lastOnline) / 60000);
+    const isOnline = Array.from(io.sockets.sockets.values()).some(s => s.data?.memberId === memberId);
 
-    return minutesPassed
+    return { isOnline, minutesPassed };
 }
+
 
 export function getOnlineMemberCount() {
     const onlineMembers = Object.values(serverconfig.servermembers)
-        .filter(m => m?.id && Number(getMemberLastOnlineTime(m.id)) <= 5);
+        .filter(m => m?.id && Number(getMemberLastOnline(m.id).minutesPassed) <= 5);
 
     return onlineMembers.length;
 }
@@ -373,28 +382,23 @@ export function getMemberList(member, channel) {
 
                 if(serverconfig.servermembers[member].onboarding === false) return
 
-                // Member ID:
-                // member
-                //
-                // Member Object
-                // members[member]
-
                 // Do not show banned users
-                if (serverconfig.servermembers[member].isBanned == 1) {
+                if (serverconfig.servermembers[member].isBanned === 1) {
                     if (!bannedMember.includes(member)) bannedMember.push(member);
 
-                    if (checkBool(serverconfig.serverinfo.moderation.bans.memberListHideBanned, "bool") == true) return;
+                    if (checkBool(serverconfig.serverinfo.moderation.bans.memberListHideBanned, "bool") === true) return;
                 }
 
                 // check here for highest role
                 var highestMemberRole = getMemberHighestRole(member);
+                role.info.id = Number(role.info.id)
 
                 // If member is in role and the role is set to be shown
-                if ((role.members.includes(member) && role.info.displaySeperate == 1) ||
-                    role.info.id == 1) {
+                if ((role.members.includes(member) && role.info.displaySeperate === 1) ||
+                    role.info.id === 1) {
 
-                    // if role is the "Offline" role and member is gone for more then 5 minutes
-                    if (role.info.id == 1 && getMemberLastOnlineTime(member) > 5) {
+                    // if role is the "Offline" role and member is gone for more then x minutes
+                    if (role.info.id === 1 && getMemberLastOnline(member).minutesPassed >= 1) {
                         // Add member to offline list (if not already done)
                         if (!offlineMember.includes(member)) {
                             offlineMember.push(member);
@@ -402,29 +406,30 @@ export function getMemberList(member, channel) {
                     }
 
                     // If the user has the permission to see the channel
-                    if (hasPermission(member, "viewChannel", channel) == true) {
+                    if (hasPermission(member, "viewChannel", channel) === true) {
 
                         // If role should be displayed and
                         // the current role is not the member's highest role and (dont remember why)
                         // the role is not the "Offline Role", then return lol
-                        if (highestMemberRole.info.displaySeperate == 1 && role.info.id != highestMemberRole.info.id && role.info.id != 1) {
+                        if (highestMemberRole.info.displaySeperate === 1 && role.info.id !== highestMemberRole.info.id && role.info.id !== 1) {
                             return;
                         }
 
-                        // Gray Color effect for offline members in the member list
-                        // Should also avoid duplicate listing in role AND offline for memberlist
+                        // gray color effect for offline members in the member list
+                        // should also avoid duplicate listing in role AND offline for memberlist
                         var extraClassOffline = "";
-                        if (role.info.id != 1) { // != Offline
-                            if (getMemberLastOnlineTime(member) > 5) {
-                                return;
-                            }
-                        } else {
-                            if (getMemberLastOnlineTime(member) < 5) {
-                                return;
-                            } else {
-                                extraClassOffline = "offline_pfp";
-                            }
+                        const { isOnline, minutesPassed } = getMemberLastOnline(member);
+
+                        // if the user IS NOT OFFLINE stop proceeding with trying to add that user
+                        if (role.info.id === 1 && isOnline) return;
+
+                        // if the user is offline, dont show him in any other role except offline role
+                        if (role.info.id !== 1 && !isOnline) return;
+                        if (role.info.id === 1) {
+                            extraClassOffline = "offline_pfp";
                         }
+
+
 
                         // This can hide offline members from the list
                         // Could be useful for big servers
@@ -434,12 +439,12 @@ export function getMemberList(member, channel) {
                         //}
 
                         // hide online members from offline section (?)
-                        if (offlineMember.includes(member)) {
-                            offlineMember.pop(member);
+                        if (offlineMember.includes(member) && role.info.id !== 1) {
+                            removeFromArray(offlineMember, member);
                         }
 
                         // If the role object itself wasnt yet listed
-                        if (noMembersInRole == true /*&& (members[member].isMuted == false && members[member].isBanned == false)*/) {
+                        if (noMembersInRole === true /*&& (members[member].isMuted == false && members[member].isBanned == false)*/) {
 
                             // Add the code for the role "header"
                             code += `<div class="infolist-role" title="${role.info.name}" style="color: ${role.info.color};">
@@ -478,7 +483,7 @@ export function getMemberList(member, channel) {
                         code += `<div class="memberlist-container" data-member-id="${members[member].id}">
                                     <img class="memberlist-img ${extraClassOffline}" data-member-id="${members[member].id}" src="${members[member].icon}" onerror="this.src = '/img/default_pfp.png'">
                                     
-                                    <div>
+                                    <div style="display:flex;flex-direction: column;width: calc(100% - 35px);">
                                         <div class="memberlist-member-info name" 
                                             onclick="getMemberProfile('${members[member].id}');" data-member-id="${members[member].id}"" 
                                             style="color: ${role.info.color};">
@@ -790,6 +795,8 @@ export function banUser(socket, member) {
     let bannedUntil = getNewDate(member.duration).getTime();
 
     // Set Member to be banned
+    console.log(member.target)
+    console.log(serverconfig.servermembers)
     serverconfig.servermembers[member.target].isBanned = 1;
 
     // Add member to banlist

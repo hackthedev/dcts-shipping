@@ -16,7 +16,7 @@
     <script src="js/sysmsg.js"></script>
     <script src="js/upload.js"></script>
 
-    <link href="css/themes/default.css" rel="stylesheet">
+    <link href="css/themes/default/default.css" rel="stylesheet">
     <link href="css/home.css" rel="stylesheet">
 
 
@@ -276,7 +276,7 @@
             id: CURRENT_USER_ID,
             name: UserManager.getUsername ? UserManager.getUsername() : 'You',
             status: selfStatus(),
-            avatar: selfAvatar(),
+            icon: selfAvatar(),
             banner: selfBanner(),
             lastOnline: new Date().getTime(),
             isOnline: true
@@ -524,7 +524,7 @@
             id: String(raw.id ?? raw.userId ?? raw.uid ?? ''),
             name: raw.name ?? raw.nickname ?? raw.loginName ?? String(raw.id ?? ''),
             status: raw.status ?? "",
-            avatar: raw.avatar ?? raw.icon ?? null,
+            icon: raw.icon ?? null,
             banner: raw.banner ?? null,
             lastOnline: raw.lastOnline ?? null,
             isOnline: isWithinTime(raw.lastOnline, 300, "past")
@@ -596,11 +596,11 @@
             id,
             name: String(id),
             status: '',
-            avatar: null,
+            icon: null,
             isOnline: false,
             lastOnline: new Date().getTime()
         };
-        return {...m, avatar: m.avatar ?? m.icon ?? null};
+        return {...m, icon: m.icon ?? null};
     }
 
     function otherParticipant(thread) {
@@ -616,8 +616,8 @@
     function avatarHTML(member, size = 'normal') {
         const cls = size === 'small' ? 'avatar small' : size === 'tiny' ? 'avatar tiny' : 'avatar';
         const dot = `<span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span>`;
-        if (member.avatar) {
-            return `<div class="${cls}"><img src="${member.avatar}" alt=""><span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span></div>`;
+        if (member.icon) {
+            return `<div class="${cls}"><img src="${member.icon}" alt=""><span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span></div>`;
         }
         return `<div class="${cls}" aria-label="${encodePlainText(member.name)}">${initials(member.name)}${dot}</div>`;
     }
@@ -628,8 +628,8 @@
         const small = size !== 'normal';
 
         let code = "";
-        if (ids[0] != UserManager.getID()) code += `<div class="a1">${avatarHTML(a, small ? 'small' : 'normal')}</div>`;
-        if (ids[1] != UserManager.getID()) code += `<div class="a2">${avatarHTML(b, small ? 'small' : 'normal')}</div>`;
+        if (ids[0] !== UserManager.getID()) code += `<div class="a1">${avatarHTML(a, small ? 'small' : 'normal')}</div>`;
+        if (ids[1] !== UserManager.getID()) code += `<div class="a2">${avatarHTML(b, small ? 'small' : 'normal')}</div>`;
 
         return `
       <div class="avatarStack ${small ? 'small' : ''}">
@@ -2474,11 +2474,13 @@
         status: UserManager.getStatus(), token: UserManager.getToken(),
         aboutme: UserManager.getAboutme(), banner: UserManager.getBanner(),
     }, function (response) {
+        console.log(response);
     });
 
     // basically entry point
     initPow(() => {
-        socket.emit('joinServer', {id: CURRENT_USER_ID, token: UserManager.getToken()}, () => {
+        socket.emit('joinServer', {id: UserManager.getID(), token: UserManager.getToken()}, function(response) {
+            console.log(response)
         });
 
 
@@ -2487,7 +2489,7 @@
             token: UserManager.getToken(),
             permission: ["manageTickets", "managePosts"]
         }, function (response) {
-            if (response.permission == "granted") {
+            if (response.permission === "granted") {
                 socket.emit('joinStaff', {userId: CURRENT_USER_ID, token: UserManager.getToken()}, () => {
                 });
 

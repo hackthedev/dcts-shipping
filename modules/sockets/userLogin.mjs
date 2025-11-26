@@ -4,7 +4,7 @@ import { copyObject, findAndVerifyUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('userLogin', function (member, response) {
+    socket.on('userLogin', async function (member, response) {
         member.password = xssFilters.inHTMLData(member.password)
         member.loginName = xssFilters.inHTMLData(member.loginName)
 
@@ -37,9 +37,7 @@ export default (io) => (socket) => {
             return;
         }
 
-        console.log(member)
-        let loginCheck = findAndVerifyUser(member.loginName, member.password);
-
+        let loginCheck = await findAndVerifyUser(member.loginName, member.password);
         if (loginCheck.result === true) {
             response({ error: null, member: loginCheck.member })
         }

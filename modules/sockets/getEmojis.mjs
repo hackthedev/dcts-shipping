@@ -1,41 +1,85 @@
-import { fs, serverconfig, xssFilters } from "../../index.mjs";
-import { hasPermission } from "../functions/chat/main.mjs";
+import { fs, serverconfig } from "../../index.mjs";
 import Logger from "../functions/logger.mjs";
-import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { validateMemberId } from "../functions/main.mjs";
+import {Emoji} from "../../public/js/core/Emoji.js";
+import path from "path";
+const EMOJI_CONFIG_PATH = "./configs/emojis.json";
+
+function checkEmojiConfig(){
+    const dir = path.dirname(EMOJI_CONFIG_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    if (!fs.existsSync(EMOJI_CONFIG_PATH))
+        fs.writeFileSync(EMOJI_CONFIG_PATH, "{}");
+}
+export function getEmojiConfig(filename = null) {
+    checkEmojiConfig();
+
+    const data = JSON.parse(fs.readFileSync(EMOJI_CONFIG_PATH, "utf8") || "{}");
+    if (filename) return data[filename] || null;
+    return data;
+}
+
+export function setEmojiConfig(filename, newData = {}) {
+    checkEmojiConfig();
+
+    const config = JSON.parse(fs.readFileSync(EMOJI_CONFIG_PATH, "utf8") || "{}");
+
+    config[filename] = { ...(config[filename] || {}), ...newData };
+    fs.writeFileSync(EMOJI_CONFIG_PATH, JSON.stringify(config, null, 4));
+
+    return config[filename];
+}
 
 export default (io) => (socket) => {
-    // socket.on code here
-    socket.on('getEmojis', async function (member, response) {
-
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+    socket.on("getEmojis", async function (member, response) {
+        if (
+            validateMemberId(member?.id, socket, member?.token) === true
         ) {
             try {
-                // Emoji List array
-                var emojiList = [];
+                const emojiList = fs
+                    .readdirSync("./public/emojis")
+                    .sort((a, b) => {
+                        const aStat = fs.statSync(`./public/emojis/${a}`);
+                        const bStat = fs.statSync(`./public/emojis/${b}`);
+                        return (
+                            new Date(bStat.birthtime).getTime() -
+                            new Date(aStat.birthtime).getTime()
+                        );
+                    });
 
-                // Get all local emojis sorted by creation date
-                fs.readdirSync("./public/emojis").sort((a, b) => {
-                    let aStat = fs.statSync(`./public/emojis/${a}`),
-                        bStat = fs.statSync(`./public/emojis/${b}`);
+                const result = [];
 
-                    return new Date(bStat.birthtime).getTime() - new Date(aStat.birthtime).getTime();
-                }).forEach(file => {
-                    emojiList.push(file);
-                });
+                for (const file of emojiList) {
+                    let emojiHash = file?.split("_")[0];
+                    let emojiData = getEmojiConfig(emojiHash);
+                    let emoji = new Emoji(file)
 
+                    emoji.setUploader(member.id)
+                        .setName(file.split("_")[1]?.split(".")[0] || file.split(".")[0])
 
-                if (emojiList.length > 0) {
-                    response({ type: "success", data: emojiList, msg: "Successfully received emojis" })
+                    setEmojiConfig(emojiHash, emoji.object);
+
+                    result.push(emoji.object);
                 }
-                else {
-                    response({ type: "error", data: null, msg: "No Emojis found" })
+
+                if (result.length > 0) {
+                    response({
+                        type: "success",
+                        data: result,
+                        msg: "Successfully received emoji configurations"
+                    });
+                } else {
+                    response({
+                        type: "error",
+                        data: null,
+                        msg: "No emojis found"
+                    });
                 }
-            }
-            catch (e) {
-                Logger.error("Couldnt get emojis");
+            } catch (e) {
+                Logger.error("Could not get emojis");
                 Logger.error(e);
             }
         }
     });
-}
+};

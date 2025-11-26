@@ -40,6 +40,22 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             {
                 icon: "&#9998;",
+                text: "Change Icon",
+                callback: async (data) => {
+                    let groupId = getGroupIdFromElement(data.element);
+                    if(!groupId){
+                        console.error("Cant change  group icon because cant get group id from element")
+                        return;
+                    }
+                    AdminActions.changeGroupIcon(groupId);
+                },
+                condition: async (data) => {
+                    return await (await checkPermission("manageGroups")).permission === "granted"
+                },
+                type: "ok"
+            },
+            {
+                icon: "&#9998;",
                 text: "Edit Group",
                 callback: async (data) => {
                     let groupId = getGroupIdFromElement(data.element);

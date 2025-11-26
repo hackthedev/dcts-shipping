@@ -19,25 +19,15 @@ function upload(files) {
         });
 }
 
-/*
-function upload(files) {
-    // Map over each file and start the upload, returning an array of promises
-    const uploadPromises = Array.from(files).map((file, index) => uploadFileInChunks(file, index));
-
-    // Wait until all uploads are done and return an array of URLs
-    return Promise.all(uploadPromises)
-        .then((urls) => {
-            console.log("All files uploaded successfully:", urls);
-            return { status: "done", urls };
-        })
-        .catch((error) => {
-            console.error("Error during upload:", error);
-            return { status: "error", error };
-        });
-}
-        */
-
 function uploadFileInChunks(file, fileIndex) {
+    showSystemMessage({
+        title: `Uploading file...`,
+        text: ``,
+        icon: "info",
+        type: "neutral",
+        duration: 10000
+    });
+
     const chunkSize = 5 * 1024 * 1024; // 5 MB per chunk
     const totalChunks = Math.ceil(file.size / chunkSize);
     let currentChunk = 0;

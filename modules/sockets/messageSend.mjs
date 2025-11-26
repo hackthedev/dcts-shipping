@@ -1,5 +1,4 @@
 import {serverconfig, typingMembers, usersocket, xssFilters} from "../../index.mjs";
-import {convertMention} from "../functions/chat/helper.mjs";
 import {formatDateTime, hasPermission} from "../functions/chat/main.mjs";
 import {saveChatMessage} from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
@@ -135,10 +134,13 @@ export default (io) => (socket) => {
                     member.name = escapeHtml(oServerMember.name);
 
                     member.message = sanitizeInput(member.message);
-                    member.message = convertMention(member.message);
 
                     // replace empty lines
                     member.message = clearMessage(member.message, messageid)
+
+                    // create room key
+                    let room = `${member.group}-${member.category}-${member.channel}`
+                    member.room = room;
 
                     if (member.message.trim() === "" || member.message.trim().length === 0) {
                         console.log("Message was empty")
@@ -188,6 +190,19 @@ export default (io) => (socket) => {
                         member.messageId = originalMsgObj.editedMsgId;
                     }
 
+                    // if the message is a reply
+                    if(member?.replyMsgId != null) {
+                        // Get Original message
+                        let originalMsg = await getChatMessagesFromDb(room, 1, member.replyMsgId);
+                        let originalMsgObj = JSON.parse(decodeFromBase64(originalMsg[0].message));
+
+                        // client will later fetch the original message.
+                        // this way it'll always show the up-to-date
+                        // message and we dont have to somehow check if the
+                        // original message was updated etc..
+                        member.reply = originalMsgObj.messageId;
+                    }
+
                     member = getCastingMemberObject(member);
 
                     let memberMessageCount = serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel].msgCount + 1;
@@ -205,8 +220,12 @@ export default (io) => (socket) => {
 
                     // Send message or update old one
                     if (member.editedMsgId == null) {
-                        // New message
-                        io.in(member.room).emit("messageCreate", member);
+                        // New message.
+                        // we will emit this to EVERYONE so we can better
+                        // integrate the feature for showing a marker when
+                        // new messages are created and check clientside
+                        // if we are in the channel or not so we display it.
+                        io.emit("messageCreate", member);
                     }
                     // emit edit event of msg
                     else {

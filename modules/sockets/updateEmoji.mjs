@@ -2,16 +2,17 @@ import { fs, serverconfig, xssFilters } from "../../index.mjs";
 import { findEmojiByID } from "../functions/chat/helper.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
-import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import {checkRateLimit, copyObject, sendMessageToUser, validateMemberId} from "../functions/main.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('updateEmoji', async function (member, response) {
         checkRateLimit(socket);
 
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+        if (validateMemberId(member.id, socket, serverconfig.servermembers[member.id].token) === true
         ) {
+            if(!member?.filehash) response({ type: "error", msg: "No filehash supplied. Its needed to identify emojis" });
+            if(!member?.emojiName) response({ type: "error", msg: "No emoji name supplied. Needed for updating. Supply old one for no changes" });
 
             try {
                 if (!hasPermission(member.id, "manageEmojis")) {
@@ -29,19 +30,18 @@ export default (io) => (socket) => {
                         "popup_type": "confirm"
                         }`));
 
-                    response({ type: "error", msg: "You dont have permissions to manage Emojis" });
+                    response({type: "error", msg: "You dont have permissions to manage Emojis"});
                     return;
                 }
 
-                var oldEmoji = findEmojiByID(member.emojiId);
-                var newEmoji = `emoji_${member.emojiId}_${member.emojiName}.${oldEmoji.split(".").pop()}`;
+                var oldEmoji = findEmojiByID(member.filehash);
+                var newEmoji = `${member.filehash}_${member.emojiName}.${oldEmoji.split(".").pop()}`;
 
                 fs.rename('./public/emojis/' + oldEmoji, `./public/emojis/` + newEmoji, function (err) {
                     if (err) {
-                        response({ type: "error", error: err, msg: "Couldnt update emoji" })
-                    }
-                    else {
-                        response({ type: "success", msg: "Emoji successfully updated" })
+                        response({type: "error", error: err, msg: "Couldnt update emoji"})
+                    } else {
+                        response({type: "success", msg: "Emoji successfully updated"})
                     }
                 });
             }

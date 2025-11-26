@@ -1,7 +1,49 @@
 
 const SANITIZE_OPTIONS = {
-    ALLOWED_TAGS: ['div', 'source', 'video', 'audio', 'span', 'p', 'br', 'b', 'i', 'u', 's', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'pre', 'code', 'blockquote', 'strong', 'em', 'img', 'mark', "iframe"],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'class', 'style', 'data-id', 'controls', 'title', 'data-member-id', 'data-message-id']
+    ALLOWED_TAGS: [
+        'div',
+        'source',
+        'video',
+        'audio',
+        'span',
+        'p',
+        'br',
+        'b',
+        'i',
+        'u',
+        's',
+        'a',
+        'ul',
+        'ol',
+        'li',
+        'h1',
+        'h2',
+        'h3',
+        'pre',
+        'code',
+        "label",
+        'blockquote',
+        'strong',
+        'em',
+        'img',
+        'mark',
+        "iframe"]
+    ,
+
+    ALLOWED_ATTR: [
+        'href',
+        'target',
+        'rel',
+        'src',
+        'alt',
+        'class',
+        'style',
+        'data-id',
+        'controls',
+        'title',
+        'data-member-id',
+        'data-message-id'
+    ]
 };
 
 function sanitizeHtmlForRender(html) {
@@ -21,7 +63,7 @@ function sanitizeHtmlForRender(html) {
         }).join('');
 
         const clean = DOMPurify.sanitize(out, SANITIZE_OPTIONS);
-        return `<div class="sanitized-content">${clean}</div>`;
+        return `${clean}`;
     }
 
     let clean = DOMPurify.sanitize(raw, SANITIZE_OPTIONS);
@@ -30,7 +72,7 @@ function sanitizeHtmlForRender(html) {
 
     clean = clean.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');
 
-    return `<div class="sanitized-content">${clean.trim()}</div>`;
+    return `${clean.trim()}`;
 }
 
 function encodePlainText(s) {

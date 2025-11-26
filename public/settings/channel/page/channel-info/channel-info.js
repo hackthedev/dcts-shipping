@@ -1,3 +1,6 @@
+window.updatePreview  = updatePreview;
+window.saveSettings   = saveSettings;
+
 var channelname = document.getElementById("channel_name");
 var saveButton = document.getElementById("settings_channel_save");
 

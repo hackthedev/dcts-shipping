@@ -4,6 +4,7 @@
 /chats
 config.json
 /public/uploads/
+/public/emojis/
 /plugins
 /discover/node_modules/
 /discover/config.json

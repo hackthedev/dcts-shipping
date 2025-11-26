@@ -15,7 +15,7 @@
 
     <!-- New to-be-implement features-->
     <script src="js/alerts.js?v={{random}}"></script>
-    <script src="js/prompts.js?v={{random}}"></script>
+    <script defer src="js/prompts.js?v={{random}}"></script>
     <script src="js/tooltips.js?v={{random}}"></script>
     <script src="js/sysmsg.js?v={{random}}"></script>
     <script src="js/upload.js?v={{random}}"></script>
@@ -31,7 +31,8 @@
     <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
-    <link href="css/themes/default.css?v={{random}}" rel="stylesheet">
+    <link href="css/themes/default/default.css?v={{random}}" rel="stylesheet">
+    <link href="css/emojis.css?v={{random}}" rel="stylesheet">
     <link href="css/message_actions.css?v={{random}}" rel="stylesheet">
     <link href="css/contextmenu.css?v={{random}}" rel="stylesheet">
     <link href="style.css?v={{random}}" rel="stylesheet">
@@ -93,6 +94,7 @@
     <script src="js/effects/party.js?v={{version}}"></script>
     <script src="js/effects/pixel.js?v={{random}}"></script>
     <script src="js/effects/glitch.js?v={{random}}"></script>
+    <script src="js/effects/splashscreen.js?v={{random}}"></script>
 
     <script src="/plugins/loader.js?v={{random}}"></script>
 
@@ -174,22 +176,22 @@
                     </div>
                 </div>
 
-               <div class="row">
-                   <div id="profile-qa-img-container">
-                       <img id="profile-qa-img" onerror="this.src = '/img/default_pfp.png';">
-                   </div>
+                <div class="row">
+                    <div id="profile-qa-img-container">
+                        <img id="profile-qa-img" onerror="this.src = '/img/default_pfp.png';">
+                    </div>
 
-                   <div id="profile-qa-info">
-                       <Label id="profile-qa-info-username" title="Edit your username">-</Label><br>
-                       <Label id="profile-qa-info-status" title="Edit your status">-</Label>
-                   </div>
+                    <div id="profile-qa-info">
+                        <Label id="profile-qa-info-username" title="Edit your username">-</Label><br>
+                        <Label id="profile-qa-info-status" title="Edit your status">-</Label>
+                    </div>
 
-                   <div class="profile-qa-actions right">
-                       <a href="/settings/account">
-                           <div class="profile-qa-icon settings"></div>
-                       </a>
-                   </div>
-               </div>
+                    <div class="profile-qa-actions right">
+                        <a href="/settings/account">
+                            <div class="profile-qa-icon settings"></div>
+                        </a>
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -217,10 +219,8 @@
                         </div>
                     </div>
 
-                    <div id="gif-searchbar"><input autocomplete="off" id="gif-searchbar-input"
-                                                   placeholder="Search anything, then press enter" type="text"></div>
-
                     <div id="emoji-entry-container"></div>
+                    <div id="gif-entry-container"></div>
                 </div>
             </div>
 
@@ -231,11 +231,12 @@
                         <div id="editor-toolbar" style="border: none !important;">
                             <!-- Add toolbar buttons as needed -->
                             <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
-                        <button class="ql-bold" title="Bold"></button>
-                        <button class="ql-italic" title="Italic"></button>
-                        <button class="ql-underline" title="Underline"></button>
-                        <button class="ql-strike" title="Strikeout"></button>
-                    </span>
+                                <button class="ql-bold" title="Bold"></button>
+                                <button class="ql-italic" title="Italic"></button>
+                                <button class="ql-underline" title="Underline"></button>
+                                <button class="ql-strike" title="Strikeout"></button>
+                                <button class="ql-clean" title="Remove formatting"></button>
+                         </span>
 
                             <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
                         <button class="ql-link" title="Link"></button>
@@ -277,7 +278,11 @@
     <div id="modalBoxButtons"></div>
 </div>
 
-<div id="popup-container" style="z-index: 99999;"></div>
+<div id="popup-container">
+    <div id="popup-content">
+
+    </div>
+</div>
 
 
 <div id="context-menu"></div>
@@ -396,7 +401,7 @@
 
 <script>
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         ContextMenu.init();
     })
 

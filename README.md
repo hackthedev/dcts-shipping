@@ -1,7 +1,7 @@
 # DCTS - Direct Communication Through Sockets
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
-
 [Visit our subreddit](https://www.reddit.com/r/dcts/) • [Feature list](https://github.com/hackthedev/dcts-shipping/blob/beta/docs/Feature%20List.md) • [Discord for convenience](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [To-Do list](https://github.com/users/hackthedev/projects/6/views/1?filterQuery=-changelog-status%3AAdded+-status%3ACanceled)
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
 
 This project was made with the goal to provide a platform that aims to fix issues with existing solutions like Discord, TeamSpeak, Revolt, Fosscord, Matrix, TeaSpeak and all others out there and to create new, advanced and easy to use features while creating as little friction as possible and keeping things intuitive.
 
@@ -68,6 +68,11 @@ DCTS isn't just a chat platform, it's a vision for better communication, driven 
 
 ## Installing
 ### Docker
+
+> [!IMPORTANT]
+>
+> Docker is currently NOT working-
+
 To install via docker you can either clone and build or use the prebuilt image.
 ```
 sudo docker run --name dcts-server  -p 8080:2052 ghcr.io/hackthedev/dcts-shipping

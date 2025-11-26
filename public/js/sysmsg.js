@@ -80,7 +80,11 @@
             display: flex;
             flex-wrap: wrap;
             margin: 0;
-            word-break: break-all;
+            word-break: break-word;
+        }
+        
+        #prompt-text p {
+            margin: 6px 0;
         }
 
         #prompt-banner {
@@ -160,6 +164,7 @@
         Icon path function to handle different scenarios
         */
         let iconPath = `/img/${icon}.png`;
+        if(icon.includes("data:image")) iconPath = icon;
         if(icon.includes("/uploads/")) iconPath = icon; // Upload filepath
         if(iconPath.includes("/img//img/")) iconPath = iconPath.replace("/img//img/", "/img/").replace(".png.png", ".png");
 

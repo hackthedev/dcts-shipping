@@ -1,156 +1,261 @@
+import {Emoji} from "../../../../js/core/Emoji.js";
 
-var servername = document.getElementById("server_name");
-var serverdescription = document.getElementById("server_description");
-var saveButton = document.getElementById("settings_profile_save");
+// handle upload
+document.getElementById("settings_profile_save")
+    .addEventListener("change", function (e) {
+            upload(e.target.files)
+        }
+    );
 
-var serverconfigName;
-var serverconfigDesc;
 
-socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageEmojis" }, function (response) {
+// dumb ass fucking fix
+window.selectRoleForWhitelist = selectRoleForWhitelist;
+window.deleteEmoji = deleteEmoji;
 
-    if(response.permission == "denied"){
+
+socket.emit("checkPermission", {
+    id: UserManager.getID(),
+    token: UserManager.getToken(),
+    permission: "manageEmojis"
+}, function (response) {
+    if (response.permission == "denied") {
         window.location.href = window.location.origin + "/settings/server";
-    }
-    else{
+    } else {
         document.getElementById("pagebody").style.display = "block";
     }
 });
 
-
 getEmojis();
 
-function checkState(element, ){
-
-
-    var emojiSaveElement = document.querySelector(`#save-${element.id}`);
-
-
-    if(element.value != element.alt.split("_")[2].split(".")[0]){
-        emojiSaveElement.style.display = "block";
-    }
-    else{
-        emojiSaveElement.style.display = "none";
-    }
-
-    // Execute a function when the user presses a key on the keyboard
-    element.addEventListener("keypress", function(event) {
-        // If the user presses the "Enter" key on the keyboard
-        if (event.key === "Enter") {
-            emojiSaveElement.click();
-        }
-    });
+function getNameFromFileName(fileName) {
+    return fileName.split("_")[1].split(".")[0]
 }
 
+function getRoleSpan(roleObj) {
+    return `<span style="margin: auto 4px;color: ${roleObj.color};" data-role-id="${roleObj.id}">${roleObj.name},</span>`
+}
 
+async function editEmoji(emojiStringified) {
+    let emoji = JSON.parse(emojiStringified);
+    var emojiName = emoji.name;
+    let emojiHash = emoji.filename.split("_")[0];
+    let uploader = emoji.uploader;
+    let uploaderObj = await ChatManager.resolveMember(UserManager.getID());
+
+    let emojiObject = new Emoji(emoji.filename)
+        .setName(emojiName)
+        .setUploader(uploader)
+        .setUserReaction(emoji.user_reaction)
+        .setAllowedRoles(emoji.allowedRoles)
+
+    console.log(emojiObject.object)
+
+    let roleCode = "";
+    for (let roleId of emojiObject.allowedRoles) {
+        let resolvedRole = await ChatManager.resolveRole(roleId);
+        roleCode += getRoleSpan(resolvedRole.info);
+    }
+
+    customPrompts.showPrompt(
+        "Edit Emoji",
+        `
+
+            <style>
+            #settings_emoji_flexContainer {
+                display: flex;
+                width: 100%;
+                flex-direction: row;
+                gap: 80px;
+                margin: 40px 0;
+            }
+            
+            #settings_emoji_flexContainer .column{
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .settings_emoji_flexContainer_hr{
+                border: 1px solid rgba(128,128,128,0.5);
+            }
+            </style>
+
+            <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 20px;margin-bottom: 20px;">
+                <img src="/emojis/${emoji.filename}" style="max-width: 50px;">
+                <label title="${uploaderObj.id}">Uploaded by ${uploaderObj.name}</label>
+            </div><hr class="settings_emoji_flexContainer_hr">
+
+            <div id="settings_emoji_flexContainer">
+                <div class="column" style="width: 100%;">
+                    <div class="prompt-form-group">              
+                        <label class="prompt-label">Emoji Name</label>
+                        <input type="text" class="prompt-input"
+                        name="inputEmojiName"
+                        value="${emoji.name}" 
+                        data-filehash="${emojiHash}" 
+                        data-name="${emoji.name}" 
+                        data-filename="${emoji.filename}"">
+                    </div>
+                    
+                    <!--
+                    <div class="prompt-form-group">                        
+                        <label for="isUserReaction">Is user reaction?</label>
+                        <input type="checkbox" ${emoji?.user_reaction ? "checked" : ""} name="inputIsUserReaction" id="isUserReaction" class="prompt-input">
+                    </div>-->
+                </div>
+                
+                <!--
+                 <div class="column">
+                    <div class="prompt-form-group">                            
+                        <label class="prompt-label">Audio Source Url</label>
+                        <input type="text" class="prompt-input"
+                        name="inputAudioSourceUrl"
+                        value="${emoji?.audio?.src ?? ""}" 
+                        data-filehash="${emojiHash}" 
+                        data-name="${emoji.name}" 
+                        data-filename="${emoji.filename}">
+                    </div>
+                    
+                    <div class="prompt-form-group">                        
+                        <label for="randomAudioPitch">Enable random audio pitch?</label>
+                        <input type="checkbox" name="inputRandomAudioPitch" id="randomAudioPitch" ${emoji?.audio?.random_pitch ? "checked" : ""} class="prompt-input">
+                    </div>
+                </div>-->
+            </div>
+                
+                <!--
+                <div style="display: flex; flex-direction: column; width: 100%;margin-top: -20px;">
+                     <div class="prompt-form-group" style="margin-bottom: 0 !important;">     
+                        <label for="allowedRoles">Restrict to the following roles:</label>
+                        <p class="prompt-input" data-name="allowedRoles" id="allowedRoles" onclick='selectRoleForWhitelist(this, ${JSON.stringify(emojiObject.allowedRoles)})'>
+                            ${roleCode}
+                        </p>
+                    </div>
+                </div>-->
+            
+`,
+        async (values) => {
+            // some code
+            console.log(values)
+
+
+            socket.emit("updateEmoji",
+                {
+                    filehash: emojiHash,
+                    emojiName: values.inputEmojiName,
+                    id: UserManager.getID(),
+                    token: UserManager.getToken()
+                }, function (response) {
+                    if (response.type === "success") {
+                        getEmojis();
+                    }
+                });
+
+        },
+        ["Save", "success"]
+    )
+}
+
+async function selectRoleForWhitelist(element, preselected = null) {
+    let chosenRoles = await chooseRole({
+        multi: true,
+        preselected
+    });
+    element.innerHTML = '';
+
+    for (let key in chosenRoles.roles) {
+        let role = chosenRoles.roles[key];
+        element.insertAdjacentHTML("beforeend", getRoleSpan(role))
+    }
+}
 
 function getEmojis() {
     var emojiContainer = document.getElementById("emoji-container");
-
-    socket.emit("getEmojis", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
-
+    socket.emit("getEmojis", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
         try {
-            if (response.type == "success") {
-                //settings_icon.value = response.msg;
+            if (response.type === "success") {
                 emojiContainer.innerHTML = "";
 
-                response.data.forEach(emoji => {
-                    //console.log(emoji)
+                response.data.reverse().forEach(emoji => {
+                    let emojiHash = emoji.filename.split("_")[0]
+                    let emojiEntry = document.createElement("div");
+                    emojiEntry.className = "emoji-entry";
 
+                    emojiEntry.innerHTML = `<div class="emoji-img">
+                                                <img class="emoji" src="/emojis/${emoji.filename}">
+                                                 <div class="emoji-actions">
+                                                    <img class="emoji-action-icon" 
+                                                    src="/img/delete.png" 
+                                                    onclick="deleteEmoji(this);" 
+                                                    data-filehash="${emojiHash}" 
+                                                    data-filename="${emoji.filename}">
+                                                </div>
+                                            </div>`
 
-                    var emojiId = emoji.split("_")[1];
-                    var emojiName = emoji.split("_")[2];
+                    let img = emojiEntry.querySelector("img")
+                    img.onclick = function () {
+                        editEmoji(JSON.stringify(emoji))
+                    }
+                    emojiContainer.appendChild(emojiEntry);
+                });
 
-                    //console.log("Emoji ID: " + emojiId);
-                    //console.log("Emoji Name: " + emojiName);
-
-                    var code = `
-                    <div class="emoji-entry">
-                        <div class="emoji-img">
-                            <img class="emoji" src="/emojis/${emoji}">
-                        </div>
-                
-                        <div class="emoji-name">
-                            <input type="text" onkeyup="checkState(this);" id="${emojiId}" alt="${emoji}" value="${emojiName.split(".")[0]}">
-                            <div class="emoji-actions">
-                                <img id="delete-${emojiId}" class="emoji-action-icon" src="/img/delete.png" onclick="deleteEmoji('${emoji}', this);">
-                                <img id="save-${emojiId}" style="display: none;" class="emoji-action-icon" src="/img/save.png" onclick="saveEmojiName('${emojiId}', this);">
-                            </div>
-                        </div>
-                    </div>`;
-
-                    emojiContainer.insertAdjacentHTML("beforeend", code);
-                })
-
-                //alert(response.msg)
-            } else {
-                //notify(response.msg, "error")
+                // debug, show last emoji prompt on default so designing it is easier for me lol
+                // #lazy
+                //editEmoji(JSON.stringify((response.data[Object.keys(response.data).length-1])))
             }
-        }
-        catch (Ex){
+        } catch (Ex) {
             console.log(Ex);
-            //notify("Unkown Error! Reloading might fix it", "error");
         }
-
-        console.log(response);
     });
 }
 
-function deleteEmoji(emoji, element){
-
-    console.log("trying to delete emoji " + emoji)
-    console.log("sending")
-
-    var parentNode = element.parentNode.parentNode;
-    var inputField = parentNode.querySelector("input");
-
-    socket.emit("deleteEmoji", {emoji: emoji, id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
-
-        if(response.type == "success"){
-            element.remove();
-
-            //notify("Emoji successfully deleted", "success");
-            getEmojis();
+function deleteEmoji(emoji) {
+    socket.emit("deleteEmoji", {
+        filename: emoji.getAttribute("data-filename"),
+        id: UserManager.getID(),
+        token: UserManager.getToken()
+    }, function (response) {
+        if (response.type === "success") {
+            socket.emit("uploadedEmoji", {id: UserManager.getID(), token: UserManager.getToken()});
+            emoji.closest(".emoji-entry").remove();
         }
         else{
-            //notify("Emoji successfully deleted", "error");
-            //alert(response.msg)
+            console.log(response)
         }
     });
 }
 
-function saveEmojiName(id, element){
+export async function upload(files) {
+    let uploadResult = await ChatManager.uploadFile(files, "emoji");
+    console.log(uploadResult);
 
-    var parentNode = element.parentNode.parentNode;
-    var inputField = parentNode.querySelector("input");
-
-    socket.emit("updateEmoji", {emojiId: id, emojiName: inputField.value, id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
-
-        if(response.type == "success"){
-            element.style.display = "none";
-            //inputField.alt = inputField.value;
-
-            //notify("Emoji successfully updated", "success")
-            getEmojis();
-        }
-        else{
-            //notify(response.msg, "error")
-        }
-    });
+    if(uploadResult.ok === true){
+        socket.emit("uploadedEmoji", {id: UserManager.getID(), token: UserManager.getToken()});
+    }
+    getEmojis();
 }
 
-function upload(files) {
 
-    socket.emit("fileUpload", {file: files[0], filename: files[0].name, id: UserManager.getID(), token: UserManager.getToken(), type: "emoji" }, function (response) {
 
-        if(response.type == "success"){
-            //settings_icon.value = response.msg;
-            //alert(response.msg)
-            getEmojis();
-        }
-        else{
-            //notify(response.msg, "error")
-        }
+const dropzone = document.getElementById("emoji-dropzone");
 
-        console.log(response);
-    });
-}
+dropzone.addEventListener("dragover", e => {
+    e.preventDefault();
+    dropzone.style.borderColor = "#00cc00";
+});
+
+dropzone.addEventListener("dragleave", () => {
+    dropzone.style.borderColor = "#666";
+});
+
+dropzone.addEventListener("drop", e => {
+    e.preventDefault();
+    dropzone.style.borderColor = "#666";
+
+    const files = [...e.dataTransfer.files];
+    const imageFiles = files.filter(file => file.type.startsWith("image/"));
+
+    if (imageFiles.length > 0) {
+        upload(imageFiles);
+    }
+});
+

@@ -22,7 +22,6 @@ export default (io) => (socket) => {
                     var targetRole = serverconfig.serverroles[member.role];
 
                     if (executer.info.sortId <= targetRole.info.sortId) {
-
                         // only administrators can bypass this
                         if (!hasPermission(member.id, "administrator")) {
                             sendMessageToUser(socket.id, JSON.parse(

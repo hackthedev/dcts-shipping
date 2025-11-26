@@ -350,6 +350,8 @@ socket.on('messageCreate', async function (message) {
             pingMentions: true
         });
     }
+
+    waitFor(scrollDown, 1)
 });
 
 socket.on('messageEdited', async function (message) {

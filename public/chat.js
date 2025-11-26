@@ -1190,7 +1190,7 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message) {
 
     replaceInlineEmojis();
     await replaceInlineImagesInQuill();
-    message = quill.root.innerHTML;
+    if(quill.root.innerText.trim().length !== 0) message = quill.root.innerHTML;
 
     let msgPayload = {
         id: authorId,
@@ -2369,19 +2369,14 @@ uploadObject.addEventListener('drop', async function (e) {
 
     try {
         // Call upload and wait for the result
-        const result = await upload(files);
-        console.log(result);
+        let result = await ChatManager.uploadFile(files);
+        console.log("upload result: ", result);
 
-        if (result.status === "done") {
-            console.log("All files uploaded successfully. URLs:", result.urls);
+        if (result.ok === true) {
+            console.log("All files uploaded successfully. URLs:", result.path);
 
             // Process the URLs array
-            for (const [index, url] of result.urls.entries()) {
-                console.log(`File ${index + 1} uploaded to: ${url}`);
-                sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), window.location.origin + url); // Sending all URLs at once
-
-
-            }
+            sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${window.location.origin}/${result.path}`); // Sending all URLs at once
         } else {
             console.error("Upload encountered an error:", result.error);
         }

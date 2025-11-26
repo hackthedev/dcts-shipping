@@ -30,8 +30,16 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         fs.mkdirSync(localUploadPath, { recursive: true });
 
         // perm check
-        if (!hasPermission(id, "uploadFiles")) return res.status(403).json({ ok: false, error: "No permission to upload files" });
-        if (!hasPermission(id, "manageEmojis")) return res.status(403).json({ ok: false, error: "No permission to manage emojis" });
+        if (type === "upload") {
+            if (!hasPermission(id, "uploadFiles"))
+                return res.status(403).json({ ok: false, error: "No permission to upload files" });
+        }
+
+        if (type === "emoji") {
+            if (!hasPermission(id, "manageEmojis"))
+                return res.status(403).json({ ok: false, error: "No permission to manage emojis" });
+        }
+
 
         // individual file size upload limit from role
         const role = getMemberHighestRole(id);

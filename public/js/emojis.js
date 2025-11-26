@@ -258,11 +258,11 @@ function isOnlyText(html) {
 async function text2Emoji(text, returnCodeOnly = false) {
     const replacedText = text.replace(/:([a-fA-F0-9]+):/g, (match, emojiId) => {
         const emojiObject = findEmojiByID(emojiId);
+
         if (emojiObject) {
             const emojiName = String(emojiObject.filename.split("_")[1].split(".")[0])
             const sendBigEmoji = isOnlyText(text) ? "big" : "";
             let emojiFileHash = emojiObject.filename.split("_")[0];
-
             if (returnCodeOnly) {
                 return `<img title="${emojiName}" data-filehash="${emojiFileHash}" onerror="this.src='/img/error.png'" class="inline-text-emoji ${sendBigEmoji}" src="/emojis/${emojiObject.filename}">`;
             }

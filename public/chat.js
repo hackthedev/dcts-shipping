@@ -957,28 +957,41 @@ function getChannelTree() {
 
 
 
-function createYouTubeEmbed(url, messageid) {
+function createYouTubeEmbed(url, messageId) {
+    let u = new URL(url.trim());
+    let host = u.hostname.replace("www.", "").toLowerCase();
+    let code = "";
+    let t = "";
 
-    var videocode = url.replace("https://www.youtube.com/watch?v=", "").replaceAll(" ", "");
-    if (url.toLowerCase().includes("youtube")) {
-        videocode = url.replace("https://www.youtube.com/watch?v=", "").replaceAll(" ", "");
-    } else if (url.toLowerCase().includes("youtu.be")) {
-        videocode = url.replace("https://youtu.be/", "").replaceAll(" ", "");
+    if (u.searchParams.has("t")) t = u.searchParams.get("t");
+    if (u.hash.startsWith("#t=")) t = u.hash.replace("#t=", "");
+    if (u.hash.startsWith("#")) t = u.hash.replace("#", "");
+
+    if (host === "youtube.com" || host === "m.youtube.com") {
+        if (u.searchParams.has("v")) code = u.searchParams.get("v");
+        else if (u.pathname.startsWith("/embed/")) code = u.pathname.replace("/embed/", "");
+    } else if (host === "youtu.be") {
+        code = u.pathname.replace("/", "");
     }
 
-    var code = `
-                <div data-message-id="${messageid.replace("msg-", "")}" class="iframe-container" id="msg-${messageid}" data-message-id="${messageid.replace("msg-", "")}" >
-                    <iframe 
-                    data-message-id="${messageid.replace("msg-", "")}"                     
-                    style="border: none;"
-                    src="https://www.youtube.com/embed/${videocode}" 
-                    title="YouTube video player" frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin">
-                                    
-                    </iframe>
-                </div>
-                `;
-    return code;
+    if (!code) return "";
+
+    let embed = "https://www.youtube.com/embed/" + code;
+    if (t) embed += "?start=" + parseInt(t);
+
+    return `
+        <div data-message-id="${messageId.replace("msg-", "")}" class="iframe-container" id="msg-${messageId}">
+            <iframe 
+                data-message-id="${messageId.replace("msg-", "")}"
+                style="border:none"
+                src="${embed}"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                referrerpolicy="strict-origin-when-cross-origin">
+            </iframe>
+        </div>
+    `;
 }
 
 
@@ -1159,12 +1172,10 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message) {
         return;
     }
 
-    //message = message.replaceAll("<p><br></p>", "");
 
     replaceInlineEmojis();
     await replaceInlineImagesInQuill();
-
-    if (!message) message = quill.root.innerHTML;
+    message = quill.root.innerHTML;
 
     let msgPayload = {
         id: authorId,

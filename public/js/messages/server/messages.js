@@ -587,7 +587,7 @@ function createMsgHTML({message, append = false, isSystem = false, reply = null,
                <div style="width: 100%;" data-message-id="${message?.messageId}" data-member-id="${message?.id}"> <!-- for the flex layout -->
                  <div class="meta">
                     ${isSystem !== true ?
-        `<label class="username" data-member-id="${message.id}" style="color: ${message.color};">${unescapeHtmlEntities(sanitizeHtmlForRender(truncateText(message.name, 25)))}</label>` : ""}
+                    `<label class="username" data-member-id="${message.id}" style="color: ${message.color};">${unescapeHtmlEntities(sanitizeHtmlForRender(truncateText(message.name, 25)))}</label>` : ""}
                     <label class="timestamp" data-timestamp="${message.timestamp}">
                         ${new Date(message.timestamp).toLocaleString("narrow")}
                         

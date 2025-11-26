@@ -506,7 +506,7 @@ async function checkMediaTypeAsync(url) {
                         throw new Error(`HTTP error! status: ${xhr.status}`);
                     }
                 } catch (error) {
-                    console.error('Error checking media type:', error);
+                    //console.error('Error checking media type:', error);
                     reject('error');
                 }
             }
@@ -570,8 +570,8 @@ async function markdown(msg, msgid) {
             }
         }
         catch(mediaTypeError) {
-            console.error("Error while checking media type")
-            console.error(mediaTypeError);
+            //console.error("Error while checking media type")
+            //console.error(mediaTypeError);
         }
 
         const msgUrls = getUrlFromText(msg);
@@ -1359,6 +1359,10 @@ function focusEditor(){
     editor.focus();
     const length = quill.getLength();
     quill.setSelection(length, 0);
+}
+
+function toggleEditor(value){
+    messageInputBox.parentNode.parentNode.style.visibility = value === true ? "visible" : "hidden";
 }
 
 const Delta = Quill.import('delta');
@@ -2149,26 +2153,29 @@ async function setUrl(param, isVC = false) {
             token: UserManager.getToken(),
             permission: "sendMessages"
         }, function (response) {
-            if (response.permission === "granted") {
-                switchLeftSideMenu(true)
+            console.log(response)
+            switchLeftSideMenu(true)
 
-                // update grouplist and channel tree if we only
-                // click on a group
-                if(groupId && !categoryId && !channelId){
-                    getChannelTree();
-                }
+            // update grouplist and channel tree if we only
+            // click on a group
+            if(groupId && !categoryId && !channelId){
+                getChannelTree();
+            }
 
-                changedChannel()
-                ChatManager.setChannelMarker(UserManager.getChannel(), false)
+            changedChannel()
+            ChatManager.setChannelMarker(channelId, false)
 
-                chatlog.innerHTML = "";
-                document.getElementById("messagebox").style.display = "flex";
-                document.querySelector('.ql-editor').focus();
+            chatlog.innerHTML = "";
+            document.getElementById("messagebox").style.display = "flex";
+            document.querySelector('.ql-editor').focus();
 
-                getChatlog();
-            } else {
-                chatlog.innerHTML = "";
-                document.getElementById("messagebox").style.display = "none";
+            getChatlog();
+
+            if (response.permission !== "granted") {
+                toggleEditor(false);
+            }
+            else{
+                toggleEditor(true);
             }
         });
     }
@@ -2263,8 +2270,6 @@ function showGroupStats() {
                 });
             }
         });
-    } else {
-        if (messageInputBox.parentNode.parentNode) messageInputBox.parentNode.parentNode.style.visibility = "visible";
     }
 }
 

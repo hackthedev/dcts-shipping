@@ -12,6 +12,9 @@ export default (io) => (socket) => {
             //consolas("Typing room: " + member.room);
             //consolas("Typing member id: " + member.id);
 
+            if(!hasPermission(member.id, "viewChannel", member.room.split("-")[2])) return;
+            if(!hasPermission(member.id, "sendMessages", member.room.split("-")[2])) return;
+
             // if user is muted dont do anything
             if (serverconfig.mutelist.hasOwnProperty(member.id)) {
                 return;

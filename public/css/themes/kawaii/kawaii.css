@@ -19,12 +19,21 @@ body {
 }
 #channelname-bar {
     background-color: hsl(from var(--main) h s calc(l * 1.9) / 10%);
+    border-radius: 0 !important;
 }
 
-#profile_container {
+#profile_container, #emoji-box-container{
     background-color: hsl(from rgb(var(--main-rgb)) h s calc(l * 1.9));
+}
+#profile-qa {
+    background-color: hsl(from rgb(var(--main-rgb)) h s calc(l * 1.2) / 80%);
 }
 
 .ql-editor{
     border: 1px solid rgba(128, 128, 128, 0.2);
 }
+
+.activeUserEntry {
+    border: 1px solid rgba(128, 128, 128, 0.2);
+}
+

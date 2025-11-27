@@ -22,7 +22,7 @@
         "ssl": {
             "key": "/etc/letsencrypt/live/EXAMPLE.COM/privkey.pem",
             "cert": "/etc/letsencrypt/live/EXAMPLE.COM/cert.pem",
-            "chain": "/etc/letsencrypt/live/EXAMPLE.com/chain.pem",
+            "chain": "/etc/letsencrypt/live/EXAMPLE.COM/chain.pem",
             "enabled": 0
         },
         "tenor": {

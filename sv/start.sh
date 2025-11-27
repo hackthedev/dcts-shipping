@@ -1,3 +1,3 @@
 #!/bin/bash
-name="$1"
+name="$(openssl rand -hex 8)"
 cd /home/dcts && screen -dmSL "$name" node /home/dcts

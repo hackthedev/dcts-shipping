@@ -1153,33 +1153,38 @@ function isOpen(el) {
 
 
 function toggleMobilePanel(element, override = null, isRight = false){
-    if(override === false){
-        element.style.transition = "transform 500ms ease-in-out";
-        element.style.transform = isRight ? "translateX(100%)" : "translateX(-100%)";
+    try{
+        if(override === false){
+            element.style.transition = "transform 500ms ease-in-out";
+            element.style.transform = isRight ? "translateX(100%)" : "translateX(-100%)";
 
-        setTimeout(() => {
-            element.style.display = "none";
-        }, 500);
+            setTimeout(() => {
+                element.style.display = "none";
+            }, 500);
 
-        return;
+            return;
+        }
+
+        if(override === true){
+            element.style.display = "flex";
+            element.style.transition = "none";
+            element.style.transform = isRight ? "translateX(100%)" : "translateX(-100%)";
+
+            void element.offsetWidth;
+
+            element.style.transition = "transform 500ms ease-in-out";
+            element.style.transform = "translateX(0)";
+            return;
+        }
+
+        if(element.style.display === "flex"){
+            toggleMobilePanel(element, false, isRight);
+        } else {
+            toggleMobilePanel(element, true, isRight);
+        }
     }
+    catch{
 
-    if(override === true){
-        element.style.display = "flex";
-        element.style.transition = "none";
-        element.style.transform = isRight ? "translateX(100%)" : "translateX(-100%)";
-
-        void element.offsetWidth;
-
-        element.style.transition = "transform 500ms ease-in-out";
-        element.style.transform = "translateX(0)";
-        return;
-    }
-
-    if(element.style.display === "flex"){
-        toggleMobilePanel(element, false, isRight);
-    } else {
-        toggleMobilePanel(element, true, isRight);
     }
 }
 

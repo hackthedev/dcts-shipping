@@ -19,7 +19,7 @@
     width: 30%;
     height: 40%;
     position: fixed;
-    z-index: 99999;
+    z-index: 15;
     padding: 8px;
     border-radius: 8px;
     overflow: hidden;

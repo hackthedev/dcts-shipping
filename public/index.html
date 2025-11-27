@@ -134,6 +134,22 @@
     </div>
 
     <div id="contentLayout">
+
+        <div class="mobilePanel">
+            <div id="leftSideMenu">
+                <div id="mobile_GroupAndChannelContainer">
+                    <div id="mobile_GroupListContainer">
+                        <div id="mobile_GroupList"></div>
+                    </div>
+
+                    <div id="mobile_ChannellistContainer">
+                        <div id="mobile_groupBanner"><img id="mobile_groupBannerDisplay"/></div>
+                        <div id="mobile_channelList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="networkServers">
 
             <div id="networkActivatorUi">
@@ -268,6 +284,13 @@
 
         </div>
         <div id="infolist"></div>
+
+
+        <div class="mobilePanel">
+            <div id="rightSideMenu">
+                    <div id="mobile_memberlist"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -426,15 +449,7 @@
 
 <!-- Mobile HTML-->
 
-<div id="leftSideMenu">
-    <div id="mobile-channellist-trigger" onclick="switchLeftSideMenu()"></div>
 
-    <div id="mobile_GroupAndChannelContainer">
-        <div id="mobile_GroupList"></div>
-        <div id="mobile_groupBanner"><img id="mobile_groupBannerDisplay"/></div>
-        <div id="mobile_channelList"></div>
-    </div>
-</div>
 
 
 <div id="profile_container" style="display: none;position: fixed;z-index: 10000;">
@@ -463,11 +478,6 @@
                 +</code>
         </div>
     </div>
-</div>
-
-<div id="rightSideMenu">
-    <div id="mobile-memberlist-trigger" onclick="switchRightSideMenu()"></div>
-    <div id="mobile_memberlist"></div>
 </div>
 
 

@@ -6,6 +6,10 @@ var editedServerRoleResponse = [];
 var editedPermissions = {};
 var currentRoleId = "";
 
+window.loadRolePerms = loadRolePerms;
+window.removeFromRole = removeFromRole;
+window.addToRole = addToRole;
+
 socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: ["manageRoles", "manageGroups"] }, function (response) {
 
     if (response.permission == "denied") {

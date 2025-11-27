@@ -1107,30 +1107,136 @@ function sendMessage(messagebox) {
 
 }
 
-function switchLeftSideMenu(checkChannelLink = false) {
 
-    let leftSideMenuContainer = document.getElementById("mobile_GroupAndChannelContainer")
+let startX = 0;
+let startY = 0;
 
-    if (leftSideMenuContainer.style.display == "block") {
+function onSwipe(direction){
+    const left = getLeftPanel();
+    const right = getRightPanel();
 
-        if (UserManager.getCategory() != null && UserManager.getChannel() != null && checkChannelLink == true) leftSideMenuContainer.style.display = "none"; else if (checkChannelLink == false) leftSideMenuContainer.style.display = "none";
-    } else {
-        leftSideMenuContainer.style.display = "block";
+    if(direction === "right"){
+        if(isOpen(right)) return switchRightSideMenu(false);
+        return switchLeftSideMenu(true);
+    }
+
+    if(direction === "left"){
+        if(isOpen(left)) return switchLeftSideMenu(false);
+        return switchRightSideMenu(true);
     }
 }
 
 
-function switchRightSideMenu() {
+const contentLayout = document.getElementById("contentLayout");
 
-    let rightMenuContainer = document.getElementById("mobile_memberlist")
+contentLayout.addEventListener("touchstart", e => {
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+});
 
-    if (rightMenuContainer.style.display == "block") {
-        rightMenuContainer.style.display = "none";
+contentLayout.addEventListener("touchend", e => {
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        onSwipe(dx > 0 ? "right" : "left");
+    }
+});
+
+function isOpen(el) {
+    return el.style.display === "flex";
+}
+
+
+function toggleMobilePanel(element, override = null, isRight = false){
+    if(override === false){
+        element.style.transition = "transform 500ms ease-in-out";
+        element.style.transform = isRight ? "translateX(100%)" : "translateX(-100%)";
+
+        setTimeout(() => {
+            element.style.display = "none";
+        }, 500);
+
+        return;
+    }
+
+    if(override === true){
+        element.style.display = "flex";
+        element.style.transition = "none";
+        element.style.transform = isRight ? "translateX(100%)" : "translateX(-100%)";
+
+        void element.offsetWidth;
+
+        element.style.transition = "transform 500ms ease-in-out";
+        element.style.transform = "translateX(0)";
+        return;
+    }
+
+    if(element.style.display === "flex"){
+        toggleMobilePanel(element, false, isRight);
     } else {
-        rightMenuContainer.style.display = "block";
-        rightMenuContainer.style.transform = `translateX(-${rightMenuContainer.offsetWidth}px)`
+        toggleMobilePanel(element, true, isRight);
     }
 }
+
+
+
+function getLeftPanel(){
+    return document.querySelector("#mobile_GroupAndChannelContainer").closest(".mobilePanel");
+}
+
+function getRightPanel(){
+    return document.querySelector("#mobile_memberlist").closest(".mobilePanel");
+}
+
+function switchLeftSideMenu(force = null) {
+    const left = getLeftPanel();
+    const right = getRightPanel();
+
+    if(force === false){
+        toggleMobilePanel(left, false);
+        return;
+    }
+    if(force === true){
+        toggleMobilePanel(right, false);
+        toggleMobilePanel(left, true);
+        return;
+    }
+
+    if(isOpen(left)){
+        toggleMobilePanel(left, false);
+    } else {
+        toggleMobilePanel(right, false);
+        toggleMobilePanel(left, true);
+    }
+}
+
+function switchRightSideMenu(force = null) {
+    const left = getLeftPanel();
+    const right = getRightPanel();
+
+    if(force === false){
+        toggleMobilePanel(right, false, true);
+        return;
+    }
+    if(force === true){
+        toggleMobilePanel(left, false);
+        toggleMobilePanel(right, true, true);
+        return;
+    }
+
+    if(isOpen(right)){
+        toggleMobilePanel(right, false, true);
+    } else {
+        toggleMobilePanel(left, false);
+        toggleMobilePanel(right, true, true);
+    }
+}
+
 
 async function replaceInlineImagesInQuill() {
     const container = quill.root;
@@ -2202,6 +2308,7 @@ async function setUrl(param, isVC = false) {
 }
 
 function changedChannel(){
+    switchLeftSideMenu(false)
     socket.emit("setRoom", {
         id: UserManager.getID(),
         username: UserManager.getUsername(),
@@ -2369,7 +2476,23 @@ uploadObject.addEventListener('drop', async function (e) {
 
     try {
         // Call upload and wait for the result
+        showSystemMessage({
+            title: `Uploading file...`,
+            text: ``,
+            icon: "info",
+            type: "neutral",
+            duration: 60000
+        });
+
         let result = await ChatManager.uploadFile(files);
+        showSystemMessage({
+            title: `File uploaded`,
+            text: ``,
+            icon: "info",
+            type: "success",
+            duration: 2000
+        });
+
         console.log("upload result: ", result);
 
         if (result.ok === true) {

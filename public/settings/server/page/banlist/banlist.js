@@ -7,6 +7,11 @@ var saveButton = document.getElementById("settings_profile_save");
 var serverconfigName;
 var serverconfigDesc;
 
+window.getBans = getBans;
+window.toggleDetails = toggleDetails;
+window.unbanUser = unbanUser;
+window.getReadableDuration = getReadableDuration;
+
 socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageBans" }, function (response) {
 
     if(response.permission == "denied"){

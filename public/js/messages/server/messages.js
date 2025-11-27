@@ -113,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
         [
             ".image-embed-container .image-embed",
             ".video-embed",
+            ".emoji-entry img",
             ".message-container .contentRows img",
             "#popup-content img",
         ],

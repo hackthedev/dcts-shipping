@@ -43,6 +43,7 @@
 
 #networkServers #networkActivatorUi .networkIndicatorIcon{
     filter: grayscale(100%);
+    z-index: 2;
 }
 
 #networkServers #networkActivatorUi{

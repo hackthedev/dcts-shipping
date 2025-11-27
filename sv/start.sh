@@ -1,3 +1,8 @@
 #!/bin/bash
-name="$(openssl rand -hex 8)"
+name="$1"
+if [[ -z "$name" ]]; then
+  echo "Couldnt start dcts as no screen session name was supplied"
+  validArgs=0
+fi
+
 cd /home/dcts && screen -dmSL "$name" node /home/dcts

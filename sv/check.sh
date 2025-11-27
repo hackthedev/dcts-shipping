@@ -8,5 +8,5 @@ fi
 
 if ! screen -list | grep -q "$name"; then
     echo "is not running"
-    bash /home/dcts/sv/start.sh
+    bash /home/dcts/sv/start.sh "$name"
 fi

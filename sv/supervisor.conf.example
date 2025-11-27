@@ -1,6 +1,6 @@
 [program:dcts]
 directory=/home/dcts/sv
-command=sh check.sh
+command=bash check.sh
 autostart=true
 autorestart=true
 stderr_logfile=/home/dcts/sv/err.log

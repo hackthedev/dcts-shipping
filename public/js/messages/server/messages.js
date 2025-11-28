@@ -424,7 +424,7 @@ async function showMessageInChat({
     // create message code structure
     var messagecode = "";
     if (message.isSystemMsg === true) {
-        messagecode = createMsgHTML({
+        messagecode = await createMsgHTML({
             message,
             append: append,
             isSystem: true,
@@ -434,7 +434,7 @@ async function showMessageInChat({
     } else {
         // dont append if the previous message was a system message
         if (messageElement?.element?.classList.contains("system")) append = false;
-        messagecode = createMsgHTML({
+        messagecode = await createMsgHTML({
             message,
             append,
             isSystem: false,
@@ -537,7 +537,7 @@ function navigateToMessage(messageId){
     }
 }
 
-function createMsgHTML({message, append = false, isSystem = false, reply = null, isMention = false} = {}) {
+async function createMsgHTML({message, append = false, isSystem = false, reply = null, isMention = false} = {}) {
     let isSigned = message?.sig?.length > 10;
 
     if (message?.lastEdited != null) {
@@ -571,7 +571,7 @@ function createMsgHTML({message, append = false, isSystem = false, reply = null,
                     <label class="username" data-member-id="${reply?.message?.id}" style="color: ${reply?.message?.color};">${unescapeHtmlEntities(sanitizeHtmlForRender(truncateText(reply?.message?.name, 25)))}</label>
                 </div>
                 <div class="content reply" data-message-id="${reply?.message?.messageId}" data-member-id="${reply?.message?.id}" data-timestamp="${reply?.message?.timestamp}">
-                    ${unescapeHtmlEntities(sanitizeHtmlForRender(reply?.message?.message))} 
+                    ${await text2Emoji(unescapeHtmlEntities(sanitizeHtmlForRender(reply?.message?.message)), false, true)} 
                 </div>
             </div>
         `;

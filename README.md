@@ -7,9 +7,11 @@ This project was made with the goal to provide a platform that aims to fix issue
 
 Although there are still some rough edges and a few missing features, DCTS is evolving rapidly due to the massive amount of work being put into its development. This includes adding new features as well as refining existing ones or improving the general experience. Compared to other alternatives, DCTS is evolving lightning fast.
 
-![image-20251024063417758](./assets/image-20251024063417758.png)
+![image-20251127214420083](./assets/image-20251127214420083.png)
 
-![image-20251024063102410](./assets/image-20251024063102410.png)
+![image-20251127214237435](./assets/image-20251127214237435.png)
+
+*(^ this is a custom theme thats shipped too)*
 
 ------
 
@@ -58,6 +60,8 @@ Modern communication platforms have limitations and issues that DCTS is designed
 
 - **Rapid Development**: Fast bug resolution, continuous feature delivery, and ongoing improvements enabled by a modern and efficient tech stack.
 
+- **Custom Themes**: You can select custom themes the server has to offer, two example themes included on default and with accent color support.
+
 DCTS isn't just a chat platform, it's a vision for better communication, driven by simplicity, freedom, and innovation. Its one step out of many to create a new, better web.
 
 > [!TIP]
@@ -69,7 +73,7 @@ DCTS isn't just a chat platform, it's a vision for better communication, driven 
 ## Installing
 ### Docker
 
-> [!IMPORTANT]
+> [!CAUTION]
 >
 > Docker is currently NOT working-
 
@@ -85,43 +89,23 @@ sudo docker compose up -d
 
 <br>
 
-### NPM
+### Installer Script
 
-Requires node.js to be installed, see [Tested Versions](https://github.com/hackthedev/dcts-shipping?tab=readme-ov-file#tested-node-versions). Clone the git repository and execute the following commands inside the app's directory.
+In order to make the install experience as easy as possible i've tried to make a complete auto installer script that installs and configurates everything thats needed to run an instance.
 ```bash
-# assuming the directory/user exists already. 
-# you can pick any directory.
-cd /home/dcts
-
-# install the voice chat and screensharing server. livekit comes with
-# a turn server as well which is important for strict NAT etc
-curl -sSL https://raw.githubusercontent.com/hackthedev/initra-shipping/refs/heads/main/apps/livekit/install.sh | bash
-
-# get the lastest stable version of DCTS.
-# Beta has new features early but may be unstable.
-git clone https://github.com/hackthedev/dcts-shipping
-
-# install dependencies
-npm install
-
-# run the server
-node .
+# Auto Installer Script that installs and configurates EVERYTHING 
+curl -sSL https://raw.githubusercontent.com/hackthedev/initra-shipping/refs/heads/main/apps/dcts/install.sh | bash -s -- --create-instance "Test Server 1" --port 2000 --create-cert --domain dev0002.network-z.com --email admin@xyz.com
 ```
 
 > [!TIP]
-> Install tutorial: https://www.youtube.com/watch?v=N8ILWcW8vGQ
->
-> Auto Installer App (wip): https://github.com/hackthedev/initra-shipping
+> Install tutorial: [Updated Video TO-DO]
 >
 > **If you need help** feel free to create a **post on** the **subreddit or message** me **on discord**.
+>Wanna **install** the **beta version**? Add `--beta` at the end!
 
 > [!NOTE]
 >
-> To be able to use all features its required to connect DCTS with MySQL/MariaDB.
-
-> [!IMPORTANT]
->
-> The installer for LiveKit  will create a config file inside `/home/livekit` called `livekit.yaml`. For public access over the internet, you will need to link TLS certificate files. You can use LetsEncrypt etc
+> This script was only tested in debian 13 so far.
 
 ------
 

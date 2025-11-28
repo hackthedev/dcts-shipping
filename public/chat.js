@@ -1636,39 +1636,31 @@ function deleteMessageFromChat(id) {
     });
 }
 
-socket.on('memberTyping', function (members) {
-
-    var runner = 0;
-    var displayUsersText = "";
-
-    if (members.length <= 0) {
+socket.on('memberTyping', members => {
+    if (members.length === 0) {
         typingIndicator.innerText = "H";
         typingIndicator.style.color = "transparent";
         return;
     }
 
-    if (members.length == 1) {
-        displayUsersText += limitString(members[0], 15) + " is typing...";
-    } else if (members.length == 2) {
-        displayUsersText += limitString(members[0], 15) + " and " + limitString(members[1], 15) + " are typing...";
+    let text = "";
+
+    if (members.length === 1) {
+        text = `${limitString(members[0], 15)} is typing...`;
+    } else if (members.length === 2) {
+        text = `${limitString(members[0], 15)} and ${limitString(members[1], 15)} are typing...`;
     } else {
-        members.forEach(member => {
-
-            // Show multiple typing
-            if (runner <= 2) {
-                displayUsersText += limitString(member, 15) + ", ";
-            }
-            runner++;
-        });
+        const firstThree = members.slice(0, 3).map(m => limitString(m, 15)).join(", ");
+        const extra = members.length - 3;
+        text = extra > 0
+            ? `${firstThree}, and ${extra} more are typing...`
+            : `${firstThree} are typing...`;
     }
 
-    if (runner > 2) {
-        displayUsersText += " and " + members.length - 2 + " users are typing";
-    }
-
-    typingIndicator.innerText = displayUsersText;
+    typingIndicator.innerHTML = unescapeHtmlEntities(text);
     typingIndicator.style.color = "hsl(from var(--main) h s calc(l * 8))";
 });
+
 
 
 socket.on('receiveChannelTree', function (data) {

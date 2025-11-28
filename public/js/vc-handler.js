@@ -265,7 +265,7 @@ async function addVcMemberToChannel(intChannelId, intMemberId){
     }
 
     if( checkResult.element){
-        let oMember = await resolveMember(intMemberId);
+        let oMember = await ChatManager.resolveMember(intMemberId);
         if(!oMember){
             console.warn("Coudlnt resolve member for vc participants list");
             return

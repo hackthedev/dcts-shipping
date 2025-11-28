@@ -865,6 +865,9 @@ export function validateMemberId(id, socket, token, bypass = false) {
 
     // check member token if present
     if(id && token){
+        let memberObject = serverconfig.servermembers[id];
+        if(memberObject) checkMemberBan(socket, memberObject);
+
         if(serverconfig.servermembers[id]?.token !== token){
             return false;
         }

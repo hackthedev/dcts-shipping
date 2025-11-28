@@ -821,17 +821,19 @@ export function banUser(socket, member) {
 export function banIp(socket, durationTimestamp) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
-    // Ban IP of User
-    let ip = socket.handshake.address;
+    let ip =
+        socket.handshake.headers["x-forwarded-for"]?.split(",")[0].trim()
+        || socket.handshake.headers["x-real-ip"]
+        || socket.handshake.address;
+
     if (!serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
-        // Add IP to Blacklist
         serverconfigEditable.ipblacklist[ip] = durationTimestamp;
         saveConfig(serverconfigEditable);
-
-        console.log(`IP ${ip} banned until ${durationTimestamp}`)
+        console.log(`IP ${ip} banned until ${durationTimestamp}`);
         return true;
     }
 }
+
 
 export function unbanIp(socket) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);

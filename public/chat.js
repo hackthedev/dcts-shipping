@@ -548,9 +548,9 @@ function decodeFromBase64(base64String) {
 function isAlreadyLink(msg, url, msgid) {
     let message = document.querySelector(`#content .message-container .content:not(.reply)[data-message-id='${msgid}']`)
     let isHTML = false;
-    if(message.innerHTML.includes("<a") ||
-        message.innerHTML.includes("<iframe") ||
-        message.innerHTML.includes("<img")
+    if(message?.innerHTML.includes("<a") ||
+        message?.innerHTML.includes("<iframe") ||
+        message?.innerHTML.includes("<img")
     ){
         isHTML = true;
     }

@@ -14,7 +14,7 @@ export default (io) => (socket) => {
             let messageObj = messageRaw[0];
             messageObj.message = JSON.parse(decodeFromBase64(messageObj.message));
 
-            if (!hasPermission(member.id, "viewChannel", messageObj?.channel)) {
+            if (!hasPermission(member.id, "viewChannel", messageObj?.message?.channel)) {
                 response({ error: "You dont have permission to resolve the message", message: null})
                 return;
             }

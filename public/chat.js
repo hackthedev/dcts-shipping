@@ -545,6 +545,20 @@ function decodeFromBase64(base64String) {
     return decodeURIComponent(atob(base64String));
 }
 
+function isAlreadyLink(msg, url, msgid) {
+    let message = document.querySelector(`#content .message-container .content:not(.reply)[data-message-id='${msgid}']`)
+    let isHTML = false;
+    if(message.innerHTML.includes("<a") ||
+        message.innerHTML.includes("<iframe") ||
+        message.innerHTML.includes("<img")
+    ){
+        isHTML = true;
+    }
+
+    return isHTML
+}
+
+
 async function markdown(msg, msgid) {
     if (msg == null) {
         return {isMarkdown: false, message: msg};
@@ -570,15 +584,18 @@ async function markdown(msg, msgid) {
             }
         }
         catch(mediaTypeError) {
-            //console.error("Error while checking media type")
-            //console.error(mediaTypeError);
-            return;
+            console.error("Error while checking media type")
+            console.error(mediaTypeError);
+            return {isMarkdown: false, message: msg}
         }
 
         const msgUrls = getUrlFromText(msg);
 
         for (const url of msgUrls) {
             if (isURL(url)) {
+                if (isAlreadyLink(msg, url, msgid)) {
+                    return { isMarkdown: false, message: msg };
+                }
 
                 // only proxy if not origin
                 let proxyUrl =`${window.location.origin}/proxy?url=${encodeURIComponent(url)}`;
@@ -2039,8 +2056,9 @@ function changeGIFSrc(url, element) {
 }
 
 function clearGifContainer(){
+    let search = document.getElementById("gif-searchbar-input");
     document.getElementById("gif-entry-container").innerHTML = `<div id="gif-searchbar"><input autocomplete="off" id="gif-searchbar-input"
-                                                       placeholder="Search anything, then press enter" type="text"></div>`;
+                                                       placeholder="Search anything, then press enter" type="text" value="${search?.value ? search?.value : ""}"></div>`;
     listenForGifSearch();
 }
 

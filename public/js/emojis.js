@@ -189,7 +189,7 @@ function findEmojiTrigger() {
         }
     });
 
-    const match = text.match(/:(\w*)$/);
+    const match = text.match(/:([^\s:]*)$/);
     if (!match) return null;
 
     return {

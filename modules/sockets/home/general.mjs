@@ -66,7 +66,7 @@ export async function sendSystemMessage(targetUserId, text, opts = {}) {
 
     // create message
     const messageId = rid("m");
-    const now = new Date().getTime();
+    const now = new Date();
     const encoded = encodeToBase64(String(JSON.stringify(text) || ""));
 
     await queryDatabase(

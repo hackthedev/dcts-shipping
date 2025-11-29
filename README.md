@@ -7,6 +7,8 @@ This project was made with the goal to provide a platform that aims to fix issue
 
 Although there are still some rough edges and a few missing features, DCTS is evolving rapidly due to the massive amount of work being put into its development. This includes adding new features as well as refining existing ones or improving the general experience. Compared to other alternatives, DCTS is evolving lightning fast.
 
+**If you need help** or wanna reach out to me feel free to create a **post on** the **subreddit**, **message** me **on discord**, or text me **on signal: shydevil.89**.
+
 ![image-20251127214420083](./assets/image-20251127214420083.png)
 
 ![image-20251127214237435](./assets/image-20251127214237435.png)
@@ -62,7 +64,9 @@ Modern communication platforms have limitations and issues that DCTS is designed
 
 - **Custom Themes**: You can select custom themes the server has to offer, two example themes included on default and with accent color support.
 
-DCTS isn't just a chat platform, it's a vision for better communication, driven by simplicity, freedom, and innovation. Its one step out of many to create a new, better web.
+- **Account Export**: You can export your account and easily re-import it when needed.
+
+While DCTS is an app, its going to be part of a bigger ecosystem that i plan to create in order to make the web a better place because we still need proper alternatives in other areas too.
 
 > [!TIP]
 >
@@ -73,47 +77,38 @@ DCTS isn't just a chat platform, it's a vision for better communication, driven 
 ## Installing
 ### Docker
 
-> [!CAUTION]
+> [!Note]
 >
 > Docker is currently NOT working-
-
-To install via docker you can either clone and build or use the prebuilt image.
-```
-sudo docker run --name dcts-server  -p 8080:2052 ghcr.io/hackthedev/dcts-shipping
-```
-or via docker-compose:
-```
-curl -L -O https://github.com/hackthedev/dcts-shipping/raw/main/docker/docker-compose.yml
-sudo docker compose up -d
-```
+> If you know how to setup docket please reach out to me or create an issue
 
 <br>
 
 ### Installer Script
 
 In order to make the install experience as easy as possible i've tried to make a complete auto installer script that installs and configurates everything thats needed to run an instance.
+
+##### Tested with
+
+- Debian 13
+
+> [!CAUTION]
+>
+> The installer script is designed to be used on a new system. It uses caddy and will completely replace the caddy config file in `/etc/caddy/` the first time it runs. Once docker works again i recommend using that.
+
+> [!IMPORTANT]
+>
+> You will need to setup your domain DNS records first! Example records:
+>
+> - Chat » chat.your-domain.com
+> - Voip » lk.chat.your-domain.com
+
 ```bash
 # Auto Installer Script that installs and configurates EVERYTHING 
-curl -sSL https://raw.githubusercontent.com/hackthedev/initra-shipping/refs/heads/main/apps/dcts/install.sh | bash -s -- --create-instance "Test Server 1" --port 2000 --create-cert --domain dev0002.network-z.com --email admin@xyz.com
+apt install curl -y && curl -sSL https://raw.githubusercontent.com/hackthedev/initra-shipping/refs/heads/main/apps/dcts/install.sh | bash -s -- --create-instance "Test Server 1" --port 2000 --domain chat.your-domain.com --beta
 ```
 
-> [!TIP]
-> Install tutorial: [Updated Video TO-DO]
->
-> **If you need help** feel free to create a **post on** the **subreddit or message** me **on discord**.
->Wanna **install** the **beta version**? Add `--beta` at the end!
-
-> [!NOTE]
->
-> This script was only tested in debian 13 so far.
-
-------
-
-## Connecting to your server
-Once you've installed the server and its running, you can open your browser and enter the server's ip and add the port 2052.<br>
-Example: http://localhost:2052
-
-Depending on your configuration the port may vary
+Once **successfully** executed, your instance should be available at `chat.your-domain.com:2000` with working voice chat and **everything**. you can access the server console with `screen -x dcts_testserver1` with this example.
 
 ------
 

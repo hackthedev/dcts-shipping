@@ -75,7 +75,7 @@ export let ratelimit = [];
 export let socketToIP = [];
 
 export let allowLogging = false;
-export let debugmode = false;
+export let debugmode = process.env.DEBUG || false;
 export let versionCode = 805;
 
 // dSync Libs
@@ -166,10 +166,10 @@ if(serverconfig.serverinfo.sql.enabled !== true){
 
 // create sql pool
 pool = mysql.createPool({
-    host: serverconfig.serverinfo.sql.host,
-    user: serverconfig.serverinfo.sql.username,
-    password: serverconfig.serverinfo.sql.password,
-    database: serverconfig.serverinfo.sql.database,
+    host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
+    user: process.env.DB_USER || serverconfig.serverinfo.sql.username,
+    password: process.env.DB_PASS || serverconfig.serverinfo.sql.password,
+    database: process.env.DB_NAME || serverconfig.serverinfo.sql.database,
     waitForConnections: true,
     connectionLimit: serverconfig.serverinfo.sql.connectionLimit,
     queueLimit: 0,
@@ -743,7 +743,7 @@ export const io = new Server(server, {
 
 export function startServer(){
     // Start the app server
-    var port = serverconfig.serverinfo.port;
+    var port = process.env.PORT || serverconfig.serverinfo.port;
     server.listen(port, function () {
 
         Logger.info('Server is running on port ' + port);
@@ -778,8 +778,8 @@ export function startServer(){
 }
 
 
-const API_KEY = serverconfig.serverinfo.livekit.key;
-const API_SECRET = serverconfig.serverinfo.livekit.secret;
+const API_KEY = process.env.LIVEKIT_KEY || serverconfig.serverinfo.livekit.key;
+const API_SECRET = process.env.LIVEKIT_SECRET || serverconfig.serverinfo.livekit.secret;
 
 const webhookReceiver = new WebhookReceiver(API_KEY, API_SECRET);
 

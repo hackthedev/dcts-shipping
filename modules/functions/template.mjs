@@ -73,7 +73,7 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
             ["server.home.about", () => config.serverinfo.home.about],
 
             // vc
-            ["livekit.url", () => `${config.serverinfo.livekit.url}`],
+            ["livekit.url", () => `${process.env.LIVEKIT_URL || config.serverinfo.livekit.url}`],
 
             ["version", () => versionCode],
             ["random", () => generateId(20)],

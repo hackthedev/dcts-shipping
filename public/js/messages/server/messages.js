@@ -311,6 +311,8 @@ async function shouldAppendMessage(message, appendTop = false) {
 }
 
 socket.on('messageCreate', async function (message) {
+    const isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+
     // lets increase the channel count first
     ChatManager.increaseChannelMarkerCount(message.channel)
     // then mark it for ourselves
@@ -352,7 +354,7 @@ socket.on('messageCreate', async function (message) {
         });
     }
 
-    waitFor(scrollDown, 1)
+    if(isScrolledDown) waitFor(scrollDown, 1)
 });
 
 socket.on('messageEdited', async function (message) {

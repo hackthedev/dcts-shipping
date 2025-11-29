@@ -354,7 +354,7 @@ socket.on('messageCreate', async function (message) {
         });
     }
 
-    if(isScrolledDown) waitFor(scrollDown, 1)
+    if(isScrolledDown) waitFor(scrollDown, 10)
 });
 
 socket.on('messageEdited', async function (message) {
@@ -589,7 +589,7 @@ async function createMsgHTML({message, append = false, isSystem = false, reply =
                     <img class="icon" draggable="false" src="${message.icon}" data-member-id="${message.id}" onerror="this.src = '/img/default_pfp.png';">
                 </div>` : ""}
                 
-               <div style="width: 100%;" data-message-id="${message?.messageId}" data-member-id="${message?.id}"> <!-- for the flex layout -->
+               <div class="content-container" data-message-id="${message?.messageId}" data-member-id="${message?.id}"> <!-- for the flex layout -->
                  <div class="meta">
                     ${isSystem !== true ?
                     `<label class="username" data-member-id="${message.id}" style="color: ${message.color};">${unescapeHtmlEntities(sanitizeHtmlForRender(truncateText(message.name, 25)))}</label>` : ""}

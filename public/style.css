@@ -466,24 +466,6 @@ code.markdown {
     font-family: "Lucida Console", "Courier New", monospace;
 }
 
-pre.markdown {
-    font-size: 12px;
-    background-color: #292a2d !important;
-
-    padding: 8px;
-    margin-left: 4px;
-    margin-top: 4px;
-
-    border-radius: 8px;
-    float: left;
-    display: block;
-
-    overflow-x: scroll;
-    line-height: 150%;
-
-    width: calc(100% - 8px);
-}
-
 .iframe-container {
     display: inline-block;
     float: left;

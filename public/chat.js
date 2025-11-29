@@ -2453,7 +2453,7 @@ function scrollDown(functionCaller) {
         scroll();
         tries++;
         if (tries > 3) clearInterval(interval);
-    }, 100);
+    }, 200);
 
     if (functionCaller) console.log(`ScrollDown called by ${functionCaller}`);
 }

@@ -838,13 +838,7 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                     room: UserManager.getRoom(),
                     token: UserManager.getToken()
                 });
-                socket.emit("getGroupBanner", {
-                    id: UserManager.getID(),
-                    token: UserManager.getToken(),
-                    username: UserManager.getUsername(),
-                    icon: UserManager.getPFP(),
-                    group: UserManager.getGroup()
-                });
+                getGroupBanner();
                 socket.emit("getGroupList", {
                     id: UserManager.getID(),
                     group: UserManager.getGroup(),
@@ -971,6 +965,7 @@ function getUrlParams(param) {
 
 function getChannelTree() {
     ChannelTree.getTree();
+    getGroupBanner()
 }
 
 
@@ -2202,10 +2197,10 @@ function getGroupList() {
 function getGroupBanner() {
     socket.emit("getGroupBanner", {
         id: UserManager.getID(),
+        token: UserManager.getToken(),
         username: UserManager.getUsername(),
         icon: UserManager.getPFP(),
-        group: UserManager.getGroup(),
-        token: UserManager.getToken()
+        group: UserManager.getGroup()
     });
 }
 

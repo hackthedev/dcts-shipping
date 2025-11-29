@@ -131,26 +131,24 @@
     function getImageSrcFromHTML(htmlString, removeResult = null) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlString, 'text/html');
-        const img = doc.querySelector('img'); // Find the <img> tag
+        const img = doc.querySelector('img');
     
-        if (!img) return null; // If no <img> tag, return original HTML string
+        if (!img) return null;
     
-        const imgSrc = img.src; // Extract the src attribute
+        const imgSrc = img.src;
     
         if (removeResult) {
-            img.remove(); // Remove the <img> tag from the parsed document
-            return doc.body.innerHTML.trim(); // Return updated HTML string
+            img.remove();
+            return doc.body.innerHTML.trim();
         }
     
-        return imgSrc; // If removeResult is null or false, return only the src
+        return imgSrc;
     }
 
     function displayMessage({ title, text, icon, img, type, duration, onClick }) {
         if (isMessageVisible) {
             clearTimeout(currentTimeout);
-            const existingMessage = document.getElementById("prompt-container");
-            if (existingMessage) existingMessage.remove();
-            isMessageVisible = false;
+            closeSystemMessage(true);
         }
 
         isMessageVisible = true;
@@ -160,9 +158,6 @@
         const typeColor = getTypeColor(type);
         promptContainer.style.backgroundColor = typeColor;
 
-        /*
-        Icon path function to handle different scenarios
-        */
         let iconPath = `/img/${icon}.png`;
         if(icon.includes("data:image")) iconPath = icon;
         if(icon.includes("/uploads/")) iconPath = icon; // Upload filepath
@@ -207,16 +202,24 @@
         displayMessage({ title, text, icon, img, type, duration, onClick });
     };
 
-    window.closeSystemMessage = function() {
+    window.closeSystemMessage = function(force = false) {
         const promptContainer = document.getElementById("prompt-container");
-        if (promptContainer && isMessageVisible) {
-            clearTimeout(currentTimeout); // Stop any existing timeout
-            promptContainer.style.animation = "fadeout 0.5s forwards";
-            setTimeout(() => {
-                promptContainer.remove();
-                isMessageVisible = false;
-            }, 500); // Match fadeout animation duration
+        if (!promptContainer) return;
+
+        clearTimeout(currentTimeout);
+
+        if (force) {
+            promptContainer.remove();
+            isMessageVisible = false;
+            return;
         }
+
+        promptContainer.style.animation = "fadeout 0.5s forwards";
+        setTimeout(() => {
+            promptContainer.remove();
+            isMessageVisible = false;
+        }, 500);
     };
+
 
 })();

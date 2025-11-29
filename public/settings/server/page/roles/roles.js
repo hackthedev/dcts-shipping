@@ -9,6 +9,11 @@ var currentRoleId = "";
 window.loadRolePerms = loadRolePerms;
 window.removeFromRole = removeFromRole;
 window.addToRole = addToRole;
+window.createRole = createRole;
+window.appearanceChanged = appearanceChanged;
+window.saveSorting = saveSorting;
+window.deleteRole = deleteRole;
+window.savePermissions = savePermissions;
 
 socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: ["manageRoles", "manageGroups"] }, function (response) {
 

@@ -61,36 +61,97 @@ class ChatManager {
     }
 
     static async srcToFile(src) {
-        if (!src || typeof src !== "string") return {ok: false, error: "invalid_src"};
+        if (!src || typeof src !== "string")
+            return { ok: false, error: "invalid_src" };
 
         try {
             const r = await fetch(src);
-            if (!r.ok) return {ok: false, error: "fetch_failed", status: r.status};
+            if (!r.ok)
+                return { ok: false, error: "fetch_failed", status: r.status };
 
             const blob = await r.blob();
             const ext = blob.type.split("/")[1] || "bin";
             const filename = `${UserManager.generateId(12)}.${ext}`;
-            const file = new File([blob], filename, {type: blob.type});
+            const file = new File([blob], filename, { type: blob.type });
 
             const res = await ChatManager.uploadFile([file]);
-
-            if (res.ok && res.path) return res.path;
             return res;
         } catch (err) {
             console.error("srcToFile error:", err);
-            return {ok: false, error: "srcToFile_failed"};
+            return { ok: false, error: "srcToFile_failed" };
         }
     }
 
-    static async uploadFile(files, type = "upload") {
-        const form = new FormData();
-        form.append("file", files[0]);
-        form.append("type", type);
-        form.append("id", UserManager.getID());
 
-        const res = await fetch("/upload", {method: "POST", body: form});
-        return await res.json();
+    static async uploadFile(files, type = "upload") {
+        const file = files[0];
+        const chunkSize =  1024 * 256; // 256kb
+        const totalChunks = Math.ceil(file.size / chunkSize);
+        const fileId = crypto.randomUUID();
+
+        const filename = file.name;
+        const id = UserManager.getID();
+
+        let lastPercent = -1;
+
+        for (let i = 0; i < totalChunks; i++) {
+            const start = i * chunkSize;
+            const end = start + chunkSize;
+            const chunk = file.slice(start, end);
+
+            const arrayBuf = await chunk.arrayBuffer();
+
+            const url = `/upload?` +
+                `id=${id}` +
+                `&type=${type}` +
+                `&filename=${encodeURIComponent(filename)}` +
+                `&chunkIndex=${i}` +
+                `&totalChunks=${totalChunks}` +
+                `&fileId=${fileId}`;
+
+            const res = await fetch(url, {
+                method: "POST",
+                body: arrayBuf
+            });
+
+            const json = await res.json();
+
+            if (!json.ok)
+                return json;
+
+            const percent = Math.round(((i + 1) / totalChunks) * 100);
+            if (percent !== lastPercent) {
+                lastPercent = percent;
+
+                if(window?.showSystemMessage){
+                    showSystemMessage({
+                        title: `Uploading file... ${percent}%`,
+                        text: ``,
+                        icon: "info",
+                        type: "neutral",
+                        duration: 1500
+                    });
+                }
+            }
+
+            if (json.ok && json.path) {
+                if(window?.showSystemMessage){
+                    showSystemMessage({
+                        title: "File uploaded",
+                        text: "",
+                        icon: "info",
+                        type: "success",
+                        duration: 2000
+                    });
+                }
+                return json;
+            }
+        }
+
+        return { ok: false, error: "unknown_upload_error" };
     }
+
+
 
     static async resolveMember(memberId) {
         return new Promise((resolve, reject) => {

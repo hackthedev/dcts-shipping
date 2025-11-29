@@ -2473,6 +2473,16 @@ async function testDb(length){
     }
 }
 
+socket.on("uploadProgress", ({ filename, bytes, total }) => {
+    const percent = total ? Math.min(100, (bytes / total) * 100) : 0;
+    showSystemMessage({
+        title: `File ${percent}% uploaded`,
+        text: ``,
+        icon: "info",
+        type: "neutral",
+        duration: 2000
+    });
+});
 
 
 var uploadObject = document.getElementById('content');
@@ -2490,24 +2500,7 @@ uploadObject.addEventListener('drop', async function (e) {
     console.log(`File dropped. Size: ${fileSize.toFixed(2)} MB`);
 
     try {
-        // Call upload and wait for the result
-        showSystemMessage({
-            title: `Uploading file...`,
-            text: ``,
-            icon: "info",
-            type: "neutral",
-            duration: 60000
-        });
-
         let result = await ChatManager.uploadFile(files);
-        showSystemMessage({
-            title: `File uploaded`,
-            text: ``,
-            icon: "info",
-            type: "success",
-            duration: 2000
-        });
-
         console.log("upload result: ", result);
 
         if (result.ok === true) {

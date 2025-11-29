@@ -1261,14 +1261,15 @@ async function replaceInlineImagesInQuill() {
 
     for (const img of images) {
         try {
-            const uploadedUrl = await ChatManager.srcToFile(img.src);
+            const uploadedUrlResult = await ChatManager.srcToFile(img.src);
 
-            if (typeof uploadedUrl === "string") {
-                img.src = uploadedUrl;
-                console.log(`Image uploaded: ${uploadedUrl}`);
+            if (uploadedUrlResult?.ok === true) {
+                img.src = uploadedUrlResult.path;
+                console.log(`Image uploaded: ${uploadedUrlResult.path}`);
             } else {
-                console.error("Upload failed:", uploadedUrl);
-                img.remove();
+                console.error("Upload failed:", uploadedUrlResult?.error);
+                // should we keep it? man idk..
+                //img.remove();
             }
         } catch (err) {
             console.error("Error uploading image:", err);
@@ -1294,7 +1295,7 @@ function replaceInlineEmojis() {
 }
 
 
-async function sendMessageToServer(authorId, authorUsername, pfp, message) {
+async function sendMessageToServer(authorId, authorUsername, pfp, message, bypassQuill = false) {
     let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
 
     if (UserManager.getGroup() == null || UserManager.getGroup().length <= 0 || UserManager.getCategory() == null || UserManager.getCategory().length <= 0 || UserManager.getChannel() == null || UserManager.getChannel().length <= 0) {
@@ -1310,10 +1311,11 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message) {
         return;
     }
 
-
     replaceInlineEmojis();
     await replaceInlineImagesInQuill();
-    if(quill.root.innerText.trim().length !== 0) message = quill.root.innerHTML;
+
+    if(bypassQuill === false) message = quill.root.innerHTML
+    //if(quill.root.innerText.trim().length !== 0) message = quill.root.innerHTML;
 
     let msgPayload = {
         id: authorId,
@@ -2502,9 +2504,16 @@ uploadObject.addEventListener('drop', async function (e) {
             console.log("All files uploaded successfully. URLs:", result.path);
 
             // Process the URLs array
-            sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${window.location.origin}/${result.path}`); // Sending all URLs at once
+            sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${window.location.origin}${result.path}`, true); // Sending all URLs at once
         } else {
             console.error("Upload encountered an error:", result.error);
+            showSystemMessage({
+                title: `Error uploading file`,
+                text: `${result.error}`,
+                icon: "error",
+                type: "error",
+                duration: 1500
+            });
         }
     } catch (error) {
         console.error("An error occurred during the upload process:", error);

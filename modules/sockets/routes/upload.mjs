@@ -13,7 +13,6 @@ fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 function sha256(b) {
     return crypto.createHash("sha256").update(b).digest("hex");
 }
-
 app.post("/upload", async (req, res) => {
     try {
         const {
@@ -25,24 +24,31 @@ app.post("/upload", async (req, res) => {
             fileId
         } = req.query;
 
-        let body = [];
-        req.on("data", (c) => body.push(c));
+        let headerBuf = Buffer.alloc(0);
+        let fullBodyChunks = [];
+
+        req.on("data", (chunk) => {
+            if (headerBuf.length < 5000) {
+                headerBuf = Buffer.concat([headerBuf, chunk]);
+                if (headerBuf.length > 5000) {
+                    headerBuf = headerBuf.slice(0, 5000);
+                }
+            }
+
+            fullBodyChunks.push(chunk);
+        });
 
         req.on("end", async () => {
             try {
-                const buf = Buffer.concat(body);
+                const fullBody = Buffer.concat(fullBodyChunks);
                 const clean = sanitizeFilename(filename);
-                const dir = type === "emoji"
-                    ? "./public/emojis"
-                    : UPLOAD_DIR;
-
+                const dir = type === "emoji" ? "./public/emojis" : UPLOAD_DIR;
 
                 if (type === "upload" && !hasPermission(id, "uploadFiles"))
                     return res.status(403).json({ ok: false, error: "no_permission" });
 
                 if (type === "emoji" && !hasPermission(id, "manageEmojis"))
                     return res.status(403).json({ ok: false });
-
 
                 const role = getMemberHighestRole(id);
                 const maxBytes = (role?.permissions?.maxUpload || 10) * 1024 * 1024;
@@ -54,19 +60,20 @@ app.post("/upload", async (req, res) => {
                 const temp = path.join(dir, `${fileId}_${clean}`);
 
                 if (chunkIndex == 0) {
-                    const { mime } = (await fileTypeFromBuffer(buf)) || {};
+                    const { mime } = (await fileTypeFromBuffer(headerBuf)) || {};
                     if (!mime || !serverconfig.serverinfo.uploadFileTypes.includes(mime))
                         return res.status(415).json({ ok: false, error: "mime_not_allowed" });
+
                     fs.writeFileSync(temp, Buffer.alloc(0));
                 }
 
                 const current = fs.existsSync(temp) ? fs.statSync(temp).size : 0;
-                const next = current + buf.length;
+                const next = current + fullBody.length;
 
                 if (next > maxBytes && role?.info.id !== 1111)
                     return res.status(413).json({ ok: false, error: "file_too_large" });
 
-                fs.appendFileSync(temp, buf);
+                fs.appendFileSync(temp, fullBody);
 
                 if (Number(chunkIndex) + 1 < Number(totalChunks))
                     return res.json({ ok: true, part: true });
@@ -81,8 +88,7 @@ app.post("/upload", async (req, res) => {
                 }
 
                 const finalName = `${hash}_${clean}`;
-                const finalPath = path.join(dir, finalName);
-                fs.renameSync(temp, finalPath);
+                fs.renameSync(temp, path.join(dir, finalName));
 
                 return res.json({ ok: true, exists: false, path: `/uploads/${finalName}` });
 
@@ -97,6 +103,10 @@ app.post("/upload", async (req, res) => {
         return res.status(500).json({ ok: false, error: "server_error" });
     }
 });
+
+
+
+
 export default (io) => (socket) => {
 
 

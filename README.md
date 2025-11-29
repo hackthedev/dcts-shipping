@@ -77,10 +77,11 @@ While DCTS is an app, its going to be part of a bigger ecosystem that i plan to 
 ## Installing
 ### Docker
 
-> [!Note]
+> [!NOTE]
 >
-> Docker is currently NOT working-
-> If you know how to setup docket please reach out to me or create an issue
+> Docker has been **discontinued**.
+>
+> I really dont have the time and knowledge to work on it and maintain it. If you know how docker works, maybe you can create a repo with working docker and i will link it here.
 
 <br>
 
@@ -94,7 +95,11 @@ In order to make the install experience as easy as possible i've tried to make a
 
 > [!CAUTION]
 >
-> The installer script is designed to be used on a new system. It uses caddy and will completely replace the caddy config file in `/etc/caddy/` the first time it runs. Once docker works again i recommend using that.
+> The installer script is designed to be used on a new system. It uses caddy and will completely replace the caddy config file in `/etc/caddy/` the first time it runs. Once docker is available i recommend using that.
+
+> [!NOTE]
+>
+> If you want to manually install DCTS checkout the `docs` folder, specifically `Getting started` and `VoIP Setup`.
 
 > [!IMPORTANT]
 >

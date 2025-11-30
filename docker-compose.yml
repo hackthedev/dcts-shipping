@@ -1,0 +1,57 @@
+services:
+  dcts-app:
+    image: dcts:latest
+    depends_on:
+      - dcts-mariadb
+      - dcts-livekit
+    environment:
+      - DB_HOST=dcts-mariadb
+      - DB_USER=dcts
+      - DB_PASS=dcts
+      - DB_NAME=dcts
+      - LIVEKIT_URL=your_proxied_url # e.g., livekit.example.com
+      - LIVEKIT_KEY=change_me
+      - LIVEKIT_SECRET=change_me
+      - DEBUG=false # optional
+    restart: unless-stopped
+    ports:
+      - 2052:2052
+    volumes:
+      - ./dcts/sv:/app/sv
+      - ./dcts/configs:/app/configs
+      - ./dcts/uploads:/app/public/uploads
+      - ./dcts/emojis:/app/public/emojis
+      - ./dcts/plugins:/app/plugins
+
+  dcts-mariadb:
+    image: mariadb:latest
+    environment:
+      - MARIADB_RANDOM_ROOT_PASSWORD=1
+      - MARIADB_DATABASE=dcts
+      - MARIADB_USER=dcts
+      - MARIADB_PASSWORD=dcts
+    volumes:
+      - dcts-mariadb-data:/var/lib/mysql
+
+  dcts-redis:
+    image: redis:alpine
+    volumes:
+      - dcts-redis-data:/data
+
+  dcts-livekit:
+    image: livekit/livekit-server:latest
+    command: --config /etc/livekit.yaml
+    volumes:
+      - dcts-livekit-config:/etc/livekit.yaml
+    ports:
+      - 7880:7880 # LiveKit API/WebSocket, must be reverse proxied
+      - 7881:7881 # ICE/TCP signaling, expose directly
+      - 7882:7882/udp # ICE/UDP mux, expose directly
+      # Optional TURN ports
+      - 3478:3478/udp
+      - 5349:5349/tcp
+
+volumes:
+  dcts-mariadb-data:
+  dcts-redis-data:
+  dcts-livekit-config:

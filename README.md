@@ -75,13 +75,15 @@ While DCTS is an app, its going to be part of a bigger ecosystem that i plan to 
 ------
 
 ## Installing
-### Docker
+### Docker Installation
 
-> [!NOTE]
->
-> Docker has been **discontinued**.
->
-> I really dont have the time and knowledge to work on it and maintain it. If you know how docker works, maybe you can create a repo with working docker and i will link it here.
+```bash
+sudo docker run --name dcts-server -p 2052:2052 ghcr.io/hackthedev/dcts-shipping
+```
+
+#### Accessing the server
+- Open your browser and go to `http://localhost:2052` (or your server's IP).
+- If you just want to try DCTS, you can visit the public instance at [https://chat.network-z.com/](https://chat.network-z.com/).
 
 <br>
 

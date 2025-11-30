@@ -1504,10 +1504,11 @@ var maxHeight = 400; // Maximum height of the editor
 var initialMargin = parseFloat(getComputedStyle(editorContainer).marginTop);
 var allowEditorBlur = true;
 
-editor.addEventListener('keydown', function (event) {
-
+editor.addEventListener('input', function (event) {
     setTyping();
+});
 
+editor.addEventListener('keydown', function (event) {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
 

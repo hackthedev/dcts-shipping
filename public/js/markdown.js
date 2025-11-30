@@ -14,72 +14,72 @@ function isAlreadyLink(msg, url, msgid) {
 async function markdown(msg, msgid) {
     if (!msg || !msgid) return { isMarkdown: false, message: msg };
 
-    try {
-        const urls = getUrlFromText(msg);
-        if (!urls?.length) return { isMarkdown: false, message: msg };
+    let urls = getUrlFromText(msg);
+    if (!urls?.length) return { isMarkdown: false, message: msg };
 
-        for (const url of urls) {
-            if (!isURL(url)) continue;
+    let changed = false;
 
-            if (isAlreadyLink(msg, url, msgid)) {
-                return { isMarkdown: false, message: msg };
-            }
+    for (const url of urls) {
+        if (!isURL(url)) continue;
+        if (isAlreadyLink(msg, url, msgid)) continue;
 
-            const mediaType = await checkMediaTypeAsync(url);
+        let media = await checkMediaTypeAsync(url);
 
-            let proxyUrl = `${window.location.origin}/proxy?url=${encodeURIComponent(url)}`;
-            if (url.toLowerCase().startsWith(window.location.origin.toLowerCase())) {
-                proxyUrl = url;
-            }
+        let proxy = url.startsWith(window.location.origin)
+            ? url
+            : `${window.location.origin}/proxy?url=${encodeURIComponent(url)}`;
 
-            if (mediaType === "audio") {
-                msg = msg.replace(url, createAudioPlayerHTML(proxyUrl)).replaceAll("\n", "");
-                return { isMarkdown: true, message: msg };
-            }
-
-            if (mediaType === "image") {
-                msg = msg.replace(url, `
-                    <div class="image-embed-container">
-                        <img draggable="false" class="image-embed"
-                             data-message-id="${msgid.replace("msg-", "")}"
-                             id="msg-${msgid.replace("msg-", "")}"
-                             alt="${proxyUrl}"
-                             src="${proxyUrl}"
-                             onerror="this.src = '/img/error.png';">
-                    </div>`);
-                return { isMarkdown: true, message: msg };
-            }
-
-            if (mediaType === "video") {
-                msg = msg.replace(url, `
-                    <p data-message-id="${msgid.replace("msg-", "")}">
-                        <a href="${url}" target="_blank">${url}</a>
-                    </p>
-                    <video data-message-id="${msgid.replace("msg-", "")}"
-                           data-src="${proxyUrl}"
-                           preload="auto"
-                           style="background-color: black;"
-                           class="video-embed"
-                           controls>
-                        <source src="${proxyUrl}">
-                    </video>`);
-                return { isMarkdown: true, message: msg };
-            }
-
-            // youtube
-            if (url.includes("youtube") || url.includes("youtu.be")) {
-                msg = msg.replace(url, createYouTubeEmbed(url, msgid));
-                return { isMarkdown: true, message: msg };
-            }
-
-            // default link
-            msg = msg.replace(url, `<a data-message-id="${msgid.replace("msg-", "")}" href="${url}" ${url.startsWith(window.location.origin) ? "" : `target="_blank"`}>${url}</a>`);
-            return { isMarkdown: true, message: msg };
+        if (media === "image") {
+            msg = msg.replace(url,
+                `<div class="image-embed-container">
+                    <img draggable="false" class="image-embed"
+                        data-message-id="${msgid.replace("msg-", "")}"
+                        id="msg-${msgid.replace("msg-", "")}"
+                        alt="${proxy}"
+                        src="${proxy}"
+                        onerror="this.src='/img/error.png'">
+                </div>`
+            );
+            changed = true;
+            continue;
         }
 
-        return { isMarkdown: false, message: msg };
-    } catch (err) {
-        console.error("Error in markdown:", err);
-        return { isMarkdown: false, message: msg };
+        if (media === "audio") {
+            msg = msg.replace(url, createAudioPlayerHTML(proxy));
+            changed = true;
+            continue;
+        }
+
+        if (media === "video") {
+            msg = msg.replace(url,
+                `<p data-message-id="${msgid.replace("msg-", "")}">
+                    <a draggable="false" href="${url}" target="_blank">${url}</a>
+                </p>
+                <video data-message-id="${msgid.replace("msg-", "")}"
+                       data-src="${proxy}"
+                       preload="auto"
+                       class="video-embed"
+                       controls>
+                    <source src="${proxy}">
+                </video>`
+            );
+            changed = true;
+            continue;
+        }
+
+        if (url.includes("youtu.be") || url.includes("youtube")) {
+            msg = msg.replace(url, createYouTubeEmbed(url, msgid));
+            changed = true;
+            continue;
+        }
+
+        msg = msg.replace(url,
+            `<a draggable="false" data-message-id="${msgid.replace("msg-", "")}" href="${url}" ${url.startsWith(window.location.origin) ? "" : "target=\"_blank\""}>${url}</a>`
+        );
+        changed = true;
     }
+
+    if (changed) scrollDown();
+
+    return { isMarkdown: changed, message: msg };
 }

@@ -88,7 +88,7 @@ import {dSyncSign} from "@hackthedev/dsync-sign";
 import dSync from "@hackthedev/dsync";
 
 export let syncer = new dSync("dcts", app)
-export const signer = new dSyncSign();
+export const signer = new dSyncSign("./configs/privatekey.json");
 export const auther = new dSyncAuth(app, signer, async function (data) {
     if (data.valid === true) {
         changeKeyVerification(data.publicKey, data.valid);

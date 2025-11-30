@@ -124,13 +124,12 @@ checkServerDirectories()
 // check if config file exists
 checkFile("./plugins/settings.json", true, "{}")
 checkConfigFile()
-if(fs.existsSync("./config.json")){
-    try{
+if (fs.existsSync("./config.json")) {
+    try {
         fs.cpSync("./config.json", configPath);
         fs.cpSync("./config.json", "./config.json.bak");
         fs.unlinkSync("./config.json");
-    }
-    catch(error){
+    } catch (error) {
         Logger.error("Error migrating config file automatically");
         Logger.error(error);
     }
@@ -145,7 +144,7 @@ initConfig(configPath);
 checkConfigAdditions();
 
 // made by installer script
-if(fs.existsSync("./configs/sql.txt")){
+if (fs.existsSync("./configs/sql.txt")) {
     const content = fs.readFileSync("./configs/sql.txt", "utf8").trim().split("\n");
 
     function getLine(lineNumber) {
@@ -157,9 +156,9 @@ if(fs.existsSync("./configs/sql.txt")){
     const dbName = getLine(2)
 
     // if anything changed, update it
-    if(serverconfig.serverinfo.sql.username !== dbUser) serverconfig.serverinfo.sql.username = dbUser
-    if(serverconfig.serverinfo.sql.password !== dbPass) serverconfig.serverinfo.sql.password = dbPass
-    if(serverconfig.serverinfo.sql.database !== dbName) serverconfig.serverinfo.sql.database = dbName
+    if (serverconfig.serverinfo.sql.username !== dbUser) serverconfig.serverinfo.sql.username = dbUser
+    if (serverconfig.serverinfo.sql.password !== dbPass) serverconfig.serverinfo.sql.password = dbPass
+    if (serverconfig.serverinfo.sql.database !== dbName) serverconfig.serverinfo.sql.database = dbName
     serverconfig.serverinfo.sql.enabled = true; // enabled it because the file doesnt exist for fun
     saveConfig(serverconfig);
 }
@@ -207,7 +206,6 @@ Logger.space()
 
 // backup members from config file
 await checkMemberMigration();
-
 
 
 // Import functions etc from files (= better organisation)
@@ -386,275 +384,275 @@ const processPlugins = async () => {
 };
 
 // Create a connection pool if sql is enabled
-if (serverconfig.serverinfo.sql.enabled === true) {
-    // SQL Database Structure needed
-    // it will create everything if missing (except database)
-    // +1 convenience
-    const tables = [
-        {
-            name: 'messages',
-            columns: [
-                {name: 'authorId', type: 'varchar(100) NOT NULL'},
-                {name: 'messageId', type: 'varchar(100) NOT NULL'},
-                {name: 'room', type: 'text NOT NULL'},
-                {name: 'message', type: 'longtext NOT NULL'},
-                {name: 'createdAt', type: 'bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)'}
-            ],
-            keys: [
-                {name: 'UNIQUE KEY', type: 'messageId (messageId)'},
-            ]
-        },
-        {
-            name: 'message_logs',
-            columns: [
-                {name: 'id', type: 'int(100) NOT NULL'},
-                {name: 'authorId', type: 'varchar(100) NOT NULL'},
-                {name: 'messageId', type: 'varchar(100) NOT NULL'},
-                {name: 'room', type: 'text NOT NULL'},
-                {name: 'message', type: 'longtext NOT NULL'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(id)'},
-                {name: 'UNIQUE KEY', type: 'id (id)'},
-            ],
-            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55'
-        },
-        {
-            name: 'url_cache',
-            columns: [
-                {name: 'id', type: 'int(11) NOT NULL'},
-                {name: 'url', type: 'longtext NOT NULL'},
-                {name: 'media_type', type: 'text NOT NULL'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(id)'},
-                {name: 'UNIQUE KEY', type: 'id (id)'},
-                {name: 'UNIQUE KEY', type: 'url (url) USING HASH'}
-            ],
-            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55'
-        },
-        {
-            name: "reports",
-            columns: [
-                {"name": "id", "type": "int(11) NOT NULL"},
-                {"name": "reportCreator", "type": "longtext NOT NULL"},
-                {"name": "reportedUser", "type": "longtext NOT NULL"},
-                {"name": "reportType", "type": "text NOT NULL"},
-                {"name": "reportData", "type": "longtext NULL"},
-                {"name": "reportNotes", "type": "longtext NULL"},
-                {"name": "reportStatus", "type": "varchar(100) NOT NULL DEFAULT 'pending'"}
-            ],
-            keys: [
-                {"name": "PRIMARY KEY", "type": "(id)"}
-            ],
-            autoIncrement: "id int(11) NOT NULL AUTO_INCREMENT"
-        }, // home section stuff
-        {
-            name: 'dms_threads',
-            columns: [
-                {name: 'threadId', type: 'varchar(100) NOT NULL'},
-                {name: 'type', type: 'varchar(50) NOT NULL'},
-                {name: 'title', type: 'text NULL'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(threadId)'}
-            ]
-        },
-        {
-            name: 'dms_participants',
-            columns: [
-                {name: 'threadId', type: 'varchar(100) NOT NULL'},
-                {name: 'memberId', type: 'varchar(100) NOT NULL'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(threadId, memberId)'},
-                {name: 'KEY', type: 'memberId (memberId)'} // <— neu
-            ]
-        },
-        {
-            name: 'dms_message_logs',
-            columns: [
-                {name: 'id', type: 'int(11) NOT NULL'},
-                {name: 'messageId', type: 'varchar(100) NOT NULL'},
-                {name: 'threadId', type: 'varchar(100) NOT NULL'},
-                {name: 'authorId', type: 'varchar(100) NOT NULL'},
-                {name: 'message', type: 'longtext NOT NULL'},
-                {name: 'loggedAt', type: 'datetime NOT NULL'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(id)'},
-                {name: 'UNIQUE KEY', type: 'id (id)'}
-            ],
-            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
-        },
-        {
-            name: 'dms_messages',
-            columns: [
-                {name: 'messageId', type: 'varchar(100) NOT NULL'},
-                {name: 'threadId', type: 'varchar(100) NOT NULL'},
-                {name: 'authorId', type: 'varchar(100) NOT NULL'},
-                {name: 'message', type: 'longtext NOT NULL'},
-                {name: 'createdAt', type: 'datetime NOT NULL'},
+// SQL Database Structure needed
+// it will create everything if missing (except database)
+// +1 convenience
+const tables = [
+    {
+        name: 'messages',
+        columns: [
+            {name: 'authorId', type: 'varchar(100) NOT NULL'},
+            {name: 'messageId', type: 'varchar(100) NOT NULL'},
+            {name: 'room', type: 'text NOT NULL'},
+            {name: 'message', type: 'longtext NOT NULL'},
+            {name: 'createdAt', type: 'bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)'}
+        ],
+        keys: [
+            {name: 'UNIQUE KEY', type: 'messageId (messageId)'},
+        ]
+    },
+    {
+        name: 'message_logs',
+        columns: [
+            {name: 'id', type: 'int(100) NOT NULL'},
+            {name: 'authorId', type: 'varchar(100) NOT NULL'},
+            {name: 'messageId', type: 'varchar(100) NOT NULL'},
+            {name: 'room', type: 'text NOT NULL'},
+            {name: 'message', type: 'longtext NOT NULL'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(id)'},
+            {name: 'UNIQUE KEY', type: 'id (id)'},
+        ],
+        autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55'
+    },
+    {
+        name: 'url_cache',
+        columns: [
+            {name: 'id', type: 'int(11) NOT NULL'},
+            {name: 'url', type: 'longtext NOT NULL'},
+            {name: 'media_type', type: 'text NOT NULL'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(id)'},
+            {name: 'UNIQUE KEY', type: 'id (id)'},
+            {name: 'UNIQUE KEY', type: 'url (url) USING HASH'}
+        ],
+        autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55'
+    },
+    {
+        name: "reports",
+        columns: [
+            {"name": "id", "type": "int(11) NOT NULL"},
+            {"name": "reportCreator", "type": "longtext NOT NULL"},
+            {"name": "reportedUser", "type": "longtext NOT NULL"},
+            {"name": "reportType", "type": "text NOT NULL"},
+            {"name": "reportData", "type": "longtext NULL"},
+            {"name": "reportNotes", "type": "longtext NULL"},
+            {"name": "reportStatus", "type": "varchar(100) NOT NULL DEFAULT 'pending'"}
+        ],
+        keys: [
+            {"name": "PRIMARY KEY", "type": "(id)"}
+        ],
+        autoIncrement: "id int(11) NOT NULL AUTO_INCREMENT"
+    }, // home section stuff
+    {
+        name: 'dms_threads',
+        columns: [
+            {name: 'threadId', type: 'varchar(100) NOT NULL'},
+            {name: 'type', type: 'varchar(50) NOT NULL'},
+            {name: 'title', type: 'text NULL'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(threadId)'}
+        ]
+    },
+    {
+        name: 'dms_participants',
+        columns: [
+            {name: 'threadId', type: 'varchar(100) NOT NULL'},
+            {name: 'memberId', type: 'varchar(100) NOT NULL'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(threadId, memberId)'},
+            {name: 'KEY', type: 'memberId (memberId)'} // <— neu
+        ]
+    },
+    {
+        name: 'dms_message_logs',
+        columns: [
+            {name: 'id', type: 'int(11) NOT NULL'},
+            {name: 'messageId', type: 'varchar(100) NOT NULL'},
+            {name: 'threadId', type: 'varchar(100) NOT NULL'},
+            {name: 'authorId', type: 'varchar(100) NOT NULL'},
+            {name: 'message', type: 'longtext NOT NULL'},
+            {name: 'loggedAt', type: 'datetime NOT NULL'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(id)'},
+            {name: 'UNIQUE KEY', type: 'id (id)'}
+        ],
+        autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
+    },
+    {
+        name: 'dms_messages',
+        columns: [
+            {name: 'messageId', type: 'varchar(100) NOT NULL'},
+            {name: 'threadId', type: 'varchar(100) NOT NULL'},
+            {name: 'authorId', type: 'varchar(100) NOT NULL'},
+            {name: 'message', type: 'longtext NOT NULL'},
+            {name: 'createdAt', type: 'datetime NOT NULL'},
 
-                {name: 'supportIdentity', type: "varchar(20) NOT NULL DEFAULT 'self'"}, // 'self' | 'support_tagged' | 'support_anon'
-                {name: 'displayName', type: 'text NULL'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(messageId)'},
-                {name: 'KEY', type: 'threadId (threadId)'}
-            ]
-        },
-        {
-            name: 'tickets',
-            columns: [
-                {name: 'threadId', type: 'varchar(100) NOT NULL'},
-                {name: 'creatorId', type: 'varchar(100) NOT NULL'},
-                {name: 'status', type: "varchar(20) NOT NULL DEFAULT 'open'"},
-                {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'},
-                {name: 'updatedAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(threadId)'},
-                {name: 'KEY', type: 'status (status)'},
-                {name: 'KEY', type: 'creatorId (creatorId)'}
-            ]
-        },
+            {name: 'supportIdentity', type: "varchar(20) NOT NULL DEFAULT 'self'"}, // 'self' | 'support_tagged' | 'support_anon'
+            {name: 'displayName', type: 'text NULL'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(messageId)'},
+            {name: 'KEY', type: 'threadId (threadId)'}
+        ]
+    },
+    {
+        name: 'tickets',
+        columns: [
+            {name: 'threadId', type: 'varchar(100) NOT NULL'},
+            {name: 'creatorId', type: 'varchar(100) NOT NULL'},
+            {name: 'status', type: "varchar(20) NOT NULL DEFAULT 'open'"},
+            {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'},
+            {name: 'updatedAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(threadId)'},
+            {name: 'KEY', type: 'status (status)'},
+            {name: 'KEY', type: 'creatorId (creatorId)'}
+        ]
+    },
 
-        {
-            name: 'posts',
-            columns: [
-                {name: 'id', type: 'int(11) NOT NULL'},
-                {name: 'title', type: 'text NOT NULL'},
-                {name: 'body', type: 'longtext NOT NULL'},
-                {name: 'authorId', type: 'varchar(100) NOT NULL'},
-                {name: 'tag', type: 'varchar(100) NULL'},
-                {name: 'pinned', type: 'tinyint(1) NOT NULL DEFAULT 0'},
-                {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(id)'}
-            ],
-            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
-        },
-        {
-            name: 'news',
-            columns: [
-                {name: 'id', type: 'int(11) NOT NULL'},
-                {name: 'title', type: 'text NOT NULL'},
-                {name: 'body', type: 'longtext NOT NULL'},
-                {name: 'authorId', type: 'varchar(100) NOT NULL'},
-                {name: 'pinned', type: 'tinyint(1) NOT NULL DEFAULT 0'},
-                {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(id)'}
-            ],
-            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
-        },
-        {
-            name: 'help',
-            columns: [
-                {name: 'id', type: 'int(11) NOT NULL'},
-                {name: 'slug', type: 'varchar(120) NOT NULL'},
-                {name: 'title', type: 'text NOT NULL'},
-                {name: 'body', type: 'longtext NOT NULL'},
-                {name: 'authorId', type: 'varchar(100) NOT NULL'},
-                {name: 'pinned', type: 'tinyint(1) NOT NULL DEFAULT 0'},
-                {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(id)'},
-                {name: 'UNIQUE KEY', type: 'slug (slug)'}
-            ],
-            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
-        },
-        {
-            name: 'dms_reads',
-            columns: [
-                {name: 'threadId', type: 'varchar(100) NOT NULL'},
-                {name: 'memberId', type: 'varchar(100) NOT NULL'},
-                {name: 'last_read_at', type: 'text NOT NULL'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(threadId, memberId)'},
-                {name: 'KEY', type: 'threadId (threadId)'},
-                {name: 'KEY', type: 'memberId (memberId)'}
-            ]
-        },
-        {
-            name: 'content_reads',
-            columns: [
-                {name: 'id', type: 'bigint NOT NULL'},
-                {name: 'contentType', type: 'varchar(32) NOT NULL'},
-                {name: 'contentId', type: 'bigint NOT NULL'},
-                {name: 'userId', type: 'varchar(128) NOT NULL'},
-                {name: 'readAt', type: 'datetime NULL'},
-                {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(id)'},
-                {name: 'UNIQUE KEY uq_content_user', type: '(contentType, contentId, userId)'},
-                {name: 'INDEX idx_user_unread', type: '(userId, readAt)'},
-                {name: 'INDEX idx_content', type: '(contentType, contentId)'}
-            ],
-            autoIncrement: 'id BIGINT NOT NULL AUTO_INCREMENT'
-        },
-        {
-            name: 'network_servers',
-            columns: [
-                {name: 'id', type: 'int(11) NOT NULL'},
-                {name: 'address', type: 'varchar(255) NOT NULL'},
-                {name: 'status', type: 'varchar(255) NOT NULL'},
-                {name: 'data', type: 'longtext'},
-                {name: 'last_sync', type: 'datetime NULL'}
-            ],
-            keys: [
-                {name: 'PRIMARY KEY', type: '(id)'},
-                {name: 'UNIQUE KEY', type: 'address (address)'}
-            ],
-            autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
-        },
-        {
-            name: 'auditlog',
-            columns: [
-                {name: 'text', type: 'longtext NOT NULL'},
-                {name: 'datetime', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
-            ]
-        },
-        {
-            name: "members",
-            columns: [
-                { name: "rowId", type: "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
-                { name: "id", type: "varchar(100) NOT NULL UNIQUE" },
-                { name: "token", type: "varchar(255) NOT NULL" },
-                { name: "onboarding", type: "BOOLEAN DEFAULT FALSE" },
-                { name: "loginName", type: "varchar(100) NOT NULL" },
-                { name: "name", type: "varchar(100) NOT NULL" },
-                { name: "nickname", type: "varchar(100) DEFAULT NULL" },
-                { name: "status", type: "text DEFAULT ''" },
-                { name: "aboutme", type: "text DEFAULT ''" },
-                { name: "icon", type: "text DEFAULT ''" },
-                { name: "banner", type: "text DEFAULT ''" },
-                { name: "joined", type: "bigint NOT NULL" },
-                { name: "isOnline", type: "BOOLEAN DEFAULT FALSE" },
-                { name: "lastOnline", type: "bigint DEFAULT 0" },
-                { name: "isBanned", type: "BOOLEAN DEFAULT FALSE" },
-                { name: "isMuted", type: "BOOLEAN DEFAULT FALSE" },
-                { name: "password", type: "text NOT NULL" },
-                { name: "publicKey", type: "text DEFAULT ''" },
-                { name: "isVerifiedKey", type: "BOOLEAN DEFAULT FALSE" },
-                { name: "pow", type: "text DEFAULT ''" }
-            ]
-        }
-    ];
+    {
+        name: 'posts',
+        columns: [
+            {name: 'id', type: 'int(11) NOT NULL'},
+            {name: 'title', type: 'text NOT NULL'},
+            {name: 'body', type: 'longtext NOT NULL'},
+            {name: 'authorId', type: 'varchar(100) NOT NULL'},
+            {name: 'tag', type: 'varchar(100) NULL'},
+            {name: 'pinned', type: 'tinyint(1) NOT NULL DEFAULT 0'},
+            {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(id)'}
+        ],
+        autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
+    },
+    {
+        name: 'news',
+        columns: [
+            {name: 'id', type: 'int(11) NOT NULL'},
+            {name: 'title', type: 'text NOT NULL'},
+            {name: 'body', type: 'longtext NOT NULL'},
+            {name: 'authorId', type: 'varchar(100) NOT NULL'},
+            {name: 'pinned', type: 'tinyint(1) NOT NULL DEFAULT 0'},
+            {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(id)'}
+        ],
+        autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
+    },
+    {
+        name: 'help',
+        columns: [
+            {name: 'id', type: 'int(11) NOT NULL'},
+            {name: 'slug', type: 'varchar(120) NOT NULL'},
+            {name: 'title', type: 'text NOT NULL'},
+            {name: 'body', type: 'longtext NOT NULL'},
+            {name: 'authorId', type: 'varchar(100) NOT NULL'},
+            {name: 'pinned', type: 'tinyint(1) NOT NULL DEFAULT 0'},
+            {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(id)'},
+            {name: 'UNIQUE KEY', type: 'slug (slug)'}
+        ],
+        autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
+    },
+    {
+        name: 'dms_reads',
+        columns: [
+            {name: 'threadId', type: 'varchar(100) NOT NULL'},
+            {name: 'memberId', type: 'varchar(100) NOT NULL'},
+            {name: 'last_read_at', type: 'text NOT NULL'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(threadId, memberId)'},
+            {name: 'KEY', type: 'threadId (threadId)'},
+            {name: 'KEY', type: 'memberId (memberId)'}
+        ]
+    },
+    {
+        name: 'content_reads',
+        columns: [
+            {name: 'id', type: 'bigint NOT NULL'},
+            {name: 'contentType', type: 'varchar(32) NOT NULL'},
+            {name: 'contentId', type: 'bigint NOT NULL'},
+            {name: 'userId', type: 'varchar(128) NOT NULL'},
+            {name: 'readAt', type: 'datetime NULL'},
+            {name: 'createdAt', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(id)'},
+            {name: 'UNIQUE KEY uq_content_user', type: '(contentType, contentId, userId)'},
+            {name: 'INDEX idx_user_unread', type: '(userId, readAt)'},
+            {name: 'INDEX idx_content', type: '(contentType, contentId)'}
+        ],
+        autoIncrement: 'id BIGINT NOT NULL AUTO_INCREMENT'
+    },
+    {
+        name: 'network_servers',
+        columns: [
+            {name: 'id', type: 'int(11) NOT NULL'},
+            {name: 'address', type: 'varchar(255) NOT NULL'},
+            {name: 'status', type: 'varchar(255) NOT NULL'},
+            {name: 'data', type: 'longtext'},
+            {name: 'last_sync', type: 'datetime NULL'}
+        ],
+        keys: [
+            {name: 'PRIMARY KEY', type: '(id)'},
+            {name: 'UNIQUE KEY', type: 'address (address)'}
+        ],
+        autoIncrement: 'id int(11) NOT NULL AUTO_INCREMENT'
+    },
+    {
+        name: 'auditlog',
+        columns: [
+            {name: 'text', type: 'longtext NOT NULL'},
+            {name: 'datetime', type: 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+        ]
+    },
+    {
+        name: "members",
+        columns: [
+            {name: "rowId", type: "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY"},
+            {name: "id", type: "varchar(100) NOT NULL UNIQUE"},
+            {name: "token", type: "varchar(255) NOT NULL"},
+            {name: "onboarding", type: "BOOLEAN DEFAULT FALSE"},
+            {name: "loginName", type: "varchar(100) NOT NULL"},
+            {name: "name", type: "varchar(100) NOT NULL"},
+            {name: "nickname", type: "varchar(100) DEFAULT NULL"},
+            {name: "status", type: "text DEFAULT ''"},
+            {name: "aboutme", type: "text DEFAULT ''"},
+            {name: "icon", type: "text DEFAULT ''"},
+            {name: "banner", type: "text DEFAULT ''"},
+            {name: "joined", type: "bigint NOT NULL"},
+            {name: "isOnline", type: "BOOLEAN DEFAULT FALSE"},
+            {name: "lastOnline", type: "bigint DEFAULT 0"},
+            {name: "isBanned", type: "BOOLEAN DEFAULT FALSE"},
+            {name: "isMuted", type: "BOOLEAN DEFAULT FALSE"},
+            {name: "password", type: "text NOT NULL"},
+            {name: "publicKey", type: "text DEFAULT ''"},
+            {name: "isVerifiedKey", type: "BOOLEAN DEFAULT FALSE"},
+            {name: "pow", type: "text DEFAULT ''"}
+        ]
+    }
+];
 
-    const dbTasks = [
-        {
-            name: "Purge Old Message Logs",
-            enabled: serverconfig.serverinfo.reports.enabled,
-            interval: toSeconds("12 hours"),
-            query: `
-                DELETE ml
+const dbTasks = [
+    {
+        name: "Purge Old Message Logs",
+        enabled: serverconfig.serverinfo.reports.enabled,
+        interval: toSeconds("12 hours"),
+        query: `
+            DELETE
+            ml
                 FROM message_logs ml
                 LEFT JOIN messages m
                   ON m.messageId = ml.messageId
@@ -662,41 +660,40 @@ if (serverconfig.serverinfo.sql.enabled === true) {
                   ON JSON_UNQUOTE(JSON_EXTRACT(r.reportData, '$.messageId')) = ml.messageId
                 WHERE m.messageId IS NULL
                   AND r.id IS NULL;
-            `
-        }
-    ];
-
-    async function runDbTask(task) {
-        if (task.enabled !== true) return;
-
-        try {
-            Logger.log("DB TASK", `[${task.name}] starting...`, Logger.colors.fgCyan);
-            await queryDatabase(task?.query);
-            Logger.log("DB TASK", `[${task.name}] done.`, Logger.colors.fgGreen);
-        } catch (err) {
-            Logger.log("DB TASK", `[${task.name}] error:`, Logger.colors.fgRed);
-            Logger.log("DB TASK", err, Logger.colors.fgRed);
-        }
+        `
     }
+];
 
-    function scheduleDbTasks(tasks) {
-        for (const task of tasks) {
-            const ms = task.interval * 1000; // second to ms
-            setLongInterval(() => runDbTask(task), ms);
-        }
+async function runDbTask(task) {
+    if (task.enabled !== true) return;
+
+    try {
+        Logger.log("DB TASK", `[${task.name}] starting...`, Logger.colors.fgCyan);
+        await queryDatabase(task?.query);
+        Logger.log("DB TASK", `[${task.name}] done.`, Logger.colors.fgGreen);
+    } catch (err) {
+        Logger.log("DB TASK", `[${task.name}] error:`, Logger.colors.fgRed);
+        Logger.log("DB TASK", err, Logger.colors.fgRed);
     }
-
-    (async () => {
-        for (const table of tables) {
-            await checkAndCreateTable(table);
-        }
-
-        await loadMembersFromDB();
-
-        // after the tables exist etc we will fire up our awesome new job(s)
-        scheduleDbTasks(dbTasks);
-    })();
 }
+
+function scheduleDbTasks(tasks) {
+    for (const task of tasks) {
+        const ms = task.interval * 1000; // second to ms
+        setLongInterval(() => runDbTask(task), ms);
+    }
+}
+
+(async () => {
+    for (const table of tables) {
+        await checkAndCreateTable(table);
+    }
+
+    await loadMembersFromDB();
+
+    // after the tables exist etc we will fire up our awesome new job(s)
+    scheduleDbTasks(dbTasks);
+})();
 
 
 Logger.success(`Welcome to DCTS`);
@@ -765,7 +762,7 @@ export const io = new Server(server, {
     pingTimeout: 60000,
 });
 
-export function startServer(){
+export function startServer() {
     // Start the app server
     var port = process.env.PORT || serverconfig.serverinfo.port;
     server.listen(port, function () {
@@ -1069,16 +1066,15 @@ export async function saveConfig(config) {
     if (!config) return;
 
     // save members only to DB
-    try{
+    try {
         if (config.servermembers && Object.keys(config.servermembers).length > 0) {
             for (const [id, member] of Object.entries(config.servermembers)) {
                 if (member && member.id) {
-                    if(serverconfig.serverinfo.sql.enabled == true) await saveMemberToDB(id, member);
+                    if (serverconfig.serverinfo.sql.enabled == true) await saveMemberToDB(id, member);
                 }
             }
         }
-    }
-    catch(exception){
+    } catch (exception) {
         Logger.error("error while trying to save config")
         Logger.error(exception);
     }

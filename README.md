@@ -75,11 +75,9 @@ While DCTS is an app, its going to be part of a bigger ecosystem that i plan to 
 ------
 
 ## Installing
-### Docker
+### Docker Installation
 
-# DCTS Shipping - Docker Installation
-
-## 🚀 Prerequisites
+#### 🚀 Prerequisites
 
 - Docker installed and running.
 - Docker Compose (recommended for multi-service setup).
@@ -87,7 +85,7 @@ While DCTS is an app, its going to be part of a bigger ecosystem that i plan to 
 - A MySQL-compatible database (e.g., MariaDB) is required for DCTS.
 - LiveKit is required for voice chat and streaming features.
 
-## 🧱 Installation using Docker Compose (recommended)
+#### 🧱 Installation using Docker Compose (recommended)
 
 1. Create a `docker-compose.yml` file with the following content:
 
@@ -195,7 +193,7 @@ sudo docker compose up -d
 docker compose logs -f
 ```
 
-## 📌 Ports Used by Each Service 
+#### 📌 Ports Used by Each Service 
 
 | Service      | Ports              | Notes                                                        |
 | ------------ | ------------------ | ------------------------------------------------------------ |
@@ -207,7 +205,7 @@ docker compose logs -f
 |              | 7882/udp           | ICE/UDP Mux, minimal setup for WebRTC, expose directly       |
 |              | 3478/udp, 5349/tcp | Optional TURN server ports, expose directly if TURN enabled  |
 
-## 🐳 Alternative method: Docker Run (quick test)
+#### 🐳 Alternative method: Docker Run (quick test)
 
 If you want to quickly test DCTS without Compose:
 
@@ -221,11 +219,11 @@ sudo docker run --name dcts-server -p 2052:2052 ghcr.io/hackthedev/dcts-shipping
 - Access it at `http://localhost:2052`.
 - If you just want to try DCTS, you can visit the public instance at [https://chat.network-z.com/](https://chat.network-z.com/).
 
-## 🌐 Accessing the server
+#### 🌐 Accessing the server
 
 - Open your browser and go to `http://localhost:2052` (or your server's IP).
 
-## 📝 Tips & best practices
+#### 📝 Tips & best practices
 
 - Use Docker volumes for persistent data (uploads, media, plugins, configs).
 - Configure environment variables, HTTPS/TLS, backups, and logs for production use.

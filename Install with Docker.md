@@ -2,7 +2,7 @@
 
 ### ⚡ Quick Start
 
-If you want to get started quickly, you can use an interactive setup script to automatically create the Docker Compose setup: [soon]
+If you want to get started quickly, you can use this interactive setup script to automatically create the Docker Compose setup: [soon]
 
 ### 🚀 Prerequisites
 

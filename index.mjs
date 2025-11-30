@@ -183,6 +183,14 @@ pool = mysql.createPool({
     }
 });
 
+// overwrites for docker
+if(process.env.DB_HOST) serverconfig.serverinfo.sql.host = process.env.DB_HOST
+if(process.env.DB_USER) serverconfig.serverinfo.sql.username = process.env.DB_USER
+if(process.env.DB_PASS) serverconfig.serverinfo.sql.password = process.env.DB_PASS
+if(process.env.DB_NAME) serverconfig.serverinfo.sql.database = process.env.DB_NAME
+serverconfig.serverinfo.sql.enabled = true;
+saveConfig(serverconfig);
+
 async function waitForDB() {
     while (true) {
         try {

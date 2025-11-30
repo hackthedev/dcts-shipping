@@ -44,10 +44,10 @@ services:
     volumes:
       - dcts-livekit-config:/etc/livekit.yaml
     ports:
-      - 7880:7880
-      - 7881:7881
-      # The following ports are only required for TURN functionality
-      - 50000-50050:50000-50050/udp
+      - 7880:7880 # LiveKit API/WebSocket, must be reverse proxied
+      - 7881:7881 # ICE/TCP signaling, expose directly
+      - 7882:7882/udp # ICE/UDP mux, expose directly
+      # Optional TURN ports
       - 3478:3478/udp
       - 5349:5349/tcp
 

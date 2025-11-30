@@ -1,6 +1,6 @@
 services:
   dcts-app:
-    image: dcts:latest
+    image: ghcr.io/hackthedev/dcts-shipping:latest
     depends_on:
       - dcts-mariadb
       - dcts-livekit
@@ -9,19 +9,20 @@ services:
       - DB_USER=dcts
       - DB_PASS=dcts
       - DB_NAME=dcts
-      - LIVEKIT_URL=your_proxied_url # e.g., livekit.example.com
+      - LIVEKIT_URL=your_proxied_url # e.g., livekit.example.com or localhost:7880
       - LIVEKIT_KEY=change_me
       - LIVEKIT_SECRET=change_me
       - DEBUG=false # optional
     restart: unless-stopped
     ports:
       - 2052:2052
-    volumes:
-      - ./dcts/sv:/app/sv
-      - ./dcts/configs:/app/configs
-      - ./dcts/uploads:/app/public/uploads
-      - ./dcts/emojis:/app/public/emojis
-      - ./dcts/plugins:/app/plugins
+# persistent volumes not working for now
+#    volumes:
+#      - ./dcts/sv:/app/sv
+#      - ./dcts/configs:/app/configs
+#      - ./dcts/uploads:/app/public/uploads
+#      - ./dcts/emojis:/app/public/emojis
+#      - ./dcts/plugins:/app/plugins
 
   dcts-mariadb:
     image: mariadb:latest

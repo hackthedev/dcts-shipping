@@ -45,10 +45,7 @@ function getTextBeforeCursor() {
 }
 
 async function initializeEmojiAutocomplete(element) {
-    console.log("getting emojis")
     await fetchEmojis()
-    console.log("got emojis")
-
     let savedCursor = 0;
 
     quill.on("selection-change", r => {
@@ -65,18 +62,13 @@ async function initializeEmojiAutocomplete(element) {
         const textBeforeCursor = getTextBeforeCursor()
         const match = textBeforeCursor.match(/:([^\s:]*)$/);
 
-
         if (match) {
             const searchTerm = match[1];
 
             if (searchTerm.length > 0) {
-                console.log("emojiList =", emojiList.map(e => e.filename));
-                console.log("searchTerm =", searchTerm);
-
-
                 matches = emojiList.filter(emoji => {
                     const namePart = emoji.filename.split("_").slice(1).join("_").toLowerCase();
-                    return namePart.startsWith(searchTerm.toLowerCase());
+                    return namePart.includes(searchTerm.toLowerCase());
                 });
 
                 if (matches.length > 0) {

@@ -1923,7 +1923,7 @@ function sendGif(url) {
         sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), document.querySelector('.ql-editor').innerHTML);
     }
 
-    sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), url);
+    sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), url, true);
 
     closeEmojiBox();
 }

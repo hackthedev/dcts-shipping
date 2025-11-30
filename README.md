@@ -75,17 +75,13 @@ While DCTS is an app, its going to be part of a bigger ecosystem that i plan to 
 ------
 
 ## Installing
-### Docker Installation
 
-```bash
-sudo docker run --name dcts-server -p 2052:2052 ghcr.io/hackthedev/dcts-shipping
-```
+### Docker
+#### Quick Start :
+If you want to get started quickly, you can use this interactive setup script to automatically create the Docker Compose setup: [soon]
 
-#### Accessing the server
-- Open your browser and go to `http://localhost:2052` (or your server's IP).
-- If you just want to try DCTS, you can visit the public instance at [https://chat.network-z.com/](https://chat.network-z.com/).
-
-<br>
+#### Manually (compose/run) :
+Alternatively, you can install DCTS manually using docker compose or docker run. See the full documentation here: Install with Docker
 
 ### Installer Script
 

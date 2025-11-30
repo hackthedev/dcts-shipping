@@ -77,6 +77,8 @@ export let socketToIP = [];
 export let allowLogging = false;
 export let debugmode = process.env.DEBUG || false;
 export let versionCode = 805;
+export let configPath = "./configs/config.json"
+
 
 // dSync Libs
 import dSyncAuth from '@hackthedev/dsync-auth';
@@ -122,12 +124,24 @@ checkServerDirectories()
 // check if config file exists
 checkFile("./plugins/settings.json", true, "{}")
 checkConfigFile()
+if(fs.existsSync("./config.json")){
+    try{
+        fs.cpSync("./config.json", configPath);
+        fs.cpSync("./config.json", "./config.json.bak");
+        fs.unlinkSync("./config.json");
+    }
+    catch(error){
+        Logger.error("Error migrating config file automatically");
+        Logger.error(error);
+    }
+}
+
 /*
     Holy Server config file.
     needs to be above the imports else serverconfig will be undefined
  */
-export var serverconfig = JSON.parse(fs.readFileSync("./config.json", {encoding: "utf-8"}));
-initConfig("./config.json");
+export var serverconfig = JSON.parse(fs.readFileSync(configPath, {encoding: "utf-8"}));
+initConfig(configPath);
 checkConfigAdditions();
 
 // made by installer script
@@ -1074,7 +1088,7 @@ export async function saveConfig(config) {
         k === "servermembers" ? undefined : v
     ), 4);
 
-    fs.writeFileSync("./config.json", fileContent);
+    fs.writeFileSync(configPath, fileContent);
 }
 
 
@@ -1104,7 +1118,7 @@ export async function reloadConfig() {
     return; // deprecated
 
     try {
-        const json = fs.readFileSync("./config.json", "utf8");
+        const json = fs.readFileSync(configPath, "utf8");
         const parsed = JSON.parse(json);
 
         for (const key of Object.keys(serverconfig)) delete serverconfig[key];
@@ -1122,7 +1136,7 @@ export async function reloadConfig() {
 
 export function getFreshConfig() {
     // used for edge cases
-    return JSON.parse(fs.readFileSync("./config.json", {encoding: "utf-8"}));
+    return JSON.parse(fs.readFileSync(configPath, {encoding: "utf-8"}));
 }
 
 export function setServer(content) {

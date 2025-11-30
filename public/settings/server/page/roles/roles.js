@@ -14,6 +14,8 @@ window.appearanceChanged = appearanceChanged;
 window.saveSorting = saveSorting;
 window.deleteRole = deleteRole;
 window.savePermissions = savePermissions;
+window.saveAppearance = saveAppearance;
+
 
 socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: ["manageRoles", "manageGroups"] }, function (response) {
 

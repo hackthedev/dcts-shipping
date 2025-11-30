@@ -2,7 +2,18 @@
     io in terms of input/output not socket.io
     everything that will handle stuff being read or written to the disk is here
  */
-import { serverconfig, fs, path, colors, debugmode, saveConfig, reloadConfig, flipDebug, allowLogging } from "../../index.mjs"
+import {
+    serverconfig,
+    fs,
+    path,
+    colors,
+    debugmode,
+    saveConfig,
+    reloadConfig,
+    flipDebug,
+    allowLogging,
+    configPath
+} from "../../index.mjs"
 import Logger from "./logger.mjs";
 import { saveChatMessageInDb, getChatMessagesFromDb, decodeFromBase64, logEditedChatMessageInDb, getMessageLogsFromDb, getChatMessageById } from "./mysql/helper.mjs"
 
@@ -122,7 +133,7 @@ export function checkFile(file, autocreate = false, content = ""){
 export function checkConfigFile() {
     // if config.json exists
     try {
-        if (checkFile("./config.json") === true) {
+        if (checkFile(configPath) === true) {
             consolas("Config file config.json did exist".yellow, "Debug");
         }
         else {
@@ -136,7 +147,7 @@ export function checkConfigFile() {
 
                 // Trying to copy file
                 try {
-                    fs.copyFileSync("./config.example.json", "./config.json");
+                    fs.copyFileSync("./config.example.json", configPath);
                     consolas(" ", "Debug");
                     consolas("Successfully copied config.example.json to config.json".green, "Debug");
                 }
@@ -152,7 +163,7 @@ export function checkConfigFile() {
         }
     } catch (err) {
         console.error(err);
-        exit();
+        process.exit();
     }
 }
 

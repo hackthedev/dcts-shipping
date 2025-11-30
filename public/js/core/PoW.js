@@ -71,7 +71,7 @@ function setupAccountFromData(data) {
     if (powChallenge) CookieManager.setCookie("pow_challenge", powChallenge);
     if (powSolution) CookieManager.setCookie("pow_solution", powSolution);
 
-    if (data?.loginName) CookieManager.setCookie("dcts_token", data?.loginName, 365);
+    if (data?.loginName) CookieManager.setCookie("loginName", data?.loginName, 365);
     if (data?.id) CookieManager.setCookie("id", data?.id, 365);
     if (data?.token) CookieManager.setCookie("dcts_token", data?.token, 365);
 }

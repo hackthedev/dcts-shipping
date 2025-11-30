@@ -173,14 +173,12 @@
 .message-container .row.reply .content.reply {
     display: flex;
     flex-direction: row;
-
     align-items: center;
 
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     word-break: keep-all;
-
 
     font-size: 12px;
     font-style: italic;

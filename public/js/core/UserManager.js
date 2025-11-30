@@ -555,7 +555,6 @@ class UserManager {
 
     static setLoginName(loginName) {
         CookieManager.setCookie("loginName", loginName, 360);
-        UserManager.updateUsernameOnUI(aboutme);
     }
 
     static generateId(length, strings = false) {

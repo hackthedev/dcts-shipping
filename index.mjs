@@ -109,7 +109,7 @@ let nodeArgs = process.argv;
 nodeArgs.shift()
 nodeArgs.shift()
 
-if (nodeArgs.includes("--debug")) {
+if (nodeArgs.includes("--debug") || debugmode === true) {
     // enable debug logging
     Logger.logDebug = true;
     flipDebug()
@@ -152,17 +152,6 @@ if(fs.existsSync("./configs/sql.txt")){
 
 
 // no sql, no server. tried sqlite but pain
-if(serverconfig.serverinfo.sql.enabled !== true){
-    console.clear();
-    Logger.error("+++ SQL IS NOT ENABLED +++")
-    Logger.error("From this version going forward, SQL is absolutely required.")
-    Logger.error("Make sure the SQL info inside the config.json file are correct")
-    Logger.error("and that sql is enabled too")
-    Logger.error("")
-    Logger.error("Make sure the sql server of your choice is compatible with MySQL / MariaDB")
-    Logger.error("")
-    process.exit(1);
-}
 
 // create sql pool
 pool = mysql.createPool({
@@ -180,6 +169,27 @@ pool = mysql.createPool({
         return next();
     }
 });
+
+async function waitForDB() {
+    while (true) {
+        try {
+            let conn = await pool.getConnection();
+            await conn.ping();
+            conn.release();
+            return;
+        } catch {
+            await new Promise(r => setTimeout(r, 1000));
+        }
+    }
+}
+
+Logger.info("Checking and waiting for database connection...")
+Logger.info("If it takes too long check the data inside the config.json file")
+Logger.info("and make sure the database is running and accessible.")
+await waitForDB();
+Logger.success("Connection established!")
+Logger.space()
+
 
 // backup members from config file
 await checkMemberMigration();

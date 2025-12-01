@@ -16,7 +16,7 @@ import {
     bcrypt,
     fs, signer
 } from "../../index.mjs"
-import {banIp, generateGid, getNewDate, hasPermission, resolveRolesByUserId} from "./chat/main.mjs";
+import {banIp, generateGid, getNewDate, getSocketIp, hasPermission, resolveRolesByUserId} from "./chat/main.mjs";
 import {consolas} from "./io.mjs";
 import Logger from "./logger.mjs";
 import path from "path";
@@ -218,6 +218,19 @@ export async function handleTerminalCommands(command, args) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     try {
+        if(command === "rotateMemberTokens"){
+            for (const memberId of Object.keys(serverconfig.servermembers)) {
+                let member = serverconfig.servermembers[memberId];
+                if(member.token){
+                    member.token = generateId(48);
+                    Logger.info(`Rotated token for member ${member.id}`)
+                }
+            }
+
+            await saveConfig(serverconfig);
+            Logger.success("Rotated all member tokens");
+            return;
+        }
         if(command === "load"){
             const mem = process.memoryUsage();
             Logger.info(`RAM usage: ${(mem.heapUsed / 1024 / 1024).toFixed(1)} MB`);
@@ -1031,7 +1044,7 @@ export function checkMemberMute(socket, member) {
 export async function checkMemberBan(socket, member) {
     await reloadConfig();
     serverconfigEditable = checkEmptyConfigVar(serverconfig);
-    let ip = socket.handshake.address;
+    let ip = getSocketIp(socket);
 
     if (serverconfigEditable.banlist.hasOwnProperty(member.id)) {
         console.log("Checking banlist for member ID:", member.id);

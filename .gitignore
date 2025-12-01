@@ -2,7 +2,7 @@
 /node_modules
 /config_backups
 /chats
-config.json
+/configs
 /public/uploads/
 /public/emojis/
 /plugins

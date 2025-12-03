@@ -5,22 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d055b26f-cdb9-4567-97eb-7ab0136f9bea" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../cache/proxy/3bf03ee0783a4c9226c80c44184f0d31ee104d99" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../cache/proxy/3bf03ee0783a4c9226c80c44184f0d31ee104d99.type" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../cache/proxy/404aba9cb0a43c2b58be7f3adc8ff1b2e02197cb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../cache/proxy/404aba9cb0a43c2b58be7f3adc8ff1b2e02197cb.type" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../cache/proxy/99343205eebbf3f20f55dd5407a4575d5ea399d3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../cache/proxy/99343205eebbf3f20f55dd5407a4575d5ea399d3.type" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../cache/proxy/a4b9600aad658140781450deb174711659afaea5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../cache/proxy/a4b9600aad658140781450deb174711659afaea5.type" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../cache/proxy/b582d26be925acacd261c31190f948c4f786918d" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../cache/proxy/b582d26be925acacd261c31190f948c4f786918d.type" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../cache/proxy/f0de864c707703f9e44ac6cdf89a8e4b4b59ef26" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../cache/proxy/f0de864c707703f9e44ac6cdf89a8e4b4b59ef26.type" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../modules/sockets/discovery/test.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../modules/sockets/getNetworkServers.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/../modules/sockets/getNetworkServers.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../modules/sockets/userLogin.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/../modules/sockets/userLogin.mjs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chat.js" beforeDir="false" afterPath="$PROJECT_DIR$/chat.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings/server/page/emojis/emojis.js" beforeDir="false" afterPath="$PROJECT_DIR$/settings/server/page/emojis/emojis.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/core/Client.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/core/Client.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,6 +68,7 @@
       <workItem from="1761970325922" duration="694000" />
       <workItem from="1763409313723" duration="850000" />
       <workItem from="1763413895640" duration="2000" />
+      <workItem from="1764668355546" duration="1819000" />
     </task>
     <servers />
   </component>

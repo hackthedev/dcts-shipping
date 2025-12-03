@@ -913,6 +913,7 @@ function createYouTubeEmbed(url, messageId) {
             <a href="${url}" target="_blank">${url}</a><br>
             <iframe
                 data-message-id="${messageId.replace("msg-", "")}"
+                data-media-type="youtube"
                 style="border:none"
                 src="${embed}"
                 frameborder="0"
@@ -2205,8 +2206,8 @@ async function setUrl(param, isVC = false) {
             chatlog.innerHTML = "";
             document.getElementById("messagebox").style.display = "flex";
             document.querySelector('.ql-editor').focus();
-
             getChatlog();
+            showGroupStats();
 
             if (response.permission !== "granted") {
                 toggleEditor(false);
@@ -2217,9 +2218,6 @@ async function setUrl(param, isVC = false) {
         });
     }
 
-
-    // get group stats
-    showGroupStats();
     getMemberList();
 }
 
@@ -2251,63 +2249,18 @@ function showGroupStats() {
     if (UserManager.getGroup() !== null && UserManager.getCategory() === null && UserManager.getChannel() === null) {
 
         messageInputBox.parentNode.parentNode.style.visibility = "hidden";
-        socket.emit("getGroupStats", {
-            id: UserManager.getID(),
-            token: UserManager.getToken(),
-            group: UserManager.getGroup()
-        }, function (response) {
-
-            if (response.type === "success") {
-
-                // Not enough users chatted to show group stats
-                if (response.mostActiveUsers.length <= 1) return;
-
-                contentBox = document.getElementById("content");
-                contentBox.innerHTML = ""
-
-                let code = `
-                    <div id="homeScreenGroupContainer">
-                        <h1 style="text-align: center">${response.group.info.name}</h1><br>
-                        <h2>Top 100 Active Users</h2><hr>
-
-                        <div id="homeGroupStatsMostActiveUserContainer">
-                    `;
-
-                // Generate user entries as divs instead of table rows
-                for (let i = 0; i < response.mostActiveUsers.length; i++) {
-                    let user = response.mostActiveUsers[i];
-
-                    // Skip if user is null
-                    if (!user) continue;
-
-                    let username = user.user.name;
-                    let message_count = user.message_count;
-
-                    code += `
-                        <div class="activeUserEntry" onclick='getMemberProfile("${user.user.id}", null, null, event)'>
-                            <p class="activeUserEntryName">${username}</p>
-                            <div class="activeUserEntryDivider"></div>
-                            <p class="activeUserEntryName">${message_count} messages</p>
-                        </div>
-                    `;
-                }
-
-                code += `</div></div>`; // Close the flex container divs
-
-                contentBox.insertAdjacentHTML("beforeend", code);
-
-
-            } else {
-                showSystemMessage({
-                    title: response.msg || response.error,
-                    text: "",
-                    icon: response.type,
-                    img: null,
-                    type: response.type,
-                    duration: 1000
-                });
-            }
-        });
+        document.getElementById("content").innerHTML =
+            `<div 
+                style="display: flex;
+                flex-direction: column; 
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+                ">
+                <h1 style="margin-bottom: 0;">Welcome to the server!</h1>
+                <p>Select a channel to begin chatting</p>
+            </div>
+            `;
     }
 }
 

@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 icon: "&#9741;",
                 text: "Copy Link",
                 callback: async (data) => {
-                    let url = data.element.src || data.element?.getAttribute("data-src")
+                    let url = data.element?.getAttribute("data-original-url") || data.element.src || data.element?.getAttribute("data-src")
                     if (!url) {
                         console.warn("Couldnt copy link because src wasnt found");
                         return;
@@ -560,7 +560,7 @@ async function createMsgHTML({message, append = false, isSystem = false, reply =
 
     // if message was a reply
     let replyCode = "";
-    if(reply != null){
+    if(reply){
         replyCode = `
             <div class="row reply" data-message-id="${reply?.message?.messageId}" data-member-id="${reply?.message?.id}">            
                 <!-- very creative name indeed -->
@@ -683,6 +683,10 @@ scrollContainer.addEventListener("scroll", async function () {
 
 
 function getChatlog(index = -1, appendTop = false) {
+    if(UserManager.getChannel() === null) return
+    if(UserManager.getCategory() === null) return
+    if(UserManager.getGroup() === null) return
+
     socket.emit("getChatlog", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
@@ -692,6 +696,7 @@ function getChatlog(index = -1, appendTop = false) {
         index
     }, async (response) => {
         let contentDiv = document.getElementById("content");
+        console.log(response)
 
         // reset chat
         if (response?.error === "denied") contentDiv.innerHTML = ""; // fuck em

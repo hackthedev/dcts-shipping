@@ -1,5 +1,5 @@
 import { loginAttempts, serverconfig, xssFilters } from "../../index.mjs";
-import { banIp, getNewDate, unbanIp } from "../functions/chat/main.mjs";
+import {banIp, getNewDate, getSocketIp, unbanIp} from "../functions/chat/main.mjs";
 import { copyObject, findAndVerifyUser, validateMemberId } from "../functions/main.mjs";
 
 export default (io) => (socket) => {
@@ -9,7 +9,7 @@ export default (io) => (socket) => {
         member.loginName = xssFilters.inHTMLData(member.loginName)
 
         // Handling ip ban
-        var ip = socket.handshake.address;
+        var ip = getSocketIp(socket);
         if (serverconfig.ipblacklist.hasOwnProperty(ip)) {
 
             // if the ban has expired, unban them

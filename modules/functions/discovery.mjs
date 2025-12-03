@@ -39,7 +39,7 @@ export function syncDiscoveredHosts(skipInterval){
 }
 
 export async function getDiscoveredHosts(){
-    return await queryDatabase(`SELECT * FROM network_servers WHERE status <> "blocked" LIMIT 200`, []);
+    return await queryDatabase(`SELECT address FROM network_servers WHERE status <> "blocked" LIMIT 200`, []);
 }
 
 export async function discoverHosts(clientKnownHosts){
@@ -59,7 +59,7 @@ export async function discoverHosts(clientKnownHosts){
     }
 }
 
-async function checkHostDiscovery(address, forceSync = false){
+export async function checkHostDiscovery(address, forceSync = false){
     if(serverconfig.serverinfo?.sql?.enabled !== true) return; // sql needed
 
     let existingServerRows = await queryDatabase(`SELECT * FROM network_servers WHERE address = ? and status <> "blocked"`, [extractHost(address)]);
@@ -69,7 +69,7 @@ async function checkHostDiscovery(address, forceSync = false){
 
     try{
         let random = String(Math.random() * 100).split(".")[1];
-        let serverDiscoveryResponse = await fetch(`http://${extractHost(address)}/discover?ran=${random}` )
+        let serverDiscoveryResponse = await fetch(`https://${extractHost(address)}/discover?ran=${random}` )
 
         // seems like a valid instance!!
         if(serverDiscoveryResponse?.status === 200){

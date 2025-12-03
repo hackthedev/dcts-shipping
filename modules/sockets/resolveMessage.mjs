@@ -10,8 +10,19 @@ export default (io) => (socket) => {
     socket.on('resolveMessage', async function (member, response) {
         // some code
         if(validateMemberId(member?.id, socket, member?.token) === true){
+
+            if(!member?.messageId) {
+                response({ error: "Message ID is required", message: null})
+                return;
+            }
+
             let messageRaw = await getChatMessageById(member?.messageId);
             let messageObj = messageRaw[0];
+            if(!messageObj) {
+                response({ error: "Message not found", message: null})
+                return;
+            }
+
             messageObj.message = JSON.parse(decodeFromBase64(messageObj.message));
 
             if (!hasPermission(member.id, "viewChannel", messageObj?.message?.channel)) {

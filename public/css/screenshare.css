@@ -60,7 +60,8 @@
 }
 
 .vc-row video {
-    width: 100%;
+    border-radius: 10px;
+    max-width: 400px;
     height: auto;
 }
 

@@ -309,8 +309,6 @@ sortable-chosen.sortable-ghost {
 #profile-qa #vcStatusText {
     margin: 0;
 }
-
-
 #profile-qa {
     height: fit-content;
     width: 100%;
@@ -679,6 +677,13 @@ code.markdown {
     margin-left: auto;
     margin-right: auto;
 }
+.profile-qa-actions.right.voip{
+    margin-left: auto;
+    margin-right: 0;
+    justify-content: end !important;
+}
+
+
 .profile-qa-icon{
     display: flex;
     width: 20px !important;

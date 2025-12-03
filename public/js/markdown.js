@@ -11,11 +11,11 @@ function isAlreadyLink(msg, url, msgid) {
     let audio = container.querySelector(`audio[data-original-url="${url}"]`);
     if (audio) return audio.getAttribute("data-media-type") || "audio";
 
+    let youtube = container.querySelector(`iframe[data-original-url="${url}"]`);
+    if (youtube) return youtube.getAttribute("data-media-type") || "youtube";
+
     let link = container.querySelector(`a[href="${url}"]`);
     if (link) return link.getAttribute("data-media-type") || "link";
-
-    let youtube = container.querySelector(`iframe[href="${url}"]`);
-    if (youtube) return youtube.getAttribute("data-media-type") || "youtube";
 
     return null;
 }
@@ -80,16 +80,25 @@ async function markdown(msg, msgid) {
             continue;
         }
 
+        console.log(isAlreadyLink(msg, url, msgid))
+
         if ((url.includes("youtu.be") || url.includes("youtube")) && isAlreadyLink(msg, url, msgid) !== "youtube") {
             msg = msg.replace(url, createYouTubeEmbed(url, msgid));
             changed = true;
             continue;
         }
 
-        msg = msg.replace(url,
-            `<a draggable="false" data-media-type="url" data-message-id="${msgid.replace("msg-", "")}" href="${url}" ${url.startsWith(window.location.origin) ? "" : "target=\"_blank\""}>${url}</a>`
-        );
-        changed = true;
+        if(isAlreadyLink(msg, url, msgid) !== "link" &&
+            isAlreadyLink(msg, url, msgid) !== "youtube" &&
+            isAlreadyLink(msg, url, msgid) !== "video" &&
+            isAlreadyLink(msg, url, msgid) !== "image" &&
+            isAlreadyLink(msg, url, msgid) !== "audio") {
+            msg = msg.replace(url,
+                `<a draggable="false" data-media-type="link" data-message-id="${msgid.replace("msg-", "")}" href="${url}" ${url.startsWith(window.location.origin) ? "" : "target=\"_blank\""}>${url}</a>`
+            );
+            changed = true;
+        }
+
     }
 
     if (changed && scrolledDown) scrollDown();

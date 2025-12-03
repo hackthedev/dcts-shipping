@@ -912,6 +912,7 @@ function createYouTubeEmbed(url, messageId) {
         <div data-message-id="${messageId.replace("msg-", "")}" class="iframe-container" id="msg-${messageId}">
             <a href="${url}" target="_blank">${url}</a><br>
             <iframe
+                data-original-url="${url}"
                 data-message-id="${messageId.replace("msg-", "")}"
                 data-media-type="youtube"
                 style="border:none"
@@ -921,6 +922,7 @@ function createYouTubeEmbed(url, messageId) {
                 allowfullscreen
                 referrerpolicy="strict-origin-when-cross-origin">
             </iframe>
+
         </div>
     `;
 }

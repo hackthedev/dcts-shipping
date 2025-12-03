@@ -170,5 +170,5 @@ async function changeFavouriteNetworkServer(address){
     }
 
     server.IsFavourite = !server.IsFavourite;
-    await Client().SaveServer(address, server.JsonData, server.IsFavourite);
+    await Client().SaveServer(address, server.IsFavourite);
 }

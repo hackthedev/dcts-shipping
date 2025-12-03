@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d055b26f-cdb9-4567-97eb-7ab0136f9bea" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../modules/sockets/discovery/test.mjs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../modules/sockets/getNetworkServers.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/../modules/sockets/getNetworkServers.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../modules/sockets/userLogin.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/../modules/sockets/userLogin.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/core/Client.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/core/Client.js" afterDir="false" />
-    </list>
+    <list default="true" id="d055b26f-cdb9-4567-97eb-7ab0136f9bea" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -48,7 +40,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-WS-252.27397.92" />
+        <option value="bundled-js-predefined-d6986cc7102b-a71380e98a7c-JavaScript-WS-252.28238.10" />
       </set>
     </attachedChunks>
   </component>
@@ -69,6 +61,7 @@
       <workItem from="1763409313723" duration="850000" />
       <workItem from="1763413895640" duration="2000" />
       <workItem from="1764668355546" duration="1819000" />
+      <workItem from="1764786622746" duration="6000" />
     </task>
     <servers />
   </component>

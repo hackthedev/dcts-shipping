@@ -3,13 +3,15 @@ function Client() {
 }
 
 function isLauncher() {
-    return !!window.__TAURI__;
+    return !!window?.__TAURI__?.core;
 }
 
 
 const TauriProxy = new Proxy({}, {
     get(target, prop) {
         return async (...args) => {
+            if(!isLauncher()) return;
+
             let params = {};
             if (args.length === 1 && typeof args[0] === "object") {
                 params = args[0];
@@ -18,8 +20,8 @@ const TauriProxy = new Proxy({}, {
                     params["arg" + i] = a;
                 });
             }
-
-            return await window.__TAURI__.invoke(prop.toString(), params);
+            
+            return await window?.__TAURI__?.core?.invoke(prop?.toString(), params);
         };
     }
 });

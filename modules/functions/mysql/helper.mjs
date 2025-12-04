@@ -4,8 +4,7 @@ import {report} from "process";
 import Logger from "../logger.mjs";
 
 export async function saveMemberToDB(id, data) {
-
-    if (!data || typeof data !== "object") return console.log("[saveMemberToDB] invalid data", data);
+    if (!data || typeof data !== "object" || !id) return console.log("[saveMemberToDB] invalid data", data);
 
     const cols = Object.keys(data);
     const vals = Object.values(data);

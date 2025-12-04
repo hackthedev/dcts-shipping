@@ -177,7 +177,7 @@ export default (io) => (socket) => {
                     token: member.token,
                     onboarding: false
                 }
-                await saveConfig(serverconfig);
+                await saveMemberToDB(member?.id, serverconfig.servermembers[member.id]);
             }
         }
 

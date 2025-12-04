@@ -15,7 +15,7 @@ export async function queryDatabase(query, params, retryCount = 3) {
             await new Promise(resolve => setTimeout(resolve, 100));
             return queryDatabase(query, params, retryCount - 1);
         } else {
-            //Logger.error('Error executing query:', err);
+            Logger.error('SQL Error executing query:', err);
             throw err;
         }
     } finally {

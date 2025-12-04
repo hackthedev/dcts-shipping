@@ -1,5 +1,5 @@
 function Client() {
-    return TauriProxy;
+    return isLauncher() ? TauriProxy : null;
 }
 
 function isLauncher() {

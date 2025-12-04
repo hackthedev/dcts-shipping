@@ -11,15 +11,16 @@ export async function queryDatabase(query, params, retryCount = 3) {
     } catch (err) {
         if (err.code === 'ER_LOCK_DEADLOCK' && retryCount > 0) {
             console.warn('Deadlock detected, retrying transaction...', retryCount);
-            // Wait for a short period before retrying
+            // wait for a short period before retrying
             await new Promise(resolve => setTimeout(resolve, 100));
             return queryDatabase(query, params, retryCount - 1);
         } else {
-            Logger.error('SQL Error executing query:', err);
+            Logger.error('SQL Error executing query:');
+            Logger.error(err);
             throw err;
         }
     } finally {
-        if (connection) connection.release(); // Ensure the connection is released back to the pool
+        if (connection) connection.release();
     }
 }
 

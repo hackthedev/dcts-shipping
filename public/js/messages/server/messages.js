@@ -573,7 +573,7 @@ async function createMsgHTML({message, append = false, isSystem = false, reply =
                     <label class="username" data-member-id="${reply?.message?.id}" style="color: ${reply?.message?.color};">${unescapeHtmlEntities(sanitizeHtmlForRender(truncateText(reply?.message?.name, 25)))}</label>
                 </div>
                 <div class="content reply" data-message-id="${reply?.message?.messageId}" data-member-id="${reply?.message?.id}" data-timestamp="${reply?.message?.timestamp}">
-                    ${await text2Emoji(unescapeHtmlEntities(sanitizeHtmlForRender(reply?.message?.message)), false, true)} 
+                    ${await text2Emoji(unescapeHtmlEntities(sanitizeHtmlForRender(reply?.message?.message)), false, true) || "[ Click to view message ]"} 
                 </div>
             </div>
         `;

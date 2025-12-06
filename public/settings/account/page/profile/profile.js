@@ -176,10 +176,8 @@ function saveSettings() {
         }
 
         // Status
-        if (settings_status.value != null && settings_status.value.length > 0) {
-            UserManager.setStatus(settings_status.value);
-            console.log("Saved status");
-        }
+        UserManager.setStatus(settings_status.value);
+        console.log("Saved status");
 
         // About me
         if (settings_aboutme.value != null && settings_aboutme.value.length > 0) {

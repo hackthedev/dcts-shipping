@@ -1045,6 +1045,16 @@ export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+export function findSocketByMemberId(io, memberId) {
+    for (const [id, sock] of io.sockets.sockets) {
+        if (sock.data?.memberId === memberId) {
+            return sock;
+        }
+    }
+    return null;
+}
+
+
 export async function checkMemberBan(socket, member) {
     await reloadConfig();
     serverconfigEditable = checkEmptyConfigVar(serverconfig);

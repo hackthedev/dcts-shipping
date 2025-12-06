@@ -76,11 +76,11 @@ export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = process.env.DEBUG || false;
-export let versionCode = 872;
+export let versionCode = 876;
 export let configPath = "./configs/config.json"
 
 
-// dSync Libs
+// dSync Libss
 import dSyncAuth from '@hackthedev/dsync-auth';
 //import dSyncAuth from '../../../dSyncAuth/index.mjs';
 import {dSyncSign} from "@hackthedev/dsync-sign";

@@ -391,8 +391,6 @@ class UserManager {
         var status = CookieManager.getCookie("status");
 
         if (status == null || status.length <= 0) {
-            CookieManager.setCookie("status", "Hey im new!", 360);
-            UserManager.updateStatusOnUI(status);
             return status;
         } else {
             UserManager.updateStatusOnUI(status);

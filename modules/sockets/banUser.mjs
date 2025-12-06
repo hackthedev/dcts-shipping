@@ -2,7 +2,7 @@ import { saveConfig, serverconfig, usersocket, xssFilters } from "../../index.mj
 import { getMemberHighestRole } from "../functions/chat/helper.mjs";
 import { banUser, getNewDate, hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
-import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import {copyObject, escapeHtml, findSocketByMemberId, sendMessageToUser, validateMemberId} from "../functions/main.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
@@ -34,7 +34,8 @@ export default (io) => (socket) => {
                         return;
                     }
 
-                    banUser(socket, member);
+                    let targetSocket = findSocketByMemberId(io, member.target);
+                    banUser(targetSocket, member);
 
                     // Notify Admins
                     response({

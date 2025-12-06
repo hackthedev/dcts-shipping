@@ -789,14 +789,12 @@ export function getChannelTree(member) {
 export function banUser(socket, member) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
-    let ip = socket.handshake.address;
+    let ip = getSocketIp(socket);
 
     // get member ban date
     let bannedUntil = getNewDate(member.duration).getTime();
 
     // Set Member to be banned
-    console.log(member.target)
-    console.log(serverconfig.servermembers)
     serverconfig.servermembers[member.target].isBanned = 1;
 
     // Add member to banlist
@@ -819,17 +817,20 @@ export function banUser(socket, member) {
 }
 
 export function getSocketIp(socket){
-    return socket.handshake.headers["x-forwarded-for"]?.split(",")[0].trim()
-        || socket.handshake.headers["x-real-ip"]
-        || socket.handshake.address;
+    return socket?.handshake?.headers["x-forwarded-for"]?.split(",")[0].trim()
+        || socket?.handshake?.headers["x-real-ip"]
+        || socket?.handshake?.address;
 }
 
 export function banIp(socket, durationTimestamp) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     let ip = getSocketIp(socket);
+    if(ip?.includes("::1") || ip?.includes("127.0.0.1")){
+        return false
+    }
 
-    if (!serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
+    if (!serverconfigEditable.ipblacklist.hasOwnProperty(ip) && ip != null) {
         serverconfigEditable.ipblacklist[ip] = durationTimestamp;
         saveConfig(serverconfigEditable);
         console.log(`IP ${ip} banned until ${durationTimestamp}`);

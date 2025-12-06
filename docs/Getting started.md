@@ -13,9 +13,9 @@ The software was designed to be setup and run as simple as possible. Using the *
 | Feature                 | Description                                                  |
 | ----------------------- | ------------------------------------------------------------ |
 | NodeJS                  | Required v16.16.0 and above [^testedNodeVersions]            |
-| MySQL-compatible Server | Optional but ***highly*** recommended! Checkout SQL Docs     |
+| MySQL-compatible Server | ***Required***. Use MySQL/MariaDB compatible server          |
 | Tenor                   | Optional, used for GIF search                                |
-| SSL                     | Optional for localhost, but ***required for public use***! Checkout SSL Docs<br / |
+| SSL                     | Optional for localhost on same machine, but ***required for public use***! |
 | LiveKit                 | Used for voice chatting and screen sharing                   |
 
 ------
@@ -71,6 +71,10 @@ As you can see all you really need is one command to launch the chat app if the 
 
 Its possible to use more advanced and better starting methods, such as using docker, a sytem service or supervisor and screen. Information about these can be found in the other documents.
 
+>  [!TIP]
+>
+> Its recommended to use reverse proxies for public access
+
 ------
 
 ## Setting up MySQL/MariaDB
@@ -123,6 +127,6 @@ You can use it to redeem the administrator role in the web client. To do so righ
 
 > [!NOTE]
 >
-> You'll need to configurate and install the software needed for Voice Chatting and Screensharing yourself as of right now. Please checkout `VoIP Setup.md` inside the `docs` folder
+> You'll need to configurate and install the software needed for Voice Chatting and Screensharing yourself as of right now. Please checkout `VoIP Setup.md` inside the `docs` folder. It will also contain a recommended DNS setup.
 
 [^testedNodeVersions]: Checkout Github Repo "Tested Node Versions"

@@ -76,7 +76,7 @@ export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = process.env.DEBUG || false;
-export let versionCode = 805;
+export let versionCode = 872;
 export let configPath = "./configs/config.json"
 
 

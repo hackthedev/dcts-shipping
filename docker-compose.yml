@@ -1,6 +1,6 @@
 services:
   dcts-app:
-    image: dcts:latest
+    image: ghcr.io/hackthedev/dcts-shipping:latest
     depends_on:
       - dcts-mariadb
       - dcts-livekit
@@ -55,3 +55,4 @@ volumes:
   dcts-mariadb-data:
   dcts-redis-data:
   dcts-livekit-config:
+

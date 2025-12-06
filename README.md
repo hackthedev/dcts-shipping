@@ -82,7 +82,7 @@ While DCTS is an app, its going to be part of a bigger ecosystem that i plan to 
 > Make sure that you have a reverse proxy setup for your chat instance! Checkout the docs folder!
 
 ```bash
-wget https://raw.githubusercontent.com/hackthedev/dcts-shipping/refs/heads/beta/docker-compose.yml
+wget https://raw.githubusercontent.com/hackthedev/dcts-shipping/refs/heads/main/docker-compose.yml
 docker compose up
 ```
 

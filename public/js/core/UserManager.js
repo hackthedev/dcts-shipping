@@ -866,6 +866,27 @@ class UserManager {
         }
     }
 
+    static async checkPermission(perms, any = false) {
+        return new Promise(resolve => {
+            socket.emit("checkPermission", {
+                id: UserManager.getID(),
+                token: UserManager.getToken(),
+                permission: perms,
+                any
+            }, function (response) {
+
+                if(response?.permission === "granted"){
+                    resolve(true)
+                }
+                else if(response?.permission === "denied"){
+                    resolve(false)
+                }
+
+                resolve(response?.permission)
+            });
+        })
+    }
+
 
     static doAccountOnboarding(defaultValues = null) {
         customPrompts.showPrompt(

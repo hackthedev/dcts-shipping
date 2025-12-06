@@ -381,7 +381,6 @@ export default (io) => (socket) => {
                 })
             );
 
-            // WICHTIG: eigene Nachrichten ausschließen (d.authorId != ?)
             const unreadRows = threadIds.length ? await queryDatabase(
                 `
             SELECT d.threadId, COUNT(*) AS unread
@@ -463,9 +462,8 @@ export default (io) => (socket) => {
                     );
                 }
 
-                // Ticket-Status anlegen
                 if (type === 'ticket') {
-                    const now = nowISO();
+                    const now = new Date();
                     await queryDatabase(
                         `INSERT INTO tickets (threadId, creatorId, status, createdAt, updatedAt)
                         VALUES (?, ?, 'open', ?, ?)
@@ -537,7 +535,7 @@ export default (io) => (socket) => {
 
             const me = socket.data.memberId;
             const messageId = "m_" + Date.now();
-            const now = nowISO();
+            const now = new Date();
 
             data.text.content = sanitizeInput(data.text.content);
             data.text.sender = sanitizeInput(data.text.sender);
@@ -1014,7 +1012,7 @@ export default (io) => (socket) => {
                     return response?.({ type: "error", msg: "forbidden" });
                 }
 
-                const type = (data.type || "").toLowerCase(); // 'posts'|'news'|'help'
+                const type = (data.type || "").toLowerCase(); // posts, news, help
                 const contentId = Number(data.contentId) || 0;
                 if (!contentId || !type) return response?.({ type: "error", msg: "invalid parameters" });
 

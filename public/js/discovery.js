@@ -12,9 +12,7 @@ async function syncHostData(){
         let json = await serverSyncResponse.json();
 
         if(isLauncher() && json){
-            let serverRaw = await Client().GetServer(window.location.host);
-            let server = JSON.parse(serverRaw);
-
+            let server = await Client().GetServer(window.location.host);
             await Client().SaveServer(window.location.host, JSON.stringify(json), server?.IsFavourite);
         }
     }
@@ -78,7 +76,7 @@ async function displayDiscoveredHosts(){
 
     // add local servers to the list too
     if(Client()){
-        let localServers = JSON.parse(await Client().GetServers());
+        let localServers = await Client().GetServers();
 
         for(let localServerKey in localServers){
             let localServer = localServers[localServerKey];
@@ -109,13 +107,14 @@ async function displayDiscoveredHosts(){
 
 
         for(let server of discoveredHosts.servers){
-            let host = server.address;
+            let host = extractHost(server.address);
+            if(!host) continue;
 
             let externalServerInfo = null;
             let externalServerData = null;
 
             try{
-                externalServerInfo = await fetch(`https://${server.address}/discover`);
+                externalServerInfo = await fetch(`https://${host}/discover`);
                 externalServerData = await externalServerInfo.json();
             }
             catch(error){
@@ -163,7 +162,7 @@ async function changeFavouriteNetworkServer(address){
         return;
     }
 
-    let server = JSON.parse(await Client().GetServer(address))
+    let server = await Client().GetServer(address)
     if(!server){
         console.warn("Couldnt get server and mark server as fav");
         return;

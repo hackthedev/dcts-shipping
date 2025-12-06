@@ -3,7 +3,6 @@ console.log("%c" + "People can use the console to steal your account xo !", "col
 
 var page = getUrlParams("page");
 
-
 doInit(() => {
 
     socket.emit("checkPermission", {
@@ -16,7 +15,7 @@ doInit(() => {
             "manageRateSettings"], any: true
     }, function (response) {
 
-        if (response.permission == "denied") {
+        if (response.permission === "denied") {
             window.location.href = window.location.origin;
         }
         else {
@@ -29,8 +28,6 @@ doInit(() => {
     checkEmptyElements.forEach(emptyElement => {
 
         var ele = emptyElement;
-        console.log(ele.id + " hm")
-
         if (ele == null || ele.id.length <= 0 || ele.id.includes("info")) { return; }
 
 
@@ -38,11 +35,15 @@ doInit(() => {
         if (links.length > 0) {
             links.forEach(link => {
 
-                if (link.id.length <= 0 || link == null) { return; }
+                if (link?.id?.length <= 0 || link == null) { return; }
 
-                socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: link.id }, function (response) {
+                // get permission needed from html
+                let permission = link?.getAttribute("data-permission");
+                console.log("Perm: ", permission)
 
-                    if (response.permission == "denied") {
+                socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission }, function (response) {
+
+                    if (response.permission === "denied") {
                         //console.log(link.id)
 
                         // Get new line break

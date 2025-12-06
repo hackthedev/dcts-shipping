@@ -29,7 +29,7 @@ body {
     overflow-anchor: none;
 }
 
-.message-container a {
+ a {
     color: hsl(from var(--main) h s calc(l * 12));
     font-style: italic;
 }

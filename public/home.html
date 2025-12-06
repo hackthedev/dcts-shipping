@@ -687,7 +687,7 @@
                       ${avatarStackHTML(t.participants)}
                       <div>
                         <div class="dmName">${encodePlainText(title)}</div>
-                        <div class="dmPreview">${clearHtmlFromText(t.last) || ""}</div>
+                        <div class="dmPreview">{clearHtmlFromText(t.last) || ""}</div>
                       </div>
 
                       ${t.unread > 0 ?
@@ -771,7 +771,7 @@
 
             // show normal dms
             sorted.forEach(async t => {
-                if (t.type != "ticket") { // dont show tickets in normal dms
+                if (t.type !== "ticket") { // dont show tickets in normal dms
 
                     if(isEncryptedMessage(t.last)){
                         t.last = getEncryptedMessageNotice();
@@ -1513,9 +1513,7 @@
             message = msg
         }
 
-        if(!message || message?.trim()?.length === 0) return "";
-
-        return message.substring(0, 5).includes("rsa|");
+        return msg?.text ? msg?.text?.encrypted : msg?.toLowerCase().includes("rsa|");
     }
 
     function getEncryptedMessageNotice(){
@@ -1538,8 +1536,10 @@
 
     async function getMessageText(message, isMine, targetUserId){
         if(isEncryptedMessage(message, isMine)){
+            console.log("is encrypted")
             if(isMine){
-                return getDecryptedMessage(isMine, message?.text?.sender, message, await UserManager.requestPublicKey(targetUserId));
+                console.log("is mine")
+                return getDecryptedMessage(isMine, message?.text?.sender, message, await Crypto.getPublicKey());
             }
             else{
                 return getDecryptedMessage(isMine, message?.text?.content, message, await UserManager.requestPublicKey(targetUserId));
@@ -1571,12 +1571,11 @@
                 // keep it just in case.
                 if(isMine) publicKey = await Crypto.getPublicKey();
 
-
                 let isValidPlainTextSig = publicKey ? await Client().VerifyString(decryptedPlain, message?.text?.plainSig, publicKey) : false;
 
                 // for my next magic trick, we shall verify the entire message object too
                 // to make sure nothing was modified, like the entire thing aka message.text object
-                let isOriginalTextObject = publicKey ? await Client().VerifyJson(JSON.stringify(message?.text), publicKey) : false;
+                let isOriginalTextObject = publicKey ? await Client().VerifyJson(message?.text, publicKey) : false;
 
                 // shows failed error message
                 if(isValidPlainTextSig !== true || isOriginalTextObject !== true){
@@ -1631,9 +1630,14 @@
             const isSystem = message.authorId === "system";
 
             // get other participant
-            let target = (thread.participants.filter(x => x !== UserManager.getID()))[0];
-            let messageText = await getMessageText(message, mine, target);
+            let target = otherParticipant(thread);
+            console.log(target);
+            console.log(message);
+            let messageText = await getMessageText(message, mine, target.id);
+
             let isEncrypted = isEncryptedMessage(message, mine);
+            console.log(messageText);
+            console.log(isEncrypted);
 
             div.innerHTML = `
               <div style="font-weight:700;font-size:12px;opacity:.9">
@@ -1850,29 +1854,36 @@
             id: UserManager.getID()
         }
 
-        if(await isLauncher() && thread.type !== "ticket"){
+
+        if(await Client() && thread.type !== "ticket"){
             let target = (thread.participants.filter(x => x !== UserManager.getID()))[0];
             let targetPublicKey = await UserManager.requestPublicKey(target);
 
             if(targetPublicKey?.error === null && targetPublicKey?.publicKey?.length > 10){
                 let plainText = payload.text.content;
-                payload.text.content = await Crypto.EncryptEnvelope(plainText, targetPublicKey?.publicKey); // encrypt for receiver
-                payload.text.sender = await Crypto.EncryptEnvelope(plainText);  // encrypt so you can read it yourself lol
-                payload.text.encrypted = true; // just a simple flag
-                payload.text.plainSig = await Client().SignString(plainText); // used to verify plaintext
+                try{
+                    console.log(await Crypto.EncryptEnvelope(plainText, targetPublicKey?.publicKey))
+                    payload.text.content = await Crypto.EncryptEnvelope(plainText, targetPublicKey?.publicKey); // encrypt for receiver
+                    payload.text.sender = await Crypto.EncryptEnvelope(plainText);  // encrypt so you can read it yourself lol
+                    payload.text.encrypted = true; // just a simple flag
+                    payload.text.plainSig = await Client().SignString(plainText); // used to verify plaintext
 
-                payload.text = await Crypto.signJson(payload.text); // signs everything to make it tamper proof
-                // its shit like this that i absolutely love!!
-                // theoretically other platforms could implement a plain text sig too
-                // and still be able to handle encrypted message reports securely
-                // without ever having to decrypt the data etc, therefore ensuring
-                // privacy and moderation without compromises.
+                    payload.text = await Crypto.signJson(payload.text); // signs everything to make it tamper proof
+                    console.log(payload);
+                    // its shit like this that i absolutely love!!
+                    // theoretically other platforms could implement a plain text sig too
+                    // and still be able to handle encrypted message reports securely
+                    // without ever having to decrypt the data etc, therefore ensuring
+                    // privacy and moderation without compromises.
+                }
+                catch(msgEncryptionError){
+                    console.error(msgEncryptionError);
+                }
             }
             else{
                 console.warn("Couldnt get public key from target user ", target);
                 console.warn(targetPublicKey)
             }
-
         }
 
         socket.emit("sendMessage", payload, (ack) => {

@@ -11,8 +11,8 @@
   "license": "",
   "dependencies": {
     "@hackthedev/dsync": "^1.0.8",
-    "@hackthedev/dsync-auth": "^1.0.6",
-    "@hackthedev/dsync-sign": "^1.0.6",
+    "@hackthedev/dsync-auth": "^1.0.7",
+    "@hackthedev/dsync-sign": "^1.0.10",
     "bcrypt": "^5.1.1",
     "colors": "^1.4.0",
     "cookie-parser": "^1.4.7",

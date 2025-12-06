@@ -8,8 +8,9 @@ export default (io) => (socket) => {
 
     socket.on('MyEvent', function (member, response) {
         // some code
-        if(validateMemberId(member?.id, socket, member?.token) === true){
+        if(validateMemberId(member?.id, socket, member?.token) === false){
             response({ error: null })
+            return;
         }
     });
 }

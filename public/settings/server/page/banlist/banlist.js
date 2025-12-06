@@ -31,7 +31,7 @@ getBans();
 function unbanUser(id) {
 
     var username = document.querySelector(`#ban-username-${id}`).innerText.split(" ")[0];
-    var container = document.querySelector(`#banned-id-${id}`);
+    var container = document.querySelector(`[data-member-id="banned-${id}"]`);
 
     if (!confirm("Do you want to unban the user " + username + "?")){
         notify("Canceled unban", "info")
@@ -85,7 +85,7 @@ function getBans() {
                     const rowClass = index % 2 === 0 ? "settings_banlist_even_row" : "settings_banlist_odd_row";
 
                     table += `
-                        <tr class="${rowClass}">
+                        <tr class="${rowClass}" data-member-id="banned-${banData.bannedUserObj.id}">
                             <td>
                                 <div class="settings_banlist_user_info">
                                     <img class="settings_banlist_user_icon" src="${banData.bannedUserObj.icon}" alt="User Icon">

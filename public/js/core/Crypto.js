@@ -10,12 +10,7 @@ class Crypto {
 
         if (result.status === 200 && json?.challenge) {
             const c = json.challenge;
-            const joined =
-                c.method === "rsa"
-                    ? [c.method, c.encKey, "", c.ciphertext, c.iv, c.tag].join("|")
-                    : [c.method, "", c.salt, c.ciphertext, c.iv, c.tag].join("|");
-
-            const solution = await this.DecryptEnvelope(joined);
+            const solution = await this.DecryptEnvelope(this.CreateEnvelopeStructure(c));
 
             // if we decrypted it do the verify
             if(solution){
@@ -31,6 +26,14 @@ class Crypto {
 
                 const verifyJson = await verifyResult.json();
                 console.log("verify:", verifyJson);
+
+                if(verifyJson?.error == null && verifyJson?.status === 200){
+                    // idk what to do honestly. ig rest is server side lol.
+                }
+            }
+            else{
+                console.log("no solution:")
+                console.log(solution)
             }
         }
     }
@@ -51,7 +54,7 @@ class Crypto {
             throw new Error("Tried to sign empty json");
         }
 
-        return JSON.parse(await Client().SignJson(JSON.stringify(json)));
+        return await Client().SignJson(json);
     }
 
     static async verifyJson(json, key) {
@@ -59,19 +62,43 @@ class Crypto {
             console.warn("Verifying is exclusive to the desktop client");
             return;
         }
-        return JSON.parse(await Client().VerifyJson(JSON.stringify(json), key));
+        return await Client().VerifyJson(json, key);
     }
 
-    static async GetEnvelopeStructure(envelope) {
+    static CreateEnvelopeStructure(obj) {
+        return [
+            obj.method || "",
+            obj.encKey || "",
+            obj.salt || "",
+            obj.ciphertext || obj.cipher || "",
+            obj.iv || "",
+            obj.tag || ""
+        ].join("|");
+    }
+
+    static GetEnvelopeStructure(envelope) {
         const p = envelope.split("|");
         return {
             method: p[0],
             encKey: p[1],
             salt: p[2],
-            cipher: p[3],
+            ciphertext: p[3],
             iv: p[4],
             tag: p[5]
         };
+    }
+
+    static async DecryptEnvelope(envelopeString, keyOrPass = null) {
+        if (!isLauncher()) return;
+
+        const env = this.GetEnvelopeStructure(envelopeString);
+
+        if (!env.method || !env.ciphertext) {
+            console.error("Cant decrypt envelope because of missing data");
+            return;
+        }
+
+        return await Client().DecryptData(env.method, env.encKey, env.iv, env.tag, env.ciphertext);
     }
 
     static async getPublicKey() {
@@ -81,40 +108,10 @@ class Crypto {
 
     static async EncryptEnvelope(content, keyOrPass = null) {
         if (!isLauncher()) return;
-        return await Client().EncryptData(content, keyOrPass);
+        if(!keyOrPass){
+            keyOrPass = await this.getPublicKey();
+        }
+        return this.CreateEnvelopeStructure(await Client().EncryptData(content, keyOrPass));
     }
 
-    static async DecryptEnvelope(envelopeOrCipher, keyOrPass = null) {
-        if (!isLauncher()) return;
-
-        const e =
-            typeof envelopeOrCipher === "string" && envelopeOrCipher.includes("|")
-                ? await this.GetEnvelopeStructure(envelopeOrCipher)
-                : envelopeOrCipher;
-
-        // no data or corrupt data
-        if(!e?.method){
-            console.error("Cant decrypt envelope because of missing data");
-            return;
-        }
-
-        if (e.method === "password") {
-            return await Client().DecryptDataPassword(
-                e.method,
-                e.salt ?? "",
-                e.iv ?? "",
-                e.tag ?? "",
-                e.cipher ?? e.ciphertext ?? "",
-                keyOrPass ?? ""
-            );
-        }
-
-        return await Client().DecryptData(
-            e.method,
-            e.encKey ?? "",
-            e.iv ?? "",
-            e.tag ?? "",
-            e.cipher ?? e.ciphertext ?? ""
-        );
-    }
 }

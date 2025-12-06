@@ -1,9 +1,9 @@
 function Client() {
-    return isLauncher() ? TauriProxy : null;
+    return window?.dcts
 }
 
 function isLauncher() {
-    return !!window?.__TAURI__?.core;
+    return !!Client()
 }
 
 

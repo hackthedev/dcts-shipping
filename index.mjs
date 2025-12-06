@@ -163,9 +163,6 @@ if (fs.existsSync("./configs/sql.txt")) {
     saveConfig(serverconfig);
 }
 
-
-// no sql, no server. tried sqlite but pain
-
 // create sql pool
 pool = mysql.createPool({
     host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
@@ -214,7 +211,6 @@ Logger.space()
 
 // backup members from config file
 await checkMemberMigration();
-
 
 // Import functions etc from files (= better organisation)
 // Special thanks to Kannustin <3
@@ -633,13 +629,13 @@ const tables = [
             {name: "id", type: "varchar(100) NOT NULL UNIQUE"},
             {name: "token", type: "varchar(255) NOT NULL"},
             {name: "onboarding", type: "BOOLEAN DEFAULT FALSE"},
-            {name: "loginName", type: "varchar(100) NOT NULL"},
+            {name: "loginName", type: "varchar(100)"},
             {name: "name", type: "varchar(100) NOT NULL"},
             {name: "nickname", type: "varchar(100) DEFAULT NULL"},
             {name: "status", type: "text DEFAULT ''"},
             {name: "aboutme", type: "text DEFAULT ''"},
-            {name: "icon", type: "text DEFAULT ''"},
-            {name: "banner", type: "text DEFAULT ''"},
+            {name: "icon", type: "longtext DEFAULT ''"},
+            {name: "banner", type: "longtext DEFAULT ''"},
             {name: "joined", type: "bigint NOT NULL"},
             {name: "isOnline", type: "BOOLEAN DEFAULT FALSE"},
             {name: "lastOnline", type: "bigint DEFAULT 0"},
@@ -1078,7 +1074,7 @@ export async function saveConfig(config) {
         if (config.servermembers && Object.keys(config.servermembers).length > 0) {
             for (const [id, member] of Object.entries(config.servermembers)) {
                 if (member && member.id) {
-                    if (serverconfig.serverinfo.sql.enabled == true) await saveMemberToDB(id, member);
+                    await saveMemberToDB(id, member);
                 }
             }
         }
@@ -1099,6 +1095,8 @@ export async function saveConfig(config) {
 function closeConfigFile() {
     if (isClosing) return;
     isClosing = true;
+
+
 
     if (fileHandle) {
         try {

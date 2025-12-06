@@ -66,6 +66,10 @@ a.channelTrigger.markChannelMessage{
     font-style: italic;
 }
 
+#channeltree ul li a{
+    font-style: normal;
+}
+
 .message-marker-icon{
     position: relative;
     display: none;

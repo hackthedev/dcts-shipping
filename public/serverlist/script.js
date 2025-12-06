@@ -88,6 +88,8 @@ async function submitServer(host){
                 type: "success",
                 duration: 4000
             });
+
+            getSavedServers();
         }
         else{
             showSystemMessage({

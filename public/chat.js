@@ -1238,8 +1238,9 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message, bypas
     };
 
     // if we're using the client, sign the message
-    if (await isLauncher()) {
-        msgPayload = JSON.parse(await Client().SignJson(JSON.stringify(msgPayload)));
+    if (await Client()) {
+        msgPayload = await Client().SignJson(msgPayload);
+        console.log(msgPayload);
     }
 
     socket.emit("messageSend", msgPayload, async function (response) {

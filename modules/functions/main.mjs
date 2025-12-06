@@ -1041,10 +1041,19 @@ export function checkMemberMute(socket, member) {
     return {result: false};
 }
 
+export function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function checkMemberBan(socket, member) {
     await reloadConfig();
     serverconfigEditable = checkEmptyConfigVar(serverconfig);
     let ip = getSocketIp(socket);
+
+    // ignore localhost ips
+    if(ip.includes("::1") || ip.includes("127.0.0.1")){
+        return {result: false, timestamp: null};
+    }
 
     if (serverconfigEditable.banlist.hasOwnProperty(member.id)) {
         console.log("Checking banlist for member ID:", member.id);
@@ -1089,7 +1098,7 @@ export async function checkMemberBan(socket, member) {
         return {result: true, timestamp: null};
     }
 
-    return {result: false};
+    return {result: false, timestamp: null};
 }
 
 export async function hashPassword(password) {

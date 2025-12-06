@@ -1,6 +1,22 @@
 document.addEventListener("DOMContentLoaded", async event => {
     voip.onJoin = (username) => {
         console.log(`${username} joined`);
+
+        setTimeout(() => {
+            if(username === UserManager.getID()){
+                setProfileQaIndicatorStatusText({
+                    text: `You're talking in`,
+                    channel: document.querySelector('#channelname').innerText
+                })
+            }
+        }, 1500)
+
+        socket.emit("notifyVcMemberJoined", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            channelId: UserManager.getChannel(),
+            memberId: username
+        });
     };
 
     voip.onLeave = (participantId) => {
@@ -8,9 +24,11 @@ document.addEventListener("DOMContentLoaded", async event => {
 
         let streamContainer = getStreamContainer();
         let elements = streamContainer?.parentNode?.querySelectorAll(`[data-member-id="${participantId}"]`)
-        elements.forEach(element => {
+        elements?.forEach(element => {
             element?.remove();
         })
+
+        emitVcMemberLeft(participantId);
     };
 
     voip.onTrackSubscribed = (track, participantId, isScreen) => {
@@ -104,29 +122,48 @@ document.addEventListener("DOMContentLoaded", async event => {
         const container = streamsContainer.querySelector(`video[data-member-id="${participantId}"]`);
         container?.remove();
     };
+
+    socket.on('vcMemberJoined', async function (response) {
+        let intMemberId = Number(response?.memberId);
+        let intChannelId = Number(response?.channelId);
+        addVcMemberToChannel(intChannelId, intMemberId)
+    });
+
+    socket.on('vcMemberLeft', async function (response) {
+        let intMemberId = Number(response?.memberId);
+        let intChannelId = Number(response?.channelId);
+
+        console.log(intChannelId)
+        console.log(intMemberId)
+        removeVcMemberFromChannel(intChannelId, intMemberId)
+    });
 });
 
 let talking = new Map();
 function highlightUser(participantId) {
-    let userElement = document.querySelectorAll(`.vc-container .participant[data-member-id="${participantId}"] img`);
+    let userElements = document.querySelectorAll(`.vc-container .participant[data-member-id="${participantId}"] img`);
+    userElements = [document.querySelector("#profile-qa-img"), ...userElements];
+
     let borderCode = "3px solid red";
 
-    if(userElement){
-        userElement.forEach(element => {
-            if(element.style.border !== borderCode) element.style.border = borderCode;
-            if(element.style.border === borderCode){
-                clearTimeout(talking.get(participantId))
-                talking.delete(participantId);
-            }
+    userElements.forEach((element) => {
+        if (!element) return;
+        let key = participantId + "_" + element.dataset?.memberId || Math.random();
+        if (talking.has(key)) {
+            clearTimeout(talking.get(key));
+            talking.delete(key);
+        }
 
-            let timeout = setTimeout(() => {
-                element.style.border = "3px solid transparent";
-            }, 1000)
+        element.style.border = borderCode;
+        let timeout = setTimeout(() => {
+            element.style.border = "3px solid transparent";
+            talking.delete(key);
+        }, 1000);
 
-            if(!talking.has(participantId)) talking.set(participantId, timeout);
-        })
-    }
+        talking.set(key, timeout);
+    });
 }
+
 
 function getStreamContainer() {
     return document.querySelector(".vc-row.screenshares")
@@ -135,7 +172,7 @@ function getStreamContainer() {
 async function addVcMember(memberId) {
     let contentContainer = document.getElementById("content");
 
-    let member = await resolveMember(memberId);
+    let member = await ChatManager.resolveMember(memberId);
     if (!member) {
         console.error("Couldnt resovle member in vc handler");
         return;
@@ -151,6 +188,99 @@ async function addVcMember(memberId) {
                     <p data-member-id="${memberId}">${member.name}</p>
                 </div>
             `);
+        }
+    }
+}
+
+function emitVcMemberLeft(memberId, channelId = null) {
+    socket.emit("notifyVcMemberLeft", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        channelId: channelId ? channelId : UserManager.getChannel(),
+        memberId
+    });
+}
+
+function checkVcMemberChannel(intChannelId, intMemberId) {
+    intChannelId = Number(intChannelId);
+    intMemberId = String(intMemberId);
+
+    if(isNaN(intMemberId) || !intMemberId){
+        console.warn("Invalid member id or channel id when showing member in channel");
+        return { status: false };
+    }
+
+    let participantsContainer = document.querySelector(`#channellist li[data-channel-id="${intChannelId}"] .participants`);
+    if(!participantsContainer){
+        console.warn("Couldnt add or remove member to vc participants list as the container wasnt found");
+        return { status: false };
+    }
+
+    return {
+        element: participantsContainer,
+        status: true
+    }
+}
+
+let connectedVcChannel = 0;
+let isInVc = false;
+function leaveVC(){
+    voip.leaveRoom()
+    emitVcMemberLeft(UserManager.getID(), connectedVcChannel);
+    isInVc = false;
+    toggleProfileQaIndicator(false);
+    highlightUser(UserManager.getID());
+}
+
+async function removeVcMemberFromChannel(intChannelId, intMemberId){
+    let checkResult = checkVcMemberChannel(intChannelId, intMemberId);
+    if(checkResult.status === false){
+        return;
+    }
+
+    if(checkResult.element){
+        let oMember = await ChatManager.resolveMember(intMemberId);
+        if(!oMember){
+            console.warn("Coudlnt resolve member for vc participants list");
+            return
+        }
+
+        // only list the member if he isnt listed already
+        let memberIsListed = checkResult.element.querySelectorAll(`li[data-member-id='${oMember.id}']`).length > 0;
+        if(memberIsListed){
+            checkResult.element.querySelector(`li[data-member-id='${oMember.id}']`).remove();
+        }
+
+        if(checkResult.element.querySelectorAll("li").length === 0){
+            checkResult.element.style.display = "none";
+        }
+    }
+}
+
+
+async function addVcMemberToChannel(intChannelId, intMemberId){
+    let checkResult = checkVcMemberChannel(intChannelId, intMemberId);
+    if(checkResult.status === false){
+        return;
+    }
+
+    if( checkResult.element){
+        let oMember = await ChatManager.resolveMember(intMemberId);
+        if(!oMember){
+            console.warn("Coudlnt resolve member for vc participants list");
+            return
+        }
+
+        // only list the member if he isnt listed already
+        let memberIsListed =  checkResult.element.querySelectorAll(`li[data-member-id='${oMember.id}']`).length > 0;
+        if(!memberIsListed){
+            checkResult.element.insertAdjacentHTML("beforeend",
+                `<li class="participant" data-member-id="${oMember.id}"><img class="avatar" src="${oMember.icon.trim() ? oMember.icon : "/img/default_icon.png"}">${truncateText(oMember.name, 25)}</li>`
+            );
+        }
+
+        if( checkResult.element.querySelectorAll("li").length > 0){
+            checkResult.element.style.display = "flex";
         }
     }
 }
@@ -266,7 +396,19 @@ async function setupVC(roomId) {
     `;
 
     addVcMember(UserManager.getID());
-    voip.joinRoom(roomId, UserManager.getID());
+
+    if(!isInVc){
+        document.querySelector("#vcStatusChannelname").innerText = "";
+        setProfileQaIndicatorStatusText({
+            text: "Connecting to vc...",
+            color: "darkorange"
+        })
+
+        voip.joinRoom(roomId, UserManager.getID());
+        connectedVcChannel = roomId;
+        isInVc = true;
+        toggleProfileQaIndicator(true);
+    }
 
     channelIcons.insertAdjacentHTML("beforeend", `<div class="screenshare icon" onclick="toggleScreenshare()"></div><div onclick="toggleMic();" class="muteMic icon"></div>`);
 
@@ -276,15 +418,27 @@ async function setupVC(roomId) {
     }, 10)
 }
 
-async function resolveMember(memberId) {
-    return new Promise((resolve, reject) => {
-        socket.emit("resolveMember", {
-            id: UserManager.getID(),
-            token: UserManager.getToken(),
-            target: memberId
-        }, function (response) {
-            console.log(response);
-            resolve(response?.data);
-        })
-    })
+function setProfileQaIndicatorStatusText({text, channel = "", color = "#02985f"} = {}){
+    let profileQaIndicatorStatusText = document.querySelector("#profile-qa .row.voip #vcStatusText")
+    let profileQaIndicatorChallenText = document.querySelector("#profile-qa .row.voip #vcStatusChannelname")
+
+    // set status trext
+    profileQaIndicatorStatusText.innerText = text;
+    profileQaIndicatorChallenText.innerText = channel ? channel : "";
+
+    // optionally do color
+    if(color){
+        let profileQaIndicator = document.querySelector("#profile-qa .row.voip")
+        if(profileQaIndicator) profileQaIndicator.style.backgroundColor = color;
+    }
+}
+
+function toggleProfileQaIndicator(showOrNah = false){
+    let profileQaIndicator = document.querySelector("#profile-qa .row.voip")
+    if(profileQaIndicator && showOrNah === true){
+        profileQaIndicator.classList.remove("invisible");
+    }
+    else{
+        profileQaIndicator.classList.add("invisible");
+    }
 }

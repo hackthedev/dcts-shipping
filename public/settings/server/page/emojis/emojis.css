@@ -44,15 +44,11 @@
 }
 
 .emoji-entry {
-    float: left;
-    display: block;
-    margin: 24px 0 0 0;
-    width: 100%;
-}
-
-.emoji-img {
-    float: left;
-    margin: 0px 4px 0px 0px;
+    display: flex;
+    position: relative;
+    width: fit-content;
+    cursor: pointer;
+    user-select: none;
 }
 
 .emoji-img img{
@@ -61,25 +57,29 @@
 }
 
 .emoji-actions {
-    margin: 0 0 0 15px;
-    float: left;
-    display: inline;
+    overflow: hidden;
+    position: absolute;
+    top: -8px;
+    left: 40px;
+    display: none;
 }
 
-.emoji-action-icon {
-    margin: 8px 0 0 0 ;
-    width: 35px;
-    height: 35px;
-    float: left;
+.emoji-entry:hover .emoji-actions {
+    display: flex;
 }
 
-.emoji-name input[type=text]{
+.emoji-actions img.emoji-action-icon {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    border: 1px solid gray;
+}
+
+.emoji-popup input[type=text]{
     margin: 15px 0 0 20px;
 
-    width: calc(20%);
-
-    float: left;
-    display: inline-block;
+    width: 200px;
     vertical-align: center;
 
     background-color: #292B2F;
@@ -93,5 +93,12 @@
 }
 
 #emoji-container {
-    margin-bottom: 64px !important;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: flex-start;
+;
+    width: 100%;
+    height: auto;
+    gap: 20px;
 }

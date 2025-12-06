@@ -104,7 +104,7 @@ class AdminActions {
     }
 
     static editChannel(channelId) {
-        window.location.href = "/settings/channel?id=" + channelId;
+        window.location.href = `/settings/channel?id=${channelId}`;
     }
 
     static createCategory() {

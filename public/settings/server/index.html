@@ -9,24 +9,30 @@
     <meta name="description" content="{{meta.page.description}}" />
 
     <script
-            src="../../js/core/socket.io.js"
+            src="/js/core/socket.io.js"
     ></script>
 
-    <link rel="stylesheet" href="../../css/themes/default.css">
+    <link rel="stylesheet" href="/css/themes/default/default.css">
 
+
+    <script defer src="/js/prompts.js"></script>
+    <script defer src="/js/sysmsg.js"></script>
     <script defer src="../utility.js"></script>
-    <script defer src="../../js/core/PermUI.js"></script>
-    <script defer src="../../js/core/UserManager.js"></script>
-    <script defer src="../../js/core/CookieManager.js"></script>
-    <script defer src="../../js/core/PoW.js"></script>
-    <script defer src="../../js/prompts.js"></script>
-    <script defer src="../../js/hover.js"></script>
+    <script type="module" src="/js/core/Emoji.js"></script>
+    <script defer src="/js/core/ChatManager.js"></script>
+    <script defer src="/js/core/PermUI.js"></script>
+    <script defer src="/js/core/UserManager.js"></script>
+    <script defer src="/js/core/CookieManager.js"></script>
+    <script defer src="/js/core/PoW.js"></script>
+    <script defer src="/js/hover.js"></script>
+    <script defer src="/js/escape.js"></script>
+    <script defer src="/js/core/purify.js"></script>
 
-    <script defer src="../../notify.js"></script>
-    <script defer src="settings.js"></script>
+    <script defer src="/notify.js"></script>
+    <script type="module" src="settings.js"></script>
 
 
-    <script src="../../js/core/sortable.js"></script>
+    <script src="/js/core/sortable.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
@@ -47,6 +53,10 @@
 
         float: left;
         overflow-y: auto;
+    }
+
+    #navigation a {
+        font-style: normal;
     }
 
     #nav_settings {
@@ -143,8 +153,8 @@
 
             <div id="general">
                 <h2>General Settings</h2>
-                <a href='?page=server-info' id="manageServerInfo">Server Info</a><br id="manageServerInfo-br">
-                <a href='?page=rate-limit' id="manageRateSettings">Rate Limit</a><br id="manageRateSettings-br">
+                <a href='?page=server-info' id="manageServerInfo" data-permission="administrator">Server Info</a><br id="manageServerInfo-br">
+                <a href='?page=rate-limit' id="manageRateSettings" data-permission="administrator">Rate Limit</a><br id="manageRateSettings-br">
                 <hr id="general-hr">
             </div>
 
@@ -152,22 +162,23 @@
                 <h2>Moderation & Safety</h2>
                 <!-- soon tm <a href='?page=server-info' id="manageServerInfo">Automod</a><br id="manageServerInfo-br">-->
 
-                <a href='?page=invites' id="manageInvites">Invites</a><br id="manageInvites-br">
-                <a href='?page=auditlog' id="viewAuditLog">Audit Log</a><br id="viewAuditLog-br">
+                <a href='?page=invites' id="manageInvites" data-permission="manageInvites">Invites</a><br id="manageInvites-br">
+                <a href='?page=auditlog' id="viewAuditLog" data-permission="viewAuditLog">Audit Log</a><br id="viewAuditLog-br">
+                <a href='?page=network-servers' id="manageNetworkServers" data-permission="manageNetworkServers">Network Servers</a><br id="manageNetworkServers-br">
                 <hr id="moderation-hr">
             </div>
 
             <div id="users">
                 <h2>User Management</h2>
-                <a href='?page=roles' id="manageRoles">Server Roles</a><br id="manageRoles-br">
-                <a href='?page=banlist' id="manageBans">Banned Members</a><br id="manageBans-br">
+                <a href='?page=roles' id="manageRoles" data-permission="manageRoles">Server Roles</a><br id="manageRoles-br">
+                <a href='?page=banlist' id="manageBans" data-permission="manageBans">Banned Members</a><br id="manageBans-br">
                 <hr id="users-hr">
             </div>
 
             <div id="media">
                 <h2>Media Settings</h2>
-                <a href='?page=emojis' id="manageEmojis">Emojis</a><br id="manageEmojis-br">
-                <a href='?page=file-uploads' id="manageUploads">File Uploads</a><br id="manageUploads-br">
+                <a href='?page=emojis' id="manageEmojis" data-permission="manageEmojis">Emojis</a><br id="manageEmojis-br">
+                <a href='?page=file-uploads' id="manageUploads" data-permission="manageUploads">File Uploads</a><br id="manageUploads-br">
                 <hr id="media-hr">
             <div>
 

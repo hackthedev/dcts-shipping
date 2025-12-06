@@ -3,35 +3,6 @@
  */
 import {serverconfig, fetch, fs} from "../../../index.mjs"
 
-export function convertMention(text) {
-    var pingedUsers;
-    var userId;
-    try {
-        text = text.toString();
-        
-        // Extracting the mention part
-        pingedUsers = text.match(/&lt;@(\d+)&gt;/);
-
-        if (pingedUsers == null) {
-            return text;
-        }
-
-        for (let i = 1; i < pingedUsers.length; i++) {
-            try {
-                userId = pingedUsers[i];
-
-                text = text.replace(`&lt;@${userId}&gt;`, `<label class="mention" data-member-id="${serverconfig.servermembers[userId].id}" id="mention-${serverconfig.servermembers[userId].id}">@${serverconfig.servermembers[userId].name}</label>`);
-            } catch (lolz) {
-                // Handle error if necessary
-                console.log(lolz);
-            }
-        }
-        return text;
-    } catch (exe) {
-        console.log(exe);
-    }
-}
-
 export function findEmojiByID(id){
     // Get all local emojis
 

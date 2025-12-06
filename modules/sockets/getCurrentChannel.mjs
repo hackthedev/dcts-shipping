@@ -6,10 +6,10 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('getCurrentChannel', function (member) {
-        if (validateMemberId(member.id, socket) == true) {
+        if (validateMemberId(member.id, socket, member.token) === true) {
 
             try {
-                if (hasPermission(member.id, "viewChannel", member.channel) == true) {
+                if (hasPermission(member.id, "viewChannel", member.channel) === true) {
                     io.to(usersocket[member.id]).emit("receiveCurrentChannel", serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel]);
                 }
             }

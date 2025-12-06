@@ -35,16 +35,6 @@ export async function sendSystemMessage(targetUserId, text, opts = {}) {
         return false;
     }
 
-    // ensure system member exists in serverconfig for nice UI rendering
-    if (!serverconfig.servermembers[systemId]) {
-        serverconfig.servermembers[systemId] = {
-            id: systemId,
-            name: displayName,
-            avatar: null,
-            token: "" // no token needed for system
-        };
-    }
-
     // try find existing 1:1 DM between systemId and targetUserId
     const [existing] = await queryDatabase(
         `SELECT t.threadId
@@ -76,7 +66,7 @@ export async function sendSystemMessage(targetUserId, text, opts = {}) {
 
     // create message
     const messageId = rid("m");
-    const now = nowISO();
+    const now = new Date();
     const encoded = encodeToBase64(String(JSON.stringify(text) || ""));
 
     await queryDatabase(
@@ -280,7 +270,7 @@ export default (io) => (socket) => {
     });
 
     socket.on("fetchMessages", async function (data, response) {
-        if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
+        if (validateMemberId(socket.data.memberId, socket, serverconfig.servermembers[data.id].token) === true) {
             try {
                 const me = socket.data.memberId;
                 const threadId = data?.threadId;
@@ -327,10 +317,11 @@ export default (io) => (socket) => {
 
     socket.on("joinServer", async function (_member, response) {
         try {
-            if (!validateMemberId(_member?.id, socket)) {
-                response?.({ type: "error", msg: "invalid member" });
+            if (!validateMemberId(_member?.id, socket, serverconfig.servermembers[_member.id].token) === true) {
+                response?.({ type: "error", msg: "invalid member in join server home" });
                 return;
             }
+
             if (serverconfig.servermembers[_member.id].token !== _member.token) {
                 response?.({ type: "error", msg: "invalid token" });
                 return;
@@ -390,7 +381,6 @@ export default (io) => (socket) => {
                 })
             );
 
-            // WICHTIG: eigene Nachrichten ausschließen (d.authorId != ?)
             const unreadRows = threadIds.length ? await queryDatabase(
                 `
             SELECT d.threadId, COUNT(*) AS unread
@@ -450,7 +440,7 @@ export default (io) => (socket) => {
 
 
     socket.on("createThread", async function (data, response) {
-        if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
+        if (validateMemberId(socket.data.memberId, socket, serverconfig.servermembers[data.id].token) === true) {
             try {
                 const me = socket.data.memberId;
                 if (!me) return response?.({ type: "error", msg: "unauthorized" });
@@ -472,9 +462,8 @@ export default (io) => (socket) => {
                     );
                 }
 
-                // Ticket-Status anlegen
                 if (type === 'ticket') {
-                    const now = nowISO();
+                    const now = new Date();
                     await queryDatabase(
                         `INSERT INTO tickets (threadId, creatorId, status, createdAt, updatedAt)
                         VALUES (?, ?, 'open', ?, ?)
@@ -546,7 +535,7 @@ export default (io) => (socket) => {
 
             const me = socket.data.memberId;
             const messageId = "m_" + Date.now();
-            const now = nowISO();
+            const now = new Date();
 
             data.text.content = sanitizeInput(data.text.content);
             data.text.sender = sanitizeInput(data.text.sender);
@@ -600,7 +589,6 @@ export default (io) => (socket) => {
                 displayName
             };
 
-            console.log(message);
 
             await emitToThread(data.threadId, "receiveMessage", { threadId: data.threadId, message });
 
@@ -669,7 +657,7 @@ export default (io) => (socket) => {
                 const reportData = {
                     id: String(msg.authorId),
                     name: reportedObj?.name ?? String(msg.authorId),
-                    icon: reportedObj?.icon ?? reportedObj?.avatar ?? null,
+                    icon: reportedObj?.icon ?? "/img/default_pfp.png",
                     message: msg.message,
                     plainText: sanitizeInput(plainText),
                     group: "0",
@@ -1024,7 +1012,7 @@ export default (io) => (socket) => {
                     return response?.({ type: "error", msg: "forbidden" });
                 }
 
-                const type = (data.type || "").toLowerCase(); // 'posts'|'news'|'help'
+                const type = (data.type || "").toLowerCase(); // posts, news, help
                 const contentId = Number(data.contentId) || 0;
                 if (!contentId || !type) return response?.({ type: "error", msg: "invalid parameters" });
 

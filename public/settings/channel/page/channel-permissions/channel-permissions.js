@@ -1,9 +1,13 @@
+window.loadRolePerms = loadRolePerms;
+window.savePermissions = savePermissions;
+
 var serverconfigName;
 var editChannel = {};
 
 var serverRoleResponse = {};
 var currentChannelId = "";
 var currentRoleId = "";
+let permListPage = null;
 
 currentChannelId = getUrlParams("id");
 
@@ -209,6 +213,10 @@ function loadRolePerms(roleId) {
 
     // Uncheck everything before checking the permissions for the specific role
     permListPage = document.querySelectorAll(`#permissionlist p input`);
+    if(!permListPage){
+        console.error("No perms element found")
+        return;
+    }
     permListPage.forEach(perm => {
         perm.checked = false;
     })

@@ -49,10 +49,10 @@ class ContextMenu {
                         clickedElement.style.cursor = "pointer";
 
                         if(clickEventCondition && clickEventCallback){
-                            if(await clickEventCondition({element: clickedElement, X: mouseX, Y: mouseY}) === true) clickEventCallback({element: clickedElement, X: mouseX, Y: mouseY});
+                            if(await clickEventCondition({element: clickedElement, X: mouseX, Y: mouseY}) === true) clickEventCallback({element: clickedElement, X: mouseX, Y: mouseY, event});
                         }
                         else{
-                            if(clickEventCallback) await clickEventCallback({element: clickedElement, X: mouseX, Y: mouseY});
+                            if(clickEventCallback) await clickEventCallback({element: clickedElement, X: mouseX, Y: mouseY, event});
                         }
                     }
                 })

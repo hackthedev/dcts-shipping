@@ -190,19 +190,25 @@ function hackerGlitch(targetElement = document.body, opts = {}) {
         const srcImgs = src.querySelectorAll("img");
         const dstImgs = dst.querySelectorAll("img");
         const n = Math.min(srcImgs.length, dstImgs.length);
+
         for (let i = 0; i < n; i++) {
             const s = srcImgs[i];
             const d = dstImgs[i];
+
+            if (!s.src || s.src.startsWith("data:")) continue;
+
             try {
-                if (s.src && !s.src.startsWith("data:")) {
-                    const resp = await fetch(s.src, { cache: "force-cache" });
-                    const blob = await resp.blob();
-                    const reader = new FileReader();
-                    const done = new Promise(res => { reader.onload = () => res(reader.result); });
-                    reader.readAsDataURL(blob);
-                    d.src = await done;
-                }
-            } catch { }
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+
+                canvas.width = s.naturalWidth || s.width;
+                canvas.height = s.naturalHeight || s.height;
+                ctx.drawImage(s, 0, 0);
+
+                d.src = canvas.toDataURL("image/png");
+            } catch (err) {
+                console.warn("Canvas snapshot failed for", s.src, err);
+            }
         }
     }
 

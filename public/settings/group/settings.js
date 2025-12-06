@@ -17,10 +17,6 @@ doInit(() => {
     loadPageContent(page)
 });
 
-
-var page = getUrlParams("page") || "group-info";
-loadPageContent(page)
-
 function setUrl(param) {
     window.history.replaceState(null, null, param); // or pushState
 }

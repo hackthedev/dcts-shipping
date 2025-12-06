@@ -19,7 +19,7 @@ export default (io) => (socket) => {
                 return;
             }
 
-            response( { error: null, publicKey: serverconfig.servermembers[member.target].publicKey } )
+            response( { error: null, publicKey: serverconfig.servermembers[member.target]?.publicKey } )
         }
     });
 }

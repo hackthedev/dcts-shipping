@@ -1,43 +1,76 @@
 console.log("%c" + "WAIT!", "color: #FF0000; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold;");
 console.log("%c" + "People can use the console to steal your account xo !", "color: #FF0000; -webkit-text-stroke: 0px black; font-size: 20px; font-weight: bold;");
 
-if (!String.prototype.replaceAll) {
-    String.prototype.replaceAll = function (search, replacement) {
-        // Escape special characters in the search string if it's not a regex
-        const escapedSearch = search.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-        const regex = new RegExp(escapedSearch, 'g'); // Create a global regex
-        return this.replace(regex, replacement);
-    };
+ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
+
+const splash = new SplashScreen(document.body);
+splash.show();
+
+if(!window.isSecureContext){
+    splash.hide();
+
+    function showSecureContextError(duration){
+        showSystemMessage({
+            title: "Missing Secure Context",
+            text: "The browser thinks the connection isnt secure! Please fix this issue by using a TLS certificate!",
+            icon: "error",
+            img: null,
+            type: "error",
+            duration,
+            onClick: () => {
+                closeSystemMessage();
+            }
+        });
+    }
+
+    let interval = 2000;
+    showSecureContextError(interval / 2)
+    setInterval(() => {
+        showSecureContextError(interval / 2)
+    }, interval)
+
+    throw new Error("Missing Browser Secure Context!");
 }
+
 
 // IMPORTANT! By default, socket.io() connects to the host that
 // served the page, so we dont have to pass the server url
 var socket = io.connect()
 
+socket.on("connect", async () => {
+    console.log("socket connected");
+
+    // join first
+    await userJoined(null, null, null, null, true);
+
+    // sick af in my opinion
+    await initPow()
+});
+
+socket.on("updatedEmojis", function (){
+    fetchEmojis();
+})
+
 // very important
 ensureDomPurify()
 
-// join first
-userJoined();
 
-// sick af in my opinion
-initPow()
 
 voip = new VoIP( `${window.location.origin.includes("https") ? "wss" : "ws"}://{{livekit.url}}/`);
 
 ContextMenu.registerContextMenu(
-    "serverbanner",
+    "serverbanner", // random ass unique name
     [
-        "#serverbanner-image"
+        "#serverbanner-image" // id or classname. if class start with .
     ],
-    [
+    [ // ur context items
         {
             icon: "&#9998;",
             text: "Change banner",
-            callback: async () => {
+            callback: async () => { // what happens on click
                 AdminActions.changeGroupBanner()
             },
-            condition: async () => {
+            condition: async () => { // condition. can be completely removed
                 return await (await checkPermission("manageGroups")).permission === "granted"
             },
             type: "ok"
@@ -72,10 +105,15 @@ ContextMenu.registerClickEvent(
         ".memberlist-container .status",
         ".memberlist-img",
         ".mention",
-        ".vc-admin-actions",
-        ".vc-admin-actions .avatar",
+        // vc container
+        ".vc-container .participant",
+        ".vc-container .participant img",
+        //
         ".message-container .icon",
         ".message-container .username",
+        // channel list vc user
+        "#channeltree .category .participants .participant",
+        "#channeltree .category .participants .participant .avatar",
     ],
     async (data) => {
         let memberId = data.element.getAttribute("data-member-id");
@@ -121,9 +159,15 @@ ContextMenu.registerContextMenu(
         ".memberlist-container .status",
         ".memberlist-img",
         ".mention",
-        ".vc-admin-actions",
-        ".vc-admin-actions .avatar",
+        // vc container
+        ".vc-container .participant",
+        ".vc-container .participant img",
         ".user-container .user-icon",
+        ".message-container .icon",
+        ".message-container .username",
+        // vc user from channels
+        "#channeltree .category .participants .participant",
+        "#channeltree .category .participants .participant .avatar",
     ],
     [
         {
@@ -177,6 +221,46 @@ ContextMenu.registerContextMenu(
             condition: async (data) => {
                 let memberId = data.element.getAttribute("data-member-id");
                 return (await (await checkPermission("kickUsers")).permission === "granted") && (memberId !== UserManager.getID())
+            },
+            type: "error"
+        },
+        {
+            icon: "&#9873;",
+            text: "Mute Member",
+            callback: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                if (!memberId) {
+                    console.warn("Couldnt mute member because memberid wasnt found");
+                    return;
+                }
+
+                ModActions.muteUser(memberId)
+            },
+            condition: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                return (await (await checkPermission("muteUsers")).permission === "granted") &&
+                    (memberId !== UserManager.getID()) &&
+                    data.element.querySelectorAll(".mutedMember").length === 0
+            },
+            type: "error"
+        },
+        {
+            icon: "&#9873;",
+            text: "Unmute Member",
+            callback: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                if (!memberId) {
+                    console.warn("Couldnt mute member because memberid wasnt found");
+                    return;
+                }
+
+                ModActions.unmuteUser(memberId)
+            },
+            condition: async (data) => {
+                let memberId = data.element.getAttribute("data-member-id");
+                return (await (await checkPermission("muteUsers")).permission === "granted") &&
+                    (memberId !== UserManager.getID()) &&
+                    data.element.querySelectorAll(".mutedMember").length !== 0
             },
             type: "error"
         },
@@ -270,6 +354,7 @@ socket.on('verifyPublicKey', () => {
     Crypto.dSyncTest();
 });
 
+
 var chatlog = document.getElementById("content");
 var channeltree = document.getElementById("channeltree");
 var serverlist = document.getElementById("serverlist");
@@ -284,7 +369,7 @@ const tooltipSystem = new TooltipSystem();
 const customAlerts = new CustomAlert();
 
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     chatlog = document.getElementById("content");
     channeltree = document.getElementById("channeltree");
     serverlist = document.getElementById("serverlist");
@@ -302,61 +387,61 @@ var blockedDataCounter = [];
 var bypassElement = [];
 var bypassCounter = [];
 
-// If markdown didnt get converted, this will
+function isElementVisible(element){
+    const rect = element.getBoundingClientRect();
+    return rect.top < window.innerHeight &&
+        rect.bottom > 0 &&
+        rect.left < window.innerWidth &&
+        rect.right > 0;
+}
+
 async function updateMarkdownLinks(delay) {
-    // await ...
-    var elements = document.querySelectorAll(".contentRows .content p");
+    const elements = document.querySelectorAll(".contentRows .content p");
+    const max = Math.min(elements.length, 50);
+    const isScrolledDown = isScrolledToBottom(document.getElementById("content"));
 
-    var lengthi = 0;
-    if (elements.length <= 50) {
-        lengthi = elements.length;
-    } else {
-        lengthi = 50;
-    }
+    let markdownChanged = false;
 
-    for (var i = elements.length; i > (elements.length - lengthi); i--) {
+    for (let i = elements.length - 1; i >= elements.length - max; i--) {
+        const el = elements[i];
+        if (!el || el.className.includes("hljs")) continue;
+        if (el.parentNode.querySelector(".video-embed")) continue;
 
-        if (elements[i] != null) {
-            if (elements[i].className.includes("hljs")) {
-                return;
-            }
+        try {
+            if (el.innerText.trim().length === 0) continue;
 
-            let videoEmbeds = elements[i].parentNode.querySelectorAll(".video-embed");
-            if (videoEmbeds.length > 0) return;
+            // skip if the element isnt visible. some way
+            // to avoid the chat log from jumping all the time
+            if (!isElementVisible(el)) continue;
 
-            try {
-                if (elements[i] != null && elements[i].innerText.length > 0) {
-                    // returns isMarked and message
-                    var marked = await markdown(elements[i].innerText, (elements[i]?.getAttribute("data-message-id") || elements[i]?.parentNode?.getAttribute("data-message-id")) );
+            const messageId = el.getAttribute("data-message-id") || el.parentNode?.getAttribute("data-message-id");
+            const marked = await markdown(el.innerText, messageId);
 
-                    // if the return message isnt null
-                    if (marked.message != null && // and is not markdown and text doesnt equal or it is in fact markdown and not equal to the innerhtml
-                        ((!marked.isMarkdown && marked.message !== elements[i].innerText) || (marked.isMarkdown && marked.message !== elements[i].innerHTML))) {
+            if (marked.message != null &&
+                ((!marked.isMarkdown && marked.message !== el.innerText) ||
+                    (marked.isMarkdown && marked.message !== el.innerHTML))) {
 
-                        if (bypassCounter[elements[i].id] == null) {
-                            bypassCounter[elements[i].id] = 0;
-                        } else {
-                            if (bypassCounter[elements[i].id] >= 1) {
-                                bypassElement[elements[i].id] = 1;
-                            }
-                            bypassCounter[elements[i].id]++;
-                        }
+                bypassCounter[el.id] = (bypassCounter[el.id] || 0) + 1;
+                if (!bypassElement[el.id]) {
 
-                        if (bypassElement[elements[i].id] == null) {
-                            elements[i].innerHTML = marked.isMarkdown ? sanitizeHtmlForRender(marked.message) : elements[i].innerText;
-                            setTimeout(() => scrollDown(), 10)
-                        }
-                    }
+                    el.innerHTML = marked.isMarkdown
+                        ? sanitizeHtmlForRender(marked.message)
+                        : el.innerText;
+                    markdownChanged = true;
                 }
-            } catch (err) {
-                console.log(err)
             }
+        } catch (err) {
+            console.log(err);
         }
     }
 
+    if (markdownChanged && isScrolledDown) {
+        //scrollDown("updateMarkdown");
+    }
 
-    setTimeout(() => updateMarkdownLinks(delay), delay)
+    setTimeout(() => updateMarkdownLinks(delay), delay);
 }
+
 
 updateMarkdownLinks(2000)// If markdown didnt get converted, this will
 
@@ -375,13 +460,12 @@ function escapeHtml(text) {
     });
 }
 
-
 async function checkMediaTypeAsync(url) {
-
     return new Promise((resolve, reject) => {
 
         if (!isURL(url)) {
             resolve("unkown");
+            return;
         }
 
         socket.emit("checkMediaUrlCache", {
@@ -390,13 +474,13 @@ async function checkMediaTypeAsync(url) {
             url: url
         }, function (response) {
 
-            if (response.isCached == true) {
+            if (response.isCached === true) {
                 // return cached media type
                 resolve(response.mediaType);
             } else {
                 // url wasnt cached
                 let xhr = new XMLHttpRequest();
-                xhr.open('HEAD', url, false); // false makes the request synchronous
+                xhr.open('HEAD', `/proxy?url=${encodeURIComponent(url)}`, false); // false makes the request synchronous
                 try {
                     xhr.send();
                     if (xhr.status >= 200 && xhr.status < 300) {
@@ -417,7 +501,7 @@ async function checkMediaTypeAsync(url) {
                             throw new Error('Content-Type header is missing');
                         }
                     } else {
-                        if (xhr.status == 404) return;
+                        if (xhr.status === 404) return;
 
                         throw new Error(`HTTP error! status: ${xhr.status}`);
                     }
@@ -432,106 +516,33 @@ async function checkMediaTypeAsync(url) {
     });
 }
 
-const playedVideos = [];
-
-function handleVideoClick(videoElement) {
-    const videoId = videoElement.getAttribute("data-id");
-    let videoPlayers = document.querySelectorAll(".video-embed");
-
-    videoPlayers.forEach(player => {
-        console.log(player.paused)
-    })
-
-    videoPlayers.forEach(player => {
-        if (player !== videoElement) {
+function handleVideoClick(event, videoElement) {
+    event.preventDefault();
+    event.stopPropagation();
+    const shouldPlay = videoElement.paused;
+    document.querySelectorAll(".video-embed").forEach(player => {
+        if (player !== videoElement && !player.paused) {
             player.pause();
         }
-    })
+    });
 
-    videoElement.currentTime = 0;
-    if (videoElement.paused === true) {
-        videoElement.play();
+    if (shouldPlay) {
+        videoElement.play().catch(err => console.warn(err));
     } else {
         videoElement.pause();
     }
-
 }
 
-/* Debug Stuff  */
+
+/* Debug Stuff
+   Should be deprecated
+* */
 function encodeToBase64(jsonString) {
     return btoa(encodeURIComponent(jsonString));
 }
 
 function decodeFromBase64(base64String) {
     return decodeURIComponent(atob(base64String));
-}
-
-async function markdown(msg, msgid) {
-    if (msg == null) {
-        return {isMarkdown: false, message: msg};
-    }
-
-    if(!msgid){
-        console.warn("Cant check markdown because no msg id set")
-        return {isMarkdown: false, message: msg};
-    }
-
-
-    try {
-
-        // Check if if we even have a url
-        let mediaType;
-        if (isURL(msg)) {
-            mediaType = await checkMediaTypeAsync(msg);
-        } else {
-            // Markdown Text formatting
-            if (!isURL(msg) && mediaType != "video" && mediaType != "audio" && mediaType != "image" && msg.length != 0) {
-                return {isMarkdown: false, message: msg};
-            }
-        }
-
-        const msgUrls = getUrlFromText(msg);
-
-        for (const url of msgUrls) {
-            if (isURL(url)) {
-
-                if (mediaType === "audio") {
-                    msg = msg.replace(url, createAudioPlayerHTML(url)).replaceAll("\n", "");
-                    return {isMarkdown: true, message: msg}
-
-                } else if (mediaType === "image") {
-                    msg = msg.replace(url, `<div class="image-embed-container">
-                                                <img class="image-embed" data-message-id="${msgid.replace("msg-", "")}" id="msg-${msgid.replace("msg-", "")}" alt="${url}" src="${url}" onerror="this.src = '/img/error.png';" >
-                                            </div>`);
-                    return {isMarkdown: true, message: msg}
-
-                } else if (mediaType === "video") {
-                    msg = msg.replace(url, `
-                                            <p data-message-id="${msgid.replace("msg-", "")}" ><a data-message-id="${msgid.replace("msg-", "")}" href="${url}" target="_blank">${url}</a></p>
-                                            <video data-message-id="${msgid.replace("msg-", "")}" data-src="${url}" preload="auto" onclick="handleVideoClick(this)" style="background-color: black;" class="video-embed" controls>
-                                                <source data-message-id="${msgid.replace("msg-", "")}" src="${url}">
-                                            </video></div>`);
-                    return {isMarkdown: true, message: msg}
-
-                } else {
-                    if (url.toLowerCase().includes("youtube") || url.toLowerCase().includes("youtu.be")) {
-                        msg = msg.replace(url, createYouTubeEmbed(url, msgid));
-                        return {isMarkdown: true, message: msg}
-
-                    } else {
-                        msg = msg.replace(url, `<a data-message-id="${msgid.replace("msg-", "")}" href="${url}" target="_blank">${url}</a>`);
-                        return {isMarkdown: true, message: msg}
-                    }
-                }
-            }
-
-        }
-
-        return {isMarkdown: false, message: msg};
-    } catch (error) {
-        console.error('Error in markdown function:', error);
-        return {isMarkdown: false, message: msg};
-    }
 }
 
 // Check if client disconnected
@@ -541,7 +552,7 @@ let connectionAttempts = 0;
 let wasDisconnected = false;
 
 
-ChatManager.checkConnection(2000)
+ChatManager.checkConnection(1000)
 
 
 function limitString(text, limit) {
@@ -576,8 +587,13 @@ function stopRecording() {
 
 
 function mentionUser(id) {
-    messageInputBox.textContent += `<@${id}>`;
-    messageInputBox.focus();
+    const range = quill.getSelection(true);
+    if (range) {
+        quill.insertText(range.index, `<@${id}>`);
+        quill.setSelection(range.index + (`<@${id}>`).length);
+    }
+
+    focusEditor();
 }
 
 function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
@@ -657,7 +673,24 @@ function redeemKey() {
 }
 
 function openNewTab(url) {
-    window.open(url, '_blank');
+    if (url.startsWith("data:")) {
+        const blob = dataURLtoBlob(url);
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, "_blank");
+    } else {
+        window.open(url, "_blank");
+    }
+}
+
+function dataURLtoBlob(dataUrl) {
+    const [header, base64] = dataUrl.split(',');
+    const mime = header.match(/:(.*?);/)[1];
+    const binary = atob(base64);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        array[i] = binary.charCodeAt(i);
+    }
+    return new Blob([array], { type: mime });
 }
 
 function getMessageId(element) {
@@ -674,13 +707,13 @@ function getMessageId(element) {
 }
 
 
-async function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null) {
+async function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false) {
 
     if (UserManager.getUsername() != null) {
         var username = UserManager.getUsername();
 
         let knownServers = "";
-        if (isLauncher()) {
+        if (isLauncher() && initial) {
             await syncHostData()
             knownServers = await Client().GetServers();
         }
@@ -702,19 +735,13 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
         }, function (response) {
 
             // if we finished onboarding
-            if (!response.error && response.finishedOnboarding == true) {
+            if (!response.error && response.finishedOnboarding === true && initial) {
                 socket.emit("setRoom", {
                     id: UserManager.getID(),
                     room: UserManager.getRoom(),
                     token: UserManager.getToken()
                 });
-                socket.emit("getGroupBanner", {
-                    id: UserManager.getID(),
-                    token: UserManager.getToken(),
-                    username: UserManager.getUsername(),
-                    icon: UserManager.getPFP(),
-                    group: UserManager.getGroup()
-                });
+                getGroupBanner();
                 socket.emit("getGroupList", {
                     id: UserManager.getID(),
                     group: UserManager.getGroup(),
@@ -722,8 +749,7 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                     username: UserManager.getUsername(),
                     icon: UserManager.getPFP()
                 });
-                getMemberList()
-                getChannelTree()
+
                 socket.emit("getCurrentChannel", {
                     id: UserManager.getID(),
                     token: UserManager.getToken(),
@@ -739,16 +765,27 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                     token: UserManager.getToken()
                 });
 
-                getServerInfo();
-                getChatlog();
+                if(initial){
+                    getMemberList()
+                    getChannelTree()
+                    getServerInfo();
+                    getChatlog();
+                    showGroupStats();
 
-                showGroupStats();
+                    setTimeout(() => {
+                        splash.hide()
+                    }, 1000)
+
+                    /* Quill Emoji Autocomplete */
+                    initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
+                }
+
                 socket.emit("checkPermission", {
                     id: UserManager.getID(),
                     token: UserManager.getToken(),
                     permission: "manageReports"
                 }, function (response) {
-                    if (response.permission == "granted") {
+                    if (response.permission === "granted" && initial) {
                         ModView.init();
                         UserReports.getReports();
                     }
@@ -774,10 +811,12 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                                     This server is an invite-only server. <br>
                                     Please enter an invite code to join the server.
                                  </p>
+                                 <p>
+                                 Already have an account? <a href="#" onclick="UserManager.doAccountLogin()">Log in instead</a>
+                                </p>
                              </div>
                              
                              <div class="prompt-form-group">
-                                <label class="prompt-label" for="inviteCode">Invite Code</label>
                                 <input class="prompt-input" autocomplete="off" type="text" name="inviteCode" id="inviteCode" placeholder="Enter an invite code" value="">
                                 <label style="color: indianred;" class="prompt-label error-text"></label>
                              </div>
@@ -797,13 +836,16 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                     }
                 }
             }
-
         });
     }
 }
 
+let lastTypingEmitted = 0;
 function setTyping() {
-    socket.emit("isTyping", {id: UserManager.getID(), token: UserManager.getToken(), room: UserManager.getRoom()});
+    if(new Date().getTime() > lastTypingEmitted){
+        socket.emit("isTyping", {id: UserManager.getID(), token: UserManager.getToken(), room: UserManager.getRoom()});
+        lastTypingEmitted = new Date().getTime() + (2000)
+    }
 
     clearTimeout(typetimeout);
     typetimeout = setTimeout(() => {
@@ -812,7 +854,7 @@ function setTyping() {
             token: UserManager.getToken(),
             room: UserManager.getRoom()
         });
-    }, 2 * 1000);
+    }, 4 * 1000);
 }
 
 
@@ -826,42 +868,63 @@ function getUrlParams(param) {
 
 function getChannelTree() {
     ChannelTree.getTree();
+    getGroupBanner()
 }
 
-function getChatlog(index = -1) {
-    socket.emit("getChatlog", {
-        id: UserManager.getID(),
-        token: UserManager.getToken(),
-        groupId: UserManager.getGroup(),
-        categoryId: UserManager.getCategory(),
-        channelId: UserManager.getChannel(),
-        startIndex: index
-    }, (response) => {
-        if (response?.error == "denied") document.getElementById("content").innerHTML = ""; // fuck em
-    });
-}
 
-function createYouTubeEmbed(url, messageid) {
+function createYouTubeEmbed(url, messageId) {
+    let u = new URL(url.trim());
+    let host = u.hostname.replace("www.", "").toLowerCase();
 
-    var videocode = url.replace("https://www.youtube.com/watch?v=", "").replaceAll(" ", "");
-    if (url.toLowerCase().includes("youtube")) {
-        videocode = url.replace("https://www.youtube.com/watch?v=", "").replaceAll(" ", "");
-    } else if (url.toLowerCase().includes("youtu.be")) {
-        videocode = url.replace("https://youtu.be/", "").replaceAll(" ", "");
+    let code = "";
+    let t = "";
+
+    if (u.searchParams.has("t")) t = u.searchParams.get("t");
+    if (u.hash.startsWith("#t=")) t = u.hash.replace("#t=", "");
+    if (u.hash.startsWith("#")) t = u.hash.replace("#", "");
+
+    if (host === "youtube.com" || host === "m.youtube.com") {
+        // watch?v=...
+        if (u.searchParams.has("v")) {
+            code = u.searchParams.get("v");
+        }
+        // /embed/...
+        else if (u.pathname.startsWith("/embed/")) {
+            code = u.pathname.replace("/embed/", "");
+        }
+        // /shorts/...
+        else if (u.pathname.startsWith("/shorts/")) {
+            code = u.pathname.replace("/shorts/", "").split("?")[0];
+        }
+    } else if (host === "youtu.be") {
+        code = u.pathname.replace("/", "");
     }
 
-    var code = `<p data-message-id="${messageid.replace("msg-", "")}" id="msg-${messageid}"><div data-message-id="${messageid.replace("msg-", "")}" class="iframe-container" id="msg-${messageid}" ><iframe data-message-id="${messageid.replace("msg-", "")}" style="border: none;" width="560" height="315" src="https://www.youtube.com/embed/${videocode}" 
-                title="YouTube video player" frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div></p>`;
+    if (!code) {
+        console.warn("No youtube code found in url")
+        return;
+    }
 
-    /*
-    console.log("Resolving YouTube URL " + url);
-    console.log("Resolved: " + videocode);
-    console.log("Resolved URL: " + "https://www.youtube.com/embed/" + videocode);
+    let embed = "https://www.youtube.com/embed/" + code;
+    if (t) embed += "?start=" + parseInt(t);
 
-    */
-    return code;
+    return `
+        <div data-message-id="${messageId.replace("msg-", "")}" class="iframe-container" id="msg-${messageId}">
+            <a href="${url}" target="_blank">${url}</a><br>
+            <iframe
+                data-original-url="${url}"
+                data-message-id="${messageId.replace("msg-", "")}"
+                data-media-type="youtube"
+                style="border:none"
+                src="${embed}"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                referrerpolicy="strict-origin-when-cross-origin">
+            </iframe>
 
+        </div>
+    `;
 }
 
 
@@ -925,10 +988,8 @@ var isValidUrl = []
 
 function isURL(text) {
     try {
-
         const url = new URL(text);
-        return url.protocol === 'http:' || url.protocol === 'https:' || url.protocol == "data:";
-
+        return url.protocol === 'http:' || url.protocol === 'https:' || url.protocol === "data:";
 
     } catch (err) {
         return false;
@@ -964,33 +1025,184 @@ function sendMessage(messagebox) {
 
 }
 
-function switchLeftSideMenu(checkChannelLink = false) {
 
-    let leftSideMenuContainer = document.getElementById("mobile_GroupAndChannelContainer")
+let startX = 0;
+let startY = 0;
 
-    if (leftSideMenuContainer.style.display == "block") {
+function onSwipe(direction){
+    const left = getLeftPanel();
+    const right = getRightPanel();
 
-        if (UserManager.getCategory() != null && UserManager.getChannel() != null && checkChannelLink == true) leftSideMenuContainer.style.display = "none"; else if (checkChannelLink == false) leftSideMenuContainer.style.display = "none";
-    } else {
-        leftSideMenuContainer.style.display = "block";
+    if(direction === "right"){
+        if(isOpen(right)) return switchRightSideMenu(false);
+        return switchLeftSideMenu(true);
+    }
+
+    if(direction === "left"){
+        if(isOpen(left)) return switchLeftSideMenu(false);
+        return switchRightSideMenu(true);
     }
 }
 
 
-function switchRightSideMenu() {
+const contentLayout = document.getElementById("contentLayout");
 
-    let rightMenuContainer = document.getElementById("mobile_memberlist")
+contentLayout.addEventListener("touchstart", e => {
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+});
 
-    if (rightMenuContainer.style.display == "block") {
-        rightMenuContainer.style.display = "none";
-    } else {
-        rightMenuContainer.style.display = "block";
-        rightMenuContainer.style.transform = `translateX(-${rightMenuContainer.offsetWidth}px)`
+contentLayout.addEventListener("touchend", e => {
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        onSwipe(dx > 0 ? "right" : "left");
+    }
+});
+
+function isOpen(el) {
+    return el.style.display === "flex";
+}
+
+
+function toggleMobilePanel(element, override = null, isRight = false){
+    try{
+        if(override === false){
+            element.style.transition = "transform 500ms ease-in-out";
+            element.style.transform = isRight ? "translateX(100%)" : "translateX(-100%)";
+
+            setTimeout(() => {
+                element.style.display = "none";
+            }, 500);
+
+            return;
+        }
+
+        if(override === true){
+            element.style.display = "flex";
+            element.style.transition = "none";
+            element.style.transform = isRight ? "translateX(100%)" : "translateX(-100%)";
+
+            void element.offsetWidth;
+
+            element.style.transition = "transform 500ms ease-in-out";
+            element.style.transform = "translateX(0)";
+            return;
+        }
+
+        if(element.style.display === "flex"){
+            toggleMobilePanel(element, false, isRight);
+        } else {
+            toggleMobilePanel(element, true, isRight);
+        }
+    }
+    catch{
+
     }
 }
 
 
-async function sendMessageToServer(authorId, authorUsername, pfp, message) {
+
+function getLeftPanel(){
+    return document.querySelector("#mobile_GroupAndChannelContainer").closest(".mobilePanel");
+}
+
+function getRightPanel(){
+    return document.querySelector("#mobile_memberlist").closest(".mobilePanel");
+}
+
+function switchLeftSideMenu(force = null) {
+    const left = getLeftPanel();
+    const right = getRightPanel();
+
+    if(force === false){
+        toggleMobilePanel(left, false);
+        return;
+    }
+    if(force === true){
+        toggleMobilePanel(right, false);
+        toggleMobilePanel(left, true);
+        return;
+    }
+
+    if(isOpen(left)){
+        toggleMobilePanel(left, false);
+    } else {
+        toggleMobilePanel(right, false);
+        toggleMobilePanel(left, true);
+    }
+}
+
+function switchRightSideMenu(force = null) {
+    const left = getLeftPanel();
+    const right = getRightPanel();
+
+    if(force === false){
+        toggleMobilePanel(right, false, true);
+        return;
+    }
+    if(force === true){
+        toggleMobilePanel(left, false);
+        toggleMobilePanel(right, true, true);
+        return;
+    }
+
+    if(isOpen(right)){
+        toggleMobilePanel(right, false, true);
+    } else {
+        toggleMobilePanel(left, false);
+        toggleMobilePanel(right, true, true);
+    }
+}
+
+
+async function replaceInlineImagesInQuill() {
+    const container = quill.root;
+    const images = container.querySelectorAll("img[src^='data:image/']");
+
+    for (const img of images) {
+        try {
+            const uploadedUrlResult = await ChatManager.srcToFile(img.src);
+
+            if (uploadedUrlResult?.ok === true) {
+                img.src = uploadedUrlResult.path;
+                console.log(`Image uploaded: ${uploadedUrlResult.path}`);
+            } else {
+                console.error("Upload failed:", uploadedUrlResult?.error);
+                // should we keep it? man idk..
+                //img.remove();
+            }
+        } catch (err) {
+            console.error("Error uploading image:", err);
+            img.remove();
+        }
+    }
+}
+
+function replaceInlineEmojis() {
+    const container = quill.root;
+    const emojis = container.querySelectorAll("img.inline-text-emoji");
+
+    for (const img of emojis) {
+        const hash = img.getAttribute("data-filehash");
+        if (!hash) {
+            img.remove();
+            continue;
+        }
+
+        const code = `:${hash}:`;
+        img.replaceWith(code);
+    }
+}
+
+
+async function sendMessageToServer(authorId, authorUsername, pfp, message, bypassQuill = false) {
+    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
 
     if (UserManager.getGroup() == null || UserManager.getGroup().length <= 0 || UserManager.getCategory() == null || UserManager.getCategory().length <= 0 || UserManager.getChannel() == null || UserManager.getChannel().length <= 0) {
         showSystemMessage({
@@ -1005,7 +1217,11 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message) {
         return;
     }
 
-    //message = message.replaceAll("<p><br></p>", "");
+    replaceInlineEmojis();
+    await replaceInlineImagesInQuill();
+
+    if(bypassQuill === false) message = quill.root.innerHTML
+    //if(quill.root.innerText.trim().length !== 0) message = quill.root.innerHTML;
 
     let msgPayload = {
         id: authorId,
@@ -1017,22 +1233,36 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message) {
         category: UserManager.getCategory(),
         channel: UserManager.getChannel(),
         room: UserManager.getRoom(),
-        editedMsgId: editMessageId
+        editedMsgId: editMessageId,
+        replyMsgId: replyMessageId
     };
 
     // if we're using the client, sign the message
-    if (await isLauncher()) {
-        msgPayload = JSON.parse(await Client().SignJson(JSON.stringify(msgPayload)));
+    if (await Client()) {
+        msgPayload = await Client().SignJson(msgPayload);
+        console.log(msgPayload);
     }
 
     socket.emit("messageSend", msgPayload, async function (response) {
         if (response.error) {
             // do smth in the future with this
+            console.error(response.error);
+        }
+        else{
+            // mark channel as read
+            ChatManager.increaseChannelMarkerCount(UserManager.getChannel())
+            // mark channel as read
+            ChatManager.setChannelMarkerCounter(UserManager.getChannel())
         }
     });
 
+    // reset all flags
     editMessageId = null;
+    replyMessageId = null;
     cancelMessageEdit();
+    cancelMessageReply();
+
+    scrollDown("sendMessageToServer"); // forgot that
 }
 
 function resolveMentions() {
@@ -1060,93 +1290,15 @@ function resolveMentions() {
 
 var audio = new Audio();
 
-function playSound(sound, volume = 0.1) {
+function playSound(sound, volume = 0.5) {
     audio.src = `/sounds/${sound}.mp3`;
     audio.volume = volume;
     audio.play();
 }
 
-function convertMention(text, playSoundOnMention = false, showMsg = false) {
-
-    try {
-        var doc = new DOMParser().parseFromString(text.message, "text/html").querySelector("label")
-        var userId = UserManager.getID();
-
-
-        if (doc.getAttribute("data-member-id") === (userId)) {
-
-            if (showMsg === true) {
-
-                showSystemMessage({
-                    title: text.name,
-                    text: text.message,
-                    icon: text.icon,
-                    img: null,
-                    type: "neutral",
-                    duration: 6000,
-                    onClick: () => {
-                        closeSystemMessage();
-                    }
-                });
-            }
-
-            if (playSoundOnMention === true) {
-                playSound("message", 0.5);
-            }
-        }
-
-    } catch (exe) {
-        //console.log(exe)
-    }
-}
-
 socket.on('doAccountOnboarding', async function (message) {
     UserManager.doAccountOnboarding()
 });
-
-function addToChatLog(element, text) {
-    //text = markdown(text, null);
-    element.insertAdjacentHTML('beforeend', text);
-    scrollDown();
-}
-
-
-function getLastMessage() {
-    let lastMessageInChat = document.getElementById("content").lastElementChild;
-
-    if (lastMessageInChat) {
-
-        let usernameElement = lastMessageInChat.querySelector(".username");
-        if (!usernameElement) {
-            console.warn("Couldnt get last message because username element wasnt found")
-            return null;
-        }
-
-        let userId = usernameElement.getAttribute("data-member-id");
-        if (!userId) {
-            console.warn("Couldnt get last message because user id wasnt found")
-            return null;
-        }
-
-        // Get Elements
-        let lastMessage = document.getElementById("content").lastElementChild.querySelectorAll(".content");
-        if (!lastMessage) return null;
-
-        if (lastMessage.length > 1) {
-            return {
-                parent: lastMessageInChat,
-                element: lastMessage[lastMessage.length - 1],
-                userId
-            }
-        }
-
-        return {
-            parent: lastMessageInChat,
-            element: lastMessage[0],
-            userId
-        }
-    }
-}
 
 
 function compareTimestamps(stamp1, stamp2) {
@@ -1167,7 +1319,7 @@ socket.on('showUserJoinMessage', function (author) {
     var message = '<div class="systemAnnouncementChat">' + '            <p>User <label class="systemAnnouncementChatUsername" id="">' + author.username + '</label> joined the chat!</p>' + '        </div>';
 
     addToChatLog(chatlog, message);
-    scrollDown();
+    scrollDown("userJoinMessage");
 });
 
 socket.on('updateGroupList', function (author) {
@@ -1176,6 +1328,13 @@ socket.on('updateGroupList', function (author) {
 });
 
 let editMessageId = null;
+let replyMessageId = null;
+
+function cancelMessageReply() {
+    replyMessageId = null;
+    let editHint = editorToolbar.querySelector("#editMsgHint");
+    if (editHint) editHint.remove();
+}
 
 function cancelMessageEdit() {
 
@@ -1183,25 +1342,43 @@ function cancelMessageEdit() {
     editMessageId = null;
     let editHint = editorToolbar.querySelector("#editMsgHint");
     if (editHint) editHint.remove();
+}
 
-    // sneaky bug fix
-    allowEditorBlur = true;
-    editor.focus();
-    editor.blur();
-    allowEditorBlur = false;
+function replyToMessage(messageId){
+    if (editorToolbar.querySelector("pre#editMsgHint") == null) {
+        editorToolbar.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageReply()'>You are replying to a message</p>`)
+    }
+    replyMessageId = messageId;
+
+    focusEditor()
 }
 
 
 function editMessage(id) {
+    if (editMessageId == null && editorToolbar.querySelector("pre.editMsgHint") == null) {
+        editorToolbar.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageEdit()'>You are editing a message</p>`)
+    }
 
-    if (editMessageId == null && editorToolbar.querySelector("pre.editMsgHint") == null) editorToolbar.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageEdit()'>You are editing a message</p>`)
-
-    // sneaky bug fix
-    editor.focus();
-
-    console.log(`.message-container .content [data-message-id="${id}"]`)
     let msgContent = document.querySelector(`.message-container .content[data-message-id="${id}"]`).cloneNode(true);
+    if(msgContent.querySelector(".messageActions")){
+        msgContent.querySelector(".messageActions").remove()
+    }
 
+    if(msgContent.querySelector(".edit-notice")){
+        msgContent.querySelector(".edit-notice").remove()
+    }
+
+    // replace all iframes
+    const iframes = msgContent.querySelectorAll("iframe");
+    // convert them back to urls
+    if (iframes.length > 0) {
+        iframes.forEach(iframe => {
+            const src = iframe.getAttribute("src");
+            const urlEl = document.createElement("p");
+            urlEl.textContent = src && src.trim() !== "" ? src : "";
+            iframe.parentNode.replaceChild(urlEl, iframe);
+        });
+    }
 
     // try to find emojis and remove the big classname
     let emojis = msgContent.querySelectorAll(`.inline-text-emoji.big`);
@@ -1212,27 +1389,57 @@ function editMessage(id) {
             let emoji = emojis[i];
 
             // Clone emoji
-            let clonedEmoji = emoji.cloneNode(true);
-            clonedEmoji.classList.remove("big");
-
-            // replace emoji
-            emoji.parentNode.replaceChild(clonedEmoji, emoji);
+            emoji.classList.remove("big");
         }
     }
-
-    window.quill.root.innerHTML = msgContent.innerHTML;
     editMessageId = msgContent.getAttribute("data-message-id");
 
     setTimeout(() => {
         const regex = /<p>\s*<\/p>/gm;
-        window.quill.root.innerHTML = window.quill.root.innerHTML.replace(regex, '');
+        quill.pasteHTML(msgContent.innerHTML.replace(regex, ''));
 
-    }, 10);
+        focusEditor()
+    }, 1);
+}
 
+function focusEditor(){
     editor.focus();
+    const length = quill.getLength();
+    quill.setSelection(length, 0);
+}
+
+function toggleEditor(value){
+    messageInputBox.parentNode.parentNode.style.visibility = value === true ? "visible" : "hidden";
 }
 
 const Delta = Quill.import('delta');
+
+const Embed = Quill.import("blots/embed");
+class EmojiBlot extends Embed {
+    static create(value) {
+        const node = super.create();
+        for (const k in value) node.setAttribute(k, value[k]);
+        return node;
+    }
+
+    static value(node) {
+        const out = {};
+        for (const a of node.attributes) out[a.name] = a.value;
+        return out;
+    }
+}
+
+EmojiBlot.blotName = "emoji";
+EmojiBlot.tagName = "img";
+
+Quill.register(EmojiBlot);
+
+
+
+
+
+
+
 
 hljs.configure({
     languages: ['javascript', 'python', 'ruby', 'xml', 'json', 'css']
@@ -1241,7 +1448,8 @@ hljs.configure({
 
 window.quill = new Quill('#editor', {
     modules: {
-        syntax: true, toolbar: {
+        syntax: true,
+        toolbar: {
             container: '#editor-toolbar', handlers: {
                 'link': function (value) {
                     if (value) {
@@ -1251,6 +1459,16 @@ window.quill = new Quill('#editor', {
                         }
                     } else {
                         quill.format('link', false);
+                    }
+                }
+            }
+        },
+        keyboard: {
+            bindings: {
+                enter: {
+                    key: 13,
+                    handler: function(range, context) {
+                        return false;
                     }
                 }
             }
@@ -1290,23 +1508,24 @@ var maxHeight = 400; // Maximum height of the editor
 var initialMargin = parseFloat(getComputedStyle(editorContainer).marginTop);
 var allowEditorBlur = true;
 
-editor.addEventListener('keydown', function (event) {
-
+editor.addEventListener('input', function (event) {
     setTyping();
+});
 
+editor.addEventListener('keydown', function (event) {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
 
+        /*
         let msgContent = quill.root.innerHTML
             //    .replace(/<p><br><\/p>/g, "")
             .replace(/<p>\s*<br\s*\/?>\s*<\/p>/g, ""); // Clean up empty lines
 
-        sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), msgContent);
+         */
+
+        sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), quill.root.innerHTML);
     }
 });
-
-/* Quill Emoji Autocomplete */
-initializeEmojiAutocomplete(document.querySelector('.ql-editor'), quill);
 
 /* Quill Emoji resize End */
 
@@ -1339,39 +1558,31 @@ function deleteMessageFromChat(id) {
     });
 }
 
-socket.on('memberTyping', function (members) {
-
-    var runner = 0;
-    var displayUsersText = "";
-
-    if (members.length <= 0) {
+socket.on('memberTyping', members => {
+    if (members.length === 0) {
         typingIndicator.innerText = "H";
         typingIndicator.style.color = "transparent";
         return;
     }
 
-    if (members.length == 1) {
-        displayUsersText += limitString(members[0], 15) + " is typing...";
-    } else if (members.length == 2) {
-        displayUsersText += limitString(members[0], 15) + " and " + limitString(members[1], 15) + " are typing...";
+    let text = "";
+
+    if (members.length === 1) {
+        text = `${limitString(members[0], 15)} is typing...`;
+    } else if (members.length === 2) {
+        text = `${limitString(members[0], 15)} and ${limitString(members[1], 15)} are typing...`;
     } else {
-        members.forEach(member => {
-
-            // Show multiple typing
-            if (runner <= 2) {
-                displayUsersText += limitString(member, 15) + ", ";
-            }
-            runner++;
-        });
+        const firstThree = members.slice(0, 3).map(m => limitString(m, 15)).join(", ");
+        const extra = members.length - 3;
+        text = extra > 0
+            ? `${firstThree}, and ${extra} more are typing...`
+            : `${firstThree} are typing...`;
     }
 
-    if (runner > 2) {
-        displayUsersText += " and " + members.length - 2 + " users are typing";
-    }
-
-    typingIndicator.innerText = displayUsersText;
+    typingIndicator.innerHTML = unescapeHtmlEntities(text);
     typingIndicator.style.color = "hsl(from var(--main) h s calc(l * 8))";
 });
+
 
 
 socket.on('receiveChannelTree', function (data) {
@@ -1388,58 +1599,14 @@ function markCurrentChannelStyle(channelId) {
     let channels = document.querySelectorAll("#channellist a");
 
     channels.forEach(channel => {
-        if (channel.classList.contains("selected")) {
-            channel.classList.remove("selected")
+        if (channel.parentNode.classList.contains("selected")) {
+            channel.parentNode.classList.remove("selected")
         }
     });
 
     let targetChannel = document.querySelector("#channellist li#channel-" + channelId);
     if (targetChannel) targetChannel.classList.add("selected");
 
-}
-
-function markChannel(channelId, read = false, msgCount = null) {
-    setTimeout(() => {
-        const idStr = String(channelId);
-        if (String(UserManager.getChannel()) === idStr) read = true;
-
-        const el = getChannelObjectFromTree(idStr);
-
-        const channelType = el?.getAttribute?.("channelType");
-        if (channelType === "voice") {
-            el?.classList?.remove("markChannelMessage");
-            return;
-        }
-
-        let count = Number.isFinite(msgCount) ? Number(msgCount) : NaN;
-        if (!Number.isFinite(count) && el) {
-            const cls = Array.from(el.classList || []).find(c => c.startsWith("msgCount_"));
-            if (cls) {
-                const maybe = parseInt(cls.split("_")[1], 10);
-                if (Number.isFinite(maybe)) count = maybe;
-            }
-        }
-
-        const cookieKey = `message-marker_${idStr}`;
-        const saved = parseInt(CookieManager.getCookie(cookieKey), 10) || 0;
-
-        if (read) {
-            if (Number.isFinite(count) && saved < count) {
-                CookieManager.setCookie(cookieKey, count);
-            }
-            el?.classList?.remove("markChannelMessage");
-            return;
-        }
-
-        if (Number.isFinite(count)) {
-            if (count > saved) {
-                CookieManager.setCookie(cookieKey, count);
-                el?.classList?.add("markChannelMessage");
-            } else {
-                el?.classList?.remove("markChannelMessage");
-            }
-        }
-    }, 200)
 }
 
 function reapplyUnreadFromCookies() {
@@ -1471,12 +1638,12 @@ socket.on('markChannel', function (data) {
 
 socket.on('createMessageEmbed', function (data) {
     document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
-    scrollDown();
+    scrollDown("createMessageEmbed");
 });
 
 socket.on('createMessageLink', function (data) {
     document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
-    scrollDown();
+    scrollDown("createMessageLink");
 });
 
 socket.on('receiveCurrentChannel', function (channel) {
@@ -1501,11 +1668,13 @@ socket.on('updateGroupList', function (data) {
 });
 
 socket.on('receiveGroupList', function (data) {
-    serverlist.innerHTML = "";
-    serverlist.innerHTML = data;
+    if(serverlist.innerHTML !== data){
+        serverlist.innerHTML = "";
+        serverlist.innerHTML = data;
 
-    let mobileGroupList = document.getElementById("mobile_GroupList");
-    mobileGroupList.innerHTML = data;
+        let mobileGroupList = document.getElementById("mobile_GroupList");
+        mobileGroupList.innerHTML = data;
+    }
     setActiveGroup(UserManager.getGroup())
 
     reapplyUnreadFromCookies();
@@ -1519,7 +1688,7 @@ socket.on('newMemberJoined', function (author) {
     var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + author.name + '</label> joined the server! <label class="timestamp" id="' + author.timestamp + '">' + author.timestamp.toLocaleString("narrow") + '</p>' + '        </div>';
 
     addToChatLog(chatlog, message);
-    scrollDown();
+    scrollDown("newMemberJoined");
 
 });
 
@@ -1529,20 +1698,24 @@ socket.on('memberOnline', function (member) {
     var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + member.username + '</label> is now online!</p>' + '        </div>';
 
     addToChatLog(chatlog, message);
-    scrollDown();
+    scrollDown("memberOnline");
 });
 
 socket.on('memberPresent', function (member) {
 });
 
 socket.on('receiveGifImage', function (response) {
+    clearGifContainer()
 
-
-    document.getElementById("emoji-entry-container").insertAdjacentHTML("beforeend", `<img 
-                    onclick="sendGif('${response.gif}')" src="${response.preview}"
-                    onmouseover="changeGIFSrc('${response.gif}', this);"
-                    onmouseleave="changeGIFSrc('${response.preview}', this);"
+    if(response?.gifs){
+        for(let gif of response.gifs){
+            console.log(gif)
+            document.getElementById("gif-entry-container").insertAdjacentHTML("beforeend", `<img 
+                    onclick="sendGif('${gif.media_formats.gif.url}')" src="${gif.media_formats.gif.url}"
                     style="padding: 1%;border-radius: 20px;float: left;width: 48%; height: fit-content;">`);
+        }
+    }
+
 });
 
 
@@ -1586,6 +1759,12 @@ socket.on('modalMessage', function (data) {
         duration: data.displayTime || 4000,
         wasDiconnected: data.wasDisconnected || null
     });
+
+    if(data?.action && data?.action === "register"){
+        setTimeout(function () {
+            window.location.reload();
+        }, data.displayTime || 4000)
+    }
 });
 
 function setActiveGroup(group) {
@@ -1628,6 +1807,7 @@ function displayHomeUnread() {
     });
 }
 
+
 document.getElementById("message-actions-image").onclick = function (e) {
     var x = e.clientX;
     var y = e.clientY;
@@ -1640,21 +1820,21 @@ document.getElementById("message-actions-image").onclick = function (e) {
         return;
     }
 
-    if (emojiBox.style.display == "block") {
+    if (emojiBox.style.display == "flex") {
         closeEmojiBox();
     } else {
-        emojiBox.style.display = "block";
+        emojiBox.style.display = "flex";
         selectEmojiTab(document.getElementById("emoji-box-emojis"))
         getEmojis()
 
         var test = document.getElementById("message-actions-image");
 
         emojiBox.style.position = "fixed";
-        emojiBox.style.float = "right";
         emojiBox.style.top = (y - emojiBox.offsetHeight - 40) + "px";
         emojiBox.style.left = x - emojiBox.offsetWidth + "px";
     }
 }
+
 
 window.addEventListener('resize', function (event) {
     // do stuff here
@@ -1662,11 +1842,11 @@ window.addEventListener('resize', function (event) {
     var emojiContainer = document.getElementById("emoji-box-container");
     var profileContainer = document.getElementById("profile_container");
 
-    if (emojiContainer.style.display == "block") {
+    if (emojiContainer.style.display == "flex") {
         //emojiContainer.style.display = "none";
         closeEmojiBox()
     }
-    if (profileContainer.style.display == "block") {
+    if (profileContainer.style.display == "flex") {
         profileContainer.style.display = "none";
     }
 });
@@ -1688,37 +1868,47 @@ document.addEventListener("keydown", (event) => {
 
 });
 
-var gifSearchbarInput = document.getElementById("gif-searchbar-input");
-// Execute a function when the user presses a key on the keyboard
-gifSearchbarInput.addEventListener("keypress", function (event) {
-    // If the user presses the "Enter" key on the keyboard
+function queryTenorSearch(search){
+    socket.emit("searchTenorGif", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        search
+    }, function (response) {
+        if (response.type === "success") {
+            console.log("Tenor Response", response);
+        } else {
+            showSystemMessage({
+                title: response.msg,
+                text: "",
+                icon: response.type,
+                img: null,
+                type: response.type,
+                duration: 1000
+            });
+        }
+    });
+}
 
-    if (event.key === "Enter") {
+function listenForGifSearch(){
 
-        var emojiEntryContainer = document.getElementById("emoji-entry-container");
-        emojiEntryContainer.innerHTML = "";
+    const gifContainer = document.getElementById("gif-entry-container");
+    const emojiEntryContainer = document.getElementById("emoji-entry-container");
 
-        // socket.emit
+    var gifSearchbarInput = document.getElementById("gif-searchbar-input");
+    // Execute a function when the user presses a key on the keyboard
+    let gifSearchTimeout;
+    gifSearchbarInput.addEventListener("input", function () {
+        clearTimeout(gifSearchTimeout);
 
-        socket.emit("searchTenorGif", {
-            id: UserManager.getID(),
-            token: UserManager.getToken(),
-            search: gifSearchbarInput.value
-        }, function (response) {
+        gifSearchTimeout = setTimeout(() => {
+            const query = gifSearchbarInput.value.trim();
+            if (!query) return;
 
-            if (response.type == "success") {
-                console.log("Tenor Response");
-                console.log(response)
-            } else {
-                showSystemMessage({
-                    title: response.msg, text: "", icon: response.type, img: null, type: response.type, duration: 1000
-                });
-            }
-        });
+            queryTenorSearch(query);
+        }, 500);
+    });
+}
 
-        //searchTenor(gifSearchbarInput.value);
-    }
-});
 
 function selectEmojiTab(element) {
     var parentnode = element.parentNode.children;
@@ -1738,7 +1928,7 @@ function sendGif(url) {
         sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), document.querySelector('.ql-editor').innerHTML);
     }
 
-    sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), url);
+    sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), url, true);
 
     closeEmojiBox();
 }
@@ -1747,11 +1937,12 @@ function closeEmojiBox() {
     var emojiContainer = document.getElementById("emoji-box-container");
     emojiContainer.style.display = "none";
 
-    var gifSearchbarInput = document.getElementById("gif-searchbar-input");
-    gifSearchbarInput.value = "";
-
     var emojiEntryContainer = document.getElementById("emoji-entry-container");
+    var gifEntryContainer = document.getElementById("emoji-entry-container");
     emojiEntryContainer.innerHTML = "";
+
+    emojiEntryContainer.style.display = "flex";
+    gifEntryContainer.style.display = "none";
 
     var emojiTab = document.getElementById("emoji-box-emojis");
     var gifTab = document.getElementById("emoji-box-gifs");
@@ -1769,53 +1960,65 @@ function changeGIFSrc(url, element) {
     element.src = url;
 }
 
+function clearGifContainer(){
+    let search = document.getElementById("gif-searchbar-input");
+    document.getElementById("gif-entry-container").innerHTML = `<div id="gif-searchbar"><input autocomplete="off" id="gif-searchbar-input"
+                                                       placeholder="Search anything, then press enter" type="text" value="${search?.value ? search?.value : ""}"></div>`;
+    listenForGifSearch();
+}
+
 function getGifs() {
-
-    var emojiContainer = document.getElementById("emoji-box-container");
+    var gifEntryContainer = document.getElementById("gif-entry-container");
     var emojiEntryContainer = document.getElementById("emoji-entry-container");
-    var gifSearchbar = document.getElementById("gif-searchbar");
-    var gifSearchbarInput = document.getElementById("gif-searchbar-input");
 
-    gifSearchbar.style.display = "block";
-    gifSearchbarInput.style.display = "block";
-    emojiEntryContainer.style.height = "calc(100% - 18% - 8.1%)";
-    emojiEntryContainer.innerHTML = "";
-    gifSearchbarInput.focus();
+    emojiEntryContainer.style.display = "none"
+    gifEntryContainer.style.display = "flex"
+    clearGifContainer()
+    queryTenorSearch("trending")
 
 }
 
 function getEmojis() {
     var emojiContainer = document.getElementById("emoji-box-container");
     var emojiEntryContainer = document.getElementById("emoji-entry-container");
-
-    gifSearchbarInput.style.display = "none";
+    var gifEntryContainer = document.getElementById("gif-entry-container");
+    gifEntryContainer.innerHTML = "";
+    gifEntryContainer.style.display = "none"
 
     socket.emit("getEmojis", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
 
-        if (response.type == "success") {
+        if (response.type === "success") {
             //settings_icon.value = response.msg;
             //emojiContainer.innerHTML = "<div id='emoji-box-header'><h2>Emojis</h2></div>";
 
-
             emojiEntryContainer.innerHTML = "";
-            response.data.forEach(emoji => {
+            emojiEntryContainer.style.display = "flex";
+            response.data.reverse().forEach(emoji => {
 
-                var emojiId = emoji.split("_")[1];
-                var emojiName = emoji.split("_")[2].split(".")[0];
+                var emojiId = emoji.filename.split("_")[0];
+                var emojiName = emoji.filename.split("_")[1].split(".")[0];
 
+                const entry = document.createElement("div");
+                entry.className = "emoji-entry";
+                entry.title = emoji.name;
 
-                var code = `
-                    <div class="emoji-entry" title="${emojiName}" onclick="
-                            document.querySelector('.ql-editor').textContent += ' :${emojiId}: ';
-                            document.getElementById('emoji-box-container').style.display = 'none';
-                            ">
-                        <div class="emoji-img">
-                            <img class="emoji" src="/emojis/${emoji}">
-                        </div>
-                    </div>`
+                const imgWrap = document.createElement("div");
+                imgWrap.className = "emoji-img";
 
+                const img = document.createElement("img");
+                img.className = "emoji";
+                img.src = `/emojis/${emoji.filename}`;
 
-                emojiEntryContainer.insertAdjacentHTML("beforeend", code);
+                imgWrap.appendChild(img);
+                entry.appendChild(imgWrap);
+
+                entry.addEventListener("click", () => {
+                    insertEmoji(emoji, true);
+                    focusEditor();
+                    document.getElementById("emoji-box-container").style.display = "none";
+                });
+
+                emojiEntryContainer.appendChild(entry);
             })
 
             //notify(response.msg)
@@ -1825,7 +2028,7 @@ function getEmojis() {
             });
         }
 
-        //console.log(response);
+        console.log(response);
     });
 }
 
@@ -1841,6 +2044,7 @@ function getChannelObjectFromTree(channelId) {
 
 
 function refreshValues() {
+    return;
     var username = UserManager.getUsername();
     getRoles();
     userJoined();
@@ -1903,10 +2107,10 @@ function getGroupList() {
 function getGroupBanner() {
     socket.emit("getGroupBanner", {
         id: UserManager.getID(),
+        token: UserManager.getToken(),
         username: UserManager.getUsername(),
         icon: UserManager.getPFP(),
-        group: UserManager.getGroup(),
-        token: UserManager.getToken()
+        group: UserManager.getGroup()
     });
 }
 
@@ -1923,7 +2127,7 @@ function getServerInfo(returnData = false) {
 
         headline.innerHTML = `
 
-        <div>
+        <div id="main_header">
             ${servername} ${serverdesc ? ` - ${serverdesc}` : ""}
         </div>
         
@@ -1943,8 +2147,16 @@ function getServerInfo(returnData = false) {
 
 }
 
-function setUrl(param, isVC = false) {
+async function waitFor(callback, timeout = 0) {
+    return new Promise(resolve => {
+        let result = callback();
+        setTimeout(async () => {
+            resolve(result)
+        }, timeout)
+    });
+}
 
+async function setUrl(param, isVC = false) {
     let urlData = param.split("&")
     let groupId = urlData[0]?.replace("?group=", "")
     let categoryId = urlData[1]?.replace("category=", "")
@@ -1953,11 +2165,10 @@ function setUrl(param, isVC = false) {
     if(!isVC) showHome(true)
 
     // channel already open, dont reload it
-    if (UserManager.getChannel() == channelId && channelId && UserManager.getChannel() && isVC == false) return;
-
+    if (UserManager.getChannel() === channelId && channelId && UserManager.getChannel() && isVC === false) return;
     window.history.replaceState(null, null, param); // or pushState
 
-    if (isVC == true) {
+    if (isVC === true) {
         socket.emit("checkChannelPermission", {
             id: UserManager.getID(),
             channel: UserManager.getChannel(),
@@ -1966,16 +2177,7 @@ function setUrl(param, isVC = false) {
         }, async function (response) {
             if (response.permission === "granted") {
                 switchLeftSideMenu(true)
-                //stopRecording();
-
-                socket.emit("setRoom", {
-                    id: UserManager.getID(),
-                    username: UserManager.getUsername(),
-                    icon: UserManager.getPFP(),
-                    room: UserManager.getRoom(),
-                    token: UserManager.getToken()
-                });
-
+                changedChannel();
                 document.getElementById("messagebox").style.display = "none";
 
                 // join vc room
@@ -1983,8 +2185,8 @@ function setUrl(param, isVC = false) {
             }
         });
     } else {
-        // leave room maybe
-        voip.leaveRoom()
+        const channelIcons = document.getElementById("channelname-icons");
+        channelIcons.innerHTML = "";
 
         socket.emit("checkChannelPermission", {
             id: UserManager.getID(),
@@ -1992,32 +2194,55 @@ function setUrl(param, isVC = false) {
             token: UserManager.getToken(),
             permission: "sendMessages"
         }, function (response) {
-            if (response.permission == "granted") {
-                switchLeftSideMenu(true)
+            console.log(response)
+            switchLeftSideMenu(true)
 
-                socket.emit("setRoom", {
-                    id: UserManager.getID(),
-                    username: UserManager.getUsername(),
-                    icon: UserManager.getPFP(),
-                    room: UserManager.getRoom(),
-                    token: UserManager.getToken()
-                });
-                chatlog.innerHTML = "";
-                document.getElementById("messagebox").style.display = "flex";
+            // update grouplist and channel tree if we only
+            // click on a group
+            if(groupId && !categoryId && !channelId){
+                getChannelTree();
+            }
 
-                document.querySelector('.ql-editor').focus();
-            } else {
-                chatlog.innerHTML = "";
-                document.getElementById("messagebox").style.display = "none";
+            changedChannel()
+            ChatManager.setChannelMarker(channelId, false)
+
+            chatlog.innerHTML = "";
+            document.getElementById("messagebox").style.display = "flex";
+            document.querySelector('.ql-editor').focus();
+            getChatlog();
+            showGroupStats();
+
+            if (response.permission !== "granted") {
+                toggleEditor(false);
+            }
+            else{
+                toggleEditor(true);
             }
         });
     }
 
+    getMemberList();
+}
 
-    // get group stats
-    showGroupStats()
+function changedChannel(){
+    switchLeftSideMenu(false)
+    socket.emit("setRoom", {
+        id: UserManager.getID(),
+        username: UserManager.getUsername(),
+        icon: UserManager.getPFP(),
+        room: UserManager.getRoom(),
+        token: UserManager.getToken()
+    });
 
-    refreshValues();
+    socket.emit("getCurrentChannel", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        username: UserManager.getUsername(),
+        icon: UserManager.getPFP(),
+        group: UserManager.getGroup(),
+        category: UserManager.getCategory(),
+        channel: UserManager.getChannel()
+    });
 }
 
 
@@ -2027,65 +2252,18 @@ function showGroupStats() {
     if (UserManager.getGroup() !== null && UserManager.getCategory() === null && UserManager.getChannel() === null) {
 
         messageInputBox.parentNode.parentNode.style.visibility = "hidden";
-        socket.emit("getGroupStats", {
-            id: UserManager.getID(),
-            token: UserManager.getToken(),
-            group: UserManager.getGroup()
-        }, function (response) {
-
-            if (response.type === "success") {
-
-                // Not enough users chatted to show group stats
-                if (response.mostActiveUsers.length <= 1) return;
-
-                contentBox = document.getElementById("content");
-                contentBox.innerHTML = ""
-
-                let code = `
-                    <div id="homeScreenGroupContainer">
-                        <h1 style="text-align: center">${response.group.info.name}</h1><br>
-                        <h2>Top 100 Active Users</h2><hr>
-
-                        <div id="homeGroupStatsMostActiveUserContainer">
-                    `;
-
-                // Generate user entries as divs instead of table rows
-                for (let i = 0; i < response.mostActiveUsers.length; i++) {
-                    let user = response.mostActiveUsers[i];
-
-                    // Skip if user is null
-                    if (!user) continue;
-
-                    let username = user.user.name;
-                    let message_count = user.message_count;
-
-                    code += `
-                        <div class="activeUserEntry" onclick='getMemberProfile("${user.user.id}", null, null, event)'>
-                            <p class="activeUserEntryName">${username}</p>
-                            <div class="activeUserEntryDivider"></div>
-                            <p class="activeUserEntryName">${message_count} messages</p>
-                        </div>
-                    `;
-                }
-
-                code += `</div></div>`; // Close the flex container divs
-
-                contentBox.insertAdjacentHTML("beforeend", code);
-
-
-            } else {
-                showSystemMessage({
-                    title: response.msg || response.error,
-                    text: "",
-                    icon: response.type,
-                    img: null,
-                    type: response.type,
-                    duration: 1000
-                });
-            }
-        });
-    } else {
-        if (messageInputBox.parentNode.parentNode) messageInputBox.parentNode.parentNode.style.visibility = "visible";
+        document.getElementById("content").innerHTML =
+            `<div 
+                style="display: flex;
+                flex-direction: column; 
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+                ">
+                <h1 style="margin-bottom: 0;">Welcome to the server!</h1>
+                <p>Select a channel to begin chatting</p>
+            </div>
+            `;
     }
 }
 
@@ -2118,35 +2296,50 @@ function getRoles() {
     });
 }
 
-let scrollTimeout;
-
-function scrollDown() {
-    let contentDiv = document.getElementById("content");
-    contentDiv.style.visibility = "hidden";
-
-    if (scrollTimeout) {
-        clearTimeout(scrollTimeout); // Clear any existing timeout
-    }
-
-    // would jump back otherwise
-    scrollTimeout = setTimeout(() => {
-        var objDiv = document.getElementById("content");
-        objDiv.scrollTop = objDiv.scrollHeight;
-        contentDiv.style.visibility = "visible";
-    }, 10);
+function isScrolledToBottom(element) {
+    return Math.abs(element.scrollHeight - element.scrollTop - element.clientHeight) < 1;
 }
 
-// todo Fetch messages and dont use fixed limit in sql
-// Add scroll event listener to the scroll container
-/*
-let scrollMessageCount = 0;
-scrollContainer.addEventListener('scroll', function() {
-   if (scrollContainer.scrollTop === 0) {
-       
-       // We reached the top of the chat, try to load more messages
-   }
+
+function scrollDown(functionCaller) {
+    const contentDiv = document.getElementById("content");
+    if (!contentDiv) return;
+
+    const scroll = () => contentDiv.scrollTop = contentDiv.scrollHeight;
+    scroll();
+
+    let tries = 0;
+    const interval = setInterval(() => {
+        scroll();
+        tries++;
+        if (tries > 3) clearInterval(interval);
+    }, 200);
+
+    if (functionCaller) console.log(`ScrollDown called by ${functionCaller}`);
+}
+
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function testDb(length){
+    for(let i = 1; i < length; i++){
+        await sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${i}`);
+        await sleep(500);
+    }
+}
+
+socket.on("uploadProgress", ({ filename, bytes, total }) => {
+    const percent = total ? Math.min(100, (bytes / total) * 100) : 0;
+    showSystemMessage({
+        title: `File ${percent}% uploaded`,
+        text: ``,
+        icon: "info",
+        type: "neutral",
+        duration: 2000
+    });
 });
-*/
 
 
 var uploadObject = document.getElementById('content');
@@ -2157,29 +2350,30 @@ uploadObject.addEventListener('drop', async function (e) {
     uploadObject.style.backgroundColor = '';
 
     // dont upload in vc
-    if (uploadObject.querySelector("#vc-user-grid")) return;
+    if (uploadObject.querySelector(".vc-container")) return;
 
     const files = Array.from(e.dataTransfer.files); // Handle multiple files if needed
     const fileSize = files[0].size / 1024 / 1024; // Example: Display the size of the first file
     console.log(`File dropped. Size: ${fileSize.toFixed(2)} MB`);
 
     try {
-        // Call upload and wait for the result
-        const result = await upload(files);
-        console.log(result);
+        let result = await ChatManager.uploadFile(files);
+        console.log("upload result: ", result);
 
-        if (result.status === "done") {
-            console.log("All files uploaded successfully. URLs:", result.urls);
+        if (result.ok === true) {
+            console.log("All files uploaded successfully. URLs:", result.path);
 
             // Process the URLs array
-            for (const [index, url] of result.urls.entries()) {
-                console.log(`File ${index + 1} uploaded to: ${url}`);
-                sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), window.location.origin + url); // Sending all URLs at once
-
-
-            }
+            sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${window.location.origin}${result.path}`, true); // Sending all URLs at once
         } else {
             console.error("Upload encountered an error:", result.error);
+            showSystemMessage({
+                title: `Error uploading file`,
+                text: `${result.error}`,
+                icon: "error",
+                type: "error",
+                duration: 1500
+            });
         }
     } catch (error) {
         console.error("An error occurred during the upload process:", error);

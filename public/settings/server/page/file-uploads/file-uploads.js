@@ -14,7 +14,8 @@ var localUploadLimit;
 var serverconfigName;
 var serverconfigDesc;
 
-
+window.updatePreview = updatePreview;
+window.saveSettings = saveSettings;
 
 socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageUploads" }, function (response) {
 

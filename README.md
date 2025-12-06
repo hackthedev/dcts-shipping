@@ -1,15 +1,19 @@
 # DCTS - Direct Communication Through Sockets
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
-
 [Visit our subreddit](https://www.reddit.com/r/dcts/) • [Feature list](https://github.com/hackthedev/dcts-shipping/blob/beta/docs/Feature%20List.md) • [Discord for convenience](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [To-Do list](https://github.com/users/hackthedev/projects/6/views/1?filterQuery=-changelog-status%3AAdded+-status%3ACanceled)
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
 
 This project was made with the goal to provide a platform that aims to fix issues with existing solutions like Discord, TeamSpeak, Revolt, Fosscord, Matrix, TeaSpeak and all others out there and to create new, advanced and easy to use features while creating as little friction as possible and keeping things intuitive.
 
 Although there are still some rough edges and a few missing features, DCTS is evolving rapidly due to the massive amount of work being put into its development. This includes adding new features as well as refining existing ones or improving the general experience. Compared to other alternatives, DCTS is evolving lightning fast.
 
-![image-20251024063417758](./assets/image-20251024063417758.png)
+**If you need help** or wanna reach out to me feel free to create a **post on** the **subreddit**, **message** me **on discord**, or text me **on signal: shydevil.89**.
 
-![image-20251024063102410](./assets/image-20251024063102410.png)
+![image-20251127214420083](./assets/image-20251127214420083.png)
+
+![image-20251127214237435](./assets/image-20251127214237435.png)
+
+*(^ this is a custom theme thats shipped too)*
 
 ------
 
@@ -58,7 +62,11 @@ Modern communication platforms have limitations and issues that DCTS is designed
 
 - **Rapid Development**: Fast bug resolution, continuous feature delivery, and ongoing improvements enabled by a modern and efficient tech stack.
 
-DCTS isn't just a chat platform, it's a vision for better communication, driven by simplicity, freedom, and innovation. Its one step out of many to create a new, better web.
+- **Custom Themes**: You can select custom themes the server has to offer, two example themes included on default and with accent color support.
+
+- **Account Export**: You can export your account and easily re-import it when needed.
+
+While DCTS is an app, its going to be part of a bigger ecosystem that i plan to create in order to make the web a better place because we still need proper alternatives in other areas too.
 
 > [!TIP]
 >
@@ -67,64 +75,47 @@ DCTS isn't just a chat platform, it's a vision for better communication, driven 
 ------
 
 ## Installing
-### Docker
-To install via docker you can either clone and build or use the prebuilt image.
+### Docker Installation
+
+```bash
+sudo docker run --name dcts-server -p 2052:2052 ghcr.io/hackthedev/dcts-shipping
 ```
-sudo docker run --name dcts-server  -p 8080:2052 ghcr.io/hackthedev/dcts-shipping
-```
-or via docker-compose:
-```
-curl -L -O https://github.com/hackthedev/dcts-shipping/raw/main/docker/docker-compose.yml
-sudo docker compose up -d
-```
+
+#### Accessing the server
+- Open your browser and go to `http://localhost:2052` (or your server's IP).
+- If you just want to try DCTS, you can visit the public instance at [https://chat.network-z.com/](https://chat.network-z.com/).
 
 <br>
 
-### NPM
+### Installer Script
 
-Requires node.js to be installed, see [Tested Versions](https://github.com/hackthedev/dcts-shipping?tab=readme-ov-file#tested-node-versions). Clone the git repository and execute the following commands inside the app's directory.
-```bash
-# assuming the directory/user exists already. 
-# you can pick any directory.
-cd /home/dcts
+In order to make the install experience as easy as possible i've tried to make a complete auto installer script that installs and configurates everything thats needed to run an instance.
 
-# install the voice chat and screensharing server. livekit comes with
-# a turn server as well which is important for strict NAT etc
-curl -sSL https://raw.githubusercontent.com/hackthedev/initra-shipping/refs/heads/main/apps/livekit/install.sh | bash
+##### Tested with
 
-# get the lastest stable version of DCTS.
-# Beta has new features early but may be unstable.
-git clone https://github.com/hackthedev/dcts-shipping
+- Debian 13
 
-# install dependencies
-npm install
-
-# run the server
-node .
-```
-
-> [!TIP]
-> Install tutorial: https://www.youtube.com/watch?v=N8ILWcW8vGQ
+> [!CAUTION]
 >
-> Auto Installer App (wip): https://github.com/hackthedev/initra-shipping
->
-> **If you need help** feel free to create a **post on** the **subreddit or message** me **on discord**.
+> The installer script is designed to be used on a new system. It uses caddy and will completely replace the caddy config file in `/etc/caddy/` the first time it runs. Once docker is available i recommend using that.
 
 > [!NOTE]
 >
-> To be able to use all features its required to connect DCTS with MySQL/MariaDB.
+> If you want to manually install DCTS checkout the `docs` folder, specifically `Getting started` and `VoIP Setup`.
 
 > [!IMPORTANT]
 >
-> The installer for LiveKit  will create a config file inside `/home/livekit` called `livekit.yaml`. For public access over the internet, you will need to link TLS certificate files. You can use LetsEncrypt etc
+> You will need to setup your domain DNS records first! Example records:
+>
+> - Chat » chat.your-domain.com
+> - Voip » lk.chat.your-domain.com
 
-------
+```bash
+# Auto Installer Script that installs and configurates EVERYTHING 
+apt install curl -y && curl -sSL https://raw.githubusercontent.com/hackthedev/initra-shipping/refs/heads/main/apps/dcts/install.sh | bash -s -- --create-instance "Test Server 1" --port 2000 --domain chat.your-domain.com --beta
+```
 
-## Connecting to your server
-Once you've installed the server and its running, you can open your browser and enter the server's ip and add the port 2052.<br>
-Example: http://localhost:2052
-
-Depending on your configuration the port may vary
+Once **successfully** executed, your instance should be available at `chat.your-domain.com:2000` with working voice chat and **everything**. you can access the server console with `screen -x dcts_testserver1` with this example.
 
 ------
 

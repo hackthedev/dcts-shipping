@@ -1,15 +1,27 @@
 function Client() {
-    return window.chrome.webview.hostObjects.dcts;
+    return window?.dcts
 }
 
 function isLauncher() {
-    try {
-        return !!(
-            window.chrome &&
-            typeof window.chrome.webview !== "undefined" &&
-            window.chrome.webview !== null
-        );
-    } catch {
-        return false;
-    }
+    return !!Client()
 }
+
+
+const TauriProxy = new Proxy({}, {
+    get(target, prop) {
+        return async (...args) => {
+            if(!isLauncher()) return;
+
+            let params = {};
+            if (args.length === 1 && typeof args[0] === "object") {
+                params = args[0];
+            } else {
+                args.forEach((a, i) => {
+                    params["arg" + i] = a;
+                });
+            }
+            
+            return await window?.__TAURI__?.core?.invoke(prop?.toString(), params);
+        };
+    }
+});

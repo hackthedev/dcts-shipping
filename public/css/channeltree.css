@@ -33,6 +33,7 @@
 #channellist {
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
 
     height: 100%;
     width: calc(300px);
@@ -45,6 +46,7 @@
 
     height: 100%;
     width: 100%;
+
 
     padding: 16px;
     overflow-y: auto;
@@ -60,8 +62,28 @@
 }
 
 a.channelTrigger.markChannelMessage{
-    color: hsl(from var(--main) h s calc(l * 10));
+    color: hsl(from var(--main) h s calc(l * 12));
     font-style: italic;
+}
+
+#channeltree ul li a{
+    font-style: normal;
+}
+
+.message-marker-icon{
+    position: relative;
+    display: none;
+    float: left;
+    width: 5px;
+    height: 5px;
+
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+
+    background-color: hsl(from var(--main) h s calc(l * 10)) !important;
+
+    top: 8px;
+    left: -6px;
 }
 
 #channeltree li.selected{
@@ -84,4 +106,29 @@ a.channelTrigger.markChannelMessage{
 #channeltree li:hover {
     background-color: rgb(0, 0, 0, 0.2);
     border-radius: 4px;
+}
+
+#channeltree ul.participants img.avatar{
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+    object-fit: cover;
+    background-position: center center;
+    border-radius: 50%;
+}
+#channeltree ul.participants{
+    display: flex;
+    flex-direction: column;
+
+    margin-top: 4px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+#channeltree ul.participants li {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-content: center;
+    gap: 8px;
+    cursor: pointer;
 }

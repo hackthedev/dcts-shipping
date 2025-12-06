@@ -53,6 +53,12 @@ body {
 #channelname-bar {
     background-color: hsl(from var(--main) h s calc(l * 1.9));
 }
+#channeltree ul.participants li:hover {
+    background-color: hsl(from var(--main) h s calc(l * 2));
+}
+#channeltree ul.participants li:not(:hover) {
+    background-color: transparent;
+}
 
 #infolist,
 .systemAnnouncementChat,

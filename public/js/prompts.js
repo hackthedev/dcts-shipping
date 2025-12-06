@@ -14,12 +14,21 @@ class Prompt {
             .prompt-form-group {
                 margin-bottom: 20px;
             }
+            
+            .prompt-form-group label{
+                user-select: none;
+            }
+            
+            #promptContainer a {
+                color: #2492c9;
+                font-style: italic;
+            }
 
             .prompt-label {
                 display: block;
                 font-weight: 600;
                 margin-bottom: 8px;
-                font-size: 14px;
+                font-size: 14px;       
             }
 
             .prompt-input {
@@ -40,7 +49,6 @@ class Prompt {
 
             .prompt-input:focus {
                 border-color:rgb(98, 98, 98);
-                border: 1px solid rgb(98, 98, 98) !important;
                 outline: none;
                 user-select: none;
             }
@@ -440,7 +448,7 @@ class Prompt {
 
 
     submitPrompt() {
-        const inputs = this.promptContent.querySelectorAll('input, select, textarea');
+        const inputs = this.promptContent.querySelectorAll('input, select, textarea, [data-name]');
         let values = { selected: this.selectedValues };
 
         inputs.forEach(input => {
@@ -448,15 +456,16 @@ class Prompt {
                 values[input.name] = input.checked;
             } else if (input.type === 'file') {
                 values[input.name] = input.files[0];
+            } else if (input.tagName === 'DIV' || input.tagName === 'P') {
+                values[input.dataset.name] = input.cloneNode(true);
             } else {
                 values[input.name] = input.value;
             }
         });
 
-        // Ensure callback is executed only once
         if (this.currentCallback) {
             this.currentCallback(values);
-            this.currentCallback = null; // Prevent duplicate execution
+            this.currentCallback = null;
         }
 
         if (this.afterSubmitAction) {
@@ -465,6 +474,7 @@ class Prompt {
 
         this.closePrompt(false);
     }
+
 
 
 }

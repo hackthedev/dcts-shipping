@@ -1,8 +1,7 @@
 async function getDiscoveredHosts(){
-    return new Promise((resolve, reject) => {
-        socket.emit("getDiscoveredHosts", {id: UserManager.getID(), token: UserManager.getToken()}, function(response) {
-            resolve(response);
-        });
+    return new Promise(async (resolve, reject) => {
+        let servers = await fetch("/servers");
+        resolve(servers.json())
     })
 }
 
@@ -13,9 +12,7 @@ async function syncHostData(){
         let json = await serverSyncResponse.json();
 
         if(isLauncher() && json){
-            let serverRaw = await Client().GetServer(window.location.host);
-            let server = JSON.parse(serverRaw);
-
+            let server = await Client().GetServer(window.location.host);
             await Client().SaveServer(window.location.host, JSON.stringify(json), server?.IsFavourite);
         }
     }
@@ -78,15 +75,14 @@ async function displayDiscoveredHosts(){
     discoveredHostList.innerHTML = "";
 
     // add local servers to the list too
-    if(isLauncher()){
-        let localServers = JSON.parse(await Client().GetServers());
+    if(Client()){
+        let localServers = await Client().GetServers();
 
         for(let localServerKey in localServers){
             let localServer = localServers[localServerKey];
             discoveredHosts.servers.push({
                 address: localServer.Address,
-                data: localServer.JsonData,
-                IsFavourite: localServer.IsFavourite || false
+                favourite: localServer.IsFavourite || false
             });
         }
 
@@ -101,18 +97,30 @@ async function displayDiscoveredHosts(){
 
     }
 
-    if(discoveredHosts?.error === null){
-
+    if(discoveredHosts?.error == null){
         // add main button to go home
         discoveredHostList.insertAdjacentHTML("beforeend",
-            `<a class="networkServerEntry" href="#" title="Go Home" style="border: none;" onclick="NavigateHome();">
-                    <img class="home" src="http://${window.location.host}/img/back.png">
+            `<a class="networkServerEntry" href="/serverlist" title="Discovery" style="border: none;">
+                    <img class="home" src="/img/discover.png">
                 </a><hr style="width: 100%;">`)
 
 
+
         for(let server of discoveredHosts.servers){
-            let serverData = JSON.parse(server.data);
-            let host = server.address;
+            let host = extractHost(server.address);
+            if(!host) continue;
+
+            let externalServerInfo = null;
+            let externalServerData = null;
+
+            try{
+                externalServerInfo = await fetch(`https://${host}/discover`);
+                externalServerData = await externalServerInfo.json();
+            }
+            catch(error){
+                console.warn(error);
+                continue;
+            }
 
             if(await testHost(host) === false){
                 console.warn(`Host ${host} wasnt reachable`);
@@ -120,12 +128,12 @@ async function displayDiscoveredHosts(){
             }
 
             if(isLauncher()){
-                Client().SaveServer(host, JSON.stringify(serverData), server?.IsFavourite);
+                Client().SaveServer(host, server?.favourite);
             }
 
             discoveredHostList.insertAdjacentHTML("beforeend",
-        `<a class="networkServerEntry" href="http://${host}" title="${serverData.serverinfo.name}">
-                    <img class="networkServerEntryImage" data-fav="${!!server?.IsFavourite}" data-host="${host}" src="http://${host}/${serverData.serverinfo.icon}">
+        `<a class="networkServerEntry" href="https://${host}" title="${externalServerData.serverinfo.name}">
+                    <img class="networkServerEntryImage" data-fav="${!!server?.IsFavourite}" data-host="${host}" src="https://${host}/${externalServerData.serverinfo.icon}">
                     <div class="networkIndicator">50</div>
                 </a>`)
 
@@ -154,12 +162,12 @@ async function changeFavouriteNetworkServer(address){
         return;
     }
 
-    let server = JSON.parse(await Client().GetServer(address))
+    let server = await Client().GetServer(address)
     if(!server){
         console.warn("Couldnt get server and mark server as fav");
         return;
     }
 
     server.IsFavourite = !server.IsFavourite;
-    await Client().SaveServer(address, server.JsonData, server.IsFavourite);
+    await Client().SaveServer(address, server.IsFavourite);
 }

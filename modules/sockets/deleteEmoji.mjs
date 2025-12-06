@@ -10,19 +10,17 @@ export default (io) => (socket) => {
         
         member.id = xssFilters.inHTMLData(member.id)
         member.token = xssFilters.inHTMLData(member.token)
-        member.emoji = xssFilters.inHTMLData(member.emoji)
-        if (member.emoji.includes("..")) return;
+        member.filename = xssFilters.inHTMLData(member.filename)
+        if (member.filename.includes("..")) return;
         
-        if (validateMemberId(member.id, socket) == true
+        if (validateMemberId(member.id, socket, member?.token) === true
         ) {
 
             if (hasPermission(member.id, "manageEmojis")) {
                 try {
 
                     try {
-                        if (member.emoji.includes("..")) return
-
-                        fs.unlinkSync(`./public/emojis/${member.emoji}`);
+                        fs.unlinkSync(`./public/emojis/${member.filename}`);
                         response({ type: "success", msg: "Emoji deleted successfully" });
 
                     } catch (error) {

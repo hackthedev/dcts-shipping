@@ -30,7 +30,9 @@ async function measureHashRate(durationSeconds = 3) {
 }
 
 async function sha256(message) {
+    console.log(message);
     const msgBuffer = new TextEncoder().encode(message);
+    console.log(msgBuffer)
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -69,7 +71,7 @@ function setupAccountFromData(data) {
     if (powChallenge) CookieManager.setCookie("pow_challenge", powChallenge);
     if (powSolution) CookieManager.setCookie("pow_solution", powSolution);
 
-    if (data?.loginName) CookieManager.setCookie("dcts_token", data?.loginName, 365);
+    if (data?.loginName) CookieManager.setCookie("loginName", data?.loginName, 365);
     if (data?.id) CookieManager.setCookie("id", data?.id, 365);
     if (data?.token) CookieManager.setCookie("dcts_token", data?.token, 365);
 }

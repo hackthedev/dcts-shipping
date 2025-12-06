@@ -1,5 +1,4 @@
 import {serverconfig, typingMembers, usersocket, xssFilters} from "../../index.mjs";
-import {convertMention} from "../functions/chat/helper.mjs";
 import {formatDateTime, hasPermission} from "../functions/chat/main.mjs";
 import {saveChatMessage} from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
@@ -9,7 +8,7 @@ import {
     copyObject,
     escapeHtml,
     generateId,
-    getCastingMemberObject,
+    getCastingMemberObject, removeFromArray,
     sanitizeInput,
     sendMessageToUser,
     validateMemberId
@@ -26,6 +25,7 @@ export default (io) => (socket) => {
 
             // Remove token from cloned object so we dont broadcast it
             let member = copyObject(memberOriginal);
+            let oServerMember = getCastingMemberObject(serverconfig.servermembers[memberOriginal?.id]);
 
             // check member mute
             let muteResult = checkMemberMute(socket, member);
@@ -130,16 +130,19 @@ export default (io) => (socket) => {
                     member.timestamp = new Date().getTime();
                     member.messageId = messageid;
 
-                    member.icon = escapeHtml(member.icon);
-                    member.name = escapeHtml(member.name);
+                    member.icon = escapeHtml(oServerMember.icon);
+                    member.name = escapeHtml(oServerMember.name);
 
                     member.message = sanitizeInput(member.message);
-                    member.message = convertMention(member.message);
 
                     // replace empty lines
                     member.message = clearMessage(member.message, messageid)
 
-                    if (member.message == "" || member.message.length == 0) {
+                    // create room key
+                    let room = `${member.group}-${member.category}-${member.channel}`
+                    member.room = room;
+
+                    if (member.message.trim() === "" || member.message.trim().length === 0) {
                         console.log("Message was empty")
                         return;
                     }
@@ -149,7 +152,7 @@ export default (io) => (socket) => {
                     Object.keys(serverconfig.serverroles).forEach(function (role) {
 
                         if (serverconfig.serverroles[role].members.includes(member.id) &&
-                            serverconfig.serverroles[role].info.displaySeperate == 1) {
+                            serverconfig.serverroles[role].info.displaySeperate === 1) {
                             userRoleArr.push(serverconfig.serverroles[role]);
                         }
                     });
@@ -187,6 +190,19 @@ export default (io) => (socket) => {
                         member.messageId = originalMsgObj.editedMsgId;
                     }
 
+                    // if the message is a reply
+                    if(member?.replyMsgId != null) {
+                        // Get Original message
+                        let originalMsg = await getChatMessagesFromDb(room, 1, member.replyMsgId);
+                        let originalMsgObj = JSON.parse(decodeFromBase64(originalMsg[0].message));
+
+                        // client will later fetch the original message.
+                        // this way it'll always show the up-to-date
+                        // message and we dont have to somehow check if the
+                        // original message was updated etc..
+                        member.reply = originalMsgObj.messageId;
+                    }
+
                     member = getCastingMemberObject(member);
 
                     let memberMessageCount = serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel].msgCount + 1;
@@ -197,17 +213,19 @@ export default (io) => (socket) => {
                     // Remove user from typing
                     var username = serverconfig.servermembers[member.id].name;
                     if (typingMembers.includes(username) === true) {
-                        typingMembers.pop(username);
+                        removeFromArray(typingMembers, username) // better
                     }
+
                     io.in(member.room).emit("memberTyping", typingMembers);
 
                     // Send message or update old one
                     if (member.editedMsgId == null) {
-                        // New message
-                        io.in(member.room).emit("messageCreate", member);
-
-
-                        io.emit("markChannel", {channelId: parseInt(member.channel), count: memberMessageCount});
+                        // New message.
+                        // we will emit this to EVERYONE so we can better
+                        // integrate the feature for showing a marker when
+                        // new messages are created and check clientside
+                        // if we are in the channel or not so we display it.
+                        io.emit("messageCreate", member);
                     }
                     // emit edit event of msg
                     else {
@@ -263,7 +281,6 @@ export default (io) => (socket) => {
             }
         } else {
             Logger.warn("Cant send message because member id wasnt valid");
-            Logger.warn("ID: " + member.id);
         }
     });
 

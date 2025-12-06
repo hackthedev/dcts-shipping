@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/css/themes/default/default.css">
+
+    <script src="/js/prompts.js?v={{random}}"></script>
+    <script src="/js/sysmsg.js?v={{random}}"></script>
+    <script src="/js/discovery.js"></script>
+    <script src="/js/core/Client.js"></script>
+    <script src="/js/core/purify.js"></script>
+    <script src="/js/escape.js"></script>
+    <script src="script.js"></script>
+
+    <title>DCTS Discovery</title>
+</head>
+<body>
+
+<div id="savedServers">
+
+
+    <div class="savedServersHeader">
+        <h1>Discovery</h1>
+
+        <div id="navigation">
+            <a href="/">&#8617; Go Back</a>
+            <a href="#" class="last" onclick="submitServerUI()">&#9998; Submit a server</a>
+        </div>
+
+        <!--
+        <div id="connectContainer">
+            <h2>... or connect via url</h2>
+
+            <div id="connectInputs">
+                <input type="text" id="connectUrl" placeholder="Enter a url">
+                <button id="connectButton" onclick="connectToServer(document.getElementById('connectUrl').value)">Connect</button>
+                <p id="connectionStatus"></p>
+            </div>
+        </div>
+        -->
+    </div>
+
+    <div class="serverlistingContainer">
+        <p>
+            If there are any servers they will be displayed here :)<br>
+            You can also submit servers for discovery
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

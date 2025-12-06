@@ -9,6 +9,17 @@ import {
     isURL,
 } from "../functions/mysql/helper.mjs"
 
+export function compareTimestamps(stamp1, stamp2) {
+    // Calculate time passed
+    var firstdate = stamp1 / 1000;
+
+    var seconddate = stamp2 / 1000;
+    var diff = firstdate - seconddate;
+    var minutesPassed = Math.round(diff / 60);
+
+    return minutesPassed;
+}
+
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('checkMediaUrlCache', async function (member, response) {
@@ -36,6 +47,12 @@ export default (io) => (socket) => {
                 return;
             }
 
+            // remove item from ram if its in there for over x minutes
+            if(checkedMediaCacheUrls[member.url]?.timestamp){
+                if(compareTimestamps(checkedMediaCacheUrls[member.url]?.timestamp, new Date().getTime()) >= 10){
+                    delete checkedMediaCacheUrls[member.url];
+                }
+            }
 
             if (checkedMediaCacheUrls[member.url].mediaType != null) {
                 // Link was already sent in for check
@@ -61,6 +78,7 @@ export default (io) => (socket) => {
                     // Save in "internal" cache until program is restarted. 
                     // supposed to avoid multiple requests
                     checkedMediaCacheUrls[member.url].mediaType = result[0].media_type;
+                    checkedMediaCacheUrls[member.url].timestamp = new Date().getTime();
                     response({ type: "success", isCached: true, mediaType: result[0].media_type });
                 }
             }

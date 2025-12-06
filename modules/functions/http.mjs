@@ -1,11 +1,19 @@
-import {server, serverconfig, http, https, app, setServer, fs} from "../../index.mjs";
+import {server, serverconfig, http, https, app, setServer, fs, saveConfig} from "../../index.mjs";
 import Logger from "./logger.mjs";
 
 var serverconfigEditable = serverconfig;
 
 export function checkSSL(){
-    if(serverconfig.serverinfo.ssl.enabled == 1){
+    // if ssl is disabled but the file exists, enable ssl and delete the file
+    if(serverconfig.serverinfo.ssl.enabled == 0){
+        if(fs.existsSync("./configs/ssl.txt")){
+            serverconfig.serverinfo.ssl.enabled = 1;
+            saveConfig(serverconfig)
+            fs.unlinkSync("./configs/ssl.txt");
+        }
+    }
 
+    if(serverconfig.serverinfo.ssl.enabled == 1){
         setServer(https.createServer({
             key: fs.readFileSync(serverconfig.serverinfo.ssl.key),
             cert: fs.readFileSync(serverconfig.serverinfo.ssl.cert),

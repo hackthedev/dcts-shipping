@@ -16,14 +16,16 @@ import {
     bcrypt,
     fs, signer
 } from "../../index.mjs"
-import {banIp, generateGid, getNewDate, hasPermission, resolveRolesByUserId} from "./chat/main.mjs";
+import {banIp, generateGid, getNewDate, getSocketIp, hasPermission, resolveRolesByUserId} from "./chat/main.mjs";
 import {consolas} from "./io.mjs";
 import Logger from "./logger.mjs";
 import path from "path";
 import {powVerifiedUsers} from "../sockets/pow.mjs";
 import {sendSystemMessage} from "../sockets/home/general.mjs";
-import {encodeToBase64} from "./mysql/helper.mjs";
+import {decodeFromBase64, encodeToBase64} from "./mysql/helper.mjs";
 import {exec, spawn} from "node:child_process";
+import {queryDatabase} from "./mysql/mysql.mjs";
+import {checkMemberMigration} from "./migrations/memberJsonToDb.mjs";
 
 var serverconfigEditable;
 
@@ -216,8 +218,48 @@ export async function handleTerminalCommands(command, args) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     try {
+        if(command === "rotateMemberTokens"){
+            for (const memberId of Object.keys(serverconfig.servermembers)) {
+                let member = serverconfig.servermembers[memberId];
+                if(member.token){
+                    member.token = generateId(48);
+                    Logger.info(`Rotated token for member ${member.id}`)
+                }
+            }
+
+            await saveConfig(serverconfig);
+            Logger.success("Rotated all member tokens");
+            return;
+        }
+        if(command === "load"){
+            const mem = process.memoryUsage();
+            Logger.info(`RAM usage: ${(mem.heapUsed / 1024 / 1024).toFixed(1)} MB`);
+            return;
+        }
+        if (command === 'migrateMessages') {
+            if(serverconfig.serverinfo.sql.enabled === true){
+                let messages = await queryDatabase("SELECT * FROM messages");
+                if(messages.length > 0){
+                    for(let message of messages){
+                        let decodedMessage = JSON.parse(decodeFromBase64(message.message));
+
+                        Logger.info(`Migrating message ${decodedMessage.messageId}, setting timestamp to ${decodedMessage.timestamp}`)
+                        await queryDatabase(`UPDATE messages set createdAt = ? WHERE messageId = ?`, [decodedMessage.timestamp, decodedMessage.messageId])
+                    }
+                    Logger.success("Migration done!")
+                }
+            }
+            else{
+                Logger.warn("SQL needs to be enabled and configurated inside the config.json. Its currently disabled!")
+            }
+
+            return;
+        }
+        if (command == 'migrateMembers') {
+            await checkMemberMigration(true);
+        }
         if (command == 'reload') {
-            reloadConfig();
+            await reloadConfig();
             consolas("Reloaded config".cyan);
         }
         if (command == 'debug') {
@@ -532,6 +574,8 @@ export function checkBool(value, type) {
 
 export function checkConfigAdditions() {
 
+    checkObjectKeys(serverconfig, "serverinfo.defaultTheme", "default.css")
+
     // livekit VC
     checkObjectKeys(serverconfig, "serverinfo.livekit.enabled", true)
     checkObjectKeys(serverconfig, "serverinfo.livekit.key", "dev")
@@ -557,12 +601,6 @@ export function checkConfigAdditions() {
         </p>    
     `)
 
-    // system user account
-    checkObjectKeys(serverconfig, "servermembers.system.id", "system")
-    checkObjectKeys(serverconfig, "servermembers.system.displayName", "System")
-    checkObjectKeys(serverconfig, "servermembers.system.avatar", "/img/default_icon.png")
-    checkObjectKeys(serverconfig, "servermembers.system.token", "")
-
     // home settings
     checkObjectKeys(serverconfig, "serverinfo.home.banner_url", "")
     checkObjectKeys(serverconfig, "serverinfo.home.title", "Default Server Title")
@@ -581,7 +619,6 @@ export function checkConfigAdditions() {
 
 
     checkObjectKeys(serverconfig, "groups.*.channels.categories.*.channel.*.msgCount", 0)
-    checkObjectKeys(serverconfig, "servermembers.*.pow", "")
     checkObjectKeys(serverconfig, "serverinfo.slots.limit", 100)
     checkObjectKeys(serverconfig, "serverinfo.slots.reserved", 4)
     checkObjectKeys(serverconfig, "serverinfo.slots.ipWhitelist", [
@@ -751,7 +788,6 @@ export function checkObjectKeys(obj, path, defaultValue) {
     }
 
     recursiveCheck(obj, 0);
-    saveConfig(obj);
 }
 
 
@@ -833,22 +869,6 @@ export function validateMemberId(id, socket, token, bypass = false) {
     }
 
     if (!powVerifiedUsers.includes(socket.id)) {
-
-        /*
-        sendMessageToUser(socket.id, JSON.parse(
-            `{
-                "title": "Verification Pending",
-                "message": "Your identity security is too low.#Please wait for your client to adjust",
-                "buttons": {
-                    "0": {
-                        "text": "Ok",
-                        "events": "closePrompt();"
-                    }
-                },
-                "type": "error",
-                "popup_type": "confirm"
-            }`)); */
-
         return false;
     }
 
@@ -858,16 +878,28 @@ export function validateMemberId(id, socket, token, bypass = false) {
 
     // check member token if present
     if(id && token){
+        let memberObject = serverconfig.servermembers[id];
+        if(memberObject) checkMemberBan(socket, memberObject);
+
         if(serverconfig.servermembers[id]?.token !== token){
+            return false;
+        }
+
+        // if is banned deny all connections
+        if(serverconfig.servermembers[id]?.isBanned === 1){
             return false;
         }
     }
 
-    if (id.length === 12 && isNaN(id) === false) {
-        return true;
-    } else {
-        return false;
+    if(id){
+        // update last online
+        serverconfig.servermembers[id].lastOnline = new Date().getTime();
+        if(serverconfig.servermembers[id]?.onboarding === false){
+            return false;
+        }
     }
+
+    return id.length === 12 && isNaN(id) === false;
 }
 
 export function escapeHtml(text) {
@@ -928,27 +960,12 @@ export function tenorCallback_search(responsetext, id) {
 
     // load the GIFs -- for our example we will load the first GIFs preview size (nanogif) and share size (gif)
 
+    const targetSocket = [...io.sockets.sockets.values()]
+        .find(s => s.data.memberId === id);
 
-    top_10_gifs.forEach(gif => {
-
-        io.to(usersocket[id]).emit("receiveGifImage", {
-            gif: gif.media_formats.gif.url,
-            preview: gif.media_formats.gifpreview.url
-        });
-        /*
-        document.getElementById("emoji-entry-container").insertAdjacentHTML("beforeend",
-            `<img
-                onclick="sendGif('${gif.media_formats.gif.url}')" src="${gif.media_formats.gifpreview.url}"
-                onmouseover="changeGIFSrc('${gif.media_formats.gif.url}', this);"
-                onmouseleave="changeGIFSrc('${gif.media_formats.gifpreview.url}', this);"
-                style="padding: 1%;border-radius: 20px;float: left;width: 48%; height: fit-content;">`
-            */
-    })
-
-
-    //document.getElementById("share_gif").src = top_10_gifs[0]["media_formats"]["gif"]["url"]; top_10_gifs[0]["media_formats"]["gif"]["url"]
-
-    return;
+    targetSocket.emit("receiveGifImage", {
+        gifs: top_10_gifs
+    });
 
 }
 
@@ -1024,10 +1041,19 @@ export function checkMemberMute(socket, member) {
     return {result: false};
 }
 
-export function checkMemberBan(socket, member) {
-    reloadConfig();
+export function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export async function checkMemberBan(socket, member) {
+    await reloadConfig();
     serverconfigEditable = checkEmptyConfigVar(serverconfig);
-    let ip = socket.handshake.address;
+    let ip = getSocketIp(socket);
+
+    // ignore localhost ips
+    if(ip.includes("::1") || ip.includes("127.0.0.1")){
+        return {result: false, timestamp: null};
+    }
 
     if (serverconfigEditable.banlist.hasOwnProperty(member.id)) {
         console.log("Checking banlist for member ID:", member.id);
@@ -1068,7 +1094,11 @@ export function checkMemberBan(socket, member) {
         }
     }
 
-    return {result: false};
+    if(serverconfig.servermembers[member?.id].isBanned === 1){
+        return {result: true, timestamp: null};
+    }
+
+    return {result: false, timestamp: null};
 }
 
 export async function hashPassword(password) {
@@ -1082,15 +1112,44 @@ export async function validatePassword(password, hash) {
     return isMatch;
 }
 
+export function getRoleCastingObject(role) {
+    role = copyObject(role);
+
+    if (!role || typeof role !== "object") {
+        console.error("getRoleCastingObject: Invalid input: Expected an object");
+        return;
+    }
+
+    const keysToDelete = [
+        "token",
+        "members",
+        "permissions"
+    ]; // Keys to always delete
+
+    keysToDelete.forEach(key => {
+        if (key in role) {
+            delete role[key];
+        }
+    });
+
+    return role;
+}
+
 export function getCastingMemberObject(member) {
     member = copyObject(member);
 
     if (!member || typeof member !== "object") {
-        console.error("Invalid input: Expected an object");
+        console.error("getCastingMemberObject: Invalid input: Expected an object");
         return;
     }
 
-    const keysToDelete = ["password", "token", "loginName", "pow"]; // Keys to always delete
+    const keysToDelete = [
+        "password",
+        "token",
+        "loginName",
+        "pow",
+        "rowId"
+    ]; // Keys to always delete
 
     keysToDelete.forEach(key => {
         if (key in member) {
@@ -1101,8 +1160,8 @@ export function getCastingMemberObject(member) {
     return member;
 }
 
-export function findAndVerifyUser(loginName, password) {
-    reloadConfig();
+export async function findAndVerifyUser(loginName, password) {
+    await reloadConfig();
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
     let serverMembers = serverconfigEditable.servermembers;
 

@@ -5,14 +5,14 @@ import {copyObject, generateId, sendMessageToUser, validateMemberId} from "../fu
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('importAccount', function (member, response) {
+    socket.on('importAccount', async function (member, response) {
         try{
             // some funky code here
             let importAccountData = member.account;
             let existingAccountData = serverconfig.servermembers[importAccountData.id];
 
             // lets check if the account already exists
-            if(existingAccountData){
+            if(existingAccountData && Object.keys(existingAccountData).length !== 0){
                 if(existingAccountData?.token !== importAccountData?.token) response({ error: "Account already exists and token doesnt match!"})
                 if(existingAccountData?.password !== importAccountData?.password) response({ error: "Account already exists and password doesnt match!"})
                 if(existingAccountData?.pow !== importAccountData?.pow) response({ error: "Account already exists and identity doesnt match!"})

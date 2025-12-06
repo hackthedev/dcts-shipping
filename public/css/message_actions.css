@@ -1,43 +1,38 @@
-.message-profile-content-message .modActions{
+.message-container .messageActions{
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+
     visibility: hidden;
     height: 0;
-    background-color: rgba(89, 93, 96, 0.3);
     border-radius: 6px;
-    padding-top: 20px !important;
+    position: absolute;
+    margin-left: auto;
+    right: 0;
+    padding: 4px;
+
+    gap: 8px;
+    background-color: hsl(from var(--main) h s calc(l * 2.75));
+    margin-top: -4px;
 }
 
-.message-profile-content-message .modActions button{
-    border: 2px solid white;
-    background-color: #2C3137;
+.message-container .messageActions button:hover{
+    background-color: hsl(from var(--main) h s calc(l * 2));
+}
+.message-container .messageActions button{
     color: white;
+    background-color: transparent;
+    border: none;
+    border-radius: 4px;
 
-    font-size: 8px;
+    font-size: 12px;
     font-weight: bold;
-
-    padding: 3px 6px;
-    margin: 6px;
-    border-radius: 50%;
     cursor: pointer;
+    text-align: center;
 }
 
-.message-profile-content-message:hover .modActions {
+.message-container .content:hover .messageActions {
     visibility: visible;
-    height: auto;
-}
-.message-profile-content-message.pending{
-    background-color: rgba(255, 165, 0, 0.57);
-    padding: 8px;
-    border-radius: 6px;
-}
-
-.message-profile-content-message .modActions button.approve{
-    background-color: rgba(61, 244, 61, 0.53);
-}
-
-.message-profile-content-message .modActions button.reject{
-    background-color: rgba(250, 172, 0, 0.76);
-}
-
-.message-profile-content-message .modActions button.delete{
-    background-color: indianred;
+    height: fit-content;
+    width: fit-content;
 }

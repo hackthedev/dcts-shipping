@@ -1,6 +1,8 @@
 const customPrompts = new Prompt();
 getLogs()
 
+window.getLogs = getLogs;
+
 socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "viewAuditLog" }, function (response) {
 
     if(response.permission == "denied"){

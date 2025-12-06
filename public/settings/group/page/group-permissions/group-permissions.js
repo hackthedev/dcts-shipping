@@ -1,13 +1,18 @@
+window.loadRolePerms  = loadRolePerms;
+window.addRole  = addRole;
+
+
 var serverconfigName;
 var editGroup = {};
 
 var serverRoleResponse = {};
 var editGroup = "";
 var currentRoleId = "";
+let permListPage = null;
 
 setupNotify();
 
-currentGroupId = getUrlParams("id");
+let currentGroupId = getUrlParams("id");
 
 socket.emit("getGroupInfo", { id: UserManager.getID(), token: UserManager.getToken(), group: currentGroupId }, function (response) {
     try {
@@ -90,7 +95,7 @@ socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getT
 
 function removeRole(id) {
 
-    socket.emit("removeRoleFromGroup", { id: getID(), token: getToken(), role: id, group: currentGroupId }, function (response) {
+    socket.emit("removeRoleFromGroup", { id: UserManager.getID(), token: UserManager.getToken(), role: id, group: currentGroupId }, function (response) {
         notify(response.msg, response.type, 2000, null, true);
     });
 }
@@ -115,7 +120,7 @@ function addRole() {
             }
 
 
-            socket.emit("addRoleToGroup", { id: getID(), token: getToken(), role: roleId, group: currentGroupId }, function (response) {
+            socket.emit("addRoleToGroup", { id: UserManager.getID(), token: UserManager.getToken(), role: roleId, group: currentGroupId }, function (response) {
                 notify(response.msg, response.type, 2000, null, true);
             });
         });
@@ -127,7 +132,7 @@ function savePermissions() {
     console.log(editGroup.permissions[currentRoleId]);
     console.log(currentGroupId);
 
-    socket.emit("updateGroupPermissions", { id: getID(), token: getToken(), roleId: currentRoleId, groupId: currentGroupId, perms: editGroup.permissions[currentRoleId] }, function (response) {
+    socket.emit("updateGroupPermissions", { id: UserManager.getID(), token: UserManager.getToken(), roleId: currentRoleId, groupId: currentGroupId, perms: editGroup.permissions[currentRoleId] }, function (response) {
 
         if (response.type == "success") {
             notify(response.msg, "success", 2000, null, true)

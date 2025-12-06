@@ -1,8 +1,12 @@
 #!/bin/bash
 #echo "Starting DCTS Check Script"
+name="$1"
+if [[ -z "$name" ]]; then
+  echo "Couldnt check dcts as no screen session name was supplied"
+  validArgs=0
+fi
 
-sleep 4
-if ! screen -list | grep -q "dcts"; then
+if ! screen -list | grep -q "$name"; then
     echo "is not running"
-    sh /home/dcts/sv/start.sh
+    bash /home/dcts/sv/start.sh "$name"
 fi

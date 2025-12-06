@@ -1,0 +1,15 @@
+
+@media (max-width: 1050px) {
+    #navigation{
+        display: none;
+    }
+
+    #content {
+        width: 100% !important;
+        overflow: auto;
+    }
+
+    #preview {
+        display: none;
+    }
+}

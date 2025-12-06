@@ -1,58 +1,66 @@
-
-
-#leftSideMenu {
-    float: left;
-    height: calc(100% - 40px);
-    width: auto;
-    background-color: #1E2124;
-
+.mobilePanel{
     display: none;
+    width: 100%;
+    height: 100%;
+    transition: all 1000ms ease-in-out;
+    overflow: hidden;
+    position: absolute;
+    z-index: 20;
 }
 
 #rightSideMenu {
-    float: left;
-    height: calc(100% - 40px);
-    width: auto;
-    background-color: #1E2124;
+    right: 0 !important;
+    left: auto;
+}
 
-    display: none;
+#rightSideMenu.open {
+    width: 100%;
+}
+
+#mobile_GroupListContainer {
+    display: flex;
+    flex-grow: 0;
+    width: fit-content;
+}
+
+#mobile_ChannellistContainer {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
 }
 
 #mobile_GroupAndChannelContainer {
-    z-index: 9999999;
-    width: calc(100% - 40px) !important;
-    margin-left: 35px;
-    height: calc(100% - 40px);
-    max-width: 420px;
+    display: flex;
 
-    background-color: rgb(49, 53, 60);
+    z-index: 10;
+    width: calc(100%) !important;
+    height: calc(100% - 40px);
+
+    background-color: hsl(from var(--main) h s calc(l * 1.9) / 100%);
     position: absolute;
-    display: none;
-    float: left;
+    flex-direction: row;
 }
 
 #mobile_memberlist {
-    width: calc(100% - 60px) !important;
+    display: flex;
+    width: calc(100%) !important;
     /*margin-left: calc(-100% + 35px + 420p);*/
+    height: calc(100% - 40px);
 
-    height: calc(100% - 40px - 20px);
-    max-width: 420px;
 
-    background-color: rgb(37, 41, 47);
-    position: absolute;
-    display: none;
-    float: left;
+    background-color: hsl(from var(--main) h s calc(l * 1.9) / 100%);
+    flex-direction: column;
     padding: 10px;
     overflow-x: auto;
+    position: absolute;
+    z-index: 10;
 
 }
 
 #mobile_GroupList {
-    width: calc(45px + 20px);
+    width: auto;
     height: calc(100%);
-
-    float: left;
-    background-color: rgb(37, 41, 47);
+    background-color: hsl(from var(--main) h s calc(l * 1.5));
 }
 
 #mobile_GroupList .server-entry {
@@ -64,22 +72,30 @@
 }
 
 #mobile_groupBanner img {
-    width: calc(100% - 65px);
+    width: calc(100%);
     height: 160px;
     float: left;
+    margin-bottom: -20px !important;
 
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: 100% 100%;
 }
 
+#mobile_channelList .sortable-channels{
+    margin-top: 2px;
+    margin-bottom: 24px;
+}
+
+#mobile_channelList hr{
+    margin-bottom: 20px;
+}
+
 
 #mobile_channelList {
-    display: block;
-    float: left;
     padding: 8px;
 
-    width: calc(100% - 16px - 65px);
+    width: calc(100% );
     height: calc(100% - 160px - 16px);
     overflow-y: auto;
 }
@@ -117,15 +133,16 @@
     background-color: transparent;
     background-image: url("/img/sandwich.png");
     background-size: contain;
-
-    float: left;
-    display: block;
 }
 
 @media (max-width: 1050px) {
 
     body {
         overflow-x: hidden;
+    }
+
+    #networkServers {
+        display: none !important;
     }
 
     #serverbanner-container,
@@ -152,18 +169,19 @@
         width: 100% !important;
     }
 
-    #content-container {
-        width: calc(100% - 35px - 35px) !important;
-        border-radius: 0;
-    }
-
     #header {
         width: calc(100% - 16px);
     }
 
-    #leftSideMenu,
-    #rightSideMenu {
-        display: block;
+    #message-actions-image{
+        position: absolute;
+        bottom: 36px;
+        right: 10px;
+        z-index: 2;
+    }
+
+    #content-container #content{
+        margin-bottom: 10%;
     }
 
     .editor-container {

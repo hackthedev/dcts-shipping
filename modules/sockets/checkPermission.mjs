@@ -46,6 +46,12 @@ let permList = {
         category: ["serverRoles"],
         description: "Allows changing server name and description"
     },
+    "manageNetworkServers": {
+        name: "Manage Network Servers",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: "Allows managing servers discovered from the network that are displayed on the discovery page"
+    },
     "viewAuditLog": {
         name: "View Audit Log",
         type: "checkbox",

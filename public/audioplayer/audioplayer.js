@@ -2,8 +2,8 @@ function createAudioPlayerHTML(src) {
     const filename = src.split('/').pop().split("_").splice(2).join('_');
 
     return `
-        <div class="audio-player">
-            <audio src="${src}" ontimeupdate="updateTime(this)" onloadedmetadata="loadMetadata(this)" onplay="updatePlayPauseButton(this, true)" onpause="updatePlayPauseButton(this, false)"></audio>
+        <div class="audio-player" data-media-type="audio">
+            <audio src="/proxy?url=${encodeURIComponent(src)}" ontimeupdate="updateTime(this)" onloadedmetadata="loadMetadata(this)" onplay="updatePlayPauseButton(this, true)" onpause="updatePlayPauseButton(this, false)"></audio>
             <div class="audio-info">
                 <span class="audio-filename">${filename}</span>
             </div>

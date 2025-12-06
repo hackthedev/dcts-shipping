@@ -1,6 +1,10 @@
 const customPrompts = new Prompt();
 getInviteCodes()
 
+window.getInviteCodes = getInviteCodes;
+window.createAccessCode = createAccessCode;
+window.deleteInvite = deleteInvite;
+
 socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageInvites" }, function (response) {
 
     if(response.permission == "denied"){

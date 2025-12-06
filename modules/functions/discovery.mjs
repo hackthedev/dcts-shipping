@@ -3,6 +3,7 @@ import {queryDatabase} from "./mysql/mysql.mjs";
 import {extractHost} from "./http.mjs";
 import {serverconfig} from "../../index.mjs";
 import logger from "./logger.mjs";
+import {sleep} from "../functions/main.mjs"
 
 
 async function syncHosts(){
@@ -16,13 +17,13 @@ async function syncHosts(){
         []
     );
 
-
     // if servers exists
     if(existingServerRows.length > 0){
         // sync with server
         for (const row of existingServerRows) {
-            if(row.address.includes("localhost:")) return;
-            checkHostDiscovery(row.address, true);
+            if(row.address.includes("localhost") || row.address.includes("127.0.0.1")) return;
+            await checkHostDiscovery(row.address, true);
+            await sleep(2000);
         }
     }
 }
@@ -39,7 +40,11 @@ export function syncDiscoveredHosts(skipInterval){
 }
 
 export async function getDiscoveredHosts(){
-    return await queryDatabase(`SELECT * FROM network_servers WHERE status <> "blocked" LIMIT 200`, []);
+    return await queryDatabase(`SELECT address FROM network_servers WHERE status <> "blocked" AND status <> "pending" LIMIT 50`, []);
+}
+
+export async function getAllDiscoveredHosts(){
+    return await queryDatabase(`SELECT * FROM network_servers LIMIT 50`, []);
 }
 
 export async function discoverHosts(clientKnownHosts){
@@ -59,7 +64,7 @@ export async function discoverHosts(clientKnownHosts){
     }
 }
 
-async function checkHostDiscovery(address, forceSync = false){
+export async function checkHostDiscovery(address, forceSync = false){
     if(serverconfig.serverinfo?.sql?.enabled !== true) return; // sql needed
 
     let existingServerRows = await queryDatabase(`SELECT * FROM network_servers WHERE address = ? and status <> "blocked"`, [extractHost(address)]);
@@ -69,7 +74,7 @@ async function checkHostDiscovery(address, forceSync = false){
 
     try{
         let random = String(Math.random() * 100).split(".")[1];
-        let serverDiscoveryResponse = await fetch(`http://${extractHost(address)}/discover?ran=${random}` )
+        let serverDiscoveryResponse = await fetch(`https://${extractHost(address)}/discover?ran=${random}` )
 
         // seems like a valid instance!!
         if(serverDiscoveryResponse?.status === 200){
@@ -86,6 +91,10 @@ async function checkHostDiscovery(address, forceSync = false){
                             data = VALUES(data),
                             last_sync = NOW()`,
                     [extractHost(address), serverconfig.serverinfo?.discovery?.defaultStatus, JSON.stringify(jsonResponse)])
+
+                if(forceSync){
+                    Logger.info(`Synced with host ${extractHost(address)}`);
+                }
             }
         }
         else{

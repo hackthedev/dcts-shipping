@@ -96,6 +96,26 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             {
                 icon: "&#10022;",
+                text: "Copy Invite Link",
+                callback: async (data) => {
+                    let element = data?.element;
+                    console.log(element)
+                    let channelId = element?.getAttribute("data-channel-id");
+                    let categoryId = element?.getAttribute("data-category-id");
+                    if(!channelId || !categoryId){
+                        console.warn("Couldnt get copy link because channel or category wasnt found", categoryId, channelId)
+                        return;
+                    }
+
+                    navigator.clipboard.writeText(`${window.location.origin}?group=${UserManager.getGroup()}&category=${categoryId}&channel=${channelId}`);
+                },
+                condition: async (data) => {
+                    return await (await checkPermission("manageChannels")).permission === "granted"
+                },
+                type: "success"
+            },
+            {
+                icon: "&#10022;",
                 text: "Set as default channel",
                 callback: async (data) => {
                     let channelId = getChannelIdFromElement(data.element);

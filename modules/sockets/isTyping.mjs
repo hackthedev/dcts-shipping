@@ -1,46 +1,40 @@
-import { serverconfig, typingMembers, typingMembersTimeout, xssFilters } from "../../index.mjs";
+import { serverconfig } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
-import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { escapeHtml } from "../functions/main.mjs";
+
+const typingMembers = {};
+const typingTimeouts = {};
 
 export default (io) => (socket) => {
-    // socket.on code here
-    socket.on('isTyping', function (member) {
-        // todo : check for perms to view channel
-        if (validateMemberId(member.id, socket, null, true) == true
-            && serverconfig.servermembers[member.id].token == member.token) {
 
-            //consolas("Typing room: " + member.room);
-            //consolas("Typing member id: " + member.id);
+    socket.on('isTyping', member => {
 
-            // if user is muted dont do anything
-            if (serverconfig.mutelist.hasOwnProperty(member.id)) {
-                return;
-            }
+        if (!hasPermission(member.id, "viewChannel", member.room.split("-")[2])) return;
+        if (!hasPermission(member.id, "sendMessages", member.room.split("-")[2])) return;
 
-            var username = serverconfig.servermembers[member.id].name;
-            if (typingMembers.includes(username) == false) {
-                typingMembers.push(escapeHtml(username));
-            }
+        const room = member.room;
+        const id = member.id;
 
-            clearTimeout(typingMembersTimeout[username]);
-            typingMembersTimeout[username] = setTimeout(() => {
+        if (!typingMembers[room]) typingMembers[room] = new Set();
+        if (!typingTimeouts[room]) typingTimeouts[room] = {};
 
-                if (typingMembers.includes(username) == true) {
-                    const index = typingMembers.indexOf(escapeHtml(username));
-                    if (index !== -1) {
-                        typingMembers.splice(index, 1); // Remove the element at the found index
-                    }
+        typingMembers[room].add(id);
 
-                }
+        clearTimeout(typingTimeouts[room][id]);
+        typingTimeouts[room][id] = setTimeout(() => {
+            typingMembers[room].delete(id);
+            io.in(room).emit("memberTyping", convertTypingMembers(room));
+        }, 4000);
 
-                io.in(member.room).emit("memberTyping", typingMembers);
-
-            }, 4 * 1000);
-
-            //console.log(typingMembersTimeout[username]);
-
-            io.in(member.room).emit("memberTyping", typingMembers);
-        }
+        io.in(room).emit("memberTyping", convertTypingMembers(room));
     });
+};
+
+function convertTypingMembers(room) {
+    if (!typingMembers[room]) return [];
+
+    return [...typingMembers[room]].map(id =>
+        escapeHtml(serverconfig.servermembers[id].name)
+    );
 }

@@ -12,9 +12,8 @@ export default (io) => (socket) => {
             && serverconfig.servermembers[member.id].token == member.token) {
 
             let channel = resolveChannelById(member?.channelId);
-
             if (hasPermission(member.id, ["viewChannel", "viewChannelHistory"], member.channelId)) {
-                io.to(usersocket[member.id]).emit("receiveChatlog", {data:  await getSavedChatMessage(member.groupId, member.categoryId, member.channelId, member.index), type: channel?.type});
+                response({data:  await getSavedChatMessage(member.groupId, member.categoryId, member.channelId, member.index), type: channel?.type});
             }
             else{
                 response?.({type: "error", error: "denied"})

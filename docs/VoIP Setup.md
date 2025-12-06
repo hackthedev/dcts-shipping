@@ -14,10 +14,10 @@ The following document is based on the setup of the official instance and works 
 
 Its recommended to create two subdomains for the VoIP system to make things easier. The subdomains are used for the reverse proxies and they should point to the server where you run DCTS and livekit.
 
-| Type | Name    | Content             | Proxy needed? |
-| ---- | ------- | ------------------- | ------------- |
-| A    | livekit | your.public.ip.here | Yes           |
-| A    | turn    | your.public.ip.here | No            |
+| Type  | Name | Content         | Proxy needed? |
+| ----- | ---- | --------------- | ------------- |
+| A     | chat | your.ip.address | Yes           |
+| CNAME | lk   | chat.domain.com | Yes           |
 
 > [!WARNING]
 >

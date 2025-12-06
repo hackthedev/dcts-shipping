@@ -77,8 +77,13 @@ While DCTS is an app, its going to be part of a bigger ecosystem that i plan to 
 ## Installing
 ### Docker Installation
 
+> [!IMPORTANT]
+>
+> Make sure that you have a reverse proxy setup for your chat instance! Checkout the docs folder!
+
 ```bash
-sudo docker run --name dcts-server -p 2052:2052 ghcr.io/hackthedev/dcts-shipping
+wget https://raw.githubusercontent.com/hackthedev/dcts-shipping/refs/heads/beta/docker-compose.yml
+docker compose up
 ```
 
 #### Accessing the server
@@ -120,6 +125,7 @@ Once **successfully** executed, your instance should be available at `chat.your-
 ------
 
 ## Tested Node Versions
+- ✔️ v24.11.1
 - ✔️ v21.7.3
 - ✔️ v20.19.2
 - ✔️ v18.20.2

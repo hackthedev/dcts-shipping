@@ -42,7 +42,7 @@ services:
     image: livekit/livekit-server:latest
     command: --config /etc/livekit.yaml
     volumes:
-      - dcts-livekit-config:/etc/livekit.yaml
+      - ./livekit.yaml:/etc/livekit.yaml # LiveKit Config (https://github.com/hackthedev/dcts-shipping/blob/main/livekit.yaml)
     ports:
       - 7880:7880 # LiveKit API/WebSocket, must be reverse proxied
       - 7881:7881 # ICE/TCP signaling, expose directly
@@ -54,5 +54,4 @@ services:
 volumes:
   dcts-mariadb-data:
   dcts-redis-data:
-  dcts-livekit-config:
 

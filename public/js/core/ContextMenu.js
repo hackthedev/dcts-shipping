@@ -4,59 +4,53 @@ class ContextMenu {
     static scope = document.body
 
     static clickEvents = {}
+    static dblclickEvents = {}
     static contextMenus = {};
     static ContextMenuHTML = null;
+
+    static matchesSelector(el, sel){
+        let match = el.matches(sel) || el.closest(sel);
+        if (!match && sel.startsWith(".") && sel.includes(".")) {
+            const classes = sel.slice(1).split(".");
+            match = classes.every(c => el.classList.contains(c));
+        }
+        if (!match && sel === "body") match = el === document.body;
+        return match;
+    }
 
     static init() {
         ContextMenu.scope = document.body;
         this.ContextMenuHTML = document.getElementById("context-menu");
 
         ContextMenu.scope.addEventListener("click", (event) => {
-
             const {clientX: mouseX, clientY: mouseY} = event;
-            var clickedElement = event.target
+            const el = event.target;
 
-            if (event.target.offsetParent !== this.ContextMenuHTML) {
-                this.hideContextMenu()
+            if (el.offsetParent !== this.ContextMenuHTML) {
+                this.hideContextMenu();
             }
 
-            Object.keys(this.clickEvents).forEach(key => {
-                let clickEvent = this.clickEvents[key];
-                let clickEventCondition = clickEvent.condition;
-                let clickEventCallback = clickEvent.callback;
-                let clickElements = clickEvent.elements;
-
-                clickElements.forEach(async element => {
-                    let elementId = element.substring(1, element.length);
-                    let elementType = null;
-
-                    if (element.startsWith(".")) elementType = "class"
-                    if (element.startsWith("#")) elementType = "id"
-
-                    let didMatch = false;
-
-                    // selector flag
-                    if (element.includes(" ")) {
-                        if (clickedElement.closest(element)) didMatch = true;
+            Object.entries(this.clickEvents).forEach(([_, {elements, callback, condition}]) => {
+                elements.forEach(async sel => {
+                    if (this.matchesSelector(el, sel)) {
+                        el.style.cursor = "pointer";
+                        const ctx = {element: el, X: mouseX, Y: mouseY, event};
+                        if (!condition || (await condition(ctx)) === true) await callback(ctx);
                     }
+                });
+            });
+        });
 
-                    if (
-                        (elementType === "class" && clickedElement?.classList.contains(elementId)) ||
-                        (elementType === "id" && clickedElement?.id === elementId) ||
-                        didMatch === true
-                    ) {
-                        // some small nice addition
-                        clickedElement.style.cursor = "pointer";
+        ContextMenu.scope.addEventListener("dblclick", (event) => {
+            const el = event.target;
 
-                        if(clickEventCondition && clickEventCallback){
-                            if(await clickEventCondition({element: clickedElement, X: mouseX, Y: mouseY}) === true) clickEventCallback({element: clickedElement, X: mouseX, Y: mouseY, event});
-                        }
-                        else{
-                            if(clickEventCallback) await clickEventCallback({element: clickedElement, X: mouseX, Y: mouseY, event});
-                        }
+            Object.entries(this.dblclickEvents).forEach(([_, {elements, callback, condition}]) => {
+                elements.forEach(async sel => {
+                    if (this.matchesSelector(el, sel)) {
+                        const ctx = {element: el, event};
+                        if (!condition || (await condition(ctx)) === true) await callback(ctx);
                     }
-                })
-
+                });
             });
         });
 
@@ -64,69 +58,36 @@ class ContextMenu {
             event.preventDefault();
 
             const {clientX: mouseX, clientY: mouseY} = event;
-            var clickedElement = document.elementFromPoint(mouseX, mouseY);
-
-            for (const key of Object.keys(this.contextMenus)) {
-                let contextMenuElements = this.contextMenus[key].elements;
-
-                for (const element of contextMenuElements) {
-                    let elementId = element.substring(1);
-                    let elementType = null;
-
-                    if (element.startsWith(".")) elementType = "class";
-                    if (element.startsWith("#")) elementType = "id";
-
-                    let didMatch = false;
-                    if (element.includes(" ")) {
-                        if (clickedElement.matches(element)) didMatch = true;
-                    }
-
-
-                    if (
-                        (elementType === "class" && clickedElement?.classList.contains(elementId)) ||
-                        (elementType === "id" && clickedElement?.id === elementId) ||
-                        didMatch === true
-                    ) {
-                        let contextMenuItems = this.contextMenus[key].items;
+            const el = document.elementFromPoint(mouseX, mouseY);
+            for (const {elements, items} of Object.values(this.contextMenus)) {
+                for (const sel of elements) {
+                    if (this.matchesSelector(el, sel)) {
                         this.resetContextMenuItem();
 
-                        for (const item of contextMenuItems) {
-                            let itemText = item.text;
-                            let itemCallback = item.callback;
-                            let itemCondition = item.condition;
-                            let itemType = item.type;
-                            let itemIcon = item.icon;
-
-                            if (itemCondition) {
-                                if (await itemCondition({ element: clickedElement }) === true) {
-                                    await this.displayContextMenuItem(itemText, itemCallback, clickedElement, itemType, itemIcon);
-                                }
-                            } else {
-                                await this.displayContextMenuItem(itemText, itemCallback, clickedElement, itemType, itemIcon);
-                            }
+                        for (const {text, callback, condition, type, icon} of items) {
+                            const ctx = {element: el};
+                            if (!condition || (await condition(ctx)) === true)
+                                await this.displayContextMenuItem(text, callback, el, type, icon);
                         }
 
                         this.showContextMenu(mouseY, mouseX);
+                        return;
                     }
                 }
             }
-
         });
     }
 
-
     static registerClickEvent(name, elements, callback, condition){
-        if(!this.clickEvents[name]) this.clickEvents[name] = {};
+        this.clickEvents[name] = {elements, callback, condition};
+    }
 
-        this.clickEvents[name].elements = elements;
-        this.clickEvents[name].callback = callback;
-        this.clickEvents[name].condition = condition;
+    static registerDoubleClickEvent(name, elements, callback, condition){
+        this.dblclickEvents[name] = {elements, callback, condition};
     }
 
     static registerContextMenu(name, elements, items) {
-        if (!this.contextMenus[name]) this.contextMenus[name] = {};
-        this.contextMenus[name].elements = elements;
-        this.contextMenus[name].items = items;
+        this.contextMenus[name] = {elements, items};
     }
 
     static resetContextMenuItem() {
@@ -158,7 +119,6 @@ class ContextMenu {
                     break;
             }
         }
-
 
         this.ContextMenuHTML.appendChild(item);
     }

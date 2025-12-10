@@ -636,7 +636,7 @@ const tables = [
             {name: "aboutme", type: "text DEFAULT ''"},
             {name: "icon", type: "longtext DEFAULT ''"},
             {name: "banner", type: "longtext DEFAULT ''"},
-            {name: "joined", type: "bigint NOT NULL"},
+            {name: "joined", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
             {name: "isOnline", type: "BOOLEAN DEFAULT FALSE"},
             {name: "lastOnline", type: "bigint DEFAULT 0"},
             {name: "isBanned", type: "BOOLEAN DEFAULT FALSE"},
@@ -754,6 +754,11 @@ process.stdin.on('data', function (text) {
     handleTerminalCommands(command, args);
 });
 
+app.use("/uploads", express.static("uploads", {
+    maxAge: "30d",
+    immutable: true
+}));
+
 
 startServer();
 
@@ -836,16 +841,19 @@ app.post("/livekit/webhook", express.raw({type: "*/*"}), async (req, res) => {
 
 //app.use(express.urlencoded({extended: true})); // Parses URL-encoded data
 registerTemplateMiddleware(app, __dirname, fs, path, serverconfig);
+
 app.use(
-    express.static(__dirname + '/public', {
+    express.static(__dirname + '/public'/*, {
         setHeaders: (res, path) => {
             res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
             res.setHeader('Pragma', 'no-cache');
             res.setHeader('Expires', '0');
             res.setHeader('Surrogate-Control', 'no-store');
         }
-    })
-);
+    }*/)
+    );
+
+
 
 
 // Process plugins at server start

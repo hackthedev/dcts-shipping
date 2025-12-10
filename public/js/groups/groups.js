@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     AdminActions.changeGroupIcon(groupId);
                 },
                 condition: async (data) => {
-                    return await (await checkPermission("manageGroups")).permission === "granted"
+                    return await UserManager.checkPermission("manageGroups") === true
                 },
                 type: "ok"
             },

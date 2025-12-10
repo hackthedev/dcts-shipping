@@ -4,7 +4,7 @@ console.log("%c" + "People can use the console to steal your account xo !", "col
 ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
 
 const splash = new SplashScreen(document.body);
-splash.show();
+splash.show()
 
 if(!window.isSecureContext){
     splash.hide();
@@ -36,6 +36,8 @@ if(!window.isSecureContext){
 // IMPORTANT! By default, socket.io() connects to the host that
 // served the page, so we dont have to pass the server url
 var socket = io.connect()
+
+registerMentionClickEvent()
 
 socket.on("connect", async () => {
     console.log("socket connected");
@@ -104,7 +106,7 @@ ContextMenu.registerClickEvent(
         ".memberlist-container .name",
         ".memberlist-container .status",
         ".memberlist-img",
-        ".mention",
+        ".mention.member",
         // vc container
         ".vc-container .participant",
         ".vc-container .participant img",
@@ -151,6 +153,21 @@ ContextMenu.registerClickEvent(
     }
 )
 
+// close emoji box when we click outside of the emoji container
+ContextMenu.registerClickEvent(
+    "body_emojicontainer",
+    [
+        "body"
+    ],
+    async (data) => {
+        let emojiContainer = getEmojiContainerElement();
+        if(emojiContainer?.style?.display === "flex" && !emojiContainer.contains(data.element)){
+            if(data?.element?.id?.includes("message-actions-image")) return;
+            emojiContainer.style.display = "none";
+        }
+    }
+)
+
 ContextMenu.registerContextMenu(
     "memberprofile",
     [
@@ -158,7 +175,7 @@ ContextMenu.registerContextMenu(
         ".memberlist-container .name",
         ".memberlist-container .status",
         ".memberlist-img",
-        ".mention",
+        ".mention.member",
         // vc container
         ".vc-container .participant",
         ".vc-container .participant img",
@@ -584,18 +601,6 @@ function stopRecording() {
     //leaveRoom(UserManager.getRoom());
 }
 
-
-
-function mentionUser(id) {
-    const range = quill.getSelection(true);
-    if (range) {
-        quill.insertText(range.index, `<@${id}>`);
-        quill.setSelection(range.index + (`<@${id}>`).length);
-    }
-
-    focusEditor();
-}
-
 function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
     if (!event && bypassEventCheck === false) return;
 
@@ -731,7 +736,11 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
             loginName: loginNameFlag,
             publicKey: await UserManager.getPublicKey(),
             knownServers,
-            code: accessCode
+            code: accessCode,
+            pow: {
+                challenge: localStorage.getItem("pow_challenge"),
+                solution: localStorage.getItem("pow_solution")
+            }
         }, function (response) {
 
             // if we finished onboarding
@@ -766,18 +775,22 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                 });
 
                 if(initial){
+                    getChatlog();
                     getMemberList()
                     getChannelTree()
                     getServerInfo();
-                    getChatlog();
                     showGroupStats();
 
                     setTimeout(() => {
                         splash.hide()
-                    }, 1000)
+                    }, 100)
+
+
+                    focusEditor()
 
                     /* Quill Emoji Autocomplete */
                     initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
+                    initializeMentionAutocomplete(document.querySelector('.ql-editor'));
                 }
 
                 socket.emit("checkPermission", {
@@ -1263,30 +1276,10 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message, bypas
     cancelMessageReply();
 
     scrollDown("sendMessageToServer"); // forgot that
+    setTimeout(() => focusEditor(), 1)
 }
 
-function resolveMentions() {
-    var mentions = document.querySelectorAll(".message-container label.mention")
 
-    if (mentions.length <= 0) {
-        return;
-    }
-
-    mentions.forEach(mention => {
-        var userId = UserManager.getID();
-
-        if (mention.id.replace("mention-", "") == userId) {
-            mention.parentNode.style.backgroundColor = "rgba(255, 174, 0, 0.12)";
-            //mention.parentNode.style.borderRadius = "6px";
-            mention.parentNode.style.borderLeft = "3px solid rgba(255, 174, 0, 0.52)";
-            mention.parentNode.style.marginTop = "0px";
-            mention.parentNode.style.width = "calc(100% - 8px)";
-        } else {
-            mention.style.backgroundColor = "transparent";
-        }
-
-    })
-}
 
 var audio = new Audio();
 
@@ -1332,21 +1325,19 @@ let replyMessageId = null;
 
 function cancelMessageReply() {
     replyMessageId = null;
-    let editHint = editorToolbar.querySelector("#editMsgHint");
-    if (editHint) editHint.remove();
+    editorHints.innerHTML = ""
 }
 
 function cancelMessageEdit() {
-
     editor.innerHTML = "<p><br></p>";
     editMessageId = null;
-    let editHint = editorToolbar.querySelector("#editMsgHint");
-    if (editHint) editHint.remove();
+    editorHints.innerHTML = ""
 }
 
 function replyToMessage(messageId){
-    if (editorToolbar.querySelector("pre#editMsgHint") == null) {
-        editorToolbar.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageReply()'>You are replying to a message</p>`)
+    if(editMessageId) cancelMessageEdit();
+    if (replyMessageId == null && editorHints.querySelector("pre#editMsgHint") == null) {
+        editorHints.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageReply()'>You are replying to a message &#128942;</p>`)
     }
     replyMessageId = messageId;
 
@@ -1355,8 +1346,9 @@ function replyToMessage(messageId){
 
 
 function editMessage(id) {
-    if (editMessageId == null && editorToolbar.querySelector("pre.editMsgHint") == null) {
-        editorToolbar.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageEdit()'>You are editing a message</p>`)
+    if(replyMessageId) cancelMessageReply();
+    if (editMessageId == null && editorHints.querySelector("pre.editMsgHint") == null) {
+        editorHints.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageEdit()'>You are editing a message &#128942;</p>`)
     }
 
     let msgContent = document.querySelector(`.message-container .content[data-message-id="${id}"]`).cloneNode(true);
@@ -1367,6 +1359,25 @@ function editMessage(id) {
     if(msgContent.querySelector(".edit-notice")){
         msgContent.querySelector(".edit-notice").remove()
     }
+
+    // handle mentions
+    let mentions = msgContent.querySelectorAll(".mention");
+    mentions.forEach(m => {
+        let raw = "";
+
+        if (m.classList.contains("member")) {
+            raw = `<@${m.getAttribute("data-member-id")}>`;
+        } else if (m.classList.contains("role")) {
+            raw = `<!@${m.getAttribute("data-role-id")}>`;
+        } else if (m.classList.contains("channel")) {
+            raw = `<#@${m.getAttribute("data-channel-id")}>`;
+        }
+
+        m.insertAdjacentText("beforebegin", raw);
+        m.remove();
+    });
+
+
 
     // replace all iframes
     const iframes = msgContent.querySelectorAll("iframe");
@@ -1442,7 +1453,7 @@ Quill.register(EmojiBlot);
 
 
 hljs.configure({
-    languages: ['javascript', 'python', 'ruby', 'xml', 'json', 'css']
+    languages: ['javascript', 'python', 'ruby', 'xml', 'json', 'css', "bash"]
 });
 
 
@@ -1499,6 +1510,7 @@ quill.clipboard.addMatcher(Node.TEXT_NODE, function (node, delta) {
 
 var editorContainer = document.querySelector('.editor-container');
 var editorToolbar = document.getElementById("editor-toolbar");
+var editorHints = document.getElementById("editor-hints");
 var quillContainer = document.querySelector('.ql-container');
 var editor = document.querySelector('.ql-editor');
 
@@ -1813,7 +1825,6 @@ document.getElementById("message-actions-image").onclick = function (e) {
     var y = e.clientY;
 
     var emojiBox = document.getElementById("emoji-box-container");
-
     var clickedElement = document.elementFromPoint(x, y)
 
     if (clickedElement.id != "message-actions-image") {
@@ -1890,7 +1901,6 @@ function queryTenorSearch(search){
 }
 
 function listenForGifSearch(){
-
     const gifContainer = document.getElementById("gif-entry-container");
     const emojiEntryContainer = document.getElementById("emoji-entry-container");
 
@@ -1905,6 +1915,7 @@ function listenForGifSearch(){
             if (!query) return;
 
             queryTenorSearch(query);
+            gifSearchbarInput.focus();
         }, 500);
     });
 }
@@ -1927,10 +1938,9 @@ function sendGif(url) {
     if (document.querySelector('.ql-editor').innerHTML.replaceAll(" ", "").length >= 1) {
         sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), document.querySelector('.ql-editor').innerHTML);
     }
-
     sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), url, true);
-
     closeEmojiBox();
+    focusEditor()
 }
 
 function closeEmojiBox() {
@@ -1939,7 +1949,7 @@ function closeEmojiBox() {
 
     var emojiEntryContainer = document.getElementById("emoji-entry-container");
     var gifEntryContainer = document.getElementById("emoji-entry-container");
-    emojiEntryContainer.innerHTML = "";
+    //emojiEntryContainer.innerHTML = "";
 
     emojiEntryContainer.style.display = "flex";
     gifEntryContainer.style.display = "none";
@@ -1979,7 +1989,7 @@ function getGifs() {
 }
 
 function getEmojis() {
-    var emojiContainer = document.getElementById("emoji-box-container");
+    var emojiContainer = getEmojiContainerElement()
     var emojiEntryContainer = document.getElementById("emoji-entry-container");
     var gifEntryContainer = document.getElementById("gif-entry-container");
     gifEntryContainer.innerHTML = "";
@@ -1991,15 +2001,20 @@ function getEmojis() {
             //settings_icon.value = response.msg;
             //emojiContainer.innerHTML = "<div id='emoji-box-header'><h2>Emojis</h2></div>";
 
-            emojiEntryContainer.innerHTML = "";
+            //emojiEntryContainer.innerHTML = "";
             emojiEntryContainer.style.display = "flex";
             response.data.reverse().forEach(emoji => {
 
                 var emojiId = emoji.filename.split("_")[0];
                 var emojiName = emoji.filename.split("_")[1].split(".")[0];
 
+                if(hasEmojiInContainer(emojiId)){
+                    return;
+                }
+
                 const entry = document.createElement("div");
                 entry.className = "emoji-entry";
+                entry.setAttribute("data-hash", emojiId)
                 entry.title = emoji.name;
 
                 const imgWrap = document.createElement("div");
@@ -2015,11 +2030,13 @@ function getEmojis() {
                 entry.addEventListener("click", () => {
                     insertEmoji(emoji, true);
                     focusEditor();
-                    document.getElementById("emoji-box-container").style.display = "none";
+                    emojiContainer.style.display = "none";
                 });
 
                 emojiEntryContainer.appendChild(entry);
             })
+
+            removeUnusedEmojisFromContainer(response)
 
             //notify(response.msg)
         } else {
@@ -2161,6 +2178,7 @@ async function setUrl(param, isVC = false) {
     let groupId = urlData[0]?.replace("?group=", "")
     let categoryId = urlData[1]?.replace("category=", "")
     let channelId = urlData[2]?.replace("channel=", "")
+    focusEditor()
 
     if(!isVC) showHome(true)
 
@@ -2350,7 +2368,10 @@ uploadObject.addEventListener('drop', async function (e) {
     uploadObject.style.backgroundColor = '';
 
     // dont upload in vc
-    if (uploadObject.querySelector(".vc-container")) return;
+    if (uploadObject.querySelector(".vc-container")) {
+        console.warn("cant upload in vc")
+        return;
+    }
 
     const files = Array.from(e.dataTransfer.files); // Handle multiple files if needed
     const fileSize = files[0].size / 1024 / 1024; // Example: Display the size of the first file

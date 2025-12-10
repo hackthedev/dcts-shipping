@@ -1,14 +1,15 @@
 import { serverconfig } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
-import { escapeHtml } from "../functions/main.mjs";
+import {escapeHtml, validateMemberId} from "../functions/main.mjs";
 
 const typingMembers = {};
 const typingTimeouts = {};
 
 export default (io) => (socket) => {
 
-    socket.on('isTyping', member => {
+    socket.on('isTyping', async function (member) {
+        if(!validateMemberId(member?.id, socket, member?.token)) return;
 
         if (!hasPermission(member.id, "viewChannel", member.room.split("-")[2])) return;
         if (!hasPermission(member.id, "sendMessages", member.room.split("-")[2])) return;

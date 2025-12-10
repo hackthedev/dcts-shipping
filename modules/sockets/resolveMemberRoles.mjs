@@ -5,20 +5,18 @@ import {copyObject, getRoleCastingObject, sendMessageToUser, validateMemberId} f
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on("getServerRoles", function (member, response) {
+    socket.on("resolveMemberRoles", function (member, response) {
         if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            if (hasPermission(member.id, "manageRoles")) {
-                response(serverconfig.serverroles);
-            }
-            else { // users wont get full role object access
-                let userRoles = copyObject(serverconfig.serverroles);
-                for(let roleId of Object.keys(userRoles)){
-                    userRoles[roleId] = getRoleCastingObject(userRoles[roleId])
-                }
+            if(!member?.target) return response({error: "Member not found"})
 
-                response(userRoles);
+            let memberRoles = [];
+            for(let roleId of Object.keys(serverconfig.serverroles)){
+                let role = serverconfig.serverroles[roleId];
+                if(role.members.includes(member.target) && !memberRoles.includes(member?.target)) memberRoles.push(roleId);
             }
+
+            response(memberRoles);
         }
         else {
             Logger.warn("ID or Token was invalid while requesting server information");

@@ -45,7 +45,7 @@ class ChatManager {
                         text: "Connection lost",
                         intensity: 0.75,
                         bgAlpha: 1,
-                        useSnapshot: true
+                        useSnapshot: false
                     }
                 )
             }
@@ -151,7 +151,26 @@ class ChatManager {
         return { ok: false, error: "unknown_upload_error" };
     }
 
+    static async resolveMemberRoles(memberId) {
+        return new Promise((resolve, reject) => {
+            socket.emit("resolveMemberRoles", {
+                id: UserManager.getID(),
+                token: UserManager.getToken(),
+                target: memberId
+            }, function (response) {
+                resolve(response);
+            })
+        })
+    }
 
+    static proxyUrl(url){
+        if(url.startsWith(window.location.origin)) return url;
+        if(url.startsWith("data:")) return url;
+        if(url.startsWith("/uploads")) return url;
+        if(url.startsWith("/img")) return url;
+        if(url.startsWith("/emojis")) return url;
+        return `/proxy?url=${encodeURIComponent(url)}`
+    }
 
     static async resolveMember(memberId) {
         return new Promise((resolve, reject) => {
@@ -165,18 +184,51 @@ class ChatManager {
         })
     }
 
+    static async resolveServerMembers() {
+        return new Promise((resolve, reject) => {
+            socket.emit("getServerMembers", {
+                id: UserManager.getID(),
+                token: UserManager.getToken()
+            }, function (response) {
+                resolve(response);
+            })
+        })
+    }
+
+    static async resolveServerRoles() {
+        return new Promise((resolve, reject) => {
+            socket.emit("getServerRoles", {
+                id: UserManager.getID(),
+                token: UserManager.getToken()
+            }, function (response) {
+                resolve(response);
+            })
+        })
+    }
+
     static async resolveRole(roleId) {
         return new Promise((resolve, reject) => {
             socket.emit("resolveRole", {
                 id: UserManager.getID(),
                 token: UserManager.getToken(),
-                target: roleId
+                target: String(roleId)
             }, function (response) {
                 resolve(response?.data);
             })
         })
     }
 
+    static async resolveChannel(roleId) {
+        return new Promise((resolve, reject) => {
+            socket.emit("resolveChannel", {
+                id: UserManager.getID(),
+                token: UserManager.getToken(),
+                channelId: String(roleId)
+            }, function (response) {
+                resolve(response);
+            })
+        })
+    }
 
     static getChannelMarkerCounter(channelId) {
         if (!String(channelId)) {

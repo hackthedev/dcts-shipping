@@ -1,0 +1,20 @@
+{
+  "name": "DCTS",
+  "short_name": "DCTS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#242424",
+  "icons": [
+    {
+      "src": "/img/default_icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/default_icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

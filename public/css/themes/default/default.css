@@ -81,8 +81,12 @@ body {
     background-color: hsl(from var(--main) h s calc(l * 1.5));
 }
 
+.ql-editor * {
+    cursor: text !important;
+}
+
 .ql-toolbar{
-    background-color: hsl(from var(--main) h calc(s * 0.5) calc(l * 2.6));
+    background-color: hsl(from var(--main) h calc(s * 0.5) calc(l * 3));
 }
 
 .activeUserEntry{

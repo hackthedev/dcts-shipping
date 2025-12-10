@@ -50,10 +50,10 @@ class UserManager {
         }
 
         return `
-            <div id="profile_banner" style="background-image: url('${memberObj?.banner}')"></div>
+            <div id="profile_banner" style="background-image: url('${ChatManager.proxyUrl(memberObj?.banner)}')"></div>
         
             <div id="profile_pfp_container">
-                <div id="profile_icon" style="background-image: url('${memberObj?.icon}');"></div>
+                <div id="profile_icon" style="background-image: url('${ChatManager.proxyUrl(memberObj?.icon)}');"></div>
                 <div class="profile_meta">
                     <div class="info">
                         <h1>Joined</h1>

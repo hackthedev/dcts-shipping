@@ -1621,6 +1621,7 @@ function markCurrentChannelStyle(channelId) {
 
 }
 
+/*
 function reapplyUnreadFromCookies() {
     const nodes = document.querySelectorAll('#channellist a[id^="channel-"], #channellist li[id^="channel-"]');
     nodes.forEach(el => {
@@ -1642,6 +1643,7 @@ function reapplyUnreadFromCookies() {
         }
     });
 }
+*/
 
 
 socket.on('markChannel', function (data) {
@@ -1689,7 +1691,7 @@ socket.on('receiveGroupList', function (data) {
     }
     setActiveGroup(UserManager.getGroup())
 
-    reapplyUnreadFromCookies();
+    //reapplyUnreadFromCookies();
     displayHomeUnread();
 });
 
@@ -2199,7 +2201,7 @@ async function setUrl(param, isVC = false) {
                 document.getElementById("messagebox").style.display = "none";
 
                 // join vc room
-                await setupVC(channelId);
+                await setupVC(UserManager.getRoom());
             }
         });
     } else {
@@ -2261,6 +2263,9 @@ function changedChannel(){
         category: UserManager.getCategory(),
         channel: UserManager.getChannel()
     });
+
+    getGroupList();
+    getChannelTree();
 }
 
 

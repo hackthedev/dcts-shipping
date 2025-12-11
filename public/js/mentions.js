@@ -9,12 +9,15 @@ function registerMentionClickEvent(){
         ],
         async (data) => {
             let channelId = data.element.getAttribute("data-channel-id");
-            if (!channelId) {
-                return;
-            }
+            let groupId = data.element.getAttribute("data-group-id");
+            let categoryId = data.element.getAttribute("data-category-id");
 
-            document.querySelector(`#channeltree .channelTrigger[data-channel-id="${channelId}"]`).scrollIntoView({behavior: "smooth"});
-            document.querySelector(`#channeltree .channelTrigger[data-channel-id="${channelId}"]`).click()
+            if (!groupId) return;
+            if (!categoryId) return;
+            if (!channelId) return;
+
+            setUrl(`?group=${groupId}&category=${categoryId}&channel=${channelId}`)
+            changedChannel() // updates channel list, server group icon etc
         }
     )
 }
@@ -163,7 +166,7 @@ async function getChannelMentions(text) {
             const channel = await ChatManager.resolveChannel(id);
             if (!channel || channel.error) continue;
 
-            const html = `<label class="mention channel" data-channel-id="${id}">#${channel.channel.name}</label>`;
+            const html = `<label class="mention channel" data-channel-id="${id}" data-group-id="${channel.groupId}"  data-category-id="${channel.categoryId}">#${channel.channel.name}</label>`;
             text = text.replace(match[0], html);
         }
 

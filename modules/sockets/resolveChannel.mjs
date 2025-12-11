@@ -25,7 +25,7 @@ export default (io) => (socket) => {
                 if(!channelObject){
                     return response({ type: "error", msg: "Channel not found" });
                 }
-                response({ type: "success", msg: "Channel was resolved", channel: channelObject });
+                response({ type: "success", msg: "Channel was resolved", channel: channelObject, groupId, categoryId });
             }
             catch (e) {
                 Logger.error("Unable to resolve member");

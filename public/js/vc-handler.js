@@ -142,13 +142,16 @@ document.addEventListener("DOMContentLoaded", async event => {
 let talking = new Map();
 function highlightUser(participantId) {
     let userElements = document.querySelectorAll(`.vc-container .participant[data-member-id="${participantId}"] img`);
-    userElements = [document.querySelector("#profile-qa-img"), ...userElements];
+    userElements = [document.querySelector(`.participant[data-member-id="${participantId}"] img.avatar`), document.querySelector("#profile-qa-img"), ...userElements];
 
-    let borderCode = "3px solid red";
+    let borderCode = "2px solid red";
 
     userElements.forEach((element) => {
         if (!element) return;
-        let key = participantId + "_" + element.dataset?.memberId || Math.random();
+        let key = participantId + "_" + element.getAttribute("data-member-id")
+        console.log(element)
+
+        console.log(key)
         if (talking.has(key)) {
             clearTimeout(talking.get(key));
             talking.delete(key);
@@ -156,7 +159,7 @@ function highlightUser(participantId) {
 
         element.style.border = borderCode;
         let timeout = setTimeout(() => {
-            element.style.border = "3px solid transparent";
+            element.style.border = "2px solid transparent";
             talking.delete(key);
         }, 1000);
 
@@ -212,7 +215,7 @@ function checkVcMemberChannel(intChannelId, intMemberId) {
 
     let participantsContainer = document.querySelector(`#channellist li[data-channel-id="${intChannelId}"] .participants`);
     if(!participantsContainer){
-        console.warn("Couldnt add or remove member to vc participants list as the container wasnt found");
+        console.warn("Couldnt add or remove member to vc participants list as the container wasnt found: ", intChannelId);
         return { status: false };
     }
 
@@ -275,7 +278,7 @@ async function addVcMemberToChannel(intChannelId, intMemberId){
         let memberIsListed =  checkResult.element.querySelectorAll(`li[data-member-id='${oMember.id}']`).length > 0;
         if(!memberIsListed){
             checkResult.element.insertAdjacentHTML("beforeend",
-                `<li class="participant" data-member-id="${oMember.id}"><img class="avatar" src="${oMember.icon.trim() ? oMember.icon : "/img/default_icon.png"}">${truncateText(oMember.name, 25)}</li>`
+                `<li class="participant" data-member-id="${oMember.id}"><img class="avatar" data-member-id="${oMember.id}" src="${oMember.icon.trim() ? oMember.icon : "/img/default_icon.png"}">${truncateText(oMember.name, 25)}</li>`
             );
         }
 
@@ -379,6 +382,9 @@ async function setupVC(roomId) {
     if (!roomId) {
         console.warn("cant join voice chat because roomid wasnt set")
     }
+
+    // vc rooms are special
+    //if(!roomId?.startsWith("vc_")) roomId = `vc_${roomId}`;
 
     const channelIcons = document.getElementById("channelname-icons");
     let contentContainer = document.getElementById("content");

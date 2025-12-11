@@ -715,16 +715,13 @@ class UserManager {
             const donatorHTML = donators.map(d => `
                 <div style="
                     padding: 10px 14px;
-                    margin: 10px;
                     background: #ffe6eb;
                     border-radius: 10px;
                     font-size: 16px;
                     font-weight: 500;
                     color: #c2185b;
                     box-shadow: inset 0 0 4px rgba(0,0,0,0.05);
-                    width: fit-content;
-                    float: left;
-                    display: block;
+                    width: fit-content;                    
                     cursor: pointer;
                 ">
                 ❤️ ${d.user}${d.amount > 0 ? ` &bull; ${d.amount}€` : ''}
@@ -740,12 +737,12 @@ class UserManager {
             // final final stuff
             const finalHTML = `
                 ${audioHTML}
-                <a href="http://ko-fi.com/shydevil/tiers" target="_blank"
-                style="
+                <a href="http://ko-fi.com/shydevil/tip/" target="_blank"
+                style="                
+                    display: flex;
+                    justify-content: center;
                     width: 100% !important; 
                     margin: 20px 0; 
-                    text-align: center;
-                    display: block;
                     font-size: 24px;
                     font-weight: bold;
                     color: #ffe6eb;
@@ -753,7 +750,18 @@ class UserManager {
                 >
                     » Become a Donator ! «
                 </a>
-                <div style="max-height: 300px; max-width: 800px; overflow-y: auto; margin-bottom: 10px;">
+                <div style="
+                    max-height: 300px; 
+                    max-width: 800px;
+                    overflow-y: auto; 
+                    margin-top: 20px;
+                    margin-bottom: 20px;
+                    display: flex;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    justify-content: center;
+                ">
                     ${donatorHTML || '<i>No donators found.</i>'}
                 </div>
 

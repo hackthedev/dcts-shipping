@@ -356,7 +356,6 @@ socket.on('messageEdited', async function (message) {
     let markdownResult = await markdown(message.message, message.messageId);
     if (!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
     if (markdownResult.isMarkdown) message.message = markdownResult.message;
-    if (markdownResult.isMarkdown) await waitForEmbedsToRender()
 
     let editElement = getMessageElementFromId(message.messageId);
     try{ message.message = await text2Emoji(message.message) } catch {}
@@ -389,7 +388,6 @@ async function showMessageInChat({
 
     let markdownResult = await markdown(message.message, message.messageId);
     if (markdownResult.isMarkdown) message.message = markdownResult.message;
-    if (markdownResult.isMarkdown) await waitForEmbedsToRender()
 
     // convert mentions and check if own userid is in it
     let convertedMentions = await convertMention(message);

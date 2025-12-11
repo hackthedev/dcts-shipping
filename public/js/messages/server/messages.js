@@ -739,7 +739,7 @@ function getChatlog(index = -1, appendTop = false, scrollPosition = null) {
                         location,
                         appendTop,
                         reply: repliedMessage,
-                        waitWithDisplay: true
+                        waitWithDisplay: appendTop
                     });
                 } else {
                     await showMessageInChat({
@@ -748,7 +748,7 @@ function getChatlog(index = -1, appendTop = false, scrollPosition = null) {
                         location,
                         appendTop,
                         reply: repliedMessage,
-                        waitWithDisplay: true
+                        waitWithDisplay: appendTop
                     });
                 }
             } catch (error) {

@@ -1,7 +1,9 @@
 import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
 
 console.clear();
+export let versionCode = 902;
 import express from 'express';
+
 
 export const app = express();
 
@@ -76,7 +78,6 @@ export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = process.env.DEBUG || false;
-export let versionCode = 876;
 export let configPath = "./configs/config.json"
 
 

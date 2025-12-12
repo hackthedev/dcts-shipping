@@ -13,10 +13,12 @@
     ></script>
 
     <link rel="stylesheet" href="/css/themes/default/default.css">
-    <script defer src="../../js/core/PermUI.js"></script>   
-    <script defer src="../../js/core/UserManager.js"></script>   
+    <script defer src="../../js/core/PermUI.js"></script>
+
+    <script src="/js/core/ChatManager.js"></script>
+    <script src="/js/core/UserManager.js"></script>
     <script defer src="../../js/core/PoW.js"></script>   
-    <script defer src="../../js/core/CookieManager.js"></script>   
+    <script src="../../js/core/CookieManager.js"></script>
     <script defer src="../../js/prompts.js"></script>   
     <script defer src="../../js/hover.js"></script>
     <script defer src="../utility.js"></script>
@@ -30,6 +32,7 @@
 <body id="pagebody" style="display: none;">
 
 <script>
+    ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
 
     document.addEventListener("DOMContentLoaded", function() {
         try{
@@ -47,47 +50,17 @@
 </script>
 
 <style>
-
-    /* width */
-    ::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    /* Track */
-    ::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-        background: #202225;
-        border-radius: 12px;
-    }
-
-    /* Handle on hover */
-    ::-webkit-scrollbar-thumb:hover {
-        background: #202225;
-    }
-
-    html, body{
-        margin: 0;
-        padding: 0;
-
-        font-family: 'Roboto', sans-serif;
-        color: #ABB8BE;
-        background-color: #2B3137;
-
-        width: 100%;
-        height: 100%;
+    #wrapper{
+        background-color: hsl(from var(--main) h s calc(l * 2));
     }
 
     #navigation{
-        background-color: #24292E;
+        background-color: hsl(from var(--main) h s calc(l * 2));
 
         padding: 32px;
 
-        width: calc(20% - 64px);
-        height: calc(100% - 64px);
+        width: calc(20% );
+        height: calc(100% );
 
         float: left;
     }
@@ -111,6 +84,7 @@
 
         text-decoration: none;
         color: #ABB8BB;
+        font-style: normal;
 
     }
 

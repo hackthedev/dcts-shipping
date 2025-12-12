@@ -6,7 +6,10 @@
     <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
           name="viewport">
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
-    <meta content="" name="expires"/>
+
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#242424">
 
     <!-- <meta name="description" content="{{meta.page.description}}" /> -->
 
@@ -19,6 +22,7 @@
     <script src="js/tooltips.js?v={{random}}"></script>
     <script src="js/sysmsg.js?v={{random}}"></script>
     <script src="js/upload.js?v={{random}}"></script>
+    <script src="js/core/Autocomplete.js?v={{random}}"></script>
 
     <script src="audioplayer/audioplayer.js?v={{random}}"></script>
 
@@ -80,6 +84,7 @@
     <script src="js/core/ContextMenu.js?v={{random}}"></script>
     <script src="js/markdown.js?v={{random}}"></script>
     <script src="js/emojis.js?v={{random}}"></script>
+    <script src="js/mentions.js?v={{random}}"></script>
     <script src="js/core/Badges.js?v={{random}}"></script>
     <script src="js/core/CookieManager.js?v={{random}}"></script>
     <script src="js/core/ModActions.js?v={{random}}"></script>
@@ -93,6 +98,7 @@
 
     <script src="js/effects/confetti.js?v={{random}}"></script>
     <script src="js/effects/party.js?v={{version}}"></script>
+    <script src="js/effects/fate.js?v={{version}}"></script>
     <script src="js/effects/pixel.js?v={{random}}"></script>
     <script src="js/effects/glitch.js?v={{random}}"></script>
     <script src="js/effects/splashscreen.js?v={{random}}"></script>
@@ -251,29 +257,30 @@
                 <div>
                     <div id="messagebox-media"></div>
                     <div class="editor-container" style="z-index: 200 !important;">
+                        <div id="editor-hints"></div>
                         <div id="editor-toolbar" style="border: none !important;">
                             <!-- Add toolbar buttons as needed -->
-                            <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
+                            <span class="ql-formats">
                                 <button class="ql-bold" title="Bold"></button>
                                 <button class="ql-italic" title="Italic"></button>
                                 <button class="ql-underline" title="Underline"></button>
                                 <button class="ql-strike" title="Strikeout"></button>
-                                <button class="ql-clean" title="Remove formatting"></button>
-                         </span>
+                            </span>
 
-                            <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
-                        <button class="ql-link" title="Link"></button>
+                            <span class="ql-formats">
+                                <button class="ql-clean" title="Remove formatting"></button>
+                                 <button class="ql-link" title="Link"></button>
                                 <!--<button title="Image" class="ql-image"></button>
                                 <button title="Video" class="ql-video"></button>-->
-                    </span>
+                            </span>
 
-                            <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
-                        <button class="ql-code" title="Inline Code"></button>
-                        <button class="ql-code-block" title="Code Block"></button>
-                        <button class="ql-blockquote" title="Blockquote"></button>
-                    </span>
+                            <span class="ql-formats">
+                                <button class="ql-code" title="Inline Code"></button>
+                                <button class="ql-code-block" title="Code Block"></button>
+                                <button class="ql-blockquote" title="Blockquote"></button>
+                            </span>
 
-                            <span class="ql-formats" style="border-right: 2px solid lightgray !important;">
+                    <span class="ql-formats" >
                         <button class="ql-list" title="Numbered List" value="ordered"></button>
                         <button class="ql-list" title="Bullet List" value="bullet"></button>
                         <button class="ql-formula" title="Formula"></button>
@@ -430,10 +437,14 @@
 </div>
 
 <script>
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/service-worker.js");
+    }
 
     document.addEventListener("DOMContentLoaded", function () {
         ContextMenu.init();
     })
+
 
     function searchForRoleInList(search) {
         var roles = document.getElementById("role-menu-list").querySelectorAll(".role-menu-entry")

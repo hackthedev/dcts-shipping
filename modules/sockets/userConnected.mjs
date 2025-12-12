@@ -19,7 +19,7 @@ import {
 } from "../functions/main.mjs";
 import { sendSystemMessage } from "./home/general.mjs";
 import {discoverHosts} from "../functions/discovery.mjs";
-import {powVerifiedUsers} from "./pow.mjs";
+import {isValidProof, powVerifiedUsers} from "./pow.mjs";
 import logger from "../functions/logger.mjs";
 import {channel} from "node:diagnostics_channel";
 import {saveMemberToDB} from "../functions/mysql/helper.mjs";
@@ -147,6 +147,10 @@ export default (io) => (socket) => {
         member.channel = xssFilters.inHTMLData(normaliseString(member.channel));
         member.room = xssFilters.inHTMLData(normaliseString(member.room));
 
+        // if pow has been passed. used for quicker initial connection to skip pow challenge
+        if(member?.pow?.challenge) member.pow.challenge = xssFilters.inHTMLData(normaliseString(member?.pow?.challenge));
+        if(member?.pow?.solution) member.pow.solution = xssFilters.inHTMLData(normaliseString(member?.pow?.solution));
+
         // check if public key was supplied
         if(member?.publicKey && member?.publicKey?.length > 10) {
             member.publicKey = xssFilters.inHTMLData(normaliseString(member?.publicKey));
@@ -181,7 +185,20 @@ export default (io) => (socket) => {
             }
         }
 
-        await checkPow(socket);
+        // skip pow challenge for faster connection
+        if(member?.pow?.challenge && member?.pow?.solution){
+            let powResult = await isValidProof(member.pow.challenge, member.pow.solution);
+            if(powResult.valid){
+                if(!powVerifiedUsers.includes(socket.id)) powVerifiedUsers.push(socket.id);
+            }
+            else{
+                await checkPow(socket);
+            }
+        }
+        else{
+            await checkPow(socket);
+        }
+
 
         // check member ban
         let banResult = await checkMemberBan(socket, member);
@@ -226,7 +243,7 @@ export default (io) => (socket) => {
                 Logger.debug(!serverconfig.servermembers[member.id]);
                 Logger.debug(serverconfig.servermembers[member.id]?.onboarding);
 
-                // handle onboarding 
+                // handle onboarding
                 if (member?.onboarding === false) {
                     // cant proceed as the user needs to setup their account with a password
                     io.to(socket.id).emit("doAccountOnboarding");
@@ -309,7 +326,7 @@ export default (io) => (socket) => {
                             "type": "success"
                         }`));
 
-                    // if a new member joins lets send a system welcome DM. 
+                    // if a new member joins lets send a system welcome DM.
                     // can be edited in config and is enabled on default.
                     if (serverconfig.serverinfo.system.welcome.enabled
                         && serverconfig.serverinfo.system.welcome.message.length > 0) sendSystemMessage(member.id, serverconfig.serverinfo.system.welcome.message)

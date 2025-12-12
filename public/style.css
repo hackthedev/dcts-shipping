@@ -203,8 +203,19 @@ sortable-chosen.sortable-ghost {
     box-sizing: border-box;
 }
 
-.editor-toolbar {
+#editor-toolbar #message-actions-image{
+    margin-left: auto;
+    justify-self: end;
+    margin-right: -18px;
+}
+#editor-toolbar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
     z-index: 10;
+    padding: 2px 8px;
+    margin-top: -2px;
 }
 
 #messagebox-content {
@@ -260,7 +271,7 @@ sortable-chosen.sortable-ghost {
     flex-shrink: 0 !important;
 
     height: 100%;
-    width: 200px;
+    width: 250px;
     padding: 16px;
     color: white;
     overflow-y: auto;
@@ -615,6 +626,7 @@ code.markdown {
 
     z-index: 2;
     text-align: center;
+    font-style: normal;
 
     top: 0px;
     left: 50px;
@@ -741,13 +753,20 @@ details[open] summary::before {
 }
 
 label.mention {
-    color: skyblue;
-
-    padding: 2px 4px 2px 4px !important;
+    all: unset;
+    display: inline;
+    background: rgba(135, 206, 235, 0.2);
+    padding: 2px 4px;
     border-radius: 4px;
-    display: inline-block !important;
-
     cursor: pointer;
+}
+
+label.mention.member{
+    color: skyblue;
+}
+
+label.mention.channel{
+    color: skyblue;
 }
 
 .group-entry-marker {
@@ -906,12 +925,27 @@ label.mention {
     overflow: hidden;
 }
 
+#editor-hints{
+    display: flex;
+    font-size: 12px;
+
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-left: 2px solid hsl(from var(--main) h s calc(l * 4) / 40%);
+    border-top: 2px solid hsl(from var(--main) h s calc(l * 4) / 40%);
+    border-right: 2px solid hsl(from var(--main) h s calc(l * 4) / 40%);
+    border-bottom: 2px solid hsl(from var(--main) h s calc(l * 4) / 40%);
+    background-color: hsl(from var(--main) h s calc(l * 2) / 100%);
+
+    justify-content: center;
+}
+
 #editMsgHint {
-    color: lightskyblue;
-    font-style: italic;
-    text-decoration: underline;
-    font-size: 14px;
-    margin: 4px 8px 16px 16px;
+    width: 100%;
+    color: hsl(from var(--main) h s calc(l * 10) / 100%);
+    margin: 0;
+
+    margin: 6px;
     user-select: none;
 }
 

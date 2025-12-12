@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     ContextMenu.registerContextMenu(
         "channellist_categories",
         [
-            "#channeltree",
+            "#channeltree > h2",
         ],
         [
             {
@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 callback: async (data) => {
                     let categoryId = getCategoryIdFromElement(data.element);
                     if(!categoryId){
+                        alert("not found")
                         console.error("Cant create channel in category because couldnt find category id from element");
                         return;
                     }

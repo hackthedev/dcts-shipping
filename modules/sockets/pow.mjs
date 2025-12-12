@@ -83,38 +83,36 @@ export function listenToPow(socket) {
             })
         }
     });
-
-    function isValidProof(challenge, solution) {
-        const hash = crypto.createHash('sha256').update(challenge + solution).digest('hex');
-        const requiredBits = serverconfig.serverinfo.pow.difficulty * 4; // each hex digit = 4 bits
-        const actualBits = countLeadingZeroBits(hash);
-        return {
-            level: Math.floor(actualBits / 4),
-            required: Math.floor(requiredBits / 4),
-            valid: actualBits >= requiredBits
-        };
-    }
-
-    function countLeadingZeroBits(hash) {
-        let bits = 0;
-
-        for (const char of hash) {
-            const nibble = parseInt(char, 16); // 4 bits per hex character
-            if (nibble === 0) {
-                bits += 4;
-            } else {
-                if (nibble < 2) bits += 3;
-                else if (nibble < 4) bits += 2;
-                else if (nibble < 8) bits += 1;
-                break;
-            }
-        }
-
-        return bits;
-    }
-
 }
 
+export function isValidProof(challenge, solution) {
+    const hash = crypto.createHash('sha256').update(challenge + solution).digest('hex');
+    const requiredBits = serverconfig.serverinfo.pow.difficulty * 4; // each hex digit = 4 bits
+    const actualBits = countLeadingZeroBits(hash);
+    return {
+        level: Math.floor(actualBits / 4),
+        required: Math.floor(requiredBits / 4),
+        valid: actualBits >= requiredBits
+    };
+}
+
+function countLeadingZeroBits(hash) {
+    let bits = 0;
+
+    for (const char of hash) {
+        const nibble = parseInt(char, 16); // 4 bits per hex character
+        if (nibble === 0) {
+            bits += 4;
+        } else {
+            if (nibble < 2) bits += 3;
+            else if (nibble < 4) bits += 2;
+            else if (nibble < 8) bits += 1;
+            break;
+        }
+    }
+
+    return bits;
+}
 
 // Send a PoW challenge to the client
 export async function sendPow(socket) {

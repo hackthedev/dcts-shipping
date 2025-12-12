@@ -81,8 +81,8 @@ async function setupAccount(challenge, difficulty) {
         "Welcome!",
         `
         <div style="margin-bottom: 15px; font-size: 14px; max-width: 600px;">
-            <b style="display: block; margin-bottom: 10px;">Do you want to import an existing account or start fresh?</b>
-            If you already have exported account, you can import it now. Otherwise, you can create a new identity and start from scratch.
+            <b style="display: block; margin-bottom: 10px;">Do you want to import an existing account from file or continue and login?</b>
+            If you already have an exported account, you can import it now, otherwise continue to login manually.
         </div>
     
         <div style="display: flex; gap: 4px; margin-top: 20px; justify-content: flex-end;">
@@ -104,7 +104,7 @@ async function setupAccount(challenge, difficulty) {
                 color: white;
                 cursor: pointer;
                 font-size: 13px;
-            ">Create New</button>
+            ">Continue</button>
         </div>
         `,
         null, // no confirm button

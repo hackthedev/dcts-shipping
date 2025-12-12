@@ -50,10 +50,10 @@ class UserManager {
         }
 
         return `
-            <div id="profile_banner" style="background-image: url('${memberObj?.banner}')"></div>
+            <div id="profile_banner" style="background-image: url('${ChatManager.proxyUrl(memberObj?.banner)}')"></div>
         
             <div id="profile_pfp_container">
-                <div id="profile_icon" style="background-image: url('${memberObj?.icon}');"></div>
+                <div id="profile_icon" style="background-image: url('${ChatManager.proxyUrl(memberObj?.icon)}');"></div>
                 <div class="profile_meta">
                     <div class="info">
                         <h1>Joined</h1>
@@ -659,6 +659,7 @@ class UserManager {
 
             const txtUrl = `${urlBase}donators.txt?v=${this.generateId(5)}`;
             let mp3Url;
+            let songName;
 
             // Load donators.txt
             const response = await fetch(txtUrl);
@@ -666,18 +667,24 @@ class UserManager {
             const text = await response.text();
 
             // split lines
-            const lines = text.split(/\r?\n/).filter(line => line.trim() !== '').reverse();
+            const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
             const seen = new Set();
             const totals = {};
-            const order = {}; // to remember 
-            for (let i = 0; i < lines.length; i++) {
+            const order = {}; // to remember
 
-                if (lines[i].startsWith("# ") && lines[i].includes(".mp3")) {
-                    // music link
-                    mp3Url = urlBase + lines[i].split(";")[0].replace("# ", "");
-                    effect = lines[i].split(";")[1] || "confetti";
-                    console.log("Music found!")
-                } else if (!lines[i].startsWith("#")) {
+            // setup music and potentially song name
+            if (lines[0].startsWith("# ") && lines[0].includes(".mp3")) {
+                mp3Url = urlBase + lines[0].split(";")[0].replace("# ", "");
+                effect = lines[0].split(";")[1] || "confetti";
+                console.log("Music found!")
+                console.log(lines[1])
+                if (lines[1].startsWith("# ")) {
+                    songName = lines[1].replace("# ", "");
+                }
+            }
+
+            for (let i = 0; i < lines.length; i++) {
+                if (!lines[i].startsWith("#")) {
                     const parts = lines[i].split(',').map(part => part.trim());
                     const user = parts[0];
                     const amount = parseFloat(parts[1]) || 0;
@@ -690,6 +697,7 @@ class UserManager {
                     totals[user] = (totals[user] || 0) + amount;
                 }
             }
+
 
             // Test if audio file exists
             let hasAudio = false;
@@ -715,16 +723,13 @@ class UserManager {
             const donatorHTML = donators.map(d => `
                 <div style="
                     padding: 10px 14px;
-                    margin: 10px;
                     background: #ffe6eb;
                     border-radius: 10px;
                     font-size: 16px;
                     font-weight: 500;
                     color: #c2185b;
                     box-shadow: inset 0 0 4px rgba(0,0,0,0.05);
-                    width: fit-content;
-                    float: left;
-                    display: block;
+                    width: fit-content;                    
                     cursor: pointer;
                 ">
                 ❤️ ${d.user}${d.amount > 0 ? ` &bull; ${d.amount}€` : ''}
@@ -740,12 +745,12 @@ class UserManager {
             // final final stuff
             const finalHTML = `
                 ${audioHTML}
-                <a href="http://ko-fi.com/shydevil/tiers" target="_blank"
-                style="
+                <a href="http://ko-fi.com/shydevil/tip/" target="_blank"
+                style="                
+                    display: flex;
+                    justify-content: center;
                     width: 100% !important; 
                     margin: 20px 0; 
-                    text-align: center;
-                    display: block;
                     font-size: 24px;
                     font-weight: bold;
                     color: #ffe6eb;
@@ -753,7 +758,18 @@ class UserManager {
                 >
                     » Become a Donator ! «
                 </a>
-                <div style="max-height: 300px; max-width: 800px; overflow-y: auto; margin-bottom: 10px;">
+                <div style="
+                    max-height: 300px; 
+                    max-width: 800px;
+                    overflow-y: auto; 
+                    margin-top: 20px;
+                    margin-bottom: 20px;
+                    display: flex;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    justify-content: center;
+                ">
                     ${donatorHTML || '<i>No donators found.</i>'}
                 </div>
 
@@ -765,9 +781,17 @@ class UserManager {
                  <li class="info" style="margin: 0px 10px;">
                     <span class="bullet"></span>These are project donations, not server donations
                 </li>
+                
+                ${songName ?
+                    `
+                    <li class="info" style="margin: 0px 10px;">
+                        <span class="bullet"></span>Song: ${songName}
+                    </li>
+                    `
+                    :
+                    ""
+                }
             `;
-
-            await manageMusic("play", 0.75)
 
             customPrompts.showPrompt(
                 "Thanks to our Donators 💖",
@@ -783,6 +807,8 @@ class UserManager {
                     manageMusic("fadeOut")
                 }
             );
+
+            await manageMusic("play", 0.75)
 
             try {
                 if (typeof window[effect] === "function") {

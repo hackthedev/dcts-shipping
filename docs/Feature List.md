@@ -11,6 +11,8 @@ This document will provide a list of all features[^1] and may describe some as w
 ## Features
 
 - **Text Chat:** persistent messages per channel with a **markdown editor**, with optional per channel permissions
+- **Mentions**: Its possible to @mention users, roles and channels.
+- **Auto-complete:** Mentions and emojis use a nice auto-complete that you can navigate with the arrow keys and select by pressing tab.
 - **Auth:** User Registrations & Logins, Rate Limits and PoW (proof of concept)
 - **User Accounts:** Custom Profile Pictures and Banners, Status and About Me section.
 - **Server Roles & Permissions:** Role System with advanced (allow, ***deny***, inherit) permission system and custom colors.
@@ -25,7 +27,6 @@ This document will provide a list of all features[^1] and may describe some as w
 - **Multiple Groups:** Possibility to create multiple groups that each have their own channel tree with custom permissions (= Staff area)
 - **Opus Voice Chat**: Chat with others using a microphone and a custom bitrate.
 - **Screensharing:** Share you screen in a voice channel with customizable resolution, FPS and Bitrate.
-- **TURN Integration:** Possibility to use a TURN server for voice chat and screensharing.
 - **Report System:** 
   - Possibility to report server chat messages and DM messages.
   - Slide-in report dashboard to view and manage reports with build in moderation actions: Delete Report, Delete Reported Message, Ban/Kick/Mute Reporter / Reported User, View profile of Reported User / Reporter, View Message Edit History.
@@ -46,16 +47,15 @@ This document will provide a list of all features[^1] and may describe some as w
 - **Emojis:** Upload and use custom emojis, rename emojis, Emoji autocomplete
 - **Invite-only system:** You can make your server invite-only, making users require an invite code in order to join.
 - **Audit Log:** Log important actions taking place in the server, like expired invite links being automatically removed and more!
-- **Tenor GIF Integration:** Search and use GIFs from tenor[^2]
-- **SQL Support:** Highly recommended and required for almost all features. Without SQL only very basic chatting will work.
-- **Mobile Support:** UI will work for mobile too[^3]
+- **Tenor GIF Integration:** Search and use GIFs from tenor.
+- **Mobile Support:** UI will work for mobile too, tho limited as of right now[^3]
 - **Plugin System:** Its possible to create plugins that hook directly into the server and client, removing the need of bots.
-- **IP Blacklist:** Automatic IP blacklisting if rate limit is reached. On member bans the IP is also banned.
-- **Hashing & Encoding:** Passwords are hashed and messages being encoded. Message encryption may follow.
+- **IP Banning:** Automatic IP blacklisting if rate limit is reached. On member bans the IP is also banned.
+- **Hashing & Encoding:** Passwords are hashed and messages being encoded.
 - **Slot Limit + reserved slots:** Possible to limit concurrent slots and define and use reserved slots based on role permission.
 
 
 
 [^3]: The mobile version may not fully support all features
-[^2]: Requires a API key
+[^2]: Requires an API key
 [^1]: Some features may not be listed as its hard to list everything retrospectively

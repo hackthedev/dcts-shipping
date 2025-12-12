@@ -41,7 +41,7 @@ class VoIP {
 
             this.storeTrack(participant.identity, track, isScreen);
 
-            // Screenshare
+            // screenshare
             if (isScreen && this.onScreenshareBegin) {
                 this.onScreenshareBegin(participant.identity, track);
             }
@@ -147,22 +147,21 @@ class VoIP {
             const track = pub.track;
             if (!track) return;
 
-            // Nur Screenshare-Track stoppen (Video+Audio)
             if (track.source.includes("screen") || track.source === LivekitClient.Track.Source.ScreenShare) {
-                // Unpublish vom Room
+                // unpublish
                 this.room.localParticipant.unpublishTrack(track).catch(() => {});
 
-                // Track vom DOM trennen
+                // remove track vom dom
                 track.detach().forEach(el => el.remove());
 
-                // MediaStreamTrack stoppen (Video+Audio)
+                // stop streams, including audio
                 if (track.mediaStreamTrack) {
                     track.mediaStreamTrack.stop();
                 }
 
-                // Bei LiveKit Audio: explizit auch "stopAudio" für den Track
+                // only kill livekit audio
                 if (track.kind === "audio" && typeof track.stop === "function") {
-                    track.stop(); // LiveKit Track stoppen
+                    track.stop();
                 }
 
                 this.isScreensharing = false

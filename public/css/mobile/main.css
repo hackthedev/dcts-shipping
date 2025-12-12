@@ -80,6 +80,7 @@
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: 100% 100%;
+    object-fit: cover;
 }
 
 #mobile_channelList .sortable-channels{
@@ -201,7 +202,7 @@
     #message-actions-image{
         position: absolute;
         bottom: 36px;
-        right: 10px;
+        right: 25px;
         z-index: 2;
     }
 

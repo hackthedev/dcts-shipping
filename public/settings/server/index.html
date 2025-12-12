@@ -19,10 +19,10 @@
     <script defer src="/js/sysmsg.js"></script>
     <script defer src="../utility.js"></script>
     <script type="module" src="/js/core/Emoji.js"></script>
-    <script defer src="/js/core/ChatManager.js"></script>
+    <script src="/js/core/ChatManager.js"></script>
     <script defer src="/js/core/PermUI.js"></script>
-    <script defer src="/js/core/UserManager.js"></script>
-    <script defer src="/js/core/CookieManager.js"></script>
+    <script src="/js/core/UserManager.js"></script>
+    <script src="/js/core/CookieManager.js"></script>
     <script defer src="/js/core/PoW.js"></script>
     <script defer src="/js/hover.js"></script>
     <script defer src="/js/escape.js"></script>
@@ -43,13 +43,14 @@
 <style>
 
     #navigation{
-        background-color: hsl(from var(--main) h s calc(l * 1.5));
+        background-color: hsl(from var(--main) h s calc(l * 2));
         color: hsl(from var(--main) h s calc(l * 10));
 
         padding: 32px;
 
         width: calc(20%);
         height: calc(100%);
+        font-style: normal;
 
         float: left;
         overflow-y: auto;
@@ -102,6 +103,7 @@
         float: left;
 
         overflow-y: auto;
+        background-color: background-color: hsl(from var(--main) h s calc(l * 2));
     }
 
     #back {
@@ -201,6 +203,10 @@
 
     </div>
 </div>
+
+<script>
+    ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
+</script>
 
 
 </body>

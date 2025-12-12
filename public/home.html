@@ -616,8 +616,8 @@
     function avatarHTML(member, size = 'normal') {
         const cls = size === 'small' ? 'avatar small' : size === 'tiny' ? 'avatar tiny' : 'avatar';
         const dot = `<span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span>`;
-        if (member.icon) {
-            return `<div class="${cls}"><img src="${member.icon}" alt=""><span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span></div>`;
+        if (member.icon || member.id === "system") {
+            return `<div class="${cls}"><img src="${member.id === "system" ? "/img/default_icon.png" : member.icon}" alt=""><span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span></div>`;
         }
         return `<div class="${cls}" aria-label="${encodePlainText(member.name)}">${initials(member.name)}${dot}</div>`;
     }
@@ -687,7 +687,7 @@
                       ${avatarStackHTML(t.participants)}
                       <div>
                         <div class="dmName">${encodePlainText(title)}</div>
-                        <div class="dmPreview">{clearHtmlFromText(t.last) || ""}</div>
+                        <div class="dmPreview">${clearHtmlFromText(t.last) || ""}</div>
                       </div>
 
                       ${t.unread > 0 ?
@@ -710,8 +710,8 @@
         const myTicketsAll = CONFIG.threads.filter(t => t.type === 'ticket' && (t.participants || []).includes(CURRENT_USER_ID));
         const openTickets = myTicketsAll.filter(t => (t.status || 'open') === 'open');
 
-        // reset old intervall
-        if(timeoutReset) timeoutReset = null;
+        // reset old timeout
+        clearTimeout(timeoutReset);
 
         // reset isHandlingDMs if it gets stuck for some reason
         timeoutReset = setTimeout(async () => {
@@ -2480,40 +2480,20 @@
     }
 
     // user connected must always happen before
+    console.log("Connecting")
     socket.emit("userConnected", {
         id: UserManager.getID(), name: UserManager.getUsername(), icon: UserManager.getPFP(),
         status: UserManager.getStatus(), token: UserManager.getToken(),
         aboutme: UserManager.getAboutme(), banner: UserManager.getBanner(),
+        pow: {
+            challenge: localStorage.getItem("pow_challenge"),
+            solution: localStorage.getItem("pow_solution")
+        }
     }, function (response) {
-        console.log(response);
-    });
+        console.log("got connect response")
 
-    // basically entry point
-    initPow(() => {
         socket.emit('joinServer', {id: UserManager.getID(), token: UserManager.getToken()}, function(response) {
             console.log(response)
-        });
-
-
-        socket.emit("checkPermission", {
-            id: UserManager.getID(),
-            token: UserManager.getToken(),
-            permission: ["manageTickets", "managePosts"]
-        }, function (response) {
-            if (response.permission === "granted") {
-                socket.emit('joinStaff', {userId: CURRENT_USER_ID, token: UserManager.getToken()}, () => {
-                });
-
-                // just for ui and inline stuff
-                isAdmin = true;
-
-                // show create post button
-                document.getElementById("btnCreatePost").style.display = "block";
-
-                setTimeout(() => {
-                    renderAll();
-                }, 50);
-            }
         });
 
         socket.on('connect', () => console.info('socket connected', socket.id));
@@ -2535,9 +2515,34 @@
             console.log("updated home")
         });
 
-        //introduceNewHome();
+        socket.emit("checkPermission", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            permission: ["manageTickets", "managePosts"]
+        }, function (response) {
+            if (response.permission === "granted") {
+                socket.emit('joinStaff', {userId: CURRENT_USER_ID, token: UserManager.getToken()}, () => {
+                });
+
+                // just for ui and inline stuff
+                isAdmin = true;
+
+                // show create post button
+                document.getElementById("btnCreatePost").style.display = "block";
+
+                setTimeout(() => {
+                    renderAll();
+                }, 50);
+            }
+        });
     });
 
+    // basically entry point
+    initPow(() => {
+
+
+        //introduceNewHome();
+    });
 
 </script>
 </body>

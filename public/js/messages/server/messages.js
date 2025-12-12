@@ -63,6 +63,31 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         ])
 
+    ContextMenu.registerDoubleClickEvent(
+        "openProfileDbl",
+        [".content"],
+        async (data) => {
+            if(data?.element){
+                let contentDiv = data.element.closest(".content:not(.reply)");
+                if(!contentDiv) return;
+
+                let messageId = contentDiv.getAttribute("data-message-id");
+                let memberId = contentDiv.getAttribute("data-member-id");
+                if(!messageId) return;
+
+                // if we double click our message, lets edit it,
+                // otherwise reply to it
+                if(memberId === UserManager.getID()) {
+                    editMessage(messageId)
+                }
+                else{
+                    replyToMessage(messageId)
+                }
+            }
+        }
+    );
+
+
 
     ContextMenu.registerClickEvent(
         "embedImagePopup",
@@ -79,6 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
             showImagePopup(src)
         }
     )
+    
 
     ContextMenu.registerClickEvent(
         "message_reply_navigate",
@@ -184,7 +210,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         ]
     );
-
 })
 
 socket.on('receiveDeleteMessage', function (id) {
@@ -219,31 +244,6 @@ socket.on('receiveDeleteMessage', function (id) {
         console.log(err)
     }
 });
-
-async function convertMention(message) {
-    try {
-        let text = message.message.toString();
-        const userIds = [];
-        const matches = [...text.matchAll(/&lt;@(\d+)&gt;/g)];
-
-        for (const match of matches) {
-            const userId = match[1];
-            if (!userIds.includes(userId)) userIds.push(userId);
-
-            const member = await ChatManager.resolveMember(userId);
-            if (!member) continue;
-
-            const html = `<label class="mention" data-member-id="${member.id}" id="mention-${member.id}">@${member.name}</label>`;
-            text = text.replace(match[0], html);
-        }
-
-        return { text, userIds };
-    } catch (err) {
-        console.log(err);
-        return { text: message.message, userIds: [] };
-    }
-}
-
 
 function getMemberIdFromElement(element) {
     if (!element?.getAttribute("data-member-id")) {
@@ -318,11 +318,6 @@ socket.on('messageCreate', async function (message) {
     // then mark it for ourselves
     ChatManager.setChannelMarkerCounter(UserManager.getChannel())
 
-    // play a sound too if its not us
-    if(message.id !== UserManager.getID() && message.channel === UserManager.getChannel()){
-        playSound("message", 0.5);
-    }
-
     // the message was not created in the room we're currently in, but thats fine.
     // we will instead show the notification icon and return;
     if(message.room !== UserManager.getRoom()){
@@ -367,6 +362,9 @@ socket.on('messageEdited', async function (message) {
     editElement.innerHTML = message.message;
     editElement.innerHTML += getMessageEditedHTML(message);
     editElement.innerHTML += createMsgActions(message.messageId);
+
+    let convertedMentions = await convertMention(message);
+    editElement.innerHTML= convertedMentions.text
 });
 
 function getMessageEditedHTML(message) {
@@ -385,6 +383,7 @@ async function showMessageInChat({
                                      reply = null,
                                      mentions = false,
                                      pingMentions = false,
+                                     waitWithDisplay = false,
                                  } = {}) {
 
     let markdownResult = await markdown(message.message, message.messageId);
@@ -392,31 +391,8 @@ async function showMessageInChat({
 
     // convert mentions and check if own userid is in it
     let convertedMentions = await convertMention(message);
-    message.message = convertedMentions.text
-
     let isMention = false;
-    convertedMentions.userIds.forEach(userId => {
-        if(userId === UserManager.getID()){
-            isMention = true;
-
-            if(pingMentions === true){
-                showSystemMessage({
-                    title: message.name,
-                    text: message.message,
-                    icon: message.icon,
-                    img: null,
-                    type: "neutral",
-                    duration: 6000,
-                    onClick: () => {
-                        navigateToMessage(message.messageId)
-                        closeSystemMessage();
-                    }
-                });
-
-                // possibly add to inbox once i implement it
-            }
-        }
-    })
+    message.message = convertedMentions.text
 
 
     // convert emojis
@@ -431,7 +407,8 @@ async function showMessageInChat({
             append: append,
             isSystem: true,
             isMention,
-            reply
+            reply,
+            waitWithDisplay
         });
     } else {
         // dont append if the previous message was a system message
@@ -441,7 +418,8 @@ async function showMessageInChat({
             append,
             isSystem: false,
             isMention,
-            reply
+            reply,
+            waitWithDisplay
         });
     }
 
@@ -452,16 +430,19 @@ async function showMessageInChat({
                 let firstMessage = getFirstMessage();
                 if (firstMessage?.parent) {
                     firstMessage.parent.querySelector(".contentRows")?.insertAdjacentHTML(location, messagecode);
+                    resolveMentions(message, pingMentions)
                     return;
                 }
             } else {
                 messageElement.element?.parentNode?.insertAdjacentHTML(location, messagecode);
+                resolveMentions(message, pingMentions)
             }
             return;
         }
     }
 
     addToChatLog(chatlog, messagecode, appendTop);
+    resolveMentions(message, pingMentions)
     //scrollDown();
 }
 
@@ -539,7 +520,7 @@ function navigateToMessage(messageId){
     }
 }
 
-async function createMsgHTML({message, append = false, isSystem = false, reply = null, isMention = false} = {}) {
+async function createMsgHTML({message, append = false, isSystem = false, reply = null, isMention = false, waitWithDisplay = false} = {}) {
     let isSigned = message?.sig?.length > 10;
 
     if (message?.lastEdited != null) {
@@ -548,7 +529,9 @@ async function createMsgHTML({message, append = false, isSystem = false, reply =
 
     let messageRow =
         `
-        <div class="content ${isSystem ? "system" : ""} ${isMention ? "mention" : ""}" data-message-id="${message.messageId}" data-member-id="${message.id}" data-timestamp="${message.timestamp}">
+        <div class="content ${isSystem ? "system" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}" 
+            style="${waitWithDisplay ? "display: none;" : ''}"
+            data-message-id="${message.messageId}" data-member-id="${message.id}" data-timestamp="${message.timestamp}">
             ${createMsgActions(message.id, isSystem)}
             ${sanitizeHtmlForRender(message.message)}  ${message?.editCode ? message?.editCode : ""}    
         </div>
@@ -561,6 +544,7 @@ async function createMsgHTML({message, append = false, isSystem = false, reply =
     // if message was a reply
     let replyCode = "";
     if(reply){
+        let convertedMentions = await convertMention(reply.message);
         replyCode = `
             <div class="row reply" data-message-id="${reply?.message?.messageId}" data-member-id="${reply?.message?.id}">            
                 <!-- very creative name indeed -->
@@ -573,14 +557,14 @@ async function createMsgHTML({message, append = false, isSystem = false, reply =
                     <label class="username" data-member-id="${reply?.message?.id}" style="color: ${reply?.message?.color};">${unescapeHtmlEntities(sanitizeHtmlForRender(truncateText(reply?.message?.name, 25)))}</label>
                 </div>
                 <div class="content reply" data-message-id="${reply?.message?.messageId}" data-member-id="${reply?.message?.id}" data-timestamp="${reply?.message?.timestamp}">
-                    ${await text2Emoji(unescapeHtmlEntities(sanitizeHtmlForRender(reply?.message?.message)), false, true) || "[ Click to view message ]"} 
+                    ${await text2Emoji(unescapeHtmlEntities(sanitizeHtmlForRender(convertedMentions.text)), false, true) || "[ Click to view message ]"} 
                 </div>
             </div>
         `;
     }
 
     return `
-        <div class="message-container ${isSystem ? "system" : ""}" data-member-id="${message.id}">
+        <div class="message-container ${isSystem ? "system" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}" style="${waitWithDisplay ? "display: none;" : ''}" data-member-id="${message.id}">
             
             ${replyCode}
             <div class="row ${isSystem === true ? `system` : ""}" data-message-id="${message?.messageId}" data-member-id="${message?.id}">
@@ -677,15 +661,17 @@ scrollContainer.addEventListener("scroll", async function () {
         if (!topElement) return;
 
         const timeStamp = Number(topElement?.element?.getAttribute("data-timestamp"));
-        await getChatlog(timeStamp, true);
+        await getChatlog(timeStamp, true, getScrollPosition(scrollContainer, topElement?.element));
     }
 });
 
 
-function getChatlog(index = -1, appendTop = false) {
+function getChatlog(index = -1, appendTop = false, scrollPosition = null) {
     if(UserManager.getChannel() === null) return
     if(UserManager.getCategory() === null) return
     if(UserManager.getGroup() === null) return
+
+    let channelId = UserManager.getChannel();
 
     socket.emit("getChatlog", {
         id: UserManager.getID(),
@@ -696,7 +682,6 @@ function getChatlog(index = -1, appendTop = false) {
         index
     }, async (response) => {
         let contentDiv = document.getElementById("content");
-        console.log(response)
 
         // reset chat
         if (response?.error === "denied") contentDiv.innerHTML = ""; // fuck em
@@ -714,12 +699,16 @@ function getChatlog(index = -1, appendTop = false) {
             scrollDownInitially = true;
         }
 
+        if(channelId !== UserManager.getChannel()) return;
         let firstMessage = getFirstMessage();
         for (let message of appendTop ? response.data.reverse() : response.data) {
+            // if user switches channel we cancel this shit
+            if(channelId !== UserManager.getChannel()) return;
+
             try {
                 // stop trying to fetch new messages on last message
                 if (response.data.length <= 1 && firstMessage) {
-                    let firstMessageTimestamp = Number(firstMessage?.getAttribute("data-timestamp")) || null;
+                    let firstMessageTimestamp = Number(firstMessage?.element?.getAttribute("data-timestamp")) || null;
 
                     if (firstMessageTimestamp) {
                         if (firstMessageTimestamp === message.timestamp) {
@@ -749,7 +738,8 @@ function getChatlog(index = -1, appendTop = false) {
                         append: true,
                         location,
                         appendTop,
-                        reply: repliedMessage
+                        reply: repliedMessage,
+                        waitWithDisplay: appendTop
                     });
                 } else {
                     await showMessageInChat({
@@ -757,12 +747,9 @@ function getChatlog(index = -1, appendTop = false) {
                         append: false,
                         location,
                         appendTop,
-                        reply: repliedMessage
+                        reply: repliedMessage,
+                        waitWithDisplay: appendTop
                     });
-                }
-
-                if(firstMessage?.element && appendTop === true){
-                    scrollToFirstElement(contentDiv, firstMessage);
                 }
             } catch (error) {
                 console.error(`Error processing message with ID ${message.messageId}:`, error);
@@ -773,30 +760,83 @@ function getChatlog(index = -1, appendTop = false) {
             document.getElementById("content").insertAdjacentHTML("beforeend", `<div style="width: 100%;text-align: center; color: gray; font-style: italic;display: block !important; float: left !important;" id="msg-0">No messages yet... be the first one!</div>`);
         }
 
-        // mark channel as read
-        ChatManager.setChannelMarkerCounter(UserManager.getChannel())
+        setTimeout(() => {
+            displayAwaitedMessages();
 
-        // only scroll down initially
-        if (!appendTop && scrollDownInitially) {
-            scrollDown("getchatlog");
-        }
-        else{
-            // we are inserting shit on the top, but we dont want to scroll up as well,
-            // so we need to reset this shit. to avoid smooth scrolling we will need to disable that too.
-            if (appendTop && firstMessage?.element !== getFirstMessage().element) {
-                scrollToFirstElement(contentDiv, firstMessage);
+            // mark channel as read
+            ChatManager.setChannelMarkerCounter(UserManager.getChannel())
+
+            // only scroll down initially
+            if (!appendTop && scrollDownInitially) {
+                scrollDown("getchatlog");
             }
-        }
-        resolveMentions();
+            else{
+                // we are inserting shit on the top, but we dont want to scroll up as well,
+                // so we need to reset this shit. to avoid smooth scrolling we will need to disable that too.
+                if (appendTop && scrollPosition !== null) {
+                    toggleSmoothScroll(contentDiv, false);
+                    setScrollPosition(contentDiv, scrollPosition);
+                    toggleSmoothScroll(contentDiv, true);
+                }
+            }
+        }, 300) // im a sneaky bastard. this is not a bug, but a feature :D
     });
+}
 
-    function scrollToFirstElement(parent, element){
-        parent.style.scrollBehavior = "auto";
-        element.parent.scrollIntoView({
-            behavior: "auto",
-        })
-        parent.style.scrollBehavior = "smooth";
+function waitForStableValue(getValueFn, stableMs, callback) {
+    let last = getValueFn();
+    let timeout = null;
+
+    const check = () => {
+        const now = getValueFn();
+        if (now !== last) {
+            last = now;
+            if (timeout) clearTimeout(timeout);
+            timeout = setTimeout(callback, stableMs);
+        }
+        requestAnimationFrame(check);
+    };
+
+    requestAnimationFrame(check);
+}
+
+
+function toggleSmoothScroll(element, toggle){
+    if(toggle === true){
+        element.style.scrollBehavior = "smooth";
     }
+    else{
+        element.style.scrollBehavior = "auto";
+    }
+}
+
+function getScrollPosition(container, refEl) {
+    return {
+        ref: refEl,
+        offset: refEl ? refEl.getBoundingClientRect().top : 0
+    };
+}
+
+
+function setScrollPosition(container, info) {
+    if (!info?.ref) return;
+
+    let newOffset = info.ref.getBoundingClientRect().top;
+    let diff = newOffset - info.offset;
+
+    container.scrollTop += diff;
+}
+
+
+
+
+
+function displayAwaitedMessages(){
+    let messages = document.querySelectorAll(".waitForDisplay");
+    messages.forEach(message => {
+        message.style.display = "flex";
+        message.classList.remove("waitForDisplay");
+    })
 }
 
 function addToChatLog(element, text, appendTop = false, force = true) {
@@ -853,6 +893,5 @@ function getLastMessage() {
         }
     } else {
         console.warn("couldnt get last message")
-        console.log(lastMessageInChat)
     }
 }

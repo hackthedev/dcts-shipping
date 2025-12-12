@@ -67,19 +67,17 @@ class SplashScreen {
         const { width, height } = this.canvas;
         ctx.clearRect(0, 0, width, height);
 
-        this.time += 0.03;
+        this.time += 0.06;
 
         const base = Math.min(width, height) * 0.25;
         const main = this.lineColor;
 
-        // sanfte Ghost-Layer
         for (let i = 3; i > 0; i--) {
             const fade = i / 3;
             const col = main.replace(/[\d.]+\)$/g, `${0.2 * fade})`);
             this.drawWave(base, i * 0.6, col, 2, 10 * fade, 1 + i * 0.1, 20 * fade);
         }
 
-        // Hauptlinie mit Glow
         this.drawWave(base, 0, main, 3.5, 12, 1.1, 45);
 
         this.animationId = requestAnimationFrame(() => this.animate());
@@ -113,7 +111,6 @@ class SplashScreen {
     }
 }
 
-// CSS
 const style = document.createElement("style");
 style.textContent = `
 .splash-overlay {

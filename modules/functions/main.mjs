@@ -1122,6 +1122,28 @@ export async function validatePassword(password, hash) {
     return isMatch;
 }
 
+export function getChannelCastingObject(channelObject) {
+    channelObject = copyObject(channelObject);
+
+    if (!channelObject || typeof channelObject !== "object") {
+        console.error("getRoleCastingObject: Invalid input: Expected an object");
+        return;
+    }
+
+    const keysToDelete = [
+        "permissions"
+    ]; // Keys to always delete
+
+    keysToDelete.forEach(key => {
+        if (key in channelObject) {
+            delete channelObject[key];
+        }
+    });
+
+    return channelObject;
+}
+
+
 export function getRoleCastingObject(role) {
     role = copyObject(role);
 

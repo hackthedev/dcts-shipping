@@ -9,11 +9,11 @@ Although there are still some rough edges and a few missing features, DCTS is ev
 
 **If you need help** or wanna reach out to me feel free to create a **post on** the **subreddit**, **message** me **on discord**, or text me **on signal: shydevil.89**.
 
+![image](./assets/image.png)
+
+*(^ this is a custom theme thats included too)*
+
 ![image-20251127214420083](./assets/image-20251127214420083.png)
-
-![image-20251127214237435](./assets/image-20251127214237435.png)
-
-*(^ this is a custom theme thats shipped too)*
 
 ------
 

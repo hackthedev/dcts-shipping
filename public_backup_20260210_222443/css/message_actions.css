@@ -1,0 +1,38 @@
+.message-container .messageActions{
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+
+    visibility: hidden;
+    height: 0;
+    border-radius: 6px;
+    position: absolute;
+    margin-left: auto;
+    right: 0;
+    padding: 4px;
+
+    gap: 8px;
+    background-color: hsl(from var(--main) h s calc(l * 2.75));
+    margin-top: -4px;
+}
+
+.message-container .messageActions button:hover{
+    background-color: hsl(from var(--main) h s calc(l * 2));
+}
+.message-container .messageActions button{
+    color: white;
+    background-color: transparent;
+    border: none;
+    border-radius: 4px;
+
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+}
+
+.message-container .content:hover .messageActions {
+    visibility: visible;
+    height: fit-content;
+    width: fit-content;
+}

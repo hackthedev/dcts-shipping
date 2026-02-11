@@ -74,6 +74,77 @@ While DCTS is an app, its going to be part of a bigger ecosystem that i plan to 
 
 ------
 
+## Frontend Development
+
+DCTS now features a modern Svelte-based frontend with a component-driven architecture.
+
+### Project Structure
+
+```
+vox-chat/
+├── frontend/              # Modern Svelte frontend
+│   ├── src/
+│   │   ├── components/    # Reusable UI components
+│   │   ├── pages/         # Page components
+│   │   ├── lib/           # Stores and services
+│   │   └── App.svelte     # Root component
+│   ├── README.md          # Frontend documentation
+│   ├── INTEGRATION.md     # Backend integration guide
+│   └── MIGRATION.md       # Migration guide
+├── public/                # Build output & static assets
+│   ├── index.html         # Built Svelte app (generated)
+│   ├── assets/            # JS/CSS bundles (generated)
+│   ├── uploads/           # User uploads
+│   └── emojis/            # Custom emojis
+├── scripts/               # Deployment scripts
+│   ├── backup-old-html.sh
+│   └── build-and-deploy.sh
+├── DEPLOYMENT.md          # Deployment guide
+└── SVELTE_QUICKSTART.md   # Quick start guide
+```
+
+### Quick Start
+
+**Development:**
+```bash
+cd frontend
+npm install
+npm run dev
+# Visit http://localhost:3000
+```
+
+**Production Build:**
+```bash
+cd frontend
+npm run build
+# Output to ../public/
+```
+
+**Automated Deployment:**
+```bash
+./scripts/build-and-deploy.sh
+```
+
+### Features
+
+- ✅ Modern component-based architecture
+- ✅ Real-time messaging with Socket.IO
+- ✅ Reactive state management
+- ✅ Client-side routing
+- ✅ Dark theme optimized
+- ✅ Responsive design
+- ✅ TypeScript ready
+
+### Documentation
+
+- **[SVELTE_QUICKSTART.md](SVELTE_QUICKSTART.md)** - Quick start guide
+- **[frontend/README.md](frontend/README.md)** - Complete documentation
+- **[frontend/INTEGRATION.md](frontend/INTEGRATION.md)** - Backend integration
+- **[frontend/MIGRATION.md](frontend/MIGRATION.md)** - Migration guide
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Deployment instructions
+
+------
+
 ## Installing
 ### Docker Installation
 

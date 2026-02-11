@@ -1,0 +1,217 @@
+#content,
+#content-container,
+.message-container,
+.message-container .contentRows,
+.message-container .row,
+.message-container .content,
+.message-container .row.reply,
+.message-container .row.reply .content.reply {
+    min-width: 0;
+    max-width: 100%;
+    flex-shrink: 1;
+    transition: all 250ms ease-in-out;
+}
+
+
+.message-container {
+    display: flex;
+    flex-direction: column;
+    margin: 12px 0;
+    position: relative;
+}
+
+.message-container .content-container{
+    box-sizing: border-box;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.message-container .content.reply .inline-text-emoji{
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    margin-left: 4px !important;
+    margin-right: 4px !important;
+}
+
+.message-container .row.system div{
+    display: flex;
+    flex-direction: column;
+    align-content: flex-start;
+    align-self: flex-start;
+    justify-content: flex-start;
+    gap: 10px;
+}
+.message-container .row.system{
+    display: flex;
+
+    font-style: italic;
+    color: hsl(from var(--main) h s calc(l * 8));
+    padding: 8px;
+
+    border-left: 3px solid hsl(from var(--main) h s calc(l * 8));
+    gap: 20px;
+}
+
+.message-container .row{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.message-container .row .meta{
+    display: flex;
+    gap: 10px;
+
+    justify-content: flex-start;
+    align-content: center;
+    align-items: center;
+}
+
+
+.message-container .contentRows {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.message-container .content.mention{
+    background-color: rgba(255, 174, 0, 0.12);
+}
+.message-container .content{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+
+    word-break: break-word;
+
+    gap: 0;
+    width: 100%;
+    font-size: 14px;
+    padding-left: 2px;
+}
+
+.message-container .icon-container img{
+    background-size: cover;
+    object-fit: cover;
+    background-position: center center;
+
+    border-radius: 50%;
+    cursor: pointer;
+
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    margin: 0;
+    padding: 0;
+}
+
+.message-container .icon-container{
+    width: 40px !important;
+    height: 40px !important;
+
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.message-container .timestamp{
+    color: hsl(from var(--main) h s calc(l * 8));
+    font-size: 10px;
+}
+
+.message-container p {
+    line-height: 150% !important;
+    margin: 0;
+}
+
+.message-container blockquote{
+    display: flex;
+    width: 100%;
+
+    font-style: italic;
+    margin: 6px 0;
+    padding: 6px;
+}
+
+.message-container .edit-notice{
+    display: flex;
+    flex-direction: row;
+    align-self: flex-start;
+
+    margin-top: 4px;
+    font-size: 8px;
+    font-style: italic;
+
+    color: hsl(from var(--main) h s calc(l * 8));
+    overflow: hidden;
+    cursor: pointer;
+    white-space: break-spaces;
+}
+
+.message-container .edit-notice .editedMsg{
+    max-height: 0;
+    overflow: hidden;
+    transition: all 500ms ease-in-out;
+}
+
+.message-container .edit-notice:hover .editedMsg{
+    max-height: 50px;
+}
+
+
+/* Replies */
+.message-container .row.reply{
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-content: center;
+    align-items: center;
+
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.message-container .row.reply .content.reply {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: keep-all;
+
+    font-size: 12px;
+    font-style: italic;
+    user-select: none;
+}
+
+.message-container .row.reply .box{
+    display: flex;
+    border-top-left-radius: 6px;
+
+    height: 50%;
+    width: 25px;
+
+    margin-left: 18px;
+    margin-top: auto;
+}
+
+.message-container .row.reply .icon-container,
+.message-container .row.reply .username {
+    user-select: none;
+}
+.message-container .row.reply .icon-container {
+    display: flex;
+    width: 15px !important;
+    height: 15px !important;
+}
+.message-container .row.reply .icon-container img{
+    display: flex;
+    align-self: center;
+}
+
+.message-container .row.reply .username {
+    white-space: nowrap;
+    padding-left: 2px;
+}

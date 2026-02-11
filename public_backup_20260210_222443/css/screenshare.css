@@ -1,0 +1,83 @@
+.vc-container{
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    align-content: center;
+    width: calc(100% + 32px);
+    height: calc(100% + 32px);
+
+    padding: 40px;
+    margin: -16px;
+
+    opacity: 0;
+    transition: all 500ms ease-in-out;
+}
+
+.vc-row {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+
+    margin: 10px auto;
+}
+
+.participant{
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+
+    background-color:  hsl(from var(--main) h s calc(l * 1.25));
+
+    padding: 20px 60px;
+    border-radius: 6px;
+}
+
+.participant p{
+    margin-bottom: 0;
+}
+
+.participant img{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    transition: all 250ms ease-in-out;
+}
+
+.vc-row.screenshares {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.vc-row video {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.vc-row video {
+    border-radius: 10px;
+    max-width: 400px;
+    height: auto;
+}
+
+.vc-row audio{
+    display: none;
+    max-height: 0;
+}
+
+#channelname-icons .screenshare.icon{
+    background-image: url("/img/screenshare.png");
+}
+
+#channelname-icons .muteMic.icon{
+    background-image: url("/img/microphone.png");
+}
+
+#channelname-icons .muteMic.muted.icon{
+    background-image: url("/img/muted.png");
+}

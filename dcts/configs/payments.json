@@ -1,0 +1,18 @@
+{
+    "paypal": {
+        "sandbox": {
+            "id": "xxx",
+            "secret": "xxx"
+        },
+        "live": {
+            "id": "xxx",
+            "secret": "xxx"
+        },
+        "use_sandbox": true
+    },
+    "coinbase": {
+        "key": "xxx",
+        "webhook": "xxx"
+    },
+    "domain": "http://localhost:2052"
+}

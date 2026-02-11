@@ -1,0 +1,50 @@
+#homeScreenGroupContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 32px;
+
+    text-align: center;
+}
+
+#homeScreenGroupContainer h1{
+    margin-bottom: 0;
+}
+
+#homeScreenGroupContainer hr{
+    width: 100%;
+}
+
+#homeGroupStatsMostActiveUserContainer {
+    max-height: 320px;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-content: center;
+    justify-content: center;
+}
+
+.activeUserEntry {
+    border-radius: 8px;
+    cursor: pointer;
+
+    min-width: 180px;
+    max-width: 250px;
+
+    margin: 8px;
+    padding: 2px 16px;
+    text-align: center;
+}
+
+#activeUserTableList {
+    width: 100%;
+}

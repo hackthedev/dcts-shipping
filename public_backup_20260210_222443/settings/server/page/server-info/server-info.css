@@ -1,0 +1,143 @@
+#profile_container{
+    padding: 4px;
+
+    width: calc(300px - 8px);
+    height: auto;
+    border-radius: 8px;
+
+    background-color: #202225;
+    color: #ABB8BE;
+}
+
+#profile_banner{
+    background-size: cover;
+
+    object-fit: cover;
+    background-color: transparent;
+    background-position: center center;
+
+    width: 100%;
+    height: 120px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+
+    display: block;
+    float: left;
+}
+
+#profile_pfp_container {
+    width: 100%;
+    float: left;
+    display: block;
+
+}
+
+#profile_icon{
+    width: 75px;
+    height: 75px;
+
+    margin-top: -37.5px !important;
+    margin-left: 20px !important;
+
+    border-radius: 50%;
+    border: 4px solid black;
+
+    float: left;
+    display: block;
+
+    background-size: cover;
+
+    object-fit: cover;
+    background-color: #202225;
+    background-position: center center;
+}
+
+#profile_content{
+    padding: 24px;
+}
+
+#profile_username {
+    float: left;
+    display: block;
+
+    width: 100%;
+}
+
+#profile_content hr{
+    border: 1px solid #36393F;
+    background-color: #36393F;
+    color: #36393F;
+
+    margin: 16px 0 16px 0;
+}
+
+.profile_headline{
+    text-transform: uppercase;
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#profile_aboutme{
+    font-size: 14px;
+}
+
+#profile_roles code.role{
+    background-color: #36393F;
+    padding: 2px 6px 2px 6px;
+    border-radius: 6px;
+}
+
+#profile_roles .role_color{
+    background-color: red;
+
+    width: 10px;
+    height: 10px;
+
+    display: inline-block;
+    border-radius: 50%;
+
+    margin: 6px 8px 0px 2px;
+}
+
+#profile_change_container {
+    float: left;
+    display: block;
+
+    margin: 0 60px 0 0;
+}
+
+#preview {
+    float: left;
+    display: block;
+}
+
+.profile_input_container {
+    margin: 0 0 20px 0;
+}
+
+.profile_input_container input[type=text], .profile_input_container textarea{
+    color: #ABB8BE;
+    background-color: #292B2F;
+    outline: none;
+    padding: 4px 8px 4px 8px;
+
+    margin: 4px 0 0 0;
+
+    border-radius: 6px;
+    border: 1px solid transparent;
+    resize: none;
+}
+
+#settings_profile_save {
+    margin: 20px 0 0 0;
+    padding: 2px 4px 2px 4px;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    background-color: #ABB8BE;
+    color: black;
+    text-align: center;
+    width: 100%;
+}

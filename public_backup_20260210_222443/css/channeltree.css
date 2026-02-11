@@ -1,0 +1,135 @@
+#serverbanner-container {
+    display: flex;
+    flex-shrink: 0;
+    height: 150px;
+    width: calc(100%);
+    margin: 0 0 20px 0;
+
+    border-radius: 4px;
+
+    overflow: hidden;
+    box-shadow: 0 8px 8px -2px black;
+}
+
+#serverbanner-image {
+    height: calc(100%);
+    width: calc(100%);
+    -webkit-transition: transform .5s ease;
+
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 100% 100%;
+    object-fit: cover;
+}
+
+
+#serverbanner-image:hover {
+    transform: scale(1.1);
+}
+
+#serverbanner-image:not(:hover) {
+    transform: scale(1);
+}
+
+#channellist {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+
+    height: 100%;
+    width: calc(300px);
+    color: hsl(from var(--main) h s calc(l * 12)) !important;
+}
+
+#channeltree {
+    display: block;
+    float: left;
+
+    height: 100%;
+    width: 100%;
+
+
+    padding: 16px;
+    overflow-y: auto;
+}
+
+#channeltree details ul li {
+    margin-left: 15px;
+    /*  list-style-image: url("img/hashtag.png"); */
+}
+
+#channeltree details ul {
+    list-style-type: none;
+}
+
+a.channelTrigger.markChannelMessage{
+    color: hsl(from var(--main) h s calc(l * 12));
+    font-style: italic;
+}
+
+#channeltree ul li a{
+    font-style: normal;
+}
+
+.message-marker-icon{
+    position: relative;
+    display: none;
+    float: left;
+    width: 5px;
+    height: 5px;
+
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+
+    background-color: hsl(from var(--main) h s calc(l * 10)) !important;
+
+    top: 8px;
+    left: -6px;
+}
+
+#channeltree li.selected{
+    background-color: hsl(from var(--main) h s calc(l * 2.5));
+    border-radius: 4px;
+}
+
+#channeltree ul {
+    margin: 0 0 16px 0;
+    padding: 0 0 16px 16px;
+
+    /*list-style-image: url("https://cdn-icons-png.flaticon.com/512/32/32213.png"); */
+    list-style-type: disc;
+}
+
+#channeltree li {
+    padding: 4px;
+}
+
+#channeltree li:hover {
+    background-color: rgb(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+#channeltree ul.participants img.avatar{
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+    object-fit: cover;
+    background-position: center center;
+    border-radius: 50%;
+}
+#channeltree ul.participants{
+    display: flex;
+    flex-direction: column;
+
+    margin-top: 4px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+#channeltree ul.participants li {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-content: center;
+    gap: 8px;
+    cursor: pointer;
+}

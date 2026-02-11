@@ -1,0 +1,104 @@
+#profile_container{
+    padding: 4px;
+
+    width: calc(300px - 8px);
+    height: auto;
+    border-radius: 8px;
+
+    background-color: #202225;
+    color: #ABB8BE;
+}
+
+.profile_headline{
+    text-transform: uppercase;
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+#profile_change_container {
+    float: left;
+    display: block;
+
+    margin: 0 60px 0 0;
+}
+
+
+.profile_input_container {
+    margin: 0 0 20px 0;
+}
+
+
+#settings_profile_save {
+    margin: 20px 0 0 0;
+    padding: 2px 4px 2px 4px;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    background-color: #ABB8BE;
+    color: black;
+    text-align: center;
+    width: 100%;
+}
+
+.emoji-entry {
+    display: flex;
+    position: relative;
+    width: fit-content;
+    cursor: pointer;
+    user-select: none;
+}
+
+.emoji-img img{
+    width: 50px;
+    height: 50px;
+}
+
+.emoji-actions {
+    overflow: hidden;
+    position: absolute;
+    top: -8px;
+    left: 40px;
+    display: none;
+}
+
+.emoji-entry:hover .emoji-actions {
+    display: flex;
+}
+
+.emoji-actions img.emoji-action-icon {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    border: 1px solid gray;
+}
+
+.emoji-popup input[type=text]{
+    margin: 15px 0 0 20px;
+
+    width: 200px;
+    vertical-align: center;
+
+    background-color: #292B2F;
+    color: #ABB8BE;
+    outline: none;
+
+    border: 1px solid #70787b;
+    border-radius: 4px;
+
+    padding: 4px 8px 4px 8px;
+}
+
+#emoji-container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: flex-start;
+;
+    width: 100%;
+    height: auto;
+    gap: 20px;
+}

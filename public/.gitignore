@@ -1,0 +1,16 @@
+# Ignore Svelte build output
+/index.html
+/manifest.json
+/assets/
+/*.js
+/*.css
+
+# Keep these directories (user content and essential assets)
+!/uploads/
+!/emojis/
+!/plugins/
+!/sounds/
+!/img/
+
+# Keep specific files that should be tracked
+!.gitignore

@@ -1,0 +1,47 @@
+.audio-player {
+    display: flex;
+    flex-direction: column;
+
+    width: auto;
+    margin: 20px auto;
+    margin-left: 0;
+    margin-top: 0;
+
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.audio-info {
+    margin-bottom: 16px;
+    font-weight: bold;
+    color: lightgray;
+    text-align: left;
+}
+
+.audio-player .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.audio-player button {
+    padding: 5px 10px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: hsl(from var(--main) h s calc(l * 2.8));
+    color: #fff;
+    cursor: pointer;
+}
+
+.audio-player button:hover {
+    background-color: hsl(from var(--main) h s calc(l * 2));
+}
+
+.audio-player input[type="range"] {
+    margin: 0 10px;
+}
+
+.audio-player input[type='range']{
+    accent-color: hsl(from var(--main) h s calc(l * 4))
+}

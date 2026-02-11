@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="description" content="{{meta.page.description}}" />
+
+    <script
+            src="/js/core/socket.io.js"
+    ></script>
+
+    <link rel="stylesheet" href="/css/themes/default/default.css">
+
+
+    <script defer src="/js/prompts.js"></script>
+    <script defer src="/js/sysmsg.js"></script>
+    <script defer src="../utility.js"></script>
+    <script type="module" src="/js/core/Emoji.js"></script>
+    <script src="/js/core/ChatManager.js"></script>
+    <script defer src="/js/core/PermUI.js"></script>
+    <script src="/js/core/UserManager.js"></script>
+    <script src="/js/core/CookieManager.js"></script>
+    <script defer src="/js/core/PoW.js"></script>
+    <script defer src="/js/hover.js"></script>
+    <script defer src="/js/escape.js"></script>
+    <script defer src="/js/core/purify.js"></script>
+
+    <script defer src="/notify.js"></script>
+    <script type="module" src="settings.js"></script>
+
+
+    <script src="/js/core/sortable.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+    <title>Server Settings</title>
+</head>
+<body id="pagebody" style="display: none;">
+
+<style>
+
+    #navigation{
+        background-color: hsl(from var(--main) h s calc(l * 2));
+        color: hsl(from var(--main) h s calc(l * 10));
+
+        padding: 32px;
+
+        width: calc(20%);
+        height: calc(100%);
+        font-style: normal;
+
+        float: left;
+        overflow-y: auto;
+    }
+
+    #navigation a {
+        font-style: normal;
+    }
+
+    #nav_settings {
+        float: right;
+        width: 150px;
+
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    #nav_settings h2 {
+        text-transform: uppercase;
+        font-size: 12px;
+    }
+    
+    #nav_settings a{
+        cursor: pointer;
+        line-height: 175%;
+
+        text-decoration: none;
+        color: hsl(from var(--main) h s calc(l * 8));
+
+    }
+
+    #nav_settings a:hover{
+        color: hsl(from var(--main) h s calc(l * 12));
+        transition: all 200ms;
+    }
+
+    #nav_settings hr {
+        border: 1px solid hsl(from var(--main) h s calc(l * 8) / 10%);
+        background-color: hsl(from var(--main) h s calc(l * 8) / 10%);
+
+        margin: 16px 0 16px 0;
+    }
+
+    #content {
+        width: calc(80% );
+        height: calc(100%);
+        padding: 32px;
+
+        display:block;
+        float: left;
+
+        overflow-y: auto;
+        background-color: background-color: hsl(from var(--main) h s calc(l * 2));
+    }
+
+    #back {
+        width: 30px;
+        height: 30px;
+
+        margin: 20px 20px 0 0;
+        position: absolute;
+        right: 0;
+
+        background-color: #2B3137;
+        float: right;
+        display: block;
+
+        background-image: url("/img/back.png");
+        transform: scaleX(-1);
+        background-size: cover;
+
+        object-fit: cover;
+        background-color: transparent;
+        background-position: center center;
+    }
+
+    #wrapper {
+        display: block;
+        width: 100%;
+        height: 100%;
+
+        background: linear-gradient(
+                90deg,
+                hsl(from var(--main) h s calc(l * 2)),
+                hsl(from var(--main) h s calc(l * 2))
+        );
+    }
+
+    input[type=text], input[type=number]{
+        border: 2px solid #3c3f44 !important;
+    }
+
+
+</style>
+
+
+<div id="wrapper">
+    <div id="navigation">
+
+        <div id="nav_settings">
+
+
+            <div id="general">
+                <h2>General Settings</h2>
+                <a href='?page=server-info' id="manageServerInfo" data-permission="administrator">Server Info</a><br id="manageServerInfo-br">
+                <a href='?page=rate-limit' id="manageRateSettings" data-permission="administrator">Rate Limit</a><br id="manageRateSettings-br">
+                <hr id="general-hr">
+            </div>
+
+            <div id="moderation">
+                <h2>Moderation & Safety</h2>
+                <!-- soon tm <a href='?page=server-info' id="manageServerInfo">Automod</a><br id="manageServerInfo-br">-->
+
+                <a href='?page=invites' id="manageInvites" data-permission="manageInvites">Invites</a><br id="manageInvites-br">
+                <a href='?page=auditlog' id="viewAuditLog" data-permission="viewAuditLog">Audit Log</a><br id="viewAuditLog-br">
+                <a href='?page=network-servers' id="manageNetworkServers" data-permission="manageNetworkServers">Network Servers</a><br id="manageNetworkServers-br">
+                <hr id="moderation-hr">
+            </div>
+
+            <div id="users">
+                <h2>User Management</h2>
+                <a href='?page=roles' id="manageRoles" data-permission="manageRoles">Server Roles</a><br id="manageRoles-br">
+                <a href='?page=banlist' id="manageBans" data-permission="manageBans">Banned Members</a><br id="manageBans-br">
+                <hr id="users-hr">
+            </div>
+
+            <div id="media">
+                <h2>Media Settings</h2>
+                <a href='?page=emojis' id="manageEmojis" data-permission="manageEmojis">Emojis</a><br id="manageEmojis-br">
+                <a href='?page=file-uploads' id="manageUploads" data-permission="manageUploads">File Uploads</a><br id="manageUploads-br">
+                <hr id="media-hr">
+            <div>
+
+
+            <div id="info">
+                <h2>Information</h2>
+                <!--<a href='?page=planned-features'>Planned Features</a><br>-->
+                <a href='?page=about'>About</a><br>
+                <a href='?page=support' style="color: #e55a72;">Support <3</a><br>
+                <hr>
+            </div>
+        </div>
+
+    </div>
+        </div>
+    </div>
+
+    <a href="/"><div id="back"></div></a>
+    <div id="content">
+
+    </div>
+</div>
+
+<script>
+    ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
+</script>
+
+
+</body>
+</html>

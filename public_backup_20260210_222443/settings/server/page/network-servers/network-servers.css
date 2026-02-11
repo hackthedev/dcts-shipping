@@ -1,0 +1,222 @@
+:root{
+    --settings-banlist-even: #41484f;
+    --settings-banlist-odd: #33393f;
+}
+
+.tablecontainer{
+    margin-bottom: 80px;
+}
+
+#serverSearch{
+    background-color: hsl(from var(--main) h s calc(l * 3));
+    color: hsl(from var(--main) h s calc(l * 10));
+
+    border: 1px solid hsl(from var(--main) h s calc(l * 10));
+    border-radius: 4px;
+
+    margin-top: 4px;
+    margin-bottom: 40px;
+    padding: 4px 8px;
+}
+
+#profile_container{
+    padding: 4px;
+
+    width: calc(300px - 8px);
+    height: auto;
+    border-radius: 8px;
+
+    background-color: #202225;
+    color: #ABB8BE;
+}
+
+.profile_headline{
+    text-transform: uppercase;
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+#profile_change_container {
+    float: left;
+    display: block;
+
+    margin: 0 60px 0 0;
+}
+
+
+.profile_input_container {
+    margin: 0 0 20px 0;
+}
+
+
+#settings_profile_save {
+    margin: 20px 0 0 0;
+    padding: 2px 4px 2px 4px;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    background-color: #ABB8BE;
+    color: black;
+    text-align: center;
+    width: 100%;
+}
+.banned-entry-img-container{
+    float: left;
+    display: block;
+    width: 100%
+}
+
+.banned-entry-icon {
+    float: left;
+    display: block;
+
+    margin-top: -12%;
+    margin-left: 6%;
+
+    width: 20%;
+    height: 20%;
+
+    border-radius: 50%;
+    border: 1px solid #292B2F;
+
+    object-fit: cover;
+    background-color: transparent;
+    background-position: center center;
+}
+
+.banned-entry-banner-container{
+    float: left;
+    display: block;
+    width: 100%;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+.banned-entry-img-containers {
+    float: left;
+    display: block;
+
+    margin-right: 2%;
+
+    width: 40%;
+}
+
+.banned-entry-banner {
+
+    width: 100%;
+    height: 150px;
+
+    border-radius: 6px;
+    border: 2px solid #292B2F;
+
+    object-fit: cover;
+    background-color: transparent;
+    background-position: center center;
+}
+
+.banned-entry-info-container {
+    float: left;
+    display: block;
+}
+
+.banned-entry-container {
+    float: left;
+    margin-bottom: 5%;
+}
+
+
+.settings_banlist_table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    text-align: left;
+}
+
+.settings_banlist_table th, .settings_banlist_table td {
+    padding: 12px !important;
+    border: 1px solid #ABB0BE;
+}
+
+.settings_banlist_even_row {
+    background-color: var(--settings-banlist-even);
+}
+
+.settings_banlist_odd_row {
+    background-color: var(--settings-banlist-odd);
+}
+
+.settings_banlist_user_info {
+    display: flex;
+    align-items: center;
+}
+
+.settings_banlist_user_icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.settings_banlist_unban_button {
+    padding: 8px 12px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.settings_banlist_details_button {
+    padding: 8px 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.rowDetails {
+    display: none;
+    width: 100%;
+    overflow: hidden !important;
+    max-height: 0;
+    transition: max-height 2s ease-in-out;
+}
+
+summary{
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+
+.rowDetails .settings_banlist_even_row,
+.settings_banlist_details_content .settings_banlist_even_row {
+    background-color: var(--settings-banlist-even);
+}
+
+.rowDetails .settings_banlist_odd_row,
+.settings_banlist_details_content .settings_banlist_odd_row {
+    background-color: var(--settings-banlist-odd);
+}
+
+.details-status-action button{
+    background-color: hsl(from var(--main) h s calc(l * 3));
+    color: hsl(from var(--main) h s calc(l * 10));
+    border: 1px solid hsl(from var(--main) h s calc(l * 8) / 60%);
+
+    outline: none;
+    padding: 8px 8px;
+}
+.details-status-action{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+}
+

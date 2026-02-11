@@ -1,0 +1,273 @@
+{
+    "serverinfo": {
+        "name": "Default Server",
+        "description": "",
+        "port": 2052,
+        "setup": 1,
+        "maxUploadStorage": 1024,
+        "rateLimit": 512,
+        "dropInterval": 5,
+        "useCloudflareImageCDN": "",
+        "cfAccountId": "",
+        "cfAccountToken": "",
+        "cfHash": "",
+        "moderation": {
+            "ip": {
+                "urlWhitelist": [
+                    "/^/discover(/.*)?$/",
+                    "/^/uploads(/.*)?$/",
+                    "/^/emojis(/.*)?$/"
+                ],
+                "companyDomainWhitelist": [],
+                "blacklist": [],
+                "whitelist": [],
+                "blockedCountryCodes": [],
+                "blockDataCenter": true,
+                "blockSatelite": true,
+                "blockCrawler": true,
+                "blockBogon": true,
+                "blockProxy": true,
+                "blockVPN": true,
+                "blockTor": true,
+                "blockAbuser": true
+            },
+            "bans": {
+                "displayName": "Banned",
+                "displayMessageNotice": "<span style=\"color: indianred;\">[ Content hidden ]</span>",
+                "ipBanDuration": "10 minutes",
+                "memberListHideBanned": true
+            },
+            "messaging": {
+                "repeatedMessages": {
+                    "enabled": false,
+                    "counter": 0,
+                    "actions": {},
+                    "timespan": 0,
+                    "bypassers": []
+                },
+                "blacklist": {
+                    "enabled": false,
+                    "words": [],
+                    "actions": {},
+                    "channels": [],
+                    "userprofile": true,
+                    "bypassers": []
+                }
+            }
+        },
+        "instance": {
+            "contact": {
+                "email": "",
+                "website": "",
+                "reddit": "",
+                "discord": "",
+                "github": "",
+                "signal": "",
+                "owner": {
+                    "name": ""
+                }
+            }
+        },
+        "defaultTheme": "default.css",
+        "livekit": {
+            "enabled": true,
+            "key": "dev",
+            "secret": "testing",
+            "url": "localhost:7880"
+        },
+        "discovery": {
+            "enabled": true,
+            "networkSyncing": true,
+            "defaultStatus": "verified"
+        },
+        "system": {
+            "members": {
+                "allowCountryCode": true,
+                "ignoreTimeout": "30 days"
+            },
+            "welcome": {
+                "enabled": true,
+                "message": "<h3>Welcome to the server!</h3>\n        <p>\n            We hope you'll like it here!\n            If you ever need help press the <b>Support</b> button on the top!\n        </p>\n\n        <p>\n            <a style=\"font-size: 10px;color: gray;\" href=\"https://ko-fi.com/shydevil/tip\" target=\"_blank\">Donate <3</a>\n        </p>\n    "
+            }
+        },
+        "home": {
+            "banner_url": "",
+            "title": "Default Server Title",
+            "subtitle": "Default Server Sub-Title",
+            "about": "This is the <i>default server</i> about me"
+        },
+        "reports": {
+            "enabled": true
+        },
+        "app": {
+            "url": "http://your-ip-or-domain:port"
+        },
+        "turn": {
+            "enabled": true,
+            "secret": "north",
+            "host": "127.0.0.1",
+            "port": 3478
+        },
+        "slots": {
+            "limit": 100,
+            "reserved": 4,
+            "ipWhitelist": [
+                "::1",
+                "::ffff:127.0.0.1"
+            ]
+        },
+        "pow": {
+            "difficulty": 4
+        },
+        "registration": {
+            "enabled": true,
+            "accessCodes": {}
+        },
+        "login": {
+            "maxLoginAttempts": 5
+        },
+        "sql": {
+            "enabled": true,
+            "host": "dcts-mariadb",
+            "port": 3306,
+            "username": "dcts",
+            "password": "dcts",
+            "database": "dcts",
+            "connectionLimit": 10
+        },
+        "ssl": {
+            "enabled": false,
+            "key": "",
+            "cert": "",
+            "chain": ""
+        },
+        "defaultChannel": "0",
+        "countryCode": "",
+        "messageLoadLimit": 50,
+        "uploadFileTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/gif",
+            "image/webp",
+            "audio/mpeg",
+            "video/mp4",
+            "audio/vnd.wave"
+        ]
+    },
+    "ipblacklist": [],
+    "banlist": {},
+    "mutelist": {},
+    "serverroles": {
+        "0": {
+            "info": {
+                "id": "0",
+                "name": "Member",
+                "icon": null,
+                "color": "#FFFFFF",
+                "deletable": 0,
+                "sortId": 1,
+                "displaySeperate": 1,
+                "hasRole": 1
+            },
+            "permissions": {
+                "readMessages": 1,
+                "sendMessages": 1,
+                "uploadFiles": 1,
+                "redeemKey": 1,
+                "maxUpload": "10",
+                "manageChannels": 0,
+                "viewChannelHistory": 1,
+                "createReports": 1
+            },
+            "members": [
+                "196202875153"
+            ],
+            "token": []
+        },
+        "1": {
+            "info": {
+                "id": "1",
+                "name": "Offline",
+                "icon": null,
+                "color": "#7C808A",
+                "deletable": 0,
+                "sortId": 0,
+                "displaySeperate": 1,
+                "hasRole": 0
+            },
+            "permissions": {},
+            "members": [],
+            "token": []
+        },
+        "1111": {
+            "info": {
+                "id": 1111,
+                "name": "Admininistrator",
+                "icon": null,
+                "color": "#ff0000",
+                "deletable": 0,
+                "sortId": 3,
+                "displaySeperate": 1,
+                "hasRole": 1
+            },
+            "permissions": {
+                "readMessages": 1,
+                "administrator": 1,
+                "manageChannels": 0
+            },
+            "members": [],
+            "token": [
+                "1321637196496725714049881222646268081555494217367053149618976308"
+            ]
+        }
+    },
+    "groups": {
+        "0": {
+            "info": {
+                "id": 0,
+                "name": "Home",
+                "icon": "img/default_icon.png",
+                "banner": "/img/default_banner.png",
+                "isDeletable": 1,
+                "sortId": 2,
+                "access": []
+            },
+            "channels": {
+                "categories": {
+                    "0": {
+                        "info": {
+                            "id": 0,
+                            "name": "General",
+                            "sortId": 2
+                        },
+                        "channel": {
+                            "0": {
+                                "id": 0,
+                                "name": "chat",
+                                "type": "text",
+                                "description": "",
+                                "sortId": 0,
+                                "permissions": {
+                                    "0": {
+                                        "readMessages": 1,
+                                        "sendMessages": 1,
+                                        "viewChannel": 1,
+                                        "viewChannelHistory": 1
+                                    }
+                                },
+                                "msgCount": 1
+                            }
+                        }
+                    }
+                }
+            },
+            "permissions": {
+                "0": {
+                    "viewGroup": 1,
+                    "sendMessages": 1,
+                    "readMessages": 1
+                }
+            }
+        }
+    }
+}

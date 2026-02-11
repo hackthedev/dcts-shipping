@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+
+    <script type="text/javascript" src="/js/core/Client.js"></script>
+    <script type="text/javascript" src="/js/core/Crypto.js"></script>
+    <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
+            integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
+            crossorigin="anonymous"
+    ></script>
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/themes/default/default.css">
+    <link rel="stylesheet" href="/css/mobile/profile_settings.css?v={{random}}">
+
+
+    <script defer src="/js/prompts.js?v={{random}}"></script>
+    <script defer src="../../js/core/CookieManager.js"></script>
+    <script defer src="../../js/core/UserManager.js"></script>
+    <script defer type="text/javascript" src="/js/core/PoW.js"></script>
+    <script defer type="text/javascript" src="/js/core/FileManager.js"></script>
+    <script defer type="text/javascript" src="../utility.js"></script>
+    <script defer type="text/javascript" src="settings.js"></script>
+    <script defer type="text/javascript" src="/js/upload.js"></script>
+    <script defer type="text/javascript" src="/js/sysmsg.js"></script>
+
+    <title>User Settings</title>
+</head>
+<body>
+
+<style>
+    html, body{
+        margin: 0;
+        padding: 0;
+
+        font-family: 'Roboto', sans-serif;
+        color: #ABB8BE;
+        background: hsl(from var(--main) h s calc(l * 1.9)) !important;
+
+        width: 100%;
+        height: 100%;
+    }
+
+    #navigation{
+        background-color: hsl(from var(--main) h s calc(l * 1));
+
+        padding: 32px;
+
+        width: calc(20% );
+        height: calc(100%);
+
+        float: left;
+    }
+
+    #nav_settings {
+        float: right;
+        width: 150px;
+
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    #nav_settings h2 {
+        text-transform: uppercase;
+        font-size: 12px;
+    }
+    
+    #nav_settings a{
+        cursor: pointer;
+        display: block;
+        margin-top: 12px;
+        font-style: normal;
+    }
+
+    #nav_settings hr {
+        border: 1.5px solid #36393F;
+        background-color: #36393F;
+        color: #36393F;
+
+        margin: 16px 0 16px 0;
+    }
+
+    #content {
+
+        width: calc(100% - 20%);
+        height: calc(100% );
+        padding: 32px;
+
+        display:block;
+        float: left;
+
+        overflow-y: auto;
+    }
+
+    #back {
+        width: 30px;
+        height: 30px;
+
+        margin: 20px 20px 0 0;
+
+        float: right;
+        display: block;
+        right: 10px;
+        position: absolute;
+
+        background-image: url("/img/back.png");
+        transform: scaleX(-1);
+        background-size: cover;
+
+        object-fit: cover;
+        background-color: transparent;
+        background-position: center center;
+    }
+
+    #wrapper {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+</style>
+
+
+<div id="wrapper">
+    <div id="navigation">
+
+        <div id="nav_settings">
+            <h2>Profile Settings</h2>
+            <a onclick='setUrl("?page=profile")'>Profile</a>
+            <a onclick='setUrl("?page=voip")'>Voice Chat</a>
+            <a onclick='setUrl("?page=themes")'>Themes</a>
+            <hr>
+        </div>
+
+    </div>
+
+    <a href="/"><div id="back"></div></a>
+    <div id="content">
+
+
+    </div>
+</div>
+
+
+</body>
+</html>

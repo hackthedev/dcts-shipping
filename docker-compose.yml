@@ -1,22 +1,32 @@
+# Production Docker Compose
+# ⚠️ Build frontend first: cd frontend && npm run build
+
 services:
+  # Backend Application (serves built frontend from public/)
   dcts-app:
     image: ghcr.io/hackthedev/dcts-shipping:latest
     depends_on:
-      - dcts-mariadb
-      - dcts-livekit
+      dcts-mariadb:
+        condition: service_healthy
+      dcts-redis:
+        condition: service_started
+      dcts-livekit:
+        condition: service_started
     environment:
       - DB_HOST=dcts-mariadb
       - DB_USER=dcts
       - DB_PASS=dcts
       - DB_NAME=dcts
-      - LIVEKIT_URL=your_proxied_url # e.g., livekit.example.com
+      - LIVEKIT_URL=ws://dcts-livekit:7880
       - LIVEKIT_KEY=change_me
       - LIVEKIT_SECRET=change_me
-      - DEBUG=false # optional
+      - DEBUG=false
+      - NODE_ENV=production
     restart: unless-stopped
     ports:
-      - 2052:2052
+      - "2052:2052"
     volumes:
+      - ./public:/app/public  # Includes Svelte frontend build
       - ./dcts/sv:/app/sv
       - ./dcts/configs:/app/configs
       - ./dcts/uploads:/app/public/uploads
@@ -32,6 +42,11 @@ services:
       - MARIADB_PASSWORD=dcts
     volumes:
       - dcts-mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   dcts-redis:
     image: redis:alpine
@@ -41,17 +56,17 @@ services:
   dcts-livekit:
     image: livekit/livekit-server:latest
     command: --config /etc/livekit.yaml
+    depends_on:
+      - dcts-redis
     volumes:
-      - ./livekit.yaml:/etc/livekit.yaml # LiveKit Config (https://github.com/hackthedev/dcts-shipping/blob/main/livekit.yaml)
+      - ./livekit.yaml:/etc/livekit.yaml
     ports:
-      - 7880:7880 # LiveKit API/WebSocket, must be reverse proxied
-      - 7881:7881 # ICE/TCP signaling, expose directly
-      - 7882:7882/udp # ICE/UDP mux, expose directly
-      # Optional TURN ports
+      - 7880:7880
+      - 7881:7881
+      - 7882:7882/udp
       - 3478:3478/udp
       - 5349:5349/tcp
 
 volumes:
   dcts-mariadb-data:
   dcts-redis-data:
-

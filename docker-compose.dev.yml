@@ -1,0 +1,95 @@
+# Development Docker Compose
+# Includes frontend dev server with hot reload
+
+services:
+  # Frontend Development Server (Optional - for hot reload)
+  frontend-dev:
+    image: node:21-slim
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # Prevent host node_modules from overwriting
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:2052
+    profiles:
+      - dev  # Only starts with --profile dev
+
+  # Backend Application
+  dcts-app:
+    image: ghcr.io/hackthedev/dcts-shipping:latest
+    depends_on:
+      dcts-mariadb:
+        condition: service_healthy
+      dcts-redis:
+        condition: service_started
+      dcts-livekit:
+        condition: service_started
+    environment:
+      - DB_HOST=dcts-mariadb
+      - DB_USER=dcts
+      - DB_PASS=dcts
+      - DB_NAME=dcts
+      - LIVEKIT_URL=ws://dcts-livekit:7880
+      - LIVEKIT_KEY=change_me
+      - LIVEKIT_SECRET=change_me
+      - DEBUG=true
+      - NODE_ENV=development
+    restart: unless-stopped
+    ports:
+      - "2052:2052"
+    volumes:
+      - ./public:/app/public
+      - ./dcts/sv:/app/sv
+      - ./dcts/configs:/app/configs
+      - ./dcts/uploads:/app/public/uploads
+      - ./dcts/emojis:/app/public/emojis
+      - ./dcts/plugins:/app/plugins
+
+  # Database
+  dcts-mariadb:
+    image: mariadb:latest
+    environment:
+      - MARIADB_RANDOM_ROOT_PASSWORD=1
+      - MARIADB_DATABASE=dcts
+      - MARIADB_USER=dcts
+      - MARIADB_PASSWORD=dcts
+    volumes:
+      - dcts-mariadb-data:/var/lib/mysql
+    ports:
+      - "3306:3306"  # Exposed for debugging
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  dcts-redis:
+    image: redis:alpine
+    volumes:
+      - dcts-redis-data:/data
+    ports:
+      - "6379:6379"  # Exposed for debugging
+
+  # LiveKit Server
+  dcts-livekit:
+    image: livekit/livekit-server:latest
+    command: --config /etc/livekit.yaml
+    depends_on:
+      - dcts-redis
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+      - "3478:3478/udp"
+      - "5349:5349/tcp"
+
+volumes:
+  dcts-mariadb-data:
+  dcts-redis-data:

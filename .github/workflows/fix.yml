@@ -1,0 +1,17 @@
+name: Fix Lockfile
+on: workflow_dispatch
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: 1.0.29
+      - run: rm bun.lock
+      - run: bun install
+      - run: git config user.name "github-actions"
+      - run: git config user.email "actions@github.com"
+      - run: git commit -am "Regenerate bun.lock"
+      - run: git push

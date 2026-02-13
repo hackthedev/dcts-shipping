@@ -8,7 +8,7 @@ WORKDIR /app
 
 COPY package.json bun.lock ./
 
-RUN bun install --frozen-lockfile
+RUN bun install
 RUN bun prune --production
 
 COPY . .
@@ -16,8 +16,3 @@ COPY . .
 EXPOSE 2052
 
 CMD ["bun", "."]
-
-
-
-
-

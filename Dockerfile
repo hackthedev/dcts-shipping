@@ -2,19 +2,19 @@
 # Dockerfile for DCTS Shipping (Bun)
 # ---------------------------
 
-FROM oven/bun:1-slim
+FROM oven/bun:1.0.29-slim
 
 WORKDIR /app
 
 COPY package.json bun.lock ./
 
-RUN rm bun.lock && \
-    bun install --production --no-frozen-lockfile
+RUN bun install --production
 
 COPY . .
 
 EXPOSE 2052
 
 CMD ["bun", "."]
+
 
 

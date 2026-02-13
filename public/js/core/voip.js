@@ -3,14 +3,13 @@ class VoIP {
         this.APPLICATION_SERVER_URL = applicationServerUrl;
         this.LIVEKIT_URL = livekitUrl;
         this.room = null;
-        this.participants = new Map(); // participantId { audioTrack, videoTrack, screenTrack }
+        this.participants = new Map();
         this.streamSettings = {
             resolution: "1920x1080",
             frameRate: 60,
-            maxBitrate: 5_000_000,
+            maxBitrate: 50_000_000,
         };
 
-        // Callbacks
         this.onJoin = null;
         this.onLeave = null;
         this.onScreenshareBegin = null;
@@ -19,76 +18,191 @@ class VoIP {
         this.onSpeaking = null;
         this.isScreensharing = false;
 
+        this._micPub = null;
+
+        this._screenPubs = [];
+        this._screenTracks = [];
 
         this.configureUrls();
+
+        this._audioCtx = null;
+        this._audioNodes = new Map();
+        this._mediaElSources = new WeakMap();
+        this._volumes = new Map();
+    }
+
+    async stopScreenshare() {
+        if (!this.room?.localParticipant) return;
+        const participantId = this.room.localParticipant.identity;
+
+        const pubs = this._screenPubs.length
+            ? [...this._screenPubs]
+            : Array.from(this.room.localParticipant.trackPublications.values()).filter(pub => {
+                const s = pub?.source;
+                return s === LivekitClient.Track.Source.ScreenShare || s === LivekitClient.Track.Source.ScreenShareAudio || s === "screen";
+            });
+
+        for (const pub of pubs) {
+            const track = pub?.track;
+            if (track) {
+                try { track.mediaStreamTrack?.stop?.(); } catch(e) {}
+                try { track.stop?.(); } catch(e) {}
+                try { this._cleanupDetachedEls(track.detach()); } catch(e) {}
+            }
+
+            try { await this.room.localParticipant.unpublishTrack(pub.trackSid); } catch(e) {}
+            try { if (track) await this.room.localParticipant.unpublishTrack(track); } catch(e) {}
+        }
+
+        for (const t of this._screenTracks) {
+            try { t.mediaStreamTrack?.stop?.(); } catch(e) {}
+            try { t.stop?.(); } catch(e) {}
+            try { this._cleanupDetachedEls(t.detach()); } catch(e) {}
+            try { await this.room.localParticipant.unpublishTrack(t); } catch(e) {}
+        }
+
+        this._screenPubs = [];
+        this._screenTracks = [];
+        this.isScreensharing = false;
+
+        if (this.onScreenshareEnd) this.onScreenshareEnd(participantId);
+    }
+
+    async shareScreen(includeAudio = false) {
+        if (!this.room?.localParticipant) return;
+
+        const participantId = this.room.localParticipant.identity;
+
+        await this.stopScreenshare().catch(()=>{});
+
+        let tracks = await this.room.localParticipant.createScreenTracks({
+            audio: includeAudio ? {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false,
+                voiceIsolation: false
+            } : false,
+            video: {
+                resolution: this.streamSettings.resolution,
+                frameRate: this.streamSettings.frameRate,
+                maxBitrate: this.streamSettings.maxBitrate,
+                codec: "h264"
+            }
+        });
+
+        this._screenTracks = tracks;
+
+        for (const track of tracks) {
+            let pub;
+            try {
+                if (track.kind === "video") {
+                    pub = await this.room.localParticipant.publishTrack(track, {
+                        source: LivekitClient.Track.Source.ScreenShare,
+                        audioPreset: LivekitClient.AudioPresets.musicHighQuality
+                    });
+                } else if (track.kind === "audio") {
+                    pub = await this.room.localParticipant.publishTrack(track, {
+                        source: LivekitClient.Track.Source.ScreenShareAudio,
+                        audioPreset: LivekitClient.AudioPresets.musicHighQuality
+                    });
+                } else {
+                    pub = await this.room.localParticipant.publishTrack(track);
+                }
+            } catch (e) {
+                pub = await this.room.localParticipant.publishTrack(track);
+            }
+
+
+            if (pub) this._screenPubs.push(pub);
+
+            try { this._cleanupDetachedEls(track.detach()); } catch(e) {}
+
+            if (this.onScreenshareBegin) this.onScreenshareBegin(participantId, track);
+            if (this.onTrackSubscribed && track.kind === "video") this.onTrackSubscribed(track, participantId, true);
+
+            track.on("ended", () => {
+                this.stopScreenshare().catch(()=>{});
+            });
+        }
+
+        this.isScreensharing = true;
     }
 
     configureUrls() {
-        if (!this.APPLICATION_SERVER_URL) {
-            this.APPLICATION_SERVER_URL = window.location.origin
-        }
+        if (!this.APPLICATION_SERVER_URL) this.APPLICATION_SERVER_URL = window.location.origin;
+        if (!this.LIVEKIT_URL) throw new TypeError("No LiveKit URL set.");
+    }
 
-        if (!this.LIVEKIT_URL) {
-            throw new TypeError("No LiveKit URL set.")
-        }
+    _lp() {
+        return this.room?.localParticipant || null;
+    }
+
+    _micEnabled() {
+        const lp = this._lp();
+        if (!lp) return false;
+        return !!lp.isMicrophoneEnabled;
     }
 
     async joinRoom(roomName, userName, memberId, channelId) {
-        this.room = new LivekitClient.Room();
+        this.room = new LivekitClient.Room({
+            publishDefaults: {
+                audioPreset: LivekitClient.AudioPresets.musicHighQuality
+            },
+            audioCaptureDefaults: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false,
+                sampleRate: 48000,
+                voiceIsolation: false,
+            }
+        });
 
-        this.room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, _publication, participant) => {
-            const isScreen = track.source === "screen" || track.source === LivekitClient.Track.Source.ScreenShare;
+        this.room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+            const src = publication?.source ?? track?.source;
+            const isScreen =
+                src === LivekitClient.Track.Source.ScreenShare ||
+                src === LivekitClient.Track.Source.ScreenShareAudio ||
+                src === "screen";
 
             this.storeTrack(participant.identity, track, isScreen);
 
-            // screenshare
-            if (isScreen && this.onScreenshareBegin) {
-                this.onScreenshareBegin(participant.identity, track);
-            }
-
-            if (this.onTrackSubscribed) {
-                this.onTrackSubscribed(track, participant.identity, isScreen);
-            }
+            if (isScreen && this.onScreenshareBegin) this.onScreenshareBegin(participant.identity, track);
+            if (this.onTrackSubscribed) this.onTrackSubscribed(track, participant.identity, isScreen);
         });
 
-        // people who are speaking
-        this.room.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, (speakers) => {
-            speakers.forEach(participant => {
-                const id = participant.identity;
-                if(this.onSpeaking) this.onSpeaking(id);
-            });
-        });
-
-
-        // when people leave
-        this.room.on(LivekitClient.RoomEvent.ParticipantDisconnected, (participant) => {
-            if (this.onLeave) this.onLeave(participant.identity);
-        });
-
-
-        this.room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track, _publication, participant) => {
-            const isScreen = track.source === "screen" || track.source === LivekitClient.Track.Source.ScreenShare;
+        this.room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
+            const src = publication?.source ?? track?.source;
+            const isScreen =
+                src === LivekitClient.Track.Source.ScreenShare ||
+                src === LivekitClient.Track.Source.ScreenShareAudio ||
+                src === "screen";
 
             this.removeTrack(participant.identity, track, isScreen);
 
-            if (isScreen && this.onScreenshareEnd) {
-                this.onScreenshareEnd(participant.identity);
-            }
+            if (isScreen && this.onScreenshareEnd) this.onScreenshareEnd(participant.identity);
+        });
+
+        this.room.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, (speakers) => {
+            speakers.forEach(participant => {
+                const id = participant.identity;
+                if (this.onSpeaking) this.onSpeaking(id);
+            });
+        });
+
+        this.room.on(LivekitClient.RoomEvent.ParticipantDisconnected, (participant) => {
+            if (this.onLeave) this.onLeave(participant.identity);
         });
 
         try {
             const token = await this.getToken(roomName, userName, memberId, channelId);
             await this.room.connect(this.LIVEKIT_URL, token);
 
-            // local mic
-            const audioTrack = await LivekitClient.createLocalAudioTrack({
+            this._micPub = await this.room.localParticipant.setMicrophoneEnabled(true, {
                 echoCancellation: true,
                 noiseSuppression: true,
-                autoGainControl: true
+                voiceIsolation: true,
+                autoGainControl: false
             });
-
-            await this.room.localParticipant.publishTrack(audioTrack);
-            this.room.localParticipant.setMicrophoneEnabled(true);
 
             if (this.onJoin) this.onJoin(userName);
         } catch (e) {
@@ -144,73 +258,96 @@ class VoIP {
         if (maxBitrate) this.streamSettings.maxBitrate = maxBitrate;
     }
 
-    async stopScreenshare() {
-        if (!this.room?.localParticipant) return;
-        const participantId = this.room.localParticipant.identity;
+    _cleanupDetachedEls(detachedEls){
+        (detachedEls || []).forEach(el => {
+            if(!el) return;
 
-        this.room.localParticipant.trackPublications.forEach(pub => {
-            const track = pub.track;
-            if (!track) return;
+            if(el.tagName === "VIDEO"){
+                try { el.pause(); } catch(e) {}
+                try { el.srcObject = null; } catch(e) {}
+                el.style.display = "none";
+                return;
+            }
 
-            if (track.source.includes("screen") || track.source === LivekitClient.Track.Source.ScreenShare) {
-                // unpublish
-                this.room.localParticipant.unpublishTrack(track).catch(() => {});
-
-                // remove track vom dom
-                track.detach().forEach(el => el.remove());
-
-                // stop streams, including audio
-                if (track.mediaStreamTrack) {
-                    track.mediaStreamTrack.stop();
+            if(el.tagName === "AUDIO"){
+                const id = el.id || "";
+                if(id.startsWith("audio-global-")){
+                    el.remove();
+                } else {
+                    try { el.pause(); } catch(e) {}
+                    try { el.srcObject = null; } catch(e) {}
                 }
-
-                // only kill livekit audio
-                if (track.kind === "audio" && typeof track.stop === "function") {
-                    track.stop();
-                }
-
-                this.isScreensharing = false
             }
         });
-
-        if (this.onScreenshareEnd) this.onScreenshareEnd(participantId);
     }
 
+    _audioKey(mid, isScreen) {
+        return `${mid}:${isScreen ? "screen" : "user"}`;
+    }
 
+    async ensureAudioCtx() {
+        if (!this._audioCtx) this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (this._audioCtx.state === "suspended") await this._audioCtx.resume().catch(()=>{});
+    }
 
-    async shareScreen(includeAudio = false) {
-        if (!this.room?.localParticipant) return;
+    setVolume(mid, isScreen, percent) {
+        const key = this._audioKey(mid, isScreen);
+        const p = Math.max(0, Math.min(400, Number(percent) || 0));
+        this._volumes.set(key, p);
 
-        const participantId = this.room.localParticipant.identity;
+        const node = this._audioNodes.get(key);
+        if (node?.gain) node.gain.gain.value = p / 100;
+    }
 
-        const tracks = await this.room.localParticipant.createScreenTracks({
-            audio: includeAudio,
-            video: {
-                resolution: this.streamSettings.resolution,
-                frameRate: this.streamSettings.frameRate,
-                maxBitrate: this.streamSettings.maxBitrate,
-                //simulcast: true,
-                codec: "h264"
-            },
-        });
+    async attachAudioEl(mid, isScreen, audioEl) {
+        await this.ensureAudioCtx();
 
-        for (const track of tracks) {
-            await this.room.localParticipant.publishTrack(track);
+        const key = this._audioKey(mid, isScreen);
 
-            track.detach().forEach(el => el.pause());
-
-            if (this.onScreenshareBegin) this.onScreenshareBegin(participantId, track);
-            if (this.onTrackSubscribed) this.onTrackSubscribed(track, participantId, true);
-
-            track.on("ended", () => {
-                track.detach().forEach(el => el.remove());
-                this.room.localParticipant.unpublishTrack(track);
-                if (this.onScreenshareEnd) this.onScreenshareEnd(participantId);
-            });
-
-            this.isScreensharing = true
+        const old = this._audioNodes.get(key);
+        if (old?.gain) {
+            try { old.gain.disconnect(); } catch(e) {}
         }
+
+        let src = this._mediaElSources.get(audioEl);
+        if (!src || src.context !== this._audioCtx) {
+            try { src?.disconnect?.(); } catch(e) {}
+
+            if (audioEl?.srcObject instanceof MediaStream) {
+                src = this._audioCtx.createMediaStreamSource(audioEl.srcObject);
+            } else {
+                src = this._audioCtx.createMediaElementSource(audioEl);
+            }
+
+            this._mediaElSources.set(audioEl, src);
+        }
+
+        const gain = this._audioCtx.createGain();
+        const p = this._volumes.get(key);
+        gain.gain.value = (p == null ? 100 : p) / 100;
+
+        src.connect(gain);
+        gain.connect(this._audioCtx.destination);
+
+        this._audioNodes.set(key, { src, gain, el: audioEl });
     }
+
+
+    detachAudio(mid, isScreen) {
+        const key = this._audioKey(mid, isScreen);
+        const node = this._audioNodes.get(key);
+        if (!node) return;
+        try { node.gain.disconnect(); } catch(e) {}
+        try { node.src?.disconnect?.(); } catch(e) {}
+        this._audioNodes.delete(key);
+    }
+
+
+    getVolume(mid, isScreen) {
+        const key = this._audioKey(mid, isScreen);
+        return this._volumes.get(key) ?? 100;
+    }
+
 
     async getToken(roomName, participantName, memberId, channelId) {
         const response = await fetch(this.APPLICATION_SERVER_URL + "/token", {
@@ -228,23 +365,36 @@ class VoIP {
         return token.token;
     }
 
-    muteMic() {
+    async muteMic() {
         if (!this.room?.localParticipant) return;
-        this.room.localParticipant.setMicrophoneEnabled(false);
+        await this.room.localParticipant.setMicrophoneEnabled(false).catch(()=>{});
     }
 
-    unmuteMic() {
+    async unmuteMic() {
         if (!this.room?.localParticipant) return;
-        this.room.localParticipant.setMicrophoneEnabled(true);
+        await this.room.localParticipant.setMicrophoneEnabled(true, {
+            echoCancellation: true,
+            noiseSuppression: true,
+            voiceIsolation: true,
+            autoGainControl: false
+        }).catch(()=>{});
     }
+
 
     isMuted() {
-        if (!this.room?.localParticipant) return;
-        return this.room.localParticipant.isMicrophoneEnabled;
+        return !this._micEnabled();
     }
 
-    toggleMic() {
-        this.room.localParticipant.setMicrophoneEnabled(!this.isMuted());
+    async toggleMic() {
+        if (!this.room?.localParticipant) return;
+        const nextEnabled = this.isMuted();
+        await this.room.localParticipant.setMicrophoneEnabled(nextEnabled, {
+            echoCancellation: true,
+            noiseSuppression: true,
+            voiceIsolation: true,
+            autoGainControl: false
+        });
+        return nextEnabled;
     }
 
     async leaveRoom() {

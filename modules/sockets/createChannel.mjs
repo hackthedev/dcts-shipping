@@ -19,7 +19,7 @@ export default (io) => (socket) => {
                 var channelId = generateId(4); 
                 serverconfig.groups[member.group].channels.categories[member.category].channel[channelId] = JSON.parse(
                     `{
-                            "id": ${channelId},
+                            "id": "${channelId}",
                             "name": "${xssFilters.inHTMLData(escapeHtml(member.value))}",
                             "type": "${member.type}",
                             "description": "Default Channel Description",

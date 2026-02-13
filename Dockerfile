@@ -15,3 +15,4 @@ COPY . .
 EXPOSE 2052
 
 CMD ["bun", "."]
+

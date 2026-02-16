@@ -311,7 +311,9 @@ async function shouldAppendMessage(message, appendTop = false) {
 }
 
 socket.on('messageCreate', async function (message) {
-    const isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+    // Check scroll position BEFORE adding message
+    const contentElement = document.getElementById("content");
+    const isScrolledDown = isScrolledToBottom(contentElement);
 
     // lets increase the channel count first
     ChatManager.increaseChannelMarkerCount(message.channel)
@@ -349,7 +351,13 @@ socket.on('messageCreate', async function (message) {
         });
     }
 
-    if(isScrolledDown) waitFor(scrollDown, 10)
+    // Scroll down AFTER the message is added, using requestAnimationFrame
+    // to ensure the browser has finished rendering the new message
+    if(isScrolledDown) {
+        requestAnimationFrame(() => {
+            scrollDown();
+        });
+    }
 });
 
 socket.on('messageEdited', async function (message) {

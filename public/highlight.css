@@ -58,14 +58,15 @@
       }
 
     .ql-syntax {
-        background-color: hsl(from var(--main) h s calc(l * 1.5)) !important; /* Match the dark background */
-        color: #f8f8f2 !important; /* Match the light text color */
-        padding: 10px !important;
-        border-radius: 3px !important;
+        background-color: hsl(from var(--main) h s calc(l * 1.75) / 100%); /* Match the dark background */
+        color: hsl(from var(--main) h s calc(l * 12) / 100%); /* Match the light text color */
+        font-family: monospace;
+        line-height: 1.5;
+        padding: 10px;
+        border-radius: 3px;
         border: 0.5px solid hsl(from var(--main) h s calc(l * 8) / 20%);
-        
-        font-size: 14px !important;
+        margin: 6px 0;
+        font-size: 12px;
         width: 100%;
         overflow-x: auto;
-        
       }

@@ -2,7 +2,9 @@
 
 This document explains how to get started with the chat application and explain some concepts. If you ever need help you can make a post on [our subreddit](https://www.reddit.com/r/dcts/).
 
-[TOC]
+> [!TIP]
+>
+> There's now an official [Youtube Tutorial playlist](https://www.youtube.com/watch?v=b1RXJ-ykdgc&list=PL2xF-BCo1FWav36ktSvBG4nDsbhfLkFR-) which is recommended! It will simply the setup massively.
 
 ------
 
@@ -10,13 +12,13 @@ This document explains how to get started with the chat application and explain 
 
 The software was designed to be setup and run as simple as possible. Using the *`config.json`* file you can manage additional settings that are not present in the web client. For example you could configurate a SQL server compatible with MySQL/MariaDB to improve overall functionality **and unlock all the features**.
 
-| Feature                 | Description                                                  |
-| ----------------------- | ------------------------------------------------------------ |
-| NodeJS                  | Required v16.16.0 and above [^testedNodeVersions]            |
-| MySQL-compatible Server | ***Required***. Use MySQL/MariaDB compatible server          |
-| Tenor                   | Optional, used for GIF search                                |
-| SSL                     | Optional for localhost on same machine, but ***required for public use***! |
-| LiveKit                 | Used for voice chatting and screen sharing                   |
+| Feature                         | Description                                                  |
+| ------------------------------- | ------------------------------------------------------------ |
+| NodeJS / Bun                    | Required v16.16.0 and above [^testedNodeVersions]            |
+| MySQL/MariaDB-compatible Server | ***Required***. Use MySQL/MariaDB compatible server          |
+| Tenor                           | Deprecated                                                   |
+| SSL / TLS                       | Optional for localhost on same machine, but ***required for public and non-localhost use***! |
+| LiveKit                         | Used for voice chatting and screen sharing                   |
 
 ------
 
@@ -24,9 +26,9 @@ The software was designed to be setup and run as simple as possible. Using the *
 
 ### Installing on Windows
 
-You can easily install NodeJS by going to the official website at https://nodejs.org/en/download and downloading the *.msi* installer. Once you're done installing you should be able to open a command prompt and entering *`node -v`* should return a version like like *`v18.20.5`*. 
+You can easily install NodeJS by going to the official website at https://nodejs.org/en/download and follow the install instructions. Once you're done installing you should be able to open a command prompt and entering *`node -v`* should return a version like like *`v18.20.5`*. 
 
-```cmd
+```bash
 Microsoft Windows [Version 10.0.67198.5894]
 (c) Microsoft Corporation. 
 
@@ -34,25 +36,21 @@ C:\Users\you_username>node -v
 v18.20.5
 ```
 
-### Installing on Linux
+------
 
-Linux too has more the one way of installing NodeJS. The following commands use nvm (node version manager) to install NodeJS. You can also use nvm to manage node versions. Please check https://nodejs.org/en/download as you can select `linux` to get the latest install instructions.
+## Installing Bun
+
+You can easily install bun using npm after the NodeJS installation
 
 ```bash
-# Verify the Node.js version:
-node -v # Should print something like "v24.11.0".
-
-# Verify npm version:
-npm -v # Should print something like "11.6.1".
+npm install -g bun	
 ```
-
-All install instructions can be found on the [NodeJS website](https://nodejs.org/en/download) if you need different instructions or if you're having issues installing NodeJS. The version numbers shown here are just examples.
 
 ------
 
 ## Running the app
 
-The chat app was made to be very easy to setup and use. Out of the box it should work without any issues. To start the server on both Windows and Linux, navigate to the app's root directory using a command prompt and start the server using *`node .`*
+The chat app was made to be very easy to setup and use. Out of the box it should work without any issues. To start the server on both Windows and Linux, navigate to the app's root directory using a command prompt and start the server using *`bun .`*
 
 Example:
 
@@ -61,10 +59,10 @@ Example:
 cd /path/to/dcts-shipping
 
 # install all packages, only required on initial setup
-npm i
+bun i
 
 # Start the server
-node .
+bun .
 ```
 
 As you can see all you really need is one command to launch the chat app if the requirements are already installed. This was made with the goal to be very user friendly and easy to setup and use.
@@ -81,17 +79,21 @@ Its possible to use more advanced and better starting methods, such as using doc
 
 > [!TIP]
 >
-> If you dont know how to setup MySQL or MariaDB on linux, you can use [Initra](https://github.com/hackthedev/initra-shipping), an autoinstaller app i've made or check youtube tutorials online and similar sources.
+> If you dont know how to setup MySQL or MariaDB on linux, you can use [Initra](https://github.com/hackthedev/initra-shipping), an autoinstaller app i've made or check youtube tutorials online and similar sources. On windows you can use [XAMPP](https://www.apachefriends.org/index.html).
 
-A MySQL / MariaDB compatible database connection is **required** for DCTS to work now, as too many features depend on a database connection and many more features will be build on top of it.
+A MySQL / MariaDB compatible database connection is **required** for DCTS to work.
 
-If you have successfully setup a database server you will need to edit the `sql` section inside the `config.json` file. You **must** set `enabled` to true and enter the other information as seen in the example screenshot below. 
+If you have successfully setup a database server you will need to edit the `sql` section inside the `config.json` file. You **must** set `enabled` to true if thats not the case yet and enter the other information as seen in the example screenshot below. Keep in mind your credentials may be different.
 
 ![image-20251108164746479](./assets/image-20251108164746479.png)
 
 > [!TIP]
 >
-> If you're on windows and wanna try DCTS first, checkout [XAMPP](https://www.apachefriends.org/index.html).
+> The default XAMPP username is `root` and the password is empty.
+
+> [!NOTE]
+>
+> Once the server starts it will automatically create the database for you.
 
 ------
 
@@ -110,6 +112,8 @@ Of course if you installed and ran the chat app on your server you would need to
 > The DCTS web client and desktop client wont work properly if you or anyone will see this message. It means the browser thinks the connection isnt secure and will therefore block important features of the client.
 >
 > You can usually solve this issue by properly setting up a TLS certificate.
+>
+> A certificate is **required** for public use or use in a local network.
 
 ![image-20251108165123275](./assets/image-20251108165123275.png)
 
@@ -128,5 +132,9 @@ You can use it to redeem the administrator role in the web client. To do so righ
 > [!NOTE]
 >
 > You'll need to configurate and install the software needed for Voice Chatting and Screensharing yourself as of right now. Please checkout `VoIP Setup.md` inside the `docs` folder. It will also contain a recommended DNS setup.
+
+> [!TIP]
+>
+> You can create a new admin token by typing `token 1111` into the DCTS console window, whereas `1111` is the role id, in this case the admin role id.
 
 [^testedNodeVersions]: Checkout Github Repo "Tested Node Versions"

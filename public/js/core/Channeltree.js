@@ -3,6 +3,15 @@ class ChannelTree {
     static lastUpdateTime = 0; // Used to prevent duplicate updates
 
     static getTree() {
+        const channeltree = document.getElementById("channeltree");
+        if (!channeltree) {
+            Clock.stop("get_channeltree")
+            return console.error("channeltree element not found!");
+        }
+
+        if(localStorage.getItem("channeltree_html_cache") && channeltree.innerText.trim().length === 0)
+
+        Clock.start("get_channeltree")
         socket.emit("getChannelTree", {
             id: UserManager.getID(),
             token: UserManager.getToken(),
@@ -16,9 +25,6 @@ class ChannelTree {
             let sortedCats = Object.keys(catCollection).sort((a, b) => {
                 return catCollection[b].info.sortId - catCollection[a].info.sortId;
             });
-
-            const channeltree = document.getElementById("channeltree");
-            if (!channeltree) return console.error("channeltree element not found!");
 
             ChannelTree.destroySortable();
 
@@ -53,7 +59,13 @@ class ChannelTree {
                         let channel = chanCollection[chan];
 
                         let channelHTML = `
-                            <li draggable="true" channelType="${channel.type}" id="channel-${channel.id}" style="color: #ABB8BE; cursor: pointer;user-select: none;" data-category-id="${category.info.id}" data-channel-id="${channel.id}">                                
+                            <li draggable="true"
+                                channelType="${channel.type}" 
+                                id="channel-${channel.id}" 
+                                style="color: #ABB8BE; cursor: pointer;user-select: none;" data-category-id="${category.info.id}" 
+                                data-channel-id="${channel.id}"
+                                onclick="setUrl('?group=${group}&category=${category.info.id}&channel=${channel.id}'${channel.type === "voice" ? `, true` : ""})" 
+                                >                                
                                 <a 
                                     channelType="${channel.type}" 
                                     class="channelTrigger msgCount_${channel.msgCount}" 
@@ -112,6 +124,11 @@ class ChannelTree {
 
             ChannelTree.makeSortable(channeltree, "categories", "summary");
             ChannelTree.makeAllChannelsSortable();
+
+            Clock.stop("get_channeltree")
+
+            markCurrentChannelStyle(UserManager.getChannel())
+            localStorage.setItem("channeltree_html_cache", channeltree.innerHTML);
         });
     }
 

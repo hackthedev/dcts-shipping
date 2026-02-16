@@ -67,7 +67,7 @@ class SplashScreen {
         const { width, height } = this.canvas;
         ctx.clearRect(0, 0, width, height);
 
-        this.time += 0.06;
+        this.time += 0.03;
 
         const base = Math.min(width, height) * 0.25;
         const main = this.lineColor;

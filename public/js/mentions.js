@@ -26,7 +26,8 @@ async function resolveMentions(message = null, pingUser = false) {
     if (!message?.messageId && !message?.reply) return;
     if(!message?.messageId && message?.reply) message.messageId = message.reply;
 
-    const container = document.querySelector(`.message-container .content[data-message-id="${message.messageId}"]`);
+    const container = document.querySelector(`.message-container .content:not(.reply)[data-message-id="${message.messageId}"]`);
+    if(!container) throw new Error("Message container not found for converting mentions");
     let messageContainer = container.closest(".message-container");
     if (!container) return;
 
@@ -70,9 +71,9 @@ function markElementAsMention(element, pingUser = false, message){
 
         if(message){
             showSystemMessage({
-                title: message.name,
+                title: message?.author?.name,
                 text: message.message,
-                icon: message.icon,
+                icon: message?.author?.icon,
                 img: null,
                 type: "neutral",
                 duration: 6000,
@@ -91,6 +92,8 @@ function Mention(type, data) {
 }
 
 async function convertMention(message, isString = false) {
+    if(!message) throw new Error("Message cannot be converted");
+
     let text = isString ? message.toString() : message.message.toString();
 
     const u = await getUserMentions(text);
@@ -197,7 +200,9 @@ async function updateMentionAutocompleteData() {
 
     let currentGroupCategories = channeltree.data.groups[UserManager.getGroup()].categories;
     let channels = {};
+
     mentionList = [];
+    mentionAc.clear();
 
     // handle channels
     for (let cat of Object.keys(currentGroupCategories)) {
@@ -245,7 +250,13 @@ async function updateMentionAutocompleteData() {
         if (!member) continue;
 
         const name = member.name;
-        const html = `<span data-role-id="${memberId}">@${name}</span>`;
+        const html = `<img 
+                                style="background-color: black;
+                                width: 20px; 
+                                height: 20px;
+                                border-radius: 50%;" 
+                                src="${ChatManager.proxyUrl(member?.icon) || "/img/default_icon.png"}"
+                                <span data-role-id="${memberId}">@${name}</span>`;
 
         const mention = new Mention("member", { member: { id: memberId, ...member }, html });
         mentionList[i++] = mention;

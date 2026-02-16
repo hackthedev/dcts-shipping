@@ -13,7 +13,7 @@ export default (io) => (socket) => {
             if (hasPermission(member.id, "manageServerInfo")) {
                 Logger.warn(`Changing server description from ${serverconfig.serverinfo.description} to ${escapeHtml(limitString(member.value, 500))}`, "Debug");
                 
-                serverconfig.serverinfo.description = escapeHtml(limitString(member.value, 500));
+                serverconfig.serverinfo.description = member.value;
                 saveConfig(serverconfig);
 
                 response({ type: "success", msg: "Server description was successfully changed" });

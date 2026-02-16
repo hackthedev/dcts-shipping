@@ -1,35 +1,8 @@
 <h2>Server Info</h2>
 
-<div id="profile_change_container">
-    <h2 class="profile_headline">Settings</h2>
 
-    <div class="profile_input_container">
-        <label>Server Name</label><br>
-        <input type="text" id="server_name" oninput="updatePreview('server_name');">
-    </div>
+<div id="main_settings" style="max-width: 500px;"></div>
 
-    <div class="profile_input_container">
-        <label>Server Description</label><br>
-        <input type="text" id="server_description" oninput="updatePreview('server_description');">
-    </div>
-
-    <div class="profile_input_container" style="margin-top: 60px;user-select: none;">
-        <label for="enableDiscovery">Enable Server Discovery?</label>
-        <input type="checkbox" id="enableDiscovery" name="enableDiscovery" onclick="updatePreview();">
-    </div>
-
-    <div class="profile_input_container" style="margin-top: 60px;user-select: none;">
-        <label for="enableRegistration">Public Server?</label>
-        <input type="checkbox" id="enableRegistration" name="enableRegistration" onclick="updatePreview();">
-
-        <p class="note">
-            Disabling this setting makes the server invite-only, meaning people need to enter a code in order to
-            be able to join your server.
-        </p>
-    </div>
-
-
-
-
-    <div id="settings_profile_save" onclick="saveSettings();" style="display: none;">Save</div>
-</div>
+<br><br><h3>Contact Settings</h3>
+<p>You can leave the fields empty.</p>
+<div id="contact_settings" style="max-width: 500px;"></div>

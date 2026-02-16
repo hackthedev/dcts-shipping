@@ -5,18 +5,18 @@
 
     <div class="profile_input_container" >
         <label>Server Rate Limit</label><br>
-        <input type="number" id="rate-limit" oninput="updatePreview('rate-limit');">
+        <input type="number" id="rate-limit" oninput="updateRateLimitPreview('rate-limit');">
 
     </div>
 
     <div class="profile_input_container" >
         <label>Rate Limit Drop Interval</label><br>
-        <input type="number" id="drop-interval" oninput="updatePreview('drop-interval');"><br><br>
+        <input type="number" id="drop-interval" oninput="updateRateLimitPreview('drop-interval');"><br><br>
 
     </div>
 
 
 
 
-    <div id="settings_profile_save" onclick="saveSettings();" style="display: none;">Save</div>
+    <div id="settings_profile_save" onclick="saveRateLimitSettings();" style="display: none;">Save</div>
 </div>

@@ -8,39 +8,46 @@ var dropInterval;
 var serverconfigName;
 var serverconfigDesc;
 
-window.updatePreview = updatePreview;
-window.saveSettings = saveSettings;
 
-socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageRateSettings" }, function (response) {
+document.addEventListener("pagechange", e => {
+    console.log(e.detail.page);
+    if (e.detail.page !== "rate-limit") return;
 
-    if(response.permission == "denied"){
-        window.location.href = window.location.origin + "/settings/server";
-    }
-    else{
-        document.getElementById("pagebody").style.display = "block";
-    }
+    initRateLimits();
 });
 
+function initRateLimits(){
+    socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageRateSettings" }, function (response) {
 
-socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
+        if(response.permission == "denied"){
+            window.location.href = window.location.origin + "/settings/server";
+        }
+        else{
+            document.getElementById("pagebody").style.display = "block";
+        }
+    });
 
-    console.log(response);
-    setting_rateLimit = document.getElementById("rate-limit");
-    setting_dropInterval = document.getElementById("drop-interval");
-    saveButton = document.getElementById("settings_profile_save");
 
-    rateLimit = response.rateLimit;
-    dropInterval = response.dropInterval;
+    socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
 
-    setting_rateLimit.value = rateLimit;
-    setting_dropInterval.value = dropInterval;
-});
+        console.log(response);
+        setting_rateLimit = document.getElementById("rate-limit");
+        setting_dropInterval = document.getElementById("drop-interval");
+        saveButton = document.getElementById("settings_profile_save");
+
+        rateLimit = response.rateLimit;
+        dropInterval = response.dropInterval;
+
+        setting_rateLimit.value = rateLimit;
+        setting_dropInterval.value = dropInterval;
+    });
+}
 
 function isChecked(element){
     return element.checked ? 1 : 0;
 }
 
-function updatePreview(){
+function updateRateLimitPreview(){
 
     try{
 
@@ -65,7 +72,7 @@ function updatePreview(){
 }
 
 
-function saveSettings(){
+function saveRateLimitSettings(){
     try{
 
         socket.emit("saveRateSettings", { id: UserManager.getID(), token: UserManager.getToken(),

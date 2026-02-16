@@ -1,7 +1,7 @@
 import {serverconfig, typingMembers, usersocket, xssFilters} from "../../index.mjs";
 import {formatDateTime, hasPermission} from "../functions/chat/main.mjs";
 import {saveChatMessage} from "../functions/io.mjs";
-import Logger from "../functions/logger.mjs";
+import Logger from "@hackthedev/terminal-logger"
 import {
     checkMemberMute,
     checkRateLimit,
@@ -15,17 +15,27 @@ import {
 } from "../functions/main.mjs";
 import {decodeFromBase64, getChatMessagesFromDb} from "../functions/mysql/helper.mjs";
 import {signer} from "../../index.mjs"
+import {decodeAndParseJSON, getMessageObjectById} from "./resolveMessage.mjs";
+
+export function getMentionIdsFromText(text){
+    return {
+        userIds: [...text.matchAll(/&lt;@(\d+)&gt;/g)].map(m => m[1]),
+        roleIds: [...text.matchAll(/&lt;!@(\d+)&gt;/g)].map(m => m[1]),
+        channelIds: [...text.matchAll(/&lt;#@(\d+)&gt;/g)].map(m => m[1])
+    }
+}
+
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('messageSend', async function (memberOriginal, response) {
-        checkRateLimit(socket);
+    socket.on('messageSend', async function (member, response) {
+        if (validateMemberId(member?.author?.id, socket, member?.token) === true) {
 
-        if (validateMemberId(memberOriginal?.id, socket, memberOriginal?.token) === true) {
-
-            // Remove token from cloned object so we dont broadcast it
-            let member = copyObject(memberOriginal);
-            let oServerMember = getCastingMemberObject(serverconfig.servermembers[memberOriginal?.id]);
+            // some new handling
+            if(!member?.message) return response({error: "No message provided"})
+            if(!member?.group) return response({error: "No group provided"})
+            if(!member?.category) return response({error: "No category provided"})
+            if(!member?.channel) return response({error: "No channel provided"})
 
             // check member mute
             let muteResult = checkMemberMute(socket, member);
@@ -103,9 +113,9 @@ export default (io) => (socket) => {
                 }
             }
 
-            if (!hasPermission(member.id, ["sendMessages", "viewChannel"], member.channel, "all")) {
+            if (!hasPermission(member.author?.id, ["sendMessages", "viewChannel"], member.channel, "all")) {
                 sendMessageToUser(socket.id, JSON.parse(
-                `{
+                    `{
                         "title": "You cant chat here",
                         "message": "You cant send a message in this channel, sorry.",
                         "buttons": {
@@ -125,15 +135,14 @@ export default (io) => (socket) => {
 
             // Check if room exists
             try {
-                if (serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel] != null) {
+                if (serverconfig?.groups[member.group]?.channels?.categories[member.category]?.channel[member.channel] != null) {
                     let messageid = generateId(12);
                     member.timestamp = new Date().getTime();
                     member.messageId = messageid;
-
-                    member.icon = escapeHtml(oServerMember.icon);
-                    member.name = escapeHtml(oServerMember.name);
-
                     member.message = sanitizeInput(member.message);
+                    member.reply = {
+                        messageId: null,
+                    }
 
                     // replace empty lines
                     member.message = clearMessage(member.message, messageid)
@@ -147,71 +156,53 @@ export default (io) => (socket) => {
                         return;
                     }
 
-                    // Display role color of the highest role
-                    var userRoleArr = [];
-                    Object.keys(serverconfig.serverroles).forEach(function (role) {
-
-                        if (serverconfig.serverroles[role].members.includes(member.id) &&
-                            serverconfig.serverroles[role].info.displaySeperate === 1) {
-                            userRoleArr.push(serverconfig.serverroles[role]);
-                        }
-                    });
-
-                    // Show user color in highest role
-                    userRoleArr = userRoleArr.sort((a, b) => {
-                        if (a.info.sortId > b.info.sortId) {
-                            return -1;
-                        }
-                    });
-                    member.color = userRoleArr[0].info.color;
-
-
                     // If the message was edited
                     if (member.editedMsgId != null) {
-
                         // Get Original message
                         let room = `${member.group}-${member.category}-${member.channel}`
                         let originalMsg = await getChatMessagesFromDb(room, 1, member.editedMsgId);
-                        let originalMsgObj = JSON.parse(decodeFromBase64(originalMsg[0].message));
+                        let originalMsgObj = decodeAndParseJSON(originalMsg[0].message);
 
                         // Check if the user who wants to edit the msg is even the original author lol
-                        if (originalMsgObj.id !== member.id) {
-                            Logger.warn(`Unauthorized user (${member.name} - ${member.id}) tried to edit another users message`);
+                        if (originalMsgObj.author.id !== member.author?.id) {
+                            Logger.warn(`Unauthorized user (${member.name} - ${member.author?.id}) tried to edit another users message`);
                             return;
                         }
 
                         // Update the data for editing
-                        member.editedMsgId = member.editedMsgId.replaceAll("msg-", "")
-                        member.lastEdited = new Date().toISOString();
+                        member.lastEdited = new Date().getTime();
 
                         // Update back to original values of the message timestamp etc
                         // Else "Created Timestamp" and "Edited" is always the same
                         member.timestamp = originalMsgObj.timestamp;
-                        member.messageId = originalMsgObj.editedMsgId;
+                        member.messageId = member.editedMsgId // used for check below
+                        member.reply.messageId = originalMsgObj?.reply?.messageId; // dont allow "unreplying"
                     }
 
                     // if the message is a reply
                     if(member?.replyMsgId != null) {
                         // Get Original message
-                        let originalMsg = await getChatMessagesFromDb(room, 1, member.replyMsgId);
-                        let originalMsgObj = JSON.parse(decodeFromBase64(originalMsg[0].message));
+                        let originalMsg = await getMessageObjectById(member.replyMsgId);
+                        if(originalMsg?.message == null) return response({error: "Original message wasnt found!"});
 
                         // client will later fetch the original message.
                         // this way it'll always show the up-to-date
                         // message and we dont have to somehow check if the
                         // original message was updated etc..
-                        member.reply = originalMsgObj.messageId;
+                        member.reply = originalMsg.message;
                     }
 
+                    // update some stuff for the message event
                     member = getCastingMemberObject(member);
+                    member.author = getCastingMemberObject(serverconfig.servermembers[member.author?.id]);
 
-                    let memberMessageCount = serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel].msgCount + 1;
+                    // msgCount is incremented in saveChatMessage()
 
                     // Save the Chat Message to file
                     saveChatMessage(member, member.editedMsgId);
 
                     // Remove user from typing
-                    var username = serverconfig.servermembers[member.id].name;
+                    var username = serverconfig.servermembers[member?.author?.id]?.name;
                     if (typingMembers.includes(username) === true) {
                         removeFromArray(typingMembers, username) // better
                     }
@@ -238,7 +229,7 @@ export default (io) => (socket) => {
                     var msg = `We were unable to send the message because the 
                         channel wasnt found. Maybe it was deleted? Reselect a channel from the channel list`.replaceAll("\n", "");
 
-                    sendMessageToUser(usersocket[member.id], JSON.parse(
+                    sendMessageToUser(usersocket[member.author?.id], JSON.parse(
                         `{
                             "title": "Channel not found",
                             "message": "${msg}",
@@ -264,7 +255,7 @@ export default (io) => (socket) => {
                 var msg = `We were unable to send the message because the 
                     channel wasnt found. Maybe it was deleted? Reselect a channel from the channel list`.replaceAll("\n", "");
 
-                sendMessageToUser(usersocket[member.id], JSON.parse(
+                sendMessageToUser(usersocket[member.author?.id], JSON.parse(
                     `{
                             "title": "Channel not found",
                             "message": "${msg}",
@@ -274,7 +265,7 @@ export default (io) => (socket) => {
                                     "events": ""
                                 }
                             },
-                            "type": "success",
+                            "type": "error",
                             "popup_type": "confirm"
                         }`));
                 return;

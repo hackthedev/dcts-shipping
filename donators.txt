@@ -1,4 +1,5 @@
-# daftpunk.mp3
+# fate.mp3;holyParticles
+# 11 - Ambition ~ Fate/Apocrypha (OST I)
 Xakku,2
 MitchellBarney,2
 ArdyMoon,10
@@ -9,14 +10,18 @@ Aztec,50
 edward,4
 WmAltDel,3
 edward,4
-anonymous,3
 Xakku,5
 edward,4
-anonymous,3
 edward,4
-anonymous,3
 edward,4
-anonymous,4
 Aztec,50
 edward,4
-anonymous,3
+Xakku,18
+WmAltDel,5
+Derrick,50
+WmAltDel,29
+Froz,3
+WmAltDel,3
+WmAltDel,5
+Xtense,3
+ariana,3

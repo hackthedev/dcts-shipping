@@ -39,29 +39,6 @@ function showPredefinedAccentColors(){
 
 async function displayThemes() {
     document.querySelector("#accentPicker").value = UserManager.getThemeAccent();
-    let themes = await getThemes();
-    console.log(themes);
-
-
-    let themeSelect = document.querySelector("#theme_select");
-    if (!themeSelect) {
-        console.error("Couldnt find theme select element")
-        return;
-    }
-
-    themes.forEach(theme => {
-        let option = document.createElement("option");
-        option.value = theme;
-        option.text = theme.split(".")[0];
-        if(theme === UserManager.getTheme()) option.selected = true;
-
-        themeSelect.appendChild(option);
-    })
-
-    themeSelect.addEventListener("change", function () {
-        UserManager.setTheme(this.value);
-    })
-
     showPredefinedAccentColors();
 }
 

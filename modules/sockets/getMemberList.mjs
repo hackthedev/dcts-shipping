@@ -6,15 +6,18 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('getMemberList', function (member, response) {
-        if (validateMemberId(member?.id, socket) == true
-            && serverconfig.servermembers[member?.id]?.token == member?.token) {
+        if (validateMemberId(member?.id, socket, member?.token) === true) {
 
             if (!hasPermission(member.id, "viewGroup", member.group)) {
                 response({ error: true, msg: "You arent allowed to view this group", type: "error" })
                 return;
             }
+
+            if(!member?.channel) return response({ members: {}, index: 0, error: "No channel id provided" });
+
+            let {members, index} = getMemberList(member, member?.channel, member?.lastIndex);
             
-            response({ data: getMemberList(member, member.channel) })
+            response({ members, index })
         }
     });
 }

@@ -6,8 +6,6 @@ import { app, fs } from "../../../index.mjs";
 const CACHE_DIR = "./cache/proxy";
 const TTL = 1000 * 60 * 60 * 24;
 
-if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
-
 // delete all cache files after some time if age expired,
 // because otherwise its gonna turn into a junk folder
 setInterval(() => {
@@ -30,6 +28,7 @@ setInterval(() => {
 app.get("/proxy", async (req, res) => {
     const url = req.query.url;
     if (!url || !/^https?:\/\//.test(url)) return res.status(400).send("Invalid URL");
+    if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
 
     const hash = crypto.createHash("sha1").update(url).digest("hex");
     const file = path.join(CACHE_DIR, hash);

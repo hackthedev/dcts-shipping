@@ -109,11 +109,6 @@ function startEmojiAutocompleteListener() {
     });
 }
 
-function hideSuggestions() {
-    const suggestionsContainer = document.getElementById("emoji-suggestions");
-    if (suggestionsContainer) suggestionsContainer.remove();
-}
-
 function findEmojiTrigger() {
     const range = quill.getSelection();
     if (!range) return null;
@@ -173,16 +168,125 @@ function extractEmojiDetails(emojiObj) {
     return [id, name];
 }
 
+function showEmojiPicker(x,y, callback, reverseHeight = false){
+    var emojiBox = document.getElementById("emoji-box-container");
+    if(!emojiBox) return;
+
+    if (emojiBox.style.display === "flex") {
+        closeEmojiBox();
+    } else {
+        emojiBox.style.display = "flex";
+        selectEmojiTab(document.getElementById("emoji-box-emojis"))
+        getEmojis(callback)
+        emojiBox.style.position = "fixed";
+
+        const margin = 8;
+        let top, left;
+
+        if (reverseHeight) {
+            top = y + 40;
+            left = x - (emojiBox.offsetWidth / 2);
+        } else {
+            top = y - emojiBox.offsetHeight - 40;
+            left = x - emojiBox.offsetWidth;
+        }
+
+        const maxTop = window.innerHeight - emojiBox.offsetHeight - margin;
+        const maxLeft = window.innerWidth - emojiBox.offsetWidth - margin;
+
+        emojiBox.style.top = Math.max(margin, Math.min(top, maxTop)) + "px";
+        emojiBox.style.left = Math.max(margin, Math.min(left, maxLeft)) + "px";
+    }
+}
+
+function closeEmojiBox() {
+    var emojiContainer = document.getElementById("emoji-box-container");
+    emojiContainer.style.display = "none";
+
+    var emojiEntryContainer = document.getElementById("emoji-entry-container");
+    var gifEntryContainer = document.getElementById("emoji-entry-container");
+    //emojiEntryContainer.innerHTML = "";
+
+    emojiEntryContainer.style.display = "flex";
+    gifEntryContainer.style.display = "none";
+
+    var emojiTab = document.getElementById("emoji-box-emojis");
+    var gifTab = document.getElementById("emoji-box-gifs");
+
+    try {
+        emojiTab.classList.add("SelectedTab");
+        gifTab.classList.remove("SelectedTab");
+    } catch (e) {
+        console.log(e)
+    }
+}
+
 function isOnlyText(html) {
     const temp = document.createElement("div");
     temp.innerHTML = html;
-    let text = temp.textContent || "";
-    text = text.replace(/\s+/g, "").replace(/:([a-fA-F0-9]+):/g, "");
-    return text.length === 0;
+
+    const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+
+    let out = "";
+    for (const { segment } of segmenter.segment(temp.textContent || "")) {
+        const isEmoji =
+            /\p{Extended_Pictographic}/u.test(segment) ||
+            /\p{Regional_Indicator}{2}/u.test(segment) ||
+            /\p{Emoji_Presentation}/u.test(segment);
+
+        if (!isEmoji) out += segment;
+    }
+
+    out = out.replace(/\s+/g, "").replace(/:([a-fA-F0-9]+):/g, "");
+    return out.length === 0;
 }
 
+
+function emojiCodeToImg(str) {
+    if (!str) return str;
+
+    const tags = [];
+    str = str.replace(/<[^>]+>/g, m => {
+        tags.push(m);
+        return `__TAG_${tags.length - 1}__`;
+    });
+
+    const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+    let out = "";
+
+    for (const { segment } of segmenter.segment(str)) {
+        const isEmoji =
+            /\p{Extended_Pictographic}/u.test(segment) ||
+            /\p{Regional_Indicator}{2}/u.test(segment) ||
+            /\p{Emoji_Presentation}/u.test(segment);
+
+
+        if (isEmoji) {
+            const code = Array.from(segment, c =>
+                c.codePointAt(0).toString(16).toLowerCase()
+            ).join("-");
+
+
+            const file = code + ".svg";
+
+            const big = isOnlyText(str) ? "big" : "";
+            out += `<img src="/img/default_emojis/${file}" alt="${segment}" data-code="${code}" class="inline-text-emoji ${big} default">`;
+        } else {
+            out += segment;
+        }
+    }
+
+    return out.replace(/__TAG_(\d+)__/g, (_, i) => tags[i]);
+}
+
+
+
+
+
 async function text2Emoji(text, returnCodeOnly = false, forceSmall = false) {
-    const replacedText = text.replace(/:([a-fA-F0-9]+):/g, (match, emojiId) => {
+    text = emojiCodeToImg(text);
+
+    let replacedText = text.replace(/:([a-fA-F0-9]+):/g, (match, emojiId) => {
         const emojiObject = findEmojiByID(emojiId);
         if (emojiObject) {
             const emojiName = String(emojiObject.filename.split("_")[1].split(".")[0]);
@@ -193,7 +297,6 @@ async function text2Emoji(text, returnCodeOnly = false, forceSmall = false) {
         }
         return match;
     });
-
     return replacedText;
 }
 

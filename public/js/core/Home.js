@@ -5,12 +5,11 @@ function showHome(override = null) {
     const header = document.getElementById("header");
     const home = document.getElementById("homeScreen");
 
-    if(isLauncher() && override !== true){
-        window.location.href = "/home.html";
-        return;
-    }
 
     if (!isShown) {
+        window.location.href = "/home.html";
+        return;
+
         let iframe = home.querySelector("iframe");
         if (!iframe) {
             iframe = document.createElement("iframe");

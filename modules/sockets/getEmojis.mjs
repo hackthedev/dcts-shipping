@@ -1,9 +1,10 @@
 import { fs, serverconfig } from "../../index.mjs";
 import Logger from "../functions/logger.mjs";
 import { validateMemberId } from "../functions/main.mjs";
-import {Emoji} from "../../public/js/core/Emoji.js";
 import path from "path";
 const EMOJI_CONFIG_PATH = "./configs/emojis.json";
+import {Emoji} from "../functions/Emoji.mjs"
+import {getFileHash} from "./routes/upload.mjs";
 
 function checkEmojiConfig(){
     const dir = path.dirname(EMOJI_CONFIG_PATH);
@@ -52,6 +53,14 @@ export default (io) => (socket) => {
 
                 for (const file of emojiList) {
                     let emojiHash = file?.split("_")[0];
+
+                    // we dont have a emoji hash so we modify the file then
+                    if(emojiHash?.length !== 64) emojiHash = null;
+                    if(!emojiHash){
+                        emojiHash = getFileHash(`./public/emojis/${file}`);
+                        fs.renameSync(`./public/emojis/${file}`, `./public/emojis/${emojiHash}_${file}`);
+                    }
+
                     let emojiData = getEmojiConfig(emojiHash);
                     let emoji = new Emoji(file)
 
@@ -62,6 +71,7 @@ export default (io) => (socket) => {
 
                     result.push(emoji.object);
                 }
+
 
                 if (result.length > 0) {
                     response({

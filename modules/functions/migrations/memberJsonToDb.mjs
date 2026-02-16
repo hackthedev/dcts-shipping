@@ -1,5 +1,3 @@
-import {saveMemberToDB} from "../mysql/helper.mjs";
-import Logger from "../logger.mjs";
 import {fs, saveConfig, serverconfig} from "../../../index.mjs";
 
 export async function checkMemberMigration(force = false){

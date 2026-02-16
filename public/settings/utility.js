@@ -1,19 +1,43 @@
-var socket = io.connect();
-let customPrompts = new Prompt();
+let socket;
+let customPrompts;
+
+document.addEventListener("DOMContentLoaded", () => {
+    socket = io.connect();
+    customPrompts = new Prompt();
+})
+
+function findAttributeUp(element, attr, maxDepth = 10) {
+    for (let i = 0; i <= maxDepth && element; i++) {
+        const val = element.getAttribute?.(attr);
+        if (val !== null) return val;
+        element = element.parentNode;
+    }
+    return null;
+}
 
 function doInit(callback) {
     socket.emit("userConnected", {
         id: UserManager.getID(), name: UserManager.getUsername(), icon: UserManager.getPFP(),
         status: UserManager.getStatus(), token: UserManager.getToken(),
-        aboutme: UserManager.getAboutme(), banner: UserManager.getBanner()
+        aboutme: UserManager.getAboutme(), banner: UserManager.getBanner(),
+        pow: {
+            solution: localStorage.getItem("pow_solution"),
+            challenge: localStorage.getItem("pow_challenge"),
+        }
     }, function (response) {
+        console.log(response)
+        if(!response?.error){
+            if (callback) {
+                callback();
+            }
+        }
     });
 
     initPow(() => {
         if (callback) {
             callback();
         }
-    });
+    })
 }
 
 async function elementImageToBase64(el) {
@@ -40,43 +64,133 @@ async function elementImageToBase64(el) {
     });
 }
 
+let currentpage;
+const pageJsPromises = {};
 
-async function loadPageContent(page = "server-info", {force = false} = {}) {
-    try {
-        const cssHref = `page/${page}/${page}.css?v={{random}}`;
-        const jsSrc = `page/${page}/${page}.js?v={{random}}`;
+async function loadPageContent(page = "server-info") {
+    if (currentpage === page) return;
+    currentpage = page;
 
-        if (force) {
-            document.querySelectorAll(`script[data-page-script="${jsSrc}"]`).forEach(s => s.remove());
-            document.querySelectorAll(`link[rel="stylesheet"][href="${cssHref}"]`).forEach(l => l.remove());
-        }
+    const content = document.getElementById("content");
+    const cacheBust = Date.now();
 
-        if (!document.querySelector(`link[rel="stylesheet"][href="${cssHref}"]`)) {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = cssHref;
-            document.head.appendChild(link);
-        }
+    content.style.transition = "opacity 150ms ease";
+    content.style.opacity = "0";
+    await new Promise(r => setTimeout(r, 160));
 
-        const res = await fetch(`page/${page}/${page}.html?v={{random}}`);
-        if (!res.ok) throw new Error(`Failed to load HTML for ${page}`);
-        document.getElementById("content").innerHTML = await res.text();
+    content.innerHTML = "";
 
-        await new Promise((resolve, reject) => {
-            const s = document.createElement("script");
-            s.src = jsSrc;
-            s.type = "module";
-            s.dataset.pageScript = jsSrc;
-            s.onload = resolve;
-            s.onerror = () => reject(new Error(`Failed to load ${jsSrc}`));
-            document.body.appendChild(s);
+    document.querySelectorAll("link[data-page]").forEach(l => l.remove());
+
+    const css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = `page/${page}/${page}.css?v=${cacheBust}`;
+    css.dataset.page = page;
+
+    await new Promise(res => {
+        css.onload = res;
+        document.head.appendChild(css);
+    });
+
+    const html = await fetch(`page/${page}/${page}.html?v=${cacheBust}`).then(r => r.text());
+    content.innerHTML = html;
+
+    if (!pageJsPromises[page]) {
+        pageJsPromises[page] = new Promise(res => {
+            const js = document.createElement("script");
+            js.src = `page/${page}/${page}.js`;
+            js.onload = res;
+            document.body.appendChild(js);
         });
+    }
 
-    } catch (err) {
-        console.error("Error loading page content:", err);
-        document.getElementById("content").innerHTML = "<p>Failed to load content.</p>";
+    await pageJsPromises[page];
+
+    document.dispatchEvent(
+        new CustomEvent("pagechange", { detail: { page } })
+    );
+
+    requestAnimationFrame(() => {
+        content.style.opacity = "1";
+    });
+
+    setUrl(`?page=${page}`)
+}
+
+function setUrl(param) {
+    const url = new URL(window.location.href);
+
+    const params = new URLSearchParams(param.startsWith("?") ? param.slice(1) : param);
+
+    for (const [key, value] of params.entries()) {
+        url.searchParams.set(key, value);
+    }
+
+    window.history.replaceState(null, "", url.pathname + "?" + url.searchParams.toString());
+}
+
+function getUrlParams(param) {
+    var url = window.location.search;
+    var urlParams = new URLSearchParams(url);
+    var urlChannel = urlParams.get(param);
+
+    return urlChannel;
+}
+
+
+async function showSaveSettings(callback, text = "Unsaved Settings!") {
+    if(!callback) throw new Error("No callback provided");
+
+    let settingsContainer = document.querySelector(".settings-save-container");
+    if(!settingsContainer){
+        settingsContainer = document.createElement("div");
+        settingsContainer.classList.add("settings-save-container");
+        document.body.appendChild(settingsContainer);
+    }
+
+    settingsContainer.innerHTML = `
+        <div class="settings-save-container-inner">
+            <div class="settings-save-container-inner-text">
+                ${text} 
+            </div>
+        </div>
+    `;
+
+    settingsContainer.classList.add("shown");
+    settingsContainer.onclick = async () => {
+        try{
+            await callback();
+        }
+        catch(e){
+            console.error(e);
+        }
+        closeSettingsPrompt()
+    };
+}
+
+function checkJsonChanges(jsonObject, stringifiedOriginal){
+    if(!jsonObject) throw new Error("No JSON Object supplied in checkChanges");
+
+    if(JSON.stringify(jsonObject) !== stringifiedOriginal){
+        return true;
+    }
+    else{
+        closeSettingsPrompt();
+        return false;
     }
 }
+
+
+function closeSettingsPrompt(){
+    let settingsContainer = document.querySelector(".settings-save-container");
+    if(!settingsContainer) return;
+
+    settingsContainer.classList.remove("shown");
+    setTimeout(() => {
+        settingsContainer.remove();
+    }, 200);
+}
+
 
 function chooseRole(arg = {}) {
     let opts = {};

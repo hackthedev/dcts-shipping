@@ -1,8 +1,7 @@
-import Logger from "./logger.mjs";
+import Logger from "@hackthedev/terminal-logger"
 import {queryDatabase} from "./mysql/mysql.mjs";
 import {extractHost} from "./http.mjs";
-import {serverconfig} from "../../index.mjs";
-import logger from "./logger.mjs";
+import {serverconfig} from "../../index.mjs";;
 import {sleep} from "../functions/main.mjs"
 
 
@@ -29,14 +28,11 @@ async function syncHosts(){
 }
 
 export function syncDiscoveredHosts(skipInterval){
-    if(skipInterval){
+    if(skipInterval) syncHosts();
+
+    setInterval(async ()=>{
         syncHosts();
-    }
-    else{
-        setInterval(async ()=>{
-            syncHosts();
-        }, 10 * 60_000) // 10 minutes
-    }
+    }, 10 * 60_000)
 }
 
 export async function getDiscoveredHosts(){
@@ -100,16 +96,16 @@ export async function checkHostDiscovery(address, forceSync = false){
         else{
             if(!forceSync){
                 Logger.warn(`Unable to discover host ${address} ( ${serverDiscoveryResponse.status} )`);
-                logger.warn(serverDiscoveryResponse?.statusText);
+                Logger.warn(serverDiscoveryResponse?.statusText);
             }
             else if(forceSync){
                 Logger.warn(`Unable to sync with host ${address} ( ${serverDiscoveryResponse.status} )`);
-                logger.warn("Error: ", serverDiscoveryResponse?.statusText);
+                Logger.warn("Error: ", serverDiscoveryResponse?.statusText);
             }
         }
     }
     catch(error){
-        logger.warn(`Error while trying to discover host ${extractHost(address)} (${address}`)
-        logger.warn(error);
+        Logger.warn(`Error while trying to discover host ${extractHost(address)} (${address}`)
+        Logger.warn(error);
     }
 }

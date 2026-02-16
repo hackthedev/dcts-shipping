@@ -334,7 +334,7 @@ body {
 .threadArea {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 4px;
     padding: 12px;
     overflow: auto;
     flex: 1 1 auto;
@@ -349,25 +349,10 @@ body {
     word-break: break-word;
 }
 
-.msg {
-    max-width: 70%;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 12px;
-}
 
-.mine {
-    margin-left: auto;
-    background: rgba(171, 184, 190, 0.18);
-    border-color: rgba(171, 184, 190, 0.5);
-}
 
-.meta {
-    color: var(--muted);
-    font-size: 11px;
-    margin-top: 6px;
-}
+
+
 
 .sendRow {
     display: flex;

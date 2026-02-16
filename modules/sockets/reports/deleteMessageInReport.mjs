@@ -29,7 +29,6 @@ export default (io) => (socket) => {
 
             if (hasPermission(member.id, "manageMessages")) {
                 try {
-
                     let messageId = member.messageId
 
                     // dm message
@@ -61,8 +60,7 @@ export default (io) => (socket) => {
                             // notify reporter
                             if (offenderAuthorId) {
                                 await sendSystemMessage(otherIds[0],
-                                    `The message you've reported sent by ${serverconfig.servermembers[messageAuthorId].name} <i>(${messageAuthorId})</i> has been deleted.<br><br>
-
+                                    `The message you've reported sent by <i>${serverconfig.servermembers[messageAuthorId].name} (${messageAuthorId})</i> has been deleted.<br><br>
                                     Thank you for helping keep the server safe.`);
                             }
 

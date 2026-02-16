@@ -6,56 +6,53 @@ var editedServerRoleResponse = [];
 var editedPermissions = {};
 var currentRoleId = "";
 
-window.loadRolePerms = loadRolePerms;
-window.removeFromRole = removeFromRole;
-window.addToRole = addToRole;
-window.createRole = createRole;
-window.appearanceChanged = appearanceChanged;
-window.saveSorting = saveSorting;
-window.deleteRole = deleteRole;
-window.savePermissions = savePermissions;
-window.saveAppearance = saveAppearance;
-window.moveRoleUp = moveRoleUp;
-window.moveRoleDown = moveRoleDown;
 
+document.addEventListener("pagechange", e => {
+    console.log(e.detail.page);
+    if (e.detail.page !== "roles") return;
 
-socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: ["manageRoles", "manageGroups"] }, function (response) {
-
-    if (response.permission == "denied") {
-        window.location.href = window.location.origin + "/settings/server";
-    }
-    else {
-        document.getElementById("pagebody").style.display = "block";
-    }
+    initServerRoles();
 });
 
 
+function initServerRoles(){
+    socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: ["manageRoles", "manageGroups"] }, function (response) {
 
-socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
-
-    rolelist = document.getElementById("rolelist");
-    roleColor = document.getElementById("roleColor");
-    roleName = document.getElementById("roleName");
-
-    serverRoleResponse = response;
-    editedServerRoleResponse = response;
-
-    var roleArraySorted = [];
-
-    Object.keys(response).reverse().forEach(function (role) {
-        var rolecolor = response[role].info.color;
-        var roleName = response[role].info.name;
-
-        roleArraySorted[response[role].info.sortId] = response[role];
+        if (response.permission == "denied") {
+            window.location.href = window.location.origin + "/settings/server";
+        }
+        else {
+            document.getElementById("pagebody").style.display = "block";
+        }
     });
 
-    var code = "";
 
-    roleArraySorted = roleArraySorted.reverse();
 
-    //var code = '<ul class="sortable-list">';
-    roleArraySorted.forEach(role => {
-        code += `
+    socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
+
+        rolelist = document.getElementById("rolelist");
+        roleColor = document.getElementById("roleColor");
+        roleName = document.getElementById("roleName");
+
+        serverRoleResponse = response;
+        editedServerRoleResponse = response;
+
+        var roleArraySorted = [];
+
+        Object.keys(response).reverse().forEach(function (role) {
+            var rolecolor = response[role].info.color;
+            var roleName = response[role].info.name;
+
+            roleArraySorted[response[role].info.sortId] = response[role];
+        });
+
+        var code = "";
+
+        roleArraySorted = roleArraySorted.reverse();
+
+        //var code = '<ul class="sortable-list">';
+        roleArraySorted.forEach(role => {
+            code += `
                    <div class="role-entry-container" id="${role.info.id}">
                        <div onclick="moveRoleUp(${role.info.id})" style="background-image: url('/img/up.png');background-size: cover;object-fit: cover;background-position: center center;
                        width: 10px; height: 10px;display: inline-block;"></div>
@@ -68,11 +65,13 @@ socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getT
                         </p>
                    </div>
         `;
-    })
-    //code += '</ul>';
+        })
+        //code += '</ul>';
 
-    rolelist.insertAdjacentHTML("beforeend", code);
-});
+        rolelist.insertAdjacentHTML("beforeend", code);
+    });
+}
+
 
 function saveAppearance() {
 
@@ -148,6 +147,7 @@ function addToRole() {
 }
 
 function createRole() {
+    console.log(socket.connected)
     socket.emit("createRole", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
         alert(response.msg);
         window.location.reload();

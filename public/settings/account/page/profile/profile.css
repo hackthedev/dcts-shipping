@@ -3,7 +3,7 @@
     flex-direction: column;
 
     padding: 4px;
-    z-index: 9999 !important;
+    z-index: 20 !important;
 
     width: 300px;
     height: auto;
@@ -11,19 +11,22 @@
 
     background-color: hsl(from var(--main) h s calc(l * 2));
     border: 2px solid hsl(from var(--main) h s calc(l * 4));
-    color: hsl(from var(--main) h s calc(l * 12));
     position: absolute;
 }
 
+#profile_container * {
+    color: hsl(from var(--main) h s calc(l * 10) / 100%) !important;
+}
+
 #profile-role-menu{
-    z-index: 99999 !important;
+    z-index: 21 !important;
 }
 
 #profile_banner{
     background-size: cover;
 
     object-fit: cover;
-    background-color: transparent;
+    background-color: black;
     background-position: center center;
 
     width: 100%;
@@ -40,16 +43,20 @@
 #profile_icon{
     width: 75px;
     height: 75px;
+    flex-shrink: 0;
 
     margin-top: -37.5px !important;
     margin-left: 20px !important;
 
     border-radius: 50%;
-    border: 2px solid black;
+    outline: 6px solid hsl(from var(--main) h s calc(l * 2) / 100%);
+    outline-offset: 0;
+
+    background-color: black;
 
     background-size: cover;
+    background-repeat: no-repeat;
     object-fit: cover;
-    background-color: #202225;
     background-position: center center;
 }
 
@@ -57,18 +64,18 @@
     display: flex;
     flex-wrap: wrap;
 
-    justify-content: space-evenly;
-    align-content: space-evenly;
+    justify-content: start;
+    align-content: start;
     gap: 6px;
 
     height: fit-content;
     width: 100%;
 
-    border: 2px solid hsl(from var(--main) h s calc(l * 4));
+    /* border: 2px solid hsl(from var(--main) h s calc(l * 4)); */
     background-color: transparent;
     overflow: hidden;
 
-    margin: 20px 0 0 0;
+    margin: 0;
     padding: 12px;
 
     border-radius: 4px;
@@ -95,6 +102,18 @@
     padding: 0 24px 24px 24px;
 }
 
+#profile_content #dm_action{
+    display: flex;
+    justify-content: center;
+
+    padding: 4px;
+    border-radius: 4px;
+
+    text-decoration: none;
+    font-style: normal;
+    font-weight: bold;
+}
+
 #profile_username {
     float: left;
     display: block;
@@ -119,9 +138,17 @@
     font-weight: bold;
 }
 
+#settings_profile_aboutme{
+    height: 150px;
+    overflow: auto;
+}
+
 #profile_aboutme, .profile_aboutme{
+    margin: 4px 0;
     font-size: 14px;
     word-break: break-word;
+    max-height: 100px;
+    overflow: auto;
 }
 
 #profile_status, .profile_status{
@@ -204,12 +231,10 @@
     align-items: center;
 
     width: 100%;
-    margin: auto;
     gap: 10px;
 }
 
 #profile_pfp_container .profile_meta{
-    margin: 6px 6px auto auto !important;
     flex-grow: 0;
     max-height: 20px;
     z-index: 20;

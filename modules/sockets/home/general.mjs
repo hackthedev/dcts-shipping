@@ -1,6 +1,6 @@
 import {io, serverconfig, signer, usersocket, xssFilters} from "../../../index.mjs";
 import { hasPermission } from "../../functions/chat/main.mjs";
-import Logger from "../../functions/logger.mjs";
+import Logger from "@hackthedev/terminal-logger"
 import { copyObject, emitBasedOnPermission, getCastingMemberObject, sanitizeInput, sendMessageToUser, validateMemberId } from "../../functions/main.mjs";
 import { decodeFromBase64, encodeToBase64 } from "../../functions/mysql/helper.mjs";
 import { queryDatabase } from "../../functions/mysql/mysql.mjs";
@@ -12,6 +12,36 @@ const rid = (p = "id") =>
     `${p}_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36)}`;
 
 const nowISO = () => new Date().toISOString();
+
+
+export async function deleteDMMessage(socket, data, response){
+    try {
+        const me = socket.data.memberId;
+        let { messageId } = data || {};
+        if(!messageId?.startsWith("m_")) messageId = "m_" + messageId;
+
+        const rows = await queryDatabase(
+            `SELECT threadId, authorId FROM dms_messages WHERE messageId = ? LIMIT 1`,
+            [messageId]
+        );
+        if (!rows.length) return response?.({ type: "error", msg: "not found" });
+        const { threadId, authorId } = rows[0];
+
+        const [isMember] = await queryDatabase(
+            `SELECT 1 FROM dms_participants WHERE threadId=? AND memberId=? LIMIT 1`,
+            [threadId, me]
+        );
+        if (!isMember || authorId !== me) return response?.({ type: "error", msg: "forbidden" });
+
+        await queryDatabase(`DELETE FROM dms_messages WHERE messageId = ?`, [messageId]);
+
+        await emitToThread(threadId, "receiveMessageDelete", { threadId, messageId });
+        response?.({ type: "success" });
+    } catch (e) {
+        Logger.error(e);
+        response?.({ type: "error", msg: "deleteMessage failed" });
+    }
+}
 
 export async function sendSystemMessage(targetUserId, text, opts = {}) {
     const systemId = opts.systemId || (serverconfig.systemMemberId || "system");
@@ -67,7 +97,7 @@ export async function sendSystemMessage(targetUserId, text, opts = {}) {
     // create message
     const messageId = rid("m");
     const now = new Date();
-    const encoded = encodeToBase64(String(JSON.stringify(text) || ""));
+    const encoded = String(JSON.stringify(text) || "");
 
     await queryDatabase(
         `INSERT INTO dms_messages (messageId, threadId, authorId, message, createdAt, supportIdentity, displayName)
@@ -237,9 +267,9 @@ export default (io) => (socket) => {
 
 
     socket.on("markRead", async function (data, response) {
-        if (validateMemberId(data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
+        if (validateMemberId(data?.id, socket, data?.token) === true) {
             try {
-                const me = data.memberId;
+                const me = data.id;
                 const { threadId, ts } = data || {};
                 const [isMemberRow] = await queryDatabase(
                     `SELECT 1 FROM dms_participants WHERE threadId=? AND memberId=? LIMIT 1`,
@@ -267,6 +297,9 @@ export default (io) => (socket) => {
                 response?.({ type: "error", msg: "markRead failed" });
             }
         }
+        else{
+            response?.({ type: "error", msg: "auth failed" });
+        }
     });
 
     socket.on("fetchMessages", async function (data, response) {
@@ -293,14 +326,24 @@ export default (io) => (socket) => {
                     [threadId, limit]
                 );
 
-                const messages = rows.map(r => ({
-                    id: r.messageId,
-                    authorId: r.authorId,
-                    text: JSON.parse(decodeFromBase64(r.message)),
-                    ts: r.createdAt || null,
-                    supportIdentity: r.supportIdentity || 'self',
-                    displayName: r.displayName || null
-                })).reverse();
+                const messages = rows.map(r => {
+                    let text;
+                    try {
+                        text = JSON.parse(decodeFromBase64(r.message));
+                    } catch {
+                        text = JSON.parse(r.message);
+                    }
+
+                    return {
+                        id: r.messageId,
+                        authorId: r.authorId,
+                        text,
+                        ts: r.createdAt || null,
+                        supportIdentity: r.supportIdentity || 'self',
+                        displayName: r.displayName || null
+                    };
+                }).reverse();
+
 
                 io.to(data.id).emit('updateUnread');
 
@@ -569,7 +612,7 @@ export default (io) => (socket) => {
             await queryDatabase(
                 `INSERT INTO dms_messages (messageId, threadId, authorId, message, createdAt, supportIdentity, displayName)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                [messageId, data.threadId, me, encodeToBase64(sanitizeInput(JSON.stringify(data.text))), now, data.supportIdentity || "self", displayName]
+                [messageId, data.threadId, me, sanitizeInput(JSON.stringify(data.text)), now, data.supportIdentity || "self", displayName]
             );
 
             // mark as read for sender
@@ -633,7 +676,7 @@ export default (io) => (socket) => {
         return { id: null, name: null, icon: null };
     }
 
-
+    /*
     socket.on("reportMessage", async (data, cb) => {
         if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
             try {
@@ -689,7 +732,7 @@ export default (io) => (socket) => {
                 cb?.({ type: "error", msg: "reportMessage failed" });
             }
         }
-    });
+    }); */
 
     socket.on('joinTicket', async ({ threadId }, cb) => {
         try {
@@ -783,9 +826,10 @@ export default (io) => (socket) => {
         if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
             try {
                 const me = socket.data.memberId;
-                const { messageId, payload } = data || {};
+                let { messageId, payload } = data || {};
                 if (!messageId) return response?.({ type: "error", msg: "missing messageId" });
                 if (typeof payload.content !== "string") return response?.({ type: "error", msg: "missing content" });
+                if(!messageId?.startsWith("m_")) messageId = "m_" + messageId;
 
                 // check if data is set ofc
                 if (payload.encrypted === true && !payload.sender) return response?.({ type: "error", msg: "Missing sender while using encryption" });
@@ -799,13 +843,13 @@ export default (io) => (socket) => {
                 // if somehow that silly wanker signed his own message but
                 // its wrong he may be using a wrong key and didnt share
                 // his new public key. odd innit
-                if(!isVaildSig){
+                if(!isVaildSig && payload?.sig){
                     return response?.({ type: "error", msg: "Message signature was invalid!" });
                 }
 
                 const rows = await queryDatabase(
                     `SELECT authorId, messageId, threadId, message FROM dms_messages WHERE messageId = ? LIMIT 1`,
-                    [messageId]
+                    [messageId.startsWith("m_") ? messageId : "m_" + messageId]
                 );
                 if (!rows.length) return response?.({ type: "error", msg: "not found" });
                 const cur = rows[0];
@@ -818,23 +862,23 @@ export default (io) => (socket) => {
 
                 await queryDatabase(
                     `INSERT INTO dms_message_logs (messageId, threadId, authorId, message, loggedAt) VALUES (?, ?, ?, ?, ?)`,
-                    [cur.messageId, cur.threadId, cur.authorId, cur.message, nowISO()]
+                    [cur.messageId, cur.threadId, cur.authorId, cur.message, new Date()]
                 );
 
                 payload.content = sanitizeInput(payload.content);
                 payload.sender = sanitizeInput(payload.sender);
                 payload.plainSig = sanitizeInput(payload.plainSig);
                 payload.sig = sanitizeInput(payload.sig);
-                const encoded = encodeToBase64(JSON.stringify(payload))
+                const encoded = JSON.stringify(payload)
 
                 await queryDatabase(
                     `UPDATE dms_messages SET message = ? WHERE messageId = ?`,
-                    [encoded, messageId]
+                    [encoded, messageId.startsWith("m_") ? messageId : "m_" + messageId]
                 );
 
                 await emitToThread(cur.threadId, "receiveMessageEdit", {
                     threadId: cur.threadId,
-                    message: { id: cur.messageId, authorId: cur.authorId, text: payload, ts: nowISO() }
+                    message: { id: cur.messageId, authorId: cur.authorId, text: payload, ts: new Date() }
                 });
 
                 response?.({ type: "success" });
@@ -847,31 +891,8 @@ export default (io) => (socket) => {
 
 
     socket.on("deleteDMMessage", async function (data, response) {
-        if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
-            try {
-                const me = socket.data.memberId;
-                const { messageId } = data || {};
-                const rows = await queryDatabase(
-                    `SELECT threadId, authorId FROM dms_messages WHERE messageId = ? LIMIT 1`,
-                    [messageId]
-                );
-                if (!rows.length) return response?.({ type: "error", msg: "not found" });
-                const { threadId, authorId } = rows[0];
-
-                const [isMember] = await queryDatabase(
-                    `SELECT 1 FROM dms_participants WHERE threadId=? AND memberId=? LIMIT 1`,
-                    [threadId, me]
-                );
-                if (!isMember || authorId !== me) return response?.({ type: "error", msg: "forbidden" });
-
-                await queryDatabase(`DELETE FROM dms_messages WHERE messageId = ?`, [messageId]);
-
-                await emitToThread(threadId, "receiveMessageDelete", { threadId, messageId });
-                response?.({ type: "success" });
-            } catch (e) {
-                Logger.error(e);
-                response?.({ type: "error", msg: "deleteMessage failed" });
-            }
+        if (validateMemberId(socket.data.memberId, socket, data.token) === true) {
+            await deleteDMMessage(socket, data, response)
         }
     });
 

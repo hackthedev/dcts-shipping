@@ -1,17 +1,23 @@
-const customPrompts = new Prompt();
-getLogs()
+document.addEventListener("pagechange", e => {
+    console.log(e.detail.page);
+    if (e.detail.page !== "auditlog") return;
 
-window.getLogs = getLogs;
-
-socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "viewAuditLog" }, function (response) {
-
-    if(response.permission == "denied"){
-        window.location.href = window.location.origin + "/settings/server";
-    }
-    else{
-        document.getElementById("pagebody").style.display = "block";
-    }
+    initAuditLogs();
 });
+
+function initAuditLogs(){
+    getLogs()
+
+    socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "viewAuditLog" }, function (response) {
+
+        if(response.permission == "denied"){
+            window.location.href = window.location.origin + "/settings/server";
+        }
+        else{
+            document.getElementById("pagebody").style.display = "block";
+        }
+    });
+}
 
 function getLogs(){
     socket.emit("getAuditlog", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {

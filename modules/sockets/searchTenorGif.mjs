@@ -8,6 +8,7 @@ export default (io) => (socket) => {
     socket.on('searchTenorGif', function (member, response) {
         if (validateMemberId(member.id, socket) == true
         ) {
+            response({ type: "error", msg: "Tenor has been deprecated" });
             member.id = xssFilters.inHTMLData(member.id)
             member.token = xssFilters.inHTMLData(member.token)
             member.search = xssFilters.inHTMLData(member.search)

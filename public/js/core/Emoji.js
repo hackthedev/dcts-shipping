@@ -1,4 +1,4 @@
-export class Emoji {
+class Emoji {
     constructor(filename) {
         // init all the shit so we always have a complete object at least.
         // doesnt matter if some shit is null

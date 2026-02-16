@@ -11,7 +11,7 @@ export default (io) => (socket) => {
         ) {
             if (hasPermission(member.id, "manageChannels")) {
                 var group = resolveGroupByChannelId(member.channel);
-                var category = resolveCategoryByChannelId(member.channel);
+                var category = resolveCategoryByChannelId(member.channelId);
 
                 serverconfig.groups[group].channels.categories[category].channel[member.channel].name = member.name;
                 saveConfig(serverconfig);

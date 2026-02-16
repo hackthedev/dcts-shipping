@@ -22,8 +22,13 @@
 
 
     <script defer src="/js/prompts.js?v={{random}}"></script>
-    <script defer src="../../js/core/CookieManager.js"></script>
-    <script defer src="../../js/core/UserManager.js"></script>
+    <script defer src="/js/core/PageRenderer.js"></script>
+    <script defer src="/js/escape.js"></script>
+    <script defer src="/js/core/purify.js"></script>
+    <script defer src="/js/core/ContextMenu.js"></script>
+    <script defer src="/js/core/ChatManager.js"></script>
+    <script defer src="/js/core/CookieManager.js"></script>
+    <script defer src="/js/core/UserManager.js"></script>
     <script defer type="text/javascript" src="/js/core/PoW.js"></script>
     <script defer type="text/javascript" src="/js/core/FileManager.js"></script>
     <script defer type="text/javascript" src="../utility.js"></script>
@@ -50,6 +55,7 @@
 
     #navigation{
         background-color: hsl(from var(--main) h s calc(l * 1));
+        color: hsl(from var(--main) h s calc(l * 8.5) / 100%) !important;
 
         padding: 32px;
 
@@ -73,6 +79,7 @@
     }
     
     #nav_settings a{
+        color: hsl(from var(--main) h s calc(l * 7) / 100%) !important;
         cursor: pointer;
         display: block;
         margin-top: 12px;

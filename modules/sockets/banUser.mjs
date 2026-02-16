@@ -54,7 +54,7 @@ export default (io) => (socket) => {
                             const reasonText = reason ? `Reason: ${reason}` : "";
 
                             const bannedUntilDate = getNewDate(member.duration);
-                            const banDuration = bannedUntilDate.getFullYear() === "9999" ? `permanently banned` : `banned until ${bannedUntilDate.toISOString()}`;
+                            const banDuration = bannedUntilDate.getFullYear() === 9999 ? `permanently banned` : `banned until ${bannedUntilDate.toISOString()}`;
 
                             const payload = {
                                 title: `You have been ${banDuration}`,

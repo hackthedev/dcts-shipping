@@ -1,31 +1,34 @@
-import {Emoji} from "../../../../js/core/Emoji.js";
 
-// handle upload
-document.getElementById("settings_profile_save")
-    .addEventListener("change", function (e) {
-            upload(e.target.files)
-        }
-    );
+document.addEventListener("pagechange", e => {
+    console.log(e.detail.page);
+    if (e.detail.page !== "emojis") return;
 
-
-// dumb ass fucking fix
-window.selectRoleForWhitelist = selectRoleForWhitelist;
-window.deleteEmoji = deleteEmoji;
-
-
-socket.emit("checkPermission", {
-    id: UserManager.getID(),
-    token: UserManager.getToken(),
-    permission: "manageEmojis"
-}, function (response) {
-    if (response.permission == "denied") {
-        window.location.href = window.location.origin + "/settings/server";
-    } else {
-        document.getElementById("pagebody").style.display = "block";
-    }
+    initEmojis();
 });
 
-getEmojis();
+
+function initEmojis(){
+    // handle upload
+    document.getElementById("settings_profile_save")
+        .addEventListener("change", function (e) {
+                upload(e.target.files)
+            }
+        );
+
+    socket.emit("checkPermission", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        permission: "manageEmojis"
+    }, function (response) {
+        if (response.permission == "denied") {
+            window.location.href = window.location.origin + "/settings/server";
+        } else {
+            document.getElementById("pagebody").style.display = "block";
+        }
+    });
+
+    getEmojis();
+}
 
 function getNameFromFileName(fileName) {
     return fileName.split("_")[1].split(".")[0]
@@ -224,7 +227,7 @@ function deleteEmoji(emoji) {
     });
 }
 
-export async function upload(files) {
+async function upload(files) {
     let uploadResult = await ChatManager.uploadFile(files, "emoji");
     console.log(uploadResult);
 

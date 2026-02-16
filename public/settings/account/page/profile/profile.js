@@ -67,14 +67,14 @@ function setPreview() {
 
     settings_username.value = `${limitString(UserManager.getUsername(), 30)}`;
     settings_status.value = `${limitString(UserManager.getStatus(), 100)}`;
-    settings_aboutme.value = `${limitString(UserManager.getAboutme(), 500)}`;
+    settings_aboutme.value = `${limitString(unescapeHtmlEntities(UserManager.getAboutme()), 500)}`;
 
     settings_icon.value = `${UserManager.getPFP()}`;
     settings_banner.value = `${UserManager.getBanner()}`;
 
     preview_username.innerHTML = `<h2>${limitString(UserManager.getUsername(), 30)}</h2>`;
     preview_status.innerText = `${limitString(UserManager.getStatus(), 100)}`;
-    preview_aboutme.innerText = `${limitString(UserManager.getAboutme(), 500)}`;
+    preview_aboutme.innerHTML = `${sanitizeHtmlForRender(limitString(UserManager.getAboutme(), 1000))}`;
     settings_loginName.value = `${limitString(UserManager.getLoginName(), 500)}`;
 }
 
@@ -217,7 +217,7 @@ function updatePreview(id) {
 
         // About me
         if (id == "settings_profile_aboutme") {
-            preview_aboutme.innerHTML = `${newSetting}`;
+            preview_aboutme.innerHTML = `${sanitizeHtmlForRender(newSetting)}`;
         }
 
         // Icon

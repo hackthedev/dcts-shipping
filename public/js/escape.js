@@ -27,7 +27,9 @@ const SANITIZE_OPTIONS = {
         'em',
         'img',
         'mark',
-        "iframe"]
+        "button",
+        "iframe" // needed for embeds
+    ]
     ,
 
     ALLOWED_ATTR: [
@@ -37,7 +39,7 @@ const SANITIZE_OPTIONS = {
         'src',
         'alt',
         'class',
-        'style',
+        //'style', // needs to be removed but with testing
         'data-id',
         'controls',
         'title',
@@ -46,7 +48,7 @@ const SANITIZE_OPTIONS = {
     ]
 };
 
-function sanitizeHtmlForRender(html) {
+function sanitizeHtmlForRender(html, wrapParagraphs = true) {
     if (html == null) return '';
 
     let raw = unescapeHtmlEntities(String(html || ''), true).trim();
@@ -59,8 +61,8 @@ function sanitizeHtmlForRender(html) {
 
         let out = paras.map(p => {
             const withBreaks = encodePlainText(p).replace(/\n/g, '<br>');
-            return `<p>${withBreaks}</p>`;
-        }).join('');
+            return wrapParagraphs ? `<p>${withBreaks}</p>` : withBreaks;
+        }).join(wrapParagraphs ? '' : '<br><br>');
 
         const clean = DOMPurify.sanitize(out, SANITIZE_OPTIONS);
         return `${clean}`;
@@ -68,7 +70,11 @@ function sanitizeHtmlForRender(html) {
 
     let clean = DOMPurify.sanitize(raw, SANITIZE_OPTIONS);
 
-    clean = clean.replace(/<p[^>]*>\s*(?:&nbsp;|\s|\u00A0)*<\/p>/gi, '');
+    if (wrapParagraphs) {
+        clean = clean.replace(/<p[^>]*>\s*(?:&nbsp;|\s|\u00A0)*<\/p>/gi, '');
+    } else {
+        clean = clean.replace(/<\/?p[^>]*>/gi, '');
+    }
 
     clean = clean.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');
 

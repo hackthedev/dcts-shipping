@@ -1,5 +1,5 @@
 # DCTS - Direct Communication Through Sockets
-[Visit our subreddit](https://www.reddit.com/r/dcts/) • [Feature list](https://github.com/hackthedev/dcts-shipping/blob/beta/docs/Feature%20List.md) • [Discord for convenience](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [To-Do list](https://github.com/users/hackthedev/projects/6/views/1?filterQuery=-changelog-status%3AAdded+-status%3ACanceled)
+[Visit our subreddit](https://www.reddit.com/r/dcts/) • [Feature list](https://github.com/hackthedev/dcts-shipping/blob/beta/docs/Feature%20List.md) • [Discord for convenience](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [To-Do list](https://github.com/users/hackthedev/projects/6/views/1?filterQuery=-changelog-status%3AAdded+-status%3ACanceled) • [Tutorial Playlist](https://www.youtube.com/watch?v=b1RXJ-ykdgc&list=PL2xF-BCo1FWav36ktSvBG4nDsbhfLkFR-&index=1)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
 
@@ -23,7 +23,9 @@ Without community support, development may slow down significantly and could eve
 
 If you value the vision of DCTS and want to see it grow, consider making a donation. Every contribution helps accelerate development and ensures the project's future. Thank you for helping to keep DCTS alive!
 
-[Donate via PayPal](https://www.paypal.me/devilsstore) | [Donate via Ko-fi](https://ko-fi.com/shydevil)
+- [Donate via PayPal](https://www.paypal.me/devilsstore) / [Ko-fi](https://ko-fi.com/shydevil)
+- [Bitcoin](https://mempool.space/address/bc1qeu9j4xh8qhya3s47j05yu78rla3hxe2yz65c9z) (BTC)
+- [Ethereum](https://etherscan.io/address/0x1DeCAf1A2C933d6806C87b08Ad56Cbfbb9021aE3) (ETC)
 
 > [!TIP]
 >
@@ -36,7 +38,7 @@ If you value the vision of DCTS and want to see it grow, consider making a donat
 > [!NOTE]
 > DCTS is still in development. Some features may not yet be fully refined.
 
-Modern communication platforms have limitations and issues that DCTS is designed to overcome and fix. Here's why DCTS exists and how it stands out:
+Communication platforms have limitations and issues that DCTS is designed to overcome and fix. Here's why DCTS exists and how it stands out:
 
 - **Encrypted DMs**: DMs are end-to-end encrypted when using the [desktop client](https://github.com/hackthedev/dcts-client-shipping/) and non-encrypted when using the web app as fallback. Despite encryption its possible to report and moderate encrypted messages without compromise![^1]
 
@@ -44,21 +46,17 @@ Modern communication platforms have limitations and issues that DCTS is designed
 
 - **Full Data Control**: Self-host your server and take complete control of your data and privacy with ease.
 
-- **Easy to Set Up**: With just two commands (assuming NodeJS & MySQL/MariaDB are installed), you can have your server running.
+- **Easy to Set Up**: In about 8 minutes you can have your server up and running.
 
-- **Community-Driven**: Responsive development ensures your feedback and feature requests are heard.
+- **Community-Driven**: Development is based on the situation and feedback as well as what makes sense to prioritize.
 
 - **Modern and User-Friendly**: Combines a sleek design with an intuitive interface for both casual and advanced users.
 
-- **Highly Customizable**: The plugin system allows endless possibilities for enhancements and features, developed by the community or officially **without** the need of additional hosting.
+- **Highly Customizable**: The plugin system allows endless possibilities for enhancements and features, developed by the community or officially **without** the need of additional hosting as plugins run within the server itself.
 
-- **Efficient Media Handling**: Supports advanced features like a Cloudflare image CDN for fast and smooth media uploads and media cache.
+- **No Paywalls**: Enjoy full functionality without subscriptions or hidden costs, forever.
 
-- **No Paywalls**: Enjoy full functionality without subscriptions or hidden costs - DCTS is made for everyone.
-
-- **User-Focused**: Designed to prioritize users, not corporations.
-
-- **Future-Proof**: Built with scalability and future features in mind.
+- **Future-Proof**: Built with scalability and future features in mind. Every update will come with improvements.
 
 - **Rapid Development**: Fast bug resolution, continuous feature delivery, and ongoing improvements enabled by a modern and efficient tech stack.
 
@@ -86,9 +84,22 @@ wget https://raw.githubusercontent.com/hackthedev/dcts-shipping/refs/heads/main/
 docker compose up
 ```
 
+or alternatively:
+
+```bash
+# You can choose between these tags
+sudo docker pull ghcr.io/hackthedev/dcts-shipping:latest # :latest, :main or :beta
+sudo docker run --rm -p 2052:2052 ghcr.io/hackthedev/dcts-shipping:latest # :latest, :main or :beta
+```
+
 #### Accessing the server
+
 - Open your browser and go to `http://localhost:2052` (or your server's IP).
 - If you just want to try DCTS, you can visit the public instance at [https://chat.network-z.com/](https://chat.network-z.com/).
+
+> [!TIP]
+>
+> Docker was made possible thanks to people like **panda**, **Reeperk** and **Animo**.
 
 <br>
 
@@ -124,7 +135,14 @@ Once **successfully** executed, your instance should be available at `chat.your-
 
 ------
 
-## Tested Node Versions
+## Tested Versions
+
+### Bun:
+
+- ✔️ 1.3.5
+
+### Node:
+
 - ✔️ v24.11.1
 - ✔️ v21.7.3
 - ✔️ v20.19.2

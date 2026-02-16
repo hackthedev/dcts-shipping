@@ -14,52 +14,60 @@ var localUploadLimit;
 var serverconfigName;
 var serverconfigDesc;
 
-window.updatePreview = updatePreview;
-window.saveSettings = saveSettings;
+document.addEventListener("pagechange", e => {
+    console.log(e.detail.page);
+    if (e.detail.page !== "file-uploads") return;
 
-socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageUploads" }, function (response) {
-
-    if(response.permission == "denied"){
-        window.location.href = window.location.origin + "/settings/server";
-    }
-    else{
-        document.getElementById("pagebody").style.display = "block";
-    }
+    initFileUploads();
 });
 
 
-socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
+function initFileUploads(){
 
-    console.log(response);
+    socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageUploads" }, function (response) {
 
-    useCf = response.useCloudflareImageCDN;
-    cfAccountId = response.cfAccountId;
-    cfAccountToken = response.cfAccountToken;
-    cfHash = response.cfHash;
-    localUploadLimit = response.maxUploadStorage;
+        if(response.permission == "denied"){
+            window.location.href = window.location.origin + "/settings/server";
+        }
+        else{
+            document.getElementById("pagebody").style.display = "block";
+        }
+    });
 
-    setting_useLocalFs = document.getElementById("saveToLocalFileSystem");
-    setting_localFsLimit = document.getElementById("localUploadLimit");
-    setting_cfAccountId = document.getElementById("cfAccountId");
-    setting_cfAccountToken = document.getElementById("cfAccountToken");
-    setting_cfAccountHash = document.getElementById("cfAccountHash");
-    saveButton = document.getElementById("settings_profile_save");
 
-    // Use CDN?
-    if(useCf == 1){
-        setting_useLocalFs.checked = true;
-    }
-    else{
-        setting_useLocalFs.checked = false;
-    }
+    socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
 
-    // Max Local Storage in MB
-    setting_localFsLimit.value = localUploadLimit;
+        console.log(response);
 
-    setting_cfAccountId.value = cfAccountId;
-    setting_cfAccountToken.value = cfAccountToken;
-    setting_cfAccountHash.value = cfHash;
-});
+        useCf = response.useCloudflareImageCDN;
+        cfAccountId = response.cfAccountId;
+        cfAccountToken = response.cfAccountToken;
+        cfHash = response.cfHash;
+        localUploadLimit = response.maxUploadStorage;
+
+        setting_useLocalFs = document.getElementById("saveToLocalFileSystem");
+        setting_localFsLimit = document.getElementById("localUploadLimit");
+        setting_cfAccountId = document.getElementById("cfAccountId");
+        setting_cfAccountToken = document.getElementById("cfAccountToken");
+        setting_cfAccountHash = document.getElementById("cfAccountHash");
+        saveButton = document.getElementById("settings_profile_save");
+
+        // Use CDN?
+        if(useCf == 1){
+            setting_useLocalFs.checked = true;
+        }
+        else{
+            setting_useLocalFs.checked = false;
+        }
+
+        // Max Local Storage in MB
+        setting_localFsLimit.value = localUploadLimit;
+
+        setting_cfAccountId.value = cfAccountId;
+        setting_cfAccountToken.value = cfAccountToken;
+        setting_cfAccountHash.value = cfHash;
+    });
+}
 
 function isChecked(element){
     return element.checked ? 1 : 0;

@@ -132,8 +132,8 @@ async function displayDiscoveredHosts(){
             }
 
             discoveredHostList.insertAdjacentHTML("beforeend",
-        `<a class="networkServerEntry" href="https://${host}" title="${externalServerData.serverinfo.name}">
-                    <img class="networkServerEntryImage" data-fav="${!!server?.IsFavourite}" data-host="${host}" src="https://${host}/${externalServerData.serverinfo.icon}">
+        `<a class="networkServerEntry" href="https://${host}" title="${externalServerData?.serverinfo?.name}">
+                    <img class="networkServerEntryImage" data-fav="${!!server?.IsFavourite}" data-host="${host}" src="https://${host}/${externalServerData?.serverinfo?.icon}">
                     <div class="networkIndicator">50</div>
                 </a>`)
 

@@ -15,24 +15,25 @@
     <link rel="stylesheet" href="/css/themes/default/default.css">
 
 
-    <script defer src="/js/prompts.js"></script>
-    <script defer src="/js/sysmsg.js"></script>
-    <script defer src="../utility.js"></script>
-    <script type="module" src="/js/core/Emoji.js"></script>
-    <script src="/js/core/ChatManager.js"></script>
-    <script defer src="/js/core/PermUI.js"></script>
+    <script src="/js/sysmsg.js"></script>
+
+    <script src="/js/prompts.js"></script>
     <script src="/js/core/UserManager.js"></script>
+    <script src="/js/core/JsonEditor.js"></script>
+    <script src="/js/core/Emoji.js"></script>
+    <script src="/js/core/ChatManager.js"></script>
+    <script src="/js/core/PermUI.js"></script>
     <script src="/js/core/CookieManager.js"></script>
-    <script defer src="/js/core/PoW.js"></script>
-    <script defer src="/js/hover.js"></script>
-    <script defer src="/js/escape.js"></script>
-    <script defer src="/js/core/purify.js"></script>
+    <script src="/js/core/PoW.js"></script>
+    <script src="/js/hover.js"></script>
+    <script src="/js/escape.js"></script>
+    <script src="/js/core/purify.js"></script>
 
-    <script defer src="/notify.js"></script>
-    <script type="module" src="settings.js"></script>
-
-
+    <script src="/notify.js"></script>
     <script src="/js/core/sortable.js"></script>
+
+    <script src="../utility.js"></script>
+    <script src="settings.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
@@ -43,8 +44,10 @@
 <style>
 
     #navigation{
-        background-color: hsl(from var(--main) h s calc(l * 2));
+        background-color: hsl(from var(--main) h s calc(l * 1));
         color: hsl(from var(--main) h s calc(l * 10));
+        flex-shrink: 0;
+        min-width: 200px;
 
         padding: 32px;
 
@@ -57,6 +60,7 @@
     }
 
     #navigation a {
+        color: hsl(from var(--main) h s calc(l * 8) / 100%);
         font-style: normal;
     }
 
@@ -69,6 +73,7 @@
     }
 
     #nav_settings h2 {
+        color: hsl(from var(--main) h s calc(l * 8.5) / 100%) !important;
         text-transform: uppercase;
         font-size: 12px;
     }
@@ -78,8 +83,6 @@
         line-height: 175%;
 
         text-decoration: none;
-        color: hsl(from var(--main) h s calc(l * 8));
-
     }
 
     #nav_settings a:hover{
@@ -103,7 +106,11 @@
         float: left;
 
         overflow-y: auto;
-        background-color: background-color: hsl(from var(--main) h s calc(l * 2));
+        background-color: hsl(from var(--main) h s calc(l * 2));
+    }
+
+    #content {
+        color: hsl(from var(--main) h s calc(l * 10) / 100%);
     }
 
     #back {
@@ -114,7 +121,6 @@
         position: absolute;
         right: 0;
 
-        background-color: #2B3137;
         float: right;
         display: block;
 
@@ -155,8 +161,8 @@
 
             <div id="general">
                 <h2>General Settings</h2>
-                <a href='?page=server-info' id="manageServerInfo" data-permission="administrator">Server Info</a><br id="manageServerInfo-br">
-                <a href='?page=rate-limit' id="manageRateSettings" data-permission="administrator">Rate Limit</a><br id="manageRateSettings-br">
+                <a onclick='loadPageContent("server-info")' id="manageServerInfo" data-permission="administrator">Server Info</a><br id="manageServerInfo-br">
+                <a onclick='loadPageContent("rate-limit")' id="manageRateSettings" data-permission="administrator">Rate Limit</a><br id="manageRateSettings-br">
                 <hr id="general-hr">
             </div>
 
@@ -164,23 +170,24 @@
                 <h2>Moderation & Safety</h2>
                 <!-- soon tm <a href='?page=server-info' id="manageServerInfo">Automod</a><br id="manageServerInfo-br">-->
 
-                <a href='?page=invites' id="manageInvites" data-permission="manageInvites">Invites</a><br id="manageInvites-br">
-                <a href='?page=auditlog' id="viewAuditLog" data-permission="viewAuditLog">Audit Log</a><br id="viewAuditLog-br">
-                <a href='?page=network-servers' id="manageNetworkServers" data-permission="manageNetworkServers">Network Servers</a><br id="manageNetworkServers-br">
+                <a onclick='loadPageContent("invites")' id="manageInvites" data-permission="manageInvites">Invites</a><br id="manageInvites-br">
+                <a onclick='loadPageContent("auditlog")' id="viewAuditLog" data-permission="viewAuditLog">Audit Log</a><br id="viewAuditLog-br">
+                <a onclick='loadPageContent("ip")' id="manageIpSettings" data-permission="manageIpSettings">IP Security</a><br id="manageIpSettings-br">
+                <a onclick='loadPageContent("network-servers")' id="manageNetworkServers" data-permission="manageNetworkServers">Network Servers</a><br id="manageNetworkServers-br">
                 <hr id="moderation-hr">
             </div>
 
             <div id="users">
                 <h2>User Management</h2>
-                <a href='?page=roles' id="manageRoles" data-permission="manageRoles">Server Roles</a><br id="manageRoles-br">
-                <a href='?page=banlist' id="manageBans" data-permission="manageBans">Banned Members</a><br id="manageBans-br">
+                <a onclick='loadPageContent("roles")' id="manageRoles" data-permission="manageRoles">Server Roles</a><br id="manageRoles-br">
+                <a onclick='loadPageContent("banlist")' id="manageBans" data-permission="manageBans">Banned Members</a><br id="manageBans-br">
                 <hr id="users-hr">
             </div>
 
             <div id="media">
                 <h2>Media Settings</h2>
-                <a href='?page=emojis' id="manageEmojis" data-permission="manageEmojis">Emojis</a><br id="manageEmojis-br">
-                <a href='?page=file-uploads' id="manageUploads" data-permission="manageUploads">File Uploads</a><br id="manageUploads-br">
+                <a onclick='loadPageContent("emojis")' id="manageEmojis" data-permission="manageEmojis">Emojis</a><br id="manageEmojis-br">
+                <a onclick='loadPageContent("file-uploads")' id="manageUploads" data-permission="manageUploads">File Uploads</a><br id="manageUploads-br">
                 <hr id="media-hr">
             <div>
 
@@ -188,8 +195,8 @@
             <div id="info">
                 <h2>Information</h2>
                 <!--<a href='?page=planned-features'>Planned Features</a><br>-->
-                <a href='?page=about'>About</a><br>
-                <a href='?page=support' style="color: #e55a72;">Support <3</a><br>
+                <a onclick='loadPageContent("about")'>About</a><br>
+                <a onclick='loadPageContent("support")' style="color: #e55a72 !important;">Support <3</a><br>
                 <hr>
             </div>
         </div>

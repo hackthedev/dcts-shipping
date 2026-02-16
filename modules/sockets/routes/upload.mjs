@@ -13,6 +13,12 @@ fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 function sha256(b) {
     return crypto.createHash("sha256").update(b).digest("hex");
 }
+
+export function getFileHash(path){
+    const finalBuf = fs.readFileSync(path);
+    return sha256(finalBuf);
+}
+
 app.post("/upload", async (req, res) => {
     try {
         const {
@@ -78,8 +84,7 @@ app.post("/upload", async (req, res) => {
                 if (Number(chunkIndex) + 1 < Number(totalChunks))
                     return res.json({ ok: true, part: true });
 
-                const finalBuf = fs.readFileSync(temp);
-                const hash = sha256(finalBuf);
+                const hash = getFileHash(temp)
 
                 const existing = fs.readdirSync(dir).find(n => n.startsWith(hash + "_"));
                 if (existing) {

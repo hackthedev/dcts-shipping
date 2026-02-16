@@ -1,0 +1,12 @@
+{
+  "name": "@hackthedev/file-manager",
+  "version": "1.0.0",
+  "description": "Frontend library with a few helper functions and dSyncFiles integration",
+  "license": "ISC",
+  "author": "",
+  "keywords": ["frontend"],
+  "main": "FileManager.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

@@ -17,7 +17,7 @@ export default (io) => (socket) => {
                     serverconfig.serverroles[roleid] = JSON.parse(
                         `{
                                     "info": {
-                                        "id": ${roleid},
+                                        "id": "${roleid}",
                                         "name": "New Role",
                                         "icon": null,
                                         "color": "#FFFFFF",

@@ -1,26 +1,20 @@
 async function getBadges(type, id, beta = false){
-    return new Promise((resolve, reject) => {
-        var badgeUrl = `https://raw.githubusercontent.com/hackthedev/dcts-shipping/${beta ? "beta" : "main"}/badges/${type}/${id}.json`;
-        //var badgeUrl = `https://raw.githubusercontent.com/hackthedev/dcts-shipping/refs/heads/${beta ? "beta" : "main"}/badges/${type}/${id}.json`;
 
-        (async function () {
-            const res = await fetch(badgeUrl)
-            //console.log(res);
+    return new Promise(async (resolve, reject) => {
+        var badgeUrl = `/badges/${type}/${id}`;
 
-            if(res.status == 404){
-                resolve(null);
-                return null;
-            }
-            else if(res.status == 200){
-                const html = await res.text()
-                //console.log(html)
-                resolve(html);
-                return html;
-            }
-            else{
-                resolve(null);
-                return null;
-            }
-        })()
+        const res = await fetch(badgeUrl)
+
+        if(res.status === 404){
+            resolve(null);
+        }
+        else if(res.status === 200){
+            const json = await res.json()
+            console.log(json)
+            resolve(json?.badges || {});
+        }
+        else{
+            resolve(null);
+        }
     });
 }

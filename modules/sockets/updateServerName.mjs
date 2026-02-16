@@ -12,7 +12,7 @@ export default (io) => (socket) => {
             if (hasPermission(member.id, "manageServerInfo")) {
                 Logger.warn(`Changing servername from ${serverconfig.serverinfo.name} to ${escapeHtml(limitString(member.value, 300))}`);
                 
-                serverconfig.serverinfo.name = escapeHtml(limitString(member.value, 200));
+                serverconfig.serverinfo.name = member.value;
                 saveConfig(serverconfig);
 
                 response({ type: "success", msg: "Server was successfully renamed" });

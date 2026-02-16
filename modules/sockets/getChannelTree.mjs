@@ -6,7 +6,7 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('getChannelTree', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
             member.id = xssFilters.inHTMLData(member.id)

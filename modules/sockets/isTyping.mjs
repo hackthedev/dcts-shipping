@@ -1,6 +1,5 @@
 import { serverconfig } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
-import Logger from "../functions/logger.mjs";
 import {escapeHtml, validateMemberId} from "../functions/main.mjs";
 
 const typingMembers = {};

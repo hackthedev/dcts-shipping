@@ -12,28 +12,33 @@
     transition: all 250ms ease-in-out;
 }
 
-
 .message-container {
     display: flex;
     flex-direction: column;
-    margin: 12px 0;
+    margin: 10px 0;
     position: relative;
 }
 
-.message-container .content-container{
+.message-container .content-container {
     box-sizing: border-box;
     width: 100%;
     overflow-y: auto;
 }
 
-.message-container .content.reply .inline-text-emoji{
+.message-container .content.reply .inline-text-emoji {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
     margin-left: 4px !important;
     margin-right: 4px !important;
+    width: 20px;
+    height: 20px;
 }
 
-.message-container .row.system div{
+.waitForDisplay {
+    content-visibility: hidden;
+}
+
+.message-container .row.system div {
     display: flex;
     flex-direction: column;
     align-content: flex-start;
@@ -41,24 +46,68 @@
     justify-content: flex-start;
     gap: 10px;
 }
-.message-container .row.system{
+.message-container.banned {
+    background: linear-gradient(
+        90deg,
+        hsl(from indianred h s l / 20%),
+        hsl(from indianred h s l / 0%)
+    );
+    padding: 8px;
+    margin-left: -8px;
+    border-radius: 4px;
+}
+.message-container.banned.waitForDisplay {
+    display: none;
+}
+.message-container .row.system {
     display: flex;
 
     font-style: italic;
     color: hsl(from var(--main) h s calc(l * 8));
     padding: 8px;
-
     border-left: 3px solid hsl(from var(--main) h s calc(l * 8));
     gap: 20px;
 }
 
-.message-container .row{
+.message-container .content .message-reaction-row{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-self: start;
+
+    gap: 4px;
+    margin: 8px 0;
+}
+.message-container .content .message-reaction-row .message-reaction-entry{
+    display: flex;
+    flex-shrink: 0;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    gap: 4px;
+    padding: 4px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.message-container .content .message-reaction-row .message-reaction-entry .inline-text-emoji{
+    border-radius: 4px !important;
+    width: 20px;
+    height: 20px;
+    margin: auto !important;
+}
+.message-container .content .message-reaction-row .message-reaction-entry span{
+    margin-right: 2px;
+    user-select: none;
+}
+
+.message-container .row {
     display: flex;
     flex-direction: row;
     gap: 10px;
 }
 
-.message-container .row .meta{
+.message-container .row .meta {
     display: flex;
     gap: 10px;
 
@@ -67,18 +116,18 @@
     align-items: center;
 }
 
-
 .message-container .contentRows {
     display: flex;
     flex-direction: column;
     width: 100%;
-    overflow-y: auto;
+    overflow-y: hidden;
+    overflow-x: auto;
 }
 
-.message-container .content.mention{
+.message-container .content.mention {
     background-color: rgba(255, 174, 0, 0.12);
 }
-.message-container .content{
+.message-container .content {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -91,7 +140,7 @@
     padding-left: 2px;
 }
 
-.message-container .icon-container img{
+.message-container .icon-container img {
     background-size: cover;
     object-fit: cover;
     background-position: center center;
@@ -106,7 +155,7 @@
     padding: 0;
 }
 
-.message-container .icon-container{
+.message-container .icon-container {
     width: 40px !important;
     height: 40px !important;
 
@@ -114,7 +163,7 @@
     flex-shrink: 0;
 }
 
-.message-container .timestamp{
+.message-container .timestamp {
     color: hsl(from var(--main) h s calc(l * 8));
     font-size: 10px;
 }
@@ -124,7 +173,7 @@
     margin: 0;
 }
 
-.message-container blockquote{
+.message-container blockquote {
     display: flex;
     width: 100%;
 
@@ -133,7 +182,7 @@
     padding: 6px;
 }
 
-.message-container .edit-notice{
+.message-container .edit-notice {
     display: flex;
     flex-direction: row;
     align-self: flex-start;
@@ -148,27 +197,28 @@
     white-space: break-spaces;
 }
 
-.message-container .edit-notice .editedMsg{
+.message-container .edit-notice .editedMsg {
     max-height: 0;
     overflow: hidden;
     transition: all 500ms ease-in-out;
 }
 
-.message-container .edit-notice:hover .editedMsg{
+.message-container .edit-notice:hover .editedMsg {
     max-height: 50px;
 }
 
-
 /* Replies */
-.message-container .row.reply{
+.message-container .row.reply {
     display: flex;
     flex-direction: row;
     justify-content: start;
     align-content: center;
     align-items: center;
 
-    margin-bottom: 6px;
+    margin-bottom: 2px;
     font-size: 12px;
+
+    gap: 4px;
 }
 
 .message-container .row.reply .content.reply {
@@ -183,22 +233,25 @@
 
     font-size: 12px;
     font-style: italic;
-    user-select: none;
 }
 
-.message-container .row.reply .box{
+.message-container .row.reply .box {
     display: flex;
+    flex-grow: 1;
     border-top-left-radius: 6px;
 
-    height: 50%;
+    height: 10px;
     width: 25px;
 
     margin-left: 18px;
     margin-top: auto;
 }
 
-.message-container .row.reply .icon-container,
-.message-container .row.reply .username {
+.message-container .username {
+    cursor: pointer;
+}
+
+.message-container .row.reply .icon-container {
     user-select: none;
 }
 .message-container .row.reply .icon-container {
@@ -206,7 +259,7 @@
     width: 15px !important;
     height: 15px !important;
 }
-.message-container .row.reply .icon-container img{
+.message-container .row.reply .icon-container img {
     display: flex;
     align-self: center;
 }

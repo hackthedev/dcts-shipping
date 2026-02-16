@@ -1,0 +1,14 @@
+{
+  "name": "@hackthedev/element-loader",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [
+    "frontend"
+  ],
+  "license": "ISC",
+  "author": "",
+  "main": "ElementLoader.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

@@ -180,8 +180,6 @@ async function renderServersList(servers) {
     }
 
     for(let server of servers){
-        console.log(server)
-
         let externalServerInfo;
         let externalServerData;
 
@@ -201,11 +199,19 @@ async function renderServersList(servers) {
         const versionText = encodePlainText(String(String(externalServerData?.serverinfo?.version).split("")).replaceAll(",", "."));
         const card = document.createElement("div");
 
+        console.log(externalServerData)
+
+        // cache or some shit
+        if(!externalServerData?.serverinfo?.voip && externalServerData?.serverinfo?.turn) {
+            externalServerData.serverinfo.voip = externalServerData.serverinfo.turn
+        }
+
+
         card.className = "server-card";
         card.style.setProperty("--reveal-delay", `${idx * 200}ms`);
         card.innerHTML = `
          <div class="banner" style="${externalServerData?.serverinfo?.banner ? `background-image:url('https://${extractHost(server.address)}/${externalServerData?.serverinfo?.banner}')` : ""}">
-            <p class="name">${encodePlainText(truncateString(externalServerData?.serverinfo?.name, 25))}</p>
+            <p class="name">${encodePlainText(unescapeHtmlEntities(truncateString(externalServerData?.serverinfo?.name, 25)))}</p>
           </div>
 
 
@@ -215,8 +221,8 @@ async function renderServersList(servers) {
             <label>Features</label>
             ${externalServerData?.serverinfo?.ssl ? `<div id="ssl" class="feature">TLS Encryption</div>` : ""}
             ${externalServerData?.serverinfo?.tenor ? `<div id="tenor" class="feature">Tenor GIFs</div>` : ""}
-            ${externalServerData?.serverinfo?.turn ? `<div id="turn-vc" class="feature">VC</div>` : ""}
-            ${externalServerData?.serverinfo?.turn ? `<div id="turn-ss" class="feature">Screensharing</div>` : ""}
+            ${externalServerData?.serverinfo?.voip ? `<div id="turn-vc" class="feature">VC</div>` : ""}
+            ${externalServerData?.serverinfo?.voip ? `<div id="turn-ss" class="feature">Screensharing</div>` : ""}
             <div class="feature">Version ${versionText}</div>
           </div>
     

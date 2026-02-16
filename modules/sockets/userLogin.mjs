@@ -1,12 +1,13 @@
 import { loginAttempts, serverconfig, xssFilters } from "../../index.mjs";
 import {banIp, getNewDate, getSocketIp, unbanIp} from "../functions/chat/main.mjs";
-import { copyObject, findAndVerifyUser, validateMemberId } from "../functions/main.mjs";
+import { copyObject, findAndVerifyUser, getCastingMemberObject, validateMemberId } from "../functions/main.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('userLogin', async function (member, response) {
         member.password = xssFilters.inHTMLData(member.password)
         member.loginName = xssFilters.inHTMLData(member.loginName)
+
 
         // Handling ip ban
         var ip = getSocketIp(socket);

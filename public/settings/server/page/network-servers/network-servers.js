@@ -1,49 +1,54 @@
-setupNotify();
+document.addEventListener("pagechange", e => {
+    console.log(e.detail.page);
+    if (e.detail.page !== "network-servers") return;
 
-window.toggleDetails = toggleDetails;
-window.changeServerStatus = changeServerStatus;
+    initNetworkServers();
+});
+
+async function initNetworkServers() {
+    setupNotify();
 
 // check perms. its checked server side anyway but just for ux
-if(await UserManager.checkPermission("manageNetworkServers") === false){
-    window.location.href = window.location.origin + "/settings/server";
-}
-else{
-    document.getElementById("pagebody").style.display = "block";
-}
+    if (await UserManager.checkPermission("manageNetworkServers") === false) {
+        window.location.href = window.location.origin + "/settings/server";
+    } else {
+        document.getElementById("pagebody").style.display = "block";
+    }
 
 // handle search
-let searchTimeout = null;
-getSearchInputElement().addEventListener("input", function(event) {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(renderServers, 500);
-})
+    let searchTimeout = null;
+    getSearchInputElement().addEventListener("input", function (event) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(renderServers, 500);
+    })
 
 // load initially
-renderServers();
+    renderServers();
+}
 
-async function renderServers(){
+async function renderServers() {
     await createServerTable(document.getElementById("verifiedServersContainer"), "verified", "Verified Servers");
     await createServerTable(document.getElementById("pendingServersContainer"), "pending", "Pending Servers");
     await createServerTable(document.getElementById("blockedServersContainer"), "blocked", "Blocked Servers");
 }
 
-function getSearchInputTextt(){
+function getSearchInputTextt() {
     return getSearchInputElement().value || null
 }
 
-function getSearchInputElement(){
+function getSearchInputElement() {
     return document.getElementById("serverSearch")
 }
 
-async function getNetworkServers(){
+async function getNetworkServers() {
     return new Promise((resolve, reject) => {
-        socket.emit("getNetworkServers", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
+        socket.emit("getNetworkServers", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
             resolve(response);
         });
     })
 }
 
-function createRowHMTL(server, serverData, index){
+function createRowHMTL(server, serverData, index) {
     let serverBanner = serverData?.banner ?
         serverData?.banner.startsWith("/uploads") === true ? `https://${server.address}${serverData?.banner}` : serverData?.banner
         :
@@ -57,7 +62,7 @@ function createRowHMTL(server, serverData, index){
                     ${unescapeHtmlEntities(serverData?.name)}
                 </td>
                 <td>
-                    <a href="${server?.address}" target="_blank">${server?.address}</a>
+                    <a href="https://${server?.address}" target="_blank">${server?.address}</a>
                 </td>
                 <td>
                     ${server?.status}
@@ -70,7 +75,7 @@ function createRowHMTL(server, serverData, index){
                 </td>
             </tr>
             <tr class="rowDetails ${rowClass}" data-address="${server?.address}">
-                <td><img style="max-width: 200px;" src="${window.location.origin}/proxy?url=${encodeURIComponent(serverBanner)}"></td>
+                <td><img style="max-width: 200px;border-radius: 4px;" src="${ChatManager.proxyUrl(serverBanner)}"></td>
                 <td><div style="max-width: 350px;">${sanitizeHtmlForRender(serverData.about)}</div></td>
                 <td>
                     <div class="details-status-action">
@@ -79,56 +84,55 @@ function createRowHMTL(server, serverData, index){
                         <button onclick="changeServerStatus(this, 'blocked')">Block Server</button> 
                     </div>
                 </td>
-                <td><p>Lol</p></td>
+                <td><p> </p></td>
                 <td></td>
             </tr>
         `;
 }
 
-async function changeServerStatus(element, status){
-    if(!element){
+async function changeServerStatus(element, status) {
+    if (!element) {
         console.error("Couldnt find server to change status for")
         return;
     }
 
-    if(!status){
+    if (!status) {
         console.error("Couldnt find status to change server to")
         return;
     }
 
     let address = element?.closest(".rowDetails")?.getAttribute("data-address");
-    if(!address){
+    if (!address) {
         console.error("Couldnt find server address for status change")
         return;
     }
 
     socket.emit("changeNetworkServerStatus",
-        {id: UserManager.getID(), token: UserManager.getToken(), address, status },
+        {id: UserManager.getID(), token: UserManager.getToken(), address, status},
         function (response) {
-        if(response.error){
-            showSystemMessage({
-                title: response.error,
-                text: ``,
-                icon: "error",
-                type: "error",
-                duration: 8000
-            });
-        }
-        else{
-            showSystemMessage({
-                title: `Status updated!`,
-                text: ``,
-                icon: "success",
-                type: "success",
-                duration: 1000
-            });
-            renderServers();
-        }
-    })
+            if (response.error) {
+                showSystemMessage({
+                    title: response.error,
+                    text: ``,
+                    icon: "error",
+                    type: "error",
+                    duration: 8000
+                });
+            } else {
+                showSystemMessage({
+                    title: `Status updated!`,
+                    text: ``,
+                    icon: "success",
+                    type: "success",
+                    duration: 1000
+                });
+                renderServers();
+            }
+        })
 }
 
 async function createServerTable(container, status, summary) {
-    if(!container) {
+    if (!container) {
         console.error("Couldnt find container to add table to")
         return;
     }
@@ -136,7 +140,7 @@ async function createServerTable(container, status, summary) {
     container.innerHTML = ""; // Clear previous entries
 
     let servers = await getNetworkServers();
-    if(servers.error){
+    if (servers.error) {
         console.error(servers.error)
         return
     }
@@ -165,9 +169,9 @@ async function createServerTable(container, status, summary) {
 
     // Add rows for each banned user
     let index = 0;
-    for(let server of filteredServers){
+    for (let server of filteredServers) {
         let serverData = (JSON.parse(server.data))?.serverinfo;
-        if(!serverData) {
+        if (!serverData) {
             console.warn("Couldnt find server data for server", server.address)
             continue
         }
@@ -175,20 +179,20 @@ async function createServerTable(container, status, summary) {
         // okay so this is simple yet cool imo.
         // if the search input text isnt empty we only wanna display servers that match the name or address,
         // if a server doesnt fit the criteria we skip em. if we dont have any search text, we just display all servers.
-        if(getSearchInputTextt() &&
+        if (getSearchInputTextt() &&
             (serverData.name.toLowerCase().includes(getSearchInputTextt().toLowerCase()) ||
-            server.address.toLowerCase().includes(getSearchInputTextt().toLowerCase())
+                server.address.toLowerCase().includes(getSearchInputTextt().toLowerCase())
             )
-        ){
+        ) {
             table += createRowHMTL(server, serverData, index);
-        }
-        else if(!getSearchInputTextt()){
+        } else if (!getSearchInputTextt()) {
             table += createRowHMTL(server, serverData, index);
         }
 
 
         index++;
-    };
+    }
+
 
 
     // Close the table
@@ -203,13 +207,13 @@ async function createServerTable(container, status, summary) {
 
 function toggleDetails(element) {
     let serverAddress = element?.closest(".row-entry")?.getAttribute("data-address");
-    if(!serverAddress){
+    if (!serverAddress) {
         console.warn("Couldnt find server address for details", serverAddress)
         return;
     }
 
     let detailsRow = element.closest(".row-entry").parentNode.querySelector(`.rowDetails[data-address="${serverAddress}"]`);
-    if(!detailsRow){
+    if (!detailsRow) {
         console.warn("Couldnt find details row for server address", serverAddress)
         return;
     }

@@ -2,6 +2,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Create Category
     ContextMenu.registerContextMenu(
+        "channellist_groups_create",
+        [
+            "#serverlist",
+        ],
+        [
+            {
+                icon: "&#10022;",
+                text: "Create Group",
+                callback: async (data) => {
+                    AdminActions.createGroup();
+                },
+                condition: async (data) => {
+                    return await (await checkPermission("manageGroups")).permission === "granted"
+                },
+                type: "success"
+            }
+        ])
+
+
+    // Create Category
+    ContextMenu.registerContextMenu(
         "channellist_groups",
         [
             "#serverlist .server-icon",
@@ -28,28 +49,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 type: "success"
             },
             {
-                icon: "&#10022;",
-                text: "Create Group",
-                callback: async (data) => {
-                    AdminActions.createGroup();
-                },
-                condition: async (data) => {
-                    return await (await checkPermission("manageGroups")).permission === "granted"
-                },
-                type: "success"
-            },
-            {
                 icon: "&#9998;",
                 text: "Change Icon",
                 callback: async (data) => {
+                    let groupId = getGroupIdFromElement(data.element);
+                    AdminActions.changeGroupIcon(groupId);
+                },
+                condition: async (data) => {
                     let groupId = getGroupIdFromElement(data.element);
                     if(!groupId){
                         console.error("Cant change  group icon because cant get group id from element")
                         return;
                     }
-                    AdminActions.changeGroupIcon(groupId);
-                },
-                condition: async (data) => {
                     return await UserManager.checkPermission("manageGroups") === true
                 },
                 type: "ok"
@@ -59,13 +70,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 text: "Edit Group",
                 callback: async (data) => {
                     let groupId = getGroupIdFromElement(data.element);
+                    AdminActions.editGroup(groupId);
+                },
+                condition: async (data) => {
+                    let groupId = getGroupIdFromElement(data.element);
                     if(!groupId){
                         console.error("Cant edit group because cant get group id from element")
                         return;
                     }
-                    AdminActions.editGroup(groupId);
-                },
-                condition: async (data) => {
                     return await (await checkPermission("manageGroups")).permission === "granted"
                 },
                 type: "ok"
@@ -75,13 +87,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 text: "Delete Group",
                 callback: async (data) => {
                     let groupId = getGroupIdFromElement(data.element);
-                    if(!groupId){
-                        console.error("Cant delete group because cant get group id from element")
-                        return;
-                    }
                     AdminActions.deleteGroup(groupId);
                 },
                 condition: async (data) => {
+                    let groupId = getGroupIdFromElement(data.element);
+                    if(!groupId){
+                        console.error("Cant change  group icon because cant get group id from element")
+                        return;
+                    }
                     return await (await checkPermission("manageGroups")).permission === "granted"
                 },
                 type: "error"
@@ -95,43 +108,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     return await (await checkPermission("redeemKey")).permission === "granted"
                 }
             },
-        ])
-
-    ContextMenu.registerContextMenu(
-        "channellist_groups_list",
-        [
-            "#serverlist",
-        ],
-        [
-            {
-                icon: "&#10022;",
-                text: "Manage server",
-                callback: async () => {
-                    AdminActions.editServer()
-                },
-                condition: async() => {
-                    return await (await checkPermission(["manageServer",
-                        "manageGroups",
-                        "manageChannels",
-                        "manageUploads",
-                        "manageGroups",
-                        "viewLogs",
-                        "manageEmojis",
-                        "manageBans",
-                        "manageServerInfo",
-                        "manageRateSettings"], true)).permission === "granted"
-                },
-                type: "ok",
-            },
-            {
-                text: "Create Group",
-                callback: async (data) => {
-                    AdminActions.createGroup();
-                },
-                condition: async (data) => {
-                    return await (await checkPermission("manageGroups")).permission === "granted"
-                }
-            }
         ])
 });
 

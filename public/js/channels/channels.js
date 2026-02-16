@@ -4,17 +4,19 @@ document.addEventListener("DOMContentLoaded", function () {
     ContextMenu.registerContextMenu(
         "channellist_categories",
         [
-            "#channeltree > h2",
+            "#channeltree",
         ],
         [
             {
+                icon: "&#10022;",
                 text: "Create Category",
                 callback: async (data) => {
                     AdminActions.createCategory();
                 },
                 condition: async (data) => {
                     return await (await checkPermission("manageChannels")).permission === "granted"
-                }
+                },
+                type: "success"
             },
 
         ])
@@ -42,15 +44,17 @@ document.addEventListener("DOMContentLoaded", function () {
                     return await (await checkPermission("manageChannels")).permission === "granted"
                 },
                 type: "success"
-            },/*
-            {
+            },
+            /*{
+                icon: "&#10022;",
                 text: "Edit Category",
                 callback: async (data) => {
                     AdminActions.createCategory();
                 },
                 condition: async (data) => {
                     return await (await checkPermission("manageChannels")).permission === "granted"
-                }
+                },
+                type: "ok"
             },*/
             {
                 icon: "&#128465;",

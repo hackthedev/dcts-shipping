@@ -165,7 +165,7 @@ h1 {
 
 .settings_banlist_unban_button {
     padding: 8px 12px;
-    background-color: #ff4d4d;
+    background-color: #ff4d4d !important;
     color: white;
     border: none;
     border-radius: 4px;
@@ -175,7 +175,7 @@ h1 {
 .settings_banlist_details_button {
     padding: 8px 12px;
     background-color: #4CAF50;
-    color: white;
+    color: white !important;
     border: none;
     border-radius: 4px;
     cursor: pointer;

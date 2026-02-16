@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <script src="/js/core/JsonEditor.js"></script>
+</head>
+<body>
+
+<style>
+    body {
+        background-color: #242424;
+    }
+</style>
+
+<script defer>
+
+    let obj;
+    document.addEventListener("DOMContentLoaded", function () {
+        let content = document.getElementById("content");
+        obj = {
+            name: "Cool ass server",
+            slots: 100,
+            ip_whitelist: [
+                "127.0.0.1", "192.168.1.1", -1,
+            ],
+            can_login: false,
+        }
+
+        content.insertAdjacentElement("beforeend",
+            JsonEditor.getSettingElement(
+                obj.name,
+                "Server Name",
+                "Change the name of the server that all users will be able to see",
+                v => obj.name = v
+            )
+        );
+
+        content.insertAdjacentElement("beforeend",
+            JsonEditor.getSettingElement(
+                obj.slots,
+                "Server Slots",
+                "Maximum of concurrent users that can be actively connected to the server",
+                v => obj.slots = v
+            )
+        );
+
+        content.insertAdjacentElement("beforeend",
+            JsonEditor.getSettingElement(
+                obj.can_login,
+                "Allow Signups",
+                "If new people can sign up",
+                v => obj.can_login = v
+            )
+        );
+
+        content.insertAdjacentElement("beforeend",
+            JsonEditor.getSettingElement(
+                obj.ip_whitelist,
+                "IP Whitelist",
+                "IPs that can bypass restrictions",
+                v => obj.ip_whitelist = v
+            )
+        );
+    })
+
+</script>
+
+<div id="content" style="display: flex; flex-shrink: 1;flex-direction: column; width: 100%; max-width: 600px;">
+
+</div>
+
+</body>
+</html>

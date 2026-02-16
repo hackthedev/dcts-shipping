@@ -1,19 +1,25 @@
-const customPrompts = new Prompt();
-getInviteCodes()
 
-window.getInviteCodes = getInviteCodes;
-window.createAccessCode = createAccessCode;
-window.deleteInvite = deleteInvite;
 
-socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageInvites" }, function (response) {
 
-    if(response.permission == "denied"){
-        window.location.href = window.location.origin + "/settings/server";
-    }
-    else{
-        document.getElementById("pagebody").style.display = "block";
-    }
+document.addEventListener("pagechange", e => {
+    console.log(e.detail.page);
+    if (e.detail.page !== "invites") return;
+
+    initInvites();
 });
+
+function initInvites(){
+    getInviteCodes()
+    socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageInvites" }, function (response) {
+
+        if(response.permission == "denied"){
+            window.location.href = window.location.origin + "/settings/server";
+        }
+        else{
+            document.getElementById("pagebody").style.display = "block";
+        }
+    });
+}
 
 function deleteInvite(code){
     if(!code){

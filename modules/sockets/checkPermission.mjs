@@ -16,6 +16,18 @@ let permList = {
         category: ["channelPerms", "serverRoles"],
         description: ""
     },
+    "viewAnonymousMessages": {
+        name: "View anonymous messages",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: "Allows viewing anonymous messages and messages by banned accounts"
+    },
+    "sendAnonymousMessages": {
+        name: "Send anonymous messages",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: "Allows sending anonymous messages"
+    },
     "kickUsers": {
         name: "Kick Members",
         type: "checkbox",
@@ -57,6 +69,12 @@ let permList = {
         type: "checkbox",
         category: ["serverRoles"],
         description: ""
+    },
+    "manageIpSettings": {
+        name: "Edit IP Security Settings",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: "Edit settings like IP based abuse, spam, VPN detection and more"
     },
     "manageInvites": {
         name: "Manage Invites",
@@ -147,6 +165,12 @@ let permList = {
         type: "checkbox",
         category: ["serverRoles", "groupPerms"],
         description: "Allows members to assign roles to other members that are lower than their own highest role"
+    },
+    "pingEveryone": {
+        name: "Ping everyone",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: "Allows members to mention everyone with @Member"
     },
     "manageUploads": {
         name: "Manage Uploads",

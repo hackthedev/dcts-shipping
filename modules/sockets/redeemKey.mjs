@@ -4,10 +4,12 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('redeemKey', function (member) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+    socket.on('redeemKey', function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token)
         ) {
+            if(response && !member?.id) response({ error: "Missing ID for Auth!" })
+            if(response && !member?.token) response({ error: "Missing Token for Auth!" })
+            if(response && !member?.key) response({ error: "Missing Key to redeem!" })
 
             member.id = xssFilters.inHTMLData(member.id)
             member.token = xssFilters.inHTMLData(member.token)
@@ -55,6 +57,8 @@ export default (io) => (socket) => {
                                 "popup_type": "confirm"
                             }`));
 
+                        if(response) response({ error: null })
+
                         io.emit("updateMemberList");
                     }
                     catch (e) {
@@ -75,12 +79,14 @@ export default (io) => (socket) => {
                             "popup_type": "confirm",
                             "type": "error"
                         }`));
+
+                        if(response) response({ error: "Couldnt redeem key!" })
                     }
                 }
             });
 
             // Only show message if all loops failed
-            if (foundTokenInRole == false) {
+            if (foundTokenInRole === false) {
                 sendMessageToUser(socket.id, JSON.parse(
                     `{
                         "title": "Wrong key!",
@@ -94,6 +100,8 @@ export default (io) => (socket) => {
                         "popup_type": "confirm",
                         "type": "error"
                     }`));
+
+                if(response) response({ error: "Key not found!" })
             }
 
             if (alreadyInRole) {
@@ -110,6 +118,8 @@ export default (io) => (socket) => {
                         "type": "success",
                         "popup_type": "confirm"
                     }`));
+
+                if(response) response({ error: "You cant use this key because you already have this role!" })
             }
         }
     });

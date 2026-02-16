@@ -1,7 +1,8 @@
 class UserReports {
-    static reportMessage(messageId) {
+    static reportMessage(messageId, type = "message", plainText = null) {
 
         messageId = messageId.replace("msg-", "");
+        messageId = messageId.replace("m_", "");
         messageId = parseInt(messageId)
 
         if (typeof (messageId) !== "number") {
@@ -22,12 +23,13 @@ class UserReports {
                     id: UserManager.getID(),
                     token: UserManager.getToken(),
                     targetId: messageId,
-                    type: "message",
+                    type,
+                    plainText,
                     description: values.reportDescription
                 }, function (response) {
 
                     showSystemMessage({
-                        title: response.msg,
+                        title: response?.msg || response?.error,
                         text: "",
                         icon: response.type,
                         img: null,

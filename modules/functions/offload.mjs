@@ -1,22 +1,20 @@
-import { Worker } from 'node:worker_threads';
+import { Worker } from "node:worker_threads";
 
-export async function offload(fn) {
-    const workerCode = `
-        import { parentPort } from 'node:worker_threads';
-        const fn = ${fn.toString()};
-        Promise.resolve(fn()).then(result => parentPort.postMessage(result));
-    `;
+export function runInWorker(fn, ...args) {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(new URL("./worker.js", import.meta.url));
 
-    const encoded = Buffer.from(workerCode).toString('base64');
-    const workerURL = `data:text/javascript;base64,${encoded}`;
-
-    return new Promise((resolve, reject) => {
-        const worker = new Worker(workerURL, { eval: true });
-        worker.on('message', resolve);
-        worker.on('error', reject);
-        worker.on('exit', code => {
-            if (code !== 0)
-                reject(new Error(`Worker stopped with exit code ${code}`));
-        });
+    worker.postMessage({
+      code: fn.toString(),
+      args,
     });
+
+    worker.on("message", (msg) => {
+      worker.terminate();
+      if (msg.ok) resolve(msg.result);
+      else reject(new Error(msg.error));
+    });
+
+    worker.on("error", reject);
+  });
 }

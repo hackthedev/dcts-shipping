@@ -20,8 +20,9 @@ class Prompt {
             }
             
             #promptContainer a {
-                color: #2492c9;
+                color: hsl(from var(--main) h calc(s * 12) calc(l * 8.5) / 100%);
                 font-style: italic;
+                cursor: pointer !important;
             }
 
             .prompt-label {
@@ -196,16 +197,17 @@ class Prompt {
         this.modal.style.display = 'flex';
         this.modal.style.justifyContent = 'center';
         this.modal.style.alignItems = 'center';
-        this.modal.style.zIndex = '99999';
+        this.modal.style.zIndex = '30';
         document.body.appendChild(this.modal);
 
-        const modalContent = document.createElement('div');
-        modalContent.style.backgroundColor = '#24292E';
-        modalContent.style.color = '#F0F0F0';
-        modalContent.style.padding = '30px';
-        modalContent.style.borderRadius = '10px';
-        modalContent.style.textAlign = 'left';
-        modalContent.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.1)';
+        this.modalContent = document.createElement('div');
+        if(!this.modalContent?.classList?.contains("prompt-content")) this.modalContent.classList.add('prompt-content');
+        this.modalContent.style.backgroundColor = '#24292E';
+        this.modalContent.style.color = '#F0F0F0';
+        this.modalContent.style.padding = '30px';
+        this.modalContent.style.borderRadius = '10px';
+        this.modalContent.style.textAlign = 'left';
+        this.modalContent.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.1)';
 
         const headerContainer = document.createElement('div');
         headerContainer.style.display = 'flex';
@@ -222,7 +224,8 @@ class Prompt {
         // Title
         const title = document.createElement('h2');
         title.style.margin = '0';
-        title.style.fontSize = '18px';
+        title.style.fontSize = '24px';
+        title.style.userSelect = 'none';
         title.innerText = 'Create a Channel'; // Default title
         titleContainer.appendChild(title);
 
@@ -245,16 +248,17 @@ class Prompt {
         this.closeButton = document.createElement('span');
         this.closeButton.innerHTML = '&times;';
         this.closeButton.style.cursor = 'pointer';
+        this.closeButton.style.userSelect = 'none';
         this.closeButton.style.fontSize = '20px';
         this.closeButton.onclick = () => this.closePrompt();
         headerContainer.appendChild(this.closeButton);
 
-        modalContent.appendChild(headerContainer);
+        this.modalContent.appendChild(headerContainer);
 
         this.promptContent = document.createElement('div');
         this.promptContent.id = 'promptContent';
         this.promptContent.style.marginTop = '20px';
-        modalContent.appendChild(this.promptContent);
+        this.modalContent.appendChild(this.promptContent);
 
         // submit button
         this.submitButton = document.createElement('button');
@@ -263,9 +267,9 @@ class Prompt {
         this.submitButton.id = 'promptsSubmitButton';
         this.submitButton.style.marginTop = '20px';
         this.submitButton.onclick = () => this.submitPrompt();
-        modalContent.appendChild(this.submitButton);
+        this.modalContent.appendChild(this.submitButton);
 
-        this.modal.appendChild(modalContent);
+        this.modal.appendChild(this.modalContent);
     }
 
 
@@ -277,6 +281,10 @@ class Prompt {
         this.promptContent.innerHTML = htmlContent;
         this.modal.style.display = 'flex';
         this.promptContent.style.minWidth = `${customMinWidth}px` || "";
+
+        // reset colors just in case
+        this.modalContent.style.backgroundColor = '#24292E';
+        this.modalContent.style.color = '#F0F0F0';
 
         // Custom submit button color and text
         let submitButtonColor = customSubmitText ? customSubmitText[1] : "#2492c9";

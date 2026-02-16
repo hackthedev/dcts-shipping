@@ -81,8 +81,7 @@ async function setupAccount(challenge, difficulty) {
         "Welcome!",
         `
         <div style="margin-bottom: 15px; font-size: 14px; max-width: 600px;">
-            <b style="display: block; margin-bottom: 10px;">Do you want to import an existing account from file or continue and login?</b>
-            If you already have an exported account, you can import it now, otherwise continue to login manually.
+            <b style="display: block; margin-bottom: 10px;">Do you want to import an existing account via file?</b>
         </div>
     
         <div style="display: flex; gap: 4px; margin-top: 20px; justify-content: flex-end;">
@@ -94,7 +93,7 @@ async function setupAccount(challenge, difficulty) {
                 color: white;
                 cursor: pointer;
                 font-size: 13px;
-            ">Import Account</button>
+            ">Import</button>
     
             <button id="createNewBtn" style="
                 padding: 8px 14px;
@@ -104,7 +103,7 @@ async function setupAccount(challenge, difficulty) {
                 color: white;
                 cursor: pointer;
                 font-size: 13px;
-            ">Continue</button>
+            ">Skip</button>
         </div>
         `,
         null, // no confirm button
@@ -131,11 +130,11 @@ async function setupAccount(challenge, difficulty) {
 
                     if (!powChallenge || !powSolution) {
                         showSystemMessage({
-                            title: "Import Error",
-                            text: "It seems like the imported data is missing identity data",
+                            title: "Import Warning",
+                            text: "Some data was missing and may not be complete!",
                             icon: "error",
                             img: null,
-                            type: "error",
+                            type: "warning",
                             duration: 10000
                         });
                         return;
@@ -328,6 +327,7 @@ function initPow(onAcceptedCallback) {
     });
 
     socket.on('powAccepted', (data) => {
+        console.log('PoW accepted:', data);
         if (typeof onAcceptedCallback === "function") {
             onAcceptedCallback(data);
         }
@@ -403,7 +403,6 @@ function verifyPow(challenge, solution) {
             duration: response.displayTime || 10000
         });
 
-        console.log(response)
         if (response.error === "invalidIdentity") {
             if (response?.powResult) {
                 if (response.powResult?.level !== null && response.powResult?.required !== null) {

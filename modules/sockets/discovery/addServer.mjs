@@ -11,7 +11,7 @@ const pingLimiter = rateLimit({
     trustProxy: true
 });
 
-app.post("/servers/add/:address(*)", pingLimiter, express.json(), async (req, res) => {
+app.post("/servers/add/:address", pingLimiter, express.json(), async (req, res) => {
     const {address} = req.params;
     if(!address){
         return res.status(400).json({error: "Missing server address"});

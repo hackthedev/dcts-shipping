@@ -1,6 +1,6 @@
 import { crypto, saveConfig, serverconfig, useridFromSocket, xssFilters } from "../../index.mjs";
 import { formatDateTime, getJson } from "../functions/chat/main.mjs";
-import Logger from "../functions/logger.mjs";
+import Logger from "@hackthedev/terminal-logger"
 import { checkConnectionLimit, checkMemberBan, checkRateLimit, copyObject, removeFromArray, validateMemberId } from "../functions/main.mjs";
 import { estimatePoWDuration, formatTimeDifference } from "../functions/pow.mjs";
 
@@ -9,8 +9,6 @@ export let powChallengeSessions = {}; // « save user challanges based on sessio
 
 export default (io) => (socket) => {
     // socket.on code here
-
-
 }
 
 export function listenToPow(socket) {
@@ -49,7 +47,7 @@ export function listenToPow(socket) {
                     let banResult = await checkMemberBan(socket, serverconfig.servermembers[data.id]);
                     let banText = "";
                     if (banResult?.timestamp) {
-                        if (new Date(banResult.timestamp).getFullYear() === "9999") {
+                        if (new Date(banResult.timestamp).getFullYear() === 9999) {
                             banText = "banned permanently";
                         }
                         else {

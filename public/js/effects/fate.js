@@ -1,4 +1,4 @@
-function holyParticles(targetElement, spawnInterval = 120) {
+function holyParticles(targetElement, spawnInterval = 120, baseColor = { h: 45, s: 80, l: 65 }) {
     if (!targetElement) return;
 
     targetElement.style.position = 'relative';
@@ -17,10 +17,18 @@ function holyParticles(targetElement, spawnInterval = 120) {
         p.style.pointerEvents = 'none';
 
         // gold / warm glow
-        const hue = 45 + Math.random() * 10;
-        p.style.background = `linear-gradient(to bottom, hsla(${hue},80%,70%,0.9), hsla(${hue},80%,55%,0.2))`;
-        p.style.boxShadow = `0 0 ${Math.random()*6+3}px hsla(${hue},80%,70%,0.8)`;
-        p.style.transform = `translateX(0px) scale(${Math.random()*0.4 + 0.8})`;
+        const hue = baseColor.h + (Math.random() * 10 - 5);
+
+        p.style.background =
+            `linear-gradient(to bottom,
+                hsla(${hue},${baseColor.s}%,${baseColor.l + 10}%,0.9),
+                hsla(${hue},${baseColor.s}%,${baseColor.l - 10}%,0.2)
+            )`;
+
+        p.style.boxShadow =
+            `0 0 ${Math.random()*6+3}px hsla(${hue},${baseColor.s}%,${baseColor.l + 10}%,0.8)`;
+
+        p.style.transform = `scale(${Math.random()*0.4 + 0.8})`;
         p.style.transition = 'top 3.5s linear, opacity 3.5s linear, transform 3.5s ease-out';
 
         targetElement.appendChild(p);

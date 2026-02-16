@@ -3,11 +3,12 @@ import {getOnlineMemberCount, resolveGroupByChannelId} from "../../functions/cha
 import Logger from "../../functions/logger.mjs";
 import {rateLimit} from "../../functions/ratelimit.mjs";
 import express from "express";
+import {getPublicServerInfoObject} from "../getServerInfo.mjs";
 
 const pingLimiter = rateLimit({
     windowMs: 60_000,
-    ipLimit: 1500,
-    sigLimit: 120000,
+    ipLimit: 10,
+    sigLimit: 20000,
     trustProxy: true
 });
 
@@ -29,38 +30,12 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/discover", pingLimiter, express.json(), (req, res) => {
+app.get("/discover", pingLimiter, express.json(), async (req, res) => {
     res.set("Cache-Control", "no-store");
 
     try {
-
         if (serverconfig.serverinfo?.discovery?.enabled === true) {
-
-            let groupId = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);
-            let group = null;
-            if(groupId !== null){
-                group = serverconfig.groups[groupId];
-            }
-
-            res.json({
-                serverinfo: {
-                    name: serverconfig.serverinfo.name || null,
-                    about: serverconfig.serverinfo.home.about || null,
-                    banner: serverconfig.serverinfo.home.banner_url || null,
-                    icon: group?.info?.icon || null,
-                    slots: {
-                        online: getOnlineMemberCount(),
-                        limit: serverconfig.serverinfo.slots.limit,
-                        reserved: serverconfig.serverinfo.slots.reserved,
-                    },
-                    registration: serverconfig.serverinfo.registration.enabled,
-                    tenor: serverconfig.serverinfo.tenor.enabled,
-                    uploadFileTypes: serverconfig.serverinfo.uploadFileTypes,
-                    turn: serverconfig.serverinfo.turn.enabled,
-                    version: versionCode
-                }
-            })
-
+            res.json(await getPublicServerInfoObject())
             return;
         }
     } catch (e) {

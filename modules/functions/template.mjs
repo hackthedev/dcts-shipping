@@ -1,5 +1,4 @@
 import {getFreshConfig, reloadConfig, versionCode} from "../../index.mjs";
-import Logger from "./logger.mjs";
 import {generateId} from "./main.mjs";
 
 // templateMiddleware.mjs

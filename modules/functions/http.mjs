@@ -1,7 +1,18 @@
 import {server, serverconfig, http, https, app, setServer, fs, saveConfig} from "../../index.mjs";
-import Logger from "./logger.mjs";
+import Logger from "@hackthedev/terminal-logger"
+import {lookupIP} from "./chat/main.mjs";
 
-var serverconfigEditable = serverconfig;
+
+function getClientIp(req) {
+    const xf = req.headers["x-forwarded-for"];
+    if (xf) return xf.split(",")[0].trim();
+
+    return req.socket?.remoteAddress || req.connection?.remoteAddress;
+}
+
+
+
+
 
 export function checkSSL(){
     // if ssl is disabled but the file exists, enable ssl and delete the file

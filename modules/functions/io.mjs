@@ -14,8 +14,25 @@ import {
     allowLogging,
     configPath
 } from "../../index.mjs"
-import Logger from "./logger.mjs";
-import { saveChatMessageInDb, getChatMessagesFromDb, decodeFromBase64, logEditedChatMessageInDb, getMessageLogsFromDb, getChatMessageById } from "./mysql/helper.mjs"
+import Logger from "@hackthedev/terminal-logger"
+import {
+    saveChatMessageInDb,
+    getChatMessagesFromDb,
+    decodeFromBase64,
+    logEditedChatMessageInDb,
+    getMessageLogsFromDb,
+    getChatMessageById,
+    addInboxMessage
+} from "./mysql/helper.mjs"
+import {getMentionIdsFromText} from "../sockets/messageSend.mjs";
+import {getJson, hasPermission, shouldIgnoreMember} from "./chat/main.mjs";
+import {copyObject, generateId, getCastingMemberObject} from "./main.mjs";
+import {
+    checkMessageObjAuthor,
+    checkMessageObjReactions,
+    decodeAndParseJSON,
+    getMessageObjectById
+} from "../sockets/resolveMessage.mjs";
 
 var serverconfigEditable = serverconfig;
 
@@ -94,6 +111,30 @@ export async function consolas(text, event = null) {
     });
 }
 
+export function enforceFolderSizeLimitMB(dir, maxMB) {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    const maxBytes = maxMB * 1024 * 1024;
+
+    const files = fs.readdirSync(dir)
+        .map(name => {
+            const path = `${dir}/${name}`;
+            const stat = fs.statSync(path);
+            return { path, size: stat.size, mtime: stat.mtimeMs };
+        })
+        .sort((a, b) => a.mtime - b.mtime);
+
+    let totalSize = files.reduce((s, f) => s + f.size, 0);
+
+    for (const file of files) {
+        if (totalSize <= maxBytes) break;
+        fs.unlinkSync(file.path);
+        totalSize -= file.size;
+    }
+}
+
+
+
 export function checkServerDirectories() {
     // Emoji storage
     if (!fs.existsSync("./public/emojis")) {
@@ -114,6 +155,18 @@ export function checkServerDirectories() {
     if (!fs.existsSync("./plugins")) {
         fs.mkdirSync("./plugins");
     }
+
+    // configs folder
+    if (!fs.existsSync("./configs")) {
+        fs.mkdirSync("./configs");
+    }
+
+    // backup folder
+    if (!fs.existsSync("./backups")) {
+        fs.mkdirSync("./backups");
+    }
+
+    enforceFolderSizeLimitMB("./backups", 1024)
 }
 
 export function checkFile(file, autocreate = false, content = ""){
@@ -137,27 +190,27 @@ export function checkConfigFile() {
             consolas("Config file config.json did exist".yellow, "Debug");
         }
         else {
-            consolas("Config file config.json didnt exist.".yellow, "Debug");
-            consolas("Checking for template file...".yellow, "Debug");
+            Logger.warn("Config file config.json didnt exist.".yellow, "Debug");
+            Logger.warn("Checking for template file...".yellow, "Debug");
 
             // config.json didnt exist. Does template config exist?
             if (checkFile("./config.example.json") === true) {
 
-                consolas("Trying to copy template file".yellow, "Debug");
+                Logger.warn("Trying to copy template file".yellow, "Debug");
 
                 // Trying to copy file
                 try {
                     fs.copyFileSync("./config.example.json", configPath);
-                    consolas(" ", "Debug");
-                    consolas("Successfully copied config.example.json to config.json".green, "Debug");
+                    Logger.success("Successfully copied config.example.json to config.json".green, "Debug");
                 }
                 catch (error) {
-                    consolas("Coudlnt copy template file ".red + colors.red(error), "Debug");
+                    Logger.error("Coudlnt copy template file ".red + colors.red(error), "Debug");
+                    process.exit();
                 }
             }
             else {
-                consolas("Neither the config.json file nor the config.example.json file were found.".red, "Debug");
-                consolas("Server was terminated.".red, "Debug");
+                Logger.error("Neither the config.json file nor the config.example.json file were found.".red, "Debug");
+                Logger.error("Server was terminated.".red, "Debug");
                 process.exit();
             }
         }
@@ -173,7 +226,6 @@ export async function getMessageLogsById(msgId) {
 }
 
 export async function getSavedChatMessage(group, category, channel, index = -1) {
-
     // add setting for checking if db storage should be used
     var sortedMessages = [];
 
@@ -181,16 +233,24 @@ export async function getSavedChatMessage(group, category, channel, index = -1) 
         var loadedMessages = await getChatMessagesFromDb(`${group}-${category}-${channel}`, index);
 
         for (let i = 0; i < loadedMessages.length; i++) {
-            loadedMessages[i].message = decodeFromBase64(loadedMessages[i].message);
 
-            if (loadedMessages[i].message != null) {
-                var messageObj = JSON.parse((loadedMessages[i].message));
+            let message = decodeAndParseJSON(loadedMessages[i].message);
+            if (message?.message) {
+                // new, enhanced message system
+                if(message?.author?.id){
+                    message.author = getCastingMemberObject(serverconfig.servermembers[message?.author?.id || message?.id]);
+                }
 
-                //if (messageObj.message.includes("<br>") && (messageObj.message.split("<br>").length - 1) <= 1) {
-                //    messageObj.message = messageObj.message.replaceAll("<br>", "")
-                //}
+                // resolve the reply too
+                if(message?.reply?.messageId){
+                    let messageObjResult = await getMessageObjectById(message.reply?.messageId)
+                    message.reply = messageObjResult?.message;
+                }
 
-                sortedMessages.push(messageObj)
+                message = checkMessageObjAuthor(message);
+                message = await checkMessageObjReactions(message);
+
+                sortedMessages.push(message)
             }
         }
     }
@@ -228,7 +288,7 @@ export function scanDirectory(dir, options = {}) {
 }
 
 export async function saveChatMessage(message, editedMsgId = null) {
-
+    message = copyObject(message)
     var group = message.group;
     var category = message.category;
     var channel = message.channel;
@@ -238,43 +298,60 @@ export async function saveChatMessage(message, editedMsgId = null) {
         message.messageId = editedMsgId;
     }
 
+    if(message?.icon) delete message.icon;
+    if(message?.banner) delete message.banner;
+    if(message?.id) delete message.id;
+    if(message?.color) delete message.color;
+
+    // only store references
+    if(!message?.author || Object.keys(message.author).length === 0) {
+        let memberId = null;
+        if(message?.id) memberId = message.id;
+        if(message?.author?.id) memberId = message.author.id;
+        message.author = { id: memberId}
+    }
+
+    if(message?.reply?.messageId) message.reply = { messageId: message.reply.messageId }
+
+    // if a message is being edited, try to log it first
+    if (editedMsgId) {
+        let toBeLogged = await getMessageObjectById(editedMsgId);
+        let decodedMessageObject = toBeLogged.message;
+        await logEditedChatMessageInDb(decodedMessageObject);
+    }
+
+    saveChatMessageInDb(message);
+
     // increase count and save it
     serverconfig.groups[group].channels.categories[category].channel[channel].msgCount += 1;
     saveConfig(serverconfig);
 
-    // If SQL is enabled it will try to save it there
-    if (serverconfig.serverinfo.sql.enabled == true) {
-        consolas("Saved message in Database", "Debug")
+    let mentions = getMentionIdsFromText(message.message)
+    // add mentions to to inbox based on user mention
+    for (const memberId of mentions.userIds) {
+        if(memberId !== message?.author?.id) await addInboxMessage(memberId, { messageId: message.messageId }, "message", `${memberId}-${message.messageId}`);
+    }
 
-        // if a message is being edited, try to log it first
-        if (editedMsgId) {
-            let toBeLogged = await getChatMessageById(editedMsgId);
-            let decodedMessageObject = decodeFromBase64(toBeLogged[0].message);
-            let parsedMessageToLog = JSON.parse(decodedMessageObject)
+    // same for role mentions
+    for (let roleId of mentions.roleIds) {
+        roleId = Number(roleId);
 
-            await logEditedChatMessageInDb(parsedMessageToLog);
+        if(roleId === 1) continue; // offline role
+        if(roleId === 0){ // member role
+            if(!hasPermission(message.id, "pingEveryone")) continue;
         }
 
-        await saveChatMessageInDb(message);
+        for (const memberId of serverconfig.serverroles[roleId]?.members || []) {
+            if(!memberId) continue;
+            if(shouldIgnoreMember(serverconfig.servermembers[memberId])) continue;
+            if(message?.id === memberId) continue;
 
-        return;
-    }
-
-    if (message.message.includes("\n") && (message.message.split("\n").length - 1) > 1) {
-        message.message = message.message.replaceAll("\n", "<br>")
-    }
-
-    // If directory does not exist, create it
-    if (!fs.existsSync(`./chats/${group}/${category}/${channel}/`)) {
-        fs.mkdirSync(`./chats/${group}/${category}/${channel}/`, { recursive: true });
-    }
-
-    // Create the chat file
-    fs.writeFile(`./chats/${group}/${category}/${channel}/${message.messageId}`, JSON.stringify(message), function (err) {
-        if (err) {
-            return console.log(err);
+            await addInboxMessage(memberId, { messageId: message.messageId }, "message", `${memberId}-${message.messageId}`);
         }
-    });
+    }
 
-    serverconfig.groups[group].channels.categories[category].channel[channel].msgCount += 1;
+    if(message?.reply){
+        let repliedMessage = await getMessageObjectById(message.reply.messageId);
+        if(repliedMessage?.message && repliedMessage?.message?.author?.id !== message?.author?.id) await addInboxMessage(repliedMessage?.message?.authorId, {messageId: message.messageId}, "message",  message.messageId);
+    }
 }

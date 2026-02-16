@@ -510,6 +510,11 @@ class ModView {
         let reportCreator = this.parseJson(report.reportCreator);
         let reportedUser = this.parseJson(report.reportedUser);
         let reportData = report.reportData
+        reportData.author = await ChatManager.resolveMember(reportData?.author?.id);
+        if(!reportData?.author?.name){
+            console.error("Unable to resolve reported message member")
+        }
+
         console.log(reportData)
 
         let reportMessage = "";
@@ -527,6 +532,10 @@ class ModView {
             }
         }
         let messageHistory = await UserReports.showMessageLogs(reportData.messageId)
+
+        let reportedMessageConvertionResult = await convertMention(reportMessage, true);
+        reportMessage = reportedMessageConvertionResult.text;
+        reportMessage = await text2Emoji(reportMessage)
 
         this.modViewDivContent.innerHTML = `
         <label id="closeModView" class="icon danger" onclick="ModView.close()">&times;</label>
@@ -596,7 +605,7 @@ class ModView {
         <div class="modview_message-container">
             <h3>Reported Message</h3>
             <div class="modview_message-box">
-                <p><strong>User:</strong> ${reportData.name} (${reportData.id})</p>
+                <p><strong>User:</strong> ${reportData?.author?.name} (${reportData?.author?.id})</p>
                 <p><strong>Message:</strong></p> <div class="reported-message"><span>${reportMessage}</span></div>
                 <p><strong>Time:</strong> ${new Date(reportData.timestamp).toLocaleString()}</p>
             </div>

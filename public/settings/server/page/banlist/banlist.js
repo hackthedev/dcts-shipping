@@ -1,4 +1,26 @@
-setupNotify();
+document.addEventListener("pagechange", e => {
+    console.log(e.detail.page);
+    if (e.detail.page !== "banlist") return;
+
+    initBanList();
+});
+
+
+function initBanList(){
+    setupNotify();
+    socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageBans" }, function (response) {
+
+        if(response.permission == "denied"){
+            window.location.href = window.location.origin + "/settings/server";
+        }
+        else{
+            document.getElementById("pagebody").style.display = "block";
+        }
+    });
+
+    getBans();
+
+}
 
 var servername = document.getElementById("server_name");
 var serverdescription = document.getElementById("server_description");
@@ -7,22 +29,6 @@ var saveButton = document.getElementById("settings_profile_save");
 var serverconfigName;
 var serverconfigDesc;
 
-window.getBans = getBans;
-window.toggleDetails = toggleDetails;
-window.unbanUser = unbanUser;
-window.getReadableDuration = getReadableDuration;
-
-socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageBans" }, function (response) {
-
-    if(response.permission == "denied"){
-        window.location.href = window.location.origin + "/settings/server";
-    }
-    else{
-        document.getElementById("pagebody").style.display = "block";
-    }
-});
-
-getBans();
 
 
 // document.querySelector("#ban-reason-119012019689").innerText = "Fag"

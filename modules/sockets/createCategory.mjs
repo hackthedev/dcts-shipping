@@ -30,7 +30,7 @@ export default (io) => (socket) => {
                 serverconfig.groups[member.group].channels.categories[catId] = JSON.parse(
                     `{
                             "info": {
-                                "id": ${catId},
+                                "id": "${catId}",
                                 "name": "${escapeHtml(member.value)}",
                                 "sortId": 0
                             },

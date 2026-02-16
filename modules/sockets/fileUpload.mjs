@@ -21,6 +21,12 @@ export default (io) => (socket) => {
 
 
         let { id, token, filename, type, totalChunks, chunkIndex, fileId } = metadata; // Expect fileId in metadata
+        
+        if (validateMemberId(id, socket, token) !== true) {
+            response({ type: "error", msg: "Invalid authentication" });
+            return;
+        }
+
         const sanitizedFilename = sanitizeFilename(filename);
         
 

@@ -1,25 +1,27 @@
 /*
     The functions here are basically the "core" of the chat app on the server side.
  */
-import {serverconfig, xssFilters, colors, saveConfig, usersocket, server} from "../../../index.mjs"
-import {consolas} from "../io.mjs";
+import {serverconfig, xssFilters, colors, saveConfig, usersocket, server, ipsec} from "../../../index.mjs"
 import {io} from "../../../index.mjs";
 import {getMemberHighestRole} from "./helper.mjs";
 import {
     checkBool,
     checkEmptyConfigVar,
-    copyObject,
-    getCastingMemberObject,
+    copyObject, generateId,
+    getCastingMemberObject, getRoleCastingObject, isLocalhostIp,
     removeFromArray,
     sendMessageToUser
 } from "../main.mjs";
 import {encodeToBase64} from "../mysql/helper.mjs";
 import {signer} from "../../../index.mjs"
+import Logger from "@hackthedev/terminal-logger"
+import {queryDatabase} from "../mysql/mysql.mjs";
 
 var serverconfigEditable = serverconfig;
 
 export function getMemberLastOnline(memberId) {
     if (!memberId || !serverconfig.servermembers[memberId]) return null;
+    if(shouldIgnoreMember(serverconfig.servermembers[memberId])) return null;
 
     const lastOnline = serverconfig.servermembers[memberId].lastOnline;
     const now = Date.now();
@@ -32,12 +34,14 @@ export function getMemberLastOnline(memberId) {
 
 export function getOnlineMemberCount() {
     const onlineMembers = Object.values(serverconfig.servermembers)
-        .filter(m => m?.id && Number(getMemberLastOnline(m.id).minutesPassed) <= 5);
+        .filter(m => !shouldIgnoreMember(m) && m?.id && Number(getMemberLastOnline(m.id).minutesPassed) <= 5);
 
     return onlineMembers.length;
 }
 
 export function hasPermission(userId, permissions, channelOrGroupId = null, mode = "any") {
+    if(shouldIgnoreMember(serverconfig.servermembers[userId])) return false;
+
     const permsToCheck = Array.isArray(permissions) ? permissions : [permissions];
 
     if (permsToCheck.length > 1) {
@@ -150,67 +154,7 @@ export function hasPermission(userId, permissions, channelOrGroupId = null, mode
 
 
 export function checkUserChannelPermission(channel, userId, perms) {
-
     return hasPermission(userId, perms, channel);
-
-    /* DEPRECATED */
-
-    const userRoles = resolveRolesByUserId(userId);
-    const group = resolveGroupByChannelId(channel);
-    const category = resolveCategoryByChannelId(channel);
-
-    // Validate if the channel, group, and category are properly configured
-    if (!group || !category || !channel) {
-        return false; // Deny if any required identifier is missing
-    }
-
-    const channelPermissions =
-        serverconfig.groups[group]?.channels?.categories[category]?.channel[channel]?.permissions;
-
-    if (!channelPermissions) {
-        return false; // Deny if no permissions are configured for the channel
-    }
-
-    // Ensure `perms` is an array, even if a single permission is passed
-    const permissionsToCheck = Array.isArray(perms) ? perms : [perms];
-
-    // Check for "administrator" permission in any role
-    for (const role of userRoles) {
-        const effectiveRole = channelPermissions.hasOwnProperty(role) ? role : "0";
-
-        if (channelPermissions[effectiveRole]?.["administrator"] === 1) {
-            return true; // If the user has "administrator", grant access immediately
-        }
-    }
-
-    // Check all specified permissions for each user role
-    for (const role of userRoles) {
-        const effectiveRole = channelPermissions.hasOwnProperty(role) ? role : "0";
-
-        // Check if all required permissions are explicitly set to 1 for the role
-        const allPermissionsGranted = permissionsToCheck.every(
-            (perm) => channelPermissions[effectiveRole]?.[perm] === 1
-        );
-
-        // If all permissions are granted for this role, return true
-        if (allPermissionsGranted) {
-            return true;
-        }
-
-        // If any permission is explicitly denied (0), deny access immediately
-        const anyPermissionDenied = permissionsToCheck.some(
-            (perm) =>
-                channelPermissions[effectiveRole]?.[perm] === 0 ||
-                !(perm in channelPermissions[effectiveRole])
-        );
-
-        if (anyPermissionDenied) {
-            return false;
-        }
-    }
-
-    // Deny by default if no role grants all the required permissions
-    return false;
 }
 
 
@@ -347,163 +291,82 @@ export async function getMemberProfile(id) {
     return null;
 }
 
-export function getMemberList(member, channel) {
+export function shouldIgnoreMember(member){
+    if (!member?.lastOnline) return true;
+    return new Date(member?.lastOnline) <= getNewDate(`-${serverconfig.serverinfo.system.members.ignoreTimeout}`);
+}
 
-    var code = "";
+export async function checkIpCache(ip){
+    if(!ip) return;
 
-    var members = serverconfig.servermembers;
-    var roles = serverconfig.serverroles;
+    let ipResult = await queryDatabase(`SELECT * FROM ip_cache WHERE ip = ?`, [ip]);
+    if(ipResult.length > 0){
+        let row = ipResult[0];
 
-    var sortedRoles = [];
-    var offlineMember = [];
-    var bannedMember = [];
+        let lastSyncDate = new Date(row.last_sync);
+        let expiredDate = getNewDate("-3 days")
 
-    Object.keys(roles).reverse().forEach(function (role) {
-        sortedRoles[roles[role].info.sortId] = roles[role];
-    });
-
-    // Foreach role
-    sortedRoles = sortedRoles.reverse();
-    sortedRoles.forEach(role => {
-
-        var noMembersInRole = true;
-        // Role ID:
-        // role
-
-        // Role Object
-        // roles[Role]
-
-
-        // If role display is on
-        if (role.info.displaySeperate == 1) {
-
-            // Foreach Role Member
-            Object.keys(members).forEach(function (member) {
-
-                if(serverconfig.servermembers[member].onboarding === false) return
-
-                // Do not show banned users
-                if (serverconfig.servermembers[member].isBanned === 1) {
-                    if (!bannedMember.includes(member)) bannedMember.push(member);
-
-                    if (checkBool(serverconfig.serverinfo.moderation.bans.memberListHideBanned, "bool") === true) return;
-                }
-
-                // check here for highest role
-                var highestMemberRole = getMemberHighestRole(member);
-                role.info.id = Number(role.info.id)
-
-                // If member is in role and the role is set to be shown
-                if ((role.members.includes(member) && role.info.displaySeperate === 1) ||
-                    role.info.id === 1) {
-
-                    // if role is the "Offline" role and member is gone for more then x minutes
-                    if (role.info.id === 1 && getMemberLastOnline(member).minutesPassed >= 1) {
-                        // Add member to offline list (if not already done)
-                        if (!offlineMember.includes(member)) {
-                            offlineMember.push(member);
-                        }
-                    }
-
-                    // If the user has the permission to see the channel
-                    if (hasPermission(member, "viewChannel", channel) === true) {
-
-                        // If role should be displayed and
-                        // the current role is not the member's highest role and (dont remember why)
-                        // the role is not the "Offline Role", then return lol
-                        if (highestMemberRole.info.displaySeperate === 1 && role.info.id !== highestMemberRole.info.id && role.info.id !== 1) {
-                            return;
-                        }
-
-                        // gray color effect for offline members in the member list
-                        // should also avoid duplicate listing in role AND offline for memberlist
-                        var extraClassOffline = "";
-                        const { isOnline, minutesPassed } = getMemberLastOnline(member);
-
-                        // if the user IS NOT OFFLINE stop proceeding with trying to add that user
-                        if (role.info.id === 1 && isOnline) return;
-
-                        // if the user is offline, dont show him in any other role except offline role
-                        if (role.info.id !== 1 && !isOnline) return;
-                        if (role.info.id === 1) {
-                            extraClassOffline = "offline_pfp";
-                        }
-
-
-
-                        // This can hide offline members from the list
-                        // Could be useful for big servers
-                        // Will be a future feature
-                        //if(offlineMember.includes(member)){
-                        //    return;
-                        //}
-
-                        // hide online members from offline section (?)
-                        if (offlineMember.includes(member) && role.info.id !== 1) {
-                            removeFromArray(offlineMember, member);
-                        }
-
-                        // If the role object itself wasnt yet listed
-                        if (noMembersInRole === true /*&& (members[member].isMuted == false && members[member].isBanned == false)*/) {
-
-                            // Add the code for the role "header"
-                            code += `<div class="infolist-role" title="${role.info.name}" style="color: ${role.info.color};">
-                                    ${role.info.name}
-                                    <hr style="margin-bottom: 16px;border: 1px solid ${role.info.color};">
-                                </div>`;
-
-                            // Flip the bool because now we want to add all members of this role
-                            // until we're going through the next role
-                            noMembersInRole = false;
-                        }
-
-                        // Making sure just in case
-                        members[member].name = xssFilters.inHTMLData(members[member].name);
-                        members[member].status = xssFilters.inHTMLData(members[member].status);
-                        members[member].icon = xssFilters.inHTMLData(members[member].icon);
-                        members[member].id = xssFilters.inHTMLData(members[member].id);
-
-                        // If user is muted or banned make it somehow visually known
-                        var nameStyle = `${members[member].name}`
-                        var statusStyle = `${members[member].status}`
-
-                        if (members[member].isMuted || members[member].isBanned) {
-                            let displayColor = "white";
-                            if (members[member].isMuted) displayColor = "grey";
-                            if (members[member].isBanned) displayColor = "indianred";
-
-                            nameStyle = `<s style="color: ${displayColor};"><span style="font-style: italic;color:${displayColor}">${members[member].name}</span></s>`;
-                            statusStyle = `<s style="color: ${displayColor};"><span style="font-style: italic;color:${displayColor}">${members[member].status}</span></s>`;
-                            extraClassOffline = "offline_pfp";
-
-                            //if(role.info.id == "1") return;
-                        }
-
-
-                        code += `<div class="memberlist-container" data-member-id="${members[member].id}">
-                                    <img class="memberlist-img ${extraClassOffline}" data-member-id="${members[member].id}" src="${members[member].icon}" onerror="this.src = '/img/default_pfp.png'">
-                                    
-                                    <div style="display:flex;flex-direction: column;width: calc(100% - 35px);">
-                                        <div class="memberlist-member-info name" 
-                                            onclick="getMemberProfile('${members[member].id}');" data-member-id="${members[member].id}"" 
-                                            style="color: ${role.info.color};">
-                                            ${nameStyle}
-                                        </div>
-                                        <div class="memberlist-member-info status" data-member-id="${members[member].id}" style="color: ${role.info.color};">
-                                            ${statusStyle}
-                                        </div>
-                                    </div>
-                            </div>`;
-
-                    }
-
-                }
-
-            });
+        // if last sync was more than 3 days ago, its not up to date anymore.
+        if(lastSyncDate < expiredDate) {
+            await queryDatabase(`DELETE FROM ip_cache WHERE ip = ?`, [ip]);
+            return null;
         }
-    });
 
-    return code;
+        return row;
+    }
+
+    return null;
+}
+
+export async function updateIpCache(ip, data){
+    if(!ip) return;
+    let ipCache = await checkIpCache(ip);
+
+    if(!ipCache){
+        await queryDatabase(`INSERT IGNORE INTO ip_cache (ip, data) VALUES (?, ?)`, [ip, JSON.stringify(data)]);
+    }
+}
+
+export async function lookupIP(ip){
+    return await ipsec.lookupIP(ip)
+}
+
+export async function getMemberIpInfo(socket){
+    let ip = getSocketIp(socket);
+    return await lookupIP(ip);
+}
+
+
+export function getMemberList(member, channel) {
+    var members = serverconfig.servermembers;
+    const memberKeys = Object.keys(members);
+    let sortedMembers = {};
+
+
+    for (let i = memberKeys.length - 1; i >= 0; i--) {
+        const memberId = memberKeys[i];
+        const memberObj = members[memberId];
+
+        // didnt finish onboarding yet
+        if(!memberObj.loginName) continue;
+        if(memberObj?.isBanned === true) continue;
+        if(shouldIgnoreMember(memberObj)) continue;
+
+        if(!hasPermission(memberId, "viewChannel", channel)) continue
+
+        var highestMemberRole = getMemberHighestRole(memberId);
+        sortedMembers[memberId] = getCastingMemberObject(memberObj);
+        sortedMembers[memberId].highestRole = getRoleCastingObject(highestMemberRole);
+
+        const { isOnline, minutesPassed } = getMemberLastOnline(memberId);
+
+        // if the user is offline
+        if (!isOnline){
+            sortedMembers[memberId].isOffline = true;
+        }
+    }
+
+    return {members: sortedMembers, index: -1};
 }
 
 export function getGroupList(member) {
@@ -786,10 +649,39 @@ export function getChannelTree(member) {
     return channeltree;
 }
 
-export function banUser(socket, member) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
+export function addBan({
+                        identifier,
+                        bannedBy = "system",
+                        reason = "",
+                        until = -1,
+                        ip = null,
+                       } = {}){
 
+    serverconfig.banlist[identifier] = {
+        bannedBy: bannedBy,
+        reason: reason,
+        until: until,
+        ip: ip
+    };
+    saveConfig(serverconfig);
+}
+
+export function removeBan(identifier){
+    if(serverconfig.banlist.hasOwnProperty(identifier)) delete serverconfig.banlist[identifier]
+
+
+    if(serverconfig.servermembers[identifier]?.isBanned){
+        serverconfig.servermembers[identifier].isBanned = 0
+    }
+
+    saveConfig(serverconfig);
+}
+
+
+
+export function banUser(socket, member) {
     let ip = getSocketIp(socket);
+    if(isLocalhostIp(ip)) ip = null;
 
     // get member ban date
     let bannedUntil = getNewDate(member.duration).getTime();
@@ -798,21 +690,15 @@ export function banUser(socket, member) {
     serverconfig.servermembers[member.target].isBanned = 1;
 
     // Add member to banlist
-    serverconfigEditable.banlist[member.target] = JSON.parse(`
-                    {
-                        "bannedBy": "${member.id}",
-                        "reason": "${member.reason}",
-                        "until": ${bannedUntil},
-                        "ip": "${ip}"
-                    }
-                    `);
+    addBan({
+        identifier: member?.target,
+        bannedBy: member?.id,
+        reason: member?.reason,
+        until: bannedUntil,
+        ip: ip
+    });
 
-    saveConfig(serverconfigEditable);
-
-    consolas(` User ${serverconfigEditable.servermembers[member.target].name} (IP ${ip}) was added to the blacklist because he was banned`.yellow);
-    consolas(` Reason: ${member.reason}`);
-    consolas(` Duration: ${bannedUntil}`);
-
+    Logger.warn(` User ${serverconfig.servermembers[member.target].name} (IP ${ip}) was added to the banlist because he was banned`.yellow);
     return banIp(socket, bannedUntil);
 }
 
@@ -822,32 +708,37 @@ export function getSocketIp(socket){
         || socket?.handshake?.address;
 }
 
-export function banIp(socket, durationTimestamp) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
-
+export function banIp(socket, durationTimestamp = -1) {
     let ip = getSocketIp(socket);
-    if(ip?.includes("::1") || ip?.includes("127.0.0.1")){
-        return false
-    }
+    if(isLocalhostIp(ip)) return;
 
-    if (!serverconfigEditable.ipblacklist.hasOwnProperty(ip) && ip != null) {
-        serverconfigEditable.ipblacklist[ip] = durationTimestamp;
-        saveConfig(serverconfigEditable);
-        console.log(`IP ${ip} banned until ${durationTimestamp}`);
+    addBan({
+        identifier: ip,
+        until: durationTimestamp,
+    })
+
+    Logger.info(`IP ${ip} banned until ${new Date(durationTimestamp).toLocaleString()}`);
+}
+
+export function isIpBanned(ip){
+    let existingBannedIp = getJson(serverconfig.blacklist, ["*.ip"]);
+    if(existingBannedIp.length > 0 || serverconfig.banlist[ip]){
+        Logger.info(`IP ${ip} already banned`)
         return true;
     }
+
+    return false;
 }
 
 
 export function unbanIp(socket) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
-
     let ip = getSocketIp(socket)
-    if (serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
-        delete serverconfigEditable.ipblacklist[ip];
-        saveConfig(serverconfigEditable);
+
+    if (serverconfig.banlist[ip]) {
+        delete serverconfig.banlist[ip];
+        saveConfig(serverconfig);
     } else {
-        console.log("does not have property " + ip)
+        Logger.warn(`Tried to unban IP ${ip} but it was not banned`);
     }
 }
 
@@ -861,27 +752,26 @@ export function findInJson(obj, keyToFind, valueToFind, returnPath = false) {
         }
 
         for (const key in currentObj) {
-            let newPath = currentPath ? `${currentPath}.${key}` : key; // ✅ Build full path
+            let newPath = currentPath ? `${currentPath}.${key}` : key;
 
             if (key === keyToFind && currentObj[key] === valueToFind) {
-                if (currentPath.includes("channel")) { // ✅ Ensure it's a CHANNEL path
+                if (currentPath.includes("channel")) {
                     result = currentObj;
-                    foundPath = currentPath; // ✅ Fix: Store only the path without `.id`
+                    foundPath = currentPath;
                     return;
                 }
             }
 
-            // ✅ Recursively search nested objects
             if (typeof currentObj[key] === "object" && currentObj[key] !== null) {
                 search(currentObj[key], newPath);
-                if (result) return; // ✅ Stop recursion when found
+                if (result) return;
             }
         }
     }
 
     search(obj);
 
-    return returnPath ? foundPath : result; // ✅ Return full JSON path if requested
+    return returnPath ? foundPath : result;
 }
 
 
@@ -964,20 +854,19 @@ export function getNewDate(offset) {
 export function disconnectUser(socketId, reason = null) {
 
     try {
-        sendMessageToUser(socketId, JSON.parse(
-            `{
-            "title": "You've been disconnected",
-            "message": "${reason ? `Reason:<br>${reason}` : ""}",
-            "buttons": {
+        sendMessageToUser(socketId, {
+            title: "You've been disconnected",
+            message: reason ? `Reason:<br>${reason}` : "",
+            buttons: {
                 "0": {
-                    "text": "Ok",
-                    "events": "onclick='closeModal()'"
+                    text: "Ok",
+                    events: "onclick='closeModal()'"
                 }
             },
-            "type": "error",
-            "displayTime": 600000,
-            "wasDisconnected": true
-        }`));
+            type: "error",
+            displayTime: 600000,
+            wasDisconnected: true
+        });
 
         io.sockets.sockets.get(socketId).disconnect();
     } catch (ex) {
@@ -988,36 +877,32 @@ export function disconnectUser(socketId, reason = null) {
 }
 
 export function muteUser(member) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
-
     let muteDate;
     let jsonObj;
     try {
         muteDate = getNewDate(member.time).getTime();
-        jsonObj = JSON.parse(`
-            {
-                "mutedBy": "${member.id}",
-                "reason": "${member.reason}",
-                "duration": ${muteDate}
-            }
-            `);
+        jsonObj = {
+            mutedBy: member.id,
+            reason: member.reason,
+            duration: muteDate
+        };
     } catch (err) {
         return {error: err}
     }
 
     if (!serverconfig.mutelist.hasOwnProperty(member.target)) {
         // used for checks
-        serverconfigEditable.servermembers[member.target].isMuted = 1;
+        serverconfig.servermembers[member.target].isMuted = 1;
 
         // Add member to mutelist
-        serverconfigEditable.mutelist[member.target] = jsonObj;
+        serverconfig.mutelist[member.target] = jsonObj;
 
-        saveConfig(serverconfigEditable);
+        saveConfig(serverconfig);
         return {duration: muteDate};
     } else {
-        serverconfigEditable.servermembers[member.target].isMuted = 1;
-        serverconfigEditable.mutelist[member.target].duration = muteDate;
-        saveConfig(serverconfigEditable);
+        serverconfig.servermembers[member.target].isMuted = 1;
+        serverconfig.mutelist[member.target].duration = muteDate;
+        saveConfig(serverconfig);
 
         io.emit("updateMemberList");
 

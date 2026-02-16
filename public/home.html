@@ -6,24 +6,35 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <script src="/js/core/socket.io.js" crossorigin="anonymous"></script>
 
-    <script src="js/core/PoW.js"></script>
-    <script src="js/core/CookieManager.js"></script>
-    <script src="js/core/UserManager.js"></script>
+    <script src="/js/core/PoW.js"></script>
+    <script src="/js/core/ContextMenu.js"></script>
+    <script src="/js/core/CookieManager.js"></script>
+    <script src="/js/core/ChatManager.js"></script>
+    <script src="/js/core/UserManager.js"></script>
+    <script src="/js/core/UserReports.js"></script>
+    <script src="/js/emojis.js"></script>
+    <script src="/js/markdown.js"></script>
+    <script src="/js/core/markdown-parser.js"></script>
+    <script src="/js/escape.js"></script>
+    <script src="/js/mentions.js"></script>
 
-    <script src="js/tooltips.js"></script>
-    <script src="js/hover.js"></script>
-    <script src="js/prompts.js"></script>
-    <script src="js/sysmsg.js"></script>
-    <script src="js/upload.js"></script>
+    <script src="/js/tooltips.js"></script>
+    <script src="/js/hover.js"></script>
+    <script src="/js/prompts.js"></script>
+    <script src="/js/sysmsg.js"></script>
+    <script src="/js/upload.js"></script>
+    <script src="/js/messages/server/messages.js"></script>
 
     <link href="/css/themes/default/default.css" rel="stylesheet">
     <link href="/css/home.css" rel="stylesheet">
+    <link href="/css/messages.css" rel="stylesheet">
+    <link href="/css/message_actions.css" rel="stylesheet">
 
 
-    <script src="js/tooltips/dialogs/introduceServerHome.js"></script>
-    <script src="js/core/purify.js"></script>
-    <script src="js/core/Crypto.js"></script>
-    <script src="js/core/Client.js"></script>
+    <script src="/js/tooltips/dialogs/introduceServerHome.js"></script>
+    <script src="/js/core/purify.js"></script>
+    <script src="/js/core/Crypto.js"></script>
+    <script src="/js/core/Client.js"></script>
 
     <title>{{server.name}} – Server Home & DMs</title>
 </head>
@@ -127,7 +138,50 @@
     </div>
 </div>
 
+<pre id="editorHints"></pre>
+
 <script>
+    function rewriteImg(img){
+        if(!img || !img.src) return;
+
+        if(img.dataset.proxied === "1") return;
+
+        const proxied = ChatManager.proxyUrl(img.src);
+        if(proxied !== img.src){
+            img.src = proxied;
+        }
+
+        img.dataset.proxied = "1";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("img").forEach(rewriteImg);
+
+        new MutationObserver(mutations => {
+            for(const m of mutations){
+                for(const n of m.addedNodes){
+                    if(n.nodeType !== 1) continue;
+
+                    if(n.tagName === "IMG"){
+                        rewriteImg(n);
+                    }
+                    else{
+                        n.querySelectorAll?.("img").forEach(rewriteImg);
+                    }
+                }
+            }
+        }).observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
+
+
+    let quill = null;
+    let focusEditor = null;
+
+    ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
+
     const socket = io({
         transports: ['websocket', 'polling'],
         reconnection: true,
@@ -136,6 +190,7 @@
         reconnectionDelayMax: 5000,
         timeout: 20000
     });
+    ContextMenu.init();
 
     const tooltipSystem = new TooltipSystem();
 
@@ -156,11 +211,6 @@
     }
 
     let isAdmin = false;
-
-    const SANITIZE_OPTIONS = {
-        ALLOWED_TAGS: ['div', 'span', 'p', 'br', 'b', 'i', 'u', 's', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'pre', 'code', 'blockquote', 'strong', 'em', 'img', 'mark'],
-        ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'class', 'style']
-    };
 
     // empty initial CONFIG
     const CONFIG = {
@@ -192,72 +242,6 @@
         unpin: `<svg viewBox="0 0 24 24"><path d="M3 5.27 4.28 4l15.5 15.5L18.5 21l-6.5-6.5L9 21v-7H5v-2l2-4V5h1.73L3 5.27zM16 9l2 4v2h-2.73l-5-5H16V3h-2v4h2v2z"/></svg>`,
         del: `<svg viewBox="0 0 24 24"><path d="M6 7h12v2H6V7zm2 3h8l-1 9H9L8 10zm3-6h2l1 1h4v2H6V5h4l1-1z"/></svg>`
     };
-
-
-    function sanitizeHtmlForRender(html) {
-        if (html == null) return '';
-
-        let raw = unescapeHtmlEntities(String(html || '')).trim();
-
-        const hasTags = /<\/?[a-z][\s\S]*?>/i.test(raw);
-        if (!hasTags) {
-            const paras = raw.replace(/\r/g, '').split(/\n{2,}/)
-                .map(s => s.trim())
-                .filter(Boolean);
-
-            let out = paras.map(p => {
-                const withBreaks = encodePlainText(p).replace(/\n/g, '<br>');
-                return `<p>${withBreaks}</p>`;
-            }).join('');
-
-            const clean = DOMPurify.sanitize(out, SANITIZE_OPTIONS);
-            return `<div class="sanitized-content">${clean}</div>`;
-        }
-
-        let clean = DOMPurify.sanitize(raw, SANITIZE_OPTIONS);
-
-        clean = clean.replace(/<p[^>]*>\s*(?:&nbsp;|\s|\u00A0)*<\/p>/gi, '');
-
-        clean = clean.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');
-
-        return `<div class="sanitized-content">${clean.trim()}</div>`;
-    }
-
-    function encodePlainText(s) {
-        return String(s || '')
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#39;');
-    }
-
-    function unescapeHtmlEntities(str) {
-        if (str == null) return '';
-        const txt = document.createElement('textarea');
-        txt.innerHTML = String(str);
-        return txt.value;
-    }
-
-    function clearHtmlFromText(str) {
-        if (str == null) return '';
-        const txt = document.createElement('label');
-        txt.innerHTML = String(unescapeHtmlEntities(str));
-        return txt.innerText;
-    }
-
-    function hl(text, query) {
-        text = String(text || '');
-        if (!query) return sanitizeHtmlForRender(encodePlainText(text));
-        const q = String(query || '').toLowerCase();
-        const idx = text.toLowerCase().indexOf(q);
-        if (idx === -1) return sanitizeHtmlForRender(encodePlainText(text));
-        const before = encodePlainText(text.slice(0, idx));
-        const match = encodePlainText(text.slice(idx, idx + q.length));
-        const after = encodePlainText(text.slice(idx + q.length));
-        return sanitizeHtmlForRender(`${before}<mark>${match}</mark>${after}`);
-    }
-
     function listByType(type) {
         return type === 'posts' ? CONFIG.posts : type === 'news' ? CONFIG.news : CONFIG.help;
     }
@@ -311,11 +295,11 @@
         const localSet = loadLocalUnread();
         STATE.unreadContent = new Set([...(STATE.unreadContent || []), ...Array.from(localSet)]);
 
+        renderAll();
 
-        sortThreads();
-        renderDMs();
-        renderRight();
-        showServerHome();
+        if(ChatManager.getDMFromUrl()){
+            startDmWith(ChatManager.getDMFromUrl());
+        }
     });
 
     socket.on('ticket:new', ({thread}) => {
@@ -394,7 +378,7 @@
         t.messages = t.messages || [];
         if (t.messages.some(m => m.id === message.id)) return;
         t.messages.push(message);
-        t.last = message.text.content || '';
+        t.last = message.message || message.text.content || "";
         t.lastAt = message.ts || new Date().toISOString();
     }
 
@@ -687,7 +671,7 @@
                       ${avatarStackHTML(t.participants)}
                       <div>
                         <div class="dmName">${encodePlainText(title)}</div>
-                        <div class="dmPreview">${clearHtmlFromText(t.last) || ""}</div>
+                        <div class="dmPreview">${unescapeHtmlEntities(t.last) || ""}</div>
                       </div>
 
                       ${t.unread > 0 ?
@@ -786,7 +770,7 @@
                         ${avatarStackHTML(t.participants)}
                         <div>
                           <div class="dmName">${encodePlainText(title)}</div>
-                          <div class="dmPreview">${clearHtmlFromText(t.last || "")}</div>
+                          <div class="dmPreview">${unescapeHtmlEntities(t.last || "")}</div>
                         </div>
                         ${t.unread > 0 ?
                                     `<div class="dmBadge">${t.unread ? `<span>${t.unread}</span>` : ''}</div>` : ""
@@ -1336,7 +1320,10 @@
             showServerHome();
             return;
         }
+
         const target = otherParticipant(t);
+        window.history.replaceState(null, null, `?dm=${target?.id}`);
+
         const title = t.type === 'ticket' ? (t.title || 'Support Ticket') : (t.title || target.name);
 
         const amParticipant = (t.participants || []).includes(CURRENT_USER_ID);
@@ -1373,10 +1360,10 @@
                 `<div class="row">
                     <div class="threadNotice warning">
                         <p>
-                            Messages are currently <b><i>not</i></b> end-2-end encrypted!
+                            Newly sent messages <b><i>wont be</i></b> end-2-end encrypted!
                         </p>
 
-                        <a class="action" href="https://github.com/hackthedev/dcts-client-shipping/releases/latest/download/update.zip">Download Client</a>
+                        <a class="action" onclick="downloadClient()">Download Client</a>
                     </div>
                 </div>`
             }
@@ -1431,6 +1418,7 @@
                 token: UserManager.getToken(),
                 id: UserManager.getID()
             }, (ack) => {
+                console.log(ack)
                 if (ack?.type === 'success') {
                     t.lastReadAt = ack.last_read_at;
                     t.unread = 0;
@@ -1444,7 +1432,6 @@
             "Are you sure you want to delete this chat and all messages?",
             [["Yes", "success"], ["No", "error"]],
             (selectedOption) => {
-
                 if (selectedOption == "yes") {
                     socket.emit('deleteThread', {
                         threadId,
@@ -1536,9 +1523,7 @@
 
     async function getMessageText(message, isMine, targetUserId){
         if(isEncryptedMessage(message, isMine)){
-            console.log("is encrypted")
             if(isMine){
-                console.log("is mine")
                 return getDecryptedMessage(isMine, message?.text?.sender, message, await Crypto.getPublicKey());
             }
             else{
@@ -1603,6 +1588,8 @@
         const cutoff = thread.lastReadAt ? +new Date(thread.lastReadAt) : null;
         let dividerPlaced = false;
 
+        let previousMessage = null;
+        let previousElement = null;
         for(let message of thread.messages) {
             const ts = message.ts ? +new Date(message.ts) : 0;
 
@@ -1612,7 +1599,7 @@
 
             if (!dividerPlaced && cutoff && ts > cutoff && message.authorId !== CURRENT_USER_ID) {
                 const divi = document.createElement('div');
-                divi.style.cssText = "text-align:center;opacity:.7;font-size:11px;margin:8px 0;";
+                divi.style.cssText = "text-align:center;opacity:.7;font-size:11px;margin:0 0;";
                 divi.textContent = "— New —";
                 area.appendChild(divi);
                 dividerPlaced = true;
@@ -1623,6 +1610,7 @@
             const div = document.createElement('div');
             div.className = 'msg' + (mine ? ' mine' : '');
 
+
             const canEdit = message.authorId === CURRENT_USER_ID;
             const canDelete = message.authorId === CURRENT_USER_ID;
 
@@ -1631,28 +1619,45 @@
 
             // get other participant
             let target = otherParticipant(thread);
-            console.log(target);
-            console.log(message);
             let messageText = await getMessageText(message, mine, target.id);
-
             let isEncrypted = isEncryptedMessage(message, mine);
-            console.log(messageText);
-            console.log(isEncrypted);
 
-            div.innerHTML = `
-              <div style="font-weight:700;font-size:12px;opacity:.9">
-                    ${encodePlainText(name)}
+            message.plainText = messageText;
+            message = makeMessageCompatible(message, messageText, isSystem);
 
-                    ${isEncrypted ?
-                        `<label title="Encrypted Message" style="filter: grayscale(75%);">
-                            &bull; &#128272;
-                        </label>`
-                        :
-                        `<label title="Message is not encrypted" style="filter: grayscale(75%);color: orange;">
-                            &bull; &#9888;
-                        </label>`
-                    }
-              </div>
+            div.setAttribute("data-thread-id", thread.id);
+            div.setAttribute("data-target-id", target.id);
+
+            // now handle display logic
+            let minutesPassed = compareTimestamps(new Date(message.ts).getTime(), new Date(previousMessage?.ts).getTime());
+            let appendMessage = Math.abs(minutesPassed) <= 5 && message?.authorId === previousMessage?.authorId;
+            let previousElementContent = previousElement?.querySelector('.contentRows');
+            let duplicateMessage = previousElementContent?.querySelector(`.content[data-message-id="${message.messageId}"]`);
+
+            if(appendMessage && previousMessage && previousElementContent && !isSystem && !duplicateMessage){
+                previousElementContent.innerHTML += await createMsgHTML({
+                    message,
+                    append: true,
+                    createActions: false,
+                })
+
+                continue;
+            }
+            else{
+                div.innerHTML = await createMsgHTML({
+                    message,
+                    append: false,
+                    createActions: false,
+                })
+            }
+
+
+            area.appendChild(div);
+            previousElement = div;
+            previousMessage = JSON.parse(JSON.stringify(message));
+
+
+            /*div.innerHTML = `
               <div>${messageText}</div>
               <div class="meta">
                 ${encodePlainText(new Date(message.ts).toLocaleString() || '')}
@@ -1661,18 +1666,15 @@
                   ${canDelete ? `<button class="linkBtn" onclick="onDeleteMsg('${thread.id}','${message.id}')">Delete</button>` : ''}
                   ${mine === false && isSystem === false && ( (isEncrypted === false && isLauncher()) || (isEncrypted === true && isLauncher()) ) ? `<button class="linkBtn" onclick="onReportMsg('${thread.id}','${message.id}', '${messageText}')">Report</button>` : ""}
                 </span>
-              </div>`;
-
-            area.appendChild(div);
+              </div>`;*/
         }
 
         area.scrollTop = area.scrollHeight;
 
         socket.emit('markRead', {
             threadId: thread.id,
-            memberId: CURRENT_USER_ID,
+            id: UserManager.getID(),
             token: UserManager.getToken(),
-            id: UserManager.getID()
         }, (ack) => {
             if (ack?.type === 'success') {
                 thread.lastReadAt = ack.last_read_at;
@@ -1681,10 +1683,34 @@
         });
     }
 
+    function makeMessageCompatible(message, messageText, isSystem){
+        // ok now we need to make this shit compatible now.
+        // make structure compatible for message display pipeline
+        message.message = messageText;
+        if(!message?.author){
+            message.author = {
+                id: message?.authorId.replace("m_",""),
+            }
+        }
+        // fix sig structure check
+        if(message?.text?.plainSig) message.sig = message.text.plainSig;
+        // fix system message type to not show system notification
+        // like member joined messages
+        if(isSystem) {
+            message.author.name = "System";
+        }
+
+        if(!message?.messageId) message.messageId = message.id.replace("m_", "");
+        return message;
+    }
+
     async function onEditMsg(threadId, messageId, targetId) {
         const t = CONFIG.threads.find(x => x.id === threadId);
-        const m = (t?.messages || []).find(x => x.id === messageId);
-        if (!m) return;
+        const m = (t?.messages || []).find(x => x.messageId === messageId);
+        if (!m){
+            console.warn('Message not found', messageId);
+            return;
+        }
 
         let msg = m.text.content;
         let isEncrypted = isEncryptedMessage(msg)
@@ -1701,7 +1727,6 @@
                 return;
             }
         }
-
 
         customPrompts.showPrompt(
             isEncrypted ? "Edit encrypted message" : "Edit Message",
@@ -1869,7 +1894,6 @@
                     payload.text.plainSig = await Client().SignString(plainText); // used to verify plaintext
 
                     payload.text = await Crypto.signJson(payload.text); // signs everything to make it tamper proof
-                    console.log(payload);
                     // its shit like this that i absolutely love!!
                     // theoretically other platforms could implement a plain text sig too
                     // and still be able to handle encrypted message reports securely
@@ -1885,7 +1909,6 @@
                 console.warn(targetPublicKey)
             }
         }
-
         socket.emit("sendMessage", payload, (ack) => {
             if (ack?.type === "success") inp.value = "";
         });
@@ -1907,7 +1930,14 @@
       </div>`;
     }
 
-    function startDmWith(id, name) {
+    function startDmWith(id) {
+        if(!id){
+            id = ChatManager.getDMFromUrl();
+            if(!id) return;
+        }
+
+        window.history.replaceState(null, null, `?dm=${id}`);
+
         // find an existing 1:1 DM
         const existing = CONFIG.threads.find(t => {
             if (!t || t.type === 'ticket') return false;
@@ -1940,7 +1970,10 @@
 
 
     // Header actions
-    document.getElementById('btnHome').onclick = showServerHome;
+    document.getElementById('btnHome').onclick = () => {
+        window.history.replaceState(null, null, `/home.html`);
+        showServerHome()
+    };
     document.getElementById('btnCreatePost').onclick = () => openPostModal();
 
     const btnNewTicket = document.getElementById('btnNewTicket');
@@ -2490,8 +2523,6 @@
             solution: localStorage.getItem("pow_solution")
         }
     }, function (response) {
-        console.log("got connect response")
-
         socket.emit('joinServer', {id: UserManager.getID(), token: UserManager.getToken()}, function(response) {
             console.log(response)
         });
@@ -2511,8 +2542,6 @@
             // if server home is activly open, refresh it
             let centerMount = document.getElementById("centerMount");
             if (centerMount.querySelector(".heroContent")) showServerHome();
-
-            console.log("updated home")
         });
 
         socket.emit("checkPermission", {
@@ -2529,10 +2558,6 @@
 
                 // show create post button
                 document.getElementById("btnCreatePost").style.display = "block";
-
-                setTimeout(() => {
-                    renderAll();
-                }, 50);
             }
         });
     });

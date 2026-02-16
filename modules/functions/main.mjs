@@ -14,18 +14,31 @@ import {
     usersocket,
     sanitizeHtml,
     bcrypt,
-    fs, signer
+    crypto,
+    fs, signer, db
 } from "../../index.mjs"
-import {banIp, generateGid, getNewDate, getSocketIp, hasPermission, resolveRolesByUserId} from "./chat/main.mjs";
+import {
+    banIp,
+    generateGid,
+    getNewDate,
+    getSocketIp,
+    hasPermission, isIpBanned,
+    removeBan,
+    resolveRolesByUserId
+} from "./chat/main.mjs";
 import {consolas} from "./io.mjs";
-import Logger from "./logger.mjs";
+import Logger from "@hackthedev/terminal-logger"
 import path from "path";
 import {powVerifiedUsers} from "../sockets/pow.mjs";
 import {sendSystemMessage} from "../sockets/home/general.mjs";
 import {decodeFromBase64, encodeToBase64} from "./mysql/helper.mjs";
-import {exec, spawn} from "node:child_process";
-import {queryDatabase} from "./mysql/mysql.mjs";
 import {checkMemberMigration} from "./migrations/memberJsonToDb.mjs";
+import {clearBase64FromDatabase} from "./migrations/base64_fixer.mjs";
+import {getMemberHighestRole} from "./chat/helper.mjs";
+import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./migrations/messageMigration.mjs";
+import archiver from "archiver";
+import JSONTools from "@hackthedev/json-tools";
+import {initPaymentSystem} from "./payments.mjs";
 
 var serverconfigEditable;
 
@@ -104,6 +117,9 @@ export function sanitizeInput(input) {
     return sanitizeHtml(input, {
         allowedTags: [
             'div',
+            'source',
+            'video',
+            'audio',
             'span',
             'p',
             'br',
@@ -118,18 +134,14 @@ export function sanitizeInput(input) {
             'h1',
             'h2',
             'h3',
-            'h4',
-            'h5',
-            'h6',
             'pre',
             'code',
+            "label",
             'blockquote',
             'strong',
             'em',
-            'em',
-            'u',
-            's',
-            'img'
+            'img',
+            'mark'
         ],
         allowedAttributes: {
             'a': ['href', 'target', 'rel'],
@@ -164,6 +176,36 @@ export function sanitizeFilename(filename) {
         .replace(/\s+/g, '_');             // Replace spaces with underscores
 }
 
+export async function backupSystem() {
+    const dirName = sanitizeFilename(`v${versionCode}_${new Date().toISOString()}`);
+    const baseDir = `./backups/${dirName}`;
+    const zipPath = `${baseDir}.zip`;
+
+    if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
+    fs.cpSync("./configs/", `${baseDir}/configs`, { recursive: true });
+
+    //await exportDatabaseFromPool(
+    //    db.pool,
+    //    `${baseDir}/${serverconfig.serverinfo.sql.database}.sql`
+    //);
+
+    await new Promise((resolve, reject) => {
+        const output = fs.createWriteStream(zipPath);
+        const archive = archiver("zip", { zlib: { level: 9 } });
+
+        output.on("close", resolve);
+        archive.on("error", reject);
+
+        archive.pipe(output);
+        archive.directory(baseDir, false);
+        archive.finalize();
+    });
+
+    fs.rmSync(baseDir, { recursive: true, force: true });
+}
+
+
+
 export const mimeTypesCache = new Map(); // Cache to store validated MIME types by file ID
 export const fileSizeCache = new Map(); // Cache to track file sizes by file ID
 
@@ -187,37 +229,30 @@ export async function checkVersionUpdate() {
 
             if (res.status == 404) {
                 resolve(null);
-                return null;
             } else if (res.status == 200) {
                 var onlineVersionCode = await res.text();
                 onlineVersionCode = onlineVersionCode.replaceAll("\n\r", "").replaceAll("\n", "");
 
                 if (onlineVersionCode > versionCode) {
                     resolve(onlineVersionCode);
-                    return onlineVersionCode;
                 } else {
                     resolve(null);
-                    return null;
                 }
-
-                resolve(html);
-                return html;
             } else {
                 resolve(null);
-                return null;
             }
         })()
-
-
     });
-
-    return prom;
 }
 
 export async function handleTerminalCommands(command, args) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     try {
+        if(command === "clear64"){
+            clearBase64FromDatabase();
+            return;
+        }
         if(command === "rotateMemberTokens"){
             for (const memberId of Object.keys(serverconfig.servermembers)) {
                 let member = serverconfig.servermembers[memberId];
@@ -238,16 +273,7 @@ export async function handleTerminalCommands(command, args) {
         }
         if (command === 'migrateMessages') {
             if(serverconfig.serverinfo.sql.enabled === true){
-                let messages = await queryDatabase("SELECT * FROM messages");
-                if(messages.length > 0){
-                    for(let message of messages){
-                        let decodedMessage = JSON.parse(decodeFromBase64(message.message));
-
-                        Logger.info(`Migrating message ${decodedMessage.messageId}, setting timestamp to ${decodedMessage.timestamp}`)
-                        await queryDatabase(`UPDATE messages set createdAt = ? WHERE messageId = ?`, [decodedMessage.timestamp, decodedMessage.messageId])
-                    }
-                    Logger.success("Migration done!")
-                }
+                await migrateOldMessagesToNewMessageSystemWithoutEncoding()
             }
             else{
                 Logger.warn("SQL needs to be enabled and configurated inside the config.json. Its currently disabled!")
@@ -573,7 +599,169 @@ export function checkBool(value, type) {
 }
 
 export function checkConfigAdditions() {
+    // recreating the config example minimum base so that copying isnt needed anymore
+    checkObjectKeys(serverconfig, "serverinfo.name", "Default Server")
+    checkObjectKeys(serverconfig, "serverinfo.description", "")
+    checkObjectKeys(serverconfig, "serverinfo.port", 2052)
+    checkObjectKeys(serverconfig, "serverinfo.setup", 0)
+    checkObjectKeys(serverconfig, "serverinfo.maxUploadStorage", 1024)
+    checkObjectKeys(serverconfig, "serverinfo.rateLimit", 512)
+    checkObjectKeys(serverconfig, "serverinfo.dropInterval", 5)
+    //
+    checkObjectKeys(serverconfig, "serverinfo.useCloudflareImageCDN", "")
+    checkObjectKeys(serverconfig, "serverinfo.cfAccountId", "")
+    checkObjectKeys(serverconfig, "serverinfo.cfAccountToken", "")
+    checkObjectKeys(serverconfig, "serverinfo.cfHash", "")
+    //
+    checkObjectKeys(serverconfig, "ipblacklist", [])
+    checkObjectKeys(serverconfig, "banlist", {})
+    checkObjectKeys(serverconfig, "mutelist", {})
+    //
+    checkObjectKeys(serverconfig, "serverroles", {
+        "0": {
+            "info": {
+                "id": "0",
+                "name": "Member",
+                "icon": null,
+                "color": "#FFFFFF",
+                "deletable": 0,
+                "sortId": 1,
+                "displaySeperate": 1,
+                "hasRole": 1
+            },
+            "permissions": {
+                "readMessages": 1,
+                "sendMessages": 1,
+                "uploadFiles": 1,
+                "redeemKey": 1,
+                "maxUpload": "10",
+                "manageChannels": 0,
+                "viewChannelHistory": 1,
+                "createReports": 1
+            },
+            "members": [],
+            "token": []
+        },
+        "1": {
+            "info": {
+                "id": "1",
+                "name": "Offline",
+                "icon": null,
+                "color": "#7C808A",
+                "deletable": 0,
+                "sortId": 0,
+                "displaySeperate": 1,
+                "hasRole": 0
+            },
+            "permissions": {},
+            "members": [],
+            "token": []
+        },
+        "1111": {
+            "info": {
+                "id": 1111,
+                "name": "Administrator",
+                "icon": null,
+                "color": "#ff0000",
+                "deletable": 0,
+                "sortId": 3,
+                "displaySeperate": 1,
+                "hasRole": 1
+            },
+            "permissions": {
+                "readMessages": 1,
+                "administrator": 1,
+                "manageChannels": 0
+            },
+            "members": [],
+            "token": [
+            ]
+        }
+    });
+    checkObjectKeys(serverconfig, "groups", {
+        "0": {
+            "info": {
+                "id": 0,
+                "name": "Home",
+                "icon": "img/default_icon.png",
+                "banner": "/img/default_banner.png",
+                "isDeletable": 1,
+                "sortId": 2,
+                "access": []
+            },
+            "channels": {
+                "categories": {
+                    "0": {
+                        "info": {
+                            "id": 0,
+                            "name": "General",
+                            "sortId": 2
+                        },
+                        "channel": {
+                            "0": {
+                                "id": 0,
+                                "name": "chat",
+                                "type": "text",
+                                "description": "",
+                                "sortId": 0,
+                                "permissions": {
+                                    "0": {
+                                        "readMessages": 1,
+                                        "sendMessages": 1,
+                                        "viewChannel": 1,
+                                        "viewChannelHistory": 1
+                                    }
+                                },
+                                "msgCount": 0
+                            }
+                        }
+                    }
+                }
+            },
+            "permissions": {
+                "0": {
+                    "viewGroup": 1,
+                    "sendMessages": 1,
+                    "readMessages": 1
+                }
+            }
+        }
+    })
 
+
+    // new cool ip block shit
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.urlWhitelist",
+        [
+            "/^\/discover(\/.*)?$/",
+            "/^\/uploads(\/.*)?$/",
+            "/^\/emojis(\/.*)?$/"
+        ]
+    )
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.companyDomainWhitelist", [])
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blacklist", [])
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.whitelist", [])
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockedCountryCodes", [])
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockDataCenter", true)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockSatelite", true)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockCrawler", true)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockBogon", true)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockProxy", true)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockVPN", true)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockTor", true)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockAbuser", true)
+
+    checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayName", "Banned")
+    checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayMessageNotice", `<span style="color: indianred;">[ Content hidden ]</span>`)
+
+    checkObjectKeys(serverconfig, "serverinfo.instance.contact.email", "")
+    checkObjectKeys(serverconfig, "serverinfo.instance.contact.website", "")
+    checkObjectKeys(serverconfig, "serverinfo.instance.contact.reddit", "")
+    checkObjectKeys(serverconfig, "serverinfo.instance.contact.discord", "")
+    checkObjectKeys(serverconfig, "serverinfo.instance.contact.github", "")
+    checkObjectKeys(serverconfig, "serverinfo.instance.contact.signal", "")
+    checkObjectKeys(serverconfig, "serverinfo.instance.contact.owner.name", "")
+
+    // v9
     checkObjectKeys(serverconfig, "serverinfo.defaultTheme", "default.css")
 
     // livekit VC
@@ -588,17 +776,19 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.discovery.defaultStatus", "verified")
 
     // cool ass system messaging thx to dms
+    checkObjectKeys(serverconfig, "serverinfo.system.members.allowCountryCode", true)
+    checkObjectKeys(serverconfig, "serverinfo.system.members.ignoreTimeout", "30 days")
     checkObjectKeys(serverconfig, "serverinfo.system.welcome.enabled", true)
     checkObjectKeys(serverconfig, "serverinfo.system.welcome.message",
         `<h3>Welcome to the server!</h3>
         <p>
-            We hope you'll like it here! 
+            We hope you'll like it here!
             If you ever need help press the <b>Support</b> button on the top!
         </p>
-        
+
         <p>
             <a style="font-size: 10px;color: gray;" href="https://ko-fi.com/shydevil/tip" target="_blank">Donate <3</a>
-        </p>    
+        </p>
     `)
 
     // home settings
@@ -642,10 +832,10 @@ export function checkConfigAdditions() {
 
 
     /*
-        UI / Mod Update 
+        UI / Mod Update
     */
 
-    // Settings for Moderation 
+    // Settings for Moderation
     //
     // Message Spam
     checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.enabled", false)
@@ -653,7 +843,7 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.actions", {})
     checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.timespan", 0)
     checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.bypassers", [])
-    //    
+    //
     // Blacklist
     checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.enabled", false)
     checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.words", [])
@@ -664,17 +854,13 @@ export function checkConfigAdditions() {
 
 
     /*
-        Config changes from some update 
+        Config changes from some update
     */
-
-    // tenor
-    checkObjectKeys(serverconfig, "serverinfo.tenor.enabled", false)
-    checkObjectKeys(serverconfig, "serverinfo.tenor.api_key", "")
-    checkObjectKeys(serverconfig, "serverinfo.tenor.limit", 100)
 
     // Added MySQL
     checkObjectKeys(serverconfig, "serverinfo.sql.enabled", false)
     checkObjectKeys(serverconfig, "serverinfo.sql.host", "localhost")
+    checkObjectKeys(serverconfig, "serverinfo.sql.port", 3306)
     checkObjectKeys(serverconfig, "serverinfo.sql.username", "")
     checkObjectKeys(serverconfig, "serverinfo.sql.password", "")
     checkObjectKeys(serverconfig, "serverinfo.sql.database", "dcts")
@@ -688,11 +874,12 @@ export function checkConfigAdditions() {
 
     // If the channel doesnt exist it will not display "member joined" messages etc
     checkObjectKeys(serverconfig, "serverinfo.defaultChannel", "0")
+    checkObjectKeys(serverconfig, "serverinfo.countryCode", "")
     // check for message load limit
     checkObjectKeys(serverconfig, "serverinfo.messageLoadLimit", 50)
 
-    // Additional File Types 
-    // Delete entire uploadFileTypes section from config file to recreate it 
+    // Additional File Types
+    // Delete entire uploadFileTypes section from config file to recreate it
     // with the extended list or add manually. will not update if already exists
     checkObjectKeys(serverconfig, "serverinfo.uploadFileTypes",
         [
@@ -864,22 +1051,24 @@ export function generateId(length) {
 }
 
 export function validateMemberId(id, socket, token, bypass = false) {
+    id = String(id)
+
+    if (bypass === false && socket) {
+        checkRateLimit(socket);
+    }
+
     if(!id){
         return false;
     }
 
-    if (!powVerifiedUsers.includes(socket.id)) {
+    if (socket && !powVerifiedUsers.includes(socket?.id)) {
         return false;
-    }
-
-    if (bypass === false) {
-        checkRateLimit(socket);
     }
 
     // check member token if present
     if(id && token){
         let memberObject = serverconfig.servermembers[id];
-        if(memberObject) checkMemberBan(socket, memberObject);
+        if(memberObject && socket) checkMemberBan(socket, memberObject);
 
         if(serverconfig.servermembers[id]?.token !== token){
             return false;
@@ -892,6 +1081,7 @@ export function validateMemberId(id, socket, token, bypass = false) {
     }
 
     if(id){
+        if(!serverconfig.servermembers[id]) return false;
         // update last online
         serverconfig.servermembers[id].lastOnline = new Date().getTime();
         if(serverconfig.servermembers[id]?.onboarding === false){
@@ -899,7 +1089,7 @@ export function validateMemberId(id, socket, token, bypass = false) {
         }
     }
 
-    return id.length === 12 && isNaN(id) === false;
+    return id.length === 12;
 }
 
 export function escapeHtml(text) {
@@ -979,8 +1169,7 @@ export function searchTenor(search, id) {
     var search_term = search;
 
     // using default locale of en_US
-    var search_url = "https://tenor.googleapis.com/v2/search?q=" + search_term + "&key=" +
-        apikey + "&client_key=" + clientkey + "&limit=" + lmt;
+    var search_url = `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(search_term)}&key=${apikey}&client_key=${clientkey}&limit=${lmt}`;
 
     httpGetAsync(search_url, tenorCallback_search, id);
 
@@ -1003,7 +1192,7 @@ export function checkMemberMute(socket, member) {
     if (serverconfigEditable.banlist.hasOwnProperty(member.id)) {
         console.log("Checking mutelist for member ID:", member.id);
     }
-    if (serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
+    if (serverconfigEditable.banlist.hasOwnProperty(ip)) {
         console.log("Checking ipblacklist for IP:", ip);
     }
 
@@ -1011,16 +1200,16 @@ export function checkMemberMute(socket, member) {
     checkRateLimit(socket);
 
     // check mutelist
-    if (serverconfigEditable.mutelist.hasOwnProperty(member.id)) {
+    if (serverconfig.mutelist.hasOwnProperty(member.id)) {
 
-        var durationStamp = serverconfigEditable.mutelist[member.id].duration;
-        var muteReason = serverconfigEditable.mutelist[member.id].reason;
+        var durationStamp = serverconfig.mutelist[member.id].duration;
+        var muteReason = serverconfig.mutelist[member.id].reason;
 
         if (Date.now() >= durationStamp) {
             // unmute user
-            serverconfigEditable.servermembers[member.id].isMuted = 0;
-            delete serverconfigEditable.mutelist[member.id];
-            saveConfig(serverconfigEditable);
+            serverconfig.servermembers[member.id].isMuted = 0;
+            delete serverconfig.mutelist[member.id];
+            saveConfig(serverconfig);
 
             consolas(colors.yellow("Automatically unmuted user " + member.name + ` (${member.id})`));
         } else {
@@ -1029,12 +1218,12 @@ export function checkMemberMute(socket, member) {
     }
 
     // check ip blacklist
-    if (serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
-        if (Date.now() >= serverconfigEditable.ipblacklist[ip]) {
-            delete serverconfigEditable.ipblacklist[ip];
-            saveConfig(serverconfigEditable);
+    if (serverconfig.banlist.hasOwnProperty(ip)) {
+        if (Date.now() >= serverconfig.banlist[ip]) {
+            delete serverconfig.banlist[ip];
+            saveConfig(serverconfig);
         } else {
-            return {result: true, timestamp: serverconfigEditable.ipblacklist[ip]}
+            return {result: true, timestamp: serverconfig.banlist[ip]}
         }
     }
 
@@ -1054,61 +1243,52 @@ export function findSocketByMemberId(io, memberId) {
     return null;
 }
 
+export function isLocalhostIp(ip){
+    return [
+        "::1",
+        "127.0.0.1"
+    ].includes(ip);
+}
+
 
 export async function checkMemberBan(socket, member) {
-    await reloadConfig();
-    serverconfigEditable = checkEmptyConfigVar(serverconfig);
     let ip = getSocketIp(socket);
-
-    // ignore localhost ips
-    if(ip.includes("::1") || ip.includes("127.0.0.1")){
-        return {result: false, timestamp: null};
-    }
-
-    if (serverconfigEditable.banlist.hasOwnProperty(member.id)) {
-        console.log("Checking banlist for member ID:", member.id);
-    }
-    if (serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
-        console.log("Checking ipblacklist for IP:", ip);
-    }
-
-
     checkRateLimit(socket);
 
-    // check banlist
-    if (serverconfigEditable.banlist.hasOwnProperty(member.id)) {
+    // if the user is not banned anymore but the flag is still there
+    if(!serverconfig.banlist.hasOwnProperty(member?.id) && checkAndUnbanIp(ip).result === false){
+        if(serverconfig.servermembers[member?.id]) serverconfig.servermembers[member.id].isBanned = false;
+    }
 
-        var durationStamp = serverconfigEditable.banlist[member.id].until;
-        var banReason = serverconfigEditable.banlist[member.id].reason;
+    // check banlist for member
+    if (serverconfig.banlist.hasOwnProperty(member?.id)) {
+        var durationStamp = serverconfig.banlist[member?.id].until;
+        var banReason = serverconfig.banlist[member?.id].reason;
 
         if (Date.now() >= durationStamp) {
             // unban user
-            console.log("unbanning user")
-            serverconfigEditable.servermembers[member.id].isBanned = 0;
-            delete serverconfigEditable.banlist[member.id];
-            saveConfig(serverconfigEditable);
-
-            consolas(colors.yellow("Automatically unbanned user " + member.name + ` (${member.id})`));
+            removeBan(member?.id);
+            return checkAndUnbanIp(ip);
         } else {
             return {result: true, timestamp: durationStamp, reason: banReason};
         }
     }
 
-    // check ip blacklist
-    if (serverconfigEditable.ipblacklist.hasOwnProperty(ip)) {
-        if (Date.now() >= serverconfigEditable.ipblacklist[ip]) {
-            delete serverconfigEditable.ipblacklist[ip];
-            saveConfig(serverconfigEditable);
-        } else {
-            return {result: true, timestamp: serverconfigEditable.ipblacklist[ip]}
+    return checkAndUnbanIp(ip);
+
+    function checkAndUnbanIp(ip){
+        // check ip blacklist
+        if (serverconfig.banlist.hasOwnProperty(ip)) {
+            if (Date.now() >= serverconfig.banlist[ip]?.until) {
+                removeBan(ip);
+                return {result: false, timestamp: null}
+            } else {
+                return {result: true, timestamp: serverconfig.banlist[ip]}
+            }
         }
-    }
 
-    if(serverconfig.servermembers[member?.id].isBanned === 1){
-        return {result: true, timestamp: null};
+        return {result: false, timestamp: null}
     }
-
-    return {result: false, timestamp: null};
 }
 
 export async function hashPassword(password) {
@@ -1167,7 +1347,126 @@ export function getRoleCastingObject(role) {
     return role;
 }
 
+export function anonymizeMember(member, shouldHide, isAdmin) {
+    if(!member) throw new Error("anonymizeMember: Invalid input: Expected a member object");
+    member = getCastingMemberObject(member)
+
+    if (!member || typeof member !== "object") {
+        console.error("getCastingMemberObject Member: Invalid input: Expected an object");
+        return;
+    }
+
+    let isBanned = member?.isBanned;
+
+    if(shouldHide && !isAdmin){
+        member.id = 0;
+        member.icon = "";
+        member.status = "";
+        member.banner = "";
+        member.aboutme = "";
+        member.name = isBanned ? `${serverconfig.serverinfo.moderation.bans.displayName}` : "Anon";
+        member.joined = 0;
+        member.isOnline = false;
+        member.lastOnline = 0;
+        member.publicKey = "";
+        member.nickname = "";
+        member.color = "white";
+    }
+
+    return member;
+}
+
+export function autoAnonymizeMember(issuerMemberId, member){
+    if(!member?.id) member = getUnkownMember()
+    let shouldAnonymize = member?.isBanned
+
+    if(shouldAnonymize){
+        return anonymizeMember(member, shouldAnonymize, hasPermission(issuerMemberId, "viewAnonymizedMessages"));
+    }
+
+    return member;
+}
+
+export function autoAnonymizeMessage(issuerMemberId, message){
+    if(!message?.author?.id) message.author = getUnkownMember()
+
+    let author = serverconfig.servermembers[message.author.id] || getUnkownMember()
+    if(!author) throw new Error("Message author member object not found");
+
+    let shouldAnonymize = (author?.isBanned == true || message?.anon === true) || false
+    if(shouldAnonymize){
+        return anonymizeMessage(message, author?.isBanned, hasPermission(issuerMemberId, "viewAnonymizedMessages"), issuerMemberId);
+    }
+    else{
+        return message;
+    }
+}
+
+export function anonymizeMessage(message, hideContentForMembers = false, isAdmin = false, issuerMemberId) {
+    message = copyObject(message);
+
+    if (!message || typeof message !== "object") {
+        console.log(message)
+        console.error("getCastingMemberObject Message: Invalid input: Expected an object");
+        return;
+    }
+
+
+    let originalAuthor = serverconfig.servermembers[message.author.id] || getUnkownMember();
+    let isBanned = originalAuthor?.isBanned;
+
+    // anonymize message author
+    if(message?.author?.name){
+        message.author = autoAnonymizeMember(issuerMemberId, originalAuthor);
+    }
+
+    // anonymize message reply author
+    if(message?.reply?.author?.name){
+        message.reply.author = autoAnonymizeMember(issuerMemberId, serverconfig.servermembers[message.reply.author.id]);
+    }
+
+    if(message?.id) delete message?.id;
+    if(message?.author) {
+        message.author.id = isAdmin ? originalAuthor?.id : 0
+    }
+
+    if(hideContentForMembers || isBanned){
+        if(isAdmin){
+            if(isBanned){
+                message.isAdmin = isAdmin;
+            }
+        }
+        else{
+            if(isBanned){
+                message.message = `${serverconfig.serverinfo.moderation.bans.displayMessageNotice}`
+                message.author.name = `${serverconfig.serverinfo.moderation.bans.displayName}`
+                message.author = anonymizeMember(message.author, true, isAdmin);
+                message.author.isBanned = true;
+            }
+        }
+    }
+
+    return message;
+}
+
+export function setMemberObjColor(member){
+    let highestRole = getMemberHighestRole(member?.author?.id || member?.id);
+    if(highestRole){
+        member.color = highestRole?.info?.color;
+    }
+
+    return member;
+}
+
+export function getUnkownMember(){
+    return {
+        id: 0,
+        name: "Unkown Member"
+    }
+}
+
 export function getCastingMemberObject(member) {
+    if(!member) member = getUnkownMember();
     member = copyObject(member);
 
     if (!member || typeof member !== "object") {
@@ -1175,7 +1474,7 @@ export function getCastingMemberObject(member) {
         return;
     }
 
-    const keysToDelete = [
+    let keysToDelete = [
         "password",
         "token",
         "loginName",
@@ -1183,12 +1482,15 @@ export function getCastingMemberObject(member) {
         "rowId"
     ]; // Keys to always delete
 
+    if(!serverconfig.serverinfo.system.members.allowCountryCode) keysToDelete.push("country_code");
+
     keysToDelete.forEach(key => {
         if (key in member) {
             delete member[key];
         }
     });
 
+    member = setMemberObjColor(member)
     return member;
 }
 
@@ -1203,7 +1505,7 @@ export async function findAndVerifyUser(loginName, password) {
         // Check loginName matches either 'name'
         if (member.loginName === loginName) {
             // Verify the password hash
-            const isPasswordValid = bcrypt.compareSync(password, member.password);
+            const isPasswordValid = await bcrypt.compare(password, member.password);
             if (isPasswordValid) {
                 return {result: true, member: copyObject(member)}; // Return the matched user
             } else {

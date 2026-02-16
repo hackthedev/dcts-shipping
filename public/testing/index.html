@@ -6,45 +6,133 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <script src="../js/core/socket.io.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="/js/core/socket.io.js"></script>
+    <script src="/js/core/FileManager.js"></script>
+    <script src="/js/core/UserManager.js"></script>
+    <script src="/js/core/CookieManager.js"></script>
 
     <title>Document</title>
 </head>
 <body>
 
 <div id="tests-container">
-    <ul id="tests">
-
-    </ul>
 </div>
 
 <script>
     var socket = io.connect()
 
-    socket.emit("getTestFiles", {}, async function (response){
-        console.log(response)
-        let testsList = document.getElementById("tests");
+    async function testLogin(){
+        // required
+        socket.emit("userConnected", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            pow: {
+                challenge: localStorage.getItem("pow_challenge"),
+                solution: localStorage.getItem("pow_solution")
+            }
+        }, function (response) {
 
-        if(response?.error == null && response?.files?.length > 0){
+        })
+    }
 
-            for(let file of response?.files){
+    document.addEventListener("DOMContentLoaded", async function() {
 
-                let test = document.createElement("li");
-                test.innerHTML = file;
-                test.onclick = async function() {
+        await testLogin();
+
+        function runTestWithGuards(testFn, testId, { timeout = 5000 } = {}) {
+            return new Promise((resolve) => {
+                let done = false;
+
+                const timer = setTimeout(() => {
+                    if (done) return;
+                    done = true;
+                    resolve({ error: "timeout" });
+                }, timeout);
+
+                const onError = (data) => {
+                    if (data?.testId !== testId) return;
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    socket.off("onErrorTesting", onError);
+                    resolve({ error: data });
+                };
+
+                socket.on("onErrorTesting", onError);
+
+                Promise.resolve()
+                    .then(() => testFn({ testId }))
+                    .then((res) => {
+                        if (done) return;
+                        done = true;
+                        clearTimeout(timer);
+                        socket.off("onErrorTesting", onError);
+                        resolve(res);
+                    })
+                    .catch((err) => {
+                        if (done) return;
+                        done = true;
+                        clearTimeout(timer);
+                        socket.off("onErrorTesting", onError);
+                        resolve({ error: err?.message || err });
+                    });
+            });
+        }
+
+
+        socket.emit("getTestFiles", {}, async function (response){
+            console.log(response)
+            let testsList = document.getElementById("tests-container");
+
+            if(response?.error == null && response?.files?.length > 0){
+
+                for(let file of response?.files){
+                    let testname = file.split(".")[0];
+                    let test = document.createElement("div");
+
+                    test.classList.add("test")
+                    test.innerHTML = `
+
+                        <div class="header">
+                            <div class="status">🕐</div>
+                            ${testname}
+                        </div>
+
+                        <details class="data">-</details>
+
+                    `;
+                    testsList.appendChild(test);
+                    testsList.insertAdjacentElement("beforeend", test)
+
+                    let status = test.querySelector(".status")
+                    let responseDisplay = test.querySelector(".data")
+
                     const mod = await import(`/testing/tests/${file}?v=${Math.random()}`);
                     if (mod.test) {
-                        let result = mod.test();
-                        console.log("test result: ", result);
+
+                        let result = await runTestWithGuards(mod.test, testname, { timeout: 2000 });
+
+
+                        if(result === true) status.innerHTML = "✅"
+                        if(result === false ) status.innerHTML = "❌"
+                        if(result == null ) status.innerHTML = "❔"
+                        if(result?.error) status.innerHTML = "🕐❌"
+                        responseDisplay.innerHTML = result?.error || result
+
+                        console.log(`${testname} result: `, result);
+                    }
+                    else{
+                        console.warn("No test Function found in ", testname)
                     }
                 }
-                testsList.appendChild(test);
 
-                testsList.insertAdjacentElement("beforeend", test)
             }
-
-        }
+        })
     })
+
+
 
     async function importJsFile(url) {
         return new Promise((resolve, reject) => {

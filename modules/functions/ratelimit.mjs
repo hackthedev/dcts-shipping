@@ -1,4 +1,3 @@
-// Minimaler Rate-Limiter: begrenzt pro IP und global pro Anfrage-Signatur (METHOD + PATH)
 export function rateLimit({ windowMs = 10_000, ipLimit = 30, sigLimit = 120, trustProxy = true } = {}) {
     const ipMap = new Map();
     const sigMap = new Map();

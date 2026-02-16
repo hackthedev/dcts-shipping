@@ -1,10 +1,10 @@
 .inline-text-emoji {
     border-radius: 0 !important;
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
 
     margin: 0 !important;
-    margin-bottom: -6px !important;
+    margin-bottom: -6.25px !important;
 }
 
 .inline-text-emoji.big {
@@ -65,7 +65,6 @@
 
 .SelectedTab {
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
 }
 
 #gif-searchbar {

@@ -6,6 +6,7 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('saveChannelPermissions', function (member, response) {
+        /* DEPRECATED */
         if (validateMemberId(member.id, socket) == true
             && serverconfig.servermembers[member.id].token == member.token
         ) {

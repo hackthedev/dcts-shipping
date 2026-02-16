@@ -45,6 +45,14 @@ class Autocomplete {
         );
     }
 
+    clear() {
+        this.entries = [];
+        this.filtered = [];
+        this.index = -1;
+        this.container.innerHTML = "";
+        this.hide();
+    }
+
     showFiltered(term) {
         if (this.hiddenBySelect) return;
         this.filtered = this.filterEntries(term);

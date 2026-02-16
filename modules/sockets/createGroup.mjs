@@ -35,7 +35,7 @@ export default (io) => (socket) => {
                 serverconfig.groups[groupId] = JSON.parse(
                     `{
                         "info": {
-                            "id": ${groupId},
+                            "id": "${groupId}",
                             "name": "${xssFilters.inHTMLData(member.value)}",
                             "icon": "/img/default_icon.png",
                             "banner": "/img/default_banner.png",
@@ -48,12 +48,12 @@ export default (io) => (socket) => {
                             "categories": {
                                 "${categoryId}": {
                                     "info": {
-                                        "id": ${categoryId},
+                                        "id": "${categoryId}",
                                         "name": "General"
                                     },
                                     "channel": {
                                         "${channelId}": {
-                                            "id": ${channelId},
+                                            "id": "${channelId}",
                                             "name": "chat",
                                             "type": "text",
                                             "description": "Default Channel Description",

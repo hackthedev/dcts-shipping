@@ -1,7 +1,32 @@
 import {queryDatabase} from "./mysql.mjs";
 import {XMLHttpRequest, fetch, serverconfig} from "../../../index.mjs";
-import {report} from "process";
-import Logger from "../logger.mjs";
+import Logger from "@hackthedev/terminal-logger"
+import fs from "fs";
+import {spawn} from "child_process";
+
+
+export async function exportDatabaseFromPool(pool, outFile) {
+    return;
+    let host = process.env.DB_HOST || serverconfig.serverinfo.sql.host;
+    let user = process.env.DB_USER || serverconfig.serverinfo.sql.username;
+    let password = process.env.DB_PASS || serverconfig.serverinfo.sql.password;
+    let database = process.env.DB_NAME || serverconfig.serverinfo.sql.database;
+
+    return await new Promise((resolve, reject) => {
+        const dump = spawn("mariadb-dump", [
+            "-h", host,
+            "-u", user,
+            `-p${password}`,
+            database
+        ]);
+
+        const stream = fs.createWriteStream(outFile);
+
+        dump.stdout.pipe(stream);
+        dump.stderr.on("data", d => reject(d.toString()));
+        dump.on("close", code => code === 0 ? resolve() : reject(code));
+    });
+}
 
 export async function saveMemberToDB(id, data) {
     if (!data || typeof data !== "object" || !id) return console.log("[saveMemberToDB] invalid data", data);
@@ -10,7 +35,13 @@ export async function saveMemberToDB(id, data) {
     const vals = Object.values(data);
     const placeholders = cols.map(() => "?").join(",");
 
-    const sql = `REPLACE INTO members (${cols.join(",")}) VALUES (${placeholders})`;
+    const sql = `
+        INSERT INTO members (${cols.join(",")})
+        VALUES (${placeholders})
+            ON DUPLICATE KEY UPDATE
+                                 ${cols.map(c => `${c}=VALUES(${c})`).join(",")}
+    `;
+
 
     try {
         await queryDatabase(sql, vals);
@@ -20,8 +51,11 @@ export async function saveMemberToDB(id, data) {
 }
 
 
+
+
 export async function loadMembersFromDB() {
-    if (!serverconfig || typeof serverconfig !== "object") serverconfig = {};
+    if (!serverconfig || typeof serverconfig !== "object") return;
+
     if (!serverconfig.servermembers || typeof serverconfig.servermembers !== "object") {
         serverconfig.servermembers = {};
     }
@@ -42,65 +76,77 @@ export async function loadMembersFromDB() {
 
     await saveMemberToDB("system", sys);
 
-    const [systemRow] = await queryDatabase("SELECT * FROM members WHERE id = ?", ["system"]);
+    const [systemRow] = await queryDatabase(
+        "SELECT * FROM members WHERE id = ?",
+        ["system"]
+    );
     if (systemRow) {
-        serverconfig.servermembers["system"] = systemRow;
+        serverconfig.servermembers.system = systemRow;
     }
 }
 
+
 export async function cacheMediaUrl(url, mediaType) {
-    const query = `INSERT IGNORE INTO url_cache (url, media_type) VALUES (?, ?)`;
+    const query = `INSERT
+    IGNORE INTO url_cache (url, media_type) VALUES (?, ?)`;
     return await queryDatabase(query, [url, mediaType]);
 }
 
 export async function getMediaUrlFromCache(url) {
-    const query = `SELECT media_type FROM url_cache WHERE url = ?`;
+    const query = `SELECT media_type
+                   FROM url_cache
+                   WHERE url = ?`;
     return await queryDatabase(query, [url]);
 }
 
-export async function saveReport(reportCreator, reportedUser, reportType, reportData = nul, reportNotes = null) {
-    const query = `INSERT INTO reports (reportCreator, reportedUser, reportType, reportData, reportNotes) VALUES (?, ?, ?, ?, ?)`;
+export async function saveReport(reportCreator, reportedUser, reportType, reportData = null, reportNotes = null) {
+    const query = `INSERT INTO reports (reportCreator, reportedUser, reportType, reportData, reportNotes)
+                   VALUES (?, ?, ?, ?, ?)`;
     return await queryDatabase(query, [reportCreator, reportedUser, reportType, reportData, reportNotes]);
 }
 
 export async function getReports(filter = "") {
-    const query = `SELECT * FROM reports ${filter}`;
+    const query = `SELECT *
+                   FROM reports ${filter}`;
     return await queryDatabase(query, []);
 }
 
 export async function deleteReport(reportId) {
-    const query = `DELETE FROM reports WHERE id = ?`;
+    const query = `DELETE
+                   FROM reports
+                   WHERE id = ?`;
     return await queryDatabase(query, [reportId]);
 }
 
 export async function saveChatMessageInDb(message) {
     const query = `
-    INSERT INTO messages (authorId, messageId, message, room) 
-    VALUES (?, ?, ?, ?)
-    ON DUPLICATE KEY UPDATE 
-      message = VALUES(message), 
-      room = VALUES(room)
-  `;
+        INSERT INTO messages (authorId, messageId, message, room)
+        VALUES (?, ?, ?, ?) ON DUPLICATE KEY
+        UPDATE
+            message =
+        VALUES (message), room =
+        VALUES (room)
+    `;
 
-    const encodedMessage = encodeToBase64(JSON.stringify(message));
-    return await queryDatabase(query, [message.id, message.messageId, encodedMessage, message.room]);
+    const encodedMessage = JSON.stringify(message);
+    return await queryDatabase(query, [message.author.id, message.messageId, encodedMessage, message.room]);
 }
 
 export async function logEditedChatMessageInDb(message) {
     const query = `
-    INSERT INTO message_logs (authorId, messageId, message, room) 
-    VALUES (?, ?, ?, ?)
-  `;
+        INSERT INTO message_logs (authorId, messageId, message, room)
+        VALUES (?, ?, ?, ?)
+    `;
 
     message.editedTimestamp = new Date().getTime();
-    const encodedMessage = encodeToBase64(JSON.stringify(message));
-    return await queryDatabase(query, [message.id, message.messageId, encodedMessage, message.room]);
+    const encodedMessage = JSON.stringify(message);
+    return await queryDatabase(query, [message.author.id, message.messageId, encodedMessage, message.room]);
 }
 
 export function leaveAllRooms(socket, memberId = null) {
     const rooms = socket.rooms;
     rooms.forEach((room) => {
-        if (room !== socket.id && room != memberId) { // Exclude the socket's own room
+        if (room !== socket.id && room !== memberId && !room.startsWith("vc_")) { // Exclude the socket's own room
             socket.leave(room);
         }
     });
@@ -122,23 +168,109 @@ export function escapeJSONString(str) {
         .replace(/\t/g, '\\t');  // Escape tabs
 }
 
+export async function markInboxMessageAsRead(memberId, inboxId) {
+    if (!memberId) throw new Error("No member id provided");
+    if (!inboxId) throw new Error("No inbox id provided");
+
+    if(!inboxId.includes("-")){
+        await queryDatabase(
+            `UPDATE inbox SET isRead = 1 WHERE memberId = ? AND inboxId = ?`,
+            [memberId, inboxId]
+        );
+    }
+    else{
+        await queryDatabase(
+            `UPDATE inbox SET isRead = 1 WHERE memberId = ? AND customId = ?`,
+            [memberId, inboxId]
+        );
+    }
+}
+
+
+export async function addInboxMessage(memberId, data = {}, type = "general", customId = null) {
+    let query = `INSERT INTO inbox (memberId, type, data, createdAt)
+                 VALUES (?, ?, ?, ?)`;
+
+    if (customId) {
+        query = `INSERT
+        INTO inbox (memberId, type, data, createdAt, customId) VALUES (?, ?, ?, ?, ?)`;
+        return await queryDatabase(query, [memberId, type, JSON.stringify(data), new Date().getTime(), customId]);
+    }
+
+    return await queryDatabase(query, [memberId, type, JSON.stringify(data), new Date().getTime()]);
+}
+
+export async function getInboxMessages({
+                                           memberId,
+                                           index = -1,
+                                           inboxId = null,
+                                           onlyUnread = false
+                                       } = {}) {
+
+    if (inboxId !== null) {
+        const query = `SELECT *
+                       FROM inbox
+                       WHERE inboxId = ? LIMIT 50`;
+        return await queryDatabase(query, [inboxId]);
+    }
+
+    if (index === -1 && !onlyUnread) {
+        const query = `SELECT *
+                       FROM inbox
+                       WHERE memberId = ?
+                       ORDER BY createdAt DESC LIMIT 100`;
+        return await queryDatabase(query, [memberId]);
+    }
+
+    return await getUnreadInbox(memberId, index);
+
+    async function getUnreadInbox(memberId, index = -1){
+        if(index !== -1){
+            const query = `SELECT *
+                       FROM inbox
+                       WHERE memberId = ?
+                         AND createdAt < ?
+                         AND isRead = 0
+                       ORDER BY createdAt DESC LIMIT 50`;
+            return await queryDatabase(query, [memberId, index]);
+        }
+
+        const query = `SELECT *
+                       FROM inbox
+                       WHERE memberId = ?
+                         AND isRead = 0
+                       ORDER BY createdAt DESC LIMIT 50`;
+        return await queryDatabase(query, [memberId]);
+    }
+}
+
+
 export async function getChatMessagesFromDb(roomId, index, msgId = null) {
     if (msgId != null) {
-        const query = `SELECT * FROM messages WHERE messageId = ?`;
+        const query = `SELECT *
+                       FROM messages
+                       WHERE messageId = ?`;
         return await queryDatabase(query, [msgId]);
     }
 
     if (index === -1) {
-        const query = `SELECT * FROM messages WHERE room = ? ORDER BY createdAt DESC LIMIT 50`;
+        const query = `SELECT *
+                       FROM messages
+                       WHERE room = ?
+                       ORDER BY createdAt DESC LIMIT 50`;
         return await queryDatabase(query, [roomId]);
     } else {
-        const query = `SELECT * FROM messages WHERE room = ? AND createdAt < ?  ORDER BY createdAt DESC LIMIT 50`;
+        const query = `SELECT *
+                       FROM messages
+                       WHERE room = ?
+                         AND createdAt < ?
+                       ORDER BY createdAt DESC LIMIT 50`;
         return await queryDatabase(query, [roomId, Number(index)]);
     }
 }
 
 export async function getChatMessageById(msgId) {
-    // SQL FEATURE ONLY obviously
+    if(typeof msgId !== "string" && typeof msgId !== "number") throw new Error("Invalid message id. Excepted string or number");
 
     // nothing was supplied
     if (!msgId) {
@@ -146,7 +278,9 @@ export async function getChatMessageById(msgId) {
         return;
     }
 
-    const query = `SELECT * FROM messages WHERE messageId = ?`;
+    const query = `SELECT *
+                   FROM messages
+                   WHERE messageId = ?`;
     return await queryDatabase(query, [msgId]);
 }
 
@@ -158,7 +292,9 @@ export async function getMessageLogsFromDb(msgId) {
         return;
     }
 
-    const query = `SELECT * FROM message_logs WHERE messageId = ?`;
+    const query = `SELECT *
+                   FROM message_logs
+                   WHERE messageId = ?`;
     return await queryDatabase(query, [msgId]);
 }
 
@@ -171,11 +307,15 @@ export async function deleteChatMessagesFromDb(messageId) {
 
     // dm message
     if (messageId?.startsWith("m_")) {
-        const query = `DELETE FROM dms_messages WHERE messageId = ?`;
+        const query = `DELETE
+                       FROM dms_messages
+                       WHERE messageId = ?`;
         return await queryDatabase(query, [messageId]);
     }
 
-    const query = `DELETE FROM messages WHERE messageId = ?`;
+    const query = `DELETE
+                   FROM messages
+                   WHERE messageId = ?`;
     return await queryDatabase(query, [messageId]);
 }
 

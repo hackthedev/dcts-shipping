@@ -12,7 +12,8 @@
     padding: 4px;
 
     gap: 8px;
-    background-color: hsl(from var(--main) h s calc(l * 2.75));
+    background-color: hsl(from var(--main) h s calc(l * 1) / 100%);
+    border: 2px solid hsl(from var(--main) h s calc(l * 8) / 30%);
     margin-top: -4px;
 }
 
@@ -21,11 +22,11 @@
 }
 .message-container .messageActions button{
     color: white;
-    background-color: transparent;
+    background-color: hsl(from var(--main) h s calc(l * 8) / 20%);
     border: none;
     border-radius: 4px;
 
-    font-size: 12px;
+    font-size: 14px;
     font-weight: bold;
     cursor: pointer;
     text-align: center;

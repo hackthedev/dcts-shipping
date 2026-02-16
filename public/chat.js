@@ -1,37 +1,575 @@
 console.log("%c" + "WAIT!", "color: #FF0000; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold;");
 console.log("%c" + "People can use the console to steal your account xo !", "color: #FF0000; -webkit-text-stroke: 0px black; font-size: 20px; font-weight: bold;");
 
-ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
+document.addEventListener("error", (e) => {
+    const el = e.target;
+    if (el.tagName === "IMG") {
+        el.setAttribute("data-src", el.src)
+        el.src = "/img/error.png";
+    }
+}, true);
 
-const splash = new SplashScreen(document.body);
-splash.show()
+function rewriteImg(img){
+    if(!img || !img.src) return;
 
-if(!window.isSecureContext){
-    splash.hide();
+    if(img.dataset.proxied === "1") return;
 
-    function showSecureContextError(duration){
-        showSystemMessage({
-            title: "Missing Secure Context",
-            text: "The browser thinks the connection isnt secure! Please fix this issue by using a TLS certificate!",
-            icon: "error",
-            img: null,
-            type: "error",
-            duration,
-            onClick: () => {
-                closeSystemMessage();
-            }
-        });
+    const proxied = ChatManager.proxyUrl(img.src);
+    if(proxied !== img.src){
+        img.src = proxied;
     }
 
-    let interval = 2000;
-    showSecureContextError(interval / 2)
-    setInterval(() => {
-        showSecureContextError(interval / 2)
-    }, interval)
-
-    throw new Error("Missing Browser Secure Context!");
+    img.dataset.proxied = "1";
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("img").forEach(rewriteImg);
+
+    new MutationObserver(mutations => {
+        for(const m of mutations){
+            for(const n of m.addedNodes){
+                if(n.nodeType !== 1) continue;
+
+                if(n.tagName === "IMG"){
+                    rewriteImg(n);
+                }
+                else{
+                    n.querySelectorAll?.("img").forEach(rewriteImg);
+                }
+            }
+        }
+    }).observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    const observer = new MutationObserver(() => {
+        document.querySelectorAll('.profile_aboutme a:not([target])').forEach(a => {
+            a.setAttribute('target', '_blank');
+            a.setAttribute('rel', 'noopener noreferrer');
+        });
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+});
+
+
+
+let customPrompts
+let tooltipSystem
+let customAlerts
+let splash
+
+var editorContainer = document.querySelector('.editor-container');
+var editorToolbar = document.getElementById("editor-toolbar");
+var editorHints = document.getElementById("editor-hints");
+var quillContainer = document.querySelector('.ql-container');
+var editor = document.querySelector('.ql-editor');
+
+var initialToolbarHeight
+var initialHeight;
+var maxHeight;
+var initialMargin
+var allowEditorBlur
+
+document.addEventListener("DOMContentLoaded", async function () {
+    ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
+    Docs.registerContextMenu()
+
+    registerMessageInfiniteLoad(document.getElementById("content"))
+    registerMessageCreateEvent();
+    initAudioPlayerEvents();
+
+    customPrompts = new Prompt();
+    tooltipSystem = new TooltipSystem();
+    customAlerts = new CustomAlert();
+    splash = new SplashScreen(document.body);
+    splash.show()
+
+    if (!window.isSecureContext) {
+        splash.hide();
+
+        function showSecureContextError(duration) {
+            showSystemMessage({
+                title: "Missing Secure Context",
+                text: "The browser thinks the connection isnt secure! Please fix this issue by using a TLS certificate!",
+                icon: "error",
+                img: null,
+                type: "error",
+                duration,
+                onClick: () => {
+                    closeSystemMessage();
+                }
+            });
+        }
+
+        let interval = 2000;
+        showSecureContextError(interval / 2)
+        setInterval(() => {
+            showSecureContextError(interval / 2)
+        }, interval)
+
+        throw new Error("Missing Browser Secure Context!");
+    }
+
+    initQuillShit();
+
+    // manual click event listener because its too general
+    document.body.addEventListener("click", (event) => {
+        const {clientX: mouseX, clientY: mouseY} = event;
+        var clickedElement = event.target
+
+        var profileContent = document.getElementById("profile_container");
+
+        // dont close the profile popup when we click somewhere on the profile
+        if (profileContent.contains(clickedElement)) {
+            // we pressed on the profile so we can close the role menu again
+            document.getElementById("profile-role-menu").style.display = "none";
+            return;
+        }
+
+        // and dont close it when we click around on the role menu
+        if (document.getElementById("profile-role-menu").contains(clickedElement)) {
+            return;
+        }
+
+        // otherwise on default close it
+        profileContent.style.display = "none";
+        profileContent.innerHTML = "";
+        ModActions.hideRoleMenu()
+    });
+
+    // mobile swiping
+    const contentLayout = document.getElementById("contentLayout");
+    contentLayout.addEventListener("touchstart", e => {
+        const t = e.touches[0];
+        startX = t.clientX;
+        startY = t.clientY;
+    });
+
+    contentLayout.addEventListener("touchend", e => {
+        const t = e.changedTouches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+
+        if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            onSwipe(dx > 0 ? "right" : "left");
+        }
+    });
+
+
+    document.getElementById("message-actions-image").onclick = function (e) {
+        var x = e.clientX;
+        var y = e.clientY;
+
+        var clickedElement = document.elementFromPoint(x, y)
+
+        if (clickedElement.id != "message-actions-image") {
+            return;
+        }
+
+        showEmojiPicker(x,y, (emojiObj) => {
+            insertEmoji(emojiObj, true);
+            focusEditor();
+        })
+    }
+
+
+    window.addEventListener('resize', function (event) {
+        // do stuff here
+
+        var emojiContainer = document.getElementById("emoji-box-container");
+        var profileContainer = document.getElementById("profile_container");
+
+        if (emojiContainer.style.display == "flex") {
+            //emojiContainer.style.display = "none";
+            closeEmojiBox()
+        }
+        if (profileContainer.style.display == "flex") {
+            profileContainer.style.display = "none";
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        var emojiContainer = document.getElementById("emoji-box-container");
+        var profileContainer = document.getElementById("profile_container");
+
+        if (event.key === "Escape") {
+            if (emojiContainer.style.display === "block") {
+                //emojiContainer.style.display = "none";
+                closeEmojiBox();
+            }
+            if (profileContainer.style.display === "block") {
+                profileContainer.style.display = "none";
+            }
+        }
+    });
+
+    initUploadDragAndDrop()
+
+    socket.on("connect", async () => {
+        // sick af in my opinion
+        await initPow()
+
+        // join first
+        await userJoined(null, null, null, null, true);
+
+        setTimeout(() => {
+            splash.hide()
+        }, 250)
+    })
+
+    ContextMenu.registerContextMenu(
+        "serverbanner", // random ass unique name
+        [
+            "#serverbanner-image" // id or classname. if class start with .
+        ],
+        [ // ur context items
+            {
+                icon: "&#9998;",
+                text: "Change banner",
+                callback: async () => { // what happens on click
+                    AdminActions.changeGroupBanner()
+                },
+                condition: async () => { // condition. can be completely removed
+                    return await (await checkPermission("manageGroups")).permission === "granted"
+                },
+                type: "ok"
+            },
+            {
+                icon: "&#10022;",
+                text: "Manage server",
+                callback: async () => {
+                    AdminActions.editServer()
+                },
+                condition: async () => {
+                    return await (await checkPermission(["manageServer",
+                        "manageGroups",
+                        "manageChannels",
+                        "manageUploads",
+                        "manageGroups",
+                        "viewLogs",
+                        "manageEmojis",
+                        "manageBans",
+                        "manageServerInfo",
+                        "manageRateSettings"], true)).permission === "granted"
+                },
+                type: "success"
+            }
+        ])
+
+    ContextMenu.registerClickEvent(
+        "memberprofile",
+        [
+            ".memberlist-container",
+            ".memberlist-container .name",
+            ".memberlist-container .status",
+            ".memberlist-img",
+            ".mention.member",
+            // vc container
+            ".vc-container .participant",
+            ".vc-container .participant img",
+            //
+            ".message-container .icon",
+            ".message-container .username",
+            // channel list vc user
+            "#channeltree .category .participants .participant",
+            "#channeltree .category .participants .participant .avatar",
+        ],
+        async (data) => {
+            let memberId = getMemberIdFromElement(data.element)
+            if (!memberId) {
+                console.warn("Couldnt get member profile from click event because memberid wasnt found");
+                return;
+            }
+            getMemberProfile(memberId, data.X, data.Y, null, true)
+        },
+        async (data) => {
+            // dont show the profile container when we click on the add role button
+            return data.element.classList.contains("addRoleMenuTrigger") === false;
+        }
+    )
+
+    ContextMenu.registerClickEvent(
+        "memberprofileroles",
+        [
+            ".addRoleMenuTrigger"
+        ],
+        async (data) => {
+            console.log(data)
+
+            let memberId = data.element.getAttribute("data-member-id");
+            if (!memberId) {
+                console.warn("Couldnt get member profile from click event because memberid wasnt found");
+                return;
+            }
+
+            ModActions.showRoleMenu(data.X, data.Y);
+        },
+        async (data) => {
+            // only show the role menu when we click the add button
+            return data.element.classList.contains("addRoleMenuTrigger") === true;
+        }
+    )
+
+    ContextMenu.registerClickEvent(
+        "inbox",
+        [
+            ".headerIcon.inbox"
+        ],
+        async (data) => {
+            Inbox.toggleInbox();
+        },
+        async (data) => {
+            const inbox = document.querySelector(".inbox-container");
+            if(!inbox) return true;
+
+            return !inbox.contains(data.event.target);
+        }
+    )
+
+
+    ContextMenu.registerClickEvent(
+        "inbox reply",
+        [
+            ".headerIcon.inbox .inbox-container .inbox-content .entry"
+        ],
+        async (data) => {
+
+            await PageRenderer.renderHTML(data.element.closest(".inbox-container"),
+                `
+                    <div class="inbox-reply">
+                        <span onclick="PageRenderer.remove();" style="cursor: pointer;">« Back</span>
+                        
+                        <div class="inbox-content">
+                            ${data.element.closest(".entry").outerHTML}
+                        </div>
+                        
+                        <span>Reply</span>
+                        <div class="inbox-editor"></div>
+                    </div>
+
+                    `
+            )
+
+            let entry = PageRenderer.Element().querySelector(".entry");
+            if(!entry) return console.error("Couldnt find inbox reply")
+
+            let messageId = findAttributeUp(entry, "data-message-id")
+            let inboxId = findAttributeUp(entry, "data-inbox-id")
+
+            const editor = new RichEditor({
+                selector: ".page-renderer .inbox-editor",
+                toolbar: [
+                    ["bold", "italic", "underline"],
+                    ["code-block", "link"]
+                ],
+                onImg: async (src) => {
+                    console.log("Uploading and replacing src " + src)
+                    let upload = await ChatManager.srcToFile(src);
+                    editor.insertImage(upload.path)
+                },
+                onSend: async(html) => {
+                    console.log(html, messageId);
+                    if(!messageId) throw new Error("Couldnt find inbox reply message id")
+
+                    replyMessageId = messageId;
+                    let wasSent = sendMessageToServer(null, null, null, html, true);
+
+                    if(wasSent){
+                        Inbox.markAsRead(inboxId)
+                        editor.clear()
+                    }
+                }
+            });
+
+
+            console.log("rendered")
+        }
+    )
+
+// close emoji box when we click outside of the emoji container
+    ContextMenu.registerClickEvent(
+        "body_emojicontainer",
+        [
+            "body"
+        ],
+        async (data) => {
+            // emoji
+            let emojiContainer = getEmojiContainerElement();
+            if (emojiContainer?.style?.display === "flex" && !emojiContainer?.contains(data.element)) {
+                if (!data?.element?.id?.includes("message-actions-image") &&
+                    !data?.element?.classList?.contains("react")
+                ){
+                    closeEmojiBox();
+                }
+            }
+
+            // inbox
+            let inboxContainer = document.querySelector(".inbox-container");
+            if(inboxContainer && inboxContainer?.style?.display === "flex" &&
+                (!inboxContainer?.contains(data.element) && !data?.element?.classList?.contains("inbox")) &&
+                (!PageRenderer?.Element()?.contains(data.element))
+            )
+            {
+                //inboxContainer.style.display = "none";
+            }
+
+            // refocus editor
+            let editorContainer = document.querySelector(".editor-container");
+            if(editorContainer &&
+                !editorContainer?.contains(data.element) &&
+                //!docsContainer?.contains(data.element) &&
+                !emojiContainer.contains(data.element)
+            ){
+                //focusEditor(); // causes too many dumb bugs as of rn
+            }
+
+
+        }
+    )
+
+    ContextMenu.registerContextMenu(
+        "memberprofile",
+        [
+            ".memberlist-container",
+            ".memberlist-container .name",
+            ".memberlist-container .status",
+            ".memberlist-img",
+            ".mention.member",
+            // vc container
+            ".vc-container .participant",
+            ".vc-container .participant img",
+            ".user-container .user-icon",
+            ".message-container .icon",
+            ".message-container .username",
+            // vc user from channels
+            "#channeltree .category .participants .participant",
+            "#channeltree .category .participants .participant .avatar",
+        ],
+        [
+            {
+                icon: "&#9878;",
+                text: "Ban Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt ban member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.banUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt ban member because memberid wasnt found");
+                        return;
+                    }
+                    return (await (await checkPermission("banMember")).permission === "granted") && (memberId !== UserManager.getID())
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9873;",
+                text: "Kick Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt kick member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.kickUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if(!memberId) return false;
+                    return (await (await checkPermission("kickUsers")).permission === "granted") && (memberId !== UserManager.getID())
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9873;",
+                text: "Mute Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt mute member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.muteUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if(!memberId) return false;
+                    return (await (await checkPermission("muteUsers")).permission === "granted") &&
+                        (memberId !== UserManager.getID()) &&
+                        data.element.querySelectorAll(".mutedMember").length === 0
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9873;",
+                text: "Unmute Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt mute member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.unmuteUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if(!memberId) return false;
+                    return (await (await checkPermission("muteUsers")).permission === "granted") &&
+                        (memberId !== UserManager.getID()) &&
+                        data.element.querySelectorAll(".mutedMember").length !== 0
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9741;",
+                text: "Disconnect Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt disconnect member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.disconnectUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if(!memberId) return false;
+                    return (await (await checkPermission("disconnectUsers")).permission === "granted") && (memberId !== UserManager.getID())
+                },
+                type: "error"
+            },
+            {
+                icon: "&#10070;",
+                text: "Copy ID",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt copy member because memberid wasnt found");
+                        return;
+                    }
+
+                    navigator.clipboard.writeText(memberId)
+                }
+            }
+        ])
+})
 
 // IMPORTANT! By default, socket.io() connects to the host that
 // served the page, so we dont have to pass the server url
@@ -39,17 +577,7 @@ var socket = io.connect()
 
 registerMentionClickEvent()
 
-socket.on("connect", async () => {
-    console.log("socket connected");
-
-    // join first
-    await userJoined(null, null, null, null, true);
-
-    // sick af in my opinion
-    await initPow()
-});
-
-socket.on("updatedEmojis", function (){
+socket.on("updatedEmojis", function () {
     fetchEmojis();
 })
 
@@ -57,291 +585,8 @@ socket.on("updatedEmojis", function (){
 ensureDomPurify()
 
 
+voip = new VoIP(`${window.location.origin.includes("https") ? "wss" : "ws"}://{{livekit.url}}/`);
 
-voip = new VoIP( `${window.location.origin.includes("https") ? "wss" : "ws"}://{{livekit.url}}/`);
-
-ContextMenu.registerContextMenu(
-    "serverbanner", // random ass unique name
-    [
-        "#serverbanner-image" // id or classname. if class start with .
-    ],
-    [ // ur context items
-        {
-            icon: "&#9998;",
-            text: "Change banner",
-            callback: async () => { // what happens on click
-                AdminActions.changeGroupBanner()
-            },
-            condition: async () => { // condition. can be completely removed
-                return await (await checkPermission("manageGroups")).permission === "granted"
-            },
-            type: "ok"
-        },
-        {
-            icon: "&#10022;",
-            text: "Manage server",
-            callback: async () => {
-                AdminActions.editServer()
-            },
-            condition: async () => {
-                return await (await checkPermission(["manageServer",
-                    "manageGroups",
-                    "manageChannels",
-                    "manageUploads",
-                    "manageGroups",
-                    "viewLogs",
-                    "manageEmojis",
-                    "manageBans",
-                    "manageServerInfo",
-                    "manageRateSettings"], true)).permission === "granted"
-            },
-            type: "success"
-        }
-    ])
-
-ContextMenu.registerClickEvent(
-    "memberprofile",
-    [
-        ".memberlist-container",
-        ".memberlist-container .name",
-        ".memberlist-container .status",
-        ".memberlist-img",
-        ".mention.member",
-        // vc container
-        ".vc-container .participant",
-        ".vc-container .participant img",
-        //
-        ".message-container .icon",
-        ".message-container .username",
-        // channel list vc user
-        "#channeltree .category .participants .participant",
-        "#channeltree .category .participants .participant .avatar",
-    ],
-    async (data) => {
-        let memberId = data.element.getAttribute("data-member-id");
-        if (!memberId) {
-            console.warn("Couldnt get member profile from click event because memberid wasnt found");
-            return;
-        }
-        getMemberProfile(memberId, data.X, data.Y, null, true)
-    },
-    async (data) => {
-        // dont show the profile container when we click on the add role button
-        return data.element.classList.contains("addRoleMenuTrigger") === false;
-    }
-)
-
-ContextMenu.registerClickEvent(
-    "memberprofileroles",
-    [
-        ".addRoleMenuTrigger"
-    ],
-    async (data) => {
-        console.log(data)
-
-        let memberId = data.element.getAttribute("data-member-id");
-        if (!memberId) {
-            console.warn("Couldnt get member profile from click event because memberid wasnt found");
-            return;
-        }
-
-        ModActions.showRoleMenu(data.X, data.Y);
-    },
-    async (data) => {
-        // only show the role menu when we click the add button
-        return data.element.classList.contains("addRoleMenuTrigger") === true;
-    }
-)
-
-// close emoji box when we click outside of the emoji container
-ContextMenu.registerClickEvent(
-    "body_emojicontainer",
-    [
-        "body"
-    ],
-    async (data) => {
-        let emojiContainer = getEmojiContainerElement();
-        if(emojiContainer?.style?.display === "flex" && !emojiContainer.contains(data.element)){
-            if(data?.element?.id?.includes("message-actions-image")) return;
-            emojiContainer.style.display = "none";
-        }
-    }
-)
-
-ContextMenu.registerContextMenu(
-    "memberprofile",
-    [
-        ".memberlist-container",
-        ".memberlist-container .name",
-        ".memberlist-container .status",
-        ".memberlist-img",
-        ".mention.member",
-        // vc container
-        ".vc-container .participant",
-        ".vc-container .participant img",
-        ".user-container .user-icon",
-        ".message-container .icon",
-        ".message-container .username",
-        // vc user from channels
-        "#channeltree .category .participants .participant",
-        "#channeltree .category .participants .participant .avatar",
-    ],
-    [
-        {
-            icon: "&#9998;",
-            text: "Mention Member",
-            callback: async (data) => {
-                let memberId = data.element.getAttribute("data-member-id");
-                if (!memberId) {
-                    console.warn("Couldnt mention member because memberid wasnt found");
-                    return;
-                }
-
-                mentionUser(memberId);
-            },
-            type: "ok"
-        },
-        {
-            icon: "&#9878;",
-            text: "Ban Member",
-            callback: async (data) => {
-                let memberId = data.element.getAttribute("data-member-id");
-                if (!memberId) {
-                    console.warn("Couldnt ban member because memberid wasnt found");
-                    return;
-                }
-
-                ModActions.banUser(memberId)
-            },
-            condition: async (data) => {
-                let memberId = data.element.getAttribute("data-member-id");
-                if (!memberId) {
-                    console.warn("Couldnt ban member because memberid wasnt found");
-                    return;
-                }
-                return (await (await checkPermission("banMember")).permission === "granted") && (memberId !== UserManager.getID())
-            },
-            type: "error"
-        },
-        {
-            icon: "&#9873;",
-            text: "Kick Member",
-            callback: async (data) => {
-                let memberId = data.element.getAttribute("data-member-id");
-                if (!memberId) {
-                    console.warn("Couldnt kick member because memberid wasnt found");
-                    return;
-                }
-
-                ModActions.kickUser(memberId)
-            },
-            condition: async (data) => {
-                let memberId = data.element.getAttribute("data-member-id");
-                return (await (await checkPermission("kickUsers")).permission === "granted") && (memberId !== UserManager.getID())
-            },
-            type: "error"
-        },
-        {
-            icon: "&#9873;",
-            text: "Mute Member",
-            callback: async (data) => {
-                let memberId = data.element.getAttribute("data-member-id");
-                if (!memberId) {
-                    console.warn("Couldnt mute member because memberid wasnt found");
-                    return;
-                }
-
-                ModActions.muteUser(memberId)
-            },
-            condition: async (data) => {
-                let memberId = data.element.getAttribute("data-member-id");
-                return (await (await checkPermission("muteUsers")).permission === "granted") &&
-                    (memberId !== UserManager.getID()) &&
-                    data.element.querySelectorAll(".mutedMember").length === 0
-            },
-            type: "error"
-        },
-        {
-            icon: "&#9873;",
-            text: "Unmute Member",
-            callback: async (data) => {
-                let memberId = data.element.getAttribute("data-member-id");
-                if (!memberId) {
-                    console.warn("Couldnt mute member because memberid wasnt found");
-                    return;
-                }
-
-                ModActions.unmuteUser(memberId)
-            },
-            condition: async (data) => {
-                let memberId = data.element.getAttribute("data-member-id");
-                return (await (await checkPermission("muteUsers")).permission === "granted") &&
-                    (memberId !== UserManager.getID()) &&
-                    data.element.querySelectorAll(".mutedMember").length !== 0
-            },
-            type: "error"
-        },
-        {
-            icon: "&#9741;",
-            text: "Disconnect Member",
-            callback: async (data) => {
-                let memberId = data.element.getAttribute("data-member-id");
-                if (!memberId) {
-                    console.warn("Couldnt disconnect member because memberid wasnt found");
-                    return;
-                }
-
-                ModActions.disconnectUser(memberId)
-            },
-            condition: async (data) => {
-                let memberId = data.element.getAttribute("data-member-id");
-                return (await (await checkPermission("disconnectUsers")).permission === "granted") && (memberId !== UserManager.getID())
-            },
-            type: "error"
-        },
-        {
-            icon: "&#10070;",
-            text: "Copy ID",
-            callback: async (data) => {
-                let memberId = data.element.getAttribute("data-member-id");
-                if (!memberId) {
-                    console.warn("Couldnt copy member because memberid wasnt found");
-                    return;
-                }
-
-                navigator.clipboard.writeText(memberId)
-            }
-        },
-    ])
-
-
-// manual click event listener because its too general
-document.body.addEventListener("click", (event) => {
-
-    const {clientX: mouseX, clientY: mouseY} = event;
-    var clickedElement = event.target
-
-    var profileContent = document.getElementById("profile_container");
-
-
-    // dont close the profile popup when we click somewhere on the profile
-    if (profileContent.contains(clickedElement)) {
-        // we pressed on the profile so we can close the role menu again
-        document.getElementById("profile-role-menu").style.display = "none";
-        return;
-    }
-
-    // and dont close it when we click around on the role menu
-    if (document.getElementById("profile-role-menu").contains(clickedElement)) {
-        return;
-    }
-
-    // otherwise on default close it
-    profileContent.style.display = "none";
-    profileContent.innerHTML = "";
-
-    ModActions.hideRoleMenu()
-});
 
 
 socket.on('receiveThreadNew', ({}) => {
@@ -381,10 +626,6 @@ var typingIndicator = document.getElementById("typing-indicator");
 var messageInputBox = document.querySelector('.ql-editor');
 var typetimeout;
 
-const customPrompts = new Prompt();
-const tooltipSystem = new TooltipSystem();
-const customAlerts = new CustomAlert();
-
 
 document.addEventListener('DOMContentLoaded', async function () {
     chatlog = document.getElementById("content");
@@ -404,7 +645,7 @@ var blockedDataCounter = [];
 var bypassElement = [];
 var bypassCounter = [];
 
-function isElementVisible(element){
+function isElementVisible(element) {
     const rect = element.getBoundingClientRect();
     return rect.top < window.innerHeight &&
         rect.bottom > 0 &&
@@ -412,55 +653,6 @@ function isElementVisible(element){
         rect.right > 0;
 }
 
-async function updateMarkdownLinks(delay) {
-    const elements = document.querySelectorAll(".contentRows .content p");
-    const max = Math.min(elements.length, 50);
-    const isScrolledDown = isScrolledToBottom(document.getElementById("content"));
-
-    let markdownChanged = false;
-
-    for (let i = elements.length - 1; i >= elements.length - max; i--) {
-        const el = elements[i];
-        if (!el || el.className.includes("hljs")) continue;
-        if (el.parentNode.querySelector(".video-embed")) continue;
-
-        try {
-            if (el.innerText.trim().length === 0) continue;
-
-            // skip if the element isnt visible. some way
-            // to avoid the chat log from jumping all the time
-            if (!isElementVisible(el)) continue;
-
-            const messageId = el.getAttribute("data-message-id") || el.parentNode?.getAttribute("data-message-id");
-            const marked = await markdown(el.innerText, messageId);
-
-            if (marked.message != null &&
-                ((!marked.isMarkdown && marked.message !== el.innerText) ||
-                    (marked.isMarkdown && marked.message !== el.innerHTML))) {
-
-                bypassCounter[el.id] = (bypassCounter[el.id] || 0) + 1;
-                if (!bypassElement[el.id]) {
-
-                    el.innerHTML = marked.isMarkdown
-                        ? sanitizeHtmlForRender(marked.message)
-                        : el.innerText;
-                    markdownChanged = true;
-                }
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    if (markdownChanged && isScrolledDown) {
-        //scrollDown("updateMarkdown");
-    }
-
-    setTimeout(() => updateMarkdownLinks(delay), delay);
-}
-
-
-updateMarkdownLinks(2000)// If markdown didnt get converted, this will
 
 function escapeHtml(text) {
 
@@ -497,7 +689,7 @@ async function checkMediaTypeAsync(url) {
             } else {
                 // url wasnt cached
                 let xhr = new XMLHttpRequest();
-                xhr.open('HEAD', `/proxy?url=${encodeURIComponent(url)}`, false); // false makes the request synchronous
+                xhr.open('HEAD', `${ChatManager.proxyUrl(url)}`, false); // false makes the request synchronous
                 try {
                     xhr.send();
                     if (xhr.status >= 200 && xhr.status < 300) {
@@ -518,13 +710,13 @@ async function checkMediaTypeAsync(url) {
                             throw new Error('Content-Type header is missing');
                         }
                     } else {
-                        if (xhr.status === 404) return;
+                        if (xhr.status === 404) resolve ("404");
 
                         throw new Error(`HTTP error! status: ${xhr.status}`);
                     }
                 } catch (error) {
                     console.error('Error checking media type:', error);
-                    reject('error');
+                    resolve('error');
                 }
             }
 
@@ -553,7 +745,7 @@ function handleVideoClick(event, videoElement) {
 
 /* Debug Stuff
    Should be deprecated
-* */
+*/
 function encodeToBase64(jsonString) {
     return btoa(encodeURIComponent(jsonString));
 }
@@ -611,8 +803,6 @@ function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
         y = event.clientY;
     }
 
-    console.log(x, y)
-
     //console.log("Requesting profile")
     socket.emit("getMemberProfile", {
         id: UserManager.getID(),
@@ -621,7 +811,6 @@ function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
         posX: x,
         posY: y
     }, async function (response) {
-
         var profileContent = document.getElementById("profile_container");
         profileContent.innerHTML = await UserManager.getMemberProfileHTML(response.member);
 
@@ -677,16 +866,6 @@ function redeemKey() {
     }
 }
 
-function openNewTab(url) {
-    if (url.startsWith("data:")) {
-        const blob = dataURLtoBlob(url);
-        const blobUrl = URL.createObjectURL(blob);
-        window.open(blobUrl, "_blank");
-    } else {
-        window.open(url, "_blank");
-    }
-}
-
 function dataURLtoBlob(dataUrl) {
     const [header, base64] = dataUrl.split(',');
     const mime = header.match(/:(.*?);/)[1];
@@ -695,11 +874,10 @@ function dataURLtoBlob(dataUrl) {
     for (let i = 0; i < binary.length; i++) {
         array[i] = binary.charCodeAt(i);
     }
-    return new Blob([array], { type: mime });
+    return new Blob([array], {type: mime});
 }
 
 function getMessageId(element) {
-
     if (element.className != "message-profile-content-message-appended") {
         var entireElement = null;
         element = element.closest(".message-container");
@@ -707,13 +885,9 @@ function getMessageId(element) {
     } else {
         return element.id;
     }
-
-
 }
 
-
 async function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false) {
-
     if (UserManager.getUsername() != null) {
         var username = UserManager.getUsername();
 
@@ -743,8 +917,17 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
             }
         }, function (response) {
 
+            // sync data
+            if (response?.token) CookieManager.setCookie("token", response.token);
+            if (response?.icon) CookieManager.setCookie("pfp", response.icon);
+            if (response?.banner) CookieManager.setCookie("banner", response.banner);
+            if (response?.aboutme) CookieManager.setCookie("banner", response.aboutme);
+            if (response?.status) CookieManager.setCookie("banner", response.status);
+            if (response?.loginName) CookieManager.setCookie("banner", response.loginName);
+            if (response?.id) CookieManager.setCookie("banner", response.id);
+
             // if we finished onboarding
-            if (!response.error && response.finishedOnboarding === true && initial) {
+            if (!response?.error && response.finishedOnboarding === true && initial) {
                 socket.emit("setRoom", {
                     id: UserManager.getID(),
                     room: UserManager.getRoom(),
@@ -774,18 +957,12 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                     token: UserManager.getToken()
                 });
 
-                if(initial){
-                    getChatlog();
+                if (initial) {
+                    getChatlog(document.getElementById("content"));
                     getMemberList()
                     getChannelTree()
                     getServerInfo();
                     showGroupStats();
-
-                    setTimeout(() => {
-                        splash.hide()
-                    }, 100)
-
-
                     focusEditor()
 
                     /* Quill Emoji Autocomplete */
@@ -803,8 +980,16 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                         UserReports.getReports();
                     }
                 });
+
             } else {
                 if (response.error) {
+                    splash.hide()
+                    if(response.error.includes("banned")){
+                        ChatManager.showInstanceInfo(response.error, "indianred");
+                        return;
+                    }
+
+
                     showSystemMessage({
                         title: response.title || "",
                         text: response.msg || response.error || "",
@@ -828,7 +1013,7 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                                  Already have an account? <a href="#" onclick="UserManager.doAccountLogin()">Log in instead</a>
                                 </p>
                              </div>
-                             
+
                              <div class="prompt-form-group">
                                 <input class="prompt-input" autocomplete="off" type="text" name="inviteCode" id="inviteCode" placeholder="Enter an invite code" value="">
                                 <label style="color: indianred;" class="prompt-label error-text"></label>
@@ -854,8 +1039,9 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
 }
 
 let lastTypingEmitted = 0;
+
 function setTyping() {
-    if(new Date().getTime() > lastTypingEmitted){
+    if (new Date().getTime() > lastTypingEmitted) {
         socket.emit("isTyping", {id: UserManager.getID(), token: UserManager.getToken(), room: UserManager.getRoom()});
         lastTypingEmitted = new Date().getTime() + (2000)
     }
@@ -1042,50 +1228,31 @@ function sendMessage(messagebox) {
 let startX = 0;
 let startY = 0;
 
-function onSwipe(direction){
+function onSwipe(direction) {
     const left = getLeftPanel();
     const right = getRightPanel();
 
-    if(direction === "right"){
-        if(isOpen(right)) return switchRightSideMenu(false);
+    if (direction === "right") {
+        if (isOpen(right)) return switchRightSideMenu(false);
         return switchLeftSideMenu(true);
     }
 
-    if(direction === "left"){
-        if(isOpen(left)) return switchLeftSideMenu(false);
+    if (direction === "left") {
+        if (isOpen(left)) return switchLeftSideMenu(false);
         return switchRightSideMenu(true);
     }
 }
 
 
-const contentLayout = document.getElementById("contentLayout");
-
-contentLayout.addEventListener("touchstart", e => {
-    const t = e.touches[0];
-    startX = t.clientX;
-    startY = t.clientY;
-});
-
-contentLayout.addEventListener("touchend", e => {
-    const t = e.changedTouches[0];
-    const dx = t.clientX - startX;
-    const dy = t.clientY - startY;
-
-    if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-        onSwipe(dx > 0 ? "right" : "left");
-    }
-});
 
 function isOpen(el) {
     return el.style.display === "flex";
 }
 
 
-function toggleMobilePanel(element, override = null, isRight = false){
-    try{
-        if(override === false){
+function toggleMobilePanel(element, override = null, isRight = false) {
+    try {
+        if (override === false) {
             element.style.transition = "transform 500ms ease-in-out";
             element.style.transform = isRight ? "translateX(100%)" : "translateX(-100%)";
 
@@ -1096,7 +1263,7 @@ function toggleMobilePanel(element, override = null, isRight = false){
             return;
         }
 
-        if(override === true){
+        if (override === true) {
             element.style.display = "flex";
             element.style.transition = "none";
             element.style.transform = isRight ? "translateX(100%)" : "translateX(-100%)";
@@ -1108,24 +1275,22 @@ function toggleMobilePanel(element, override = null, isRight = false){
             return;
         }
 
-        if(element.style.display === "flex"){
+        if (element.style.display === "flex") {
             toggleMobilePanel(element, false, isRight);
         } else {
             toggleMobilePanel(element, true, isRight);
         }
-    }
-    catch{
+    } catch {
 
     }
 }
 
 
-
-function getLeftPanel(){
+function getLeftPanel() {
     return document.querySelector("#mobile_GroupAndChannelContainer").closest(".mobilePanel");
 }
 
-function getRightPanel(){
+function getRightPanel() {
     return document.querySelector("#mobile_memberlist").closest(".mobilePanel");
 }
 
@@ -1133,17 +1298,17 @@ function switchLeftSideMenu(force = null) {
     const left = getLeftPanel();
     const right = getRightPanel();
 
-    if(force === false){
+    if (force === false) {
         toggleMobilePanel(left, false);
         return;
     }
-    if(force === true){
+    if (force === true) {
         toggleMobilePanel(right, false);
         toggleMobilePanel(left, true);
         return;
     }
 
-    if(isOpen(left)){
+    if (isOpen(left)) {
         toggleMobilePanel(left, false);
     } else {
         toggleMobilePanel(right, false);
@@ -1155,17 +1320,17 @@ function switchRightSideMenu(force = null) {
     const left = getLeftPanel();
     const right = getRightPanel();
 
-    if(force === false){
+    if (force === false) {
         toggleMobilePanel(right, false, true);
         return;
     }
-    if(force === true){
+    if (force === true) {
         toggleMobilePanel(left, false);
         toggleMobilePanel(right, true, true);
         return;
     }
 
-    if(isOpen(right)){
+    if (isOpen(right)) {
         toggleMobilePanel(right, false, true);
     } else {
         toggleMobilePanel(left, false);
@@ -1199,10 +1364,11 @@ async function replaceInlineImagesInQuill() {
 
 function replaceInlineEmojis() {
     const container = quill.root;
-    const emojis = container.querySelectorAll("img.inline-text-emoji");
+    const emojis = container.querySelectorAll("img.inline-text-emoji:not(.default)");
 
     for (const img of emojis) {
-        const hash = img.getAttribute("data-filehash");
+        let hash = img.getAttribute("data-filehash");
+
         if (!hash) {
             img.remove();
             continue;
@@ -1214,7 +1380,12 @@ function replaceInlineEmojis() {
 }
 
 
-async function sendMessageToServer(authorId, authorUsername, pfp, message, bypassQuill = false) {
+async function sendMessageToServer(authorId = UserManager.getID(),
+                                   authorUsername = UserManager.getUsername(),
+                                   pfp = UserManager.getPFP(),
+                                   message,
+                                   bypassQuill = false) {
+    Clock.start("send_message");
     let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
 
     if (UserManager.getGroup() == null || UserManager.getGroup().length <= 0 || UserManager.getCategory() == null || UserManager.getCategory().length <= 0 || UserManager.getChannel() == null || UserManager.getChannel().length <= 0) {
@@ -1226,6 +1397,8 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message, bypas
             type: "warning",
             duration: 4000
         });
+
+        Clock.stop("send_message");
         //alert("Please select any channel first");
         return;
     }
@@ -1233,19 +1406,19 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message, bypas
     replaceInlineEmojis();
     await replaceInlineImagesInQuill();
 
-    if(bypassQuill === false) message = quill.root.innerHTML
+    if (bypassQuill === false) message = quill.root.innerHTML
     //if(quill.root.innerText.trim().length !== 0) message = quill.root.innerHTML;
 
     let msgPayload = {
-        id: authorId,
-        name: authorUsername,
-        icon: pfp,
+        author: {
+            id: UserManager.getID(),
+        },
+        room: UserManager.getRoom(),
         token: UserManager.getToken(),
         message: message,
         group: UserManager.getGroup(),
         category: UserManager.getCategory(),
         channel: UserManager.getChannel(),
-        room: UserManager.getRoom(),
         editedMsgId: editMessageId,
         replyMsgId: replyMessageId
     };
@@ -1253,15 +1426,13 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message, bypas
     // if we're using the client, sign the message
     if (await Client()) {
         msgPayload = await Client().SignJson(msgPayload);
-        console.log(msgPayload);
     }
 
     socket.emit("messageSend", msgPayload, async function (response) {
         if (response.error) {
             // do smth in the future with this
             console.error(response.error);
-        }
-        else{
+        } else {
             // mark channel as read
             ChatManager.increaseChannelMarkerCount(UserManager.getChannel())
             // mark channel as read
@@ -1277,8 +1448,10 @@ async function sendMessageToServer(authorId, authorUsername, pfp, message, bypas
 
     scrollDown("sendMessageToServer"); // forgot that
     setTimeout(() => focusEditor(), 1)
-}
+    Clock.stop("send_message");
 
+    return true;
+}
 
 
 var audio = new Audio();
@@ -1290,20 +1463,8 @@ function playSound(sound, volume = 0.5) {
 }
 
 socket.on('doAccountOnboarding', async function (message) {
-    UserManager.doAccountOnboarding()
+    UserManager.doAccountLogin()
 });
-
-
-function compareTimestamps(stamp1, stamp2) {
-    // Calculate time passed
-    var firstdate = stamp1 / 1000;
-
-    var seconddate = stamp2 / 1000;
-    var diff = firstdate - seconddate;
-    var minutesPassed = Math.round(diff / 60);
-
-    return minutesPassed;
-}
 
 
 socket.on('showUserJoinMessage', function (author) {
@@ -1318,227 +1479,153 @@ socket.on('showUserJoinMessage', function (author) {
 socket.on('updateGroupList', function (author) {
 
     getGroupList();
-});
-
-let editMessageId = null;
-let replyMessageId = null;
-
-function cancelMessageReply() {
-    replyMessageId = null;
-    editorHints.innerHTML = ""
-}
-
-function cancelMessageEdit() {
-    editor.innerHTML = "<p><br></p>";
-    editMessageId = null;
-    editorHints.innerHTML = ""
-}
-
-function replyToMessage(messageId){
-    if(editMessageId) cancelMessageEdit();
-    if (replyMessageId == null && editorHints.querySelector("pre#editMsgHint") == null) {
-        editorHints.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageReply()'>You are replying to a message &#128942;</p>`)
-    }
-    replyMessageId = messageId;
-
-    focusEditor()
-}
+})
 
 
-function editMessage(id) {
-    if(replyMessageId) cancelMessageReply();
-    if (editMessageId == null && editorHints.querySelector("pre.editMsgHint") == null) {
-        editorHints.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageEdit()'>You are editing a message &#128942;</p>`)
-    }
 
-    let msgContent = document.querySelector(`.message-container .content[data-message-id="${id}"]`).cloneNode(true);
-    if(msgContent.querySelector(".messageActions")){
-        msgContent.querySelector(".messageActions").remove()
-    }
+function focusEditor() {
+    if (!quill) return;
 
-    if(msgContent.querySelector(".edit-notice")){
-        msgContent.querySelector(".edit-notice").remove()
-    }
+    quill.focus();
 
-    // handle mentions
-    let mentions = msgContent.querySelectorAll(".mention");
-    mentions.forEach(m => {
-        let raw = "";
-
-        if (m.classList.contains("member")) {
-            raw = `<@${m.getAttribute("data-member-id")}>`;
-        } else if (m.classList.contains("role")) {
-            raw = `<!@${m.getAttribute("data-role-id")}>`;
-        } else if (m.classList.contains("channel")) {
-            raw = `<#@${m.getAttribute("data-channel-id")}>`;
-        }
-
-        m.insertAdjacentText("beforebegin", raw);
-        m.remove();
+    requestAnimationFrame(() => {
+        const len = quill.getLength();
+        quill.setSelection(len - 1, 0, Quill.sources.SILENT);
     });
-
-
-
-    // replace all iframes
-    const iframes = msgContent.querySelectorAll("iframe");
-    // convert them back to urls
-    if (iframes.length > 0) {
-        iframes.forEach(iframe => {
-            const src = iframe.getAttribute("src");
-            const urlEl = document.createElement("p");
-            urlEl.textContent = src && src.trim() !== "" ? src : "";
-            iframe.parentNode.replaceChild(urlEl, iframe);
-        });
-    }
-
-    // try to find emojis and remove the big classname
-    let emojis = msgContent.querySelectorAll(`.inline-text-emoji.big`);
-
-    if (emojis != null) {
-        for (let i = 0; i < emojis.length; i++) {
-            // Set reference
-            let emoji = emojis[i];
-
-            // Clone emoji
-            emoji.classList.remove("big");
-        }
-    }
-    editMessageId = msgContent.getAttribute("data-message-id");
-
-    setTimeout(() => {
-        const regex = /<p>\s*<\/p>/gm;
-        quill.pasteHTML(msgContent.innerHTML.replace(regex, ''));
-
-        focusEditor()
-    }, 1);
 }
 
-function focusEditor(){
-    editor.focus();
-    const length = quill.getLength();
-    quill.setSelection(length, 0);
+function focusElementInput(element) {
+    element?.focus();
+
+    const length =
+        element?.getLength?.() ??
+        element?.value?.length ??
+        0;
+
+    element?.setSelection?.(length, 0);
+    element?.setSelectionRange?.(length, length);
 }
 
-function toggleEditor(value){
+
+
+function toggleEditor(value) {
     messageInputBox.parentNode.parentNode.style.visibility = value === true ? "visible" : "hidden";
 }
 
-const Delta = Quill.import('delta');
 
-const Embed = Quill.import("blots/embed");
-class EmojiBlot extends Embed {
-    static create(value) {
-        const node = super.create();
-        for (const k in value) node.setAttribute(k, value[k]);
-        return node;
-    }
+function initQuillShit(){
 
-    static value(node) {
-        const out = {};
-        for (const a of node.attributes) out[a.name] = a.value;
-        return out;
-    }
-}
+    const Delta = Quill.import('delta');
+    const Embed = Quill.import("blots/embed");
 
-EmojiBlot.blotName = "emoji";
-EmojiBlot.tagName = "img";
-
-Quill.register(EmojiBlot);
-
-
-
-
-
-
-
-
-hljs.configure({
-    languages: ['javascript', 'python', 'ruby', 'xml', 'json', 'css', "bash"]
-});
-
-
-window.quill = new Quill('#editor', {
-    modules: {
-        syntax: true,
-        toolbar: {
-            container: '#editor-toolbar', handlers: {
-                'link': function (value) {
-                    if (value) {
-                        var href = prompt('Enter the URL');
-                        if (href) {
-                            quill.format('link', href);
-                        }
-                    } else {
-                        quill.format('link', false);
-                    }
-                }
-            }
-        },
-        keyboard: {
-            bindings: {
-                enter: {
-                    key: 13,
-                    handler: function(range, context) {
-                        return false;
-                    }
-                }
-            }
+    class EmojiBlot extends Embed {
+        static create(value) {
+            const node = super.create();
+            for (const k in value) node.setAttribute(k, value[k]);
+            return node;
         }
-    }, theme: 'snow'
-});
 
-// Add a matcher specifically for image elements
-quill.clipboard.addMatcher('img', function (node, delta) {
-    // Insert a newline before the image content
-    return new Delta().insert('\n').concat(delta);
-});
+        static value(node) {
+            const out = {};
+            for (const a of node.attributes) out[a.name] = a.value;
+            return out;
+        }
+    }
+
+    EmojiBlot.blotName = "emoji";
+    EmojiBlot.tagName = "img";
+
+    Quill.DEFAULTS.placeholder = "Write a message...";
+    Quill.register(EmojiBlot);
 
 
-quill.clipboard.addMatcher('PRE', function (node, delta) {
-    return delta.compose(new Delta().retain(delta.length(), {'code-block': true}));
-});
+    hljs.configure({
+        languages: ['javascript', 'python', 'ruby', 'xml', 'json', 'css', "bash"]
+    });
 
-quill.clipboard.addMatcher(Node.TEXT_NODE, function (node, delta) {
-    if (node.parentNode && node.parentNode.tagName === 'PRE') {
+
+    window.quill = new Quill('#editor', {
+        modules: {
+            syntax: true,
+            toolbar: {
+                container: '#editor-toolbar', handlers: {
+                    'link': function (value) {
+                        if (value) {
+                            var href = prompt('Enter the URL');
+                            if (href) {
+                                quill.format('link', href);
+                            }
+                        } else {
+                            quill.format('link', false);
+                        }
+                    }
+                }
+            },
+            keyboard: {
+                bindings: {
+                    enter: {
+                        key: 13,
+                        handler: function (range, context) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }, theme: 'snow'
+    });
+
+    // Add a matcher specifically for image elements
+    quill.clipboard.addMatcher('img', function (node, delta) {
+        // Insert a newline before the image content
+        return new Delta().insert('\n').concat(delta);
+    });
+
+
+    quill.clipboard.addMatcher('PRE', function (node, delta) {
         return delta.compose(new Delta().retain(delta.length(), {'code-block': true}));
-    }
-    return delta;
-});
+    });
+
+    quill.clipboard.addMatcher(Node.TEXT_NODE, function (node, delta) {
+        if (node.parentNode && node.parentNode.tagName === 'PRE') {
+            return delta.compose(new Delta().retain(delta.length(), {'code-block': true}));
+        }
+        return delta;
+    });
 
 
-/* Quill Size begin */
+    /* Quill Size begin */
 
-var editorContainer = document.querySelector('.editor-container');
-var editorToolbar = document.getElementById("editor-toolbar");
-var editorHints = document.getElementById("editor-hints");
-var quillContainer = document.querySelector('.ql-container');
-var editor = document.querySelector('.ql-editor');
+    editorContainer = document.querySelector('.editor-container');
+    editorToolbar = document.getElementById("editor-toolbar");
+    editorHints = document.getElementById("editor-hints");
+    quillContainer = document.querySelector('.ql-container');
+    editor = document.querySelector('.ql-editor');
 
-var initialToolbarHeight = editorToolbar.offsetHeight;
-var initialHeight = 40; // Initial height of the editor
-var maxHeight = 400; // Maximum height of the editor
-var initialMargin = parseFloat(getComputedStyle(editorContainer).marginTop);
-var allowEditorBlur = true;
+    initialToolbarHeight = editorToolbar.offsetHeight;
+    initialHeight = 40; // Initial height of the editor
+    maxHeight = 400; // Maximum height of the editor
+    initialMargin = parseFloat(getComputedStyle(editorContainer).marginTop);
+    allowEditorBlur = true;
 
-editor.addEventListener('input', function (event) {
-    setTyping();
-});
+    editor.addEventListener('input', function (event) {
+        setTyping();
+    });
 
-editor.addEventListener('keydown', function (event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault();
+    editor.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
 
-        /*
-        let msgContent = quill.root.innerHTML
-            //    .replace(/<p><br><\/p>/g, "")
-            .replace(/<p>\s*<br\s*\/?>\s*<\/p>/g, ""); // Clean up empty lines
+            /*
+            let msgContent = quill.root.innerHTML
+                //    .replace(/<p><br><\/p>/g, "")
+                .replace(/<p>\s*<br\s*\/?>\s*<\/p>/g, ""); // Clean up empty lines
 
-         */
+             */
 
-        sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), quill.root.innerHTML);
-    }
-});
-
+            sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), quill.root.innerHTML);
+        }
+    });
+}
 /* Quill Emoji resize End */
 
 
@@ -1558,17 +1645,6 @@ function getAllChildren(element) {
     return children;
 }
 
-
-function deleteMessageFromChat(id) {
-    socket.emit("deleteMessage", {
-        id: UserManager.getID(),
-        token: UserManager.getToken(),
-        messageId: id,
-        group: UserManager.getGroup(),
-        category: UserManager.getCategory(),
-        channel: UserManager.getChannel()
-    });
-}
 
 socket.on('memberTyping', members => {
     if (members.length === 0) {
@@ -1596,14 +1672,14 @@ socket.on('memberTyping', members => {
 });
 
 
-
 socket.on('receiveChannelTree', function (data) {
     getChannelTree()
+    markCurrentChannelStyle(UserManager.getChannel())
 });
 
 
 socket.on('updateChatlog', async function (data) {
-    getChatlog();
+    getChatlog(document.getElementById("content"));
 });
 
 
@@ -1616,7 +1692,7 @@ function markCurrentChannelStyle(channelId) {
         }
     });
 
-    let targetChannel = document.querySelector("#channellist li#channel-" + channelId);
+    let targetChannel = document.querySelector(`#channellist li[data-channel-id='${channelId}']`);
     if (targetChannel) targetChannel.classList.add("selected");
 
 }
@@ -1673,8 +1749,9 @@ socket.on('receiveCurrentChannel', function (channel) {
     }
 });
 
-socket.on('updateMemberList', function (data) {
+socket.on('updateMemberList', async function (data) {
     getMemberList();
+    await updateMentionAutocompleteData();
 });
 
 socket.on('updateGroupList', function (data) {
@@ -1682,7 +1759,7 @@ socket.on('updateGroupList', function (data) {
 });
 
 socket.on('receiveGroupList', function (data) {
-    if(serverlist.innerHTML !== data){
+    if (serverlist.innerHTML !== data) {
         serverlist.innerHTML = "";
         serverlist.innerHTML = data;
 
@@ -1721,15 +1798,19 @@ socket.on('memberPresent', function (member) {
 socket.on('receiveGifImage', function (response) {
     clearGifContainer()
 
-    if(response?.gifs){
-        for(let gif of response.gifs){
-            console.log(gif)
-            document.getElementById("gif-entry-container").insertAdjacentHTML("beforeend", `<img 
-                    onclick="sendGif('${gif.media_formats.gif.url}')" src="${gif.media_formats.gif.url}"
+    if (response?.gifs) {
+        for (let gif of response.gifs) {
+            document.getElementById("gif-entry-container").insertAdjacentHTML("beforeend", `<img
+                    onclick="sendGif('${gif.media_formats.gif.url}')" src="${ChatManager.proxyUrl(gif.media_formats.nanogif.url)}"
                     style="padding: 1%;border-radius: 20px;float: left;width: 48%; height: fit-content;">`);
         }
     }
 
+    requestAnimationFrame(() => {
+        var gifSearchbarInput = document.getElementById("gif-searchbar-input");
+        focusElementInput(gifSearchbarInput)
+        Clock.stop("gifSearch")
+    })
 });
 
 
@@ -1738,9 +1819,6 @@ socket.on('receiveToken', function (data) {
 });
 
 socket.on('modalMessage', function (data) {
-
-    console.log(data)
-
     var buttonArray = [];
     if (data.buttons) {
         Object.keys(data.buttons).forEach(function (button) {
@@ -1774,7 +1852,7 @@ socket.on('modalMessage', function (data) {
         wasDiconnected: data.wasDisconnected || null
     });
 
-    if(data?.action && data?.action === "register"){
+    if (data?.action && data?.action === "register") {
         setTimeout(function () {
             window.location.reload();
         }, data.displayTime || 4000)
@@ -1822,66 +1900,8 @@ function displayHomeUnread() {
 }
 
 
-document.getElementById("message-actions-image").onclick = function (e) {
-    var x = e.clientX;
-    var y = e.clientY;
-
-    var emojiBox = document.getElementById("emoji-box-container");
-    var clickedElement = document.elementFromPoint(x, y)
-
-    if (clickedElement.id != "message-actions-image") {
-        return;
-    }
-
-    if (emojiBox.style.display == "flex") {
-        closeEmojiBox();
-    } else {
-        emojiBox.style.display = "flex";
-        selectEmojiTab(document.getElementById("emoji-box-emojis"))
-        getEmojis()
-
-        var test = document.getElementById("message-actions-image");
-
-        emojiBox.style.position = "fixed";
-        emojiBox.style.top = (y - emojiBox.offsetHeight - 40) + "px";
-        emojiBox.style.left = x - emojiBox.offsetWidth + "px";
-    }
-}
-
-
-window.addEventListener('resize', function (event) {
-    // do stuff here
-
-    var emojiContainer = document.getElementById("emoji-box-container");
-    var profileContainer = document.getElementById("profile_container");
-
-    if (emojiContainer.style.display == "flex") {
-        //emojiContainer.style.display = "none";
-        closeEmojiBox()
-    }
-    if (profileContainer.style.display == "flex") {
-        profileContainer.style.display = "none";
-    }
-});
-
-document.addEventListener("keydown", (event) => {
-    var emojiContainer = document.getElementById("emoji-box-container");
-    var profileContainer = document.getElementById("profile_container");
-
-    if (event.key === "Escape") {
-        if (emojiContainer.style.display === "block") {
-            //emojiContainer.style.display = "none";
-            closeEmojiBox();
-        }
-        if (profileContainer.style.display === "block") {
-            profileContainer.style.display = "none";
-        }
-    }
-
-
-});
-
-function queryTenorSearch(search){
+function queryTenorSearch(search) {
+    Clock.start("gifSearch")
     socket.emit("searchTenorGif", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
@@ -1891,7 +1911,7 @@ function queryTenorSearch(search){
             console.log("Tenor Response", response);
         } else {
             showSystemMessage({
-                title: response.msg,
+                title: response.msg || "",
                 text: "",
                 icon: response.type,
                 img: null,
@@ -1902,7 +1922,7 @@ function queryTenorSearch(search){
     });
 }
 
-function listenForGifSearch(){
+function listenForGifSearch() {
     const gifContainer = document.getElementById("gif-entry-container");
     const emojiEntryContainer = document.getElementById("emoji-entry-container");
 
@@ -1913,11 +1933,10 @@ function listenForGifSearch(){
         clearTimeout(gifSearchTimeout);
 
         gifSearchTimeout = setTimeout(() => {
-            const query = gifSearchbarInput.value.trim();
+            const query = gifSearchbarInput.value
             if (!query) return;
 
             queryTenorSearch(query);
-            gifSearchbarInput.focus();
         }, 500);
     });
 }
@@ -1945,34 +1964,13 @@ function sendGif(url) {
     focusEditor()
 }
 
-function closeEmojiBox() {
-    var emojiContainer = document.getElementById("emoji-box-container");
-    emojiContainer.style.display = "none";
-
-    var emojiEntryContainer = document.getElementById("emoji-entry-container");
-    var gifEntryContainer = document.getElementById("emoji-entry-container");
-    //emojiEntryContainer.innerHTML = "";
-
-    emojiEntryContainer.style.display = "flex";
-    gifEntryContainer.style.display = "none";
-
-    var emojiTab = document.getElementById("emoji-box-emojis");
-    var gifTab = document.getElementById("emoji-box-gifs");
-
-    try {
-        emojiTab.classList.add("SelectedTab");
-        gifTab.classList.remove("SelectedTab");
-    } catch (e) {
-        console.log(e)
-    }
-}
 
 
 function changeGIFSrc(url, element) {
     element.src = url;
 }
 
-function clearGifContainer(){
+function clearGifContainer() {
     let search = document.getElementById("gif-searchbar-input");
     document.getElementById("gif-entry-container").innerHTML = `<div id="gif-searchbar"><input autocomplete="off" id="gif-searchbar-input"
                                                        placeholder="Search anything, then press enter" type="text" value="${search?.value ? search?.value : ""}"></div>`;
@@ -1990,14 +1988,20 @@ function getGifs() {
 
 }
 
-function getEmojis() {
+async function getEmojis(callback = null) {
     var emojiContainer = getEmojiContainerElement()
     var emojiEntryContainer = document.getElementById("emoji-entry-container");
     var gifEntryContainer = document.getElementById("gif-entry-container");
     gifEntryContainer.innerHTML = "";
     gifEntryContainer.style.display = "none"
 
-    socket.emit("getEmojis", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
+    let emojiEntries = emojiContainer.querySelectorAll(".emoji-entry")
+    emojiEntries.forEach(emoji => {
+        let clone = emoji.cloneNode(true);
+        emoji.replaceWith(clone);
+    })
+
+    socket.emit("getEmojis", {id: UserManager.getID(), token: UserManager.getToken()}, async function (response) {
 
         if (response.type === "success") {
             //settings_icon.value = response.msg;
@@ -2005,13 +2009,19 @@ function getEmojis() {
 
             //emojiEntryContainer.innerHTML = "";
             emojiEntryContainer.style.display = "flex";
-            response.data.reverse().forEach(emoji => {
+            for(let emoji of response.data.reverse()){
 
-                var emojiId = emoji.filename.split("_")[0];
-                var emojiName = emoji.filename.split("_")[1].split(".")[0];
+                const base = emoji.filename.replace(/\.[^/.]+$/, "");
+                const parts = base.split("_");
 
-                if(hasEmojiInContainer(emojiId)){
-                    return;
+                var emojiId = parts[0];
+                var emojiName = parts.length > 1 ? parts.slice(1).join("_") : parts[0];
+
+                let existingEmojiElement = emojiEntryContainer.querySelector(`.emoji-entry[data-hash="${emojiId}"]`);
+
+                if (hasEmojiInContainer(emojiId)) {
+                    if(existingEmojiElement) registerEmojiCallback(existingEmojiElement, emoji);
+                    continue;
                 }
 
                 const entry = document.createElement("div");
@@ -2029,31 +2039,40 @@ function getEmojis() {
                 imgWrap.appendChild(img);
                 entry.appendChild(imgWrap);
 
-                entry.addEventListener("click", () => {
-                    insertEmoji(emoji, true);
-                    focusEditor();
-                    emojiContainer.style.display = "none";
-                });
+                registerEmojiCallback(entry, emoji);
+
 
                 emojiEntryContainer.appendChild(entry);
-            })
+            }
 
             removeUnusedEmojisFromContainer(response)
 
             //notify(response.msg)
         } else {
             showSystemMessage({
-                title: response.msg, text: "", icon: response.type, img: null, type: response.type, duration: 1000
+                title: response.msg || "", text: "", icon: response.type, img: null, type: response.type, duration: 1000
             });
         }
-
-        console.log(response);
     });
+
+    function registerEmojiCallback(element, emojiObj){
+        element.addEventListener("click", async () => {
+            if(!callback){
+                insertEmoji(emojiObj, true);
+                focusEditor();
+            }
+            else{
+                await callback(emojiObj);
+            }
+
+            if(getEmojiContainerElement()) getEmojiContainerElement().style.display = "none";
+        }, {once: true});
+    }
 }
 
 socket.on('receiveGroupBanner', function (data) {
-    groupbanner.src = data;
-    document.getElementById("mobile_groupBannerDisplay").src = data;
+    groupbanner.src = ChatManager.proxyUrl(data);
+    document.getElementById("mobile_groupBannerDisplay").src = ChatManager.proxyUrl(data);
 });
 
 function getChannelObjectFromTree(channelId) {
@@ -2063,7 +2082,7 @@ function getChannelObjectFromTree(channelId) {
 
 
 function refreshValues() {
-    return;
+    /* Deprecated? */
     var username = UserManager.getUsername();
     getRoles();
     userJoined();
@@ -2087,28 +2106,6 @@ function refreshValues() {
         category: UserManager.getCategory(),
         channel: UserManager.getChannel(),
         token: UserManager.getToken()
-    });
-}
-
-function getMemberList() {
-    socket.emit("getMemberList", {
-        id: UserManager.getID(),
-        username: UserManager.getUsername(),
-        icon: UserManager.getPFP(),
-        token: UserManager.getToken(),
-        channel: UserManager.getChannel(),
-        group: UserManager.getGroup()
-    }, function (response) {
-
-        if (response.error) {
-            showSystemMessage({
-                title: response.msg, text: "", icon: response.type, img: null, type: response.type, duration: 1000
-            });
-        } else {
-            memberlist.innerHTML = response.data;
-            document.getElementById("mobile_memberlist").innerHTML = response.data;
-        }
-
     });
 }
 
@@ -2136,34 +2133,49 @@ function getGroupBanner() {
 var serverName;
 var serverDesc;
 
-function getServerInfo(returnData = false) {
-    socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
+async function getServerInfo(returnData = false) {
+    return new Promise((resolve, reject) => {
 
-        var headline = document.getElementById("header");
+        // reject if we get disconnected or something
+        setTimeout(() => {
+            if(!socket.connected){
+                resolve(null);
+            }
+        }, 1000)
 
-        servername = response.name;
-        serverdesc = response.description;
+        //Official <span style="font-weight: bold; color: skyblue;">DCTS <span style="font-weight: bold; color: cadetblue;">Community</span></span>
+        socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken()}, async function (response) {
+            if(returnData) return resolve(response);
+            var headline = document.getElementById("header");
 
-        headline.innerHTML = `
+            servername = response.serverinfo.name;
+            serverdesc = response.serverinfo.description;
+            let countryCode = response.serverinfo.countryCode;
 
-        <div id="main_header">
-            ${servername} ${serverdesc ? ` - ${serverdesc}` : ""}
-        </div>
-        
-        <div id="badges"></div>
-        
-        <div id="headerRight">
-            <div class="headerIcon help" onclick="newUserExplainUI()"></div>
-            <div class="headerIcon donators" onclick="UserManager.showDonatorList('https://shy-devil.me/app/dcts/');"></div>
-        </div>
-        `;
+            headline.innerHTML = `
+
+            <div id="main_header">
+                ${countryCode ? `${ChatManager.countryCodeToEmoji(countryCode)} ` : ""}${sanitizeHtmlForRender(servername, false)} ${serverdesc ? ` - ${sanitizeHtmlForRender(serverdesc, false)}` : ""}
+            </div>
+
+            <div id="badges"></div>          
+            <div id="headerRight">
+                <div class="headerIcon help" onclick="ChatManager.showInstanceInfo()"></div>
+                <div class="headerIcon donators" onclick="UserManager.showDonatorList('https://shy-devil.me/app/dcts/');"></div>
+                <div class="headerIcon inbox">
+                    <span id="inbox-indicator"></span>
+
+                    ${await Inbox.getContentHTML()}
+                </div>
+            </div>
+            `;
 
 
-        UserManager.displayServerBadges();
-    });
+            UserManager.displayServerBadges();
+        });
 
-    displayDiscoveredHosts();
-
+        displayDiscoveredHosts();
+    })
 }
 
 async function waitFor(callback, timeout = 0) {
@@ -2182,7 +2194,7 @@ async function setUrl(param, isVC = false) {
     let channelId = urlData[2]?.replace("channel=", "")
     focusEditor()
 
-    if(!isVC) showHome(true)
+    if (!isVC) showHome(true)
 
     // channel already open, dont reload it
     if (UserManager.getChannel() === channelId && channelId && UserManager.getChannel() && isVC === false) return;
@@ -2219,7 +2231,7 @@ async function setUrl(param, isVC = false) {
 
             // update grouplist and channel tree if we only
             // click on a group
-            if(groupId && !categoryId && !channelId){
+            if (groupId && !categoryId && !channelId) {
                 getChannelTree();
             }
 
@@ -2228,14 +2240,13 @@ async function setUrl(param, isVC = false) {
 
             chatlog.innerHTML = "";
             document.getElementById("messagebox").style.display = "flex";
-            document.querySelector('.ql-editor').focus();
-            getChatlog();
+            focusEditor();
+            getChatlog(document.getElementById("content"));
             showGroupStats();
 
             if (response.permission !== "granted") {
                 toggleEditor(false);
-            }
-            else{
+            } else {
                 toggleEditor(true);
             }
         });
@@ -2244,7 +2255,7 @@ async function setUrl(param, isVC = false) {
     getMemberList();
 }
 
-function changedChannel(){
+function changedChannel() {
     switchLeftSideMenu(false)
     socket.emit("setRoom", {
         id: UserManager.getID(),
@@ -2273,12 +2284,11 @@ function showGroupStats() {
     // If we only clicked a group and no channel etc the main windows is empty.
     // lets show some nice group home / welcome screen
     if (UserManager.getGroup() !== null && UserManager.getCategory() === null && UserManager.getChannel() === null) {
-
         messageInputBox.parentNode.parentNode.style.visibility = "hidden";
         document.getElementById("content").innerHTML =
-            `<div 
+            `<div
                 style="display: flex;
-                flex-direction: column; 
+                flex-direction: column;
                 justify-content: center;
                 align-items: center;
                 height: 100%;
@@ -2299,9 +2309,6 @@ function checkSEO() {
 
             const title = doc.querySelector('title')?.textContent || 'No <title> found';
             const description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || 'No meta description';
-
-            console.log('Title:', title);
-            console.log('Description:', description);
         })
         .catch(err => console.error('Request failed:', err));
 }
@@ -2346,14 +2353,14 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function testDb(length){
-    for(let i = 1; i < length; i++){
+async function testDb(length) {
+    for (let i = 1; i < length; i++) {
         await sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${i}`);
         await sleep(500);
     }
 }
 
-socket.on("uploadProgress", ({ filename, bytes, total }) => {
+socket.on("uploadProgress", ({filename, bytes, total}) => {
     const percent = total ? Math.min(100, (bytes / total) * 100) : 0;
     showSystemMessage({
         title: `File ${percent}% uploaded`,
@@ -2364,62 +2371,63 @@ socket.on("uploadProgress", ({ filename, bytes, total }) => {
     });
 });
 
+function initUploadDragAndDrop(){
 
-var uploadObject = document.getElementById('content');
+    var uploadObject = document.getElementById('content');
 
-// Handle the file drop event
-uploadObject.addEventListener('drop', async function (e) {
-    e.preventDefault();
-    uploadObject.style.backgroundColor = '';
+    // Handle the file drop event
+    uploadObject.addEventListener('drop', async function (e) {
+        e.preventDefault();
+        uploadObject.style.backgroundColor = '';
 
-    // dont upload in vc
-    if (uploadObject.querySelector(".vc-container")) {
-        console.warn("cant upload in vc")
-        return;
-    }
-
-    const files = Array.from(e.dataTransfer.files); // Handle multiple files if needed
-    const fileSize = files[0].size / 1024 / 1024; // Example: Display the size of the first file
-    console.log(`File dropped. Size: ${fileSize.toFixed(2)} MB`);
-
-    try {
-        let result = await ChatManager.uploadFile(files);
-        console.log("upload result: ", result);
-
-        if (result.ok === true) {
-            console.log("All files uploaded successfully. URLs:", result.path);
-
-            // Process the URLs array
-            sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${window.location.origin}${result.path}`, true); // Sending all URLs at once
-        } else {
-            console.error("Upload encountered an error:", result.error);
-            showSystemMessage({
-                title: `Error uploading file`,
-                text: `${result.error}`,
-                icon: "error",
-                type: "error",
-                duration: 1500
-            });
+        // dont upload in vc
+        if (uploadObject.querySelector(".vc-container")) {
+            console.warn("cant upload in vc")
+            return;
         }
-    } catch (error) {
-        console.error("An error occurred during the upload process:", error);
-    }
-}, false);
+
+        const files = Array.from(e.dataTransfer.files); // Handle multiple files if needed
+        const fileSize = files[0].size / 1024 / 1024; // Example: Display the size of the first file
+        console.log(`File dropped. Size: ${fileSize.toFixed(2)} MB`);
+
+        try {
+            let result = await ChatManager.uploadFile(files);
+            console.log("upload result: ", result);
+
+            if (result.ok === true) {
+                console.log("All files uploaded successfully. URLs:", result.path);
+
+                // Process the URLs array
+                sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${window.location.origin}${result.path}`, true); // Sending all URLs at once
+            } else {
+                console.error("Upload encountered an error:", result.error);
+                showSystemMessage({
+                    title: `Error uploading file`,
+                    text: `${result.error}`,
+                    icon: "error",
+                    type: "error",
+                    duration: 1500
+                });
+            }
+        } catch (error) {
+            console.error("An error occurred during the upload process:", error);
+        }
+    }, false);
 
 
-uploadObject.addEventListener('dragenter', function (e) {
-    e.preventDefault();
-    uploadObject.style.backgroundColor = 'gray';
+    uploadObject.addEventListener('dragenter', function (e) {
+        e.preventDefault();
+        uploadObject.style.backgroundColor = 'gray';
 
-}, false);
+    }, false);
 
-uploadObject.addEventListener('dragover', function (e) {
-    e.preventDefault();
-    uploadObject.style.backgroundColor = 'gray';
-}, false);
+    uploadObject.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        uploadObject.style.backgroundColor = 'gray';
+    }, false);
 
-uploadObject.addEventListener('dragleave', function (e) {
-    e.preventDefault();
-    uploadObject.style.backgroundColor = '';
-}, false);
-
+    uploadObject.addEventListener('dragleave', function (e) {
+        e.preventDefault();
+        uploadObject.style.backgroundColor = '';
+    }, false);
+}

@@ -221,8 +221,8 @@ function getMemberList() {
 
 
     function getRoleHTML(role){
-        return `<div class="infolist-role" data-sort-id="${role.info.sortId}" data-role-id="${role.info.id}" title="${role.info.name}" style="color: ${role.info.color};">
-                    ${role.info.name}
+        return `<div class="infolist-role" data-sort-id="${role.info.sortId}" data-role-id="${role.info.id}" title="${role.info.name}">
+                    <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${role.info.name}</span>
                     <hr style="margin-bottom: 16px;border: 1px solid ${role.info.color};">
                 </div>`
     }
@@ -234,11 +234,11 @@ function getMemberList() {
                         <div style="display:flex;flex-direction: column;width: calc(100% - 35px);">
                             <div class="memberlist-member-info name" 
                                 onclick="getMemberProfile('${member.id}');" data-member-id="${member.id}"" 
-                                style="color: ${role.info.color};">
-                                ${getDisplayString(member?.name, member, role.info.color)}
+                                >
+                                <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${getDisplayString(member?.name, member, role.info.color)}</span>
                             </div>
-                            <div class="memberlist-member-info status" data-member-id="${member.id}" style="color: ${role.info.color};">
-                                ${getDisplayString(member?.status, member, role.info.color)}
+                            <div class="memberlist-member-info status" data-member-id="${member.id}">
+                                <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${getDisplayString(member?.status, member, role.info.color)}</span>
                             </div>
                         </div>
                 </div>`

@@ -847,7 +847,7 @@ async function createMsgHTML({
                     <img class="icon" draggable="false" src="${reply?.author?.icon}" data-member-id="${reply?.author?.id}" onerror="this.src = '/img/default_pfp.png';">
                 </div>
                 <div class="meta">
-                    <label class="username" data-member-id="${reply?.author?.id}" style="color: ${reply?.author?.color};">
+                    <label class="username" data-member-id="${reply?.author?.id}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
                         ${sanitizeHtmlForRender(truncateText(reply?.author?.name, 25))}
                     </label>
                 </div>
@@ -871,7 +871,7 @@ async function createMsgHTML({
                <div class="content-container" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}"> <!-- for the flex layout -->
                  <div class="meta">
                     ${isSystem !== true ?
-                    `<label class="username" data-member-id="${message?.author?.id}" style="color: ${message?.author?.color};">${sanitizeHtmlForRender(truncateText(message?.author?.name, 25))}</label>` : ""}
+                    `<label class="username" data-member-id="${message?.author?.id}" style="color: ${message?.author?.color}; background: ${message?.author?.background}; background-clip: ${message?.author?.backgroundClip};">${sanitizeHtmlForRender(truncateText(message?.author?.name, 25))}</label>` : ""}
                     <label class="timestamp" data-timestamp="${message.timestamp}">
                         ${new Date(message.timestamp).toLocaleString("narrow")}
                         

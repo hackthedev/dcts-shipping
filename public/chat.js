@@ -211,6 +211,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     initUploadDragAndDrop()
+    initUploadFileDialog()
 
     socket.on("connect", async () => {
         // sick af in my opinion
@@ -2440,6 +2441,39 @@ socket.on("uploadProgress", ({filename, bytes, total}) => {
         duration: 2000
     });
 });
+
+function initUploadFileDialog(){
+    //Setting up to trigger once Input-Dialog element receives a new file
+    const fileInput = document.getElementById('uploadCaller');
+    fileInput.addEventListener('change', async function () {
+        if (fileInput.files.length > 0) {
+            //Code borrowed from initUploadDragAndDrop.
+            try {
+                let result = await ChatManager.uploadFile(fileInput.files);
+                console.log("upload result: ", result);
+                if (result.ok === true) {
+                    console.log("All files uploaded successfully. URLs:", result.path);
+                    // Process the URLs array
+                    sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${window.location.origin}${result.path}`, true); // Sending all URLs at once
+                } else {
+                    console.error("Upload encountered an error:", result.error);
+                    showSystemMessage({
+                        title: `Error uploading file`,
+                        text: `${result.error}`,
+                        icon: "error",
+                        type: "error",
+                        duration: 1500
+                    });
+                }
+            } catch (error) {
+                console.error("An error occurred during the upload process:", error);
+            }
+            //End of borrowed code
+        } else {
+            console.log('No file selected from dialog.')
+        }
+    })
+}
 
 function initUploadDragAndDrop(){
 

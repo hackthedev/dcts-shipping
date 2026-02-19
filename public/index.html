@@ -289,40 +289,6 @@
                                           <path id="svg_2" d="m0.84951,8.63977l15.6251,0" opacity="undefined" stroke-linecap="undefined" stroke-linejoin="undefined" stroke-width="2" stroke="#000" fill="none"/>
                                          </g>
                                     </svg>
-                                <script>
-                                    async function uploadFiles(files) {
-                                        try {
-                                            let result = await ChatManager.uploadFile(files);
-                                            console.log("upload result: ", result);
-
-                                            if (result.ok === true) {
-                                                console.log("All files uploaded successfully. URLs:", result.path);
-
-                                                // Process the URLs array
-                                                sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${window.location.origin}${result.path}`, true); // Sending all URLs at once
-                                            } else {
-                                                console.error("Upload encountered an error:", result.error);
-                                                showSystemMessage({
-                                                title: `Error uploading file`,
-                                                text: `${result.error}`,
-                                                icon: "error",
-                                                type: "error",
-                                                duration: 1500
-                                                });
-                                                }
-                                            } catch (error) {
-                                                console.error("An error occurred during the upload process:", error);
-                                        }
-                                    }
-                                  const fileInput = document.getElementById('uploadCaller');
-                                  fileInput.addEventListener('change', () => {
-                                    if (fileInput.files.length > 0) {
-                                      uploadFiles(fileInput.files);
-                                    } else {
-                                        console.log('No file selected from dialog.')
-                                    }
-                                  });
-                                </script>
                                 </button>
                             </span>
 

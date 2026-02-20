@@ -962,11 +962,6 @@ const firstEntry = Object.entries(data.keys || {})[0];
 const API_KEY = firstEntry?.[0] || serverconfig.serverinfo.livekit.key;
 const API_SECRET = firstEntry?.[1] || serverconfig.serverinfo.livekit.secret;
 
-serverconfig.serverinfo.livekit.key = API_KEY;
-serverconfig.serverinfo.livekit.secret = API_SECRET;
-
-await saveConfig(serverconfig);
-
 const webhookReceiver = new WebhookReceiver(API_KEY, API_SECRET);
 
 app.post("/token", async (req, res) => {

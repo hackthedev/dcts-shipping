@@ -130,7 +130,6 @@ checkFile("./plugins/settings.json", true, "{}");
 
 export var serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, {encoding: "utf-8"})) : {};
 checkConfigAdditions();
-app.set("trust proxy", serverconfig.serverinfo?.security?.trustProxy ?? false);
 
 
 // made by installer script
@@ -746,7 +745,7 @@ if (checkVer != null) {
     Logger.space();
 }
 
-checkSSL();
+server = http.createServer(app)
 io = new Server(server, {
     maxHttpBufferSize: 1e8,
     secure: true,
@@ -1036,10 +1035,6 @@ processPlugins().catch((err) => console.error(err));
 
 const socketHandlers = [];
 const activeSockets = new Map();
-const socketHandlerManifest = {
-    include: [/\.mjs$/i],
-    exclude: [/[/\\]test\.mjs$/i, /\.test\.mjs$/i, /\.spec\.mjs$/i],
-};
 
 const loadSocketHandlers = async (mainHandlersDir, io) => {
     const fileList = [];
@@ -1051,12 +1046,7 @@ const loadSocketHandlers = async (mainHandlersDir, io) => {
             if (file.isDirectory()) {
                 scanDir(filePath);
             } else if (file.name.endsWith(".mjs")) {
-                const normalizedPath = filePath.replaceAll("\\", "/");
-                const shouldInclude = socketHandlerManifest.include.some((re) => re.test(normalizedPath));
-                const shouldExclude = socketHandlerManifest.exclude.some((re) => re.test(normalizedPath));
-                if (shouldInclude && !shouldExclude) {
-                    fileList.push(filePath);
-                }
+                fileList.push(filePath);
             }
         }
     };

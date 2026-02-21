@@ -229,9 +229,10 @@ async function buildThreadOut(threadId, memberId = null) {
 export default (io) => (socket) => {
 
     socket.on("deleteThread", async function (data, response) {
-        if (validateMemberId(data?.id, socket, data?.token) == true && String(socket.data.memberId) === String(data?.id)) {
+        const requesterId = data?.id ?? data?.memberId;
+        if (validateMemberId(requesterId, socket, data?.token) === true && String(socket.data.memberId) === String(requesterId)) {
             try {
-                const me = data.id;
+                const me = String(requesterId);
                 const threadId = data?.threadId;
 
                 const rows = await queryDatabase(
@@ -241,7 +242,7 @@ export default (io) => (socket) => {
 
                 if (!rows.length) return response?.({ type: "error", msg: "not found" });
 
-                const isMember = rows.some(r => r.memberId === me);
+                const isMember = rows.some(r => String(r.memberId) === me);
                 if (!isMember) return response?.({ type: "error", msg: "forbidden" });
 
                 const participants = rows.map(r => r.memberId);

@@ -441,7 +441,7 @@ function updateUiButtons() {
 
     if (camBtn) {
         camBtn.className = camOn ? "vc-btn active" : "vc-btn";
-        camBtn.innerHTML = camOn ? "📷" : "📷";
+        camBtn.innerHTML = camOn ? "📷📹" : "📹";
     }
 
     if (micBtn) {

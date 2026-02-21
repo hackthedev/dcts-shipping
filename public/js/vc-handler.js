@@ -441,19 +441,19 @@ function updateUiButtons() {
 
     if (camBtn) {
         camBtn.className = camOn ? "vc-btn active" : "vc-btn";
-        camBtn.innerHTML = camOn ? "📷📹" : "📹";
+        camBtn.innerHTML = camOn ? emojiCodeToImg("📷", true) : emojiCodeToImg("📷", true);
     }
 
     if (micBtn) {
         if (isDeafened) {
             micBtn.className = "vc-btn deafened";
-            micBtn.innerHTML = "🚫";
+            micBtn.innerHTML = emojiCodeToImg("🚫", true);
         } else if (isMuted) {
             micBtn.className = "vc-btn danger";
-            micBtn.innerHTML = "🔇";
+            micBtn.innerHTML = emojiCodeToImg("🔇", true);
         } else {
             micBtn.className = "vc-btn";
-            micBtn.innerHTML = "🎙️";
+            micBtn.innerHTML = emojiCodeToImg("🎙", true);
         }
     }
 
@@ -462,13 +462,13 @@ function updateUiButtons() {
     if (pipMic) {
         if (isDeafened) {
             pipMic.className = "vc-pip-btn danger";
-            pipMic.innerHTML = "🚫";
+            pipMic.innerHTML = emojiCodeToImg("🚫", true);
         } else if (isMuted) {
             pipMic.className = "vc-pip-btn danger";
-            pipMic.innerHTML = "🔇";
+            pipMic.innerHTML = emojiCodeToImg("🔇", true);
         } else {
             pipMic.className = "vc-pip-btn";
-            pipMic.innerHTML = "🎙️";
+            pipMic.innerHTML = emojiCodeToImg("🎙️", true);
         }
     }
 

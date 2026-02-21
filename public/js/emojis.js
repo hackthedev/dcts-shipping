@@ -242,7 +242,7 @@ function isOnlyText(html) {
 }
 
 
-function emojiCodeToImg(str) {
+function emojiCodeToImg(str, forceSmall = false) {
     if (!str) return str;
 
     const tags = [];
@@ -269,7 +269,7 @@ function emojiCodeToImg(str) {
 
             const file = code + ".svg";
 
-            const big = isOnlyText(str) ? "big" : "";
+            const big = forceSmall ? "" : isOnlyText(str) ? "big" : "";
             out += `<img src="/img/default_emojis/${file}" alt="${segment}" data-code="${code}" class="inline-text-emoji ${big} default">`;
         } else {
             out += segment;

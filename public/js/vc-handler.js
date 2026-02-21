@@ -485,8 +485,6 @@ function checkPipVisibility() {
     let grid = document.getElementById("vc-grid");
     let currentChannel = UserManager.getRoom();
     let isDifferentChannel = String(currentChannel) !== String(connectedVcChannel);
-    console.log("is different channel", isDifferentChannel)
-
     let shouldShow = !grid || isDifferentChannel;
     togglePip(shouldShow);
 }

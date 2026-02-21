@@ -66,6 +66,10 @@ a.channelTrigger.markChannelMessage{
     font-style: italic;
 }
 
+#channeltree ul li .inline-text-emoji{
+    margin-bottom: -4px !important;
+    display: inline-block;
+}
 #channeltree ul li a{
     font-style: normal;
 }
@@ -82,7 +86,7 @@ a.channelTrigger.markChannelMessage{
 
     background-color: hsl(from var(--main) h s calc(l * 10)) !important;
 
-    top: 8px;
+    top: 10px;
     left: -6px;
 }
 

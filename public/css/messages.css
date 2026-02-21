@@ -130,9 +130,7 @@
 .message-container .content {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-
-    word-break: break-word;
+    justify-content: center;
 
     gap: 0;
     width: 100%;
@@ -169,6 +167,8 @@
 }
 
 .message-container p {
+    display: flex;
+    flex-direction: row;
     line-height: 150% !important;
     margin: 0;
 }
@@ -179,7 +179,6 @@
 
     font-style: italic;
     margin: 6px 0;
-    padding: 6px;
 }
 
 .message-container .edit-notice {

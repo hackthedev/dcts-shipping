@@ -1,8 +1,10 @@
 function isAlreadyLink(msg, url, msgid) {
+    url = url.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "");
+
     let container = document.querySelector(`#content .message-container .content:not(.reply)[data-message-id='${msgid}']`);
     if (!container) return null;
 
-    let img = container.querySelector(`img[data-original-url="${url}"]`);
+    let img = container?.querySelector(`img[data-original-url="${url}"]`);
     if (img) return img.getAttribute("data-media-type") || "image";
 
     let video = container.querySelector(`video[data-original-url="${url}"]`);
@@ -13,6 +15,7 @@ function isAlreadyLink(msg, url, msgid) {
 
     let youtube = container.querySelector(`iframe[data-original-url="${url}"]`);
     if (youtube) return youtube.getAttribute("data-media-type") || "youtube";
+
 
     let link = container.querySelector(`a[href="${url}"]`);
     if (link) return link.getAttribute("data-media-type") || "link";
@@ -74,6 +77,16 @@ async function updateMarkdownLinks(delay) {
     setTimeout(() => updateMarkdownLinks(delay), delay);
 }
 
+async function getUrlMeta(url){
+    try{
+
+        let meta = await fetch(`/meta/${encodeURIComponent(url)}`)
+        if(meta.status === 200){
+            return await meta.json()
+        }
+    }
+    catch{}
+}
 
 async function markdown(msg, msgid) {
     if (!msg || !msgid) return { isMarkdown: false, message: msg };
@@ -89,10 +102,8 @@ async function markdown(msg, msgid) {
         if (!isURL(url)) continue;
 
         let media = await checkMediaTypeAsync(url);
-
-        let proxy = url.startsWith(window.location.origin)
-            ? url
-            : `${window.location.origin}/proxy?url=${encodeURIComponent(url)}`;
+        let proxy = ChatManager.proxyUrl(url);
+        let urlMeta = await getUrlMeta(url)
 
         if (media === "image" && isAlreadyLink(msg, url, msgid) !== "image") {
             msg = msg.replace(url,
@@ -144,10 +155,25 @@ async function markdown(msg, msgid) {
         if(isAlreadyLink(msg, url, msgid) !== "link" &&
             isAlreadyLink(msg, url, msgid) !== "youtube" &&
             isAlreadyLink(msg, url, msgid) !== "video" &&
-            isAlreadyLink(msg, url, msgid) !== "image" &&
-            isAlreadyLink(msg, url, msgid) !== "audio" && changed === false) {
+            isAlreadyLink(msg, url, msgid) !== "image" ) {
             msg = msg.replace(url,
-                `<a draggable="false" data-media-type="link" data-message-id="${msgid.replace("msg-", "")}" href="${url}" ${url.startsWith(window.location.origin) ? "" : "target=\"_blank\""}>${url}</a>`
+                `
+                <a                     
+                    class="markdown-urlEmbed"
+                    draggable="false" 
+                    data-media-type="link" 
+                    data-message-id="${msgid.replace("msg-", "")}" 
+                    href="${url}" ${url.startsWith(window.location.origin) ? "" : "target=\"_blank\""}
+                >
+                    <p class="meta-info title">
+                        ${urlMeta?.meta?.title ? truncateText(urlMeta?.meta?.title, 200) : ""}
+                    </p>
+                    <p class="meta-info description">                    
+                        ${urlMeta?.meta?.description ? truncateText(urlMeta?.meta?.description, 300) : ""}
+                    </p>        
+                    ${!urlMeta ? url : ""}
+                </a>
+`
             );
             changed = true;
         }

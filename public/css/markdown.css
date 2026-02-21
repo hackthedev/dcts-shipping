@@ -1,0 +1,27 @@
+.markdown-urlEmbed {
+    display: flex;
+    flex-direction: column;
+
+    width: fit-content;
+    max-width: 600px;
+
+    padding: 8px;
+    border-radius: 6px;
+    background-color: hsl(from var(--main) h s calc(l * 8) / 10%);
+    border: 1px solid hsl(from var(--main) h s calc(l * 8) / 20%);
+    backdrop-filter: blur(10px);
+}
+
+a.markdown-urlEmbed{
+    text-decoration: none !important;
+}
+
+.markdown-urlEmbed .meta-info.title{
+    font-weight: bold;
+    font-size: 18px;
+    color: hsl(from var(--main) calc(h * 2.7) calc(s * 12) calc(l * 8) / 100%);
+}
+
+.markdown-urlEmbed:hover .meta-info.title{
+    color: hsl(from var(--main) calc(h * 2.7) calc(s * 12) calc(l * 10) / 100%);
+}

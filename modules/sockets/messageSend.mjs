@@ -90,8 +90,8 @@ export default (io) => (socket) => {
             }
 
             // if message is signed, verify the signature
-            if(member?.sig !== null && member?.sig?.length > 10 && serverconfig.servermembers[member?.id]?.isVerifiedKey === true){
-                let signCheckResult = await signer.verifyJson(member, serverconfig.servermembers[member?.id]?.publicKey);
+            if(member?.sig !== null && member?.sig?.length > 10 && serverconfig.servermembers[member?.author?.id]?.isVerifiedKey === true){
+                let signCheckResult = await signer.verifyJson(member, serverconfig.servermembers[member?.author?.id]?.publicKey);
 
                 if(signCheckResult !== true){
                     sendMessageToUser(socket.id, JSON.parse(

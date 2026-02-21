@@ -7,7 +7,6 @@ import {
     XMLHttpRequest,
     saveConfig,
     fetch,
-    reloadConfig,
     flipDebug,
     ratelimit,
     setRatelimit,
@@ -285,8 +284,7 @@ export async function handleTerminalCommands(command, args) {
             await checkMemberMigration(true);
         }
         if (command == 'reload') {
-            await reloadConfig();
-            consolas("Reloaded config".cyan);
+            consolas("Reload command is no longer available".yellow);
         }
         if (command == 'debug') {
 
@@ -457,7 +455,7 @@ export function checkConnectionLimit(socket, token = null, id = null) {
     if (token !== null && id !== null) {
 
         // lets make sure the account data is correct
-        if (validateMemberId(id, socket, true) == true
+        if (validateMemberId(id, socket, token, true) == true
             && serverconfig.servermembers[id].token == token) {
 
             // check if user is allowed to bypass based on roles
@@ -1219,11 +1217,11 @@ export function checkMemberMute(socket, member) {
 
     // check ip blacklist
     if (serverconfig.banlist.hasOwnProperty(ip)) {
-        if (Date.now() >= serverconfig.banlist[ip]) {
+        if (Date.now() >= serverconfig.banlist[ip]?.until) {
             delete serverconfig.banlist[ip];
             saveConfig(serverconfig);
         } else {
-            return {result: true, timestamp: serverconfig.banlist[ip]}
+            return {result: true, timestamp: serverconfig.banlist[ip]?.until}
         }
     }
 
@@ -1495,7 +1493,6 @@ export function getCastingMemberObject(member) {
 }
 
 export async function findAndVerifyUser(loginName, password) {
-    await reloadConfig();
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
     let serverMembers = serverconfigEditable.servermembers;
 

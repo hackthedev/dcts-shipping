@@ -58,7 +58,11 @@ export default (io) => (socket) => {
                             )
 
                             emitBasedOnPermission("manageReports", "newReport")
+                            response({ type: "success", msg: "Report was created" });
+                            return;
                         }
+                        response({ type: "error", msg: "Message cant be reported" });
+                        return;
                     case "dm":
                         try {
                             const me = socket.data.memberId;
@@ -117,14 +121,16 @@ export default (io) => (socket) => {
                             emitBasedOnPermission("manageReports", "newReport")
 
                             response?.({ type: "success" });
+                            return;
                         } catch (e) {
                             Logger.error(e);
                             response?.({ type: "error", msg: "reportMessage failed" });
+                            return;
                         }
-                    break;
+                    default:
+                        response({ type: "error", msg: "Invalid report type" });
+                        return;
                 }
-
-                response({ type: "success", msg: "Report was created" });
             }
             catch (e) {
                 response({ type: "error", msg: "Message cant be reported" });

@@ -10,13 +10,8 @@ import {
 } from "../functions/mysql/helper.mjs"
 
 export function compareTimestamps(stamp1, stamp2) {
-    // Calculate time passed
-    var firstdate = stamp1 / 1000;
-
-    var seconddate = stamp2 / 1000;
-    var diff = firstdate - seconddate;
-    var minutesPassed = Math.round(diff / 60);
-
+    var diff = stamp2 - stamp1;
+    var minutesPassed = Math.round(diff / 60000);
     return minutesPassed;
 }
 
@@ -44,6 +39,7 @@ export default (io) => (socket) => {
 
             // if its not a url we dont want to process it
             if (!isURL(member.url)) {
+                response({ type: "error", isCached: false });
                 return;
             }
 
@@ -57,35 +53,26 @@ export default (io) => (socket) => {
             if (checkedMediaCacheUrls[member.url].mediaType != null) {
                 // Link was already sent in for check
                 response({ type: "success", isCached: true, mediaType: checkedMediaCacheUrls[member.url].mediaType });
+                return;
             }
-            else {
-                // check if link is cached
-                let result = await getMediaUrlFromCache(member.url);
+            let result = await getMediaUrlFromCache(member.url);
 
-                if (result.length <= 0) {
-
-                    // if its not cached, get media type by using a request
-                    let urlMediaType = await checkMediaTypeAsync(member.url);
-
-                    // if the media type isnt unknown
-                    if (urlMediaType != "unkown" && urlMediaType != "error" && urlMediaType != null) {
-
-                        // try to save the url in cache
-                        let cacheResult = await cacheMediaUrl(member.url, urlMediaType);
-                    }
-                }
-                else {
-                    // Save in "internal" cache until program is restarted. 
-                    // supposed to avoid multiple requests
-                    checkedMediaCacheUrls[member.url].mediaType = result[0].media_type;
-                    checkedMediaCacheUrls[member.url].timestamp = new Date().getTime();
-                    response({ type: "success", isCached: true, mediaType: result[0].media_type });
-                }
+            if (result.length > 0) {
+                checkedMediaCacheUrls[member.url].mediaType = result[0].media_type;
+                checkedMediaCacheUrls[member.url].timestamp = new Date().getTime();
+                response({ type: "success", isCached: true, mediaType: result[0].media_type });
+                return;
             }
 
+            let urlMediaType = await checkMediaTypeAsync(member.url);
 
+            if (urlMediaType != "unknown" && urlMediaType != "error" && urlMediaType != null) {
+                await cacheMediaUrl(member.url, urlMediaType);
+                checkedMediaCacheUrls[member.url].mediaType = urlMediaType;
+                checkedMediaCacheUrls[member.url].timestamp = new Date().getTime();
+            }
 
-            response({ type: "error", isCached: false });
+            response({ type: "success", isCached: false, mediaType: urlMediaType });
         }
     });
 }

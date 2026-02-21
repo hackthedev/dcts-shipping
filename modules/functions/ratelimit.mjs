@@ -1,18 +1,23 @@
 export function rateLimit({ windowMs = 10_000, ipLimit = 30, sigLimit = 120, trustProxy = true } = {}) {
     const ipMap = new Map();
     const sigMap = new Map();
+    let nextCleanupAt = 0;
 
     const now = () => Date.now();
 
     const getIp = (req) => {
-        if (trustProxy) {
-            const xf = req.headers['x-forwarded-for'];
-            if (typeof xf === 'string' && xf.length > 0) {
-                const first = xf.split(',')[0].trim();
-                if (first) return first;
+        if (trustProxy && req.ip) {
+            return req.ip;
+        }
+        return req.connection?.remoteAddress || req.socket?.remoteAddress || req.ip || 'unknown';
+    };
+
+    const cleanupExpired = (map, t) => {
+        for (const [key, rec] of map.entries()) {
+            if (t >= rec.resetAt) {
+                map.delete(key);
             }
         }
-        return req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown';
     };
 
     const touch = (map, key, limit) => {
@@ -31,6 +36,13 @@ export function rateLimit({ windowMs = 10_000, ipLimit = 30, sigLimit = 120, tru
     };
 
     return (req, res, next) => {
+        const ts = now();
+        if (ts >= nextCleanupAt) {
+            cleanupExpired(ipMap, ts);
+            cleanupExpired(sigMap, ts);
+            nextCleanupAt = ts + windowMs;
+        }
+
         const ip = getIp(req);
         const sig = `${req.method} ${req.path}`;
 

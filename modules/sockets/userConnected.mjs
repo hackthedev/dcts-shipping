@@ -287,7 +287,7 @@ export default (io) => (socket) => {
         checkMemberMute(socket, member);
 
         Logger.debug(
-            `Member connected. User: ${member.name} (${member.id} - ${socketToIP[socket]})`,
+            `Member connected. User: ${member.name} (${member.id} - ${socketToIP[socket.id]})`,
         );
 
         // Check if member is in default role

@@ -11,7 +11,8 @@ export async function getBadges(type, id, beta = false){
 
         let badgeCache = await getCache(badgeUrl, "badges");
         if(badgeCache){
-            resolve(badgeCache);
+            resolve(JSONTools.tryParse(badgeCache?.data));
+            return;
         }
 
         const res = await fetch(badgeUrl)

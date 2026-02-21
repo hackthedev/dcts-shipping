@@ -20,7 +20,7 @@ async function syncHosts(){
     if(existingServerRows.length > 0){
         // sync with server
         for (const row of existingServerRows) {
-            if(row.address.includes("localhost") || row.address.includes("127.0.0.1")) return;
+            if(row.address.includes("localhost") || row.address.includes("127.0.0.1")) continue;
             await checkHostDiscovery(row.address, true);
             await sleep(2000);
         }
@@ -48,10 +48,13 @@ export async function discoverHosts(clientKnownHosts){
 
     try{
         let knownHosts = JSON.parse(clientKnownHosts);
+        const hosts = Array.isArray(knownHosts) ? knownHosts : Object.values(knownHosts || {});
 
-        for(let server in knownHosts){
-            if(extractHost(server).includes("localhost:")) return;
-            await checkHostDiscovery(extractHost(server))
+        for (const server of hosts) {
+            const host = extractHost(server);
+            if (!host) continue;
+            if (host.includes("localhost:") || host === "localhost" || host.startsWith("127.0.0.1")) continue;
+            await checkHostDiscovery(host);
         }
     }
     catch(error){

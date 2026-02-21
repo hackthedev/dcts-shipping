@@ -21,7 +21,6 @@ export default (io) => (socket) => {
 
         // initiate login counter
         if (!loginAttempts.hasOwnProperty(ip)) {
-            loginAttempts.push(ip);
             loginAttempts[ip] = 0;
         }
 
@@ -40,6 +39,7 @@ export default (io) => (socket) => {
 
         let loginCheck = await findAndVerifyUser(member.loginName, member.password);
         if (loginCheck.result === true) {
+            delete loginAttempts[ip];
             response({ error: null, member: loginCheck.member })
         }
         else if (loginCheck.result === false) {

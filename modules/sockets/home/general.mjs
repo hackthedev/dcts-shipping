@@ -229,9 +229,9 @@ async function buildThreadOut(threadId, memberId = null) {
 export default (io) => (socket) => {
 
     socket.on("deleteThread", async function (data, response) {
-        if (validateMemberId(data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
+        if (validateMemberId(data?.id, socket, data?.token) == true && String(socket.data.memberId) === String(data?.id)) {
             try {
-                const me = data.memberId;
+                const me = data.id;
                 const threadId = data?.threadId;
 
                 const rows = await queryDatabase(

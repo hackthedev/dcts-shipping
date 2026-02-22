@@ -85,7 +85,7 @@ class UserManager {
                `
                 <hr>
                 <div class="profile_aboutme">       
-                    <h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(memberObj.aboutme)}
+                    <h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(limitString(memberObj.aboutme, 1000))}
                     
                     
                     <div class="profile_meta_container">

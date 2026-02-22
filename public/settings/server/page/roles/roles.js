@@ -1,6 +1,8 @@
 var rolelist = document.getElementById("rolelist");
-var roleColor = document.getElementById("roleColor");
 var roleName = document.getElementById("roleName");
+var roleColor = document.getElementById("roleColor");
+var roleColorGradient1 = document.getElementById("roleColorGradient1");
+var roleColorGradient2 = document.getElementById("roleColorGradient2");
 var serverRoleResponse = "";
 var editedServerRoleResponse = [];
 var editedPermissions = {};
@@ -33,6 +35,10 @@ function initServerRoles(){
         rolelist = document.getElementById("rolelist");
         roleStyle = computeRoleStyle();
         roleName = document.getElementById("roleName");
+        roleColor = document.getElementById("roleColor");
+        roleColorGradient1 = document.getElementById("roleColorGradient1");
+        roleColorGradient2 = document.getElementById("roleColorGradient2");
+        roleMenuEntryExample = document.getElementById("roleMenuEntryExample");
 
         serverRoleResponse = response;
         editedServerRoleResponse = response;
@@ -119,7 +125,7 @@ function appearanceChanged() {
     document.getElementById('roleMenuEntryExample').style.backgroundClip = roleStyle.backgroundClip;
     document.getElementById('roleMenuEntryExample').style.color = roleStyle.color;
     if(document.getElementById('gradientsEnabled').checked) {
-        document.getElementById('gradientOptions').style.display = "inline-block";
+        document.getElementById('gradientOptions').style.display = "block";
     }
     else {
         document.getElementById('gradientOptions').style.display = "none";
@@ -221,6 +227,12 @@ function deleteRole() {
     });
 }
 
+function rgbToHex(rgbString) {
+  const [r, g, b] = rgbString.match(/\d+/g).map(Number);
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+}
+
+
 function loadRolePerms(roleId) {
     PermUI.init();
 
@@ -292,7 +304,23 @@ function loadRolePerms(roleId) {
             currentRoleId = roleId;
 
             // Style and Name
-            roleStyle.value = serverRoleResponse[roleId].info.style;
+            if(serverRoleResponse[roleId].info.color == 'transparent') {
+                document.getElementById('gradientsEnabled').checked = true;
+                document.getElementById('gradientOptions').style.display = "block";
+                var roleColors = serverRoleResponse[roleId].info.background.match(/(rgb\(.*,.*,.*\)), (rgb\(.*,.*,*\)), (rgb\(.*,.*,.*[^)]\))/);
+                roleColor.value = rgbToHex(roleColors[1]);
+                roleColorGradient1.value = rgbToHex(roleColors[2])
+                roleColorGradient2.value = rgbToHex(roleColors[3])
+            }
+            else {
+                document.getElementById('gradientsEnabled').checked = false;
+                document.getElementById('gradientOptions').style.display = "none";
+                roleColor.value = rgbToHex(serverRoleResponse[roleId].info.color);
+            }
+            var roleStyle = computeRoleStyle();
+            roleMenuEntryExample.color = roleStyle.color;
+            roleMenuEntryExample.background = roleStyle.background;
+            roleMenuEntryExample.backgroundClip = roleStyle.backgroundClip;
             roleName.value = serverRoleResponse[roleId].info.name;
 
             /*

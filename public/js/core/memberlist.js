@@ -72,7 +72,7 @@ function getMemberList() {
                 infolist.innerHTML = "";
                 window.firstInitMemberList = true;
             }
-            
+
             for (let entry of sortedRoles) {
                 insertRoleIntoList(entry.role.info, getRoleHTML(entry.role));
 

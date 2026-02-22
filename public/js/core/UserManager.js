@@ -78,24 +78,27 @@ class UserManager {
             
         
             <div id="profile_content">       
-                <div id="profile_username"><h2 style="margin: 0 !important;">${memberObj?.name}</h2></div>                
+                <div id="profile_username"><h2 style="margin: 0 !important;">${unescapeHtmlEntities(memberObj?.name)}</h2></div>                
                 <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? memberObj?.status : ""}</i></div>  
-                                
+                
+                ${memberObj?.aboutme?.trim()?.length > 0 ?                
+               `
                 <hr>
                 <div class="profile_aboutme">       
-                    ${memberObj?.aboutme?.trim()?.length > 0 ? `<h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(memberObj.aboutme)}` : ""}
+                    <h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(memberObj.aboutme)}
                     
                     
                     <div class="profile_meta_container">
                         ${
-                            mutedCode || bannedCode ?
-                                `<div class="profile_meta">
+                   mutedCode || bannedCode ?
+                       `<div class="profile_meta">
                                     ${mutedCode}
                                     ${bannedCode}   
                                 </div>` : ""
-                        }   
+               }   
                     </div>        
                 </div>
+               ` : ""}
             <hr>
                        
             <a id="dm_action" href="/home.html?dm=${memberObj?.id}">&#10149; Send Message</a>

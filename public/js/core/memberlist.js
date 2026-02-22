@@ -67,6 +67,12 @@ function getMemberList() {
             const sortedRoles = Object.values(rolesMap)
                 .sort((a, b) => b.role.info.sortId - a.role.info.sortId);
 
+            // only clear cache once we load
+            if(!window?.firstInitMemberList){
+                infolist.innerHTML = "";
+                window.firstInitMemberList = true;
+            }
+            
             for (let entry of sortedRoles) {
                 insertRoleIntoList(entry.role.info, getRoleHTML(entry.role));
 

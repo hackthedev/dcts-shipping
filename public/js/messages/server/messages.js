@@ -1112,13 +1112,13 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
         if (response.data == null) {
             console.log("Data was null history");
             Clock.stop("load_messages_total")
-            ElementLoader.stop(channelname);
+            ElementLoader.stop(channelbar);
             return;
         }
         if (response.type === "voice") {
             Clock.stop("load_messages_total")
 
-            ElementLoader.stop(channelname);
+            ElementLoader.stop(channelbar);
             return;
         }
 
@@ -1182,7 +1182,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
         ]);
 
         if(channelId !== UserManager.getChannel()){
-            ElementLoader.stop(channelname);
+            ElementLoader.stop(channelbar);
             Clock.stop("load_messages_processing")
             renderer.remove();
             return;

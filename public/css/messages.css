@@ -242,7 +242,8 @@
     border-top-left-radius: 6px;
 
     height: 14px;
-    width: 70px;
+    min-width: 25px;
+    max-width: 25px;
 
     margin-left: 18px;
     margin-top: auto;

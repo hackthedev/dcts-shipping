@@ -205,6 +205,13 @@ sortable-chosen.sortable-ghost {
     box-sizing: border-box;
 }
 
+.ql-editor p{
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: row;
+}
+
 #editor-toolbar #message-actions-image {
     margin-left: auto;
     justify-self: end;

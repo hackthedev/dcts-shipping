@@ -76,7 +76,7 @@ class ChannelTree {
                                     onclick="setUrl('?group=${group}&category=${category.info.id}&channel=${channel.id}'${channel.type === "voice" ? `, true` : ""})" 
                                     style="display: block;"
                                 >                                    
-                                    <span class="message-marker-icon"></span>${channel.type === "text" ? "⌨" : "🎙️"} ${channel.name}
+                                    <span class="message-marker-icon"></span>${channel.type === "text" ? emojiCodeToImg("⌨", true) : emojiCodeToImg("🎙", true)} ${channel.name}
                                 </a>
                                 ${channel.type === "voice" ?
                             `<ul class="participants" style="display: none;"></ul>`

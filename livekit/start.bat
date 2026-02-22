@@ -4,6 +4,6 @@ color 0a
 
 :start
 cls
-livekit-server.exe --config livekitXXX.yaml
+livekit-server.exe --config livekit.yaml
 pause
 goto start

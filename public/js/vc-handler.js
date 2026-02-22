@@ -12,63 +12,7 @@ let pipLastStream = null;
 
 let fsMuteCache = new Map();
 
-let _lastCtxOk = null;
 
-async function hookVcAudio(mid, isScreen, audioEl) {
-    await voip.ensureAudioCtx().catch(() => {});
-    const ctxOk = voip._audioCtx && voip._audioCtx.state === "running";
-
-    if (ctxOk) {
-        audioEl.muted = true;
-        audioEl.volume = 0;
-
-        await voip.attachAudioEl(mid, isScreen, audioEl).catch(err => {
-            console.error("Failed to attach audio to WebAudio:", err);
-        });
-
-        voip.setVolume(mid, isScreen, voip.getVolume(mid, isScreen));
-    } else {
-        const isSelf = mid === UserManager.getID();
-        audioEl.muted = isDeafened || isSelf;
-
-        const p = voip.getVolume(mid, isScreen);
-        audioEl.volume = Math.max(0, Math.min(1, (Number(p) || 100) / 100));
-    }
-}
-
-async function ensureVcAudioRouting() {
-    await voip.ensureAudioCtx().catch(() => {});
-    const ctxOk = voip._audioCtx && voip._audioCtx.state === "running";
-
-    if (_lastCtxOk === ctxOk) return;
-    _lastCtxOk = ctxOk;
-
-    document.querySelectorAll("audio[id^='audio-global-']").forEach(a => {
-        const mid = a.getAttribute("data-member-id");
-        const isScreen = a.id.includes("-screen");
-        if (!mid) return;
-        hookVcAudio(mid, isScreen, a);
-    });
-}
-
-async function setVcVolume(mid, isScreen, percent) {
-    const p = Math.max(0, Math.min(400, Number(percent) || 0));
-    voip.setVolume(mid, isScreen, p);
-
-    if (isScreen) return;
-
-    const audioId = `audio-global-${mid}`;
-    const el = document.getElementById(audioId);
-    if (!el) return;
-
-    await voip.ensureAudioCtx().catch(() => {});
-    const ctxOk = voip._audioCtx && voip._audioCtx.state === "running";
-
-    if (!ctxOk) {
-        el.volume = Math.max(0, Math.min(1, p / 100));
-        el.muted = isDeafened || mid === UserManager.getID();
-    }
-}
 
 function pickLatestActiveScreenshare() {
     let bestId = null;
@@ -93,51 +37,16 @@ function pickLatestActiveScreenshare() {
         lastScreenStream = null;
     }
 }
-
-function cleanupAudioElById(audioId, mid, isScreen) {
-    try {
-        voip.detachAudio(mid, isScreen);
-    } catch (e) {}
-
-    const oldEl = document.getElementById(audioId);
-    if (oldEl) {
-        oldEl.srcObject = null;
-        oldEl.remove();
-    }
-}
-
-async function attachAudioTrack(track, participantId, isScreen) {
-    const audioId = `audio-global-${participantId}${isScreen ? "-screen" : ""}`;
-
-    cleanupAudioElById(audioId, participantId, isScreen);
-
-    const audio = track.attach();
-    audio.id = audioId;
-    audio.autoplay = true;
-    audio.setAttribute("data-member-id", participantId);
-
-    document.body.appendChild(audio);
-
-    await hookVcAudio(participantId, isScreen, audio);
-}
-
 function rebuildVcUiFromTracks() {
     if (!voip?.participants) return;
 
-    document.querySelectorAll("audio[id^='audio-global-']").forEach(a => {
-        const mid = a.getAttribute("data-member-id");
-        const isScreen = a.id.includes("-screen");
-        if (mid) {
-            try {
-                voip.detachAudio(mid, isScreen);
-            } catch (e) {}
-        }
-        a.srcObject = null;
-        a.remove();
-    });
+    voip.reattachAllAudio();
 
     voip.participants.forEach((p, memberId) => {
         if (!memberId) return;
+
+        // just making sure it exists yolo
+        getOrCreateUserCard(memberId, false);
 
         if (p.videoTrack) {
             const card = getOrCreateUserCard(memberId, false);
@@ -147,6 +56,11 @@ function rebuildVcUiFromTracks() {
                 video.muted = true;
                 video.style.display = "block";
                 video.play().catch(() => {});
+
+                // remove avatar from cam shit
+                const avatar = card?.querySelector(".avatar-container");
+                if (avatar) avatar.style.display = "none";
+
                 const mst = p.videoTrack.mediaStreamTrack;
                 if (mst) lastUserStream = new MediaStream([mst]);
             }
@@ -172,14 +86,6 @@ function rebuildVcUiFromTracks() {
                 }
             }
         }
-
-        if (p.audioTrack) {
-            attachAudioTrack(p.audioTrack, memberId, false);
-        }
-
-        if (p.screenAudioTrack) {
-            attachAudioTrack(p.screenAudioTrack, memberId, true);
-        }
     });
 
     const myId = UserManager.getID();
@@ -197,7 +103,7 @@ function rebuildVcUiFromTracks() {
 document.addEventListener("DOMContentLoaded", async event => {
     initGlobalPip();
     setInterval(checkPipVisibility, 500);
-    setInterval(ensureVcAudioRouting, 500);
+    setInterval(() => voip.ensureVcAudioRouting(), 500);
 
     socket.on("connect", () => {
         document.querySelectorAll("#channellist li[data-channel-id]").forEach(li => {
@@ -233,6 +139,21 @@ document.addEventListener("DOMContentLoaded", async event => {
         });
     };
 
+    voip.onCameraEnd = (participantId) => {
+        const cardId = `vc-card-${participantId}-user`;
+        const card = document.getElementById(cardId);
+        if (!card) return;
+
+        const video = card.querySelector("video");
+        if (video) {
+            video.srcObject = null;
+            video.style.display = "none";
+        }
+
+        const avatar = card.querySelector(".avatar-container");
+        if (avatar) avatar.style.display = "";
+    };
+
     voip.onLeave = (participantId) => {
         document.querySelectorAll(`[data-member-id="${participantId}"]`).forEach(e => e.remove());
         document.querySelectorAll(`audio[id^="audio-global-${participantId}"]`).forEach(a => {
@@ -255,11 +176,6 @@ document.addEventListener("DOMContentLoaded", async event => {
     voip.onTrackSubscribed = (track, participantId, isScreen) => {
         getOrCreateUserCard(participantId, isScreen === true);
 
-        if (track.kind === "audio") {
-            attachAudioTrack(track, participantId, isScreen === true);
-            return;
-        }
-
         if (track.kind === "video") {
             const card = getOrCreateUserCard(participantId, isScreen === true);
             const video = card?.querySelector("video");
@@ -270,13 +186,18 @@ document.addEventListener("DOMContentLoaded", async event => {
             video.style.display = "block";
             video.play().catch(() => {});
 
+            // remove avatar
+            if (!isScreen) {
+                const avatar = card.querySelector(".avatar-container");
+                if (avatar) avatar.style.display = "none";
+            }
+
             const mst = track.mediaStreamTrack;
             if (mst) {
                 const s = new MediaStream([mst]);
 
                 if (isScreen) {
                     screenStreams[participantId] = s;
-
                     const ts = screenStartTs[participantId] || Date.now();
                     if (ts >= lastScreenCreatedAt) {
                         lastScreenCreatedAt = ts;
@@ -306,8 +227,12 @@ document.addEventListener("DOMContentLoaded", async event => {
                 a.remove();
             });
 
-        try { voip.detachAudio(participantId, true); } catch (e) {}
-        voip._volumes.delete(`${participantId}:screen`);
+        // restore user card if missing
+        const userCard = document.getElementById(`vc-card-${participantId}-user`);
+        if (userCard) {
+            const avatar = userCard.querySelector(".avatar-container");
+            if (avatar) avatar.style.display = "";
+        }
 
         delete screenStartTs[participantId];
         delete screenStreams[participantId];
@@ -387,7 +312,7 @@ function getOrCreateUserCard(memberId, isScreen = false) {
              onclick="event.stopPropagation()">
           <input class="vc-vol" type="range" min="0" max="400" value="${vol}"
             oninput="
-              setVcVolume('${memberId}', ${isScreen}, this.value);
+              voip.setVcVolume('${memberId}', ${isScreen}, this.value);
               this.nextElementSibling.innerText = this.value + '%';
             ">
           <div class="vc-volpct">${vol}%</div>
@@ -423,6 +348,13 @@ function getOrCreateUserCard(memberId, isScreen = false) {
     return card;
 }
 
+async function toggleCamera() {
+    if (!voip || typeof voip.toggleCamera !== "function") return;
+
+    await voip.toggleCamera();
+    updateUiButtons();
+}
+
 async function setupVC(roomId) {
     if (!roomId) return;
 
@@ -444,6 +376,7 @@ async function setupVC(roomId) {
             </div>
 
             <div class="vc-controls">
+                <button class="vc-btn" onclick="toggleCamera()" id="btn-cam" title="Camera">📷</button>
                 <button class="vc-btn" onclick="toggleScreenshare()" title="Share Screen">🖥️</button>
                 <button class="vc-btn" onclick="toggleMic()" id="btn-mic" title="Mic">🎙️</button>
                 <button class="vc-btn" onclick="toggleDeafen()" id="btn-deafen" title="Deafen">🎧</button>
@@ -495,25 +428,32 @@ async function setupVC(roomId) {
 
 function updateUiButtons() {
     const isMuted = voip && typeof voip.isMuted === "function" ? voip.isMuted() : false;
+    const camOn = voip && typeof voip.isCameraEnabled === "function" ? voip.isCameraEnabled() : false;
 
     const micBtn = document.getElementById("btn-mic");
     const deafBtn = document.getElementById("btn-deafen");
+    const camBtn = document.getElementById("btn-cam");
     const pipMic = document.getElementById("pip-mic");
     const pipDeaf = document.getElementById("pip-deafen");
     const channelIconMic = document.querySelector("#channelname-icons .muteMic.icon");
 
     if (channelIconMic) channelIconMic.classList.toggle("muted", isMuted);
 
+    if (camBtn) {
+        camBtn.className = camOn ? "vc-btn active" : "vc-btn";
+        camBtn.innerHTML = camOn ? emojiCodeToImg("📷", true) : emojiCodeToImg("📷", true);
+    }
+
     if (micBtn) {
         if (isDeafened) {
             micBtn.className = "vc-btn deafened";
-            micBtn.innerHTML = "🚫";
+            micBtn.innerHTML = emojiCodeToImg("🚫", true);
         } else if (isMuted) {
             micBtn.className = "vc-btn danger";
-            micBtn.innerHTML = "🔇";
+            micBtn.innerHTML = emojiCodeToImg("🔇", true);
         } else {
             micBtn.className = "vc-btn";
-            micBtn.innerHTML = "🎙️";
+            micBtn.innerHTML = emojiCodeToImg("🎙", true);
         }
     }
 
@@ -522,13 +462,13 @@ function updateUiButtons() {
     if (pipMic) {
         if (isDeafened) {
             pipMic.className = "vc-pip-btn danger";
-            pipMic.innerHTML = "🚫";
+            pipMic.innerHTML = emojiCodeToImg("🚫", true);
         } else if (isMuted) {
             pipMic.className = "vc-pip-btn danger";
-            pipMic.innerHTML = "🔇";
+            pipMic.innerHTML = emojiCodeToImg("🔇", true);
         } else {
             pipMic.className = "vc-pip-btn";
-            pipMic.innerHTML = "🎙️";
+            pipMic.innerHTML = emojiCodeToImg("🎙️", true);
         }
     }
 
@@ -543,9 +483,8 @@ function checkPipVisibility() {
     }
 
     let grid = document.getElementById("vc-grid");
-    let currentChannel = UserManager.getChannel();
+    let currentChannel = UserManager.getRoom();
     let isDifferentChannel = String(currentChannel) !== String(connectedVcChannel);
-
     let shouldShow = !grid || isDifferentChannel;
     togglePip(shouldShow);
 }
@@ -701,6 +640,7 @@ function leaveVC() {
     const cid = connectedVcChannel || UserManager.getChannel();
     const myId = UserManager.getID();
 
+    voip.stopCamera().catch(() => {});
     voip.leaveRoom();
 
     removeVcMemberFromChannel(cid, myId);

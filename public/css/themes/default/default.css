@@ -324,3 +324,21 @@ p.note{
     border: 2px solid hsl(from var(--main) h calc(s * 20) calc(l * 8) / 20%);
     color: hsl(from var(--main) h calc(s * 20) calc(l * 8) / 80%);
 }
+
+/* url embeds */
+.markdown-urlEmbed {
+    background-color: hsl(from var(--main) h s calc(l * 8) / 10%);
+    border: 1px solid hsl(from var(--main) h s calc(l * 8) / 20%);
+}
+.markdown-urlEmbed .meta-info.title{
+    font-weight: bold;
+    color: hsl(from var(--main) calc(h * 2.7) calc(s * 12) calc(l * 8) / 100%);
+}
+.markdown-urlEmbed .meta-info.description{
+    font-weight: bold;
+    color: hsl(from var(--main) h s  calc(l * 10) / 100%);
+}
+
+.markdown-urlEmbed:hover .meta-info.title{
+    color: hsl(from var(--main) calc(h * 2.7) calc(s * 12) calc(l * 10) / 100%);
+}

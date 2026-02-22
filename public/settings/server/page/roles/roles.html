@@ -44,12 +44,27 @@
                 Role Name
                 <input onkeydown="appearanceChanged()" style="display: inline-block;margin-top: -4px; float: right;" id="roleName" type="text">
             </p>
-
             <p>
                 Role Color
                 <input onchange="appearanceChanged()" style="display: inline-block;margin-top: -4px; float: right;" id="roleColor" type="color">
             </p>
-
+            <p>
+                Gradient enabled
+                <input onchange="appearanceChanged()" style="float: right;" id="gradientsEnabled" type="checkbox">
+            </p>
+            <div id="gradientOptions" style="display:none">                
+            <p>    
+                Gradient color 1
+                <input onchange="appearanceChanged()" style="display: inline-block;margin-top: -4px; float: right;" id="roleColorGradient1" type="color">
+            </p>
+            <p>
+                Gradient color 2
+                <input onchange="appearanceChanged()" style="display: inline-block;margin-top: -4px; float: right;" id="roleColorGradient2" type="color">
+            </div>
+            </p>
+            <p>
+                Role look: <span id="roleMenuEntryExample">Example</span>
+            </p>
             <p>
                 Display Seperate
                 <input onchange="appearanceChanged()" style="float: right;" id="displaySeperate" type="checkbox">

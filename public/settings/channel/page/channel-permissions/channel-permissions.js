@@ -75,7 +75,7 @@ socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getT
                        width: 10px; height: 10px;display: inline-block;"></div>
                        
                         <p class="role-entry" onclick="loadRolePerms('${role.info.id}')" id="${role.info.id}" style="display: inline-block;color: ${role.info.color};">
-                            ${role.info.name}
+                            <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${role.info.name}</span>
                         </p>
                    </div>`;
 

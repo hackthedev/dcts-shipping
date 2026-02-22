@@ -232,7 +232,7 @@ async function updateMentionAutocompleteData() {
         if (!role?.info) continue;
 
         const name = role.info.name;
-        const html = `<span data-role-id="${roleId}" style="color:${role.info.color}">@${name}</span>`;
+        const html = `<span data-role-id="${roleId}" style="color:${role.info.color}; background:${role.info.background}; background-clip:${role.info.backgroundClip};">@${name}</span>`;
 
         const mention = new Mention("role", { role: { id: roleId, ...role.info }, html });
         mentionList[i++] = mention;

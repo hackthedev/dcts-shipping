@@ -1,6 +1,8 @@
 var rolelist = document.getElementById("rolelist");
-var roleColor = document.getElementById("roleColor");
 var roleName = document.getElementById("roleName");
+var roleColor = document.getElementById("roleColor");
+var roleColorGradient1 = document.getElementById("roleColorGradient1");
+var roleColorGradient2 = document.getElementById("roleColorGradient2");
 var serverRoleResponse = "";
 var editedServerRoleResponse = [];
 var editedPermissions = {};
@@ -31,8 +33,12 @@ function initServerRoles(){
     socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
 
         rolelist = document.getElementById("rolelist");
-        roleColor = document.getElementById("roleColor");
+        roleStyle = computeRoleStyle();
         roleName = document.getElementById("roleName");
+        roleColor = document.getElementById("roleColor");
+        roleColorGradient1 = document.getElementById("roleColorGradient1");
+        roleColorGradient2 = document.getElementById("roleColorGradient2");
+        roleMenuEntryExample = document.getElementById("roleMenuEntryExample");
 
         serverRoleResponse = response;
         editedServerRoleResponse = response;
@@ -40,7 +46,7 @@ function initServerRoles(){
         var roleArraySorted = [];
 
         Object.keys(response).reverse().forEach(function (role) {
-            var rolecolor = response[role].info.color;
+            var roleStyle = response[role].info.style;
             var roleName = response[role].info.name;
 
             roleArraySorted[response[role].info.sortId] = response[role];
@@ -60,8 +66,8 @@ function initServerRoles(){
                        <div onclick="moveRoleDown(${role.info.id})" style="background-image: url('/img/down.png');background-size: cover;object-fit: cover;background-position: center center;
                        width: 10px; height: 10px;display: inline-block;"></div>
                        
-                        <p class="role-entry" onclick="loadRolePerms('${role.info.id}')" id="${role.info.id}" style="display: inline-block;color: ${role.info.color};">
-                            ${role.info.name}
+                        <p class="role-entry" onclick="loadRolePerms('${role.info.id}')" id="${role.info.id}">
+                            <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${role.info.name}</span>
                         </p>
                    </div>
         `;
@@ -76,7 +82,10 @@ function initServerRoles(){
 function saveAppearance() {
 
     serverRoleResponse[currentRoleId].info.name = roleName.value;
-    serverRoleResponse[currentRoleId].info.color = roleColor.value;
+    var roleStyle = computeRoleStyle();
+    serverRoleResponse[currentRoleId].info.color= roleStyle.color;
+    serverRoleResponse[currentRoleId].info.background= roleStyle.background;
+    serverRoleResponse[currentRoleId].info.backgroundClip= roleStyle.backgroundClip;
 
     if (document.getElementById("displaySeperate").checked == true) {
         serverRoleResponse[currentRoleId].info.displaySeperate = 1;
@@ -91,7 +100,36 @@ function saveAppearance() {
     });
 }
 
+function computeRoleStyle() {
+    var roleStyle = document.getElementById('roleMenuEntryExample').style
+    if(document.getElementById('gradientsEnabled').checked) {
+        var roleColorValue = document.getElementById("roleColor").value;
+        var roleColorGradient1Value = document.getElementById("roleColorGradient1").value; 
+        var roleColorGradient2Value = document.getElementById("roleColorGradient2").value;
+        roleStyle.background = `linear-gradient(90deg, ${roleColorValue}, ${roleColorGradient1Value}, ${roleColorGradient2Value})`;
+        roleStyle.backgroundClip = "text";
+        roleStyle.color = "transparent";
+    }
+    else {
+        roleStyle.color = document.getElementById("roleColor").value;
+        roleStyle.background = "none";
+        roleStyle.backgroundClip = "initial";
+    }
+    return roleStyle;
+}
+
 function appearanceChanged() {
+    var roleStyle = computeRoleStyle();
+    console.log(`color: ${roleStyle.color}`)
+    document.getElementById('roleMenuEntryExample').style.background = roleStyle.background;
+    document.getElementById('roleMenuEntryExample').style.backgroundClip = roleStyle.backgroundClip;
+    document.getElementById('roleMenuEntryExample').style.color = roleStyle.color;
+    if(document.getElementById('gradientsEnabled').checked) {
+        document.getElementById('gradientOptions').style.display = "block";
+    }
+    else {
+        document.getElementById('gradientOptions').style.display = "none";
+    }
     document.getElementById("saveAppearanceButton").style.display = "inline-block";
     document.getElementById("cancelAppearanceButton").style.display = "inline-block";
 }
@@ -189,6 +227,12 @@ function deleteRole() {
     });
 }
 
+function rgbToHex(rgbString) {
+  const [r, g, b] = rgbString.match(/\d+/g).map(Number);
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+}
+
+
 function loadRolePerms(roleId) {
     PermUI.init();
 
@@ -259,8 +303,24 @@ function loadRolePerms(roleId) {
             document.getElementById("deleteRole").style.display = "block";
             currentRoleId = roleId;
 
-            // Color and Name
-            roleColor.value = serverRoleResponse[roleId].info.color;
+            // Style and Name
+            if(serverRoleResponse[roleId].info.color == 'transparent') {
+                document.getElementById('gradientsEnabled').checked = true;
+                document.getElementById('gradientOptions').style.display = "block";
+                var roleColors = serverRoleResponse[roleId].info.background.match(/(rgb\(.*,.*,.*\)), (rgb\(.*,.*,*\)), (rgb\(.*,.*,.*[^)]\))/);
+                roleColor.value = rgbToHex(roleColors[1]);
+                roleColorGradient1.value = rgbToHex(roleColors[2])
+                roleColorGradient2.value = rgbToHex(roleColors[3])
+            }
+            else {
+                document.getElementById('gradientsEnabled').checked = false;
+                document.getElementById('gradientOptions').style.display = "none";
+                roleColor.value = rgbToHex(serverRoleResponse[roleId].info.color);
+            }
+            var roleStyle = computeRoleStyle();
+            roleMenuEntryExample.color = roleStyle.color;
+            roleMenuEntryExample.background = roleStyle.background;
+            roleMenuEntryExample.backgroundClip = roleStyle.backgroundClip;
             roleName.value = serverRoleResponse[roleId].info.name;
 
             /*

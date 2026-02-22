@@ -528,7 +528,7 @@ class UserManager {
     }
 
     static resetAccount() {
-        var reset = confirm("Do you really want to reset your account? EVERYTHING will be reset.")
+        var reset = confirm("Do you really wanna logout?")
 
         if (reset) {
             CookieManager.setCookie("id", null, 365);
@@ -540,9 +540,7 @@ class UserManager {
             CookieManager.setCookie("pow_challenge", null, 365);
             CookieManager.setCookie("pow_solution", null, 365);
 
-            alert("Your account has been reset. Please refresh the page if you want to continue");
-
-            window.location.reload();
+            window.location.href = window.location.origin;
         }
     }
 

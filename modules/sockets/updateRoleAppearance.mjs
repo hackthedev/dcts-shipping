@@ -14,6 +14,8 @@ export default (io) => (socket) => {
                 try {
                     serverconfig.serverroles[member.roleId].info.name = member.data.info.name;
                     serverconfig.serverroles[member.roleId].info.color = member.data.info.color;
+                    serverconfig.serverroles[member.roleId].info.background = member.data.info.background;
+                    serverconfig.serverroles[member.roleId].info.backgroundClip = member.data.info.backgroundClip;
                     serverconfig.serverroles[member.roleId].info.displaySeperate = member.data.info.displaySeperate;
 
                     saveConfig(serverconfig);

@@ -216,6 +216,8 @@ class ModActions {
                 var roleId = Number(roleObj.info.id);
                 var roleName = roleObj.info.name;
                 var roleColor = roleObj.info.color;
+                var roleBackground = roleObj.info.background;
+                var roleBackgroundClip = roleObj.info.backgroundclip;
                 var hasRole = Number(roleObj.info.hasRole);
 
                 // no point in showing Member and Offline role to be choosen.
@@ -233,7 +235,7 @@ class ModActions {
                     roleList.insertAdjacentHTML("beforeend",
                         `<div class="role-menu-entry" onclick="ModActions.checkCheckedRoleMenu(this.querySelector('input'))">
                             <input type="checkbox" ${displayChecked} class="role-menu-entry-checkbox" id="role-menu-entry_${roleId}_${userId}" onclick="ModActions.checkCheckedRoleMenu(this)">
-                            <label style="color: ${roleColor};" class="role-menu-entry-roleName">${roleName}</label>
+                            <label style="color: ${roleColor};background: ${roleBackground};background-clip: ${roleBackgroundClip};" class="role-menu-entry-roleName">${roleName}</label>
                         </div>`)
                 }
 

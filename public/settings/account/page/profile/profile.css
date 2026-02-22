@@ -14,10 +14,6 @@
     position: absolute;
 }
 
-#profile_container * {
-    color: hsl(from var(--main) h s calc(l * 10) / 100%) !important;
-}
-
 #profile-role-menu{
     z-index: 21 !important;
 }

@@ -136,6 +136,7 @@
     width: 100%;
     font-size: 14px;
     padding-left: 2px;
+    word-break: break-all;
 }
 
 .message-container .icon-container img {
@@ -210,9 +211,10 @@
 .message-container .row.reply {
     display: flex;
     flex-direction: row;
-    justify-content: start;
+    justify-content: center;
     align-content: center;
     align-items: center;
+    align-self: start;
 
     margin-bottom: 2px;
     font-size: 12px;
@@ -223,7 +225,9 @@
 .message-container .row.reply .content.reply {
     display: flex;
     flex-direction: row;
+    justify-content: start;
     align-items: center;
+    flex-grow: 1;
 
     overflow: hidden;
     text-overflow: ellipsis;
@@ -239,8 +243,9 @@
     flex-grow: 1;
     border-top-left-radius: 6px;
 
-    height: 10px;
-    width: 25px;
+    height: 12px;
+    min-width: 25px;
+    max-width: 25px;
 
     margin-left: 18px;
     margin-top: auto;

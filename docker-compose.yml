@@ -34,6 +34,8 @@ services:
       - DB_PASS=dcts
       - DB_NAME=dcts
       - DEBUG=false # optional
+    ports:
+      - 2052:2052
     restart: unless-stopped
     volumes:
       - ./dcts/sv:/app/sv
@@ -70,21 +72,22 @@ services:
       timeout: 3s
       retries: 10
 
-  caddy:
-    image: caddy:2
-    env_file:
-      - config.env
-    restart: unless-stopped
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./Private_Certs:/etc/caddy/certs:ro # Mount the certs directory as read-only
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - dcts-livekit
+
+#  caddy:
+#    image: caddy:2
+#    env_file:
+#      - config.env
+#    restart: unless-stopped
+#    ports:
+#      - 80:80
+#      - 443:443
+#    volumes:
+#      - ./Caddyfile:/etc/caddy/Caddyfile
+#      - ./Private_Certs:/etc/caddy/certs:ro # Mount the certs directory as read-only
+#      - caddy_data:/data
+#      - caddy_config:/config
+#    depends_on:
+#      - dcts-livekit
 
 volumes:
   dcts-mariadb-data:

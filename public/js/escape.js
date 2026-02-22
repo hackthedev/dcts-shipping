@@ -101,7 +101,11 @@ function unescapeHtmlEntities(str, raw = false) {
 
     const txt = document.createElement('label');
     txt.innerHTML = String(str);
-    return txt.textContent;
+    let unescaped = txt.textContent;
+
+    const div = document.createElement('div');
+    div.innerHTML = unescaped;
+    return div.textContent || "";
 }
 
 function hl(text, query) {

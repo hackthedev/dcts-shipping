@@ -422,6 +422,16 @@ function editMessage(id) {
     }
     editMessageId = msgContent.getAttribute("data-message-id");
 
+    // remove all url embeds
+    let embeds = msgContent.querySelectorAll(".markdown-urlEmbed");
+    if(embeds?.length > 0){
+        for(let embed of embeds) {
+            let url = embed.getAttribute("href");
+            embed.replaceWith(url);
+        }
+        msgContent.innerHTML = msgContent.innerHTML.replace(/\s+/g, " ").trim();
+    }
+
     setTimeout(() => {
         const regex = /<p>\s*<\/p>/gm;
         if(quill) quill.pasteUnconverted(msgContent.innerHTML.replace(regex, ''));
@@ -622,7 +632,11 @@ function truncateText(text, length) {
         actualLength = length;
     }
 
-    return text?.substring(0, actualLength);
+    if(text?.length > length){
+        return text?.substring(0, actualLength) + "..."
+    }
+
+    return text?.substring(0, actualLength)
 }
 
 function hidePopup() {
@@ -752,7 +766,7 @@ async function getMessageReactionsHTML(messageObj){
     return row.innerHTML;
 
     function getEmojiReactionRowEntryHTML(messageObj, emojiObj){
-        let emojiPath = `/emojis/${emojiObj.filename}`;
+        let emojiPath = emojiObj?.code ? `/img/default_emojis/${emojiObj.code}.svg` : `/emojis/${emojiObj.filename}`;
         let emojiDetails = extractEmojiDetails(emojiObj);
         let emojiHash = emojiDetails[0]
 
@@ -833,7 +847,7 @@ async function createMsgHTML({
                     <img class="icon" draggable="false" src="${reply?.author?.icon}" data-member-id="${reply?.author?.id}" onerror="this.src = '/img/default_pfp.png';">
                 </div>
                 <div class="meta">
-                    <label class="username" data-member-id="${reply?.author?.id}" style="color: ${reply?.author?.color};">
+                    <label class="username" data-member-id="${reply?.author?.id}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
                         ${sanitizeHtmlForRender(truncateText(reply?.author?.name, 25))}
                     </label>
                 </div>
@@ -857,7 +871,7 @@ async function createMsgHTML({
                <div class="content-container" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}"> <!-- for the flex layout -->
                  <div class="meta">
                     ${isSystem !== true ?
-                    `<label class="username" data-member-id="${message?.author?.id}" style="color: ${message?.author?.color};">${sanitizeHtmlForRender(truncateText(message?.author?.name, 25))}</label>` : ""}
+                    `<label class="username" data-member-id="${message?.author?.id}" style="color: ${message?.author?.color}; background: ${message?.author?.background}; background-clip: ${message?.author?.backgroundClip};">${sanitizeHtmlForRender(truncateText(message?.author?.name, 25))}</label>` : ""}
                     <label class="timestamp" data-timestamp="${message.timestamp}">
                         ${new Date(message.timestamp).toLocaleString("narrow")}
                         
@@ -931,20 +945,20 @@ function reactToMessageFromAction(element){
     }
 
     showEmojiPicker(clientRec.x, clientRec.y, async (emoji) => {
-        console.log("picked emoji: ", emoji);
         let emojiDetails = extractEmojiDetails(emoji);
         let emojiHash = emojiDetails[0]
 
-        addMessageReaction(messageId, emojiHash);
+        addMessageReaction(messageId, emojiHash, emoji?.default);
     }, true);
 }
 
-async function addMessageReaction(messageId, emojiHash){
+async function addMessageReaction(messageId, emojiHash, isDefault = false){
     socket.emit("addMessageReaction", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
         messageId,
-        emojiHash
+        emojiHash,
+        default: isDefault
     }, async (response) => {
         if(response?.error){
             console.log(response.error);
@@ -1098,13 +1112,13 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
         if (response.data == null) {
             console.log("Data was null history");
             Clock.stop("load_messages_total")
-            ElementLoader.stop(channelname);
+            ElementLoader.stop(channelbar);
             return;
         }
         if (response.type === "voice") {
             Clock.stop("load_messages_total")
 
-            ElementLoader.stop(channelname);
+            ElementLoader.stop(channelbar);
             return;
         }
 
@@ -1168,7 +1182,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
         ]);
 
         if(channelId !== UserManager.getChannel()){
-            ElementLoader.stop(channelname);
+            ElementLoader.stop(channelbar);
             Clock.stop("load_messages_processing")
             renderer.remove();
             return;

@@ -207,6 +207,8 @@ sortable-chosen.sortable-ghost {
 
 .ql-editor p{
     display: flex;
+    justify-content: start;
+    align-items: center;
     flex-direction: row;
 }
 

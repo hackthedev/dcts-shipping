@@ -422,6 +422,16 @@ function editMessage(id) {
     }
     editMessageId = msgContent.getAttribute("data-message-id");
 
+    // remove all url embeds
+    let embeds = msgContent.querySelectorAll(".markdown-urlEmbed");
+    if(embeds?.length > 0){
+        for(let embed of embeds) {
+            let url = embed.getAttribute("href");
+            embed.replaceWith(url);
+        }
+        msgContent.innerHTML = msgContent.innerHTML.replace(/\s+/g, " ").trim();
+    }
+
     setTimeout(() => {
         const regex = /<p>\s*<\/p>/gm;
         if(quill) quill.pasteUnconverted(msgContent.innerHTML.replace(regex, ''));
@@ -622,7 +632,11 @@ function truncateText(text, length) {
         actualLength = length;
     }
 
-    return text?.substring(0, actualLength);
+    if(text?.length > length){
+        return text?.substring(0, actualLength) + "..."
+    }
+
+    return text?.substring(0, actualLength)
 }
 
 function hidePopup() {

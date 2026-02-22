@@ -23,6 +23,33 @@ function isAlreadyLink(msg, url, msgid) {
     return null;
 }
 
+async function updateMissingMeta() {
+    let embeds = document.querySelectorAll(".markdown-urlEmbed");
+    for (let embed of embeds) {
+        let titleEl = embed.querySelector(".meta-info.title");
+        let descEl = embed.querySelector(".meta-info.description");
+
+        if (titleEl && titleEl.textContent.trim()) continue;
+
+        let url = embed.getAttribute("href");
+        if (!url) continue;
+
+        try {
+            let urlMeta = await getUrlMeta(url);
+            if (!urlMeta?.meta) continue;
+
+            if (titleEl) titleEl.textContent = truncateText(urlMeta.meta.title || "", 75);
+            if (descEl) descEl.textContent = truncateText(urlMeta.meta.description || "", 300);
+
+            embed.childNodes.forEach(n => {
+                if (n.nodeType === 3 && n.textContent.trim().includes(url)) {
+                    n.textContent = "";
+                }
+            });
+        } catch (e) {}
+    }
+}
+
 async function updateMarkdownLinks(delay) {
     const elements = document.querySelectorAll(".contentRows .content p");
     const max = Math.min(elements.length, 50);
@@ -73,6 +100,8 @@ async function updateMarkdownLinks(delay) {
     if (markdownChanged && isScrolledDown) {
         scrollDown("updateMarkdown");
     }
+
+    await updateMissingMeta();
 
     setTimeout(() => updateMarkdownLinks(delay), delay);
 }
@@ -156,28 +185,29 @@ async function markdown(msg, msgid) {
             isAlreadyLink(msg, url, msgid) !== "youtube" &&
             isAlreadyLink(msg, url, msgid) !== "video" &&
             isAlreadyLink(msg, url, msgid) !== "image" ) {
-            msg = msg.replace(url,
-                `
-                <a                     
-                    class="markdown-urlEmbed"
-                    draggable="false" 
-                    data-media-type="link" 
-                    data-message-id="${msgid.replace("msg-", "")}" 
-                    href="${url}" ${url.startsWith(window.location.origin) ? "" : "target=\"_blank\""}
-                >
-                    <p class="meta-info title">
-                        ${urlMeta?.meta?.title ? truncateText(urlMeta?.meta?.title, 200) : ""}
-                    </p>
-                    <p class="meta-info description">                    
-                        ${urlMeta?.meta?.description ? truncateText(urlMeta?.meta?.description, 300) : ""}
-                    </p>        
-                    ${!urlMeta ? url : ""}
-                </a>
-`
-            );
+
+            let linkText = msg.replace(url, "").trim();
+
+            let embed = `
+            <a                     
+                class="markdown-urlEmbed"
+                draggable="false" 
+                data-media-type="link" 
+                data-message-id="${msgid.replace("msg-", "")}" 
+                href="${url}" ${url.startsWith(window.location.origin) ? "" : 'target="_blank"'}
+            >
+                <span class="meta-info title">
+                    ${urlMeta?.meta?.title ? truncateText(urlMeta?.meta?.title, 75) : ""}
+                </span>
+                <span class="meta-info description">                    
+                    ${urlMeta?.meta?.description ? truncateText(urlMeta?.meta?.description, 300) : ""}
+                </span>        
+                ${!urlMeta ? url : ""}
+            </a>`;
+
+            msg = (linkText ? linkText + "" : "") + embed;
             changed = true;
         }
-
     }
 
     return { isMarkdown: changed, message: msg };

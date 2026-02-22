@@ -230,7 +230,7 @@ export default (io) => (socket) => {
 
     socket.on("deleteThread", async function (data, response) {
         const requesterId = data?.id ?? data?.memberId;
-        if (validateMemberId(requesterId, socket, data?.token) === true && String(socket.data.memberId) === String(requesterId)) {
+        if (validateMemberId(requesterId, socket, data?.token) === true) {
             try {
                 const me = String(requesterId);
                 const threadId = data?.threadId;

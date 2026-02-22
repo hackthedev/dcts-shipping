@@ -219,11 +219,15 @@ function getMemberList() {
         });
     }
 
-
     function getRoleHTML(role){
         return `<div class="infolist-role" data-sort-id="${role.info.sortId}" data-role-id="${role.info.id}" title="${role.info.name}">
                     <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${role.info.name}</span>
-                    <hr style="margin-bottom: 16px;border: 1px solid ${role.info.color};">
+                    <hr style="
+                    margin-bottom: 16px; 
+                    border: none;
+                    height: 2px;
+                    background: ${role?.info?.background?.replace("text", "") || role.info.color};
+                    ">
                 </div>`
     }
 

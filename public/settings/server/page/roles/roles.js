@@ -229,6 +229,9 @@ function deleteRole() {
 
 function rgbToHex(rgbString) {
   const [r, g, b] = rgbString.match(/\d+/g).map(Number);
+  if(r === undefined) return rgbString
+  if(g === undefined) return rgbString
+  if(b === undefined) return rgbString
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
 }
 
@@ -280,6 +283,8 @@ function loadRolePerms(roleId) {
 
             // Mark the current role that is being edited
             var currentRole = document.querySelectorAll(`.role-entry`);
+            let roleInfoObj = serverRoleResponse[roleId].info;
+
             currentRole.forEach(role => {
 
                 if (role.id == roleId) {
@@ -308,6 +313,7 @@ function loadRolePerms(roleId) {
                 document.getElementById('gradientsEnabled').checked = true;
                 document.getElementById('gradientOptions').style.display = "block";
                 var roleColors = serverRoleResponse[roleId].info.background.match(/(rgb\(.*,.*,.*\)), (rgb\(.*,.*,*\)), (rgb\(.*,.*,.*[^)]\))/);
+
                 roleColor.value = rgbToHex(roleColors[1]);
                 roleColorGradient1.value = rgbToHex(roleColors[2])
                 roleColorGradient2.value = rgbToHex(roleColors[3])

@@ -766,7 +766,7 @@ async function getMessageReactionsHTML(messageObj){
     return row.innerHTML;
 
     function getEmojiReactionRowEntryHTML(messageObj, emojiObj){
-        let emojiPath = `/emojis/${emojiObj.filename}`;
+        let emojiPath = emojiObj?.code ? `/img/default_emojis/${emojiObj.code}.svg` : `/emojis/${emojiObj.filename}`;
         let emojiDetails = extractEmojiDetails(emojiObj);
         let emojiHash = emojiDetails[0]
 
@@ -945,20 +945,20 @@ function reactToMessageFromAction(element){
     }
 
     showEmojiPicker(clientRec.x, clientRec.y, async (emoji) => {
-        console.log("picked emoji: ", emoji);
         let emojiDetails = extractEmojiDetails(emoji);
         let emojiHash = emojiDetails[0]
 
-        addMessageReaction(messageId, emojiHash);
+        addMessageReaction(messageId, emojiHash, emoji?.default);
     }, true);
 }
 
-async function addMessageReaction(messageId, emojiHash){
+async function addMessageReaction(messageId, emojiHash, isDefault = false){
     socket.emit("addMessageReaction", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
         messageId,
-        emojiHash
+        emojiHash,
+        default: isDefault
     }, async (response) => {
         if(response?.error){
             console.log(response.error);

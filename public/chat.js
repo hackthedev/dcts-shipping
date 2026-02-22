@@ -2004,32 +2004,74 @@ async function getEmojis(callback = null) {
         emoji.replaceWith(clone);
     })
 
-    socket.emit("getEmojis", {id: UserManager.getID(), token: UserManager.getToken()}, async function (response) {
-
+    socket.emit("getEmojis", { id: UserManager.getID(), token: UserManager.getToken() }, async function (response) {
         if (response.type === "success") {
-            //settings_icon.value = response.msg;
-            //emojiContainer.innerHTML = "<div id='emoji-box-header'><h2>Emojis</h2></div>";
-
-            //emojiEntryContainer.innerHTML = "";
             emojiEntryContainer.style.display = "flex";
-            for(let emoji of response.data.reverse()){
 
+            let groupBar = emojiEntryContainer.querySelector(".emoji-group-bar");
+            if (!groupBar) {
+                groupBar = document.createElement("div");
+                groupBar.className = "emoji-group-bar";
+                emojiEntryContainer.prepend(groupBar);
+            }
+            groupBar.innerHTML = "";
+
+            // groups
+            const customTab = document.createElement("div");
+            customTab.className = "emoji-group-tab active";
+            customTab.setAttribute("data-group", "custom");
+            customTab.title = "custom";
+
+            const customIcon = document.createElement("img");
+
+            customIcon.src = "/img/default_pfp.png";
+            customIcon.className = "emoji-group-icon";
+            customTab.appendChild(customIcon);
+            groupBar.appendChild(customTab);
+
+            // tabs
+            for (const group of twemojiIndex) {
+                const tab = document.createElement("div");
+                tab.className = "emoji-group-tab";
+                tab.setAttribute("data-group", group.group);
+                tab.title = group.group;
+
+                const icon = document.createElement("img");
+
+                icon.src = `/img/default_emojis/${group.icon}.svg`;
+                icon.className = "emoji-group-icon";
+                tab.appendChild(icon);
+                groupBar.appendChild(tab);
+            }
+
+            // content container
+            let contentContainer = emojiEntryContainer.querySelector(".emoji-group-content");
+            if (!contentContainer) {
+                contentContainer = document.createElement("div");
+                contentContainer.className = "emoji-group-content";
+                emojiEntryContainer.appendChild(contentContainer);
+            }
+            contentContainer.innerHTML = "";
+
+            // custom
+            const customSection = document.createElement("div");
+            customSection.className = "emoji-section";
+            customSection.setAttribute("data-group", "custom");
+
+            for (let emoji of response.data.reverse()) {
                 const base = emoji.filename.replace(/\.[^/.]+$/, "");
                 const parts = base.split("_");
-
-                var emojiId = parts[0];
-                var emojiName = parts.length > 1 ? parts.slice(1).join("_") : parts[0];
-
-                let existingEmojiElement = emojiEntryContainer.querySelector(`.emoji-entry[data-hash="${emojiId}"]`);
+                const emojiId = parts[0];
 
                 if (hasEmojiInContainer(emojiId)) {
-                    if(existingEmojiElement) registerEmojiCallback(existingEmojiElement, emoji);
+                    let existingEmojiElement = contentContainer.querySelector(`.emoji-entry[data-hash="${emojiId}"]`);
+                    if (existingEmojiElement) registerEmojiCallback(existingEmojiElement, emoji);
                     continue;
                 }
 
                 const entry = document.createElement("div");
                 entry.className = "emoji-entry";
-                entry.setAttribute("data-hash", emojiId)
+                entry.setAttribute("data-hash", emojiId);
                 entry.title = emoji.name;
 
                 const imgWrap = document.createElement("div");
@@ -2041,22 +2083,86 @@ async function getEmojis(callback = null) {
 
                 imgWrap.appendChild(img);
                 entry.appendChild(imgWrap);
-
                 registerEmojiCallback(entry, emoji);
+                customSection.appendChild(entry);
+            }
+            contentContainer.appendChild(customSection);
 
+            // twemoji
+            for (const group of twemojiIndex) {
+                const section = document.createElement("div");
+                section.className = "emoji-section";
+                section.setAttribute("data-group", group.group);
+                section.style.display = "none";
 
-                emojiEntryContainer.appendChild(entry);
+                for (const e of group.emojis) {
+                    const entry = document.createElement("div");
+                    entry.className = "emoji-entry";
+                    entry.setAttribute("data-default", "1");
+                    entry.title = e.name;
+
+                    const imgWrap = document.createElement("div");
+                    imgWrap.className = "emoji-img";
+
+                    const img = document.createElement("img");
+                    img.className = "emoji";
+                    img.src = `/img/default_emojis/${e.code}.svg`;
+                    imgWrap.appendChild(img);
+                    entry.appendChild(imgWrap);
+
+                    entry.addEventListener("click", () => {
+                        if (typeof callback === "function") {
+                            callback({ code: e.code, name: e.name, default: true });
+                            closeEmojiBox();
+                        } else {
+                            const sel = quill.getSelection(true);
+                            quill.insertEmbed(sel.index, "emoji", {
+                                src: `/img/default_emojis/${e.code}.svg`,
+                                class: "inline-text-emoji default",
+                                ["data-code"]: e.code
+                            });
+                            quill.setSelection(sel.index + 1);
+                            focusEditor();
+                            getEmojiContainerElement().style.display = "none";
+                        }
+                    });
+
+                    section.appendChild(entry);
+                }
+                contentContainer.appendChild(section);
             }
 
-            removeUnusedEmojisFromContainer(response)
+            // tab switching
+            groupBar.addEventListener("click", (ev) => {
+                const tab = ev.target.closest(".emoji-group-tab");
+                if (!tab) return;
 
-            //notify(response.msg)
+                const groupName = tab.getAttribute("data-group");
+
+                groupBar.querySelectorAll(".emoji-group-tab").forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+
+                contentContainer.querySelectorAll(".emoji-section").forEach(s => {
+                    s.style.display = s.getAttribute("data-group") === groupName ? "flex" : "none";
+                });
+            });
+
+            removeUnusedEmojisFromContainer(response);
+
         } else {
             showSystemMessage({
-                title: response.msg || "", text: "", icon: response.type, img: null, type: response.type, duration: 1000
+                title: response.msg || "",
+                text: "",
+                icon: response.type,
+                img: null,
+                type: response.type,
+                duration: 1000
             });
         }
     });
+
+
+
 
     function registerEmojiCallback(element, emojiObj){
         element.addEventListener("click", async () => {

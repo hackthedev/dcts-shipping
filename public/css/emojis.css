@@ -139,3 +139,56 @@
     border-radius: 10%;
     cursor: pointer;
 }
+
+/* tabs */
+
+.emoji-group-bar {
+    display: flex;
+    gap: 2px;
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--border-color, #333);
+    width: 100%;
+    flex-shrink: 0;
+    overflow-x: auto;
+}
+
+.emoji-group-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.15s, background 0.15s;
+}
+
+.emoji-group-tab:hover {
+    opacity: 0.8;
+    background: var(--hover-bg, rgba(255, 255, 255, 0.08));
+}
+
+.emoji-group-tab.active {
+    opacity: 1;
+    background: var(--active-bg, rgba(255, 255, 255, 0.12));
+}
+
+.emoji-group-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.emoji-group-content {
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: auto;
+    flex: 1;
+    padding: 6px;
+}
+
+.emoji-section {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+}

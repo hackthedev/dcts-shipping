@@ -210,7 +210,7 @@ function getMemberList() {
                 }
 
                 if(memberName && memberName.innerText !== memberObject.name){
-                    memberName.innerText = memberObject.name;
+                    memberName.innerText = unescapeHtmlEntities(memberObject.name);
                 }
                 if(memberStatus && memberStatus.innerText !== memberObject.status){
                     memberStatus.innerText = memberObject.status;

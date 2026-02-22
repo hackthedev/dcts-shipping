@@ -136,6 +136,7 @@
     width: 100%;
     font-size: 14px;
     padding-left: 2px;
+    word-break: break-all;
 }
 
 .message-container .icon-container img {
@@ -226,6 +227,7 @@
     flex-direction: row;
     justify-content: start;
     align-items: center;
+    flex-grow: 1;
 
     overflow: hidden;
     text-overflow: ellipsis;

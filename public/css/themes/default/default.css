@@ -332,7 +332,7 @@ p.note{
 }
 .markdown-urlEmbed .meta-info.title{
     font-weight: bold;
-    color: hsl(from var(--main) calc(h * 2.7) calc(s * 12) calc(l * 8) / 100%);
+    color: hsl(from var(--main) calc(h * 2.7) calc(s * 16) calc(l * 8) / 100%);
 }
 .markdown-urlEmbed .meta-info.description{
     font-weight: bold;
@@ -340,5 +340,5 @@ p.note{
 }
 
 .markdown-urlEmbed:hover .meta-info.title{
-    color: hsl(from var(--main) calc(h * 2.7) calc(s * 12) calc(l * 10) / 100%);
+    color: hsl(from var(--main) calc(h * 2.7) calc(s * 16) calc(l * 10) / 100%);
 }

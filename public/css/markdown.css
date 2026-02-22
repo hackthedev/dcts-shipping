@@ -1,6 +1,7 @@
 .markdown-urlEmbed {
     display: flex;
     flex-direction: column;
+    font-style: normal;
 
     width: fit-content;
     max-width: 600px;

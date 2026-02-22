@@ -62,10 +62,11 @@ async function updateMarkdownLinks(delay) {
 
     let markdownChanged = false;
 
-    for (let i = elements.length - 1; i >= elements.length - max; i--) {
+    for (let i = elements.length - 1; i >= 0; i--) {
         const el = elements[i];
         if (!el || el.className.includes("hljs")) continue;
         if (el.parentNode.querySelector(".video-embed")) continue;
+        if (el.hasAttribute("data-markdown-done")) continue;
 
         try {
             if (el.innerText.trim().length === 0) continue;
@@ -87,6 +88,8 @@ async function updateMarkdownLinks(delay) {
                     el.innerHTML = marked.isMarkdown
                         ? sanitizeHtmlForRender(marked.message)
                         : el.innerText;
+
+                    if (marked.isMarkdown) el.setAttribute("data-markdown-done", "true");
                     markdownChanged = true;
 
                     fixScrollAfterMediaLoad(container, scrollPosition);

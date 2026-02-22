@@ -2016,20 +2016,32 @@ async function getEmojis(callback = null) {
             }
             groupBar.innerHTML = "";
 
-            // groups
+            let searchWrap = emojiEntryContainer.querySelector(".emoji-search-wrap");
+            if (!searchWrap) {
+                searchWrap = document.createElement("div");
+                searchWrap.className = "emoji-search-wrap";
+                const searchInput = document.createElement("input");
+                searchInput.className = "emoji-search-input";
+                searchInput.type = "text";
+                searchInput.placeholder = "search emojis...";
+                searchWrap.appendChild(searchInput);
+                groupBar.parentNode ? emojiEntryContainer.insertBefore(searchWrap, groupBar.nextSibling) : emojiEntryContainer.prepend(searchWrap);
+            }
+            const searchInput = searchWrap.querySelector(".emoji-search-input");
+            searchInput.value = "";
+            setTimeout(() => searchInput.focus(), 50);
+
             const customTab = document.createElement("div");
             customTab.className = "emoji-group-tab active";
             customTab.setAttribute("data-group", "custom");
             customTab.title = "custom";
 
             const customIcon = document.createElement("img");
-
             customIcon.src = "/img/default_pfp.png";
             customIcon.className = "emoji-group-icon";
             customTab.appendChild(customIcon);
             groupBar.appendChild(customTab);
 
-            // tabs
             for (const group of twemojiIndex) {
                 const tab = document.createElement("div");
                 tab.className = "emoji-group-tab";
@@ -2037,14 +2049,12 @@ async function getEmojis(callback = null) {
                 tab.title = group.group;
 
                 const icon = document.createElement("img");
-
                 icon.src = `/img/default_emojis/${group.icon}.svg`;
                 icon.className = "emoji-group-icon";
                 tab.appendChild(icon);
                 groupBar.appendChild(tab);
             }
 
-            // content container
             let contentContainer = emojiEntryContainer.querySelector(".emoji-group-content");
             if (!contentContainer) {
                 contentContainer = document.createElement("div");
@@ -2053,7 +2063,6 @@ async function getEmojis(callback = null) {
             }
             contentContainer.innerHTML = "";
 
-            // custom
             const customSection = document.createElement("div");
             customSection.className = "emoji-section";
             customSection.setAttribute("data-group", "custom");
@@ -2088,7 +2097,6 @@ async function getEmojis(callback = null) {
             }
             contentContainer.appendChild(customSection);
 
-            // twemoji
             for (const group of twemojiIndex) {
                 const section = document.createElement("div");
                 section.className = "emoji-section";
@@ -2099,6 +2107,7 @@ async function getEmojis(callback = null) {
                     const entry = document.createElement("div");
                     entry.className = "emoji-entry";
                     entry.setAttribute("data-default", "1");
+                    entry.setAttribute("data-name", e.name);
                     entry.title = e.name;
 
                     const imgWrap = document.createElement("div");
@@ -2132,7 +2141,32 @@ async function getEmojis(callback = null) {
                 contentContainer.appendChild(section);
             }
 
-            // tab switching
+            searchInput.addEventListener("input", () => {
+                const query = searchInput.value.toLowerCase().trim();
+
+                if (!query) {
+                    groupBar.style.display = "";
+                    const activeGroup = groupBar.querySelector(".emoji-group-tab.active")?.getAttribute("data-group") || "custom";
+                    contentContainer.querySelectorAll(".emoji-section").forEach(s => {
+                        s.style.display = s.getAttribute("data-group") === activeGroup ? "flex" : "none";
+                        s.classList.remove("emoji-section-search");
+                    });
+                    contentContainer.querySelectorAll(".emoji-entry").forEach(e => e.style.display = "");
+                    return;
+                }
+
+                groupBar.style.display = "none";
+                contentContainer.querySelectorAll(".emoji-section").forEach(s => {
+                    s.style.display = "";
+                    s.classList.add("emoji-section-search");
+                });
+
+                contentContainer.querySelectorAll(".emoji-entry").forEach(entry => {
+                    const name = (entry.title || entry.getAttribute("data-name") || "").toLowerCase();
+                    entry.style.display = name.includes(query) ? "" : "none";
+                });
+            });
+
             groupBar.addEventListener("click", (ev) => {
                 const tab = ev.target.closest(".emoji-group-tab");
                 if (!tab) return;
@@ -2142,6 +2176,8 @@ async function getEmojis(callback = null) {
                 groupBar.querySelectorAll(".emoji-group-tab").forEach(t => t.classList.remove("active"));
                 tab.classList.add("active");
 
+                searchInput.value = "";
+                contentContainer.querySelectorAll(".emoji-entry").forEach(e => e.style.display = "");
                 contentContainer.querySelectorAll(".emoji-section").forEach(s => {
                     s.style.display = s.getAttribute("data-group") === groupName ? "flex" : "none";
                 });
@@ -2160,8 +2196,6 @@ async function getEmojis(callback = null) {
             });
         }
     });
-
-
 
 
     function registerEmojiCallback(element, emojiObj){

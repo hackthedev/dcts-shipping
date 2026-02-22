@@ -7,7 +7,7 @@ const twemojiIndex = [
     {
         group: "smileys",
         icon: "1f600",
-        emojis: [
+        emojis: [ // char is pretty much useless, i just wanna know what emoji im editing
             { code: "1f60a", char: "😊", name: "grinning" },
             { code: "1f602", char: "😂", name: "joy" },
             { code: "1f605", char: "😅", name: "sweat_smile" },
@@ -22,6 +22,8 @@ const twemojiIndex = [
             { code: "1f44d", char: "👍", name: "thumbsup" },
             { code: "1f44e", char: "👎", name: "thumbsdown" },
             { code: "1f44b", char: "👋", name: "wave" },
+            { code: "1f44c", char: "👌", name: "nice" },
+            { code: "1f449", char: "👉", name: "fingerright" },
         ]
     },
     {
@@ -360,19 +362,30 @@ function emojiCodeToImg(str, forceSmall = false) {
 
 
 async function text2Emoji(text, returnCodeOnly = false, forceSmall = false) {
-    text = emojiCodeToImg(text);
+    text = emojiCodeToImg(text, forceSmall);
 
     let replacedText = text.replace(/:([a-fA-F0-9]+):/g, (match, emojiId) => {
         const emojiObject = findEmojiByID(emojiId);
-        if (emojiObject) {
-            const emojiName = String(emojiObject.filename.split("_")[1].split(".")[0]);
-            const sendBigEmoji = forceSmall === false ? isOnlyText(text) ? "big" : "" : "";
-            let emojiFileHash = emojiObject.filename.split("_")[0];
+        if (!emojiObject) return match;
 
-            return `<img title="${emojiName}" data-filehash="${emojiFileHash}" onerror="this.src='/img/error.png'" class="inline-text-emoji ${sendBigEmoji}" src="/emojis/${emojiObject.filename}">`;
+        const sendBigEmoji = forceSmall === false ? isOnlyText(text) ? "big" : "" : "";
+
+        if (emojiObject.code) {
+            return `<img title="${emojiObject.name}" data-code="${emojiObject.code}" onerror="this.src='/img/error.png'" class="inline-text-emoji ${sendBigEmoji} default" src="/img/default_emojis/${emojiObject.code}.svg">`;
         }
-        return match;
+
+        const emojiName = String(emojiObject.filename.split("_")[1].split(".")[0]);
+        let emojiFileHash = emojiObject.filename.split("_")[0];
+        return `<img title="${emojiName}" data-filehash="${emojiFileHash}" onerror="this.src='/img/error.png'" class="inline-text-emoji ${sendBigEmoji}" src="/emojis/${emojiObject.filename}">`;
     });
+
+    if (!forceSmall && isOnlyText(replacedText)) {
+        replacedText = replacedText.replace(/class="inline-text-emoji([^"]*)"/g, (m, rest) => {
+            if (rest.includes("big")) return m;
+            return `class="inline-text-emoji big${rest}"`;
+        });
+    }
+
     return replacedText;
 }
 

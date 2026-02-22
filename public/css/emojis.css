@@ -146,7 +146,7 @@
     display: flex;
     gap: 2px;
     padding: 4px 6px;
-    border-bottom: 1px solid var(--border-color, #333);
+    border-bottom: 1px solid #333;
     width: 100%;
     flex-shrink: 0;
     overflow-x: auto;
@@ -166,12 +166,12 @@
 
 .emoji-group-tab:hover {
     opacity: 0.8;
-    background: var(--hover-bg, rgba(255, 255, 255, 0.08));
+    background: rgba(255, 255, 255, 0.08)
 }
 
 .emoji-group-tab.active {
     opacity: 1;
-    background: var(--active-bg, rgba(255, 255, 255, 0.12));
+    background: rgba(255, 255, 255, 0.12)
 }
 
 .emoji-group-icon {
@@ -191,4 +191,30 @@
     display: flex;
     flex-wrap: wrap;
     width: 100%;
+}
+
+/* emoji search */
+.emoji-search-wrap {
+    padding: 6px 8px;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+.emoji-search-input {
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(128, 128, 128, 0.25);
+    color: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.emoji-search-input::placeholder {
+    opacity: 0.4;
+}
+
+.emoji-section-search {
+    display: contents !important;
 }

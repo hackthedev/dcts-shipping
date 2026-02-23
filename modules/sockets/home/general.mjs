@@ -8,8 +8,7 @@ import { queryDatabase } from "../../functions/mysql/mysql.mjs";
 
 
 const clean = (s) => xssFilters.inHTMLData(String(s ?? ""));
-const rid = (p = "id") =>
-    `${p}_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36)}`;
+const rid = (p) => `${p}_${crypto.randomUUID()}`;
 
 const nowISO = () => new Date().toISOString();
 

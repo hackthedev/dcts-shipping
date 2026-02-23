@@ -506,12 +506,13 @@ const tables = [
     {
         name: "dms_participants",
         columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "memberId", type: "varchar(100) NOT NULL"},
+            { name: "threadId", type: "varchar(100) NOT NULL" },
+            { name: "memberId", type: "varchar(100) NOT NULL" },
         ],
         keys: [
-            {name: "KEY", type: "memberId (memberId)"}, // <— neu
-        ],
+            { name: "PRIMARY KEY", type: "(threadId, memberId)" },
+            { name: "KEY", type: "memberId (memberId)" }
+        ]
     },
     {
         name: "dms_message_logs",

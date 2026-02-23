@@ -1770,8 +1770,6 @@ socket.on('receiveGroupList', function (data) {
         mobileGroupList.innerHTML = data;
     }
     setActiveGroup(UserManager.getGroup())
-
-    //reapplyUnreadFromCookies();
     displayHomeUnread();
 });
 
@@ -2369,7 +2367,6 @@ async function setUrl(param, isVC = false) {
             token: UserManager.getToken(),
             permission: "sendMessages"
         }, function (response) {
-            console.log(response)
             switchLeftSideMenu(true)
 
             // update grouplist and channel tree if we only

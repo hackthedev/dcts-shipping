@@ -174,7 +174,7 @@ if (process.env.DB_NAME)
 if (process.env.DB_HOST || process.env.DB_USER || process.env.DB_PASS || process.env.DB_NAME) {
     serverconfig.serverinfo.sql.enabled = true;
 }
-await saveConfig(serverconfig);
+saveConfig(serverconfig);
 
 // nicer warning
 serverconfig.serverinfo.sql.enabled = true;

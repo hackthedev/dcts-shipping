@@ -52,49 +52,42 @@ async function updateMissingMeta() {
 
 async function updateMarkdownLinks(delay) {
     const elements = document.querySelectorAll(".contentRows .content p");
-    const max = Math.min(elements.length, 50);
-
-    let container = document.getElementById("content");
+    const container = document.getElementById("content");
     const isScrolledDown = isScrolledToBottom(container);
 
-    let firstElement = getLastMessage(container)
-    let scrollPosition = getScrollPosition(container,  firstElement?.element);
+    let firstElement = getLastMessage(container);
+    let scrollPosition = getScrollPosition(container, firstElement?.element);
 
     let markdownChanged = false;
 
     for (let i = elements.length - 1; i >= 0; i--) {
         const el = elements[i];
-        if (!el || el.className.includes("hljs")) continue;
-        if (el.parentNode.querySelector(".video-embed")) continue;
+        if (!el) continue;
+        if (el.className.includes("hljs")) continue;
         if (el.hasAttribute("data-markdown-done")) continue;
+        if (!isElementVisible(el)) continue;
+
+        const messageId =
+            el.getAttribute("data-message-id") ||
+            el.parentNode?.getAttribute("data-message-id");
+
+        if (!messageId) continue;
+
+        const originalText = el.textContent;
+        if (!originalText || !originalText.trim()) continue;
 
         try {
-            if (el.innerText.trim().length === 0) continue;
+            const marked = await markdown(originalText, messageId);
+            if (!marked.isMarkdown) continue;
 
-            // skip if the element isnt visible. some way
-            // to avoid the chat log from jumping all the time
-            if (!isElementVisible(el)) continue;
+            const wrapper = document.createElement("div");
+            wrapper.innerHTML = sanitizeHtmlForRender(marked.message);
 
-            const messageId = el.getAttribute("data-message-id") || el.parentNode?.getAttribute("data-message-id");
-            const marked = await markdown(el.innerText, messageId);
+            el.replaceWith(wrapper);
+            wrapper.setAttribute("data-markdown-done", "true");
 
-            if (marked.message != null &&
-                ((!marked.isMarkdown && marked.message !== el.innerText) ||
-                    (marked.isMarkdown && marked.message !== el.innerHTML))) {
-
-                bypassCounter[el.id] = (bypassCounter[el.id] || 0) + 1;
-                if (!bypassElement[el.id]) {
-
-                    el.innerHTML = marked.isMarkdown
-                        ? sanitizeHtmlForRender(marked.message)
-                        : el.innerText;
-
-                    if (marked.isMarkdown) el.setAttribute("data-markdown-done", "true");
-                    markdownChanged = true;
-
-                    fixScrollAfterMediaLoad(container, scrollPosition);
-                }
-            }
+            markdownChanged = true;
+            fixScrollAfterMediaLoad(container, scrollPosition);
         } catch (err) {
             console.log(err);
         }
@@ -105,10 +98,8 @@ async function updateMarkdownLinks(delay) {
     }
 
     await updateMissingMeta();
-
     setTimeout(() => updateMarkdownLinks(delay), delay);
 }
-
 async function getUrlMeta(url){
     try{
 

@@ -293,6 +293,7 @@ function registerMessageCreateEvent(){
         // we will instead show the notification icon and return;
         if(message.room !== UserManager.getRoom()){
             ChatManager.setChannelMarker(message.channel, true);
+            await updateUIIndicators(message)
             return;
         }
 
@@ -319,11 +320,16 @@ function registerMessageCreateEvent(){
             scrollDown("messageCreated");
         }
 
-        await Inbox.markAsRead(`${UserManager.getID()}-${message.messageId}`)
+        await updateUIIndicators(message)
+    });
+
+    async function updateUIIndicators(message){
+        if(message.channel === UserManager.getChannel()) await Inbox.markAsRead(`${UserManager.getID()}-${message.messageId}`)
+
         setTimeout(() => {
             Inbox.updateInboxMessageEntries()
-        }, 250)
-    });
+        }, 500)
+    }
 }
 
 function registerMessageInfiniteLoad(element){
@@ -1070,6 +1076,11 @@ async function displayMessagesInElement({
                 });
             }
 
+            // this will help with the mentions etc
+            if(Inbox.isUnread(message?.messageId) && message?.messageId){
+                await Inbox.markAsRead(Inbox.getInboxIdFromMessageId(message.messageId))
+            }
+
             loaded++;
             let percent = (loaded / data.length) * 100
             ElementLoader.setValue(channelbar, percent)
@@ -1246,6 +1257,8 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
 
         Clock.stop("load_messages_total")
         ElementLoader.stop(channelbar);
+
+        Inbox.updateInboxMessageEntries();
     });
 }
 

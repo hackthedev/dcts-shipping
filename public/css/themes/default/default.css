@@ -342,3 +342,11 @@ p.note{
 .markdown-urlEmbed:hover .meta-info.title{
     color: hsl(from var(--main) calc(h * 2.7) calc(s * 12) calc(l * 10) / 100%);
 }
+
+
+/* markdown code */
+.ql-editor code,
+code {
+    background-color: hsl(from var(--main) h s calc(l * 1) / 100%) !important;
+    border: 2px solid hsl(from var(--main) h s calc(l * 8) / 30%);
+}

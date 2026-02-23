@@ -22,6 +22,10 @@ a.markdown-urlEmbed{
     font-size: 16px;
 }
 .markdown-urlEmbed .meta-info.description{
-    font-weight: normal;
+    font-weight: normal !important;
     font-size: 12px;
+}
+
+.markdown-urlEmbed-container{
+    width: 100%;
 }

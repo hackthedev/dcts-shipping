@@ -130,7 +130,10 @@
 .message-container .content {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: center !important;
+    align-content: start;
+    align-self: start;
+    align-items: start;
 
     gap: 0;
     width: 100%;
@@ -168,8 +171,6 @@
 }
 
 .message-container p {
-    display: flex;
-    flex-direction: row;
     line-height: 150% !important;
     margin: 0;
 }

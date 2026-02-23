@@ -75,8 +75,11 @@ class ChannelTree {
                                     id="channel-${channel.id}" 
                                     onclick="setUrl('?group=${group}&category=${category.info.id}&channel=${channel.id}'${channel.type === "voice" ? `, true` : ""})" 
                                     style="display: block;"
-                                >                                    
-                                    <span class="message-marker-icon"></span>${channel.type === "text" ? emojiCodeToImg("⌨", true) : emojiCodeToImg("🎙", true)} ${channel.name}
+                                >                               
+                                    <span class="message-marker-icon"></span>
+                                    ${channel.type === "text" ? emojiCodeToImg("⌨", true) : emojiCodeToImg("🎙", true)} ${channel.name}
+                                    
+                                    <span class="channel-mention-marker" data-channel-id="${channel.id}">5</span>     
                                 </a>
                                 ${channel.type === "voice" ?
                             `<ul class="participants" style="display: none;"></ul>`

@@ -48,3 +48,67 @@
 #activeUserTableList {
     width: 100%;
 }
+
+.group-mention-indicator{
+    display: none;
+    justify-content: center;
+    align-self: center;
+    align-content: center;
+    align-items: center;
+
+    position: absolute;
+    z-index: 2;
+
+    top: -10px;
+    right: -10px;
+
+    width: 20px;
+    height: 20px;
+
+    background-color: indianred;
+    border-radius: 50%;
+
+    font-size: 12px;
+    font-style: normal;
+}
+
+
+.server-icon {
+    width: 45px;
+    height: 45px;
+
+    background-size: cover !important;
+    object-fit: cover;
+    background-position: center center;
+
+    filter: grayscale(100%);
+    background-color: transparent;
+}
+
+.server-entry {
+    position: relative;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.server-icon:hover {
+    border-radius: 10%;
+    transition: all 400ms;
+
+    -webkit-transform: scale(1.1);
+    -moz-transform: scale(1.1);
+    -o-transform: scale(1.1);
+    transform: scale(1.1);
+    filter: grayscale(0%);
+}
+
+.server-icon:not(:hover) {
+    border-radius: 50%;
+    transition: all 400ms;
+
+    -webkit-transform: scale(1);
+    -moz-transform: scale(1);
+    -o-transform: scale(1);
+    transform: scale(1);
+    filter: grayscale(100%);
+}

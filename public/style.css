@@ -296,45 +296,6 @@ sortable-chosen.sortable-ghost {
     overflow-y: auto;
 }
 
-.server-icon {
-    width: 45px;
-    height: 45px;
-
-    background-size: cover !important;
-    object-fit: cover;
-    background-position: center center;
-
-    filter: grayscale(100%);
-    background-color: transparent;
-}
-
-.server-entry {
-    margin-bottom: 8px;
-    cursor: pointer;
-}
-
-.server-icon:hover {
-    border-radius: 10%;
-    transition: all 400ms;
-
-    -webkit-transform: scale(1.1);
-    -moz-transform: scale(1.1);
-    -o-transform: scale(1.1);
-    transform: scale(1.1);
-    filter: grayscale(0%);
-}
-
-.server-icon:not(:hover) {
-    border-radius: 50%;
-    transition: all 400ms;
-
-    -webkit-transform: scale(1);
-    -moz-transform: scale(1);
-    -o-transform: scale(1);
-    transform: scale(1);
-    filter: grayscale(100%);
-}
-
 #profile-qa #vcStatusText {
     margin: 0;
 }
@@ -486,9 +447,17 @@ sortable-chosen.sortable-ghost {
     border-radius: 6px;
 }
 
-code.markdown {
+.ql-editor code,
+code{
+    padding: 0 4px;
+    margin: 0 4px;
+    font-family: Consolas;
     font-size: 12px;
-    background-color: #292a2d !important;
+    border-radius: 4px;
+}
+
+code.markdown{
+    font-size: 12px;
     font-weight: bold;
     padding: 4px 8px 4px 8px;
     border-radius: 4px;
@@ -528,6 +497,11 @@ code.markdown {
     border-radius: 6px;
     user-select: none;
 }
+
+.message-container .content img.inline-text-emoji {
+    border-radius: 0;
+}
+
 
 .video-embed {
     display: block;
@@ -779,11 +753,15 @@ details[open] summary::before {
     inherits: false;
 }
 
+label.mention .inline-text-emoji{
+}
+
 label.mention {
-    all: unset;
     display: inline;
+    all: unset;
     background: rgba(135, 206, 235, 0.2);
-    padding: 2px 4px;
+    padding: 0 4px;
+    margin: 0 4px;
     border-radius: 4px;
     cursor: pointer;
 }

@@ -96,6 +96,10 @@ export default (io) => (socket) => {
             let messageObjResult = await getMessageObjectById(member?.messageId)
             let messageObj = messageObjResult?.message;
 
+            if(!messageObj){
+                return response({ error: "The message wasnt found", message: null})
+            }
+
             if(messageObj?.reply?.messageId) {
                 let replyResult = await getMessageObjectById(messageObj?.reply?.messageId);
                 messageObj.reply = replyResult.message;

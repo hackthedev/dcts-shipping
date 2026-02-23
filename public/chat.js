@@ -958,12 +958,12 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                 });
 
                 if (initial) {
-                    getChatlog(document.getElementById("content"));
                     getMemberList()
                     getChannelTree()
                     getServerInfo();
                     showGroupStats();
                     focusEditor()
+                    getChatlog(document.getElementById("content"));
 
                     /* Quill Emoji Autocomplete */
                     initializeEmojiAutocomplete(document.querySelector('.ql-editor'));

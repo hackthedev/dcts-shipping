@@ -405,6 +405,7 @@ export function getGroupList(member) {
                     <a onclick="setUrl('?group=${group.info.id}');" id="group-entry-${group.info.id}">
                         <div class="group-entry-marker" id="group-marker-${group.info.id}"></div>
                         <div class="server-entry">
+                            <span class="group-mention-indicator" data-group-id="${group.info.id}"></span>
                            <img title="${group.info.name}" id="${group.info.id}" data-group-id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
                         </div>
                     </a>`;
@@ -418,9 +419,18 @@ export function getGroupList(member) {
                         addedGroups.includes(group.info.id) == false
                     ) {
                         addedGroups.push(group.info.id);
-                        code += `<a onclick="setUrl('?group=${group.info.id}');"><div class="server-entry">
-                                    <img title="${group.info.name}" data-group-id="${group.info.id}" id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
-                                </div></a>`;
+                        code += `<a onclick="setUrl('?group=${group.info.id}');">
+                                    <div class="group-entry-marker" id="group-marker-${group.info.id}"></div>
+                                    <div class="server-entry">
+                                        <span class="group-mention-indicator" data-group-id="${group.info.id}"></span>
+                                        <img 
+                                        title="${group.info.name}" 
+                                            data-group-id="${group.info.id}" 
+                                            id="${group.info.id}" 
+                                            class="server-icon group-icon-${group.info.id}" 
+                                            src="${group.info.icon}">
+                                    </div>
+                                </a>`;
                     }
                 } catch {
 

@@ -225,8 +225,11 @@
 .message-container .row.reply .content.reply {
     display: flex;
     flex-direction: row;
-    justify-content: start;
+    justify-content: center;
+    align-content: center;
     align-items: center;
+    align-self: start;
+    margin: auto;
     flex-grow: 1;
 
     overflow: hidden;

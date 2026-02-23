@@ -2478,6 +2478,7 @@ function scrollDown(functionCaller, opts = {}) {
     const tolerancePx = Number.isFinite(opts.tolerancePx) ? opts.tolerancePx : 2;
     const maxMs = Number.isFinite(opts.maxMs) ? opts.maxMs : 5000;
     const stableMs = Number.isFinite(opts.stableMs) ? opts.stableMs : 250;
+    const userBreakPx = Number.isFinite(opts.userBreakPx) ? opts.userBreakPx : 20;
 
     if (!el._scrollDownState) el._scrollDownState = {};
     const state = el._scrollDownState;
@@ -2492,8 +2493,13 @@ function scrollDown(functionCaller, opts = {}) {
     const start = performance.now();
     let lastChange = performance.now();
 
+    const bottomTop = () => Math.max(0, el.scrollHeight - el.clientHeight);
+
+    let lastAutoTop = el.scrollTop;
+
     const jumpBottom = () => {
-        const top = Math.max(0, el.scrollHeight - el.clientHeight);
+        const top = bottomTop();
+        lastAutoTop = top;
         if (el.scrollTop !== top) el.scrollTop = top;
     };
 
@@ -2529,26 +2535,37 @@ function scrollDown(functionCaller, opts = {}) {
     const tick = () => {
         if (el._scrollDownState.seq !== seq) return;
 
+        const now = performance.now();
+
+        if (Math.abs(el.scrollTop - lastAutoTop) > userBreakPx) {
+            cleanup();
+            return;
+        }
+
         bindMedia();
         jumpBottom();
 
-        const now = performance.now();
         const bottomOk = isScrolledToBottom(el, tolerancePx);
         const stableEnough = bottomOk && (now - lastChange) >= stableMs;
 
         if (stableEnough || (now - start) >= maxMs) {
-            if (state.mo) state.mo.disconnect();
-            if (state.ro) state.ro.disconnect();
-            state.mo = null;
-            state.ro = null;
-            state.raf = null;
+            cleanup();
             return;
         }
 
         state.raf = requestAnimationFrame(tick);
     };
 
+    const cleanup = () => {
+        if (state.mo) state.mo.disconnect();
+        if (state.ro) state.ro.disconnect();
+        state.mo = null;
+        state.ro = null;
+        state.raf = null;
+    };
+
     lastChange = performance.now();
+    jumpBottom();
     tick();
 
     if (functionCaller) console.log(`ScrollDown called by ${functionCaller}`);

@@ -752,7 +752,7 @@ export function checkConfigAdditions() {
 
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayName", "Banned")
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayMessageNotice", `<span style="color: indianred;">[ Content hidden ]</span>`)
-
+    
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.email", "")
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.website", "")
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.reddit", "")
@@ -1453,6 +1453,8 @@ export function setMemberObjColor(member){
     let highestRole = getMemberHighestRole(member?.author?.id || member?.id);
     if(highestRole){
         member.color = highestRole?.info?.color;
+        member.background = highestRole?.info?.background;
+        member.backgroundClip = highestRole?.info?.backgroundClip;
     }
 
     return member;

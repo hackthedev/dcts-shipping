@@ -553,7 +553,7 @@ class ChatManager {
                 messageId
             }, async (response) => {
                 if (response?.error != null) {
-                    console.error("Couldnt resolve message");
+                    console.error("Couldnt resolve message", messageId);
                     console.error(response.error);
                     resolve(null)
                 } else {

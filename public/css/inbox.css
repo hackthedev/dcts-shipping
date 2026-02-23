@@ -46,7 +46,7 @@
     flex-direction: column;
     gap: 4px;
 
-    overflow: hidden;
+    overflow: auto;
     word-break: break-all;
 }
 

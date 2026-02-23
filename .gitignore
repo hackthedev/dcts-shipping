@@ -6,13 +6,11 @@
 /public/uploads/
 /public/emojis/
 /public/.idea/
-/public/emojis/
 /plugins
 /discover/node_modules/
 /discover/config.json
 /cache
 /backups
-/public/img/default_emojis/
 privatekey.json
 
 .idea
@@ -22,3 +20,8 @@ privatekey.json
 
 /config.env
 /livekit.yaml
+/public/plugins
+public/css/themes/your-name/background.gif
+public/css/themes/your-name/config.json
+public/css/themes/your-name/thumbnail.png
+public/css/themes/your-name/your-name.css

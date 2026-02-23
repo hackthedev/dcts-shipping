@@ -42,9 +42,14 @@ class UserManager {
         for (let i = 0; i < memberObj?.roles.length; i++) {
             var role = memberObj?.roles[i];
             var roleColor = role.color;
+            var roleBackground = role?.background?.replace("text", "");
+            var roleBackgroundClip = role.backgroundClip;
             var roleName = role.name;
 
-            roleCode += `<code class="role" id="profile-role-entry-${role.id}"><div class="role_color" style="background-color: ${roleColor};"></div>${roleName}</code>`;
+            console.log(roleColor)
+            console.log(roleBackground)
+
+            roleCode += `<code class="role" id="profile-role-entry-${role.id}"><div class="role_color" style="background: ${roleColor === "transparent" ? roleBackground : roleColor};"></div><span style="color: ${roleColor};background: ${roleBackground};background-clip: ${roleBackgroundClip};">${roleName}</span></code>`;
         }
 
         let isMuted = memberObj?.isMuted;
@@ -78,24 +83,27 @@ class UserManager {
             
         
             <div id="profile_content">       
-                <div id="profile_username"><h2 style="margin: 0 !important;">${memberObj?.name}</h2></div>                
+                <div id="profile_username"><h2 style="margin: 0 !important;">${unescapeHtmlEntities(memberObj?.name)}</h2></div>                
                 <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? memberObj?.status : ""}</i></div>  
-                                
+                
+                ${memberObj?.aboutme?.trim()?.length > 0 ?                
+               `
                 <hr>
                 <div class="profile_aboutme">       
-                    ${memberObj?.aboutme?.trim()?.length > 0 ? `<h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(memberObj.aboutme)}` : ""}
+                    <h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(limitString(memberObj.aboutme, 1000))}
                     
                     
                     <div class="profile_meta_container">
                         ${
-                            mutedCode || bannedCode ?
-                                `<div class="profile_meta">
+                   mutedCode || bannedCode ?
+                       `<div class="profile_meta">
                                     ${mutedCode}
                                     ${bannedCode}   
                                 </div>` : ""
-                        }   
+               }   
                     </div>        
                 </div>
+               ` : ""}
             <hr>
                        
             <a id="dm_action" href="/home.html?dm=${memberObj?.id}">&#10149; Send Message</a>
@@ -523,7 +531,7 @@ class UserManager {
     }
 
     static resetAccount() {
-        var reset = confirm("Do you really want to reset your account? EVERYTHING will be reset.")
+        var reset = confirm("Do you really wanna logout?")
 
         if (reset) {
             CookieManager.setCookie("id", null, 365);
@@ -535,9 +543,7 @@ class UserManager {
             CookieManager.setCookie("pow_challenge", null, 365);
             CookieManager.setCookie("pow_solution", null, 365);
 
-            alert("Your account has been reset. Please refresh the page if you want to continue");
-
-            window.location.reload();
+            window.location.href = window.location.origin;
         }
     }
 

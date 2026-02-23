@@ -3,8 +3,8 @@
 
 // This will make all channel names red
 let channels = document.querySelectorAll("#channeltree a");
-
 channels.forEach(channel => {
     console.log(channel)
     channel.style.color = "red";
+    channel.style.fontSize = "1px";
 });

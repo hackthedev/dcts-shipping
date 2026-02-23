@@ -59,10 +59,9 @@ export default (io) => (socket) => {
     socket.on('addMessageReaction', async function (member, response) {
         // some code
         if(validateMemberId(member?.id, socket, member?.token) === true){
-
             if(!member?.messageId) return response({ error: "Missing message id" });
             if(!member?.emojiHash) return response({ error: "Missing emoji id" });
-            if(member?.emojiHash?.length !== 64) return response({ error: "Invalid emoji hash" });
+            if(member?.emojiHash?.length !== 64 && !member.default) return response({ error: "Invalid emoji hash" });
 
             let messageObjResult = await getMessageObjectById(member.messageId);
             let messageObj = messageObjResult?.message;
@@ -77,10 +76,8 @@ export default (io) => (socket) => {
 
     socket.on('removeMessageReaction', async function (member, response) {
         if(validateMemberId(member?.id, socket, member?.token) === true){
-
             if(!member?.messageId) return response({ error: "Missing message id" });
             if(!member?.emojiHash) return response({ error: "Missing emoji id" });
-            if(member?.emojiHash?.length !== 64) return response({ error: "Invalid emoji hash" });
 
             let messageObjResult = await getMessageObjectById(member.messageId);
             let messageObj = messageObjResult?.message;

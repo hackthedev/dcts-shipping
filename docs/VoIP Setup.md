@@ -27,6 +27,8 @@ Its recommended to create two subdomains for the VoIP system to make things easi
 
 ## LiveKit Reverse Proxy Setup
 
+The following block will show you two possible reverse proxy setups for either nginx or caddy that can be used to the voice chat server aka livekit.
+
 ```nginx
 # nginx
 location / {
@@ -43,6 +45,22 @@ location / {
 	proxy_set_header X-Real-IP $remote_addr;
 	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 	proxy_set_header X-Forwarded-Proto $scheme;
+}
+
+# caddy
+lk.comain.com {
+    reverse_proxy localhost:7880 {
+        transport http {
+            versions 1.1
+        }
+    }
+
+    header {
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods "GET, POST, OPTIONS"
+        Access-Control-Allow-Headers *
+        Access-Control-Allow-Credentials true
+    }
 }
 ```
 
@@ -80,4 +98,4 @@ Inside the `config.json` file in your DCTS root folder, you will find a section 
 
 > [!WARNING]
 >
-> Before editing **anything** inside the config file manually, makes sure to stop the server, as your changes may get lost.
+> Before editing **anything** inside the config file manually, makes sure to stop the server/livekit, as your changes may get lost.

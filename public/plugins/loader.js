@@ -6,7 +6,7 @@ function loadPlugins(){
             for(let i = 0; i < pluginObj.filePaths.length; i++){
                 let file = pluginObj.filePaths[i];
     
-                if(file.includes(`${plugin}\\main.js`)){
+                if(file.includes(`${plugin}\\main.js`) || file.includes(`${plugin}/main.js`)){
                     loadScript(file);
                 }
             }

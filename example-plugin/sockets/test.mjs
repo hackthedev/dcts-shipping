@@ -1,4 +1,4 @@
-import { validateMemberId } from "../../modules/functions/main.mjs";
+import { validateMemberId } from "../../../modules/functions/main.mjs";
 
 export default (socket) => {
     socket.on('test', (member, response) => {

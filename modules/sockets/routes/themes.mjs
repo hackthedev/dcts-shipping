@@ -10,35 +10,15 @@ import JSONTools from "@hackthedev/json-tools";
 import unzipper from "unzipper";
 import {Readable} from "stream";
 import {getThemes} from "../getThemes.mjs";
+import {getCache, setCache} from "../../functions/ip-cache.mjs";
 
 
 export async function loadThemeCache(force = false){
-    let themeCacheRow = await queryDatabase(`SELECT * FROM cache WHERE identifier = "theme_cache"`, []);
-
-    // check cache and if it expired
-    if(themeCacheRow?.length > 0) {
-        let lastUpdate = themeCacheRow[0]?.last_update;
-        let updateDate = new Date(lastUpdate);
-        let cacheExpiredDate = updateDate.getTime() + DateTools.getDateFromOffset("1 hour").getTime();
-
-        // if true, cache expired
-        if(new Date().getTime() > cacheExpiredDate){
-            return null;
-        }
-
-        return JSONTools.tryParse(themeCacheRow[0].data);
-    }
-    return null;
+    return await getCache("theme_cache", "theme_cache")
 }
 
 export async function saveThemeCache(data){
-    let themeCacheRow = await queryDatabase(
-        `INSERT INTO cache (identifier, data) VALUES("theme_cache", ?)
-            ON DUPLICATE KEY UPDATE data= VALUES(data), last_update = ?`
-        , [JSON.stringify(data), new Date().getTime()]);
-
-    if(themeCacheRow?.rowsAffected > 0) return true;
-    return false;
+    await setCache("theme_cache", "theme_cache", data);
 }
 
 export async function listThemes() {

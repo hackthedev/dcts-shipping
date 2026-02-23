@@ -36,6 +36,14 @@ class Inbox {
         this.getInboxElement().style.display === "flex" ? this.getInboxElement().style.display = "none" : this.getInboxElement().style.display = "flex";
     }
 
+    static isUnread(messageId){
+        return this.getInboxElement()?.querySelector(`.entry[data-message-id='${messageId}']`) != null
+    }
+
+    static getInboxIdFromMessageId(messageId){
+        return this.getInboxElement().querySelector(`.entry[data-message-id='${messageId}']`)?.getAttribute("data-inbox-id") || null
+    }
+
     static async markAsRead(inboxId) {
         if (!inboxId) throw new Error("No inbox id provided");
 
@@ -62,6 +70,8 @@ class Inbox {
 
         let html = "";
         if (data?.items?.length > 0) {
+            updateUIMentions()
+
             for (let item of data.items) {
                 let itemData = JSON.parse(item.data);
                 let itemType = item.type;

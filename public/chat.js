@@ -958,12 +958,12 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                 });
 
                 if (initial) {
-                    getChatlog(document.getElementById("content"));
                     getMemberList()
                     getChannelTree()
                     getServerInfo();
                     showGroupStats();
                     focusEditor()
+                    getChatlog(document.getElementById("content"));
 
                     /* Quill Emoji Autocomplete */
                     initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
@@ -1770,8 +1770,6 @@ socket.on('receiveGroupList', function (data) {
         mobileGroupList.innerHTML = data;
     }
     setActiveGroup(UserManager.getGroup())
-
-    //reapplyUnreadFromCookies();
     displayHomeUnread();
 });
 
@@ -2369,7 +2367,6 @@ async function setUrl(param, isVC = false) {
             token: UserManager.getToken(),
             permission: "sendMessages"
         }, function (response) {
-            console.log(response)
             switchLeftSideMenu(true)
 
             // update grouplist and channel tree if we only

@@ -130,14 +130,16 @@
 .message-container .content {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: center !important;
+    align-content: start;
+    align-self: start;
+    align-items: start;
 
     gap: 0;
-    padding: 4px;
     width: 100%;
     font-size: 14px;
     padding-left: 2px;
-    word-break: break-all;
+    word-break: break-word;
 }
 
 .message-container .icon-container img {
@@ -169,8 +171,6 @@
 }
 
 .message-container p {
-    display: flex;
-    flex-direction: row;
     line-height: 150% !important;
     margin: 0;
 }
@@ -226,9 +226,14 @@
 .message-container .row.reply .content.reply {
     display: flex;
     flex-direction: row;
-    justify-content: start;
+    justify-content: center;
+    align-content: center;
     align-items: center;
+    align-self: start;
+    margin: auto;
     flex-grow: 1;
+
+    padding: 0 2px;
 
     overflow: hidden;
     text-overflow: ellipsis;

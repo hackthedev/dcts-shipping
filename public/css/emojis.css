@@ -1,10 +1,9 @@
 .inline-text-emoji {
-    display: inline-flex;
-    border-radius: 0 !important;
-    width: 20px;
-    height: 20px;
-
-    margin: 2px !important;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    margin: 0 !important;
 }
 
 .inline-text-emoji.big {

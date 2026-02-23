@@ -344,6 +344,12 @@ function emojiCodeToImg(str, forceSmall = false) {
                 c.codePointAt(0).toString(16).toLowerCase()
             ).join("-");
 
+            let bypassCodes = [
+                "2122"
+            ]
+            if(bypassCodes.includes(code)){
+                continue
+            }
 
             const file = code + ".svg";
 

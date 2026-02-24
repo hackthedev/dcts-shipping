@@ -128,6 +128,12 @@ export async function saveChatMessageInDb(message) {
         VALUES (room)
     `;
 
+    // get rid of the entire author object
+    // only store the fucking reference
+    message.author = {
+        id: message.author.id
+    }
+
     const encodedMessage = JSON.stringify(message);
     return await queryDatabase(query, [message.author.id, message.messageId, encodedMessage, message.room]);
 }
@@ -249,25 +255,33 @@ export async function getInboxMessages({
 
 export async function getChatMessagesFromDb(roomId, index, msgId = null) {
     if (msgId != null) {
-        const query = `SELECT *
-                       FROM messages
-                       WHERE messageId = ?`;
-        return await queryDatabase(query, [msgId]);
+        return await queryDatabase(
+            `SELECT messageId, authorId, room, message, createdAt
+             FROM messages
+             WHERE messageId = ?`,
+            [msgId]
+        );
     }
 
     if (index === -1) {
-        const query = `SELECT *
-                       FROM messages
-                       WHERE room = ?
-                       ORDER BY createdAt DESC LIMIT 50`;
-        return await queryDatabase(query, [roomId]);
+        return await queryDatabase(
+            `SELECT messageId, authorId, message, createdAt
+             FROM messages
+             WHERE room = ?
+             ORDER BY createdAt DESC
+             LIMIT 50`,
+            [roomId]
+        );
     } else {
-        const query = `SELECT *
-                       FROM messages
-                       WHERE room = ?
-                         AND createdAt < ?
-                       ORDER BY createdAt DESC LIMIT 50`;
-        return await queryDatabase(query, [roomId, Number(index)]);
+        return await queryDatabase(
+            `SELECT messageId, authorId, message, createdAt
+             FROM messages
+             WHERE room = ?
+               AND createdAt < ?
+             ORDER BY createdAt DESC
+             LIMIT 50`,
+            [roomId, Number(index)]
+        );
     }
 }
 

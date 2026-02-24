@@ -3,13 +3,22 @@ import {debugmode} from "../../index.mjs";
 export class Clock {
     static timers = new Map();
 
-    static start(name) {
+    static async start(name, callback) {
         let entry = this.timers.get(name);
         if (!entry) {
             entry = { stack: [], total: 0 };
             this.timers.set(name, entry);
         }
+
         entry.stack.push(performance.now());
+
+        if (typeof callback === "function") {
+            try {
+                return await callback();
+            } finally {
+                this.stop(name);
+            }
+        }
     }
 
     static stop(name) {

@@ -33,16 +33,19 @@ import {
     decodeAndParseJSON,
     getMessageObjectById
 } from "../sockets/resolveMessage.mjs";
+import {Clock} from "./clock.mjs";
+
 
 var serverconfigEditable = serverconfig;
 
-export function logFile(filePath, text, callback = () => { }) {
+export function logFile(filePath, text, callback = () => {
+}) {
     if (!allowLogging) return;
 
     const dir = path.dirname(filePath);
 
     // Ensure the directory exists
-    fs.mkdir(dir, { recursive: true }, (err) => {
+    fs.mkdir(dir, {recursive: true}, (err) => {
         if (err) {
             callback(err);
             return;
@@ -74,8 +77,7 @@ export async function consolas(text, event = null) {
 
         if (event == null) {
             console.log(consolePrefix + text);
-        }
-        else {
+        } else {
             if (event.toLowerCase() == "debug") {
                 if (debugmode != false) {
                     if (text.length == 0) {
@@ -84,8 +86,7 @@ export async function consolas(text, event = null) {
 
                     console.log(consolePrefix + text);
                 }
-            }
-            else if (event.toLowerCase() == "log") {
+            } else if (event.toLowerCase() == "log") {
                 // Only display logs when debug is true
                 if (debugmode != false) {
                     if (text.length == 0) {
@@ -94,12 +95,10 @@ export async function consolas(text, event = null) {
 
                     console.log(consolePrefix + text);
                 }
-            }
-            else {
+            } else {
                 if (text.length <= 0 || text == null) {
                     console.log(" ");
-                }
-                else {
+                } else {
                     console.log(consolePrefix + `[${event}] ` + text);
                 }
 
@@ -112,7 +111,7 @@ export async function consolas(text, event = null) {
 }
 
 export function enforceFolderSizeLimitMB(dir, maxMB) {
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true});
 
     const maxBytes = maxMB * 1024 * 1024;
 
@@ -120,7 +119,7 @@ export function enforceFolderSizeLimitMB(dir, maxMB) {
         .map(name => {
             const path = `${dir}/${name}`;
             const stat = fs.statSync(path);
-            return { path, size: stat.size, mtime: stat.mtimeMs };
+            return {path, size: stat.size, mtime: stat.mtimeMs};
         })
         .sort((a, b) => a.mtime - b.mtime);
 
@@ -132,7 +131,6 @@ export function enforceFolderSizeLimitMB(dir, maxMB) {
         totalSize -= file.size;
     }
 }
-
 
 
 export function checkServerDirectories() {
@@ -169,12 +167,11 @@ export function checkServerDirectories() {
     enforceFolderSizeLimitMB("./backups", 1024)
 }
 
-export function checkFile(file, autocreate = false, content = ""){
+export function checkFile(file, autocreate = false, content = "") {
     if (fs.existsSync(file)) {
         return true;
-    }
-    else{
-        if(autocreate){
+    } else {
+        if (autocreate) {
             fs.writeFileSync(file, content)
             return true
         }
@@ -188,8 +185,7 @@ export function checkConfigFile() {
     try {
         if (checkFile(configPath) === true) {
             consolas("Config file config.json did exist".yellow, "Debug");
-        }
-        else {
+        } else {
             Logger.warn("Config file config.json didnt exist.".yellow, "Debug");
             Logger.warn("Checking for template file...".yellow, "Debug");
 
@@ -202,13 +198,11 @@ export function checkConfigFile() {
                 try {
                     fs.copyFileSync("./config.example.json", configPath);
                     Logger.success("Successfully copied config.example.json to config.json".green, "Debug");
-                }
-                catch (error) {
+                } catch (error) {
                     Logger.error("Coudlnt copy template file ".red + colors.red(error), "Debug");
                     process.exit();
                 }
-            }
-            else {
+            } else {
                 Logger.error("Neither the config.json file nor the config.example.json file were found.".red, "Debug");
                 Logger.error("Server was terminated.".red, "Debug");
                 process.exit();
@@ -228,47 +222,56 @@ export async function getMessageLogsById(msgId) {
 export async function getSavedChatMessage(group, category, channel, index = -1) {
     // add setting for checking if db storage should be used
     var sortedMessages = [];
-
     if (serverconfig.serverinfo.sql.enabled === true) {
-        var loadedMessages = await getChatMessagesFromDb(`${group}-${category}-${channel}`, index);
 
-        for (let i = 0; i < loadedMessages.length; i++) {
+        await Clock.start("Chatlog Processing", async () => {
+            let loadedMessages = null;
+            await Clock.start("Chatlog Processing Load", async () => {
+                loadedMessages = await getChatMessagesFromDb(`${group}-${category}-${channel}`, index);
+            });
 
-            let message = decodeAndParseJSON(loadedMessages[i].message);
-            if (message?.message) {
-                // new, enhanced message system
-                if(message?.author?.id){
-                    message.author = getCastingMemberObject(serverconfig.servermembers[message?.author?.id || message?.id]);
+            for (let i = 0; i < loadedMessages.length; i++) {
+
+                let message = decodeAndParseJSON(loadedMessages[i].message);
+                if (message?.message) {
+                    // new, enhanced message system
+                    if (message?.author?.id) {
+                        message.author = getCastingMemberObject(serverconfig.servermembers[message?.author?.id || message?.id]);
+                    }
+
+                    // resolve the reply too
+                    if (message?.reply?.messageId) {
+                        let messageObjResult = await getMessageObjectById(message.reply?.messageId)
+                        message.reply = messageObjResult?.message;
+
+                    }
+
+                    message = checkMessageObjAuthor(message);
+                    message = await checkMessageObjReactions(message);
+
+
+                    sortedMessages.push(message)
                 }
-
-                // resolve the reply too
-                if(message?.reply?.messageId){
-                    let messageObjResult = await getMessageObjectById(message.reply?.messageId)
-                    message.reply = messageObjResult?.message;
-                }
-
-                message = checkMessageObjAuthor(message);
-                message = await checkMessageObjReactions(message);
-
-                sortedMessages.push(message)
             }
-        }
+        })
     }
 
-    sortedMessages = sortedMessages.sort((a, b) => {
-        if (a.timestamp < b.timestamp) {
-            return -1;
-        }
+    await Clock.start("Chatlog Sorting", async () => {
+        sortedMessages = sortedMessages.sort((a, b) => {
+            if (a.timestamp < b.timestamp) {
+                return -1;
+            }
+        });
     });
 
     return sortedMessages;
 }
 
 export function scanDirectory(dir, options = {}) {
-    const { includeFiles = false, recursive = false } = options;
+    const {includeFiles = false, recursive = false} = options;
     const result = [];
 
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const entries = fs.readdirSync(dir, {withFileTypes: true});
 
     for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
@@ -298,20 +301,20 @@ export async function saveChatMessage(message, editedMsgId = null) {
         message.messageId = editedMsgId;
     }
 
-    if(message?.icon) delete message.icon;
-    if(message?.banner) delete message.banner;
-    if(message?.id) delete message.id;
-    if(message?.color) delete message.color;
+    if (message?.icon) delete message.icon;
+    if (message?.banner) delete message.banner;
+    if (message?.id) delete message.id;
+    if (message?.color) delete message.color;
 
     // only store references
-    if(!message?.author || Object.keys(message.author).length === 0) {
+    if (!message?.author || Object.keys(message.author).length === 0) {
         let memberId = null;
-        if(message?.id) memberId = message.id;
-        if(message?.author?.id) memberId = message.author.id;
-        message.author = { id: memberId}
+        if (message?.id) memberId = message.id;
+        if (message?.author?.id) memberId = message.author.id;
+        message.author = {id: memberId}
     }
 
-    if(message?.reply?.messageId) message.reply = { messageId: message.reply.messageId }
+    if (message?.reply?.messageId) message.reply = {messageId: message.reply.messageId}
 
     // if a message is being edited, try to log it first
     if (editedMsgId) {
@@ -329,29 +332,29 @@ export async function saveChatMessage(message, editedMsgId = null) {
     let mentions = getMentionIdsFromText(message.message)
     // add mentions to to inbox based on user mention
     for (const memberId of mentions.userIds) {
-        if(memberId !== message?.author?.id) await addInboxMessage(memberId, { messageId: message.messageId }, "message", `${memberId}-${message.messageId}`);
+        if (memberId !== message?.author?.id) await addInboxMessage(memberId, {messageId: message.messageId}, "message", `${memberId}-${message.messageId}`);
     }
 
     // same for role mentions
     for (let roleId of mentions.roleIds) {
         roleId = Number(roleId);
 
-        if(roleId === 1) continue; // offline role
-        if(roleId === 0){ // member role
-            if(!hasPermission(message.id, "pingEveryone")) continue;
+        if (roleId === 1) continue; // offline role
+        if (roleId === 0) { // member role
+            if (!hasPermission(message.id, "pingEveryone")) continue;
         }
 
         for (const memberId of serverconfig.serverroles[roleId]?.members || []) {
-            if(!memberId) continue;
-            if(shouldIgnoreMember(serverconfig.servermembers[memberId])) continue;
-            if(message?.id === memberId) continue;
+            if (!memberId) continue;
+            if (shouldIgnoreMember(serverconfig.servermembers[memberId])) continue;
+            if (message?.id === memberId) continue;
 
-            await addInboxMessage(memberId, { messageId: message.messageId }, "message", `${memberId}-${message.messageId}`);
+            await addInboxMessage(memberId, {messageId: message.messageId}, "message", `${memberId}-${message.messageId}`);
         }
     }
 
-    if(message?.reply){
+    if (message?.reply) {
         let repliedMessage = await getMessageObjectById(message.reply.messageId);
-        if(repliedMessage?.message && repliedMessage?.message?.author?.id !== message?.author?.id) await addInboxMessage(repliedMessage?.message?.author?.id, {messageId: message.messageId}, "message",  message.messageId);
+        if (repliedMessage?.message && repliedMessage?.message?.author?.id !== message?.author?.id) await addInboxMessage(repliedMessage?.message?.author?.id, {messageId: message.messageId}, "message", message.messageId);
     }
 }

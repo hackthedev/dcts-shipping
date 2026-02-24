@@ -404,7 +404,7 @@ const tables = [
         columns: [
             {name: "authorId", type: "varchar(100) NOT NULL"},
             {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
-            {name: "room", type: "text NOT NULL"},
+            {name: "room", type: "varchar(25) NOT NULL"},
             {name: "message", type: "longtext NOT NULL"},
             {
                 name: "createdAt",

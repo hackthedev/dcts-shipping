@@ -2566,7 +2566,7 @@ function sleep(ms) {
 
 async function testDb(length) {
     for (let i = 1; i < length; i++) {
-        await sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${i}`);
+        await sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${i}`, true);
         await sleep(500);
     }
 }

@@ -62,6 +62,16 @@ export async function checkMigrations(){
         await completeMigrationTask("fixAutoIncrementInMessageLogs")
     }
 
+    // messages room change
+    migrationTask = await getMigrationTask("messagesRoomTypeChange", true);
+    if(migrationTask && migrationTask?.done === 0){
+        await doBackup()
+        await queryDatabase(
+            "ALTER TABLE messages MODIFY COLUMN room VARCHAR(25) NOT NULL"
+        );
+        await completeMigrationTask("messagesRoomTypeChange")
+    }
+
     // beta to main update
     migrationTask = await getMigrationTask("mainMerge", true);
     if(migrationTask && migrationTask?.done === 0){

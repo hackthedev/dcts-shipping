@@ -146,6 +146,7 @@ export default (io) => (socket) => {
 
                     // replace empty lines
                     member.message = clearMessage(member.message, messageid)
+                    member.message = member.message?.substring(0, 8000)
 
                     // create room key
                     let room = `${member.group}-${member.category}-${member.channel}`

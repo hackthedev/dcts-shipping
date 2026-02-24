@@ -233,17 +233,24 @@ function extractEmojiDetails(emojiObj) {
         return [emojiObj.code, emojiObj.name];
     }
 
-    if (typeof emojiObj.filename === "string") {
-        const lastUnderscore = emojiObj.filename.lastIndexOf("_");
-        if (lastUnderscore === -1) return null;
+    const src = typeof emojiObj.emojiHash === "string"
+        ? emojiObj.emojiHash
+        : typeof emojiObj.filename === "string"
+            ? emojiObj.filename
+            : null;
 
-        const id = emojiObj.filename.slice(0, lastUnderscore);
-        const nameWithExt = emojiObj.filename.slice(lastUnderscore + 1);
-        const name = nameWithExt.replace(/\.[^.]+$/, "");
-        return [id, name];
+    if (!src) return null;
+
+    const base = src.replace(/\.[^.]+$/, "");
+    const idx = base.indexOf("_");
+
+    if (idx === -1) {
+        return [base, null];
     }
 
-    return null;
+    const id = base.slice(0, idx);
+    const name = base.slice(idx + 1);
+    return [id, name];
 }
 
 function showEmojiPicker(x,y, callback, reverseHeight = false){

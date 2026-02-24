@@ -2069,7 +2069,10 @@ async function getEmojis(callback = null) {
             for (let emoji of response.data.reverse()) {
                 const base = emoji.filename.replace(/\.[^/.]+$/, "");
                 const parts = base.split("_");
-                const emojiId = parts[0];
+
+                let parsed = parseEmojiFilename(emoji.filename)
+                const emojiId = parsed.hash;
+                const emojiName = parsed.name;
 
                 if (hasEmojiInContainer(emojiId)) {
                     let existingEmojiElement = contentContainer.querySelector(`.emoji-entry[data-hash="${emojiId}"]`);
@@ -2080,7 +2083,7 @@ async function getEmojis(callback = null) {
                 const entry = document.createElement("div");
                 entry.className = "emoji-entry";
                 entry.setAttribute("data-hash", emojiId);
-                entry.title = emoji.name;
+                entry.title = emojiName;
 
                 const imgWrap = document.createElement("div");
                 imgWrap.className = "emoji-img";

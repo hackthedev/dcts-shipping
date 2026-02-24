@@ -63,18 +63,15 @@ async function fetchEmojis() {
                     for (const e of emojiList) {
                         if (!e.filename) continue;
 
-                        const name = e.filename
-                            .split("_")
-                            .slice(1)
-                            .join("_")
-                            .replace(/\.[^.]+$/, "");
+                        const parsed = parseEmojiFilename(e.filename);
+                        if (!parsed) continue;
 
                         const html = `
                             <img src="/emojis/${e.filename}" style="width:25px;height:25px;margin-right:8px;">
-                            <span>${name}</span>
-                        `;
+                            <span>${parsed.name}</span>
+`;
 
-                        ac.addEntry(name, e, html);
+                        ac.addEntry(parsed.name, e, html);
                     }
 
                     for (const group of twemojiIndex) {
@@ -216,10 +213,12 @@ function insertEmoji(emojiObj, force = false) {
             ["data-code"]: emojiObj.code
         });
     } else {
+        const parsed = parseEmojiFilename(emojiObj.filename);
+
         quill.insertEmbed(pos, "emoji", {
             src: `/emojis/${emojiObj.filename}`,
             class: "inline-text-emoji",
-            ["data-filehash"]: emojiObj.filename.split("_")[0]
+            ["data-filehash"]: parsed.hash
         });
     }
 
@@ -233,24 +232,35 @@ function extractEmojiDetails(emojiObj) {
         return [emojiObj.code, emojiObj.name];
     }
 
-    const src = typeof emojiObj.emojiHash === "string"
-        ? emojiObj.emojiHash
-        : typeof emojiObj.filename === "string"
-            ? emojiObj.filename
-            : null;
+    if (typeof emojiObj.filename === "string") {
+        const dot = emojiObj.filename.lastIndexOf(".");
+        if (dot === -1) return null;
 
-    if (!src) return null;
+        const base = emojiObj.filename.slice(0, dot);
+        const firstUnderscore = base.indexOf("_");
+        if (firstUnderscore === -1) return null;
 
-    const base = src.replace(/\.[^.]+$/, "");
-    const idx = base.indexOf("_");
+        const id = base.slice(0, firstUnderscore);
+        const name = base.slice(firstUnderscore + 1);
 
-    if (idx === -1) {
-        return [base, null];
+        return [id, name];
     }
 
-    const id = base.slice(0, idx);
-    const name = base.slice(idx + 1);
-    return [id, name];
+    return null;
+}
+
+function parseEmojiFilename(filename) {
+    const dot = filename.lastIndexOf(".");
+    if (dot === -1) return null;
+
+    const base = filename.slice(0, dot);
+    const idx = base.indexOf("_");
+    if (idx === -1) return null;
+
+    return {
+        hash: base.slice(0, idx),
+        name: base.slice(idx + 1)
+    };
 }
 
 function showEmojiPicker(x,y, callback, reverseHeight = false){
@@ -387,10 +397,15 @@ async function text2Emoji(text, returnCodeOnly = false, forceSmall = false) {
             return `<img title="${emojiObject.name}" data-code="${emojiObject.code}" onerror="this.src='/img/error.png'" class="inline-text-emoji ${sendBigEmoji} default" src="/img/default_emojis/${emojiObject.code}.svg">`;
         }
 
-        const emojiName = String(emojiObject.filename.split("_")[1].split(".")[0]);
-        let emojiFileHash = emojiObject.filename.split("_")[0];
-        return `<img title="${emojiName}" data-filehash="${emojiFileHash}" onerror="this.src='/img/error.png'" class="inline-text-emoji ${sendBigEmoji}" src="/emojis/${emojiObject.filename}">`;
-    });
+        const parsed = parseEmojiFilename(emojiObject.filename);
+        if (!parsed) return match;
+
+        return `<img title="${parsed.name}"
+            data-filehash="${parsed.hash}"
+            onerror="this.src='/img/error.png'"
+            class="inline-text-emoji ${sendBigEmoji}"
+            src="/emojis/${emojiObject.filename}">`;
+        });
 
     if (!forceSmall && isOnlyText(replacedText)) {
         replacedText = replacedText.replace(/class="inline-text-emoji([^"]*)"/g, (m, rest) => {
@@ -403,7 +418,11 @@ async function text2Emoji(text, returnCodeOnly = false, forceSmall = false) {
 }
 
 function findEmojiByID(emojiId) {
-    const custom = emojiList.find(e => e.filename.startsWith(`${emojiId}_`));
+    const custom = emojiList.find(e => {
+        const p = parseEmojiFilename(e.filename);
+        return p && p.hash === emojiId;
+    });
+
     if (custom) return custom;
 
     for (const group of twemojiIndex) {

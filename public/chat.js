@@ -922,10 +922,10 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
             if (response?.token) CookieManager.setCookie("token", response.token);
             if (response?.icon) CookieManager.setCookie("pfp", response.icon);
             if (response?.banner) CookieManager.setCookie("banner", response.banner);
-            if (response?.aboutme) CookieManager.setCookie("banner", response.aboutme);
-            if (response?.status) CookieManager.setCookie("banner", response.status);
-            if (response?.loginName) CookieManager.setCookie("banner", response.loginName);
-            if (response?.id) CookieManager.setCookie("banner", response.id);
+            if (response?.aboutme) CookieManager.setCookie("aboutme", response.aboutme);
+            if (response?.status) CookieManager.setCookie("status", response.status);
+            if (response?.loginName) CookieManager.setCookie("loginName", response.loginName);
+            if (response?.id) CookieManager.setCookie("id", response.id);
 
             // if we finished onboarding
             if (!response?.error && response.finishedOnboarding === true && initial) {

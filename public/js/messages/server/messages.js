@@ -1212,6 +1212,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
         }
 
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())
+        ChatManager.setChannelMarker(UserManager.getChannel(), false)
 
         if (!appendTop) {
             displayAwaitedMessages(container)

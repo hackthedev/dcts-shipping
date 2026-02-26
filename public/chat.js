@@ -2676,17 +2676,16 @@ function initUploadDragAndDrop(){
     }, false);
 }
 
-
-function openPagePopup(url){
+function openPagePopup(elementId, url){
     if(!url) throw new Error("No url supplied bitch", url); // lol
 
-    let pagePopup = document.querySelector('#pagePopup');
+    let pagePopup = document.querySelector('#' + elementId);
     let iframe = pagePopup?.querySelector('iframe');
 
     // if no shit found make it
     if(!pagePopup) {
         pagePopup = document.createElement('div');
-        pagePopup.id = "pagePopup";
+        pagePopup.id = elementId;
 
         // some styling for it to seam "real
         pagePopup.style.width = "90%";

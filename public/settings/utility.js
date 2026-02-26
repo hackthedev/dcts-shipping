@@ -106,6 +106,8 @@ async function loadPageContent(page = "server-info") {
 
     await pageJsPromises[page];
 
+
+    console.log("emitting pagechange", page);
     document.dispatchEvent(
         new CustomEvent("pagechange", { detail: { page } })
     );

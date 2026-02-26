@@ -9,7 +9,6 @@ import {
     colors,
     debugmode,
     saveConfig,
-    reloadConfig,
     flipDebug,
     allowLogging,
     configPath

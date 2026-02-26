@@ -713,9 +713,9 @@ export function banUser(socket, member) {
 }
 
 export function getSocketIp(socket){
-    return socket?.handshake?.headers["x-forwarded-for"]?.split(",")[0].trim()
-        || socket?.handshake?.headers["x-real-ip"]
-        || socket?.handshake?.address;
+    return socket?.handshake?.address
+        || socket?.request?.socket?.remoteAddress
+        || socket?.conn?.remoteAddress;
 }
 
 export function banIp(socket, durationTimestamp = -1) {

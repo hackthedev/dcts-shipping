@@ -11,24 +11,6 @@ const pingLimiter = rateLimit({
     trustProxy: true
 });
 
-
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Vary", "Origin");
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-    res.header("Access-Control-Max-Age", "86400");
-    res.set("Cache-Control", "no-store");
-
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(204);
-    }
-
-    next();
-});
-
 app.get("/servers", pingLimiter, express.json(), async (req, res) => {
     res.set("Cache-Control", "no-store");
 

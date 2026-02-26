@@ -76,8 +76,8 @@ export {
 
 
 export let checkedMediaCacheUrls = {};
-export let usersocket = [];
-export let loginAttempts = [];
+export let usersocket = {};
+export let loginAttempts = {};
 export let userOldRoom = {};
 export let useridFromSocket = [];
 export let peopleInVC = {};
@@ -87,7 +87,7 @@ export let typingMembers = [];
 export let typingMembersTimeout = [];
 
 export let ratelimit = [];
-export let socketToIP = [];
+export let socketToIP = {};
 
 export let allowLogging = false;
 export let debugmode = process.env.DEBUG || false;
@@ -103,12 +103,6 @@ export const auther = new dSyncAuth(app, signer, async function (data) {
 
 export let ipsec;
 export let io;
-
-// config file saving
-let fileHandle = null; // File handle for the config file
-let savedState = null; // In-memory config state
-let writeQueue = Promise.resolve(); // Queue for write operations
-let isClosing = false; // Flag to prevent multiple close attempts
 
 // handle startup args
 let nodeArgs = process.argv;
@@ -756,7 +750,6 @@ if (checkVer != null) {
     Logger.space();
 }
 
-// Check if SSL is used or not
 server = http.createServer(app)
 io = new Server(server, {
     maxHttpBufferSize: 1e8,
@@ -799,6 +792,21 @@ process.stdin.on("data", function (text) {
     var command = args[0];
 
     handleTerminalCommands(command, args);
+});
+
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Vary", "Origin");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+    res.header("Access-Control-Max-Age", "86400");
+    res.set("Cache-Control", "no-store");
+
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(204);
+    }
+
+    next();
 });
 
 app.use(
@@ -911,7 +919,7 @@ async function initIPSec(){
 }
 
 export async function startServer() {
-    initIPSec();
+    await initIPSec();
 
 
     const { rows, hourlyBaseline, dailyAverage, hourlyAverage, currentHourlyAverage } = await getChannelMessageFrequency({ room: "0-0-1254" });
@@ -1144,10 +1152,12 @@ async function listenToIO(){
             } catch (cleanupError) {
                 Logger.error(cleanupError);
             }
+
+            delete socketToIP[socket.id];
         });
 
         // Check if user ip is blacklisted
-        socketToIP[socket] = ip;
+        socketToIP[socket.id] = ip;
         if (serverconfig.ipblacklist.hasOwnProperty(ip)) {
             if (Date.now() <= serverconfig.ipblacklist[ip]) {
                 let detailText = "";
@@ -1191,19 +1201,6 @@ async function listenToIO(){
     });
 }
 
-function initConfig(filePath) {
-    try {
-        fileHandle = fs.openSync(filePath, "r+");
-        const fileContent = fs.readFileSync(filePath, {encoding: "utf-8"});
-        savedState = JSON.parse(fileContent);
-    } catch (error) {
-        console.error("Failed to initialize config file:", error);
-        throw error;
-    }
-}
-
-
-
 export async function saveConfig(config) {
     if (!config) return;
 
@@ -1229,47 +1226,6 @@ export async function saveConfig(config) {
     );
 
     fs.writeFileSync(configPath, fileContent);
-}
-
-function closeConfigFile() {
-    if (isClosing) return;
-    isClosing = true;
-
-    if (fileHandle) {
-        try {
-            fs.closeSync(fileHandle);
-            console.log("Config file closed.");
-        } catch (error) {
-            console.error("Error closing config file:", error);
-        }
-    }
-
-    process.exit();
-}
-
-// Automatically close the file on process exit
-process.on("exit", closeConfigFile);
-process.on("SIGINT", closeConfigFile); // Handle Ctrl+C
-process.on("SIGTERM", closeConfigFile); // Handle termination
-
-export async function reloadConfig() {
-    return; // deprecated
-
-    try {
-        const json = fs.readFileSync(configPath, "utf8");
-        const parsed = JSON.parse(json);
-
-        for (const key of Object.keys(serverconfig)) delete serverconfig[key];
-        Object.assign(serverconfig, parsed);
-
-        const rows = await queryDatabase("SELECT * FROM members");
-        serverconfig.servermembers = {};
-        for (const row of rows) {
-            serverconfig.servermembers[row.id] = row;
-        }
-    } catch (err) {
-        serverconfig.servermembers = {};
-    }
 }
 
 export function getFreshConfig() {

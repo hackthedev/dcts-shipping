@@ -1,4 +1,4 @@
-import {getFreshConfig, reloadConfig, versionCode} from "../../index.mjs";
+import {getFreshConfig, versionCode} from "../../index.mjs";
 import {generateId} from "./main.mjs";
 
 // templateMiddleware.mjs
@@ -93,12 +93,17 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
     }
 
     app.use((req, res, next) => {
-        let reqPath = req.path === '/' ? '/index.html' : req.path;
-        const ext = path.extname(reqPath).toLowerCase();
+        const requestedPath = req.path === '/' ? '/index.html' : req.path;
+        const normalizedPath = path.normalize(requestedPath).replace(/^([/\\]*\.\.[/\\])+/, "");
+        const safeRelativePath = normalizedPath.replace(/^[/\\]+/, "");
+        const ext = path.extname(safeRelativePath).toLowerCase();
 
         if (!templateExtensions.includes(ext)) return next();
 
-        const fullPath = path.join(publicDir, reqPath);
+        const fullPath = path.resolve(publicDir, safeRelativePath);
+        if (fullPath !== publicDir && !fullPath.startsWith(publicDir + path.sep)) {
+            return res.status(403).end();
+        }
 
         fs.readFile(fullPath, 'utf8', (err, content) => {
             if (err) return next();

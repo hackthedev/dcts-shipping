@@ -1,21 +1,28 @@
-var COOKIE_BIT = 'settings.vc.mic.bitrate';
-var COOKIE_DEV = 'settings.vc.mic.deviceId';
-var COOKIE_NOISE = 'settings.vc.mic.noiseSuppression';
-var COOKIE_ECHO = 'settings.vc.mic.echoCancellation';
+var COOKIE_BIT = null
+var COOKIE_DEV = null
+var COOKIE_NOISE = null
+var COOKIE_ECHO  = null
 
-var micSelect = document.getElementById('vc-mic');
-var bitrateSlider = document.getElementById('vc-br');
-var bitrateOut = document.getElementById('vc-br-val');
-var voiceSaveButton = document.getElementById('vc-save');
-var voiceTestButton = document.getElementById('vc-test');
-var voiceRefreshButton = document.getElementById('vc-refresh');
-var voiceDefaultcheck = document.getElementById('vc-mic-default');
-var voiceLoopbackAudio = document.getElementById('vc-loopback');
-var voiceEchoCancellation = document.getElementById("vc-mic-echoCancellation");
-var voiceNoiseSuppression = document.getElementById("vc-mic-noiseSuppression");
+var micSelect = null
+var bitrateSlide = null
+var bitrateOut = null
+var voiceSaveButton = null
+var voiceTestButton = null
+var voiceRefreshButton = null
+var voiceDefaultcheck  = null
+var voiceLoopbackAudio = null
+var voiceEchoCancellation = null
+var voiceNoiseSuppression = null
 
 var activeStream = null;
 var isTesting = false;
+
+document.addEventListener("pagechange", e => {
+  console.log(e.detail.page);
+  if (e.detail.page !== "voip") return;
+
+  initVoiceSettingsPanel()
+});
 
 function setSaveEnabled(on = true) {
   voiceSaveButton.disabled = !on;
@@ -261,9 +268,23 @@ function bindUI() {
 }
 
 async function initVoiceSettingsPanel() {
+  COOKIE_BIT = 'settings.vc.mic.bitrate';
+  COOKIE_DEV = 'settings.vc.mic.deviceId';
+  COOKIE_NOISE = 'settings.vc.mic.noiseSuppression';
+  COOKIE_ECHO = 'settings.vc.mic.echoCancellation';
+
+  micSelect = document.getElementById('vc-mic');
+  bitrateSlider = document.getElementById('vc-br');
+  bitrateOut = document.getElementById('vc-br-val');
+  voiceSaveButton = document.getElementById('vc-save');
+  voiceTestButton = document.getElementById('vc-test');
+  voiceRefreshButton = document.getElementById('vc-refresh');
+  voiceDefaultcheck = document.getElementById('vc-mic-default');
+  voiceLoopbackAudio = document.getElementById('vc-loopback');
+  voiceEchoCancellation = document.getElementById("vc-mic-echoCancellation");
+  voiceNoiseSuppression = document.getElementById("vc-mic-noiseSuppression");
+
   initBitrateUI();
   await renderMicOptions();
   bindUI();
 }
-
-initVoiceSettingsPanel();

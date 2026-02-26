@@ -657,11 +657,17 @@ class UserManager {
                         }, function (response) {
 
                             console.log(response)
+
+                            if (response?.member?.token) CookieManager.setCookie("token", response.member.token);
+                            if (response?.member?.icon) CookieManager.setCookie("pfp", response.member.icon);
+                            if (response?.member?.banner) CookieManager.setCookie("banner", response.member.banner);
+                            if (response?.member?.aboutme) CookieManager.setCookie("aboutme", response.member.aboutme);
+                            if (response?.member?.status) CookieManager.setCookie("status", response.member.status);
+                            if (response?.member?.loginName) CookieManager.setCookie("loginName", response.member.loginName);
+                            if (response?.member?.id) CookieManager.setCookie("id", response.member.id);
+
                             if (response?.error === null && response.member) {
                                 console.log("Setting cookies")
-                                CookieManager.setCookie("dcts_token", response.member.token, 365);
-                                CookieManager.setCookie("id", response.member.id, 365);
-                                CookieManager.setCookie("username", response.member.name, 365);
 
                                 UserManager.setPFP(response.member.icon);
                                 UserManager.setBanner(response.member.banner);

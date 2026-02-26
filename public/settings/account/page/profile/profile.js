@@ -1,23 +1,23 @@
-var settings_username = document.getElementById("settings_profile_username");
-var settings_loginName = document.getElementById("settings_profile_loginName");
-var settings_status = document.getElementById("settings_profile_status");
-var settings_aboutme = document.getElementById("settings_profile_aboutme");
-var settings_icon = document.getElementById("settings_profile_icon");
-var settings_banner = document.getElementById("settings_profile_banner");
+var settings_username  = null
+var settings_loginName = null
+var settings_status = null
+var settings_aboutme = null
+var settings_icon  = null
+var settings_banner = null
+var preview_username = null
+var preview_status  = null
+var preview_aboutme = null
+var preview_icon  = null
+var preview_banner = null
+var saveButton  = null
 
-var preview_username = document.getElementById("profile_username");
-var preview_status = document.getElementById("profile_status");
-var preview_aboutme = document.getElementById("profile_aboutme");
-var preview_icon = document.getElementById("profile_icon");
-var preview_banner = document.getElementById("profile_banner");
-var saveButton = document.getElementById("settings_profile_save");
 
-window.updatePreview = updatePreview;
-window.saveSettings = saveSettings;
-window.exportAccount = exportAccount;
-window.importAccount = importAccount;
-window.resetAccount = resetAccount;
-window.handleUpload = handleUpload;
+document.addEventListener("pagechange", e => {
+    console.log(e.detail.page);
+    if (e.detail.page !== "profile") return;
+
+    setPreview()
+});
 
 async function handleUpload(files, id) {
     try {
@@ -62,6 +62,21 @@ function resetAccount() {
 }
 
 function setPreview() {
+    settings_username = document.getElementById("settings_profile_username");
+    settings_loginName = document.getElementById("settings_profile_loginName");
+    settings_status = document.getElementById("settings_profile_status");
+    settings_aboutme = document.getElementById("settings_profile_aboutme");
+    settings_icon = document.getElementById("settings_profile_icon");
+    settings_banner = document.getElementById("settings_profile_banner");
+
+    preview_username = document.getElementById("profile_username");
+    preview_status = document.getElementById("profile_status");
+    preview_aboutme = document.getElementById("profile_aboutme");
+    preview_icon = document.getElementById("profile_icon");
+    preview_banner = document.getElementById("profile_banner");
+    saveButton = document.getElementById("settings_profile_save");
+
+
     preview_icon.style.backgroundImage = `url("${UserManager.getPFP()}")`;
     preview_banner.style.backgroundImage = `url("${UserManager.getBanner()}")`;
 

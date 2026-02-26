@@ -10,7 +10,7 @@ import { queryDatabase } from "../../functions/mysql/mysql.mjs";
 const clean = (s) => xssFilters.inHTMLData(String(s ?? ""));
 const rid = (p) => `${p}_${crypto.randomUUID()}`;
 
-const nowISO = () => new Date().toISOString();
+const nowISO = () => new Date().getTime();
 
 
 export async function deleteDMMessage(socket, data, response){

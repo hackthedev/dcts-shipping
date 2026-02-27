@@ -23,3 +23,13 @@ function getUrlParams(param) {
 
     return urlChannel;
 }
+
+function closeSettings(){
+    let pagePopup = window.parent.document.querySelector('#settingsPopup');
+    if(pagePopup) {
+        pagePopup.remove()
+    }
+    else {
+        throw new Error("No page popup to be closed is present!");
+    }
+}

@@ -1,13 +1,4 @@
-var setting_rateLimit = document.getElementById("rate-limit");
-var setting_dropInterval = document.getElementById("drop-interval");
-var saveButton = document.getElementById("settings_profile_save");
-
-var rateLimit;
-var dropInterval;
-
-var serverconfigName;
-var serverconfigDesc;
-
+let originalRateLimitServerInfo = null;
 
 document.addEventListener("pagechange", e => {
     console.log(e.detail.page);
@@ -16,76 +7,87 @@ document.addEventListener("pagechange", e => {
     initRateLimits();
 });
 
-function initRateLimits(){
-    socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageRateSettings" }, function (response) {
+async function initRateLimits(){
+    socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageRateSettings" }, async function (response) {
 
-        if(response.permission == "denied"){
+        if(response.permission === "denied"){
             window.location.href = window.location.origin + "/settings/server";
         }
         else{
             document.getElementById("pagebody").style.display = "block";
         }
+
+        let serverInfo = await getServerInfo();
+        originalRateLimitServerInfo = JSON.stringify(serverInfo)
+        displayRateLimitSettings(serverInfo);
+
+        // chart shit
+        let channels = await getChannelTree();
+        let channelConfigPath = getChannelPathFromGroupConfig(channels, serverInfo.serverinfo.defaultChannel);
+        let defaultChannelRoom = `${channelConfigPath.groupId}-${channelConfigPath.categoryId}-${channelConfigPath.channelId}`;
+        if(!defaultChannelRoom) throw new Error("Somehow unable to contruct room string?", defaultChannelRoom)
+
+        let charts = await getRoomCharts(defaultChannelRoom);
+        if(charts?.daily){
+            displayGraph("daily", charts.daily, document.querySelector("#chart-example-daily"))
+        }
+        if(charts?.daily){
+            displayGraph("hourly", charts.hourly, document.querySelector("#chart-example-hourly"))
+        }
     });
 
 
-    socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
-
-        console.log(response);
-        setting_rateLimit = document.getElementById("rate-limit");
-        setting_dropInterval = document.getElementById("drop-interval");
-        saveButton = document.getElementById("settings_profile_save");
-
-        rateLimit = response.rateLimit;
-        dropInterval = response.dropInterval;
-
-        setting_rateLimit.value = rateLimit;
-        setting_dropInterval.value = dropInterval;
-    });
 }
 
-function isChecked(element){
-    return element.checked ? 1 : 0;
-}
+function displayRateLimitSettings(response) {
+    let mainSettings = document.getElementById("main_settings");
+    mainSettings.innerHTML = "";
 
-function updateRateLimitPreview(){
+    mainSettings.insertAdjacentElement("beforeend",
+        JsonEditor.getSettingElement(
+            response.serverinfo.moderation.ratelimit.actions.user_slowmode,
+            "User Slowmode",
+            "This setting is a multiplier based off the baseline and will enable a slow mode for everyone.",
+            v => {
+                response.serverinfo.moderation.ratelimit.actions.user_slowmode = v;
+                if (checkJsonChanges(response, originalRateLimitServerInfo)) {
+                    showSaveSettings(async () => {
+                        saveServerInfoSettings(response);
+                    })
+                }
+            }
+        )
+    );
 
-    try{
+    mainSettings.insertAdjacentElement("beforeend",
+        JsonEditor.getSettingElement(
+            response.serverinfo.moderation.ratelimit.actions.ratelimit,
+            "Rate limit",
+            "Also based off of the baseline, once this limit is reached users will be rate limited.",
+            v => {
+                response.serverinfo.moderation.ratelimit.actions.ratelimit = v;
+                if (checkJsonChanges(response, originalRateLimitServerInfo)) {
+                    showSaveSettings(async () => {
+                        saveServerInfoSettings(response);
+                    })
+                }
+            }
+        )
+    );
 
-        // Username
-        if(setting_rateLimit.value != rateLimit ||
-            setting_dropInterval.value != dropInterval
-
-        ){
-            console.log("NOt same");
-            saveButton.style.display = "block";
-        }
-        else{
-            console.log("same");
-            saveButton.style.display = "none";
-        }
-
-    }
-    catch(e){
-        console.log(e);
-    }
-
-}
-
-
-function saveRateLimitSettings(){
-    try{
-
-        socket.emit("saveRateSettings", { id: UserManager.getID(), token: UserManager.getToken(),
-                                        newRateLimit: setting_rateLimit.value,
-                                        newDropInterval: setting_dropInterval.value
-        }, function (response) {
-
-            alert(response.msg);
-            console.log(response);
-        });
-    }
-    catch(error){
-        alert("Error while trying to save settings: " + error);
-        return;
-    }
+    mainSettings.insertAdjacentElement("beforeend",
+        JsonEditor.getSettingElement(
+            response.serverinfo.moderation.ratelimit.record_history,
+            "Record History",
+            "Will determine the data to be used as reference for the base line from the current date going backwards.",
+            v => {
+                response.serverinfo.moderation.ratelimit.record_history = v;
+                if (checkJsonChanges(response, originalRateLimitServerInfo)) {
+                    showSaveSettings(async () => {
+                        saveServerInfoSettings(response);
+                    })
+                }
+            }
+        )
+    );
 }

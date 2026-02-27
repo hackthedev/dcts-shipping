@@ -119,6 +119,70 @@ async function loadPageContent(page = "server-info") {
     setUrl(`?page=${page}`)
 }
 
+function displayGraph(type, path, element = null){
+    if(type === "daily"){
+        let dailyElement = element ?? document.querySelector("#chart_daily");
+        if(dailyElement){
+            dailyElement.src = path;
+        }
+    }
+    if(type === "hourly"){
+        let hourlyElement = element ?? document.querySelector("#chart_hourly");
+        if(hourlyElement){
+            hourlyElement.src = path;
+        }
+    }
+}
+
+async function getRoomCharts(room){
+    if(!room) throw new Error("No room argument passed.");
+
+    return new Promise((resolve, reject) => {
+        socket.emit("getRoomCharts", {id: UserManager.getID(), token: UserManager.getToken(), room }, function (response) {
+            resolve(response?.paths || response);
+        })
+    })
+}
+async function getServerInfo(){
+    return new Promise((resolve, reject) => {
+        socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
+            resolve(response);
+        })
+    })
+}
+async function getChannelTree(){
+    return new Promise((resolve, reject) => {
+        socket.emit("getChannelTree", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageChannels" }, function (response) {
+            resolve(response?.data || response);
+        });
+    })
+}
+
+function getChannelPathFromGroupConfig(data, channelId) {
+    const groups = data?.groups;
+    if (!groups) return null;
+
+    for (const gId in groups) {
+        const cats = groups[gId]?.categories;
+        if (!cats) continue;
+
+        for (const cId in cats) {
+            const channels = cats[cId]?.channel;
+            if (!channels) continue;
+
+            if (channels[channelId]) {
+                return {
+                    path: `groups.${gId}.categories.${cId}.channel.${channelId}`,
+                    groupId: gId,
+                    categoryId: cId,
+                    channelId
+                };
+            }
+        }
+    }
+    return null;
+}
+
 function setUrl(param) {
     const url = new URL(window.location.href);
 

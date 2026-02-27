@@ -913,52 +913,6 @@ async function initIPSec(){
 export async function startServer() {
     initIPSec();
 
-
-    const { rows, hourlyBaseline, dailyAverage, hourlyAverage, currentHourlyAverage } = await getChannelMessageFrequency({ room: "0-0-1254" });
-    const status = await getChannelRateLimit("0-0-0");
-
-    // QUE PUTAS!
-    // THIS IS HERE FOR TESTING OKAY
-    // IM A LAZY SHIT SO THIS WILL BE MOVED ELSEWHERE
-    // AND YES THIS IS HOW I LIKE TO TEST AND FORGET
-    // IF YOU SEE THIS CRY FOR HELP
-
-    // daily shit
-    await renderChart({
-        xLabels: rows.map(r => r.day),
-        yValues: rows.map(r => r.messages),
-        xLabel: "Day",
-        yLabel: "Messages",
-        label: "messages / day",
-        lines: [
-            { value: dailyAverage, label: "Baseline", color: "rgba(255,234,0,0.9)" },
-            { value: dailyAverage * 2, label: "User Specific Slowmode", color: "rgba(255,98,0,0.9)" },
-            { value: dailyAverage * 2.5, label: "Rate Limit", color: "rgba(255, 0, 0, 0.9)" },
-            { value: status.currentDaily, label: "Current", color: "rgba(0,255,255,0.9)" }
-        ]
-    }, path.join(process.cwd(), "plot-daily.png"));
-
-    // hourly shit
-    const hours = [...hourlyBaseline.keys()];
-    const avgValues = [...hourlyBaseline.values()];
-
-    console.log(status); // <-- super fucking professional
-    await renderChart({
-        xLabels: hours.map(h => `${h}:00`),
-        yValues: avgValues,
-        xLabel: "Time",
-        yLabel: "avg messages",
-        label: "avg messages / hour",
-        lines: [
-            { value: hourlyAverage, label: "Baseline", color: "rgba(255,234,0,0.9)" },
-            { value: hourlyAverage * 2, label: "User Specific Slowmode", color: "rgba(255,98,0,0.9)" },
-            { value: hourlyAverage * 2.5, label: "Rate Limit", color: "rgba(255, 0, 0, 0.9)" },
-            { value: status.currentHourly, label: "Current", color: "rgba(0,255,255,0.9)" }
-        ]
-    }, path.join(process.cwd(), "plot-hourly.png"));
-
-
-
     // Start the app server
     var port = process.env.PORT || serverconfig.serverinfo.port;
     server.listen(port, function () {

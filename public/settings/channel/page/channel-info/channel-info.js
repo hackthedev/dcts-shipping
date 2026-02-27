@@ -15,7 +15,7 @@ function initChannelSettings(){
         return;
     }
 
-    socket.emit("getChannelInfo", {id: UserManager.getID(), token: UserManager.getToken(), channel: getUrlParams("id")}, function (response) {
+    socket.emit("getChannelInfo", {id: UserManager.getID(), token: UserManager.getToken(), channel: getUrlParams("id")}, async function (response) {
         try{
             console.log(response)
             if(response?.error){
@@ -35,6 +35,22 @@ function initChannelSettings(){
 
                 originalChannelInfo = JSON.stringify(response.data);
                 showChannelSettings(response.data);
+
+                // chart shit
+                let channels = await getChannelTree();
+                let channelConfigPath = getChannelPathFromGroupConfig(channels, getUrlParams("id"));
+                let defaultChannelRoom = `${channelConfigPath.groupId}-${channelConfigPath.categoryId}-${channelConfigPath.channelId}`;
+                if(!defaultChannelRoom) throw new Error("Somehow unable to contruct room string?", defaultChannelRoom)
+
+                let charts = await getRoomCharts(defaultChannelRoom);
+                console.log(charts)
+
+                if(charts?.daily){
+                    displayGraph("daily", charts.daily)
+                }
+                if(charts?.hourly){
+                    displayGraph("hourly", charts.hourly)
+                }
             }
         }
         catch(err){

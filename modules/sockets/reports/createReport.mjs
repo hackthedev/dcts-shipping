@@ -31,18 +31,21 @@ export default (io) => (socket) => {
                 let reportType = xssFilters.inHTMLData(member.type);
                 let reportDescription = xssFilters.inHTMLData(member.description);
 
+
+
                 switch (reportType) {
                     case "message":
                         let message = await getChatMessagesFromDb(null, null, reportTargetId);
                         let messageObj = message[0].message;
 
+                        // you shall not be confused like i was,
+                        // as this authorId is a database column
                         let messageAuthorId = message[0]?.authorId;
 
                         // if data is available
                         if (messageAuthorId) {
                             let room = message[0]?.room; // 1-2-3
                             let channelId = room.split("-")[2]; // 3
-                            let channelObj = resolveChannelById(channelId) // json obj of channel
 
                             if (!serverconfig.servermembers[messageAuthorId]) {
                                 return response({ type: "error", msg: "User is not in the server anymore" });
@@ -59,6 +62,11 @@ export default (io) => (socket) => {
 
                             emitBasedOnPermission("manageReports", "newReport")
                         }
+                        else{
+                            return response?.({ type: "error", error: "Message author not found" });
+                        }
+
+                        break;
                     case "dm":
                         try {
                             const me = socket.data.memberId;
@@ -80,7 +88,7 @@ export default (io) => (socket) => {
                                          WHERE messageId = ? LIMIT 1`,
                                 [messageId.startsWith("m_") ? messageId : `m_${messageId}`]
                             );
-                            if (!msg) return response?.({ type: "error", msg: "not found" });
+                            if (!msg) return response?.({ type: "error", msg: "Message not found" });
 
                             const reporterObj = getCastingMemberObject(serverconfig.servermembers[me]);
                             const reportedObj = getCastingMemberObject(serverconfig.servermembers[msg.authorId]);

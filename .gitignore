@@ -3,6 +3,7 @@
 /config_backups
 /chats
 /configs
+/public/graphs/
 /public/uploads/
 /public/emojis/
 /public/.idea/

@@ -737,6 +737,12 @@ export function checkConfigAdditions() {
             "/^\/emojis(\/.*)?$/"
         ]
     )
+
+
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.user_slowmode", 1.5)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.ratelimit", 2)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.record_history", "-14 days")
+
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.companyDomainWhitelist", [])
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blacklist", [])
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.whitelist", [])
@@ -761,7 +767,6 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.signal", "")
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.owner.name", "")
 
-    // v9
     checkObjectKeys(serverconfig, "serverinfo.defaultTheme", "default.css")
 
     // livekit VC
@@ -796,16 +801,10 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.home.title", "Default Server Title")
     checkObjectKeys(serverconfig, "serverinfo.home.subtitle", "Default Server Sub-Title")
     checkObjectKeys(serverconfig, "serverinfo.home.about", "This is the <i>default server</i> about me")
-
     checkObjectKeys(serverconfig, "serverinfo.reports.enabled", true)
 
     // TURN SERVER SETTINGS
     checkObjectKeys(serverconfig, "serverinfo.app.url", "http://your-ip-or-domain:port")    // without slash at end!
-
-    checkObjectKeys(serverconfig, "serverinfo.turn.enabled", true)         // use turn or no
-    checkObjectKeys(serverconfig, "serverinfo.turn.secret", "north")        // static-auth-secret
-    checkObjectKeys(serverconfig, "serverinfo.turn.host", "127.0.0.1")      // public ip or domain
-    checkObjectKeys(serverconfig, "serverinfo.turn.port", 3478)             // listening-port
 
 
     checkObjectKeys(serverconfig, "groups.*.channels.categories.*.channel.*.msgCount", 0)
@@ -829,29 +828,6 @@ export function checkConfigAdditions() {
     // Rate Spam & Failed Logins as example
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.ipBanDuration", "10 minutes")
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.memberListHideBanned", true)
-
-
-    /*
-        UI / Mod Update
-    */
-
-    // Settings for Moderation
-    //
-    // Message Spam
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.enabled", false)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.counter", 0)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.actions", {})
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.timespan", 0)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.bypassers", [])
-    //
-    // Blacklist
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.enabled", false)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.words", [])
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.actions", {})
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.channels", [])
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.userprofile", true)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.bypassers", [])
-
 
     /*
         Config changes from some update

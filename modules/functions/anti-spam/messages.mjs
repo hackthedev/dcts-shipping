@@ -1,4 +1,4 @@
-import {db} from "../../../index.mjs";
+import {db, serverconfig} from "../../../index.mjs";
 import dSyncRateLimit from "@hackthedev/dsync-ratelimit";
 import DateTools from "@hackthedev/datetools";
 
@@ -12,6 +12,10 @@ export async function getChannelRateLimit(room, {
 
     const {currentHourlyAverage} = await getChannelMessageFrequency({room, authorId});
     const baseline = currentHourlyAverage;
+
+
+    let userSlowModeMultiplier = serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode
+    let rateLimitMultiplier = serverconfig.serverinfo.moderation.ratelimit.actions.ratelimit
 
     const hourStart = new Date();
     hourStart.setMinutes(0, 0, 0);
@@ -44,8 +48,8 @@ export async function getChannelRateLimit(room, {
         currentHourly,
         currentDaily,
         baseline,
-        slowmode: currentHourly >= baseline * 2,
-        rateLimited: currentHourly >= baseline * 2.5
+        slowmode: userSlowModeMultiplier === 0 ? false : currentHourly >= baseline * userSlowModeMultiplier,
+        rateLimited: rateLimitMultiplier === 0 ? false : currentHourly >= baseline * rateLimitMultiplier
     }
 
     if (callback && typeof callback === "function") {
@@ -58,7 +62,7 @@ export async function getChannelRateLimit(room, {
 export async function getChannelMessageFrequency({
                                                      room,
                                                      authorId = null,
-                                                     since = DateTools.getDateFromOffset("-14 days")
+                                                     since = DateTools.getDateFromOffset(serverconfig.serverinfo.moderation.ratelimit.record_history)
                                                  }) {
 
     if (!(since instanceof Date) || isNaN(since.getTime())) {

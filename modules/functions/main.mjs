@@ -739,9 +739,10 @@ export function checkConfigAdditions() {
     )
 
 
-    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.user_slowmode", 1.5)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.ratelimit", 2)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.record_history", "-14 days")
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.user_slowmode", 0)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.user_slowmode_duration", "2 minutes")
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.ratelimit", 0)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.record_history", "14 days")
 
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.companyDomainWhitelist", [])
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blacklist", [])

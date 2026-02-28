@@ -10,8 +10,7 @@ export async function getChannelRateLimit({
                                               callback = null
                                           } = {}
 ) {
-
-    if (!room) throw new Error("Room not supplied");
+    if (!room) throw new Error("Room not supplied in getChannelRateLimit");
 
     const {currentHourlyAverage} = await getChannelMessageFrequency({room, memberId});
     const baseline = currentHourlyAverage;
@@ -70,7 +69,7 @@ export async function getChannelRateLimit({
 export async function getChannelMessageFrequency({
                                                      room,
                                                      memberId = null,
-                                                     since = DateTools.getDateFromOffset(serverconfig.serverinfo.moderation.ratelimit.record_history)
+                                                     since = DateTools.getDateFromOffset(`-${serverconfig.serverinfo.moderation.ratelimit.record_history}`)
                                                  }) {
 
     if (!(since instanceof Date) || isNaN(since.getTime())) {

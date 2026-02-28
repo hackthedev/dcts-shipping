@@ -11,8 +11,10 @@ import {serverconfig} from "../../../index.mjs";
 // If you dont like it, go fuck yourself, respectfully  ¯\_(ツ)_/¯
 
 export async function renderRoomCharts(room){
+    if(!room) throw new Error("Room not supplied in renderRoomCharts");
+
     const { rows, hourlyBaseline, dailyAverage, hourlyAverage, currentHourlyAverage } = await getChannelMessageFrequency({ room });
-    const status = await getChannelRateLimit(room);
+    const status = await getChannelRateLimit({room});
 
     let dailyPath = path.join(path.resolve(), "public", "graphs", `${room}_daily.png`);
     let hourlyPath = path.join(path.resolve(), "public", "graphs", `${room}_hourly.png`);

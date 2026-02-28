@@ -46,7 +46,7 @@ function displayRateLimitSettings(response) {
     mainSettings.insertAdjacentElement("beforeend",
         JsonEditor.getSettingElement(
             response.serverinfo.moderation.ratelimit.actions.user_slowmode,
-            "User Slowmode",
+            "Slowmode Multiplier",
             "This setting is a multiplier based off the baseline and will enable a slow mode for everyone.",
             v => {
                 response.serverinfo.moderation.ratelimit.actions.user_slowmode = v;
@@ -61,8 +61,24 @@ function displayRateLimitSettings(response) {
 
     mainSettings.insertAdjacentElement("beforeend",
         JsonEditor.getSettingElement(
+            response.serverinfo.moderation.ratelimit.actions.user_slowmode_duration,
+            "Slowmode Duration",
+            "The amount of time someone needs to wait between sending messages",
+            v => {
+                response.serverinfo.moderation.ratelimit.actions.user_slowmode_duration = v;
+                if (checkJsonChanges(response, originalRateLimitServerInfo)) {
+                    showSaveSettings(async () => {
+                        saveServerInfoSettings(response);
+                    })
+                }
+            }
+        )
+    );
+
+    mainSettings.insertAdjacentElement("beforeend",
+        JsonEditor.getSettingElement(
             response.serverinfo.moderation.ratelimit.actions.ratelimit,
-            "Rate limit",
+            "Rate limit Multiplier",
             "Also based off of the baseline, once this limit is reached users will be rate limited.",
             v => {
                 response.serverinfo.moderation.ratelimit.actions.ratelimit = v;

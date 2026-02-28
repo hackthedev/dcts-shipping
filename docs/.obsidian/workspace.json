@@ -1,0 +1,195 @@
+{
+  "main": {
+    "id": "05d70f477aed8ca7",
+    "type": "split",
+    "children": [
+      {
+        "id": "d990732dfa6875e1",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1c4490349bf68a2c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "network/Reverse Proxy Setup.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Reverse Proxy Setup"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "8a8fea85d3bb3e28",
+    "type": "split",
+    "children": [
+      {
+        "id": "9f34a4460ead710c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "37a4cdff02af2a98",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Dateiexplorer"
+            }
+          },
+          {
+            "id": "9bc41163ef2d6e26",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Suchen"
+            }
+          },
+          {
+            "id": "a72af276712ffccb",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Lesezeichen"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "46d01e6586f2336c",
+    "type": "split",
+    "children": [
+      {
+        "id": "0a0eafbd135ff96b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d164de9c60fd8081",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "network/Reverse Proxy Setup.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Rückverweise auf Reverse Proxy Setup"
+            }
+          },
+          {
+            "id": "3f973def1c112c02",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "network/Reverse Proxy Setup.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Ausgehende Links von Reverse Proxy Setup öffnen"
+            }
+          },
+          {
+            "id": "af986acdc35eef94",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "9af483212892ebba",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Alle Eigenschaften"
+            }
+          },
+          {
+            "id": "1800e199ef2ec53a",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "network/Reverse Proxy Setup.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Gliederung von Reverse Proxy Setup"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Schnellauswahl öffnen": false,
+      "graph:Graph-Ansicht öffnen": false,
+      "canvas:Neuen Canvas erstellen": false,
+      "daily-notes:Heutige Notiz öffnen": false,
+      "templates:Vorlage einfügen": false,
+      "command-palette:Befehlspalette öffnen": false,
+      "bases:Neue Base erstellen": false
+    }
+  },
+  "active": "37a4cdff02af2a98",
+  "lastOpenFiles": [
+    "VoIP Setup.md",
+    "DCTS Docs Base.base",
+    "assets/Pasted image 20260228193820.png",
+    "Pasted image 20260228193713.png",
+    "Getting started.md",
+    "Performance.md"
+  ]
+}

@@ -72,7 +72,7 @@ The chat app was made to be very easy to setup and use. Out of the box it should
 
 Example:
 
-```cmd
+```bash
 # navigate to the project directory
 cd /path/to/dcts
 

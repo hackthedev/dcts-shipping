@@ -48,7 +48,7 @@ location / {
 }
 
 # caddy
-lk.comain.com {
+lk.domain.com {
     reverse_proxy localhost:7880 {
         transport http {
             versions 1.1
@@ -78,11 +78,15 @@ This step assumes you've already installed livekit on your server with the insta
 
 Its important that you set `enabled` to `true`, and change the `domain` value to the domain you're using and linking the TLS certificate files. After you've setup the config file you can exit your editor of choice and restart livekit using `service livekit restart`.
 
-![image-20251108181804501](./assets/image-20251108181804501.png)
+![[assets/Pasted image 20260228193820.png]]
 
 > [!NOTE]
 >
 > Turn and TLS is required if you want others to be able to connect to VoIP. Its used for both talking and screensharing.
+> 
+> The sub-domain `livekit`  shown in the screenshot would need to be replaced with `lk` as with the given DNS example above
+> 
+> The `key` shown at line 2 can be changed freely and needs to match with the `livekit` settings inside the `configs/config.json` file.
 
 > [!TIP]
 >

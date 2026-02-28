@@ -107,6 +107,7 @@ export default (io) => (socket) => {
 
                 // new rate limit settings
                 if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode != null) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode = member.serverinfo.moderation.ratelimit.actions.user_slowmode;
+                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode_duration != null) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration = member.serverinfo.moderation.ratelimit.actions.user_slowmode_duration;
                 if(member?.serverinfo?.moderation?.ratelimit?.actions?.ratelimit != null) serverconfig.serverinfo.moderation.ratelimit.actions.ratelimit = member.serverinfo.moderation.ratelimit.actions.ratelimit;
                 if(member?.serverinfo?.moderation?.ratelimit?.record_history != null) serverconfig.serverinfo.moderation.ratelimit.record_history = member.serverinfo.moderation.ratelimit.record_history;
 

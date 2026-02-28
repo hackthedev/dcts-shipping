@@ -11,7 +11,7 @@
   "license": "",
   "dependencies": {
     "@hackthedev/arraytools": "^1.0.2",
-    "@hackthedev/datetools": "^1.0.1",
+    "@hackthedev/datetools": "^1.0.3",
     "@hackthedev/dsync": "^1.0.8",
     "@hackthedev/dsync-auth": "^1.0.9",
     "@hackthedev/dsync-files": "^1.0.9",

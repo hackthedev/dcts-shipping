@@ -19,6 +19,7 @@ import {decodeAndParseJSON, getMessageObjectById} from "./resolveMessage.mjs";
 import {getChannelRateLimit} from "../functions/anti-spam/messages.mjs";
 import {getMemberLatestMessage} from "../functions/chat/helper.mjs";
 import DateTools from "@hackthedev/datetools";
+import dSyncRateLimit from "@hackthedev/dsync-ratelimit";
 
 export function getMentionIdsFromText(text) {
     return {
@@ -27,7 +28,6 @@ export function getMentionIdsFromText(text) {
         channelIds: [...text.matchAll(/&lt;#@(\d+)&gt;/g)].map(m => m[1])
     }
 }
-
 
 export default (io) => (socket) => {
     // socket.on code here
@@ -48,22 +48,29 @@ export default (io) => (socket) => {
             })
 
             // check results
-            if(rateLimitResult?.slowmode === true /*&& !hasPermission(member.author.id, "bypassSlowmode", member.channel)*/ || true === true){
+            if (rateLimitResult?.slowmode === true && !hasPermission(member.author.id, "bypassSlowmode", member.channel)) {
                 // get last message sent from member here so we can check the timestamp
                 let lastMemberMessageObj = await getMemberLatestMessage(member.author.id, member.author.id);
-                if(!lastMemberMessageObj) return Logger.debug("No message found. Possibly first message") // allow if none found
+                if (!lastMemberMessageObj) return Logger.debug("No message found. Possibly first message") // allow if none found
 
-                let slowmodeDate = DateTools.getDateFromOffset(`-${serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration}`).getTime();
-                if(lastMemberMessageObj?.timestamp &&
-                    lastMemberMessageObj?.timestamp <= slowmodeDate){
+                // get future date where slowmode will be expired
+                let slowmodeDate = DateTools.getDateFromOffset(
+                    `+${serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration}`,
+                    new Date(lastMemberMessageObj.timestamp)
+                ).getTime();
+
+                if (lastMemberMessageObj?.timestamp &&
+                    new Date().getTime() >= slowmodeDate) {
                     // member is allowed to send a message
-                }
-                else{
+                } else {
                     // we can use that in the client to check for it like if xx?.slowMode and if
                     // it exists we can straight up use it to get a display date. this way we
                     // save some data to transmit ig as that works too.
-                    return response({ error: "Slow mode active!", slowmode: slowmodeDate })
+                    return response({error: "Slow mode active!", slowmode: slowmodeDate})
                 }
+            }
+            else if(rateLimitResult?.rateLimited === true){
+                return response({error: "The server has been rate limited!", rateLimited: true})
             }
 
             // check member mute
@@ -252,6 +259,8 @@ export default (io) => (socket) => {
                     else {
                         io.in(member.room).emit("messageEdited", member);
                     }
+
+                    response({error: null})
 
                 } else {
                     Logger.debug("Couldnt find message channel");

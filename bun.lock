@@ -6,7 +6,7 @@
       "name": "dcts",
       "dependencies": {
         "@hackthedev/arraytools": "^1.0.2",
-        "@hackthedev/datetools": "^1.0.1",
+        "@hackthedev/datetools": "^1.0.3",
         "@hackthedev/dsync": "^1.0.8",
         "@hackthedev/dsync-auth": "^1.0.9",
         "@hackthedev/dsync-files": "^1.0.9",
@@ -54,7 +54,7 @@
 
     "@hackthedev/arraytools": ["@hackthedev/arraytools@1.0.2", "", {}, "sha512-rFr3L60vAqp6bs+ur2W3VqaavOzoyQxDFqGYU/R+ocgZ63Hh4nat7HRZOVqZ6BVHC/UuC4Q/Y8+BiX9i3xakkg=="],
 
-    "@hackthedev/datetools": ["@hackthedev/datetools@1.0.1", "", {}, "sha512-6xtBypklkzTHYR7pn9KAjTyyo988zvSu7daa3pysbCgysHJtLCwZGMXng2qgaNl2O1YYwiwT5XOLgd1iBkjCnA=="],
+    "@hackthedev/datetools": ["@hackthedev/datetools@1.0.3", "", {}, "sha512-9uOAUWsbFUUYtdZvHi8nQvwENpkIGPQXY2SfmVnx6nAlQpi2COZneOlH29atMtWzzppp+4PbNBXyELOyMMM83w=="],
 
     "@hackthedev/dsync": ["@hackthedev/dsync@1.0.8", "", { "dependencies": { "express": "^5.1.0" } }, "sha512-ty4jO6R8xDxCD9Psmmk5cGvx3HDPEt9q2sj986nUg2rTa5xBaLAI19wuYx45PNwHtEIZ2mexkqA12x/s0A6THA=="],
 

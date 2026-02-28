@@ -354,9 +354,30 @@ function cancelMessageReply() {
 }
 
 function cancelMessageEdit() {
-    editor.innerHTML = "<p><br></p>";
     editMessageId = null;
     if(editorHints) editorHints.innerHTML = ""
+}
+
+function showRateLimitNotice(){
+    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+    if (replyMessageId == null && editorHints ) {
+        if(editorHints?.querySelector("#ratelimitHint") != null) editorHints?.querySelector("#ratelimitHint").remove();
+
+        editorHints.insertAdjacentHTML("afterbegin", `<p id="ratelimitHint" >The server has been rate limited</p>`)
+    }
+
+    if(isScrolledDown) scrollDown("showRateLimitNotice")
+}
+
+function showSlowmodeNotice(timestamp){
+    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+    if (replyMessageId == null && editorHints ) {
+        if(editorHints?.querySelector("#slowmodeHint") != null) editorHints?.querySelector("#slowmodeHint").remove();
+
+        editorHints.insertAdjacentHTML("afterbegin", `<p id="slowmodeHint" >Slowmode is active! You need to wait for ${getReadableDuration(new Date(timestamp))}</p>`)
+    }
+
+    if(isScrolledDown) scrollDown("showSlowmodeNotice")
 }
 
 function replyToMessage(messageId) {
@@ -738,7 +759,7 @@ async function updateMessageReactionsElementById(messageId, container = document
     let messageObj = await ChatManager.resolveMessage(messageId);
     if(!messageObj) return console.error(`Couldnt find message object for message reaction update ${messageId}`);
 
-    // no reactions were present so add the container
+    // no reactions were presen^t so add the container
     if(!reactionRow) {
         contentContainer.innerHTML += await getMessageReactionsHTML(messageObj);
         reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);

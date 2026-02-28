@@ -16,8 +16,12 @@ import {
 import {decodeFromBase64, getChatMessagesFromDb} from "../functions/mysql/helper.mjs";
 import {signer} from "../../index.mjs"
 import {decodeAndParseJSON, getMessageObjectById} from "./resolveMessage.mjs";
+import {getChannelRateLimit} from "../functions/anti-spam/messages.mjs";
+import {getMemberLatestMessage} from "../functions/chat/helper.mjs";
+import DateTools from "@hackthedev/datetools";
+import dSyncRateLimit from "@hackthedev/dsync-ratelimit";
 
-export function getMentionIdsFromText(text){
+export function getMentionIdsFromText(text) {
     return {
         userIds: [...text.matchAll(/&lt;@(\d+)&gt;/g)].map(m => m[1]),
         roleIds: [...text.matchAll(/&lt;!@(\d+)&gt;/g)].map(m => m[1]),
@@ -25,24 +29,56 @@ export function getMentionIdsFromText(text){
     }
 }
 
-
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('messageSend', async function (member, response) {
         if (validateMemberId(member?.author?.id, socket, member?.token) === true) {
 
             // some new handling
-            if(!member?.message) return response({error: "No message provided"})
-            if(!member?.group) return response({error: "No group provided"})
-            if(!member?.category) return response({error: "No category provided"})
-            if(!member?.channel) return response({error: "No channel provided"})
+            if (!member?.message) return response({error: "No message provided"})
+            if (!member?.group) return response({error: "No group provided"})
+            if (!member?.category) return response({error: "No category provided"})
+            if (!member?.channel) return response({error: "No channel provided"})
+
+
+            // anti spam check
+            let rateLimitResult = await getChannelRateLimit({
+                room: `${member.group}-${member.category}-${member.channel}`,
+                memberId: member.author.id,
+            })
+
+            // check results
+            if (rateLimitResult?.slowmode === true && !hasPermission(member.author.id, "bypassSlowmode", member.channel)) {
+                // get last message sent from member here so we can check the timestamp
+                let lastMemberMessageObj = await getMemberLatestMessage(member.author.id, member.author.id);
+                if (!lastMemberMessageObj) return Logger.debug("No message found. Possibly first message") // allow if none found
+
+                // get future date where slowmode will be expired
+                let slowmodeDate = DateTools.getDateFromOffset(
+                    `+${serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration}`,
+                    new Date(lastMemberMessageObj.timestamp)
+                ).getTime();
+
+                if (lastMemberMessageObj?.timestamp &&
+                    new Date().getTime() >= slowmodeDate) {
+                    // member is allowed to send a message
+                } else {
+                    // we can use that in the client to check for it like if xx?.slowMode and if
+                    // it exists we can straight up use it to get a display date. this way we
+                    // save some data to transmit ig as that works too.
+                    return response({error: "Slow mode active!", slowmode: slowmodeDate})
+                }
+            }
+            else if(rateLimitResult?.rateLimited === true){
+                return response({error: "The server has been rate limited!", rateLimited: true})
+            }
 
             // check member mute
             let muteResult = checkMemberMute(socket, member);
             let muteText = "";
 
             if (muteResult?.timestamp) {
-                if (new Date(muteResult.timestamp).getFullYear() == "9999") {
+                if (new Date(muteResult.timestamp).getFullYear() === 9999) {
                     muteText = "muted permanently";
                 } else {
                     muteText = `muted until <br>${formatDateTime(new Date(muteResult.timestamp))}`
@@ -90,10 +126,10 @@ export default (io) => (socket) => {
             }
 
             // if message is signed, verify the signature
-            if(member?.sig !== null && member?.sig?.length > 10 && serverconfig.servermembers[member?.id]?.isVerifiedKey === true){
+            if (member?.sig !== null && member?.sig?.length > 10 && serverconfig.servermembers[member?.id]?.isVerifiedKey === true) {
                 let signCheckResult = await signer.verifyJson(member, serverconfig.servermembers[member?.id]?.publicKey);
 
-                if(signCheckResult !== true){
+                if (signCheckResult !== true) {
                     sendMessageToUser(socket.id, JSON.parse(
                         `{
                                 "title": "Message rejected!",
@@ -181,10 +217,10 @@ export default (io) => (socket) => {
                     }
 
                     // if the message is a reply
-                    if(member?.replyMsgId != null) {
+                    if (member?.replyMsgId != null) {
                         // Get Original message
                         let originalMsg = await getMessageObjectById(member.replyMsgId);
-                        if(originalMsg?.message == null) return response({error: "Original message wasnt found!"});
+                        if (originalMsg?.message == null) return response({error: "Original message wasnt found!"});
 
                         // client will later fetch the original message.
                         // this way it'll always show the up-to-date
@@ -223,6 +259,8 @@ export default (io) => (socket) => {
                     else {
                         io.in(member.room).emit("messageEdited", member);
                     }
+
+                    response({error: null})
 
                 } else {
                     Logger.debug("Couldnt find message channel");

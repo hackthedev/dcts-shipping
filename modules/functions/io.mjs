@@ -139,6 +139,10 @@ export function checkServerDirectories() {
         fs.mkdirSync("./public/emojis");
     }
 
+    if (!fs.existsSync("./public/graphs")) {
+        fs.mkdirSync("./public/graphs", {recursive: true});
+    }
+
     // Sounds used internally
     if (!fs.existsSync("./public/sounds")) {
         fs.mkdirSync("./public/sounds");

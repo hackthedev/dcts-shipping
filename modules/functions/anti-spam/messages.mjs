@@ -1,17 +1,23 @@
-import {db} from "../../../index.mjs";
+import {db, serverconfig} from "../../../index.mjs";
 import dSyncRateLimit from "@hackthedev/dsync-ratelimit";
 import DateTools from "@hackthedev/datetools";
+import {getMemberLatestMessage} from "../chat/helper.mjs";
+import {checkMessageObjReactions} from "../../sockets/resolveMessage.mjs";
 
-export async function getChannelRateLimit(room, {
-                                              authorId = null,
+export async function getChannelRateLimit({
+                                              room,
+                                              memberId = null,
                                               callback = null
                                           } = {}
 ) {
+    if (!room) throw new Error("Room not supplied in getChannelRateLimit");
 
-    if (!room) throw new Error("Room not supplied");
-
-    const {currentHourlyAverage} = await getChannelMessageFrequency({room, authorId});
+    const {currentHourlyAverage} = await getChannelMessageFrequency({room, memberId});
     const baseline = currentHourlyAverage;
+
+
+    let userSlowModeMultiplier = serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode
+    let rateLimitMultiplier = serverconfig.serverinfo.moderation.ratelimit.actions.ratelimit
 
     const hourStart = new Date();
     hourStart.setMinutes(0, 0, 0);
@@ -22,9 +28,9 @@ export async function getChannelRateLimit(room, {
     const params = [hourStart.getTime(), dayStart.getTime(), room, dayStart.getTime()];
     let authorFilter = "";
 
-    if (authorId) {
+    if (memberId) {
         authorFilter = " AND authorId = ?";
-        params.push(authorId);
+        params.push(memberId);
     }
 
     const result = await db.queryDatabase(
@@ -40,12 +46,17 @@ export async function getChannelRateLimit(room, {
     const currentHourly = row?.currentHourly || 0;
     const currentDaily = row?.currentDaily || 0;
 
+    let memberLatestMessage = null;
+    if(memberId){
+        memberLatestMessage = await getMemberLatestMessage(memberId);
+    }
+
     let returnData = {
-        currentHourly,
-        currentDaily,
+        currentHourly: Number(currentHourly),
+        currentDaily: Number(currentDaily),
         baseline,
-        slowmode: currentHourly >= baseline * 2,
-        rateLimited: currentHourly >= baseline * 2.5
+        slowmode: userSlowModeMultiplier === 0 ? false : currentHourly >= baseline * userSlowModeMultiplier,
+        rateLimited: rateLimitMultiplier === 0 ? false : currentHourly >= baseline * rateLimitMultiplier
     }
 
     if (callback && typeof callback === "function") {
@@ -57,8 +68,8 @@ export async function getChannelRateLimit(room, {
 
 export async function getChannelMessageFrequency({
                                                      room,
-                                                     authorId = null,
-                                                     since = DateTools.getDateFromOffset("-14 days")
+                                                     memberId = null,
+                                                     since = DateTools.getDateFromOffset(`-${serverconfig.serverinfo.moderation.ratelimit.record_history}`)
                                                  }) {
 
     if (!(since instanceof Date) || isNaN(since.getTime())) {
@@ -71,9 +82,9 @@ export async function getChannelMessageFrequency({
     const params = [room, sinceMs];
     let authorFilter = "";
 
-    if (authorId) {
+    if (memberId) {
         authorFilter = " AND authorId = ?";
-        params.push(authorId);
+        params.push(memberId);
     }
 
     // grouping by day

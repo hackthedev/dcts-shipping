@@ -105,6 +105,11 @@ export default (io) => (socket) => {
                 if(member?.serverinfo?.rateLimit != null) serverconfig.serverinfo.rateLimit = member.serverinfo.rateLimit;
                 if(member?.serverinfo?.dropInterval != null) serverconfig.serverinfo.dropInterval = member.serverinfo.dropInterval;
 
+                // new rate limit settings
+                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode != null) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode = member.serverinfo.moderation.ratelimit.actions.user_slowmode;
+                if(member?.serverinfo?.moderation?.ratelimit?.actions?.ratelimit != null) serverconfig.serverinfo.moderation.ratelimit.actions.ratelimit = member.serverinfo.moderation.ratelimit.actions.ratelimit;
+                if(member?.serverinfo?.moderation?.ratelimit?.record_history != null) serverconfig.serverinfo.moderation.ratelimit.record_history = member.serverinfo.moderation.ratelimit.record_history;
+
                 await saveConfig(serverconfig);
                 return response({error: null})
             }

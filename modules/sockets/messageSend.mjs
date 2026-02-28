@@ -16,8 +16,9 @@ import {
 import {decodeFromBase64, getChatMessagesFromDb} from "../functions/mysql/helper.mjs";
 import {signer} from "../../index.mjs"
 import {decodeAndParseJSON, getMessageObjectById} from "./resolveMessage.mjs";
+import {getChannelRateLimit} from "../functions/anti-spam/messages.mjs";
 
-export function getMentionIdsFromText(text){
+export function getMentionIdsFromText(text) {
     return {
         userIds: [...text.matchAll(/&lt;@(\d+)&gt;/g)].map(m => m[1]),
         roleIds: [...text.matchAll(/&lt;!@(\d+)&gt;/g)].map(m => m[1]),
@@ -32,17 +33,29 @@ export default (io) => (socket) => {
         if (validateMemberId(member?.author?.id, socket, member?.token) === true) {
 
             // some new handling
-            if(!member?.message) return response({error: "No message provided"})
-            if(!member?.group) return response({error: "No group provided"})
-            if(!member?.category) return response({error: "No category provided"})
-            if(!member?.channel) return response({error: "No channel provided"})
+            if (!member?.message) return response({error: "No message provided"})
+            if (!member?.group) return response({error: "No group provided"})
+            if (!member?.category) return response({error: "No category provided"})
+            if (!member?.channel) return response({error: "No channel provided"})
+
+            await getChannelRateLimit({
+                room: `${member.group}-${member.category}-${member.channel}`,
+                memberId: member.author.id,
+                callback: async (result) => {
+                    // check slowmode with permission bypass
+                    if(result?.slowmode && !hasPermission(member.author.id, "bypassSlowmode", member.channel)){
+                        return response({ error: "Slow mode active!" })
+                    }
+                    console.log(result)
+                }
+            })
 
             // check member mute
             let muteResult = checkMemberMute(socket, member);
             let muteText = "";
 
             if (muteResult?.timestamp) {
-                if (new Date(muteResult.timestamp).getFullYear() == "9999") {
+                if (new Date(muteResult.timestamp).getFullYear() === 9999) {
                     muteText = "muted permanently";
                 } else {
                     muteText = `muted until <br>${formatDateTime(new Date(muteResult.timestamp))}`
@@ -90,10 +103,10 @@ export default (io) => (socket) => {
             }
 
             // if message is signed, verify the signature
-            if(member?.sig !== null && member?.sig?.length > 10 && serverconfig.servermembers[member?.id]?.isVerifiedKey === true){
+            if (member?.sig !== null && member?.sig?.length > 10 && serverconfig.servermembers[member?.id]?.isVerifiedKey === true) {
                 let signCheckResult = await signer.verifyJson(member, serverconfig.servermembers[member?.id]?.publicKey);
 
-                if(signCheckResult !== true){
+                if (signCheckResult !== true) {
                     sendMessageToUser(socket.id, JSON.parse(
                         `{
                                 "title": "Message rejected!",
@@ -181,10 +194,10 @@ export default (io) => (socket) => {
                     }
 
                     // if the message is a reply
-                    if(member?.replyMsgId != null) {
+                    if (member?.replyMsgId != null) {
                         // Get Original message
                         let originalMsg = await getMessageObjectById(member.replyMsgId);
-                        if(originalMsg?.message == null) return response({error: "Original message wasnt found!"});
+                        if (originalMsg?.message == null) return response({error: "Original message wasnt found!"});
 
                         // client will later fetch the original message.
                         // this way it'll always show the up-to-date

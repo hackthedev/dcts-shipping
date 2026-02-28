@@ -52,6 +52,7 @@ export async function checkMessageObjReactions(message){
 }
 
 export function checkMessageObjAuthor(message){
+    console.log(message)
     if(!message?.author?.name){
         message.author = getCastingMemberObject(serverconfig.servermembers[message.author.id]);
     }

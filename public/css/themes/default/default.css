@@ -351,9 +351,9 @@ code {
     border: 2px solid hsl(from var(--main) h s calc(l * 8) / 30%);
 }
 
-
-
+/*
 img {
     border-radius: 10px;
     border: 1px solid hsl(from var(--main) h s calc(l * 8) / 20%);
 }
+ */

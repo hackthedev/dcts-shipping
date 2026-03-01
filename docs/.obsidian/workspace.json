@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "network/Reverse Proxy Setup.md",
+                "file": "Lore/Architecture.md",
                 "mode": "source",
-                "source": false
+                "source": true
               },
               "icon": "lucide-file",
-              "title": "Reverse Proxy Setup"
+              "title": "Architecture"
             }
           }
         ]
@@ -183,14 +183,17 @@
       "bases:Neue Base erstellen": false
     }
   },
-  "active": "1c4490349bf68a2c",
+  "active": "37a4cdff02af2a98",
   "lastOpenFiles": [
+    "index.md",
+    "Getting started.md",
+    "network/Reverse Proxy Setup.md",
+    "markdown-examples.md",
+    "api-examples.md",
     "sql/Configurating SQL.md",
     "sql/errors/SQL Tables and Columns not setting up automatically.md",
     "Feature List.md",
-    "Getting started.md",
     "VoIP Setup.md",
-    "network/Reverse Proxy Setup.md",
     "DCTS Docs Base.base",
     "ssl/errors/Cant access cert files.md",
     "Unbenannt.base",

@@ -8,7 +8,6 @@ export default (io) => (socket) => {
     // socket.on code here
     socket.on('setRoom', function (member) {
         if (validateMemberId(member.id, socket, member?.token) === true
-
         ) {
             leaveAllRooms(socket, member.id);
 

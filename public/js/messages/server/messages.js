@@ -397,10 +397,16 @@ function replaceUrlEmbeds(element){
     if(embeds?.length > 0){
         for(let embed of embeds) {
             let embedLink = embed.querySelector(".markdown-urlEmbed");
-            if(!embedLink) continue; // skip
+            if(!embedLink) continue;
 
             let url = embedLink.getAttribute("href");
-            embed.outerHTML = url;
+            let wrapper = embed.closest("[data-markdown-done]");
+
+            if(wrapper && wrapper !== element) {
+                wrapper.outerHTML = url;
+            } else {
+                embed.outerHTML = url;
+            }
         }
 
         // in case we have duplicate shit

@@ -1,5 +1,6 @@
 import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
-import {getMessageObjectById} from "./resolveMessage.mjs";
+import { getMessageObjectById } from "./resolveMessage.mjs";
+import { emitToBotsWithViewChannel } from "./botEvents.mjs";
 import {queryDatabase} from "../functions/mysql/mysql.mjs";
 import xssFilters from "xss-filters";
 import Logger from "@hackthedev/terminal-logger"
@@ -54,10 +55,7 @@ export async function removeMessageReactionById(messageId, emojiHash, memberId){
 }
 
 export default (io) => (socket) => {
-    // socket.on code here
-
     socket.on('addMessageReaction', async function (member, response) {
-        // some code
         if(validateMemberId(member?.id, socket, member?.token) === true){
             if(!member?.messageId) return response({ error: "Missing message id" });
             if(!member?.emojiHash) return response({ error: "Missing emoji id" });
@@ -71,6 +69,8 @@ export default (io) => (socket) => {
 
             response({ error: null })
             io.in(messageObj.room).emit("updateReactions", messageObj);
+            const [group, category, channel] = (messageObj.room || "").split("-");
+            if (group && category && channel) await emitToBotsWithViewChannel(io, group, category, channel, "updateReactions", messageObj);
         }
     });
 
@@ -87,6 +87,8 @@ export default (io) => (socket) => {
 
             response({ error: null })
             io.in(messageObj.room).emit("updateReactions", messageObj);
+            const [group, category, channel] = (messageObj.room || "").split("-");
+            if (group && category && channel) await emitToBotsWithViewChannel(io, group, category, channel, "updateReactions", messageObj);
         }
     });
 }

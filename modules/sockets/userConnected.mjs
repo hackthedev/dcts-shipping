@@ -18,7 +18,7 @@ import {
     resolveChannelById,
     resolveGroupByChannelId,
 } from "../functions/chat/main.mjs";
-import {saveChatMessage} from "../functions/io.mjs";
+import { saveChatMessage } from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
 import {
     checkMemberBan,
@@ -34,14 +34,15 @@ import {
     sendMessageToUser,
     validateMemberId,
 } from "../functions/main.mjs";
-import {sendSystemMessage} from "./home/general.mjs";
-import {discoverHosts} from "../functions/discovery.mjs";
-import {isValidProof, powVerifiedUsers} from "./pow.mjs";
+import { sendSystemMessage } from "./home/general.mjs";
+import { emitToAllBots } from "./botEvents.mjs";
+import { discoverHosts } from "../functions/discovery.mjs";
+import { isValidProof, powVerifiedUsers } from "./pow.mjs";
 import logger from "../functions/logger.mjs";
-import {channel} from "node:diagnostics_channel";
-import {saveMemberToDB} from "../functions/mysql/helper.mjs";
-import {runInWorker} from "../functions/offload.mjs";
-import {listThemes, loadThemeCache} from "./routes/themes.mjs";
+import { channel } from "node:diagnostics_channel";
+import { saveMemberToDB } from "../functions/mysql/helper.mjs";
+import { runInWorker } from "../functions/offload.mjs";
+import { listThemes, loadThemeCache } from "./routes/themes.mjs";
 
 function normaliseString(v) {
     if (v === null || v === undefined) return "";
@@ -60,17 +61,14 @@ function truncateText(text, length) {
 }
 
 function handleInviteCode(member, socket, response) {
-    // handle user registration and invite only things.
-    // if a member was on the server already he wont be prompted for codes.
+    // registration / invite-only. existing members skip code prompt.
 
     if (
         serverconfig.serverinfo.registration.enabled === false
         && serverconfig.servermembers[member?.id]?.onboarding === false
     ) {
         if (!member?.code) {
-            // to be extra sure, remove users from the pow verified array
-            // so that if they try to fetch data like member list etc
-            // it'll automatically be denied
+            // clear pow verified so any member list etc fetch is denied
             removeFromArray(powVerifiedUsers, socket.id);
 
             response({
@@ -83,11 +81,9 @@ function handleInviteCode(member, socket, response) {
             return false;
         }
 
-        // code was correct, so lets process its properties
         if (serverconfig.serverinfo.registration.accessCodes[member.code]) {
             let code = serverconfig.serverinfo.registration.accessCodes[member.code];
 
-            // check if the code is expired
             if (code.expires !== -1) {
                 if (new Date().getTime() >= code.expires) {
                     response({
@@ -101,7 +97,6 @@ function handleInviteCode(member, socket, response) {
                 }
             }
 
-            // check if max uses is already used up if not infinite
             if (code.maxUses !== -1) {
                 if (code.maxUses <= 0) {
                     response({
@@ -134,13 +129,14 @@ function handleInviteCode(member, socket, response) {
 }
 
 export default (io) => (socket) => {
-    // handles disconnect event as the member list doesnt update
-    // currently if someone goes offline.
     socket.on("disconnect", async () => {
         const memberId = socket.data?.memberId || socket?.memberId;
-        if (!memberId) return;
+        if (memberId) {
+            await emitToAllBots(io, "memberLeft", { memberId });
+        }
 
         setTimeout(() => {
+            if (!memberId) return;
             const info = getMemberLastOnline(memberId);
             if (info && !info.isOnline && info.minutesPassed >= 1) {
                 io.emit("updateMemberList");
@@ -148,7 +144,6 @@ export default (io) => (socket) => {
         }, 65_000);
     });
 
-    // socket.on code here
     socket.on("userConnected", async function (member, response) {
         if (member?.id) member.id = String(member.id);
         if (member?.token) member.token = String(member.token);
@@ -163,8 +158,8 @@ export default (io) => (socket) => {
             });
         }
 
-        if(member?.status === "null" || member?.status === "undefined") member.status = null
-        if(member?.aboutme === "null" || member?.aboutme === "undefined") member.aboutme = null
+        if (member?.status === "null" || member?.status === "undefined") member.status = null
+        if (member?.aboutme === "null" || member?.aboutme === "undefined") member.aboutme = null
 
         member.id = xssFilters.inHTMLData(normaliseString(member.id));
         member.loginName = xssFilters.inHTMLData(normaliseString(member.loginName));
@@ -185,16 +180,13 @@ export default (io) => (socket) => {
         member.channel = xssFilters.inHTMLData(normaliseString(member.channel));
         member.room = xssFilters.inHTMLData(normaliseString(member.room));
 
-        // get ip info
         let ipInfo = await getMemberIpInfo(socket);
         if (ipInfo?.error) Logger.debug(ipInfo.error);
         if (ipInfo?.location?.country_code) member.country_code = ipInfo.location.country_code;
 
-        // base 64 too bad
         if (member?.icon?.startsWith("data:image")) member.icon = "";
         if (member?.banner?.startsWith("data:image")) member.banner = "";
 
-        // if pow has been passed. used for quicker initial connection to skip pow challenge
         if (member?.pow?.challenge)
             member.pow.challenge = xssFilters.inHTMLData(
                 normaliseString(member?.pow?.challenge),
@@ -204,20 +196,17 @@ export default (io) => (socket) => {
                 normaliseString(member?.pow?.solution),
             );
 
-        // check if public key was supplied
         if (member?.publicKey && member?.publicKey?.length > 10) {
             member.publicKey = xssFilters.inHTMLData(
                 normaliseString(member?.publicKey),
             );
         }
 
-        // check if knownServers was supplied
         if (member?.knownServers && member?.knownServers?.length > 2) {
             member.knownServers = xssFilters.inHTMLData(member?.knownServers);
             discoverHosts(member.knownServers);
         }
 
-        // check registration code and filter
         if (member?.code && member?.code > 0) {
             member.code = xssFilters.inHTMLData(member?.code);
         }
@@ -227,20 +216,27 @@ export default (io) => (socket) => {
         if (!inviteResult) {
             return;
         } else {
-            // prematurely create a servermembers object since the code was correct and the
-            // servermembers object is used to display invite code prompts or not.
+            // invite flow: server issues token after PoW + password; never trust client token
             if (!serverconfig.servermembers[member.id]) {
                 serverconfig.servermembers[member.id] = {
                     id: member.id,
-                    token: member.token,
+                    token: generateId(48),
                     onboarding: false,
                 };
                 await saveMemberToDB(member?.id, serverconfig.servermembers[member.id]);
             }
         }
 
-        // skip pow challenge for faster connection
-        if (member?.pow?.challenge && member?.pow?.solution) {
+        const memberEntry = serverconfig.servermembers[member.id];
+        const tokenMatches = memberEntry?.token === member.token;
+        const isBotAuth = tokenMatches && memberEntry?.isBot === true;
+
+        if (isBotAuth) {
+            serverconfig.servermembers[member.id].isBot = true;
+            if (!powVerifiedUsers.includes(socket.id))
+                powVerifiedUsers.push(socket.id);
+        }
+        else if (member?.pow?.challenge && member?.pow?.solution) {
             let powResult = await isValidProof(
                 member.pow.challenge,
                 member.pow.solution,
@@ -256,7 +252,6 @@ export default (io) => (socket) => {
             await checkPow(socket, member);
         }
 
-        // check member ban
         let banResult = await checkMemberBan(socket, member);
         let banText = "";
 
@@ -283,35 +278,29 @@ export default (io) => (socket) => {
             return;
         }
 
-        // call checkMemberMute so it unmutes automatically
         checkMemberMute(socket, member);
 
         Logger.debug(
             `Member connected. User: ${member.name} (${member.id} - ${socketToIP[socket]})`,
         );
 
-        // Check if member is in default role
         if (serverconfig.serverroles["0"].members.includes(member.id) === false) {
             serverconfig.serverroles["0"].members.push(member.id);
             await saveConfig(serverconfig);
         }
 
         if (member.id.length === 12) {
-            usersocket[member.id] = socket.id; // deprecated, left for legacy
+            usersocket[member.id] = socket.id;
 
-            // if new member
             if (
                 !serverconfig.servermembers[member.id] ||
                 serverconfig.servermembers[member.id]?.onboarding === false
             ) {
-                if(!member?.name) member.name = "Arnold"
+                if (!member?.name) member.name = "Arnold"
 
-                // New Member joined the server
                 Logger.debug("New member connected");
 
-                // handle onboarding
                 if (member?.onboarding === false) {
-                    // cant proceed as the user needs to setup their account with a password
                     io.to(socket.id).emit("doAccountOnboarding");
                     response({
                         error: "Onboarding not completed",
@@ -323,14 +312,11 @@ export default (io) => (socket) => {
                     return;
                 }
 
-                // error if no password passed
-                if(!member?.password) return response({error: "Missing password field in plaintext"})
+                if (!member?.password) return response({ error: "Missing password field in plaintext" })
 
                 var userToken = generateId(48);
                 member.token = userToken;
 
-                // if the user login name already exists we just append an id to the login name.
-                // we then emit it to the user so they can save it.
                 let existingUsernames = getJson(serverconfig.servermembers, [
                     "*.id",
                     "*.loginName",
@@ -344,7 +330,6 @@ export default (io) => (socket) => {
                     if (loginName === member.loginName) member.loginName += generateId(4);
                 });
 
-                // setup member
                 const now = new Date().getTime();
                 const hashedPassword = await hashPassword(member.password);
                 serverconfig.servermembers[member.id] = {
@@ -367,8 +352,6 @@ export default (io) => (socket) => {
                     isVerifiedKey: false
                 };
 
-                // set some values this way because it may cauz errors
-                // and i dont wanna manually encode shit etc...
                 if (member?.icon) serverconfig.servermembers[member.id].icon = member.icon;
                 if (member?.banner) serverconfig.servermembers[member.id].banner = member.banner;
                 if (member?.aboutme) serverconfig.servermembers[member.id].aboutme = member.aboutme;
@@ -404,8 +387,6 @@ export default (io) => (socket) => {
                         }
                     );
 
-                    // if a new member joins lets send a system welcome DM.
-                    // can be edited in config and is enabled on default.
                     if (
                         serverconfig.serverinfo.system.welcome.enabled &&
                         serverconfig.serverinfo.system.welcome.message.length > 0
@@ -414,23 +395,17 @@ export default (io) => (socket) => {
                             member.id,
                             serverconfig.serverinfo.system.welcome.message,
                         );
-                    //
-                    // you can broadcast messages via the console with the following syntax
-                    // msg < userid | * > <Message>
-                    //msg * <h3>Welcome to the server!</h3><p>We hope you'll like it here!<br>If you ever need help press the <b>Support</b> button on the top!</p>
                 } catch (e) {
                     Logger.error("Error on token message sending");
                     Logger.error(e);
                 }
 
-                // create copy of server member without token etc
                 var castingMember = getCastingMemberObject(
                     serverconfig.servermembers[member.id],
                 );
                 delete castingMember.token;
                 delete castingMember.password;
 
-                // Save system message to the default channel
                 castingMember.group = resolveGroupByChannelId(
                     serverconfig.serverinfo.defaultChannel,
                 );
@@ -452,7 +427,6 @@ export default (io) => (socket) => {
 
                 io.emit("updateMemberList");
 
-                // better "member joined" notification
                 let channelId = serverconfig.serverinfo.defaultChannel;
                 let categoryId = resolveCategoryByChannelId(channelId);
                 let groupId = resolveGroupByChannelId(
@@ -460,6 +434,7 @@ export default (io) => (socket) => {
                 );
                 let room = `${groupId}-${categoryId}-${channelId}`;
                 io.in(room).emit("messageCreate", castingMember);
+                await emitToAllBots(io, "memberJoined", { member: getCastingMemberObject(castingMember) });
 
                 socket.join(member.id);
                 socket.data.memberId = member.id;
@@ -476,13 +451,18 @@ export default (io) => (socket) => {
                     aboutme: serverconfig.servermembers[member.id].aboutme,
                 });
             } else {
+                const storedMember = serverconfig.servermembers[member.id];
+                const isBotMember = storedMember?.isBot && storedMember?.token === member.token;
+
                 if (
-                    member.token == null ||
-                    member.token.length !== 48 ||
-                    serverconfig.servermembers[member.id].token == null ||
-                    serverconfig.servermembers[member.id].loginName == null ||
-                    serverconfig.servermembers[member.id].name == null ||
-                    serverconfig.servermembers[member.id].token !== member.token
+                    !isBotMember && (
+                        member.token == null ||
+                        member.token.length !== 48 ||
+                        storedMember.token == null ||
+                        storedMember.loginName == null ||
+                        storedMember.name == null ||
+                        storedMember.token !== member.token
+                    )
                 ) {
                     try {
                         response({
@@ -500,40 +480,35 @@ export default (io) => (socket) => {
 
                     Logger.debug("User did not have a valid token.");
 
-                    response({error: "Invalid Token", finishedOnboarding: true});
+                    response({ error: "Invalid Token", finishedOnboarding: true });
                     socket.disconnect();
                     return;
                 }
 
-                // login was successful
                 socket.join(member.id);
+                socket.data.memberId = member.id;
                 if (member.banner == "data:image/jpeg") member.banner = "";
                 if (member.icon == "data:image/jpeg")
                     member.icon = "/img/default_pfp.png";
 
-                // set public key and verify it
                 if (member?.publicKey) {
-                    // set pubic key
                     serverconfig.servermembers[member.id].publicKey =
                         xssFilters.inHTMLData(member.publicKey);
 
-                    // check if its valid and change the flag
                     if ((await hasVerifiedKey(member.id)) === true) {
                         serverconfig.servermembers[member.id].isVerifiedKey = true;
                     } else {
-                        // otherwise make the client verify their ownership of the key.
-                        // key wont be used until its verified
                         emitBasedOnMemberId(member.id, "verifyPublicKey");
                     }
                 }
 
-                if(member?.name) serverconfig.servermembers[member.id].name = xssFilters.inHTMLData(
+                if (member?.name) serverconfig.servermembers[member.id].name = xssFilters.inHTMLData(
                     member.name
                 );
-                if(member?.status) serverconfig.servermembers[member.id].status = xssFilters.inHTMLData(
+                if (member?.status) serverconfig.servermembers[member.id].status = xssFilters.inHTMLData(
                     member.status
                 );
-                if(member?.aboutme) serverconfig.servermembers[member.id].aboutme = xssFilters.inHTMLData(
+                if (member?.aboutme) serverconfig.servermembers[member.id].aboutme = xssFilters.inHTMLData(
                     member.aboutme
                 );
                 if (member.icon) serverconfig.servermembers[member.id].icon = xssFilters.inHTMLData(
@@ -548,11 +523,14 @@ export default (io) => (socket) => {
                 serverconfig.servermembers[member.id].lastOnline = new Date().getTime();
                 socket.memberId = member.id;
 
+                await saveMemberToDB(member.id, serverconfig.servermembers[member.id]);
+
                 usersocket[member.id] = socket.id;
                 socket.data.memberId = member.id;
-                response({finishedOnboarding: true});
+                response({ finishedOnboarding: true });
 
                 io.emit("updateMemberList");
+                await emitToAllBots(io, "memberOnline", { memberId: member.id });
             }
         } else {
             socket.disconnect();

@@ -3,10 +3,10 @@ import { getMemberHighestRole } from "../functions/chat/helper.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { emitToAllBots } from "./botEvents.mjs";
 
 export default (io) => (socket) => {
-    // socket.on code here
-    socket.on('addUserToRole', function (member, response) {
+    socket.on('addUserToRole', async function (member, response) {
         if (validateMemberId(member.id, socket) == true
             && serverconfig.servermembers[member.id].token == member.token
         ) {
@@ -22,7 +22,6 @@ export default (io) => (socket) => {
                     var targetRole = serverconfig.serverroles[member.role];
 
                     if (executer.info.sortId <= targetRole.info.sortId) {
-                        // only administrators can bypass this
                         if (!hasPermission(member.id, "administrator")) {
                             sendMessageToUser(socket.id, JSON.parse(
                                 `{
@@ -43,9 +42,10 @@ export default (io) => (socket) => {
 
                     serverconfig.serverroles[member.role].members.push(member.target);
                     saveConfig(serverconfig);
-                    
+
                     io.emit("updateMemberList");
                     io.to(usersocket[member.target]).emit("updateMemberList");
+                    await emitToAllBots(io, "memberRoleAdded", { memberId: member.target, roleId: member.role });
                     response({ type: "success", msg: "Role assigned" });
 
                 }

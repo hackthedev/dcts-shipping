@@ -1,6 +1,6 @@
-import {serverconfig, typingMembers, usersocket, xssFilters} from "../../index.mjs";
-import {formatDateTime, hasPermission} from "../functions/chat/main.mjs";
-import {saveChatMessage} from "../functions/io.mjs";
+import { serverconfig, typingMembers, usersocket, xssFilters } from "../../index.mjs";
+import { formatDateTime, hasPermission } from "../functions/chat/main.mjs";
+import { saveChatMessage } from "../functions/io.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import {
     checkMemberMute,
@@ -13,11 +13,12 @@ import {
     sendMessageToUser,
     validateMemberId
 } from "../functions/main.mjs";
-import {decodeFromBase64, getChatMessagesFromDb} from "../functions/mysql/helper.mjs";
-import {signer} from "../../index.mjs"
-import {decodeAndParseJSON, getMessageObjectById} from "./resolveMessage.mjs";
-import {getChannelRateLimit} from "../functions/anti-spam/messages.mjs";
-import {getMemberLatestMessage} from "../functions/chat/helper.mjs";
+import { decodeFromBase64, getChatMessagesFromDb } from "../functions/mysql/helper.mjs";
+import { signer } from "../../index.mjs"
+import { decodeAndParseJSON, getMessageObjectById } from "./resolveMessage.mjs";
+import { emitToBotsWithViewChannel } from "./botEvents.mjs";
+import { getChannelRateLimit } from "../functions/anti-spam/messages.mjs";
+import { getMemberLatestMessage } from "../functions/chat/helper.mjs";
 import DateTools from "@hackthedev/datetools";
 import dSyncRateLimit from "@hackthedev/dsync-ratelimit";
 
@@ -30,30 +31,29 @@ export function getMentionIdsFromText(text) {
 }
 
 export default (io) => (socket) => {
-    // socket.on code here
     socket.on('messageSend', async function (member, response) {
-        if (validateMemberId(member?.author?.id, socket, member?.token) === true) {
+        const authorId = member?.author?.id || socket.data?.memberId;
 
-            // some new handling
-            if (!member?.message) return response({error: "No message provided"})
-            if (!member?.group) return response({error: "No group provided"})
-            if (!member?.category) return response({error: "No category provided"})
-            if (!member?.channel) return response({error: "No channel provided"})
+        if (validateMemberId(authorId, socket, member?.token) === true) {
+            if (!member.author) member.author = {};
+            member.author.id = authorId;
+
+            if (!member?.message) return response({ error: "No message provided" })
+            if (!member?.group) return response({ error: "No group provided" })
+            if (!member?.category) return response({ error: "No category provided" })
+            if (!member?.channel) return response({ error: "No channel provided" })
 
 
-            // anti spam check
+            // rate limit / slowmode
             let rateLimitResult = await getChannelRateLimit({
                 room: `${member.group}-${member.category}-${member.channel}`,
-                memberId: member.author.id,
+                memberId: authorId,
             })
 
-            // check results
             if (rateLimitResult?.slowmode === true && !hasPermission(member.author.id, "bypassSlowmode", member.channel)) {
-                // get last message sent from member here so we can check the timestamp
                 let lastMemberMessageObj = await getMemberLatestMessage(member.author.id, member.author.id);
                 if (!lastMemberMessageObj) return Logger.debug("No message found. Possibly first message") // allow if none found
 
-                // get future date where slowmode will be expired
                 let slowmodeDate = DateTools.getDateFromOffset(
                     `+${serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration}`,
                     new Date(lastMemberMessageObj.timestamp)
@@ -61,16 +61,13 @@ export default (io) => (socket) => {
 
                 if (lastMemberMessageObj?.timestamp &&
                     new Date().getTime() >= slowmodeDate) {
-                    // member is allowed to send a message
                 } else {
-                    // we can use that in the client to check for it like if xx?.slowMode and if
-                    // it exists we can straight up use it to get a display date. this way we
-                    // save some data to transmit ig as that works too.
-                    return response({error: "Slow mode active!", slowmode: slowmodeDate})
+                    // client can use slowmode date for display
+                    return response({ error: "Slow mode active!", slowmode: slowmodeDate })
                 }
             }
-            else if(rateLimitResult?.rateLimited === true){
-                return response({error: "The server has been rate limited!", rateLimited: true})
+            else if (rateLimitResult?.rateLimited === true) {
+                return response({ error: "The server has been rate limited!", rateLimited: true })
             }
 
             // check member mute
@@ -104,7 +101,7 @@ export default (io) => (socket) => {
                                         "popup_type": "confirm"
                                     }`));
 
-                response({error: `You cant chat here! You have been ${muteText}`})
+                response({ error: `You cant chat here! You have been ${muteText}` })
                 return;
             }
 
@@ -125,7 +122,7 @@ export default (io) => (socket) => {
                 return;
             }
 
-            // if message is signed, verify the signature
+            // verify signature if present
             if (member?.sig !== null && member?.sig?.length > 10 && serverconfig.servermembers[member?.id]?.isVerifiedKey === true) {
                 let signCheckResult = await signer.verifyJson(member, serverconfig.servermembers[member?.id]?.publicKey);
 
@@ -144,7 +141,7 @@ export default (io) => (socket) => {
                                 "popup_type": "confirm"
                             }`));
 
-                    response({error: "Message rejected! Signature wasnt valid!"})
+                    response({ error: "Message rejected! Signature wasnt valid!" })
                     return;
                 }
             }
@@ -164,12 +161,11 @@ export default (io) => (socket) => {
                         "popup_type": "confirm"
                    }`));
 
-                response({error: "You cant chat here!"})
+                response({ error: "You cant chat here!" })
 
                 return;
             }
 
-            // Check if room exists
             try {
                 if (serverconfig?.groups[member.group]?.channels?.categories[member.category]?.channel[member.channel] != null) {
                     let messageid = generateId(12);
@@ -193,74 +189,50 @@ export default (io) => (socket) => {
                         return;
                     }
 
-                    // If the message was edited
                     if (member.editedMsgId != null) {
-                        // Get Original message
                         let room = `${member.group}-${member.category}-${member.channel}`
                         let originalMsg = await getChatMessagesFromDb(room, 1, member.editedMsgId);
                         let originalMsgObj = decodeAndParseJSON(originalMsg[0].message);
 
-                        // Check if the user who wants to edit the msg is even the original author lol
                         if (originalMsgObj.author.id !== member.author?.id) {
                             Logger.warn(`Unauthorized user (${member.name} - ${member.author?.id}) tried to edit another users message`);
                             return;
                         }
 
-                        // Update the data for editing
                         member.lastEdited = new Date().getTime();
-
-                        // Update back to original values of the message timestamp etc
-                        // Else "Created Timestamp" and "Edited" is always the same
                         member.timestamp = originalMsgObj.timestamp;
                         member.messageId = member.editedMsgId // used for check below
                         member.reply.messageId = originalMsgObj?.reply?.messageId; // dont allow "unreplying"
                     }
 
-                    // if the message is a reply
                     if (member?.replyMsgId != null) {
-                        // Get Original message
                         let originalMsg = await getMessageObjectById(member.replyMsgId);
-                        if (originalMsg?.message == null) return response({error: "Original message wasnt found!"});
-
-                        // client will later fetch the original message.
-                        // this way it'll always show the up-to-date
-                        // message and we dont have to somehow check if the
-                        // original message was updated etc..
+                        if (originalMsg?.message == null) return response({ error: "Original message wasnt found!" });
                         member.reply = originalMsg.message;
                     }
 
-                    // update some stuff for the message event
                     member = getCastingMemberObject(member);
                     member.author = getCastingMemberObject(serverconfig.servermembers[member.author?.id]);
 
-                    // msgCount is incremented in saveChatMessage()
-
-                    // Save the Chat Message to file
                     saveChatMessage(member, member.editedMsgId);
 
-                    // Remove user from typing
                     var username = serverconfig.servermembers[member?.author?.id]?.name;
                     if (typingMembers.includes(username) === true) {
-                        removeFromArray(typingMembers, username) // better
+                        removeFromArray(typingMembers, username);
                     }
 
-                    io.in(member.room).emit("memberTyping", typingMembers);
+                    const roomName = escapeHtml(member.room);
+                    io.in(roomName).emit("memberTyping", typingMembers);
 
-                    // Send message or update old one
                     if (member.editedMsgId == null) {
-                        // New message.
-                        // we will emit this to EVERYONE so we can better
-                        // integrate the feature for showing a marker when
-                        // new messages are created and check clientside
-                        // if we are in the channel or not so we display it.
-                        io.emit("messageCreate", member);
+                        io.in(roomName).emit("messageCreate", member);
+                    } else {
+                        io.in(roomName).emit("messageEdited", member);
                     }
-                    // emit edit event of msg
-                    else {
-                        io.in(member.room).emit("messageEdited", member);
-                    }
+                    const eventName = member.editedMsgId == null ? "messageCreate" : "messageEdited";
+                    await emitToBotsWithViewChannel(io, member.group, member.category, member.channel, eventName, member);
 
-                    response({error: null})
+                    response({ error: null })
 
                 } else {
                     Logger.debug("Couldnt find message channel");

@@ -26,19 +26,19 @@ import {
     removeBan,
     resolveRolesByUserId
 } from "./chat/main.mjs";
-import {consolas} from "./io.mjs";
+import { consolas } from "./io.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import path from "path";
-import {powVerifiedUsers} from "../sockets/pow.mjs";
-import {sendSystemMessage} from "../sockets/home/general.mjs";
-import {decodeFromBase64, encodeToBase64} from "./mysql/helper.mjs";
-import {checkMemberMigration} from "./migrations/memberJsonToDb.mjs";
-import {clearBase64FromDatabase} from "./migrations/base64_fixer.mjs";
-import {getMemberHighestRole} from "./chat/helper.mjs";
-import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./migrations/messageMigration.mjs";
+import { powVerifiedUsers } from "../sockets/pow.mjs";
+import { sendSystemMessage } from "../sockets/home/general.mjs";
+import { decodeFromBase64, encodeToBase64 } from "./mysql/helper.mjs";
+import { checkMemberMigration } from "./migrations/memberJsonToDb.mjs";
+import { clearBase64FromDatabase } from "./migrations/base64_fixer.mjs";
+import { getMemberHighestRole } from "./chat/helper.mjs";
+import { migrateOldMessagesToNewMessageSystemWithoutEncoding } from "./migrations/messageMigration.mjs";
 import archiver from "archiver";
 import JSONTools from "@hackthedev/json-tools";
-import {initPaymentSystem} from "./payments.mjs";
+import { initPaymentSystem } from "./payments.mjs";
 
 var serverconfigEditable;
 
@@ -55,8 +55,8 @@ export function removeFromArray(array, value) {
     }
 }
 
-export function emitBasedOnMemberId(memberId, event, payload){
-    if(serverconfig.servermembers[memberId] !== null){
+export function emitBasedOnMemberId(memberId, event, payload) {
+    if (serverconfig.servermembers[memberId] !== null) {
         io.to(String(memberId)).emit(event, payload);
     }
 }
@@ -155,14 +155,14 @@ export function sanitizeInput(input) {
             '*': ['class', 'style']
         },
         transformTags: {
-            'a': sanitizeHtml.simpleTransform('a', {target: '_blank', rel: 'noopener noreferrer'})
+            'a': sanitizeHtml.simpleTransform('a', { target: '_blank', rel: 'noopener noreferrer' })
         },
         allowedSchemesByTag: {
-            img: ['http', 'https', 'data'] // Erlaubt das data-Schema für img-Tags
+            img: ['http', 'https', 'data'] // allow data: for img src
         },
-        allowedSchemesAppliedToAttributes: ['src'], // Nur auf das 'src'-Attribut anwenden
+        allowedSchemesAppliedToAttributes: ['src'], // only for src attr
         textFilter: (text) => {
-            // Entfernt alle 'data:'-URLs außer 'data:image/png;base64' und 'data:image/jpeg;base64'
+            // strip data: URLs except image/png and image/jpeg base64
             return text.replace(/data:image\/(?!png|jpeg)[^;]+;base64[^"]*/g, '');
         }
     });
@@ -209,11 +209,11 @@ export async function backupSystem() {
 export const mimeTypesCache = new Map(); // Cache to store validated MIME types by file ID
 export const fileSizeCache = new Map(); // Cache to track file sizes by file ID
 
-// Helper function to get the total size of files in a directory
+// get total size of files in dir
 export const getFolderSize = (folderPath) => {
     const files = fs.readdirSync(folderPath);
     return files.reduce((total, file) => {
-        const {size} = fs.statSync(path.join(folderPath, file));
+        const { size } = fs.statSync(path.join(folderPath, file));
         return total + size;
     }, 0);
 };
@@ -249,14 +249,14 @@ export async function handleTerminalCommands(command, args) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     try {
-        if(command === "clear64"){
+        if (command === "clear64") {
             clearBase64FromDatabase();
             return;
         }
-        if(command === "rotateMemberTokens"){
+        if (command === "rotateMemberTokens") {
             for (const memberId of Object.keys(serverconfig.servermembers)) {
                 let member = serverconfig.servermembers[memberId];
-                if(member.token){
+                if (member.token) {
                     member.token = generateId(48);
                     Logger.info(`Rotated token for member ${member.id}`)
                 }
@@ -266,16 +266,16 @@ export async function handleTerminalCommands(command, args) {
             Logger.success("Rotated all member tokens");
             return;
         }
-        if(command === "load"){
+        if (command === "load") {
             const mem = process.memoryUsage();
             Logger.info(`RAM usage: ${(mem.heapUsed / 1024 / 1024).toFixed(1)} MB`);
             return;
         }
         if (command === 'migrateMessages') {
-            if(serverconfig.serverinfo.sql.enabled === true){
+            if (serverconfig.serverinfo.sql.enabled === true) {
                 await migrateOldMessagesToNewMessageSystemWithoutEncoding()
             }
-            else{
+            else {
                 Logger.warn("SQL needs to be enabled and configurated inside the config.json. Its currently disabled!")
             }
 
@@ -759,7 +759,7 @@ export function checkConfigAdditions() {
 
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayName", "Banned")
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayMessageNotice", `<span style="color: indianred;">[ Content hidden ]</span>`)
-    
+
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.email", "")
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.website", "")
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.reddit", "")
@@ -1034,34 +1034,44 @@ export function validateMemberId(id, socket, token, bypass = false) {
         checkRateLimit(socket);
     }
 
-    if(!id){
+    if (!id) {
         return false;
     }
+
 
     if (socket && !powVerifiedUsers.includes(socket?.id)) {
         return false;
     }
 
-    // check member token if present
-    if(id && token){
-        let memberObject = serverconfig.servermembers[id];
-        if(memberObject && socket) checkMemberBan(socket, memberObject);
 
-        if(serverconfig.servermembers[id]?.token !== token){
+    // member must exist before any further checks
+    if (!serverconfig.servermembers[id]) return false;
+
+    // when no token is sent, only allow acting as the socket's authenticated identity
+    if (socket && (token == null || token === '') && String(socket.data?.memberId) !== id) return false;
+
+    // check member token if present
+    if (id && token) {
+        const memberObj = serverconfig.servermembers[id];
+        if (memberObj && socket) checkMemberBan(socket, memberObj);
+
+
+        // bots already verified via pow bypass — skip strict token string comparison only when socket is authenticated as this bot
+        const isVerifiedBot = memberObj?.isBot && socket && powVerifiedUsers.includes(socket?.id) && String(socket.data?.memberId) === id;
+        if (!isVerifiedBot && memberObj?.token !== token) {
             return false;
         }
 
         // if is banned deny all connections
-        if(serverconfig.servermembers[id]?.isBanned === 1){
+        if (memberObj?.isBanned === 1) {
             return false;
         }
     }
 
-    if(id){
-        if(!serverconfig.servermembers[id]) return false;
+    if (id) {
         // update last online
         serverconfig.servermembers[id].lastOnline = new Date().getTime();
-        if(serverconfig.servermembers[id]?.onboarding === false){
+        if (serverconfig.servermembers[id]?.onboarding === false) {
             return false;
         }
     }
@@ -1190,7 +1200,7 @@ export function checkMemberMute(socket, member) {
 
             consolas(colors.yellow("Automatically unmuted user " + member.name + ` (${member.id})`));
         } else {
-            return {result: true, timestamp: durationStamp, reason: muteReason};
+            return { result: true, timestamp: durationStamp, reason: muteReason };
         }
     }
 
@@ -1200,11 +1210,11 @@ export function checkMemberMute(socket, member) {
             delete serverconfig.banlist[ip];
             saveConfig(serverconfig);
         } else {
-            return {result: true, timestamp: serverconfig.banlist[ip]}
+            return { result: true, timestamp: serverconfig.banlist[ip] }
         }
     }
 
-    return {result: false};
+    return { result: false };
 }
 
 export function sleep(ms) {
@@ -1220,7 +1230,7 @@ export function findSocketByMemberId(io, memberId) {
     return null;
 }
 
-export function isLocalhostIp(ip){
+export function isLocalhostIp(ip) {
     return [
         "::1",
         "127.0.0.1"
@@ -1233,8 +1243,8 @@ export async function checkMemberBan(socket, member) {
     checkRateLimit(socket);
 
     // if the user is not banned anymore but the flag is still there
-    if(!serverconfig.banlist.hasOwnProperty(member?.id) && checkAndUnbanIp(ip).result === false){
-        if(serverconfig.servermembers[member?.id]) serverconfig.servermembers[member.id].isBanned = false;
+    if (!serverconfig.banlist.hasOwnProperty(member?.id) && checkAndUnbanIp(ip).result === false) {
+        if (serverconfig.servermembers[member?.id]) serverconfig.servermembers[member.id].isBanned = false;
     }
 
     // check banlist for member
@@ -1247,24 +1257,24 @@ export async function checkMemberBan(socket, member) {
             removeBan(member?.id);
             return checkAndUnbanIp(ip);
         } else {
-            return {result: true, timestamp: durationStamp, reason: banReason};
+            return { result: true, timestamp: durationStamp, reason: banReason };
         }
     }
 
     return checkAndUnbanIp(ip);
 
-    function checkAndUnbanIp(ip){
+    function checkAndUnbanIp(ip) {
         // check ip blacklist
         if (serverconfig.banlist.hasOwnProperty(ip)) {
             if (Date.now() >= serverconfig.banlist[ip]?.until) {
                 removeBan(ip);
-                return {result: false, timestamp: null}
+                return { result: false, timestamp: null }
             } else {
-                return {result: true, timestamp: serverconfig.banlist[ip]}
+                return { result: true, timestamp: serverconfig.banlist[ip] }
             }
         }
 
-        return {result: false, timestamp: null}
+        return { result: false, timestamp: null }
     }
 }
 
@@ -1325,7 +1335,7 @@ export function getRoleCastingObject(role) {
 }
 
 export function anonymizeMember(member, shouldHide, isAdmin) {
-    if(!member) throw new Error("anonymizeMember: Invalid input: Expected a member object");
+    if (!member) throw new Error("anonymizeMember: Invalid input: Expected a member object");
     member = getCastingMemberObject(member)
 
     if (!member || typeof member !== "object") {
@@ -1335,7 +1345,7 @@ export function anonymizeMember(member, shouldHide, isAdmin) {
 
     let isBanned = member?.isBanned;
 
-    if(shouldHide && !isAdmin){
+    if (shouldHide && !isAdmin) {
         member.id = 0;
         member.icon = "";
         member.status = "";
@@ -1353,28 +1363,28 @@ export function anonymizeMember(member, shouldHide, isAdmin) {
     return member;
 }
 
-export function autoAnonymizeMember(issuerMemberId, member){
-    if(!member?.id) member = getUnkownMember()
+export function autoAnonymizeMember(issuerMemberId, member) {
+    if (!member?.id) member = getUnkownMember()
     let shouldAnonymize = member?.isBanned
 
-    if(shouldAnonymize){
+    if (shouldAnonymize) {
         return anonymizeMember(member, shouldAnonymize, hasPermission(issuerMemberId, "viewAnonymizedMessages"));
     }
 
     return member;
 }
 
-export function autoAnonymizeMessage(issuerMemberId, message){
-    if(!message?.author?.id) message.author = getUnkownMember()
+export function autoAnonymizeMessage(issuerMemberId, message) {
+    if (!message?.author?.id) message.author = getUnkownMember()
 
     let author = serverconfig.servermembers[message.author.id] || getUnkownMember()
-    if(!author) throw new Error("Message author member object not found");
+    if (!author) throw new Error("Message author member object not found");
 
     let shouldAnonymize = (author?.isBanned == true || message?.anon === true) || false
-    if(shouldAnonymize){
+    if (shouldAnonymize) {
         return anonymizeMessage(message, author?.isBanned, hasPermission(issuerMemberId, "viewAnonymizedMessages"), issuerMemberId);
     }
-    else{
+    else {
         return message;
     }
 }
@@ -1393,28 +1403,28 @@ export function anonymizeMessage(message, hideContentForMembers = false, isAdmin
     let isBanned = originalAuthor?.isBanned;
 
     // anonymize message author
-    if(message?.author?.name){
+    if (message?.author?.name) {
         message.author = autoAnonymizeMember(issuerMemberId, originalAuthor);
     }
 
     // anonymize message reply author
-    if(message?.reply?.author?.name){
+    if (message?.reply?.author?.name) {
         message.reply.author = autoAnonymizeMember(issuerMemberId, serverconfig.servermembers[message.reply.author.id]);
     }
 
-    if(message?.id) delete message?.id;
-    if(message?.author) {
+    if (message?.id) delete message?.id;
+    if (message?.author) {
         message.author.id = isAdmin ? originalAuthor?.id : 0
     }
 
-    if(hideContentForMembers || isBanned){
-        if(isAdmin){
-            if(isBanned){
+    if (hideContentForMembers || isBanned) {
+        if (isAdmin) {
+            if (isBanned) {
                 message.isAdmin = isAdmin;
             }
         }
-        else{
-            if(isBanned){
+        else {
+            if (isBanned) {
                 message.message = `${serverconfig.serverinfo.moderation.bans.displayMessageNotice}`
                 message.author.name = `${serverconfig.serverinfo.moderation.bans.displayName}`
                 message.author = anonymizeMember(message.author, true, isAdmin);
@@ -1426,9 +1436,9 @@ export function anonymizeMessage(message, hideContentForMembers = false, isAdmin
     return message;
 }
 
-export function setMemberObjColor(member){
+export function setMemberObjColor(member) {
     let highestRole = getMemberHighestRole(member?.author?.id || member?.id);
-    if(highestRole){
+    if (highestRole) {
         member.color = highestRole?.info?.color;
         member.background = highestRole?.info?.background;
         member.backgroundClip = highestRole?.info?.backgroundClip;
@@ -1437,7 +1447,7 @@ export function setMemberObjColor(member){
     return member;
 }
 
-export function getUnkownMember(){
+export function getUnkownMember() {
     return {
         id: 0,
         name: "Unkown Member"
@@ -1445,7 +1455,7 @@ export function getUnkownMember(){
 }
 
 export function getCastingMemberObject(member) {
-    if(!member) member = getUnkownMember();
+    if (!member) member = getUnkownMember();
     member = copyObject(member);
 
     if (!member || typeof member !== "object") {
@@ -1461,7 +1471,7 @@ export function getCastingMemberObject(member) {
         "rowId"
     ]; // Keys to always delete
 
-    if(!serverconfig.serverinfo.system.members.allowCountryCode) keysToDelete.push("country_code");
+    if (!serverconfig.serverinfo.system.members.allowCountryCode) keysToDelete.push("country_code");
 
     keysToDelete.forEach(key => {
         if (key in member) {
@@ -1486,15 +1496,15 @@ export async function findAndVerifyUser(loginName, password) {
             // Verify the password hash
             const isPasswordValid = await bcrypt.compare(password, member.password);
             if (isPasswordValid) {
-                return {result: true, member: copyObject(member)}; // Return the matched user
+                return { result: true, member: copyObject(member) }; // Return the matched user
             } else {
-                return {result: false, member: null};
+                return { result: false, member: null };
             }
         }
     }
 
     console.log("User not found for loginName:", loginName);
-    return {result: null, member: null}; // Return null if no user matches
+    return { result: null, member: null }; // Return null if no user matches
 }
 
 export function updateFunction_Main(name, sourceString) {

@@ -1,9 +1,9 @@
 /*
     The functions here are basically the "core" of the chat app on the server side.
  */
-import {serverconfig, xssFilters, colors, saveConfig, usersocket, server, ipsec} from "../../../index.mjs"
-import {io} from "../../../index.mjs";
-import {getMemberHighestRole} from "./helper.mjs";
+import { serverconfig, xssFilters, colors, saveConfig, usersocket, server, ipsec } from "../../../index.mjs"
+import { io } from "../../../index.mjs";
+import { getMemberHighestRole } from "./helper.mjs";
 import {
     checkBool,
     checkEmptyConfigVar,
@@ -12,16 +12,16 @@ import {
     removeFromArray,
     sendMessageToUser
 } from "../main.mjs";
-import {encodeToBase64} from "../mysql/helper.mjs";
-import {signer} from "../../../index.mjs"
+import { encodeToBase64 } from "../mysql/helper.mjs";
+import { signer } from "../../../index.mjs"
 import Logger from "@hackthedev/terminal-logger"
-import {queryDatabase} from "../mysql/mysql.mjs";
+import { queryDatabase } from "../mysql/mysql.mjs";
 
 var serverconfigEditable = serverconfig;
 
 export function getMemberLastOnline(memberId) {
     if (!memberId || !serverconfig.servermembers[memberId]) return null;
-    if(shouldIgnoreMember(serverconfig.servermembers[memberId])) return null;
+    if (shouldIgnoreMember(serverconfig.servermembers[memberId])) return null;
 
     const lastOnline = serverconfig.servermembers[memberId].lastOnline;
     const now = Date.now();
@@ -40,7 +40,7 @@ export function getOnlineMemberCount() {
 }
 
 export function hasPermission(userId, permissions, channelOrGroupId = null, mode = "any") {
-    if(shouldIgnoreMember(serverconfig.servermembers[userId])) return false;
+    if (shouldIgnoreMember(serverconfig.servermembers[userId])) return false;
 
     const permsToCheck = Array.isArray(permissions) ? permissions : [permissions];
 
@@ -218,62 +218,62 @@ export function generateGid(id) {
     return (encodeToBase64(signer.canonicalize(serverconfig.servermembers[id]?.publicKey))).substring(0, 20);
 }
 
-export function getMemberFromKey(publicKey){
+export function getMemberFromKey(publicKey) {
     const members = Object.values(serverconfig.servermembers);
     let found = members.filter(m => m.publicKey === publicKey);
 
-    if(Array.isArray(found)){
+    if (Array.isArray(found)) {
         return found[0];
     }
-    else{
+    else {
         return found;
     }
 }
 
-export async function changeKeyVerification(publicKey, value){
-    if(value !== true && value !== false){
+export async function changeKeyVerification(publicKey, value) {
+    if (value !== true && value !== false) {
         return;
     }
 
     let member = getMemberFromKey(publicKey);
-    if(!member) return;
+    if (!member) return;
 
     let gid = generateGid(member.id)
-    if(!gid) return;
+    if (!gid) return;
 
     member.isVerifiedKey = value;
 }
 
-export async function hasVerifiedKey(id){
-    if(!id) return null;
+export async function hasVerifiedKey(id) {
+    if (!id) return null;
 
     let member = serverconfig.servermembers[id];
-    if(!member) return null;
+    if (!member) return null;
 
     let publicKey = member?.publicKey;
     let keyIsVerified = member?.isVerifiedKey;
 
     // user isnt using public keys
-    if(!publicKey){
+    if (!publicKey) {
         return null;
     }
 
     // if the public key exists but the verified field doesnt
     // or isnt set, return false;
-    if(publicKey && !keyIsVerified){
+    if (publicKey && !keyIsVerified) {
         publicKey = false;
         return false;
     }
 
     // has key and is verified
-    if(publicKey && keyIsVerified === true){
+    if (publicKey && keyIsVerified === true) {
         return true;
     }
 }
 
 export async function getMemberProfile(id) {
 
-    if(serverconfig.servermembers[id]){
+    if (serverconfig.servermembers[id]) {
         let roles = Object.keys(serverconfig.serverroles).map(role => ({
             id: role,
             ...serverconfig.serverroles[role].info,
@@ -291,23 +291,24 @@ export async function getMemberProfile(id) {
     return null;
 }
 
-export function shouldIgnoreMember(member){
+export function shouldIgnoreMember(member) {
+    if (member?.isBot) return false; // bots are always visible (isBot can be true or 1)
     if (!member?.lastOnline) return true;
     return new Date(member?.lastOnline) <= getNewDate(`-${serverconfig.serverinfo.system.members.ignoreTimeout}`);
 }
 
-export async function checkIpCache(ip){
-    if(!ip) return;
+export async function checkIpCache(ip) {
+    if (!ip) return;
 
     let ipResult = await queryDatabase(`SELECT * FROM ip_cache WHERE ip = ?`, [ip]);
-    if(ipResult.length > 0){
+    if (ipResult.length > 0) {
         let row = ipResult[0];
 
         let lastSyncDate = new Date(row.last_sync);
         let expiredDate = getNewDate("-3 days")
 
         // if last sync was more than 3 days ago, its not up to date anymore.
-        if(lastSyncDate < expiredDate) {
+        if (lastSyncDate < expiredDate) {
             await queryDatabase(`DELETE FROM ip_cache WHERE ip = ?`, [ip]);
             return null;
         }
@@ -318,20 +319,20 @@ export async function checkIpCache(ip){
     return null;
 }
 
-export async function updateIpCache(ip, data){
-    if(!ip) return;
+export async function updateIpCache(ip, data) {
+    if (!ip) return;
     let ipCache = await checkIpCache(ip);
 
-    if(!ipCache){
+    if (!ipCache) {
         await queryDatabase(`INSERT IGNORE INTO ip_cache (ip, data) VALUES (?, ?)`, [ip, JSON.stringify(data)]);
     }
 }
 
-export async function lookupIP(ip){
+export async function lookupIP(ip) {
     return await ipsec.lookupIP(ip)
 }
 
-export async function getMemberIpInfo(socket){
+export async function getMemberIpInfo(socket) {
     let ip = getSocketIp(socket);
     return await lookupIP(ip);
 }
@@ -348,11 +349,11 @@ export function getMemberList(member, channel) {
         const memberObj = members[memberId];
 
         // didnt finish onboarding yet
-        if(!memberObj.loginName) continue;
-        if(memberObj?.isBanned === true) continue;
-        if(shouldIgnoreMember(memberObj)) continue;
+        if (!memberObj.loginName) continue;
+        if (memberObj?.isBanned === true) continue;
+        if (shouldIgnoreMember(memberObj)) continue;
 
-        if(!hasPermission(memberId, "viewChannel", channel)) continue
+        if (!hasPermission(memberId, "viewChannel", channel)) continue
 
         var highestMemberRole = getMemberHighestRole(memberId);
         sortedMembers[memberId] = getCastingMemberObject(memberObj);
@@ -361,12 +362,12 @@ export function getMemberList(member, channel) {
         const { isOnline, minutesPassed } = getMemberLastOnline(memberId);
 
         // if the user is offline
-        if (!isOnline){
+        if (!isOnline) {
             sortedMembers[memberId].isOffline = true;
         }
     }
 
-    return {members: sortedMembers, index: -1};
+    return { members: sortedMembers, index: -1 };
 }
 
 export function getGroupList(member) {
@@ -660,12 +661,12 @@ export function getChannelTree(member) {
 }
 
 export function addBan({
-                        identifier,
-                        bannedBy = "system",
-                        reason = "",
-                        until = -1,
-                        ip = null,
-                       } = {}){
+    identifier,
+    bannedBy = "system",
+    reason = "",
+    until = -1,
+    ip = null,
+} = {}) {
 
     serverconfig.banlist[identifier] = {
         bannedBy: bannedBy,
@@ -676,11 +677,11 @@ export function addBan({
     saveConfig(serverconfig);
 }
 
-export function removeBan(identifier){
-    if(serverconfig.banlist.hasOwnProperty(identifier)) delete serverconfig.banlist[identifier]
+export function removeBan(identifier) {
+    if (serverconfig.banlist.hasOwnProperty(identifier)) delete serverconfig.banlist[identifier]
 
 
-    if(serverconfig.servermembers[identifier]?.isBanned){
+    if (serverconfig.servermembers[identifier]?.isBanned) {
         serverconfig.servermembers[identifier].isBanned = 0
     }
 
@@ -691,7 +692,7 @@ export function removeBan(identifier){
 
 export function banUser(socket, member) {
     let ip = getSocketIp(socket);
-    if(isLocalhostIp(ip)) ip = null;
+    if (isLocalhostIp(ip)) ip = null;
 
     // get member ban date
     let bannedUntil = getNewDate(member.duration).getTime();
@@ -712,7 +713,7 @@ export function banUser(socket, member) {
     return banIp(socket, bannedUntil);
 }
 
-export function getSocketIp(socket){
+export function getSocketIp(socket) {
     return socket?.handshake?.headers["x-forwarded-for"]?.split(",")[0].trim()
         || socket?.handshake?.headers["x-real-ip"]
         || socket?.handshake?.address;
@@ -720,7 +721,7 @@ export function getSocketIp(socket){
 
 export function banIp(socket, durationTimestamp = -1) {
     let ip = getSocketIp(socket);
-    if(isLocalhostIp(ip)) return;
+    if (isLocalhostIp(ip)) return;
 
     addBan({
         identifier: ip,
@@ -730,9 +731,9 @@ export function banIp(socket, durationTimestamp = -1) {
     Logger.info(`IP ${ip} banned until ${new Date(durationTimestamp).toLocaleString()}`);
 }
 
-export function isIpBanned(ip){
+export function isIpBanned(ip) {
     let existingBannedIp = getJson(serverconfig.blacklist, ["*.ip"]);
-    if(existingBannedIp.length > 0 || serverconfig.banlist[ip]){
+    if (existingBannedIp.length > 0 || serverconfig.banlist[ip]) {
         Logger.info(`IP ${ip} already banned`)
         return true;
     }
@@ -879,10 +880,10 @@ export function disconnectUser(socketId, reason = null) {
 
         io.sockets.sockets.get(socketId).disconnect();
     } catch (ex) {
-        return {error: ex}
+        return { error: ex }
     }
 
-    return {error: null};
+    return { error: null };
 }
 
 export function muteUser(member) {
@@ -896,7 +897,7 @@ export function muteUser(member) {
             duration: muteDate
         };
     } catch (err) {
-        return {error: err}
+        return { error: err }
     }
 
     if (!serverconfig.mutelist.hasOwnProperty(member.target)) {
@@ -907,7 +908,7 @@ export function muteUser(member) {
         serverconfig.mutelist[member.target] = jsonObj;
 
         saveConfig(serverconfig);
-        return {duration: muteDate};
+        return { duration: muteDate };
     } else {
         serverconfig.servermembers[member.target].isMuted = 1;
         serverconfig.mutelist[member.target].duration = muteDate;
@@ -915,6 +916,6 @@ export function muteUser(member) {
 
         io.emit("updateMemberList");
 
-        return {duration: muteDate};
+        return { duration: muteDate };
     }
 }

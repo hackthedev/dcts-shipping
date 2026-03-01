@@ -1,8 +1,8 @@
-import {queryDatabase} from "./mysql.mjs";
-import {XMLHttpRequest, fetch, serverconfig} from "../../../index.mjs";
+import { queryDatabase } from "./mysql.mjs";
+import { XMLHttpRequest, fetch, serverconfig } from "../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import fs from "fs";
-import {spawn} from "child_process";
+import { spawn } from "child_process";
 
 
 export async function exportDatabaseFromPool(pool, outFile) {
@@ -31,8 +31,14 @@ export async function exportDatabaseFromPool(pool, outFile) {
 export async function saveMemberToDB(id, data) {
     if (!data || typeof data !== "object" || !id) return console.log("[saveMemberToDB] invalid data", data);
 
-    const cols = Object.keys(data);
-    const vals = Object.values(data);
+    // strip base64 data before saving to DB (too large for max_allowed_packet)
+    // these are already persisted in config.json
+    const dbData = Object.assign({}, data);
+    if (typeof dbData.icon === "string" && dbData.icon.startsWith("data:image")) dbData.icon = "";
+    if (typeof dbData.banner === "string" && dbData.banner.startsWith("data:image")) dbData.banner = "";
+
+    const cols = Object.keys(dbData);
+    const vals = Object.values(dbData);
     const placeholders = cols.map(() => "?").join(",");
 
     const sql = `
@@ -41,7 +47,6 @@ export async function saveMemberToDB(id, data) {
             ON DUPLICATE KEY UPDATE
                                  ${cols.map(c => `${c}=VALUES(${c})`).join(",")}
     `;
-
 
     try {
         await queryDatabase(sql, vals);
@@ -178,13 +183,13 @@ export async function markInboxMessageAsRead(memberId, inboxId) {
     if (!memberId) throw new Error("No member id provided");
     if (!inboxId) throw new Error("No inbox id provided");
 
-    if(!inboxId.includes("-")){
+    if (!inboxId.includes("-")) {
         await queryDatabase(
             `UPDATE inbox SET isRead = 1 WHERE memberId = ? AND inboxId = ?`,
             [memberId, inboxId]
         );
     }
-    else{
+    else {
         await queryDatabase(
             `UPDATE inbox SET isRead = 1 WHERE memberId = ? AND customId = ?`,
             [memberId, inboxId]
@@ -209,11 +214,11 @@ export async function addInboxMessage(memberId, data = {}, type = "general", cus
 }
 
 export async function getInboxMessages({
-                                           memberId,
-                                           index = -1,
-                                           inboxId = null,
-                                           onlyUnread = false
-                                       } = {}) {
+    memberId,
+    index = -1,
+    inboxId = null,
+    onlyUnread = false
+} = {}) {
 
     if (inboxId !== null) {
         const query = `SELECT *
@@ -232,8 +237,8 @@ export async function getInboxMessages({
 
     return await getUnreadInbox(memberId, index);
 
-    async function getUnreadInbox(memberId, index = -1){
-        if(index !== -1){
+    async function getUnreadInbox(memberId, index = -1) {
+        if (index !== -1) {
             const query = `SELECT *
                        FROM inbox
                        WHERE memberId = ?
@@ -286,7 +291,7 @@ export async function getChatMessagesFromDb(roomId, index, msgId = null) {
 }
 
 export async function getChatMessageById(msgId) {
-    if(typeof msgId !== "string" && typeof msgId !== "number") throw new Error("Invalid message id. Excepted string or number");
+    if (typeof msgId !== "string" && typeof msgId !== "number") throw new Error("Invalid message id. Excepted string or number");
 
     // nothing was supplied
     if (!msgId) {
@@ -349,7 +354,7 @@ export async function getStringSizeInMegabytes(str) {
 // Same as in chat.js
 export async function checkMediaTypeAsync(url) {
     try {
-        const response = await fetch(url, {method: 'HEAD'});
+        const response = await fetch(url, { method: 'HEAD' });
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

@@ -1,6 +1,7 @@
 import { serverconfig } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
-import {escapeHtml, validateMemberId} from "../functions/main.mjs";
+import { escapeHtml, validateMemberId } from "../functions/main.mjs";
+import { emitToBotsWithViewChannel } from "./botEvents.mjs";
 
 const typingMembers = {};
 const typingTimeouts = {};
@@ -22,12 +23,18 @@ export default (io) => (socket) => {
         typingMembers[room].add(id);
 
         clearTimeout(typingTimeouts[room][id]);
-        typingTimeouts[room][id] = setTimeout(() => {
+        typingTimeouts[room][id] = setTimeout(async () => {
             typingMembers[room].delete(id);
-            io.in(room).emit("memberTyping", convertTypingMembers(room));
+            const payload = convertTypingMembers(room);
+            io.in(room).emit("memberTyping", payload);
+            const [group, category, channel] = (room || "").split("-");
+            if (group && category && channel) await emitToBotsWithViewChannel(io, group, category, channel, "memberTyping", payload);
         }, 4000);
 
-        io.in(room).emit("memberTyping", convertTypingMembers(room));
+        const payload = convertTypingMembers(room);
+        io.in(room).emit("memberTyping", payload);
+        const [group, category, channel] = (room || "").split("-");
+        if (group && category && channel) await emitToBotsWithViewChannel(io, group, category, channel, "memberTyping", payload);
     });
 };
 

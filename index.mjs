@@ -1,9 +1,9 @@
-import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
+import { syncDiscoveredHosts } from "./modules/functions/discovery.mjs";
 
 console.clear();
 
 let versionPath = path.join(path.resolve(), "version");
-if(!fs.existsSync(versionPath)) {
+if (!fs.existsSync(versionPath)) {
     Logger.error("Version path not found!!")
     process.exit(1);
 }
@@ -25,7 +25,7 @@ import crypto from "crypto";
 
 // dSync Libs
 import dSyncAuth from "@hackthedev/dsync-auth";
-import {dSyncSign} from "@hackthedev/dsync-sign";
+import { dSyncSign } from "@hackthedev/dsync-sign";
 import dSync from "@hackthedev/dsync";
 
 import Logger from "@hackthedev/terminal-logger"
@@ -36,10 +36,10 @@ import FrontendLibs from "@hackthedev/frontend-libs";
 
 // Depending on the SSL setting, this will switch.
 export let server; // = http.createServer(app);
-import {Server} from "socket.io";
+import { Server } from "socket.io";
 import getSize from "get-folder-size";
 
-import {fileTypeFromBuffer} from "file-type";
+import { fileTypeFromBuffer } from "file-type";
 import XMLHttpRequest from "xhr2";
 
 import colors from "colors";
@@ -134,7 +134,7 @@ checkFile("./plugins/settings.json", true, "{}");
     needs to be above the imports else serverconfig will be undefined
  */
 
-export var serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, {encoding: "utf-8"})) : {};
+export var serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, { encoding: "utf-8" })) : {};
 checkConfigAdditions();
 
 
@@ -178,7 +178,7 @@ saveConfig(serverconfig);
 
 // nicer warning
 serverconfig.serverinfo.sql.enabled = true;
-if(!serverconfig?.serverinfo?.sql?.username){
+if (!serverconfig?.serverinfo?.sql?.username) {
     Logger.warn("Congrats, setup worked! Please go to the /configs/config.json file and enter the SQL information under 'sql'");
     process.exit(0);
 }
@@ -237,7 +237,7 @@ import {
     saveChatMessage,
 } from "./modules/functions/io.mjs";
 
-import {checkSSL} from "./modules/functions/http.mjs";
+import { checkSSL } from "./modules/functions/http.mjs";
 
 // Chat functions
 import {
@@ -254,38 +254,38 @@ import {
     queryDatabase,
 } from "./modules/functions/mysql/mysql.mjs";
 
-import {fileURLToPath, pathToFileURL} from "url";
-import {registerTemplateMiddleware} from "./modules/functions/template.mjs";
+import { fileURLToPath, pathToFileURL } from "url";
+import { registerTemplateMiddleware } from "./modules/functions/template.mjs";
 import {
     listenToPow,
     powVerifiedUsers,
     sendPow,
     waitForPowSolution,
 } from "./modules/sockets/pow.mjs";
-import {Addon} from "./modules/functions/addon.mjs";
+import { Addon } from "./modules/functions/addon.mjs";
 
 // vc
-import {AccessToken, WebhookReceiver} from "livekit-server-sdk";
+import { AccessToken, WebhookReceiver } from "livekit-server-sdk";
 import {
     loadMembersFromDB,
     saveMemberToDB,
 } from "./modules/functions/mysql/helper.mjs";
-import {checkMemberMigration} from "./modules/functions/migrations/memberJsonToDb.mjs";
+import { checkMemberMigration } from "./modules/functions/migrations/memberJsonToDb.mjs";
 import {
     checkMigrations,
     completeMigrationTask,
     createMigrationTask,
     getMigrationTask
 } from "./modules/functions/migrations/helper.mjs";
-import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./modules/functions/migrations/messageMigration.mjs";
+import { migrateOldMessagesToNewMessageSystemWithoutEncoding } from "./modules/functions/migrations/messageMigration.mjs";
 import JSONTools from "@hackthedev/json-tools";
-import {initPaymentSystem, paymentConfig} from "./modules/functions/payments.mjs";
-import {getCache, setCache} from "./modules/functions/ip-cache.mjs";
-import {emitErrorToTestingClient} from "./modules/sockets/onErrorTesting.mjs";
+import { initPaymentSystem, paymentConfig } from "./modules/functions/payments.mjs";
+import { getCache, setCache } from "./modules/functions/ip-cache.mjs";
+import { emitErrorToTestingClient } from "./modules/sockets/onErrorTesting.mjs";
 import {
     getChannelMessageFrequency, getChannelRateLimit,
 } from "./modules/functions/anti-spam/messages.mjs";
-import {renderChart} from "./modules/functions/anti-spam/charts.mjs";
+import { renderChart } from "./modules/functions/anti-spam/charts.mjs";
 
 /*
     Files for the plugin system
@@ -301,7 +301,7 @@ const registerPluginSocketEvents = async (socket, pluginSocketsDir) => {
         if (file.endsWith(".mjs")) {
             const filePath = path.join(pluginSocketsDir, file);
             const fileUrl = pathToFileURL(filePath).href;
-            const {default: handler} = await import(fileUrl);
+            const { default: handler } = await import(fileUrl);
 
             try {
                 handler(socket);
@@ -337,7 +337,7 @@ const loadAndExecutePluginFunctions = async (pluginFunctionsDir) => {
 const moveWebFolders = async (pluginWebDir, pluginName) => {
     const destinationDir = path.join(publicPluginsDir, pluginName);
     await fse.ensureDir(destinationDir); // Ensure the destination directory exists
-    await fse.copy(pluginWebDir, destinationDir, {overwrite: true});
+    await fse.copy(pluginWebDir, destinationDir, { overwrite: true });
 };
 
 // Iterate over each plugin and process it
@@ -406,10 +406,10 @@ const tables = [
     {
         name: "messages",
         columns: [
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
-            {name: "room", type: "varchar(25) NOT NULL"},
-            {name: "message", type: "longtext NOT NULL"},
+            { name: "authorId", type: "varchar(100) NOT NULL" },
+            { name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY" },
+            { name: "room", type: "varchar(25) NOT NULL" },
+            { name: "message", type: "longtext NOT NULL" },
             {
                 name: "createdAt",
                 type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)",
@@ -419,50 +419,50 @@ const tables = [
     {
         name: "message_reactions",
         columns: [
-            {name: "cid", type: "varchar(500) NOT NULL UNIQUE KEY"},
-            {name: "reactionId", type: "int(100) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "messageId", type: "varchar(100) NOT NULL"},
-            {name: "emojiHash", type: "longtext NOT NULL"},
-            {name: "memberId", type: "varchar(100) NOT NULL"},
-            {name: "react_timestamp", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"}
+            { name: "cid", type: "varchar(500) NOT NULL UNIQUE KEY" },
+            { name: "reactionId", type: "int(100) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+            { name: "messageId", type: "varchar(100) NOT NULL" },
+            { name: "emojiHash", type: "longtext NOT NULL" },
+            { name: "memberId", type: "varchar(100) NOT NULL" },
+            { name: "react_timestamp", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)" }
         ]
     },
     {
         name: "ip_cache",
         columns: [
-            {name: "ip", type: "varchar(100) NOT NULL UNIQUE KEY"},
-            {name: "data", type: "longtext NOT NULL"},
-            {name: "last_sync", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"}
+            { name: "ip", type: "varchar(100) NOT NULL UNIQUE KEY" },
+            { name: "data", type: "longtext NOT NULL" },
+            { name: "last_sync", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)" }
         ]
     },
     {
         name: "cache",
         columns: [
-            {name: "rowId", type: "int(12) NOT NULL AUTO_INCREMENT PRIMARY KEY"},
-            {name: "identifier", type: "varchar(255) NOT NULL UNIQUE KEY"},
-            {name: "type", type: "varchar(255) NOT NULL"},
-            {name: "data", type: "longtext NOT NULL"},
-            {name: "last_update", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
-            {name: "created", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"}
+            { name: "rowId", type: "int(12) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
+            { name: "identifier", type: "varchar(255) NOT NULL UNIQUE KEY" },
+            { name: "type", type: "varchar(255) NOT NULL" },
+            { name: "data", type: "longtext NOT NULL" },
+            { name: "last_update", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)" },
+            { name: "created", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)" }
         ]
     },
     {
         name: "migrations",
         columns: [
-            {name: "migration_name", type: "varchar(100) NOT NULL"},
-            {name: "done", type: "int(10) NOT NULL DEFAULT 0"},
+            { name: "migration_name", type: "varchar(100) NOT NULL" },
+            { name: "done", type: "int(10) NOT NULL DEFAULT 0" },
         ],
-        keys: [{name: "UNIQUE KEY", type: "migration_name (migration_name)"}],
+        keys: [{ name: "UNIQUE KEY", type: "migration_name (migration_name)" }],
     },
     {
         name: "inbox",
         columns: [
-            {name: "inboxId", type: "int(100) NOT NULL AUTO_INCREMENT PRIMARY KEY UNIQUE KEY"},
-            {name: "memberId", type: "varchar(250) NOT NULL"},
-            {name: "customId", type: "varchar(250) DEFAULT NULL"},
-            {name: "data", type: "longtext NOT NULL"},
-            {name: "type", type: "varchar(250) NOT NULL"},
-            {name: "isRead", type: "bigint NOT NULL DEFAULT 0"},
+            { name: "inboxId", type: "int(100) NOT NULL AUTO_INCREMENT PRIMARY KEY UNIQUE KEY" },
+            { name: "memberId", type: "varchar(250) NOT NULL" },
+            { name: "customId", type: "varchar(250) DEFAULT NULL" },
+            { name: "data", type: "longtext NOT NULL" },
+            { name: "type", type: "varchar(250) NOT NULL" },
+            { name: "isRead", type: "bigint NOT NULL DEFAULT 0" },
             {
                 name: "createdAt",
                 type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)",
@@ -472,39 +472,39 @@ const tables = [
     {
         name: "message_logs",
         columns: [
-            {name: "id", type: "int(100) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "messageId", type: "varchar(100) NOT NULL"},
-            {name: "room", type: "text NOT NULL"},
-            {name: "message", type: "longtext NOT NULL"},
+            { name: "id", type: "int(100) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT" },
+            { name: "authorId", type: "varchar(100) NOT NULL" },
+            { name: "messageId", type: "varchar(100) NOT NULL" },
+            { name: "room", type: "text NOT NULL" },
+            { name: "message", type: "longtext NOT NULL" },
         ]
     },
     {
         name: "url_cache",
         columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT"},
-            {name: "url", type: "longtext NOT NULL UNIQUE KEY"},
-            {name: "media_type", type: "text NOT NULL"},
+            { name: "id", type: "int(11) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT" },
+            { name: "url", type: "longtext NOT NULL UNIQUE KEY" },
+            { name: "media_type", type: "text NOT NULL" },
         ]
     },
     {
         name: "reports",
         columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "reportCreator", type: "longtext NOT NULL"},
-            {name: "reportedUser", type: "longtext NOT NULL"},
-            {name: "reportType", type: "text NOT NULL"},
-            {name: "reportData", type: "longtext NULL"},
-            {name: "reportNotes", type: "longtext NULL"},
-            {name: "reportStatus", type: "varchar(100) NOT NULL DEFAULT 'pending'"},
+            { name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+            { name: "reportCreator", type: "longtext NOT NULL" },
+            { name: "reportedUser", type: "longtext NOT NULL" },
+            { name: "reportType", type: "text NOT NULL" },
+            { name: "reportData", type: "longtext NULL" },
+            { name: "reportNotes", type: "longtext NULL" },
+            { name: "reportStatus", type: "varchar(100) NOT NULL DEFAULT 'pending'" },
         ],
     }, // home section stuff
     {
         name: "dms_threads",
         columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "type", type: "varchar(50) NOT NULL"},
-            {name: "title", type: "text NULL"},
+            { name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY" },
+            { name: "type", type: "varchar(50) NOT NULL" },
+            { name: "title", type: "text NULL" },
         ],
     },
     {
@@ -521,36 +521,36 @@ const tables = [
     {
         name: "dms_message_logs",
         columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT"},
-            {name: "messageId", type: "varchar(100) NOT NULL"},
-            {name: "threadId", type: "varchar(100) NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "message", type: "longtext NOT NULL"},
-            {name: "loggedAt", type: "datetime NOT NULL"},
+            { name: "id", type: "int(11) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT" },
+            { name: "messageId", type: "varchar(100) NOT NULL" },
+            { name: "threadId", type: "varchar(100) NOT NULL" },
+            { name: "authorId", type: "varchar(100) NOT NULL" },
+            { name: "message", type: "longtext NOT NULL" },
+            { name: "loggedAt", type: "datetime NOT NULL" },
         ]
     },
     {
         name: "dms_messages",
         columns: [
-            {name: "messageId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "threadId", type: "varchar(100) NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "message", type: "longtext NOT NULL"},
-            {name: "createdAt", type: "datetime NOT NULL"},
+            { name: "messageId", type: "varchar(100) NOT NULL PRIMARY KEY" },
+            { name: "threadId", type: "varchar(100) NOT NULL" },
+            { name: "authorId", type: "varchar(100) NOT NULL" },
+            { name: "message", type: "longtext NOT NULL" },
+            { name: "createdAt", type: "datetime NOT NULL" },
 
-            {name: "supportIdentity", type: "varchar(20) NOT NULL DEFAULT 'self'"}, // 'self' | 'support_tagged' | 'support_anon'
-            {name: "displayName", type: "text NULL"},
+            { name: "supportIdentity", type: "varchar(20) NOT NULL DEFAULT 'self'" }, // 'self' | 'support_tagged' | 'support_anon'
+            { name: "displayName", type: "text NULL" },
         ],
         keys: [
-            {name: "KEY", type: "threadId (threadId)"},
+            { name: "KEY", type: "threadId (threadId)" },
         ],
     },
     {
         name: "tickets",
         columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "creatorId", type: "varchar(100) NOT NULL"},
-            {name: "status", type: "varchar(20) NOT NULL DEFAULT 'open'"},
+            { name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY" },
+            { name: "creatorId", type: "varchar(100) NOT NULL" },
+            { name: "status", type: "varchar(20) NOT NULL DEFAULT 'open'" },
             {
                 name: "createdAt",
                 type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
@@ -561,20 +561,20 @@ const tables = [
             },
         ],
         keys: [
-            {name: "KEY", type: "status (status)"},
-            {name: "KEY", type: "creatorId (creatorId)"},
+            { name: "KEY", type: "status (status)" },
+            { name: "KEY", type: "creatorId (creatorId)" },
         ],
     },
 
     {
         name: "posts",
         columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "title", type: "text NOT NULL"},
-            {name: "body", type: "longtext NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "tag", type: "varchar(100) NULL"},
-            {name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0"},
+            { name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+            { name: "title", type: "text NOT NULL" },
+            { name: "body", type: "longtext NOT NULL" },
+            { name: "authorId", type: "varchar(100) NOT NULL" },
+            { name: "tag", type: "varchar(100) NULL" },
+            { name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0" },
             {
                 name: "createdAt",
                 type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
@@ -584,11 +584,11 @@ const tables = [
     {
         name: "news",
         columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "title", type: "text NOT NULL"},
-            {name: "body", type: "longtext NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0"},
+            { name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+            { name: "title", type: "text NOT NULL" },
+            { name: "body", type: "longtext NOT NULL" },
+            { name: "authorId", type: "varchar(100) NOT NULL" },
+            { name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0" },
             {
                 name: "createdAt",
                 type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
@@ -598,12 +598,12 @@ const tables = [
     {
         name: "help",
         columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "slug", type: "varchar(120) NOT NULL UNIQUE KEY"},
-            {name: "title", type: "text NOT NULL"},
-            {name: "body", type: "longtext NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0"},
+            { name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+            { name: "slug", type: "varchar(120) NOT NULL UNIQUE KEY" },
+            { name: "title", type: "text NOT NULL" },
+            { name: "body", type: "longtext NOT NULL" },
+            { name: "authorId", type: "varchar(100) NOT NULL" },
+            { name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0" },
             {
                 name: "createdAt",
                 type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
@@ -613,68 +613,69 @@ const tables = [
     {
         name: "dms_reads",
         columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "memberId", type: "varchar(100) NOT NULL"},
-            {name: "last_read_at", type: "text NOT NULL"},
+            { name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY" },
+            { name: "memberId", type: "varchar(100) NOT NULL" },
+            { name: "last_read_at", type: "text NOT NULL" },
         ]
     },
     {
         name: "content_reads",
         columns: [
-            {name: "id", type: "bigint NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "contentType", type: "varchar(32) NOT NULL"},
-            {name: "contentId", type: "bigint NOT NULL"},
-            {name: "userId", type: "varchar(128) NOT NULL"},
-            {name: "readAt", type: "datetime NULL"},
-            {name: "createdAt",type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP" },
+            { name: "id", type: "bigint NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+            { name: "contentType", type: "varchar(32) NOT NULL" },
+            { name: "contentId", type: "bigint NOT NULL" },
+            { name: "userId", type: "varchar(128) NOT NULL" },
+            { name: "readAt", type: "datetime NULL" },
+            { name: "createdAt", type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP" },
         ],
         keys: [
-            {name: "UNIQUE KEY uq_content_user",type: "(contentType, contentId, userId)"},
-            {name: "INDEX idx_user_unread", type: "(userId, readAt)"},
-            {name: "INDEX idx_content", type: "(contentType, contentId)"},
+            { name: "UNIQUE KEY uq_content_user", type: "(contentType, contentId, userId)" },
+            { name: "INDEX idx_user_unread", type: "(userId, readAt)" },
+            { name: "INDEX idx_content", type: "(contentType, contentId)" },
         ],
     },
     {
         name: "network_servers",
         columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "address", type: "varchar(255) NOT NULL UNIQUE KEY"},
-            {name: "status", type: "varchar(255) NOT NULL"},
-            {name: "data", type: "longtext"},
-            {name: "last_sync", type: "datetime NULL"},
+            { name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+            { name: "address", type: "varchar(255) NOT NULL UNIQUE KEY" },
+            { name: "status", type: "varchar(255) NOT NULL" },
+            { name: "data", type: "longtext" },
+            { name: "last_sync", type: "datetime NULL" },
         ]
     },
     {
         name: "auditlog",
         columns: [
-            {name: "text", type: "longtext NOT NULL"},
-            {name: "datetime", type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP"},
+            { name: "text", type: "longtext NOT NULL" },
+            { name: "datetime", type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP" },
         ],
     },
     {
         name: "members",
         columns: [
-            {name: "rowId", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
-            {name: "id", type: "varchar(100) NOT NULL UNIQUE"},
-            {name: "token", type: "varchar(255)"},
-            {name: "onboarding", type: "BOOLEAN DEFAULT FALSE"},
-            {name: "loginName", type: "varchar(100)"},
-            {name: "name", type: "varchar(100) NOT NULL DEFAULT 'User'"},
-            {name: "nickname", type: "varchar(100) DEFAULT NULL"},
-            {name: "country_code", type: "varchar(50) DEFAULT NULL"},
-            {name: "status", type: "text DEFAULT ''"},
-            {name: "aboutme", type: "text DEFAULT ''"},
-            {name: "icon", type: "longtext DEFAULT ''"},
-            {name: "banner", type: "longtext DEFAULT ''"},
-            {name: "joined", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
-            {name: "isOnline", type: "BOOLEAN DEFAULT FALSE"},
-            {name: "lastOnline", type: "bigint DEFAULT 0"},
-            {name: "isBanned", type: "BOOLEAN DEFAULT FALSE"},
-            {name: "isMuted", type: "BOOLEAN DEFAULT FALSE"},
-            {name: "password", type: "text DEFAULT NULL"},
-            {name: "publicKey", type: "text DEFAULT ''"},
-            {name: "isVerifiedKey", type: "BOOLEAN DEFAULT FALSE"},
-            {name: "pow", type: "text DEFAULT ''"},
+            { name: "rowId", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+            { name: "id", type: "varchar(100) NOT NULL UNIQUE" },
+            { name: "token", type: "varchar(255)" },
+            { name: "onboarding", type: "BOOLEAN DEFAULT FALSE" },
+            { name: "loginName", type: "varchar(100)" },
+            { name: "name", type: "varchar(100) NOT NULL DEFAULT 'User'" },
+            { name: "nickname", type: "varchar(100) DEFAULT NULL" },
+            { name: "country_code", type: "varchar(50) DEFAULT NULL" },
+            { name: "status", type: "text DEFAULT ''" },
+            { name: "aboutme", type: "text DEFAULT ''" },
+            { name: "icon", type: "longtext DEFAULT ''" },
+            { name: "banner", type: "longtext DEFAULT ''" },
+            { name: "joined", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)" },
+            { name: "isOnline", type: "BOOLEAN DEFAULT FALSE" },
+            { name: "lastOnline", type: "bigint DEFAULT 0" },
+            { name: "isBanned", type: "BOOLEAN DEFAULT FALSE" },
+            { name: "isMuted", type: "BOOLEAN DEFAULT FALSE" },
+            { name: "password", type: "text DEFAULT NULL" },
+            { name: "publicKey", type: "text DEFAULT ''" },
+            { name: "isVerifiedKey", type: "BOOLEAN DEFAULT FALSE" },
+            { name: "pow", type: "text DEFAULT ''" },
+            { name: "isBot", type: "BOOLEAN DEFAULT FALSE" },
         ]
     },
 ];
@@ -848,7 +849,7 @@ async function waitForTable(table, interval = 1000) {
     for (const table of tables) {
         await db.checkAndCreateTable(table);
     }
-    
+
     for (const t of criticalTables) {
         await waitForTable(t);
     }
@@ -867,10 +868,10 @@ async function waitForTable(table, interval = 1000) {
     ]);
 
     results.forEach((r) => {
-        if(r?.success || r?.skipped){
+        if (r?.success || r?.skipped) {
             Logger.debug(r?.message)
         }
-        else{
+        else {
             Logger.error(r?.message)
         }
     });
@@ -880,11 +881,11 @@ async function waitForTable(table, interval = 1000) {
     listenToIO();
 })();
 
-async function initIPSec(){
+async function initIPSec() {
     ipsec = new dSyncIPSec({
         checkCache: async (ip) => {
             let ipInfoRow = await getCache(ip, "ip_cache");
-            if(ipInfoRow?.length === 0){
+            if (ipInfoRow?.length === 0) {
                 await setCache(ip, "ip_cache");
             }
         },
@@ -980,7 +981,7 @@ const loadSocketHandlers = async (mainHandlersDir, io) => {
     const fileList = [];
 
     const scanDir = (dir) => {
-        const files = fs.readdirSync(dir, {withFileTypes: true});
+        const files = fs.readdirSync(dir, { withFileTypes: true });
         for (const file of files) {
             const filePath = path.join(dir, file.name);
             if (file.isDirectory()) {
@@ -996,7 +997,7 @@ const loadSocketHandlers = async (mainHandlersDir, io) => {
     for (const filePath of fileList) {
         const fileUrl = pathToFileURL(filePath).href;
         try {
-            const {default: handlerFactory} = await import(fileUrl);
+            const { default: handlerFactory } = await import(fileUrl);
             const handler = handlerFactory(io);
 
             if (typeof handler === "function") {
@@ -1037,7 +1038,18 @@ const registerSocketEvents = (socket) => {
     }
 })();
 
-export async function checkPow(socket) {
+export async function checkPow(socket, member) {
+    // bots authenticate via token — skip pow entirely
+    if (member?.id) {
+        const entry = serverconfig.servermembers[member.id];
+        if (entry?.isBot && entry?.token === member?.token) {
+            if (!powVerifiedUsers.includes(socket.id))
+                powVerifiedUsers.push(socket.id);
+            socket.powValidated = true;
+            return;
+        }
+    }
+
     if (powVerifiedUsers.includes(socket.id)) {
         socket.powValidated = true;
         return;
@@ -1075,7 +1087,7 @@ export async function checkPow(socket) {
 }
 
 
-async function listenToIO(){
+async function listenToIO() {
     io.on("connection", async function (socket) {
         // socket ip
         var ip = getSocketIp(socket);
@@ -1148,7 +1160,7 @@ async function listenToIO(){
 function initConfig(filePath) {
     try {
         fileHandle = fs.openSync(filePath, "r+");
-        const fileContent = fs.readFileSync(filePath, {encoding: "utf-8"});
+        const fileContent = fs.readFileSync(filePath, { encoding: "utf-8" });
         savedState = JSON.parse(fileContent);
     } catch (error) {
         console.error("Failed to initialize config file:", error);
@@ -1228,7 +1240,7 @@ export async function reloadConfig() {
 
 export function getFreshConfig() {
     // used for edge cases
-    return JSON.parse(fs.readFileSync(configPath, {encoding: "utf-8"}));
+    return JSON.parse(fs.readFileSync(configPath, { encoding: "utf-8" }));
 }
 
 export function setServer(content) {

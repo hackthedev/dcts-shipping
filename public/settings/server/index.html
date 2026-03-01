@@ -1,16 +1,15 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <meta name="description" content="{{meta.page.description}}" />
 
-    <script
-            src="/js/core/socket.io.js"
-    ></script>
+    <script src="/js/core/socket.io.js"></script>
 
     <link rel="stylesheet" href="/css/themes/default/default.css">
     <link rel="stylesheet" href="/css/notes.css">
@@ -44,186 +43,201 @@
         });
     </script>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
     <title>Server Settings</title>
 </head>
+
 <body id="pagebody" style="display: none;">
 
-<style>
+    <style>
+        #navigation {
+            background-color: hsl(from var(--main) h s calc(l * 1));
+            color: hsl(from var(--main) h s calc(l * 10));
+            flex-shrink: 0;
+            min-width: 200px;
 
-    #navigation{
-        background-color: hsl(from var(--main) h s calc(l * 1));
-        color: hsl(from var(--main) h s calc(l * 10));
-        flex-shrink: 0;
-        min-width: 200px;
+            padding: 32px;
 
-        padding: 32px;
+            width: calc(20%);
+            height: calc(100%);
+            font-style: normal;
 
-        width: calc(20%);
-        height: calc(100%);
-        font-style: normal;
+            float: left;
+            overflow-y: auto;
+        }
 
-        float: left;
-        overflow-y: auto;
-    }
+        #navigation a {
+            color: hsl(from var(--main) h s calc(l * 8) / 100%);
+            font-style: normal;
+        }
 
-    #navigation a {
-        color: hsl(from var(--main) h s calc(l * 8) / 100%);
-        font-style: normal;
-    }
+        #nav_settings {
+            float: right;
+            width: 150px;
 
-    #nav_settings {
-        float: right;
-        width: 150px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
 
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
+        #nav_settings h2 {
+            color: hsl(from var(--main) h s calc(l * 8.5) / 100%) !important;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
 
-    #nav_settings h2 {
-        color: hsl(from var(--main) h s calc(l * 8.5) / 100%) !important;
-        text-transform: uppercase;
-        font-size: 12px;
-    }
-    
-    #nav_settings a{
-        cursor: pointer;
-        line-height: 175%;
+        #nav_settings a {
+            cursor: pointer;
+            line-height: 175%;
 
-        text-decoration: none;
-    }
+            text-decoration: none;
+        }
 
-    #nav_settings a:hover{
-        color: hsl(from var(--main) h s calc(l * 12));
-        transition: all 200ms;
-    }
+        #nav_settings a:hover {
+            color: hsl(from var(--main) h s calc(l * 12));
+            transition: all 200ms;
+        }
 
-    #nav_settings hr {
-        border: 1px solid hsl(from var(--main) h s calc(l * 8) / 10%);
-        background-color: hsl(from var(--main) h s calc(l * 8) / 10%);
+        #nav_settings hr {
+            border: 1px solid hsl(from var(--main) h s calc(l * 8) / 10%);
+            background-color: hsl(from var(--main) h s calc(l * 8) / 10%);
 
-        margin: 16px 0 16px 0;
-    }
+            margin: 16px 0 16px 0;
+        }
 
-    #content {
-        width: calc(80% );
-        height: calc(100%);
-        padding: 32px;
+        #content {
+            width: calc(80%);
+            height: calc(100%);
+            padding: 32px;
 
-        display:block;
-        float: left;
+            display: block;
+            float: left;
 
-        overflow-y: auto;
-        background-color: hsl(from var(--main) h s calc(l * 2));
-    }
+            overflow-y: auto;
+            background-color: hsl(from var(--main) h s calc(l * 2));
+        }
 
-    #content {
-        color: hsl(from var(--main) h s calc(l * 10) / 100%);
-    }
+        #content {
+            color: hsl(from var(--main) h s calc(l * 10) / 100%);
+        }
 
-    #back {
-        width: 30px;
-        height: 30px;
+        #back {
+            width: 30px;
+            height: 30px;
 
-        margin: 20px 20px 0 0;
-        position: absolute;
-        right: 0;
+            margin: 20px 20px 0 0;
+            position: absolute;
+            right: 0;
 
-        float: right;
-        display: block;
+            float: right;
+            display: block;
 
-        background-image: url("/img/back.png");
-        transform: scaleX(-1);
-        background-size: cover;
+            background-image: url("/img/back.png");
+            transform: scaleX(-1);
+            background-size: cover;
 
-        object-fit: cover;
-        background-color: transparent;
-        background-position: center center;
-    }
+            object-fit: cover;
+            background-color: transparent;
+            background-position: center center;
+        }
 
-    #wrapper {
-        display: block;
-        width: 100%;
-        height: 100%;
+        #wrapper {
+            display: block;
+            width: 100%;
+            height: 100%;
 
-        background: linear-gradient(
-                90deg,
-                hsl(from var(--main) h s calc(l * 2)),
-                hsl(from var(--main) h s calc(l * 2))
-        );
-    }
+            background: linear-gradient(90deg,
+                    hsl(from var(--main) h s calc(l * 2)),
+                    hsl(from var(--main) h s calc(l * 2)));
+        }
 
-    input[type=text], input[type=number]{
-        border: 2px solid #3c3f44 !important;
-    }
-
-
-</style>
+        input[type=text],
+        input[type=number] {
+            border: 2px solid #3c3f44 !important;
+        }
+    </style>
 
 
-<div id="wrapper">
-    <div id="navigation">
+    <div id="wrapper">
+        <div id="navigation">
 
-        <div id="nav_settings">
-
-
-            <div id="general">
-                <h2>General Settings</h2>
-                <a onclick='loadPageContent("server-info")' id="manageServerInfo" data-permission="administrator">Server Info</a><br id="manageServerInfo-br">
-                <a onclick='loadPageContent("rate-limit")' id="manageRateSettings" data-permission="administrator">Rate Limit</a><br id="manageRateSettings-br">
-                <hr id="general-hr">
-            </div>
-
-            <div id="moderation">
-                <h2>Moderation & Safety</h2>
-                <!-- soon tm <a href='?page=server-info' id="manageServerInfo">Automod</a><br id="manageServerInfo-br">-->
-
-                <a onclick='loadPageContent("invites")' id="manageInvites" data-permission="manageInvites">Invites</a><br id="manageInvites-br">
-                <a onclick='loadPageContent("auditlog")' id="viewAuditLog" data-permission="viewAuditLog">Audit Log</a><br id="viewAuditLog-br">
-                <a onclick='loadPageContent("ip")' id="manageIpSettings" data-permission="manageIpSettings">IP Security</a><br id="manageIpSettings-br">
-                <a onclick='loadPageContent("network-servers")' id="manageNetworkServers" data-permission="manageNetworkServers">Network Servers</a><br id="manageNetworkServers-br">
-                <hr id="moderation-hr">
-            </div>
-
-            <div id="users">
-                <h2>User Management</h2>
-                <a onclick='loadPageContent("roles")' id="manageRoles" data-permission="manageRoles">Server Roles</a><br id="manageRoles-br">
-                <a onclick='loadPageContent("banlist")' id="manageBans" data-permission="manageBans">Banned Members</a><br id="manageBans-br">
-                <hr id="users-hr">
-            </div>
-
-            <div id="media">
-                <h2>Media Settings</h2>
-                <a onclick='loadPageContent("emojis")' id="manageEmojis" data-permission="manageEmojis">Emojis</a><br id="manageEmojis-br">
-                <a onclick='loadPageContent("file-uploads")' id="manageUploads" data-permission="manageUploads">File Uploads</a><br id="manageUploads-br">
-                <hr id="media-hr">
-            <div>
+            <div id="nav_settings">
 
 
-            <div id="info">
-                <h2>Information</h2>
-                <!--<a href='?page=planned-features'>Planned Features</a><br>-->
-                <a onclick='loadPageContent("about")'>About</a><br>
-                <a onclick='loadPageContent("support")' style="color: #e55a72 !important;">Support <3</a><br>
-                <hr>
+                <div id="general">
+                    <h2>General Settings</h2>
+                    <a onclick='loadPageContent("server-info")' id="manageServerInfo"
+                        data-permission="administrator">Server Info</a><br id="manageServerInfo-br">
+                    <a onclick='loadPageContent("rate-limit")' id="manageRateSettings"
+                        data-permission="administrator">Rate Limit</a><br id="manageRateSettings-br">
+                    <hr id="general-hr">
+                </div>
+
+                <div id="moderation">
+                    <h2>Moderation & Safety</h2>
+                    <!-- soon tm <a href='?page=server-info' id="manageServerInfo">Automod</a><br id="manageServerInfo-br">-->
+
+                    <a onclick='loadPageContent("invites")' id="manageInvites"
+                        data-permission="manageInvites">Invites</a><br id="manageInvites-br">
+                    <a onclick='loadPageContent("auditlog")' id="viewAuditLog" data-permission="viewAuditLog">Audit
+                        Log</a><br id="viewAuditLog-br">
+                    <a onclick='loadPageContent("ip")' id="manageIpSettings" data-permission="manageIpSettings">IP
+                        Security</a><br id="manageIpSettings-br">
+                    <a onclick='loadPageContent("network-servers")' id="manageNetworkServers"
+                        data-permission="manageNetworkServers">Network Servers</a><br id="manageNetworkServers-br">
+                    <hr id="moderation-hr">
+                </div>
+
+                <div id="users">
+                    <h2>User Management</h2>
+                    <a onclick='loadPageContent("roles")' id="manageRoles" data-permission="manageRoles">Server
+                        Roles</a><br id="manageRoles-br">
+                    <a onclick='loadPageContent("banlist")' id="manageBans" data-permission="manageBans">Banned
+                        Members</a><br id="manageBans-br">
+                    <a onclick='loadPageContent("bot-settings")' id="manageBots" data-permission="manageRoles">Bot
+                        Accounts</a><br id="manageBots-br">
+                    <hr id="users-hr">
+                </div>
+
+                <div id="media">
+                    <h2>Media Settings</h2>
+                    <a onclick='loadPageContent("emojis")' id="manageEmojis"
+                        data-permission="manageEmojis">Emojis</a><br id="manageEmojis-br">
+                    <a onclick='loadPageContent("file-uploads")' id="manageUploads" data-permission="manageUploads">File
+                        Uploads</a><br id="manageUploads-br">
+                    <hr id="media-hr">
+                    <div>
+
+
+                        <div id="info">
+                            <h2>Information</h2>
+                            <!--<a href='?page=planned-features'>Planned Features</a><br>-->
+                            <a onclick='loadPageContent("about")'>About</a><br>
+                            <a onclick='loadPageContent("support")' style="color: #e55a72 !important;">Support <3< /a>
+                                    <br>
+                                    <hr>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
 
-    </div>
+        <a href="/">
+            <div id="back"></div>
+        </a>
+        <div id="content">
+
         </div>
     </div>
 
-    <a href="/"><div id="back"></div></a>
-    <div id="content">
-
-    </div>
-</div>
-
-<script>
-    ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
-</script>
+    <script>
+        ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
+    </script>
 
 
 </body>
+
 </html>

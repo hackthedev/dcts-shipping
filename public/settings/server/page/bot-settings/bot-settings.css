@@ -1,0 +1,84 @@
+.bot-settings-page {
+    color: #fff;
+}
+
+.create-bot-btn {
+    background-color: #289b28;
+    color: white;
+    font-weight: bold;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.bot-creation-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    margin-top: 16px;
+    align-items: center;
+}
+
+.input-field {
+    background-color: rgba(30, 30, 30, 0.5);
+    border: 1px solid #444;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    width: 250px;
+    outline: none;
+}
+
+.input-field:focus {
+    border-color: #666;
+}
+
+.bot-entry {
+    background-color: rgba(30, 30, 30, 0.4);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    justify-content: space-between;
+}
+
+.bot-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.bot-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.bot-name {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.bot-token {
+    font-size: 12px;
+    color: #aaa;
+    cursor: pointer;
+    font-family: monospace;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.bot-token:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.delete-bot-btn:hover {
+    background-color: #b71c1c !important;
+}

@@ -7,9 +7,7 @@ import { estimatePoWDuration, formatTimeDifference } from "../functions/pow.mjs"
 export let powVerifiedUsers = [];
 export let powChallengeSessions = {}; // « save user challanges based on session id.
 
-export default (io) => (socket) => {
-    // socket.on code here
-}
+export default (io) => (socket) => {}
 
 export function listenToPow(socket) {
     socket.on('verifyPow', async function (data, response) {
@@ -20,51 +18,50 @@ export function listenToPow(socket) {
         if (powResult?.valid === true) {
             let powString = data.challenge + "-" + data.solution;
 
+            if (data?.token == null || data?.id == null) {
+                response({ type: "error", msg: "ID and token required for authentication" });
+                return;
+            }
+            if (validateMemberId(data.id, socket, data.token, true) !== true) {
+                response({ type: "error", msg: "Invalid credentials or member not found" });
+                return;
+            }
+
             powVerifiedUsers.push(socket.id);
+            checkConnectionLimit(socket, data.token, data.id);
 
-            // only works after powVerifiedUsers includes the socket id
-            checkConnectionLimit(socket, data?.token, data?.id);
+            const members = Object.values(serverconfig.servermembers || {});
+            const duplicatePowMember = members.find(member => member.pow === powString);
 
-            if (data?.token !== null && data?.id !== null) {
-                // lets make sure the account data is correct and save the pow
-                // so other accounts cant reuse the same id
-                if (validateMemberId(data?.id, socket, data?.token,  true) === true) {
-                    // if someone uses the same pow kick em!
-                    const members = Object.values(serverconfig.servermembers || {});
-                    const duplicatePowMember = members.find(member => member.pow === powString);
+            if (duplicatePowMember && serverconfig.servermembers[data.id].token !== data.token) {
+                removeFromArray(powVerifiedUsers, socket.id);
+                Logger.warn(`Duplicate PoW detected: ${serverconfig.servermembers[data.id].name} uses the same POW as ${duplicatePowMember.name} !!`);
+            }
 
-                    if (duplicatePowMember && serverconfig.servermembers[data.id].token !== data.token) {
-                        removeFromArray(powVerifiedUsers, socket.id);
-                        Logger.warn(`Duplicate PoW detected: ${serverconfig.servermembers[data.id].name} uses the same POW as ${duplicatePowMember.name} !!`);
-                    }
+            useridFromSocket[socket.id] = data.id;
 
-                    useridFromSocket[socket.id] = data.id;
+            serverconfig.servermembers[data.id].pow = powString;
+            saveConfig(serverconfig);
 
-                    serverconfig.servermembers[data.id].pow = powString;
-                    saveConfig(serverconfig);
-
-                    
-                    let banResult = await checkMemberBan(socket, serverconfig.servermembers[data.id]);
-                    let banText = "";
-                    if (banResult?.timestamp) {
-                        if (new Date(banResult.timestamp).getFullYear() === 9999) {
-                            banText = "banned permanently";
-                        }
-                        else {
-                            banText = `banned until <br>${formatDateTime(new Date(banResult.timestamp))}`
-                        }
-                    }
-
-                    if (banResult?.reason) {
-                        banText += `<br><br>Reason:<br>${banResult.reason}`
-                    }
-
-                    if (banResult.result === true) {
-                        response({ error: `You've been ${banText}`, type: "error", msg: `You've been ${banText}`, msgDisplayDuration: 1000 * 60 })
-                        socket.disconnect();
-                        return;
-                    }
+            let banResult = await checkMemberBan(socket, serverconfig.servermembers[data.id]);
+            let banText = "";
+            if (banResult?.timestamp) {
+                if (new Date(banResult.timestamp).getFullYear() === 9999) {
+                    banText = "banned permanently";
                 }
+                else {
+                    banText = `banned until <br>${formatDateTime(new Date(banResult.timestamp))}`
+                }
+            }
+
+            if (banResult?.reason) {
+                banText += `<br><br>Reason:<br>${banResult.reason}`
+            }
+
+            if (banResult.result === true) {
+                response({ error: `You've been ${banText}`, type: "error", msg: `You've been ${banText}`, msgDisplayDuration: 1000 * 60 })
+                socket.disconnect();
+                return;
             }
 
             response({ type: "success", msg: "Authenticated" })
@@ -112,7 +109,6 @@ function countLeadingZeroBits(hash) {
     return bits;
 }
 
-// Send a PoW challenge to the client
 export async function sendPow(socket) {
     let powChallenge = crypto.randomBytes(16).toString('hex');
     powChallengeSessions[socket.id] = powChallenge;
@@ -146,7 +142,6 @@ export function waitForPow(socket, timeoutSeconds = 10) {
             waited += intervalMs;
         }, intervalMs);
 
-        // disconnect handler
         function onDisconnect() {
             clearInterval(interval);
             reject(new Error('Socket disconnected before solving PoW'));

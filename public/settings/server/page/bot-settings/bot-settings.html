@@ -1,0 +1,19 @@
+<div class="bot-settings-page">
+    <h2>Bot Users</h2>
+    <p>Create and manage global bot accounts that can interact with sockets on this server. They will authenticate using
+        a unique token.</p>
+
+    <div class="bot-creation-form">
+        <div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;"
+            onclick="document.getElementById('bot-icon-input').click()">
+            <img id="bot-icon-preview" src="/img/default_icon.png" class="bot-icon" style="margin-bottom: 8px;"
+                title="Click to upload icon">
+        </div>
+        <input type="file" id="bot-icon-input" style="display: none;"
+            accept="image/jpeg, image/png, image/jpg, image/webp, image/gif" onchange="previewBotIcon(this.files)">
+        <input type="text" id="bot-name-input" placeholder="Bot Name" class="input-field">
+        <button id="create-bot-btn" class="create-bot-btn" onclick="createBot()">Create Bot</button>
+    </div>
+
+    <div id="bot-list"></div>
+</div>

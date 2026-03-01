@@ -58,6 +58,10 @@ async function updateMarkdownLinks(delay) {
         if (el.hasAttribute("data-markdown-done")) continue;
         if (!isElementVisible(el)) continue;
 
+        // avoid duplicate markdown bs
+        if (el.querySelector(".markdown-urlEmbed-container")) continue;
+        if (el.closest(".markdown-urlEmbed-container")) continue;
+
         const messageId =
             el.getAttribute("data-message-id") ||
             el.parentNode?.getAttribute("data-message-id");

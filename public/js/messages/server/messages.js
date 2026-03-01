@@ -355,6 +355,7 @@ function cancelMessageReply() {
 
 function cancelMessageEdit() {
     editMessageId = null;
+    editor.innerHTML = "";
     if(editorHints) editorHints.innerHTML = ""
 }
 
@@ -363,7 +364,7 @@ function showRateLimitNotice(){
     if (replyMessageId == null && editorHints ) {
         if(editorHints?.querySelector("#ratelimitHint") != null) editorHints?.querySelector("#ratelimitHint").remove();
 
-        editorHints.insertAdjacentHTML("afterbegin", `<p id="ratelimitHint" >The server has been rate limited</p>`)
+        editorHints.insertAdjacentHTML("afterbegin", `<p id="ratelimitHint" >You have been rate limited</p>`)
     }
 
     if(isScrolledDown) scrollDown("showRateLimitNotice")
@@ -388,6 +389,32 @@ function replyToMessage(messageId) {
     replyMessageId = messageId;
 
     if(focusEditor) focusEditor()
+}
+
+function replaceUrlEmbeds(element){
+    let embeds = element.querySelectorAll(".markdown-urlEmbed-container");
+
+    if(embeds?.length > 0){
+        for(let embed of embeds) {
+            let embedLink = embed.querySelector(".markdown-urlEmbed");
+            if(!embedLink) continue; // skip
+
+            let url = embedLink.getAttribute("href");
+            embed.outerHTML = url;
+        }
+
+        // in case we have duplicate shit
+        let emptyDivs = element.querySelectorAll("div:empty");
+        emptyDivs.forEach(d => d.remove());
+
+        // wrap shit if needed
+        if(!element.querySelector("p")) {
+            let text = element.textContent.trim();
+            if(text) element.innerHTML = `<p>${text}</p>`;
+        }
+
+        element.innerHTML = element.innerHTML.replace(/\s+/g, " ").trim();
+    }
 }
 
 function editMessage(id) {
@@ -449,15 +476,7 @@ function editMessage(id) {
     }
     editMessageId = msgContent.getAttribute("data-message-id");
 
-    // remove all url embeds
-    let embeds = msgContent.querySelectorAll(".markdown-urlEmbed");
-    if(embeds?.length > 0){
-        for(let embed of embeds) {
-            let url = embed.getAttribute("href");
-            embed.replaceWith(url);
-        }
-        msgContent.innerHTML = msgContent.innerHTML.replace(/\s+/g, " ").trim();
-    }
+    replaceUrlEmbeds(msgContent);
 
     setTimeout(() => {
         const regex = /<p>\s*<\/p>/gm;

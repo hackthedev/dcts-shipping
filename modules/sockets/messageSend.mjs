@@ -47,6 +47,7 @@ export default (io) => (socket) => {
                 memberId: member.author.id,
             })
 
+            console.log(rateLimitResult)
             // check results
             if (rateLimitResult?.slowmode === true && !hasPermission(member.author.id, "bypassSlowmode", member.channel)) {
                 // get last message sent from member here so we can check the timestamp
@@ -69,7 +70,7 @@ export default (io) => (socket) => {
                     return response({error: "Slow mode active!", slowmode: slowmodeDate})
                 }
             }
-            else if(rateLimitResult?.rateLimited === true){
+            else if(rateLimitResult?.rateLimited === true && !hasPermission(member.author.id, "administrator", member.channel)){
                 return response({error: "The server has been rate limited!", rateLimited: true})
             }
 

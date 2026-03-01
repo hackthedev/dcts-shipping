@@ -27,42 +27,7 @@ Its recommended to create two subdomains for the VoIP system to make things easi
 
 ## LiveKit Reverse Proxy Setup
 
-The following block will show you two possible reverse proxy setups for either nginx or caddy that can be used to the voice chat server aka livekit.
-
-```nginx
-# nginx
-location / {
-	proxy_pass http://127.0.0.1:7880/;
-	proxy_http_version 1.1;
-
-	add_header Access-Control-Allow-Origin *;
-	add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
-	add_header Access-Control-Allow-Headers "*";
-
-	proxy_set_header Upgrade $http_upgrade;
-	proxy_set_header Connection "upgrade";
-	proxy_set_header Host $host;
-	proxy_set_header X-Real-IP $remote_addr;
-	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-	proxy_set_header X-Forwarded-Proto $scheme;
-}
-
-# caddy
-lk.comain.com {
-    reverse_proxy localhost:7880 {
-        transport http {
-            versions 1.1
-        }
-    }
-
-    header {
-        Access-Control-Allow-Origin *
-        Access-Control-Allow-Methods "GET, POST, OPTIONS"
-        Access-Control-Allow-Headers *
-        Access-Control-Allow-Credentials true
-    }
-}
-```
+You can find the example proxy configs for livekit in [[network/Reverse Proxy Setup|Reverse Proxy Setup]]. Once you have done that you can check if the url works like below.
 
 > [!TIP]
 >
@@ -78,11 +43,15 @@ This step assumes you've already installed livekit on your server with the insta
 
 Its important that you set `enabled` to `true`, and change the `domain` value to the domain you're using and linking the TLS certificate files. After you've setup the config file you can exit your editor of choice and restart livekit using `service livekit restart`.
 
-![image-20251108181804501](./assets/image-20251108181804501.png)
+![](assets/Pasted%20image%2020260228193820.png)
 
 > [!NOTE]
 >
 > Turn and TLS is required if you want others to be able to connect to VoIP. Its used for both talking and screensharing.
+> 
+> The sub-domain `livekit`  shown in the screenshot would need to be replaced with `lk` as with the given DNS example above
+> 
+> The `key` shown at line 2 can be changed freely and needs to match with the `livekit` settings inside the `configs/config.json` file.
 
 > [!TIP]
 >
@@ -92,7 +61,7 @@ Its important that you set `enabled` to `true`, and change the `domain` value to
 
 ## LiveKit DCTS Config Setup
 
-Inside the `config.json` file in your DCTS root folder, you will find a section for livekit. This is where you set it to enabled and enter the other relevant data found inside the `livekit.yaml` file from the previous step. Once everything is set VoIP and Screensharing should work flawlessly now.
+Inside the `config.json` file in found in the `configs/`, you will find a section for livekit. This is where you set it to enabled and enter the other relevant data found inside the `livekit.yaml` file from the previous step. Once everything is set VoIP and Screensharing should work flawlessly now.
 
 ![image-20251108182459231](./assets/image-20251108182459231.png)
 

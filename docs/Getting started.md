@@ -141,7 +141,7 @@ You can use it to redeem the administrator role in the web client. To do so righ
 ---
 
 ## Going Public
-If everything works locally and want to go public now so others can access it too then go checkout [[network/Reverse Proxy Setup|Reverse Proxy Setup]]
+If everything works locally and want to go public now so others can access it too then go checkout [Reverse Proxy Setup](network/Reverse%20Proxy%20Setup.md)
 
 
 

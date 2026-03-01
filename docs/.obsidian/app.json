@@ -4,5 +4,6 @@
   "showUnsupportedFiles": true,
   "showInlineTitle": false,
   "promptDelete": false,
-  "attachmentFolderPath": "assets"
+  "attachmentFolderPath": "assets",
+  "useMarkdownLinks": true
 }

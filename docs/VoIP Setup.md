@@ -43,7 +43,7 @@ This step assumes you've already installed livekit on your server with the insta
 
 Its important that you set `enabled` to `true`, and change the `domain` value to the domain you're using and linking the TLS certificate files. After you've setup the config file you can exit your editor of choice and restart livekit using `service livekit restart`.
 
-![[assets/Pasted image 20260228193820.png]]
+![](assets/Pasted%20image%2020260228193820.png)
 
 > [!NOTE]
 >

@@ -27,42 +27,7 @@ Its recommended to create two subdomains for the VoIP system to make things easi
 
 ## LiveKit Reverse Proxy Setup
 
-The following block will show you two possible reverse proxy setups for either nginx or caddy that can be used to the voice chat server aka livekit.
-
-```nginx
-# nginx
-location / {
-	proxy_pass http://127.0.0.1:7880/;
-	proxy_http_version 1.1;
-
-	add_header Access-Control-Allow-Origin *;
-	add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
-	add_header Access-Control-Allow-Headers "*";
-
-	proxy_set_header Upgrade $http_upgrade;
-	proxy_set_header Connection "upgrade";
-	proxy_set_header Host $host;
-	proxy_set_header X-Real-IP $remote_addr;
-	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-	proxy_set_header X-Forwarded-Proto $scheme;
-}
-
-# caddy
-lk.domain.com {
-    reverse_proxy localhost:7880 {
-        transport http {
-            versions 1.1
-        }
-    }
-
-    header {
-        Access-Control-Allow-Origin *
-        Access-Control-Allow-Methods "GET, POST, OPTIONS"
-        Access-Control-Allow-Headers *
-        Access-Control-Allow-Credentials true
-    }
-}
-```
+You can find the example proxy configs for livekit in [[network/Reverse Proxy Setup|Reverse Proxy Setup]]. Once you have done that you can check if the url works like below.
 
 > [!TIP]
 >
@@ -96,7 +61,7 @@ Its important that you set `enabled` to `true`, and change the `domain` value to
 
 ## LiveKit DCTS Config Setup
 
-Inside the `config.json` file in your DCTS root folder, you will find a section for livekit. This is where you set it to enabled and enter the other relevant data found inside the `livekit.yaml` file from the previous step. Once everything is set VoIP and Screensharing should work flawlessly now.
+Inside the `config.json` file in found in the `configs/`, you will find a section for livekit. This is where you set it to enabled and enter the other relevant data found inside the `livekit.yaml` file from the previous step. Once everything is set VoIP and Screensharing should work flawlessly now.
 
 ![image-20251108182459231](./assets/image-20251108182459231.png)
 

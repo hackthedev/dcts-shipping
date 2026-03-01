@@ -6,6 +6,10 @@ This document explains how to get started with the chat application and explain 
 >
 > There's now an official [Youtube Tutorial playlist](https://www.youtube.com/watch?v=b1RXJ-ykdgc&list=PL2xF-BCo1FWav36ktSvBG4nDsbhfLkFR-) which is recommended! It will simply the setup massively.
 
+> [!Warning]
+>
+> Always stop the server before editing the *`config.json`* file. Data may be overwritten otherwise!
+
 ------
 
 ## Requirements & Recommendations
@@ -132,5 +136,13 @@ You can use it to redeem the administrator role in the web client. To do so righ
 > [!TIP]
 >
 > You can create a new admin token by typing `token 1111` into the DCTS console window, whereas `1111` is the role id, in this case the admin role id.
+
+
+---
+
+## Going Public
+If everything works locally and want to go public now so others can access it too then go checkout [[network/Reverse Proxy Setup|Reverse Proxy Setup]]
+
+
 
 [^testedNodeVersions]: Checkout Github Main Readme "Tested Versions"

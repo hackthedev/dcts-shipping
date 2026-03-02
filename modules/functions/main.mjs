@@ -1300,15 +1300,16 @@ export function getRoleCastingObject(role) {
 
 export async function anonymizeMember(member, shouldHide, isAdmin) {
     if(!member) throw new Error("anonymizeMember: Invalid input: Expected a member object");
+
+    // avoid re-checking anon members
+    if(member?.id === 0) return member;
+    
     member = await getCastingMemberObject(member)
 
     if (!member || typeof member !== "object") {
         console.error("getCastingMemberObject Member: Invalid input: Expected an object");
         return;
     }
-
-    // avoid re-checking anon members
-    if(member?.id === 0) return member;
 
     let isBanned = await isIdentifierBanned(member?.id)
     if(shouldHide && !isAdmin){

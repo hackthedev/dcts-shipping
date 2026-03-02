@@ -216,7 +216,6 @@ import {
     sanitizeInput,
     copyObject,
     sanitizeFilename,
-    checkMemberBan,
     hashPassword,
     getCastingMemberObject,
     findAndVerifyUser,
@@ -241,7 +240,6 @@ import {checkSSL} from "./modules/functions/http.mjs";
 
 // Chat functions
 import {
-    unbanIp,
     formatDateTime,
     findInJson,
     changeKeyVerification,
@@ -286,6 +284,7 @@ import {
     getChannelMessageFrequency, getChannelRateLimit,
 } from "./modules/functions/anti-spam/messages.mjs";
 import {renderChart} from "./modules/functions/anti-spam/charts.mjs";
+import {unbanIp} from "./modules/functions/ban-system/helpers.mjs";
 
 /*
     Files for the plugin system
@@ -675,6 +674,18 @@ const tables = [
             {name: "publicKey", type: "text DEFAULT ''"},
             {name: "isVerifiedKey", type: "BOOLEAN DEFAULT FALSE"},
             {name: "pow", type: "text DEFAULT ''"},
+        ]
+    },
+    {
+        name: "bans",
+        columns: [
+            {name: "rowId", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+            {name: "memberId", type: "varchar(100) NOT NULL UNIQUE"},
+            {name: "issuerId", type: "varchar(100) NOT NULL"},
+            {name: "ip", type: "varchar(100) DEFAULT NULL"},
+            {name: "reason", type: "varchar(500) DEFAULT NULL"},
+            {name: "created", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+            {name: "until", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
         ]
     },
 ];

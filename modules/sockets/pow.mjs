@@ -1,8 +1,9 @@
 import { crypto, saveConfig, serverconfig, useridFromSocket, xssFilters } from "../../index.mjs";
 import { formatDateTime, getJson } from "../functions/chat/main.mjs";
 import Logger from "@hackthedev/terminal-logger"
-import { checkConnectionLimit, checkMemberBan, checkRateLimit, copyObject, removeFromArray, validateMemberId } from "../functions/main.mjs";
+import { checkConnectionLimit, checkRateLimit, copyObject, removeFromArray, validateMemberId } from "../functions/main.mjs";
 import { estimatePoWDuration, formatTimeDifference } from "../functions/pow.mjs";
+import {checkMemberBan} from "../functions/ban-system/helpers.mjs";
 
 export let powVerifiedUsers = [];
 export let powChallengeSessions = {}; // « save user challanges based on session id.

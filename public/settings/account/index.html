@@ -33,6 +33,14 @@
     <script defer type="text/javascript" src="/js/core/FileManager.js"></script>
     <script defer type="text/javascript" src="../utility.js"></script>
     <script defer type="text/javascript" src="settings.js"></script>
+    <script src="/plugins/loader.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof loadPlugins === "function") {
+                loadPlugins();
+            }
+        });
+    </script>
     <script defer type="text/javascript" src="/js/upload.js"></script>
     <script defer type="text/javascript" src="/js/sysmsg.js"></script>
 

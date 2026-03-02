@@ -62,6 +62,16 @@ export async function checkMigrations(){
         await completeMigrationTask("fixAutoIncrementInMessageLogs")
     }
 
+    // messages room change
+    migrationTask = await getMigrationTask("messagesRoomTypeChange", true);
+    if(migrationTask && migrationTask?.done === 0){
+        await doBackup()
+        await queryDatabase(
+            "ALTER TABLE messages MODIFY COLUMN room VARCHAR(25) NOT NULL"
+        );
+        await completeMigrationTask("messagesRoomTypeChange")
+    }
+
     // beta to main update
     migrationTask = await getMigrationTask("mainMerge", true);
     if(migrationTask && migrationTask?.done === 0){
@@ -84,6 +94,24 @@ export async function checkMigrations(){
         }
 
         await completeMigrationTask("mainMerge")
+    }
+
+    // dm participant stuff
+    migrationTask = await getMigrationTask("dmParticipants", true);
+    if(migrationTask && migrationTask?.done === 0){
+        await doBackup()
+
+        try{
+            await queryDatabase(`ALTER TABLE dms_participants DROP PRIMARY KEY`, []);
+            await queryDatabase(`ALTER TABLE dms_participants ADD PRIMARY KEY (threadId, memberId)`, []);
+            await queryDatabase(`ALTER TABLE dms_participants ADD KEY memberId (memberId)`, []);
+        }catch(err){
+            Logger.error("DB Migration failed and wont be retried!")
+            Logger.error(err);
+            await completeMigrationTask("dmParticipants")
+        }
+
+        await completeMigrationTask("dmParticipants")
     }
 
     // fix 1erb45 ids to 123254345

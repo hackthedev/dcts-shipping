@@ -3,16 +3,15 @@
 /config_backups
 /chats
 /configs
+/public/graphs/
 /public/uploads/
 /public/emojis/
 /public/.idea/
-/public/emojis/
 /plugins
 /discover/node_modules/
 /discover/config.json
 /cache
 /backups
-/public/img/default_emojis/
 privatekey.json
 
 .idea

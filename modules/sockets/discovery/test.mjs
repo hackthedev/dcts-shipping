@@ -35,7 +35,6 @@ app.get("/discover", pingLimiter, express.json(), (req, res) => {
     try {
 
         if (serverconfig.serverinfo?.discovery?.enabled === true) {
-
             let groupId = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);
             let group = null;
             if(groupId !== null){
@@ -63,12 +62,13 @@ app.get("/discover", pingLimiter, express.json(), (req, res) => {
 
             return;
         }
+        else{
+            res.json({error: "Discovery is not enabled on this server"});
+        }
     } catch (e) {
         Logger.error(e);
         res.json({error: "Internal server error"})
     }
-
-    res.json({error: "Discovery is not enabled on this server"});
 });
 
 // will break if removed

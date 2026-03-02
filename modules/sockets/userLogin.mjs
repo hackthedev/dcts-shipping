@@ -1,6 +1,7 @@
 import { loginAttempts, serverconfig, xssFilters } from "../../index.mjs";
-import {banIp, getNewDate, getSocketIp, unbanIp} from "../functions/chat/main.mjs";
+import {getNewDate, getSocketIp} from "../functions/chat/main.mjs";
 import { copyObject, findAndVerifyUser, getCastingMemberObject, validateMemberId } from "../functions/main.mjs";
+import {banIp, unbanIp} from "../functions/ban-system/helpers.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

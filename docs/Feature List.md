@@ -27,6 +27,7 @@ This document will provide a list of all features[^1] and may describe some as w
 - **Multiple Groups:** Possibility to create multiple groups that each have their own channel tree with custom permissions (= Staff area)
 - **Opus Voice Chat**: Chat with others using a microphone and a custom bitrate.
 - **Screensharing:** Share you screen in a voice channel with customizable resolution, FPS and Bitrate.
+- **Camera Sharing:** You can share your camera as well in addition to screensharing.
 - **Report System:** 
   - Possibility to report server chat messages and DM messages.
   - Slide-in report dashboard to view and manage reports with build in moderation actions: Delete Report, Delete Reported Message, Ban/Kick/Mute Reporter / Reported User, View profile of Reported User / Reporter, View Message Edit History.
@@ -34,7 +35,7 @@ This document will provide a list of all features[^1] and may describe some as w
   - In the server home page, its possible to create a support ticket that appears where the DMs are listed
   - For Staff, its possible to claim a ticket and chat with your username, with `[Support Team]` as prefix or anonymously as `Support Team`.
   - Both the user and staff member can delete the ticket.
-- **Advanced Bans & Mutes:** Possibility to mute or ban a user permanently or temporarily.
+- **Advanced Bans & Mutes:** Possibility to mute or ban a user permanently or temporarily with a custom duration.
 - **Template Engine:** 
   - Dynamically loads variables from the config file and displays them where needed, resulting in dynamic SEO meta tag generation
   - Also used to display specific info across the entire app and very handy.
@@ -47,12 +48,12 @@ This document will provide a list of all features[^1] and may describe some as w
 - **Emojis:** Upload and use custom emojis, rename emojis, Emoji autocomplete
 - **Invite-only system:** You can make your server invite-only, making users require an invite code in order to join.
 - **Audit Log:** Log important actions taking place in the server, like expired invite links being automatically removed and more!
-- **Tenor GIF Integration:** Search and use GIFs from tenor.
 - **Mobile Support:** UI will work for mobile too, tho limited as of right now[^3]
 - **Plugin System:** Its possible to create plugins that hook directly into the server and client, removing the need of bots.
 - **IP Banning:** Automatic IP blacklisting if rate limit is reached. On member bans the IP is also banned.
 - **Hashing & Encoding:** Passwords are hashed and messages being encoded.
 - **Slot Limit + reserved slots:** Possible to limit concurrent slots and define and use reserved slots based on role permission.
+- **Advanced Anti-Spam:** There is a fully dynamic anti spam system that will adjust itself based on the community's activity which also goes into great detail to avoid false positives. 
 
 
 

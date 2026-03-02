@@ -16,3 +16,5 @@ EXPOSE 2052
 
 CMD ["bun", "."]
 
+LABEL org.opencontainers.image.source=https://github.com/hackthedev/dcts-shipping
+LABEL org.opencontainers.image.description="Free Open Source Decentralized Chat App"

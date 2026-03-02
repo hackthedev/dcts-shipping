@@ -8,11 +8,7 @@ import { queryDatabase } from "../../functions/mysql/mysql.mjs";
 
 
 const clean = (s) => xssFilters.inHTMLData(String(s ?? ""));
-const rid = (p = "id") =>
-    `${p}_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36)}`;
-
-const nowISO = () => new Date().toISOString();
-
+const rid = (p) => `${p}_${crypto.randomUUID()}`;
 
 export async function deleteDMMessage(socket, data, response){
     try {
@@ -280,7 +276,7 @@ export default (io) => (socket) => {
                 if (!allowed && await isStaff(me)) allowed = true;
                 if (!allowed) return response?.({ type: "error", msg: "forbidden" });
 
-                const when = ts || nowISO();
+                const when = ts || new Date();
                 await queryDatabase(
                     `INSERT INTO dms_reads (threadId, memberId, last_read_at)
                     VALUES (?, ?, ?)
@@ -376,7 +372,7 @@ export default (io) => (socket) => {
             socket.data.memberId = myId;
             socket.join(myId);
 
-            const members = Object.values(copyObject(serverconfig.servermembers) || {}).map(getCastingMemberObject);
+            const members = Object.values(copyObject(serverconfig.servermembers) || {}).map(await getCastingMemberObject);
 
             const threads = await queryDatabase(
                 `SELECT t.threadId, t.type, t.title, k.status
@@ -668,10 +664,10 @@ export default (io) => (socket) => {
 
 
 
-    function getMemberForReport(uid) {
+    async function getMemberForReport(uid) {
         try {
             const m = (serverconfig?.servermembers || {})[uid];
-            if (m) return getCastingMemberObject(m);
+            if (m) return await getCastingMemberObject(m);
         } catch { }
         return { id: null, name: null, icon: null };
     }
@@ -909,7 +905,7 @@ export default (io) => (socket) => {
                 const title = clean(data?.title || "");
                 const body = clean(data?.body || "");
                 const authorId = data?.authorId;
-                const createdAt = nowISO();
+                const createdAt = new Date();
                 const notifyAll = !!data?.notifyAll;
 
                 if (type === "help") {

@@ -1,6 +1,80 @@
 let mentionAc = null;
 let mentionList = [];
 
+async function updateUIMentions(){
+    let channelTree = document.querySelector("#channeltree");
+    let groupList = document.querySelector("#serverlist");
+
+    if(!channelTree) throw new Error("Channel tree not found!!")
+    if(!groupList) throw new Error("Group list not found!!")
+
+    let mentions = await Inbox.fetchMessages();
+
+    let channelMentions = [];
+    let groupMentions = [];
+
+    if(mentions?.items?.length >= 0){
+        for(let mentionKey of Object.keys(mentions.items)){
+
+            // lets set some vars
+            let mention = mentions.items[mentionKey]
+            let mentionType = mention?.type;
+
+            // parse this shit
+            mention.data = JSON.parse(mention?.data || "{}");
+
+            if(mentionType === "message"){
+                await handleMessageMentionType(mention)
+            }
+        }
+    }
+
+    async function handleMessageMentionType(mention){
+        let messageId = mention?.data?.messageId;
+        if(!messageId) return console.warn("No message id found in mention?");
+
+        let message = await ChatManager.resolveMessage(messageId);
+        if(!message) return console.warn("Message not found from mention? Maybe it was deleted?")
+
+        // our nice lil counters
+        channelMentions.push(message.channel)
+        groupMentions.push(message.group)
+
+        updateChannelMentionUI(message.channel);
+        updateGroupMentionUI(message.group)
+    }
+
+    function updateChannelMentionUI(channelId){
+        let channelMentionBadgeElement = channelTree.querySelector(`li .channel-mention-marker[data-channel-id='${channelId}']`)
+        if(!channelMentionBadgeElement) return;
+
+        let count = channelMentions.filter(id => id === channelId).length;
+        channelMentionBadgeElement.innerText = count > 0 ? count : "";
+
+        if(count > 0){
+            channelMentionBadgeElement.style.display = "inline-flex";
+        }
+        else {
+            channelMentionBadgeElement.style.display = "none";
+        }
+    }
+
+    function updateGroupMentionUI(groupId){
+        let groupMentionBadgeElement = groupList.querySelector(`.server-entry .group-mention-indicator[data-group-id='${groupId}']`)
+        if(!groupMentionBadgeElement) return console.warn("Group element not found :/");
+
+        let count = groupMentions.filter(id => id === groupId).length;
+        groupMentionBadgeElement.innerText = count > 0 ? count : "";
+
+        if(count > 0){
+            groupMentionBadgeElement.style.display = "inline-flex";
+        }
+        else{
+            groupMentionBadgeElement.style.display = "none";
+        }
+    }
+}
+
 function registerMentionClickEvent(){
     ContextMenu.registerClickEvent(
         "mention_channel_click",
@@ -29,7 +103,7 @@ async function resolveMentions(message = null, pingUser = false) {
     const container = document.querySelector(`.message-container .content:not(.reply)[data-message-id="${message.messageId}"]`);
     if(!container) throw new Error("Message container not found for converting mentions");
     let messageContainer = container.closest(".message-container");
-    if (!container) return;
+    if (!messageContainer) return;
 
     let replyRow = messageContainer.querySelector(".row.reply");
     if(replyRow){
@@ -48,11 +122,13 @@ async function resolveMentions(message = null, pingUser = false) {
 
         if (mention.getAttribute("data-member-id") === userId) {
             markElementAsMention(mention.closest(".content"), pingUser, message);
+
         } else if (mention.getAttribute("data-role-id")) {
             let ownUserRoles = await ChatManager.resolveMemberRoles(userId);
             if (ownUserRoles?.includes(mention.getAttribute("data-role-id"))) {
                 markElementAsMention(mention.closest(".content"), pingUser, message);
             }
+
         } else {
             mention.style.backgroundColor = "transparent";
         }
@@ -232,7 +308,7 @@ async function updateMentionAutocompleteData() {
         if (!role?.info) continue;
 
         const name = role.info.name;
-        const html = `<span data-role-id="${roleId}" style="color:${role.info.color}">@${name}</span>`;
+        const html = `<span data-role-id="${roleId}" style="color:${role.info.color}; background:${role.info.background}; background-clip:${role.info.backgroundClip};">@${name}</span>`;
 
         const mention = new Mention("role", { role: { id: roleId, ...role.info }, html });
         mentionList[i++] = mention;

@@ -67,6 +67,12 @@ function getMemberList() {
             const sortedRoles = Object.values(rolesMap)
                 .sort((a, b) => b.role.info.sortId - a.role.info.sortId);
 
+            // only clear cache once we load
+            if(!window?.firstInitMemberList){
+                infolist.innerHTML = "";
+                window.firstInitMemberList = true;
+            }
+
             for (let entry of sortedRoles) {
                 insertRoleIntoList(entry.role.info, getRoleHTML(entry.role));
 
@@ -205,40 +211,44 @@ function getMemberList() {
 
                     let newSrc = ChatManager.proxyUrl(memberObject.icon);
                     if(memberIcon.src !== newSrc){
-                        memberIcon.src = newSrc;
+                        memberIcon.src = sanitizeHtmlForRender(newSrc, false);
                     }
                 }
 
                 if(memberName && memberName.innerText !== memberObject.name){
-                    memberName.innerText = memberObject.name;
+                    memberName.innerText = unescapeHtmlEntities(sanitizeHtmlForRender(memberObject.name, false));
                 }
                 if(memberStatus && memberStatus.innerText !== memberObject.status){
-                    memberStatus.innerText = memberObject.status;
+                    memberStatus.innerText = sanitizeHtmlForRender(memberObject.status, false);
                 }
             }
         });
     }
 
-
     function getRoleHTML(role){
-        return `<div class="infolist-role" data-sort-id="${role.info.sortId}" data-role-id="${role.info.id}" title="${role.info.name}" style="color: ${role.info.color};">
-                    ${role.info.name}
-                    <hr style="margin-bottom: 16px;border: 1px solid ${role.info.color};">
+        return `<div class="infolist-role" data-sort-id="${role.info.sortId}" data-role-id="${role.info.id}" title="${role.info.name}">
+                    <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${role.info.name}</span>
+                    <hr style="
+                    margin-bottom: 16px; 
+                    border: none;
+                    height: 2px;
+                    background: ${role?.info?.background?.replace("text", "") || role.info.color};
+                    ">
                 </div>`
     }
 
     function getMemberHTML(member, role){
         return `<div class="memberlist-container" data-member-id="${member.id}">
-                        <img draggable="false" class="memberlist-img ${member?.isOffline ? "offline_pfp" : ""}" data-member-id="${member.id}" src="${ChatManager.proxyUrl(member.icon)}" onerror="this.src = '/img/default_pfp.png'">
+                        <img draggable="false" class="memberlist-img ${member?.isOffline ? "offline_pfp" : ""}" data-member-id="${member.id}" src="${ChatManager.proxyUrl(sanitizeHtmlForRender(member.icon))}" onerror="this.src = '/img/default_pfp.png'">
                         
                         <div style="display:flex;flex-direction: column;width: calc(100% - 35px);">
                             <div class="memberlist-member-info name" 
-                                onclick="getMemberProfile('${member.id}');" data-member-id="${member.id}"" 
-                                style="color: ${role.info.color};">
-                                ${getDisplayString(member?.name, member, role.info.color)}
+                                onclick="getMemberProfile('${sanitizeHtmlForRender(member.id, false)}');" data-member-id="${sanitizeHtmlForRender(member.id, false)}"" 
+                                >
+                                <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${sanitizeHtmlForRender(getDisplayString(member?.name, member, role.info.color), false)}</span>
                             </div>
-                            <div class="memberlist-member-info status" data-member-id="${member.id}" style="color: ${role.info.color};">
-                                ${getDisplayString(member?.status, member, role.info.color)}
+                            <div class="memberlist-member-info status" data-member-id="${member.id}">
+                                <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${sanitizeHtmlForRender(getDisplayString(member?.status, member, role.info.color), false)}</span>
                             </div>
                         </div>
                 </div>`

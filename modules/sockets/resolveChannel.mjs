@@ -2,10 +2,7 @@ import { serverconfig, xssFilters } from "../../index.mjs";
 import {hasPermission, resolveCategoryByChannelId, resolveGroupByChannelId} from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import {
-    copyObject,
-    getCastingMemberObject, getChannelCastingObject,
-    getRoleCastingObject,
-    sendMessageToUser,
+    getChannelCastingObject,
     validateMemberId
 } from "../functions/main.mjs";
 

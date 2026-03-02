@@ -29,7 +29,7 @@ class UserReports {
                 }, function (response) {
 
                     showSystemMessage({
-                        title: response?.msg || response?.error,
+                        title: response?.error || response?.msg,
                         text: "",
                         icon: response.type,
                         img: null,

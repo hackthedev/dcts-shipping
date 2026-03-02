@@ -1,0 +1,61 @@
+span.note {
+    display: flex;
+    width: fit-content;
+    flex-direction: column;
+    align-items: start;
+    gap: .5rem;
+    margin: 1rem 0;
+    padding: 0.75rem;
+
+    background-color: rgba(5, 163, 0, 0.25);
+    border-left: 4px solid rgb(5, 163, 0);
+}
+span.note ul{
+    margin-top: 0;
+    margin-bottom: 0;
+}
+span.note::before{
+    content: "Note";
+    font-weight: bold;
+}
+
+
+/* info */
+span.info{
+    background-color: rgba(0, 98, 128, 0.25);
+    border-left: 4px solid rgb(0, 98, 128);
+}
+span.info::before{
+    content: "Info";
+    font-weight: bold;
+}
+
+/* important */
+span.important{
+    background-color: rgba(140, 0, 163, 0.25);
+    border-left: 4px solid rgb(140, 0, 163);
+}
+span.important::before{
+    content: "Important";
+    font-weight: bold;
+}
+
+/* warning */
+span.warning{
+    background-color: rgba(182, 144, 0, 0.25);
+    border-left: 4px solid rgb(182, 144, 0);
+}
+span.warning::before{
+    content: "Warning";
+    font-weight: bold;
+}
+
+/* caution */
+span.caution{
+    background-color: rgba(181, 0, 0, 0.25);
+    border-left: 4px solid rgb(181, 0, 0);
+}
+span.caution::before{
+    content: "Caution";
+    font-weight: bold;
+}

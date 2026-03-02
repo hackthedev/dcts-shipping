@@ -17,8 +17,24 @@ class Emoji {
         };
     }
 
+    parseEmojiFilename(filename) {
+        const dot = filename.lastIndexOf(".");
+        if (dot === -1) return null;
+
+        const base = filename.slice(0, dot);
+        const idx = base.indexOf("_");
+        if (idx === -1) return null;
+
+        return {
+            hash: base.slice(0, idx),
+            name: base.slice(idx + 1)
+        };
+    }
+
     setName(value) {
-        this.name = value || "";
+        let parsed = this.parseEmojiFilename(this.filename);
+        this.name = parsed.name;
+        console.log(parsed)
         return this;
     }
 

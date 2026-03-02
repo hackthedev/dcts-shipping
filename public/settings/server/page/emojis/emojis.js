@@ -51,8 +51,6 @@ async function editEmoji(emojiStringified) {
         .setUserReaction(emoji.user_reaction)
         .setAllowedRoles(emoji.allowedRoles)
 
-    console.log(emojiObject.object)
-
     let roleCode = "";
     for (let roleId of emojiObject.allowedRoles) {
         let resolvedRole = await ChatManager.resolveRole(roleId);

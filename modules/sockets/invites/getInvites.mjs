@@ -48,7 +48,7 @@ export default (io) => (socket) => {
                     }
                 }
 
-                if(serverconfig.servermembers[code.createdBy]) code.createdBy = getCastingMemberObject(serverconfig.servermembers[code.createdBy]);
+                if(serverconfig.servermembers[code.createdBy]) code.createdBy = await getCastingMemberObject(serverconfig.servermembers[code.createdBy]);
             }
 
             // lets try to me efficient

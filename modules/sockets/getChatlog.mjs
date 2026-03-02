@@ -18,34 +18,40 @@ export default (io) => (socket) => {
     // socket.on code here
 
     socket.on('getChatlog', async function (member, response) {
-        Clock.start("chatlog_total")
-        if (validateMemberId(member?.id, socket,  member?.token) === true) {
+        Clock.start("chatlog_total", async () => {
+            if (validateMemberId(member?.id, socket,  member?.token) === true) {
 
-            if(!member?.id) return response({type: "error", error: "No member id provided"});
-            if(!member?.token) return response({type: "error", error: "No member token provided"});
+                if(!member?.id) return response({type: "error", error: "No member id provided"});
+                if(!member?.token) return response({type: "error", error: "No member token provided"});
 
-            let channel = resolveChannelById(member?.channelId);
-            if (hasPermission(member.id, ["viewChannel", "viewChannelHistory"], member.channelId)) {
+                let channel = resolveChannelById(member?.channelId);
+                if (hasPermission(member.id, ["viewChannel", "viewChannelHistory"], member.channelId)) {
 
-                // filter messages
-                let messages = await getSavedChatMessage(member.groupId, member.categoryId, member.channelId, member.index);
-                messages = await Promise.all(
-                    messages.map(async m => {
-                        let msg = autoAnonymizeMessage(member.id, structuredClone(m));
-                        if(msg?.reply?.messageId) msg.reply = autoAnonymizeMessage(member.id, structuredClone(msg.reply));
+                    // filter messages
+                    let messages
+                    await Clock.start("Chatlog Message Fetching", async () => {
+                        messages = await getSavedChatMessage(member.groupId, member.categoryId, member.channelId, member.index);
+                    });
 
-                        if (msg?.author?.icon?.startsWith("data:image")) msg.author.icon = "";
-                        if (msg?.author?.banner?.startsWith("data:image")) msg.author.banner = "";
-                        return msg;
+                    await Clock.start("Chatlog Message Anon", async () => {
+                        messages = await Promise.all(
+                            messages.map(async m => {
+                                let msg = await autoAnonymizeMessage(member.id, structuredClone(m));
+                                if (msg?.reply?.messageId) msg.reply = await autoAnonymizeMessage(member.id, structuredClone(msg.reply));
+
+                                if (msg?.author?.icon?.startsWith("data:image")) msg.author.icon = "";
+                                if (msg?.author?.banner?.startsWith("data:image")) msg.author.banner = "";
+                                return msg;
+                            })
+                        );
                     })
-                );
 
-                response({data: messages, type: channel?.type});
+                    response({data: messages, type: channel?.type});
+                }
+                else{
+                    response?.({type: "error", error: "denied"})
+                }
             }
-            else{
-                response?.({type: "error", error: "denied"})
-            }
-        }
-        Clock.stop("chatlog_total")
+        })
     });
 }

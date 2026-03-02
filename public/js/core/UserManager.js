@@ -42,9 +42,14 @@ class UserManager {
         for (let i = 0; i < memberObj?.roles.length; i++) {
             var role = memberObj?.roles[i];
             var roleColor = role.color;
+            var roleBackground = role?.background?.replace("text", "");
+            var roleBackgroundClip = role.backgroundClip;
             var roleName = role.name;
 
-            roleCode += `<code class="role" id="profile-role-entry-${role.id}"><div class="role_color" style="background-color: ${roleColor};"></div>${roleName}</code>`;
+            console.log(roleColor)
+            console.log(roleBackground)
+
+            roleCode += `<code class="role" id="profile-role-entry-${role.id}"><div class="role_color" style="background: ${roleColor === "transparent" ? roleBackground : roleColor};"></div><span style="color: ${roleColor};background: ${roleBackground};background-clip: ${roleBackgroundClip};">${roleName}</span></code>`;
         }
 
         let isMuted = memberObj?.isMuted;
@@ -73,32 +78,35 @@ class UserManager {
         
             <div id="profile_pfp_container">
                 <div id="profile_icon" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.icon)}');"></div>                
-                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(memberObj?.publicKey) : ""}"></div>                
+                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(sanitizeHtmlForRender(memberObj?.publicKey)) : ""}"></div>                
             </div>
             
         
             <div id="profile_content">       
-                <div id="profile_username"><h2 style="margin: 0 !important;">${memberObj?.name}</h2></div>                
-                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? memberObj?.status : ""}</i></div>  
-                                
+                <div id="profile_username"><h2 style="margin: 0 !important;">${unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.name))}</h2></div>                
+                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? sanitizeHtmlForRender(memberObj?.status) : ""}</i></div>  
+                
+                ${memberObj?.aboutme?.trim()?.length > 0 ?                
+               `
                 <hr>
                 <div class="profile_aboutme">       
-                    ${memberObj?.aboutme?.trim()?.length > 0 ? `<h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(memberObj.aboutme)}` : ""}
+                    <h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(limitString(memberObj.aboutme, 1000))}
                     
                     
                     <div class="profile_meta_container">
                         ${
-                            mutedCode || bannedCode ?
-                                `<div class="profile_meta">
+                   mutedCode || bannedCode ?
+                       `<div class="profile_meta">
                                     ${mutedCode}
                                     ${bannedCode}   
                                 </div>` : ""
-                        }   
+               }   
                     </div>        
                 </div>
+               ` : ""}
             <hr>
                        
-            <a id="dm_action" href="/home.html?dm=${memberObj?.id}">&#10149; Send Message</a>
+            <a id="dm_action" href="/home.html?dm=${sanitizeHtmlForRender(memberObj?.id)}">&#10149; Send Message</a>
 
             <div class="profile_meta">
                 <div class="info">
@@ -129,7 +137,7 @@ class UserManager {
             <div id="profile_roles">
                 <h2 class="profile_headline">Roles</h2>
                 ${roleCode}
-                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${memberObj.id}');" class="role addRoleMenuTrigger" data-member-id="${memberObj.id}" id="addRole-${memberObj.id}">+</code>
+                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${sanitizeHtmlForRender(memberObj.id)}');" class="role addRoleMenuTrigger" data-member-id="${memberObj.id}" id="addRole-${memberObj.id}">+</code>
             </div>`;
     }
 
@@ -448,7 +456,7 @@ class UserManager {
 
     static getUsername() {
 
-        var username = CookieManager.getCookie("username");
+        var username = sanitizeHtmlForRender(CookieManager.getCookie("username"), false);
 
         if (username == null || username.length <= 0) {
             return UserManager.getRandomUsername();
@@ -462,7 +470,7 @@ class UserManager {
     }
 
     static getAboutme() {
-        var aboutme = CookieManager.getCookie("aboutme");
+        var aboutme = sanitizeHtmlForRender(CookieManager.getCookie("aboutme"), false);
 
         if (aboutme == null || aboutme.length <= 0) {
             return "";
@@ -476,7 +484,7 @@ class UserManager {
     }
 
     static getBanner() {
-        var banner = localStorage.getItem("banner");
+        var banner = sanitizeHtmlForRender(localStorage.getItem("banner"), false);
 
         if (banner == null || banner.length <= 0) {
             return "";
@@ -523,7 +531,7 @@ class UserManager {
     }
 
     static resetAccount() {
-        var reset = confirm("Do you really want to reset your account? EVERYTHING will be reset.")
+        var reset = confirm("Do you really wanna logout?")
 
         if (reset) {
             CookieManager.setCookie("id", null, 365);
@@ -535,38 +543,41 @@ class UserManager {
             CookieManager.setCookie("pow_challenge", null, 365);
             CookieManager.setCookie("pow_solution", null, 365);
 
-            alert("Your account has been reset. Please refresh the page if you want to continue");
-
-            window.location.reload();
+            window.location.href = window.location.origin;
         }
     }
 
     static setUser(username) {
         // renamed setUser. May be used. legacy function lol
-        UserManager.setUsername(username)
+        UserManager.setUsername(sanitizeHtmlForRender(username, false))
     }
 
     static setUsername(username) {
+        username = sanitizeHtmlForRender(username, false);
         CookieManager.setCookie("username", username, 360);
         UserManager.updateUsernameOnUI(username);
     }
 
     static setBanner(banner) {
+        banner = sanitizeHtmlForRender(banner, false)
         CookieManager.setCookie("banner", banner, 360);
         localStorage.setItem("banner", banner);
     }
 
     static setStatus(status) {
+        status = sanitizeHtmlForRender(status, false);
         CookieManager.setCookie("status", status, 360);
         UserManager.updateUsernameOnUI(status);
     }
 
     static setPFP(pfp) {
+        pfp = sanitizeHtmlForRender(pfp, false)
         localStorage.setItem("pfp", pfp);
         UserManager.updateUsernameOnUI(pfp);
     }
 
     static setAboutme(aboutme) {
+        aboutme = sanitizeHtmlForRender(aboutme, false);
         CookieManager.setCookie("aboutme", aboutme, 360);
         UserManager.updateUsernameOnUI(aboutme);
     }
@@ -651,11 +662,17 @@ class UserManager {
                         }, function (response) {
 
                             console.log(response)
+
+                            if (response?.member?.token) CookieManager.setCookie("token", response.member.token);
+                            if (response?.member?.icon) CookieManager.setCookie("pfp", response.member.icon);
+                            if (response?.member?.banner) CookieManager.setCookie("banner", response.member.banner);
+                            if (response?.member?.aboutme) CookieManager.setCookie("aboutme", response.member.aboutme);
+                            if (response?.member?.status) CookieManager.setCookie("status", response.member.status);
+                            if (response?.member?.loginName) CookieManager.setCookie("loginName", response.member.loginName);
+                            if (response?.member?.id) CookieManager.setCookie("id", response.member.id);
+
                             if (response?.error === null && response.member) {
                                 console.log("Setting cookies")
-                                CookieManager.setCookie("dcts_token", response.member.token, 365);
-                                CookieManager.setCookie("id", response.member.id, 365);
-                                CookieManager.setCookie("username", response.member.name, 365);
 
                                 UserManager.setPFP(response.member.icon);
                                 UserManager.setBanner(response.member.banner);

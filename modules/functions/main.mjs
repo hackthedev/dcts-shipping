@@ -18,27 +18,22 @@ import {
     fs, signer, db
 } from "../../index.mjs"
 import {
-    banIp,
     generateGid,
     getNewDate,
-    getSocketIp,
-    hasPermission, isIpBanned,
-    removeBan,
-    resolveRolesByUserId
+    hasPermission,
 } from "./chat/main.mjs";
 import {consolas} from "./io.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import path from "path";
 import {powVerifiedUsers} from "../sockets/pow.mjs";
 import {sendSystemMessage} from "../sockets/home/general.mjs";
-import {decodeFromBase64, encodeToBase64} from "./mysql/helper.mjs";
 import {checkMemberMigration} from "./migrations/memberJsonToDb.mjs";
-import {clearBase64FromDatabase} from "./migrations/base64_fixer.mjs";
+import {clearBase64FromDatabase, clearMemberBase64FromDb} from "./migrations/base64_fixer.mjs";
 import {getMemberHighestRole} from "./chat/helper.mjs";
 import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./migrations/messageMigration.mjs";
 import archiver from "archiver";
-import JSONTools from "@hackthedev/json-tools";
-import {initPaymentSystem} from "./payments.mjs";
+import {banIp, checkMemberBan, getBan, isIdentifierBanned, removeBan} from "./ban-system/helpers.mjs";
+import checkPermission from "../sockets/checkPermission.mjs";
 
 var serverconfigEditable;
 
@@ -249,8 +244,26 @@ export async function handleTerminalCommands(command, args) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     try {
+        if(command === "unban"){
+            if (args.length === 2) {
+
+                var identifier = args[1];
+
+                try {
+                    await removeBan(identifier);
+                    Logger.info(`User/IP ${identifier} has been unbanned`)
+                } catch (Err) {
+                    Logger.error(`Couldnt unban User/IP ${identifier}`);
+                    Logger.error(Err)
+                }
+            } else {
+                Logger.warn(`Missing Argument: Member Id / IP address`);
+            }
+            return;
+        }
         if(command === "clear64"){
             clearBase64FromDatabase();
+            clearMemberBase64FromDb();
             return;
         }
         if(command === "rotateMemberTokens"){
@@ -737,6 +750,13 @@ export function checkConfigAdditions() {
             "/^\/emojis(\/.*)?$/"
         ]
     )
+
+
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.user_slowmode", 0)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.user_slowmode_duration", "2 minutes")
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.ratelimit", 0)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.record_history", "14 days")
+
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.companyDomainWhitelist", [])
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blacklist", [])
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.whitelist", [])
@@ -751,8 +771,8 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockAbuser", true)
 
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayName", "Banned")
-    checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayMessageNotice", `<span style="color: indianred;">[ Content hidden ]</span>`)
-
+    checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayMessageNotice", `<span class="content-hidden">[ Content hidden ]</span>`)
+    
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.email", "")
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.website", "")
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.reddit", "")
@@ -761,7 +781,6 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.signal", "")
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.owner.name", "")
 
-    // v9
     checkObjectKeys(serverconfig, "serverinfo.defaultTheme", "default.css")
 
     // livekit VC
@@ -796,16 +815,10 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.home.title", "Default Server Title")
     checkObjectKeys(serverconfig, "serverinfo.home.subtitle", "Default Server Sub-Title")
     checkObjectKeys(serverconfig, "serverinfo.home.about", "This is the <i>default server</i> about me")
-
     checkObjectKeys(serverconfig, "serverinfo.reports.enabled", true)
 
     // TURN SERVER SETTINGS
     checkObjectKeys(serverconfig, "serverinfo.app.url", "http://your-ip-or-domain:port")    // without slash at end!
-
-    checkObjectKeys(serverconfig, "serverinfo.turn.enabled", true)         // use turn or no
-    checkObjectKeys(serverconfig, "serverinfo.turn.secret", "north")        // static-auth-secret
-    checkObjectKeys(serverconfig, "serverinfo.turn.host", "127.0.0.1")      // public ip or domain
-    checkObjectKeys(serverconfig, "serverinfo.turn.port", 3478)             // listening-port
 
 
     checkObjectKeys(serverconfig, "groups.*.channels.categories.*.channel.*.msgCount", 0)
@@ -829,29 +842,6 @@ export function checkConfigAdditions() {
     // Rate Spam & Failed Logins as example
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.ipBanDuration", "10 minutes")
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.memberListHideBanned", true)
-
-
-    /*
-        UI / Mod Update
-    */
-
-    // Settings for Moderation
-    //
-    // Message Spam
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.enabled", false)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.counter", 0)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.actions", {})
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.timespan", 0)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.repeatedMessages.bypassers", [])
-    //
-    // Blacklist
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.enabled", false)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.words", [])
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.actions", {})
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.channels", [])
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.userprofile", true)
-    checkObjectKeys(serverconfig, "serverinfo.moderation.messaging.blacklist.bypassers", [])
-
 
     /*
         Config changes from some update
@@ -1075,7 +1065,7 @@ export function validateMemberId(id, socket, token, bypass = false) {
         }
 
         // if is banned deny all connections
-        if(serverconfig.servermembers[id]?.isBanned === 1){
+        if(serverconfig.servermembers[id]?.onboarding === false){
             return false;
         }
     }
@@ -1251,45 +1241,6 @@ export function isLocalhostIp(ip){
 }
 
 
-export async function checkMemberBan(socket, member) {
-    let ip = getSocketIp(socket);
-    checkRateLimit(socket);
-
-    // if the user is not banned anymore but the flag is still there
-    if(!serverconfig.banlist.hasOwnProperty(member?.id) && checkAndUnbanIp(ip).result === false){
-        if(serverconfig.servermembers[member?.id]) serverconfig.servermembers[member.id].isBanned = false;
-    }
-
-    // check banlist for member
-    if (serverconfig.banlist.hasOwnProperty(member?.id)) {
-        var durationStamp = serverconfig.banlist[member?.id].until;
-        var banReason = serverconfig.banlist[member?.id].reason;
-
-        if (Date.now() >= durationStamp) {
-            // unban user
-            removeBan(member?.id);
-            return checkAndUnbanIp(ip);
-        } else {
-            return {result: true, timestamp: durationStamp, reason: banReason};
-        }
-    }
-
-    return checkAndUnbanIp(ip);
-
-    function checkAndUnbanIp(ip){
-        // check ip blacklist
-        if (serverconfig.banlist.hasOwnProperty(ip)) {
-            if (Date.now() >= serverconfig.banlist[ip]?.until) {
-                removeBan(ip);
-                return {result: false, timestamp: null}
-            } else {
-                return {result: true, timestamp: serverconfig.banlist[ip]}
-            }
-        }
-
-        return {result: false, timestamp: null}
-    }
-}
 
 export async function hashPassword(password) {
     const saltRounds = 10; // potential config setting, 20 is painful!!!!
@@ -1347,18 +1298,22 @@ export function getRoleCastingObject(role) {
     return role;
 }
 
-export function anonymizeMember(member, shouldHide, isAdmin) {
+export async function anonymizeMember(member, shouldHide, isAdmin) {
     if(!member) throw new Error("anonymizeMember: Invalid input: Expected a member object");
-    member = getCastingMemberObject(member)
+
+    // avoid re-checking anon members
+    if(member?.id === 0) return member;
+
+    member = await getCastingMemberObject(member)
 
     if (!member || typeof member !== "object") {
         console.error("getCastingMemberObject Member: Invalid input: Expected an object");
         return;
     }
 
-    let isBanned = member?.isBanned;
-
+    let isBanned = await isIdentifierBanned(member?.id)
     if(shouldHide && !isAdmin){
+
         member.id = 0;
         member.icon = "";
         member.status = "";
@@ -1376,53 +1331,54 @@ export function anonymizeMember(member, shouldHide, isAdmin) {
     return member;
 }
 
-export function autoAnonymizeMember(issuerMemberId, member){
+export async function autoAnonymizeMember(issuerMemberId, member){
     if(!member?.id) member = getUnkownMember()
-    let shouldAnonymize = member?.isBanned
+    let shouldAnonymize = await isIdentifierBanned(member?.id);
 
     if(shouldAnonymize){
-        return anonymizeMember(member, shouldAnonymize, hasPermission(issuerMemberId, "viewAnonymizedMessages"));
+        return await anonymizeMember(member, shouldAnonymize, hasPermission(issuerMemberId, "viewAnonymizedMessages"));
     }
 
     return member;
 }
 
-export function autoAnonymizeMessage(issuerMemberId, message){
+export async function autoAnonymizeMessage(issuerMemberId, message){
     if(!message?.author?.id) message.author = getUnkownMember()
 
     let author = serverconfig.servermembers[message.author.id] || getUnkownMember()
     if(!author) throw new Error("Message author member object not found");
+    let isBanned = await isIdentifierBanned(message.author?.id)
+    message.author.isBanned = isBanned;
 
-    let shouldAnonymize = (author?.isBanned == true || message?.anon === true) || false
+    let shouldAnonymize = (isBanned || message?.anon === true) || false
     if(shouldAnonymize){
-        return anonymizeMessage(message, author?.isBanned, hasPermission(issuerMemberId, "viewAnonymizedMessages"), issuerMemberId);
+        return await anonymizeMessage(message, isBanned, hasPermission(issuerMemberId, "viewAnonymizedMessages"), issuerMemberId);
     }
     else{
         return message;
     }
 }
 
-export function anonymizeMessage(message, hideContentForMembers = false, isAdmin = false, issuerMemberId) {
+export async function anonymizeMessage(message, hideContentForMembers = false, isAdmin = false, issuerMemberId) {
     message = copyObject(message);
 
     if (!message || typeof message !== "object") {
-        console.log(message)
         console.error("getCastingMemberObject Message: Invalid input: Expected an object");
         return;
     }
 
 
     let originalAuthor = serverconfig.servermembers[message.author.id] || getUnkownMember();
-    let isBanned = originalAuthor?.isBanned;
+    let isBanned = message.author.isBanned;
 
     // anonymize message author
     if(message?.author?.name){
-        message.author = autoAnonymizeMember(issuerMemberId, originalAuthor);
+        message.author = await autoAnonymizeMember(issuerMemberId, originalAuthor);
     }
 
     // anonymize message reply author
     if(message?.reply?.author?.name){
-        message.reply.author = autoAnonymizeMember(issuerMemberId, serverconfig.servermembers[message.reply.author.id]);
+        message.reply.author = await autoAnonymizeMember(issuerMemberId, serverconfig.servermembers[message.reply.author.id]);
     }
 
     if(message?.id) delete message?.id;
@@ -1430,19 +1386,15 @@ export function anonymizeMessage(message, hideContentForMembers = false, isAdmin
         message.author.id = isAdmin ? originalAuthor?.id : 0
     }
 
-    if(hideContentForMembers || isBanned){
+    if(hideContentForMembers){
         if(isAdmin){
-            if(isBanned){
-                message.isAdmin = isAdmin;
-            }
+            message.isAdmin = isAdmin;
         }
         else{
-            if(isBanned){
-                message.message = `${serverconfig.serverinfo.moderation.bans.displayMessageNotice}`
-                message.author.name = `${serverconfig.serverinfo.moderation.bans.displayName}`
-                message.author = anonymizeMember(message.author, true, isAdmin);
-                message.author.isBanned = true;
-            }
+            message.message = `${serverconfig.serverinfo.moderation.bans.displayMessageNotice}`
+            message.author.name = `${serverconfig.serverinfo.moderation.bans.displayName}`
+            message.author = await anonymizeMember(message.author, true, isAdmin);
+            message.author.isBanned = true;
         }
     }
 
@@ -1453,6 +1405,8 @@ export function setMemberObjColor(member){
     let highestRole = getMemberHighestRole(member?.author?.id || member?.id);
     if(highestRole){
         member.color = highestRole?.info?.color;
+        member.background = highestRole?.info?.background;
+        member.backgroundClip = highestRole?.info?.backgroundClip;
     }
 
     return member;
@@ -1465,7 +1419,7 @@ export function getUnkownMember(){
     }
 }
 
-export function getCastingMemberObject(member) {
+export async function getCastingMemberObject(member) {
     if(!member) member = getUnkownMember();
     member = copyObject(member);
 
@@ -1489,6 +1443,10 @@ export function getCastingMemberObject(member) {
             delete member[key];
         }
     });
+
+    if(await getBan(member?.id || member?.author?.id)){
+        member.isBanned = true;
+    }
 
     member = setMemberObjColor(member)
     return member;

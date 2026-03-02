@@ -31,6 +31,7 @@
 
 
 
+    <link href="/css/markdown.css?v={{random}}" rel="stylesheet">
     <link href="/css/inbox.css?v={{random}}" rel="stylesheet">
     <link href="/css/messages.css?v={{random}}" rel="stylesheet">
     <link href="/highlight.css?v={{random}}" rel="stylesheet">
@@ -255,6 +256,10 @@
                         </div>
                         <div class='emoji-box-header' id="emoji-box-gifs" onclick="getGifs(); selectEmojiTab(this);">
                             <h2>GIFs</h2>
+                        </div>
+                        <div class='emoji-box-header' id="emoji-box-upload" onclick="document.getElementById('uploadCaller').click();">
+                            <input type="file" id="uploadCaller" style="display:none" accept="image/*,video/*" /> 
+                            <h2>Upload</h2>
                         </div>
                     </div>
 

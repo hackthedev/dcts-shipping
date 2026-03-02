@@ -211,6 +211,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     initUploadDragAndDrop()
+    initUploadFileDialog()
 
     socket.on("connect", async () => {
         // sick af in my opinion
@@ -379,8 +380,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     if(!messageId) throw new Error("Couldnt find inbox reply message id")
 
                     replyMessageId = messageId;
-                    let wasSent = sendMessageToServer(null, null, null, html, true);
-
+                    let wasSent = await sendMessageToServer(null, null, null, html, true);
                     if(wasSent){
                         Inbox.markAsRead(inboxId)
                         editor.clear()
@@ -921,10 +921,10 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
             if (response?.token) CookieManager.setCookie("token", response.token);
             if (response?.icon) CookieManager.setCookie("pfp", response.icon);
             if (response?.banner) CookieManager.setCookie("banner", response.banner);
-            if (response?.aboutme) CookieManager.setCookie("banner", response.aboutme);
-            if (response?.status) CookieManager.setCookie("banner", response.status);
-            if (response?.loginName) CookieManager.setCookie("banner", response.loginName);
-            if (response?.id) CookieManager.setCookie("banner", response.id);
+            if (response?.aboutme) CookieManager.setCookie("aboutme", response.aboutme);
+            if (response?.status) CookieManager.setCookie("status", response.status);
+            if (response?.loginName) CookieManager.setCookie("loginName", response.loginName);
+            if (response?.id) CookieManager.setCookie("id", response.id);
 
             // if we finished onboarding
             if (!response?.error && response.finishedOnboarding === true && initial) {
@@ -958,12 +958,12 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                 });
 
                 if (initial) {
-                    getChatlog(document.getElementById("content"));
                     getMemberList()
                     getChannelTree()
                     getServerInfo();
                     showGroupStats();
                     focusEditor()
+                    getChatlog(document.getElementById("content"));
 
                     /* Quill Emoji Autocomplete */
                     initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
@@ -1431,31 +1431,76 @@ async function sendMessageToServer(authorId = UserManager.getID(),
         msgPayload = await Client().SignJson(msgPayload);
     }
 
-    socket.emit("messageSend", msgPayload, async function (response) {
-        if (response.error) {
-            // do smth in the future with this
-            console.error(response.error);
-        } else {
-            // mark channel as read
-            ChatManager.increaseChannelMarkerCount(UserManager.getChannel())
-            // mark channel as read
-            ChatManager.setChannelMarkerCounter(UserManager.getChannel())
-        }
-    });
+    return new Promise((resolve, reject) => {
+        socket.emit("messageSend", msgPayload, async function (response) {
+            Clock.stop("send_message");
 
-    // reset all flags
-    editMessageId = null;
-    replyMessageId = null;
-    cancelMessageEdit();
-    cancelMessageReply();
+            if (response?.error) {
+                // do smth in the future with this
+                console.error(response);
 
-    scrollDown("sendMessageToServer"); // forgot that
-    setTimeout(() => focusEditor(), 1)
-    Clock.stop("send_message");
+                // check for slowmode
+                if(response?.slowmode){
+                    showSlowmodeNotice(response.slowmode)
+                }
+                // check for ratelimit
+                if(response?.rateLimited){
+                    showRateLimitNotice()
+                }
 
-    return true;
+                resolve(false)
+            } else {
+                // mark channel as read
+                ChatManager.increaseChannelMarkerCount(UserManager.getChannel())
+                // mark channel as read
+                ChatManager.setChannelMarkerCounter(UserManager.getChannel())
+
+                // reset all flags
+                editMessageId = null;
+                replyMessageId = null;
+                cancelMessageEdit();
+                cancelMessageReply();
+
+                scrollDown("sendMessageToServer"); // forgot that
+                setTimeout(() => focusEditor(), 1)
+
+                console.log("clearing editor")
+                editor.innerHTML = "<p><br></p>"
+
+                resolve(true);
+            }
+        });
+    })
 }
 
+function getReadableDuration(date) {
+    let untilTimestamp = date.getTime();
+
+    const remainingTime = untilTimestamp - Date.now();
+    if (remainingTime <= 0) return "Expired";
+
+    let secondsTotal = Math.floor(remainingTime / 1000);
+
+    const years = Math.floor(secondsTotal / (60 * 60 * 24 * 365));
+    secondsTotal %= 60 * 60 * 24 * 365;
+
+    const days = Math.floor(secondsTotal / (60 * 60 * 24));
+    secondsTotal %= 60 * 60 * 24;
+
+    const hours = Math.floor(secondsTotal / (60 * 60));
+    secondsTotal %= 60 * 60;
+
+    const minutes = Math.floor(secondsTotal / 60);
+    const seconds = secondsTotal % 60;
+
+    return [
+        years ? `${years}y` : null,
+        days ? `${days}d` : null,
+        hours ? `${hours}h` : null,
+        minutes ? `${minutes}m` : null,
+        seconds ? `${seconds}s` : null
+    ].filter(Boolean).join(" ");
+}
 
 var audio = new Audio();
 
@@ -1770,8 +1815,6 @@ socket.on('receiveGroupList', function (data) {
         mobileGroupList.innerHTML = data;
     }
     setActiveGroup(UserManager.getGroup())
-
-    //reapplyUnreadFromCookies();
     displayHomeUnread();
 });
 
@@ -2004,33 +2047,87 @@ async function getEmojis(callback = null) {
         emoji.replaceWith(clone);
     })
 
-    socket.emit("getEmojis", {id: UserManager.getID(), token: UserManager.getToken()}, async function (response) {
-
+    socket.emit("getEmojis", { id: UserManager.getID(), token: UserManager.getToken() }, async function (response) {
         if (response.type === "success") {
-            //settings_icon.value = response.msg;
-            //emojiContainer.innerHTML = "<div id='emoji-box-header'><h2>Emojis</h2></div>";
-
-            //emojiEntryContainer.innerHTML = "";
             emojiEntryContainer.style.display = "flex";
-            for(let emoji of response.data.reverse()){
 
+            let groupBar = emojiEntryContainer.querySelector(".emoji-group-bar");
+            if (!groupBar) {
+                groupBar = document.createElement("div");
+                groupBar.className = "emoji-group-bar";
+                emojiEntryContainer.prepend(groupBar);
+            }
+            groupBar.innerHTML = "";
+
+            let searchWrap = emojiEntryContainer.querySelector(".emoji-search-wrap");
+            if (!searchWrap) {
+                searchWrap = document.createElement("div");
+                searchWrap.className = "emoji-search-wrap";
+                const searchInput = document.createElement("input");
+                searchInput.className = "emoji-search-input";
+                searchInput.type = "text";
+                searchInput.placeholder = "search emojis...";
+                searchWrap.appendChild(searchInput);
+                groupBar.parentNode ? emojiEntryContainer.insertBefore(searchWrap, groupBar.nextSibling) : emojiEntryContainer.prepend(searchWrap);
+            }
+            const searchInput = searchWrap.querySelector(".emoji-search-input");
+            searchInput.value = "";
+            setTimeout(() => searchInput.focus(), 50);
+
+            const customTab = document.createElement("div");
+            customTab.className = "emoji-group-tab active";
+            customTab.setAttribute("data-group", "custom");
+            customTab.title = "custom";
+
+            const customIcon = document.createElement("img");
+            customIcon.src = "/img/default_pfp.png";
+            customIcon.className = "emoji-group-icon";
+            customTab.appendChild(customIcon);
+            groupBar.appendChild(customTab);
+
+            for (const group of twemojiIndex) {
+                const tab = document.createElement("div");
+                tab.className = "emoji-group-tab";
+                tab.setAttribute("data-group", group.group);
+                tab.title = group.group;
+
+                const icon = document.createElement("img");
+                icon.src = `/img/default_emojis/${group.icon}.svg`;
+                icon.className = "emoji-group-icon";
+                tab.appendChild(icon);
+                groupBar.appendChild(tab);
+            }
+
+            let contentContainer = emojiEntryContainer.querySelector(".emoji-group-content");
+            if (!contentContainer) {
+                contentContainer = document.createElement("div");
+                contentContainer.className = "emoji-group-content";
+                emojiEntryContainer.appendChild(contentContainer);
+            }
+            contentContainer.innerHTML = "";
+
+            const customSection = document.createElement("div");
+            customSection.className = "emoji-section";
+            customSection.setAttribute("data-group", "custom");
+
+            for (let emoji of response.data.reverse()) {
                 const base = emoji.filename.replace(/\.[^/.]+$/, "");
                 const parts = base.split("_");
 
-                var emojiId = parts[0];
-                var emojiName = parts.length > 1 ? parts.slice(1).join("_") : parts[0];
-
-                let existingEmojiElement = emojiEntryContainer.querySelector(`.emoji-entry[data-hash="${emojiId}"]`);
+                let parsed = parseEmojiFilename(emoji.filename)
+                const emojiId = parsed.hash;
+                const emojiName = parsed.name;
 
                 if (hasEmojiInContainer(emojiId)) {
-                    if(existingEmojiElement) registerEmojiCallback(existingEmojiElement, emoji);
+                    let existingEmojiElement = contentContainer.querySelector(`.emoji-entry[data-hash="${emojiId}"]`);
+                    if (existingEmojiElement) registerEmojiCallback(existingEmojiElement, emoji);
                     continue;
                 }
 
                 const entry = document.createElement("div");
                 entry.className = "emoji-entry";
-                entry.setAttribute("data-hash", emojiId)
-                entry.title = emoji.name;
+                entry.setAttribute("data-hash", emojiId);
+                entry.title = emojiName;
 
                 const imgWrap = document.createElement("div");
                 imgWrap.className = "emoji-img";
@@ -2041,22 +2138,111 @@ async function getEmojis(callback = null) {
 
                 imgWrap.appendChild(img);
                 entry.appendChild(imgWrap);
-
                 registerEmojiCallback(entry, emoji);
+                customSection.appendChild(entry);
+            }
+            contentContainer.appendChild(customSection);
 
+            for (const group of twemojiIndex) {
+                const section = document.createElement("div");
+                section.className = "emoji-section";
+                section.setAttribute("data-group", group.group);
+                section.style.display = "none";
 
-                emojiEntryContainer.appendChild(entry);
+                for (const e of group.emojis) {
+                    const entry = document.createElement("div");
+                    entry.className = "emoji-entry";
+                    entry.setAttribute("data-default", "1");
+                    entry.setAttribute("data-name", e.name);
+                    entry.title = e.name;
+
+                    const imgWrap = document.createElement("div");
+                    imgWrap.className = "emoji-img";
+
+                    const img = document.createElement("img");
+                    img.className = "emoji";
+                    img.src = `/img/default_emojis/${e.code}.svg`;
+                    imgWrap.appendChild(img);
+                    entry.appendChild(imgWrap);
+
+                    entry.addEventListener("click", () => {
+                        if (typeof callback === "function") {
+                            callback({ code: e.code, name: e.name, default: true });
+                            closeEmojiBox();
+                        } else {
+                            const sel = quill.getSelection(true);
+                            quill.insertEmbed(sel.index, "emoji", {
+                                src: `/img/default_emojis/${e.code}.svg`,
+                                class: "inline-text-emoji default",
+                                ["data-code"]: e.code
+                            });
+                            quill.setSelection(sel.index + 1);
+                            focusEditor();
+                            getEmojiContainerElement().style.display = "none";
+                        }
+                    });
+
+                    section.appendChild(entry);
+                }
+                contentContainer.appendChild(section);
             }
 
-            removeUnusedEmojisFromContainer(response)
+            searchInput.addEventListener("input", () => {
+                const query = searchInput.value.toLowerCase().trim();
 
-            //notify(response.msg)
+                if (!query) {
+                    groupBar.style.display = "";
+                    const activeGroup = groupBar.querySelector(".emoji-group-tab.active")?.getAttribute("data-group") || "custom";
+                    contentContainer.querySelectorAll(".emoji-section").forEach(s => {
+                        s.style.display = s.getAttribute("data-group") === activeGroup ? "flex" : "none";
+                        s.classList.remove("emoji-section-search");
+                    });
+                    contentContainer.querySelectorAll(".emoji-entry").forEach(e => e.style.display = "");
+                    return;
+                }
+
+                groupBar.style.display = "none";
+                contentContainer.querySelectorAll(".emoji-section").forEach(s => {
+                    s.style.display = "";
+                    s.classList.add("emoji-section-search");
+                });
+
+                contentContainer.querySelectorAll(".emoji-entry").forEach(entry => {
+                    const name = (entry.title || entry.getAttribute("data-name") || "").toLowerCase();
+                    entry.style.display = name.includes(query) ? "" : "none";
+                });
+            });
+
+            groupBar.addEventListener("click", (ev) => {
+                const tab = ev.target.closest(".emoji-group-tab");
+                if (!tab) return;
+
+                const groupName = tab.getAttribute("data-group");
+
+                groupBar.querySelectorAll(".emoji-group-tab").forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+
+                searchInput.value = "";
+                contentContainer.querySelectorAll(".emoji-entry").forEach(e => e.style.display = "");
+                contentContainer.querySelectorAll(".emoji-section").forEach(s => {
+                    s.style.display = s.getAttribute("data-group") === groupName ? "flex" : "none";
+                });
+            });
+
+            removeUnusedEmojisFromContainer(response);
+
         } else {
             showSystemMessage({
-                title: response.msg || "", text: "", icon: response.type, img: null, type: response.type, duration: 1000
+                title: response.msg || "",
+                text: "",
+                icon: response.type,
+                img: null,
+                type: response.type,
+                duration: 1000
             });
         }
     });
+
 
     function registerEmojiCallback(element, emojiObj){
         element.addEventListener("click", async () => {
@@ -2229,7 +2415,6 @@ async function setUrl(param, isVC = false) {
             token: UserManager.getToken(),
             permission: "sendMessages"
         }, function (response) {
-            console.log(response)
             switchLeftSideMenu(true)
 
             // update grouplist and channel tree if we only
@@ -2425,7 +2610,7 @@ function sleep(ms) {
 
 async function testDb(length) {
     for (let i = 1; i < length; i++) {
-        await sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${i}`);
+        await sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${i}`, true);
         await sleep(500);
     }
 }
@@ -2440,6 +2625,39 @@ socket.on("uploadProgress", ({filename, bytes, total}) => {
         duration: 2000
     });
 });
+
+function initUploadFileDialog(){
+    //Setting up to trigger once Input-Dialog element receives a new file
+    const fileInput = document.getElementById('uploadCaller');
+    fileInput.addEventListener('change', async function () {
+        if (fileInput.files.length > 0) {
+            //Code borrowed from initUploadDragAndDrop.
+            try {
+                let result = await ChatManager.uploadFile(fileInput.files);
+                console.log("upload result: ", result);
+                if (result.ok === true) {
+                    console.log("All files uploaded successfully. URLs:", result.path);
+                    // Process the URLs array
+                    sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${window.location.origin}${result.path}`, true); // Sending all URLs at once
+                } else {
+                    console.error("Upload encountered an error:", result.error);
+                    showSystemMessage({
+                        title: `Error uploading file`,
+                        text: `${result.error}`,
+                        icon: "error",
+                        type: "error",
+                        duration: 1500
+                    });
+                }
+            } catch (error) {
+                console.error("An error occurred during the upload process:", error);
+            }
+            //End of borrowed code
+        } else {
+            console.log('No file selected from dialog.')
+        }
+    })
+}
 
 function initUploadDragAndDrop(){
 

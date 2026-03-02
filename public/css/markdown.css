@@ -1,0 +1,31 @@
+.markdown-urlEmbed {
+    display: flex;
+    flex-direction: column;
+    font-style: normal;
+
+    width: fit-content;
+    max-width: 600px;
+
+    margin: 4px 0;
+
+    padding: 8px;
+    border-radius: 6px;
+    backdrop-filter: blur(10px);
+}
+
+a.markdown-urlEmbed{
+    text-decoration: none !important;
+}
+
+.markdown-urlEmbed .meta-info.title{
+    font-weight: bold;
+    font-size: 16px;
+}
+.markdown-urlEmbed .meta-info.description{
+    font-weight: normal !important;
+    font-size: 12px;
+}
+
+.markdown-urlEmbed-container{
+    width: 100%;
+}

@@ -337,7 +337,7 @@ export async function getMemberIpInfo(socket){
 }
 
 
-export function getMemberList(member, channel) {
+export async function getMemberList(member, channel) {
     var members = serverconfig.servermembers;
     const memberKeys = Object.keys(members);
     let sortedMembers = {};
@@ -355,7 +355,7 @@ export function getMemberList(member, channel) {
         if(!hasPermission(memberId, "viewChannel", channel)) continue
 
         var highestMemberRole = getMemberHighestRole(memberId);
-        sortedMembers[memberId] = getCastingMemberObject(memberObj);
+        sortedMembers[memberId] = await getCastingMemberObject(memberObj);
         sortedMembers[memberId].highestRole = getRoleCastingObject(highestMemberRole);
 
         const { isOnline, minutesPassed } = getMemberLastOnline(memberId);
@@ -405,6 +405,7 @@ export function getGroupList(member) {
                     <a onclick="setUrl('?group=${group.info.id}');" id="group-entry-${group.info.id}">
                         <div class="group-entry-marker" id="group-marker-${group.info.id}"></div>
                         <div class="server-entry">
+                            <span class="group-mention-indicator" data-group-id="${group.info.id}"></span>
                            <img title="${group.info.name}" id="${group.info.id}" data-group-id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
                         </div>
                     </a>`;
@@ -418,9 +419,18 @@ export function getGroupList(member) {
                         addedGroups.includes(group.info.id) == false
                     ) {
                         addedGroups.push(group.info.id);
-                        code += `<a onclick="setUrl('?group=${group.info.id}');"><div class="server-entry">
-                                    <img title="${group.info.name}" data-group-id="${group.info.id}" id="${group.info.id}" class="server-icon group-icon-${group.info.id}" src="${group.info.icon}">
-                                </div></a>`;
+                        code += `<a onclick="setUrl('?group=${group.info.id}');">
+                                    <div class="group-entry-marker" id="group-marker-${group.info.id}"></div>
+                                    <div class="server-entry">
+                                        <span class="group-mention-indicator" data-group-id="${group.info.id}"></span>
+                                        <img 
+                                        title="${group.info.name}" 
+                                            data-group-id="${group.info.id}" 
+                                            id="${group.info.id}" 
+                                            class="server-icon group-icon-${group.info.id}" 
+                                            src="${group.info.icon}">
+                                    </div>
+                                </a>`;
                     }
                 } catch {
 
@@ -649,97 +659,10 @@ export function getChannelTree(member) {
     return channeltree;
 }
 
-export function addBan({
-                        identifier,
-                        bannedBy = "system",
-                        reason = "",
-                        until = -1,
-                        ip = null,
-                       } = {}){
-
-    serverconfig.banlist[identifier] = {
-        bannedBy: bannedBy,
-        reason: reason,
-        until: until,
-        ip: ip
-    };
-    saveConfig(serverconfig);
-}
-
-export function removeBan(identifier){
-    if(serverconfig.banlist.hasOwnProperty(identifier)) delete serverconfig.banlist[identifier]
-
-
-    if(serverconfig.servermembers[identifier]?.isBanned){
-        serverconfig.servermembers[identifier].isBanned = 0
-    }
-
-    saveConfig(serverconfig);
-}
-
-
-
-export function banUser(socket, member) {
-    let ip = getSocketIp(socket);
-    if(isLocalhostIp(ip)) ip = null;
-
-    // get member ban date
-    let bannedUntil = getNewDate(member.duration).getTime();
-
-    // Set Member to be banned
-    serverconfig.servermembers[member.target].isBanned = 1;
-
-    // Add member to banlist
-    addBan({
-        identifier: member?.target,
-        bannedBy: member?.id,
-        reason: member?.reason,
-        until: bannedUntil,
-        ip: ip
-    });
-
-    Logger.warn(` User ${serverconfig.servermembers[member.target].name} (IP ${ip}) was added to the banlist because he was banned`.yellow);
-    return banIp(socket, bannedUntil);
-}
-
 export function getSocketIp(socket){
     return socket?.handshake?.headers["x-forwarded-for"]?.split(",")[0].trim()
         || socket?.handshake?.headers["x-real-ip"]
         || socket?.handshake?.address;
-}
-
-export function banIp(socket, durationTimestamp = -1) {
-    let ip = getSocketIp(socket);
-    if(isLocalhostIp(ip)) return;
-
-    addBan({
-        identifier: ip,
-        until: durationTimestamp,
-    })
-
-    Logger.info(`IP ${ip} banned until ${new Date(durationTimestamp).toLocaleString()}`);
-}
-
-export function isIpBanned(ip){
-    let existingBannedIp = getJson(serverconfig.blacklist, ["*.ip"]);
-    if(existingBannedIp.length > 0 || serverconfig.banlist[ip]){
-        Logger.info(`IP ${ip} already banned`)
-        return true;
-    }
-
-    return false;
-}
-
-
-export function unbanIp(socket) {
-    let ip = getSocketIp(socket)
-
-    if (serverconfig.banlist[ip]) {
-        delete serverconfig.banlist[ip];
-        saveConfig(serverconfig);
-    } else {
-        Logger.warn(`Tried to unban IP ${ip} but it was not banned`);
-    }
 }
 
 export function findInJson(obj, keyToFind, valueToFind, returnPath = false) {

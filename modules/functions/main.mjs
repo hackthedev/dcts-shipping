@@ -1308,7 +1308,6 @@ export async function anonymizeMember(member, shouldHide, isAdmin) {
     }
 
     let isBanned = await isIdentifierBanned(member?.id)
-
     if(shouldHide && !isAdmin){
         member.id = 0;
         member.icon = "";

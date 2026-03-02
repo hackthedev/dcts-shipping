@@ -573,17 +573,17 @@ async function showMessageInChat({
     // convert mentions and check if own userid is in it
     let convertedMentions = await convertMention(message);
     let isMention = false;
-    message.message = convertedMentions.text
+    message.message = sanitizeHtmlForRender(convertedMentions.text)
 
     // convert emojis
-    try{ message.message = await text2Emoji(message.message) } catch {}
+    try{ message.message = sanitizeHtmlForRender(await text2Emoji(message.message)) } catch {}
 
     // convert emojis and mentions for replies too
     if(message?.reply?.message) {
-        try{ message.reply.message = await text2Emoji(message.reply.message); } catch {}
+        try{ message.reply.message = sanitizeHtmlForRender(await text2Emoji(message.reply.message)); } catch {}
 
         let convertedReplyMentions = await convertMention(message.reply);
-        message.reply.message = convertedReplyMentions.text
+        message.reply.message = sanitizeHtmlForRender(convertedReplyMentions.text)
     }
 
     let messageElement = appendTop ? getFirstMessage(container) : getLastMessage(container);
@@ -591,23 +591,23 @@ async function showMessageInChat({
     // create message code structure
     var messagecode = "";
     if (message.isSystemMsg === true) {
-        messagecode = await createMsgHTML({
+        messagecode = sanitizeHtmlForRender(await createMsgHTML({
             message,
             append: append,
             isSystem: true,
             isMention,
             waitWithDisplay
-        });
+        }));
     } else {
         // dont append if the previous message was a system message
         if (messageElement?.element?.classList.contains("system")) append = false;
-        messagecode = await createMsgHTML({
+        messagecode = sanitizeHtmlForRender(await createMsgHTML({
             message,
             append,
             isSystem: false,
             isMention,
             waitWithDisplay
-        });
+        }));
     }
 
     // display it

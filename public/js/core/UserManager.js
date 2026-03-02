@@ -78,13 +78,13 @@ class UserManager {
         
             <div id="profile_pfp_container">
                 <div id="profile_icon" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.icon)}');"></div>                
-                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(memberObj?.publicKey) : ""}"></div>                
+                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(sanitizeHtmlForRender(memberObj?.publicKey)) : ""}"></div>                
             </div>
             
         
             <div id="profile_content">       
-                <div id="profile_username"><h2 style="margin: 0 !important;">${unescapeHtmlEntities(memberObj?.name)}</h2></div>                
-                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? memberObj?.status : ""}</i></div>  
+                <div id="profile_username"><h2 style="margin: 0 !important;">${unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.name))}</h2></div>                
+                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? sanitizeHtmlForRender(memberObj?.status) : ""}</i></div>  
                 
                 ${memberObj?.aboutme?.trim()?.length > 0 ?                
                `
@@ -106,7 +106,7 @@ class UserManager {
                ` : ""}
             <hr>
                        
-            <a id="dm_action" href="/home.html?dm=${memberObj?.id}">&#10149; Send Message</a>
+            <a id="dm_action" href="/home.html?dm=${sanitizeHtmlForRender(memberObj?.id)}">&#10149; Send Message</a>
 
             <div class="profile_meta">
                 <div class="info">
@@ -137,7 +137,7 @@ class UserManager {
             <div id="profile_roles">
                 <h2 class="profile_headline">Roles</h2>
                 ${roleCode}
-                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${memberObj.id}');" class="role addRoleMenuTrigger" data-member-id="${memberObj.id}" id="addRole-${memberObj.id}">+</code>
+                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${sanitizeHtmlForRender(memberObj.id)}');" class="role addRoleMenuTrigger" data-member-id="${memberObj.id}" id="addRole-${memberObj.id}">+</code>
             </div>`;
     }
 

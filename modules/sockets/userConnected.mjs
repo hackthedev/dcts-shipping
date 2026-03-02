@@ -9,39 +9,30 @@ import {
 } from "../../index.mjs";
 import {
     formatDateTime,
-    generateGid,
     getJson,
-    getMemberFromKey, getMemberIpInfo,
+    getMemberIpInfo,
     getMemberLastOnline,
     hasVerifiedKey,
     resolveCategoryByChannelId,
-    resolveChannelById,
     resolveGroupByChannelId,
 } from "../functions/chat/main.mjs";
 import {saveChatMessage} from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
 import {
-    checkMemberBan,
     checkMemberMute,
     checkRateLimit,
-    copyObject,
     emitBasedOnMemberId,
-    escapeHtml,
     generateId,
     getCastingMemberObject,
     hashPassword,
     removeFromArray,
     sendMessageToUser,
-    validateMemberId,
 } from "../functions/main.mjs";
 import {sendSystemMessage} from "./home/general.mjs";
 import {discoverHosts} from "../functions/discovery.mjs";
 import {isValidProof, powVerifiedUsers} from "./pow.mjs";
-import logger from "../functions/logger.mjs";
-import {channel} from "node:diagnostics_channel";
 import {saveMemberToDB} from "../functions/mysql/helper.mjs";
-import {runInWorker} from "../functions/offload.mjs";
-import {listThemes, loadThemeCache} from "./routes/themes.mjs";
+import {checkMemberBan} from "../functions/ban-system/helpers.mjs";
 
 function normaliseString(v) {
     if (v === null || v === undefined) return "";

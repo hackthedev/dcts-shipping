@@ -18,27 +18,21 @@ import {
     fs, signer, db
 } from "../../index.mjs"
 import {
-    banIp,
     generateGid,
     getNewDate,
-    getSocketIp,
-    hasPermission, isIpBanned,
-    removeBan,
-    resolveRolesByUserId
+    hasPermission,
 } from "./chat/main.mjs";
 import {consolas} from "./io.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import path from "path";
 import {powVerifiedUsers} from "../sockets/pow.mjs";
 import {sendSystemMessage} from "../sockets/home/general.mjs";
-import {decodeFromBase64, encodeToBase64} from "./mysql/helper.mjs";
 import {checkMemberMigration} from "./migrations/memberJsonToDb.mjs";
 import {clearBase64FromDatabase} from "./migrations/base64_fixer.mjs";
 import {getMemberHighestRole} from "./chat/helper.mjs";
 import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./migrations/messageMigration.mjs";
 import archiver from "archiver";
-import JSONTools from "@hackthedev/json-tools";
-import {initPaymentSystem} from "./payments.mjs";
+import {banIp, checkMemberBan} from "./ban-system/helpers.mjs";
 
 var serverconfigEditable;
 
@@ -1052,7 +1046,7 @@ export function validateMemberId(id, socket, token, bypass = false) {
         }
 
         // if is banned deny all connections
-        if(serverconfig.servermembers[id]?.isBanned === 1){
+        if(serverconfig.servermembers[id]?.onboarding === false){
             return false;
         }
     }
@@ -1228,45 +1222,6 @@ export function isLocalhostIp(ip){
 }
 
 
-export async function checkMemberBan(socket, member) {
-    let ip = getSocketIp(socket);
-    checkRateLimit(socket);
-
-    // if the user is not banned anymore but the flag is still there
-    if(!serverconfig.banlist.hasOwnProperty(member?.id) && checkAndUnbanIp(ip).result === false){
-        if(serverconfig.servermembers[member?.id]) serverconfig.servermembers[member.id].isBanned = false;
-    }
-
-    // check banlist for member
-    if (serverconfig.banlist.hasOwnProperty(member?.id)) {
-        var durationStamp = serverconfig.banlist[member?.id].until;
-        var banReason = serverconfig.banlist[member?.id].reason;
-
-        if (Date.now() >= durationStamp) {
-            // unban user
-            removeBan(member?.id);
-            return checkAndUnbanIp(ip);
-        } else {
-            return {result: true, timestamp: durationStamp, reason: banReason};
-        }
-    }
-
-    return checkAndUnbanIp(ip);
-
-    function checkAndUnbanIp(ip){
-        // check ip blacklist
-        if (serverconfig.banlist.hasOwnProperty(ip)) {
-            if (Date.now() >= serverconfig.banlist[ip]?.until) {
-                removeBan(ip);
-                return {result: false, timestamp: null}
-            } else {
-                return {result: true, timestamp: serverconfig.banlist[ip]}
-            }
-        }
-
-        return {result: false, timestamp: null}
-    }
-}
 
 export async function hashPassword(password) {
     const saltRounds = 10; // potential config setting, 20 is painful!!!!

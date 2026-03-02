@@ -1,14 +1,14 @@
 import { saveConfig, serverconfig, usersocket, xssFilters } from "../../index.mjs";
 import { getMemberHighestRole } from "../functions/chat/helper.mjs";
-import { banUser, getNewDate, hasPermission } from "../functions/chat/main.mjs";
+import { getNewDate, hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import {copyObject, escapeHtml, findSocketByMemberId, sendMessageToUser, validateMemberId} from "../functions/main.mjs";
+import {banUser} from "../functions/ban-system/helpers.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('banUser', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token) {
+    socket.on('banUser', async function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token) === true) {
 
             if (member.id == member.target) {
                 response({ type: "error", msg: "You cant ban yourself!", error: "You cant ban yourself." });
@@ -35,7 +35,7 @@ export default (io) => (socket) => {
                     }
 
                     let targetSocket = findSocketByMemberId(io, member.target);
-                    banUser(targetSocket, member);
+                    await banUser(targetSocket, member);
 
                     // Notify Admins
                     response({

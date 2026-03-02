@@ -1,3 +1,10 @@
+var servername
+var serverdescription
+var saveButton
+var serverconfigName;
+var serverconfigDesc;
+
+
 document.addEventListener("pagechange", e => {
     console.log(e.detail.page);
     if (e.detail.page !== "banlist") return;
@@ -8,9 +15,14 @@ document.addEventListener("pagechange", e => {
 
 function initBanList(){
     setupNotify();
+
+    servername = document.getElementById("server_name");
+    serverdescription = document.getElementById("server_description");
+    saveButton = document.getElementById("settings_profile_save");
+
     socket.emit("checkPermission", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageBans" }, function (response) {
 
-        if(response.permission == "denied"){
+        if(response.permission === "denied"){
             window.location.href = window.location.origin + "/settings/server";
         }
         else{
@@ -19,25 +31,15 @@ function initBanList(){
     });
 
     getBans();
-
 }
-
-var servername = document.getElementById("server_name");
-var serverdescription = document.getElementById("server_description");
-var saveButton = document.getElementById("settings_profile_save");
-
-var serverconfigName;
-var serverconfigDesc;
-
 
 
 // document.querySelector("#ban-reason-119012019689").innerText = "Fag"
 
 
 function unbanUser(id) {
-
-    var username = document.querySelector(`#ban-username-${id}`).innerText.split(" ")[0];
-    var container = document.querySelector(`[data-member-id="banned-${id}"]`);
+    var container = document.querySelector(`tr[data-member-id="${id}"]`);
+    var username = container.querySelector(`#username[data-member-id="${id}"]`)?.innerText?.split(" ")[0];
 
     if (!confirm("Do you want to unban the user " + username + "?")){
         notify("Canceled unban", "info")
@@ -47,7 +49,7 @@ function unbanUser(id) {
 
     socket.emit("unbanUser", {id: UserManager.getID(), token: UserManager.getToken(), target: id}, function (response) {
         //notify("User was banned by " + response.data.name, "info", null, "normal");
-        if(response.type == "success"){
+        if(response.type === "success"){
             notify(response.msg, "success");
             container.remove();
         }
@@ -85,17 +87,21 @@ function getBans() {
                         <tbody>
                 `;
 
-                // Add rows for each banned user
-                Object.keys(bannedObj).forEach((bannedUserId, index) => {
-                    const banData = bannedObj[bannedUserId];
-                    const rowClass = index % 2 === 0 ? "settings_banlist_even_row" : "settings_banlist_odd_row";
+                if(bannedObj?.length > 0) {
+                    // Add rows for each banned user
+                    Object.keys(bannedObj).forEach((key, index) => {
+                        const banData = bannedObj[key];
+                        let bannedUserId = bannedObj[key].memberId;
 
-                    table += `
-                        <tr class="${rowClass}" data-member-id="banned-${banData.bannedUserObj.id}">
+
+                        const rowClass = index % 2 === 0 ? "settings_banlist_even_row" : "settings_banlist_odd_row";
+
+                        table += `
+                        <tr class="${rowClass}" data-member-id="${banData.bannedUserObj.id}">
                             <td>
                                 <div class="settings_banlist_user_info">
                                     <img class="settings_banlist_user_icon" src="${banData.bannedUserObj.icon}" alt="User Icon">
-                                    <span id="ban-username-${banData.bannedUserObj.id}">${banData.bannedUserObj.name} (${banData.bannedUserObj.id})</span>
+                                    <span id="username" data-member-id="${banData.bannedUserObj.id}">${banData.bannedUserObj.name} (${banData.bannedUserObj.id})</span>
                                 </div>
                             </td>
                             <td>${banData.bannedUserObj.status || "No Status"}</td>
@@ -116,8 +122,8 @@ function getBans() {
                             </td>
                         </tr>
                     `;
-                });
-                
+                    });
+                }
 
                 // Close the table
                 table += `
@@ -128,7 +134,7 @@ function getBans() {
                 // Add it to the html
                 emojiContainer.insertAdjacentHTML("beforeend", table);
             } else {
-                alert(response1.msg);
+                alert(response1?.error || response1?.msg);
             }
         } catch (ex) {
             console.log(ex);

@@ -1444,7 +1444,7 @@ export async function getCastingMemberObject(member) {
         }
     });
 
-    if(await getBan(member?.id)){
+    if(await getBan(member?.id || member?.author?.id)){
         member.isBanned = true;
     }
 

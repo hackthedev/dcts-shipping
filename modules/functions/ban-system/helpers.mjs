@@ -52,6 +52,7 @@ export async function addBan({
 }
 
 export async function getBan(identifier){
+    if(!identifier) throw new Error("Identifier not set")
     let row = await queryDatabase(
         `SELECT * FROM bans WHERE memberId = ? OR ip = ?`,
         [identifier, identifier]
@@ -87,7 +88,6 @@ export async function removeBan(identifier){
     if(!identifier) throw new Error("Identifier was undefined!")
 
     let ban = await getBan(identifier);
-    console.log(ban, identifier)
 
     if(ban){
         let result = await queryDatabase(

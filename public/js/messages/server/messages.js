@@ -863,6 +863,9 @@ async function createMsgHTML({
     }
 
     let isBanned = message?.author?.isBanned;
+    let isAdmin = message?.isAdmin
+
+    console.log(message, isBanned, isAdmin)
     let messageReactionsRow = await getMessageReactionsHTML(message);
 
     let messageRow =
@@ -911,7 +914,7 @@ async function createMsgHTML({
     }
 
     return `
-        <div class="message-container ${isSystem ? "system" : ""} ${isBanned && message?.isAdmin ? "banned" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}" data-member-id="${message?.author?.id}">
+        <div class="message-container ${isSystem ? "system" : ""} ${isBanned && isAdmin ? "banned" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}" data-member-id="${message?.author?.id}">
             
             ${replyCode}
             <div class="row ${isSystem === true ? `system` : ""}" data-message-id="${message?.messageId}" data-member-id="${message?.id}">

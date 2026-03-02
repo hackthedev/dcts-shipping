@@ -61,6 +61,10 @@ export async function getBan(identifier){
     return row[0]
 }
 
+export async function isIdentifierBanned(identifier){
+    return !!await getBan(identifier);
+}
+
 export async function getBans(timestamp = null){
     let query = `SELECT * FROM bans ORDER BY created DESC LIMIT 50`
     let params = []

@@ -415,7 +415,7 @@ export default (io) => (socket) => {
                 }
 
                 // create copy of server member without token etc
-                var castingMember = getCastingMemberObject(
+                var castingMember = await getCastingMemberObject(
                     serverconfig.servermembers[member.id],
                 );
                 delete castingMember.token;

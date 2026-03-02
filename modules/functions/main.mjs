@@ -28,11 +28,12 @@ import path from "path";
 import {powVerifiedUsers} from "../sockets/pow.mjs";
 import {sendSystemMessage} from "../sockets/home/general.mjs";
 import {checkMemberMigration} from "./migrations/memberJsonToDb.mjs";
-import {clearBase64FromDatabase} from "./migrations/base64_fixer.mjs";
+import {clearBase64FromDatabase, clearMemberBase64FromDb} from "./migrations/base64_fixer.mjs";
 import {getMemberHighestRole} from "./chat/helper.mjs";
 import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./migrations/messageMigration.mjs";
 import archiver from "archiver";
-import {banIp, checkMemberBan} from "./ban-system/helpers.mjs";
+import {banIp, checkMemberBan, getBan, isIdentifierBanned, removeBan} from "./ban-system/helpers.mjs";
+import checkPermission from "../sockets/checkPermission.mjs";
 
 var serverconfigEditable;
 
@@ -243,8 +244,26 @@ export async function handleTerminalCommands(command, args) {
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     try {
+        if(command === "unban"){
+            if (args.length === 2) {
+
+                var identifier = args[1];
+
+                try {
+                    await removeBan(identifier);
+                    Logger.info(`User/IP ${identifier} has been unbanned`)
+                } catch (Err) {
+                    Logger.error(`Couldnt unban User/IP ${identifier}`);
+                    Logger.error(Err)
+                }
+            } else {
+                Logger.warn(`Missing Argument: Member Id / IP address`);
+            }
+            return;
+        }
         if(command === "clear64"){
             clearBase64FromDatabase();
+            clearMemberBase64FromDb();
             return;
         }
         if(command === "rotateMemberTokens"){
@@ -752,7 +771,7 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockAbuser", true)
 
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayName", "Banned")
-    checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayMessageNotice", `<span style="color: indianred;">[ Content hidden ]</span>`)
+    checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayMessageNotice", `<span class="content-hidden">[ Content hidden ]</span>`)
     
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.email", "")
     checkObjectKeys(serverconfig, "serverinfo.instance.contact.website", "")
@@ -1279,16 +1298,16 @@ export function getRoleCastingObject(role) {
     return role;
 }
 
-export function anonymizeMember(member, shouldHide, isAdmin) {
+export async function anonymizeMember(member, shouldHide, isAdmin) {
     if(!member) throw new Error("anonymizeMember: Invalid input: Expected a member object");
-    member = getCastingMemberObject(member)
+    member = await getCastingMemberObject(member)
 
     if (!member || typeof member !== "object") {
         console.error("getCastingMemberObject Member: Invalid input: Expected an object");
         return;
     }
 
-    let isBanned = member?.isBanned;
+    let isBanned = await isIdentifierBanned(member?.id)
 
     if(shouldHide && !isAdmin){
         member.id = 0;
@@ -1308,53 +1327,54 @@ export function anonymizeMember(member, shouldHide, isAdmin) {
     return member;
 }
 
-export function autoAnonymizeMember(issuerMemberId, member){
+export async function autoAnonymizeMember(issuerMemberId, member){
     if(!member?.id) member = getUnkownMember()
-    let shouldAnonymize = member?.isBanned
+    let shouldAnonymize = await isIdentifierBanned(member?.id);
 
     if(shouldAnonymize){
-        return anonymizeMember(member, shouldAnonymize, hasPermission(issuerMemberId, "viewAnonymizedMessages"));
+        return await anonymizeMember(member, shouldAnonymize, hasPermission(issuerMemberId, "viewAnonymizedMessages"));
     }
 
     return member;
 }
 
-export function autoAnonymizeMessage(issuerMemberId, message){
+export async function autoAnonymizeMessage(issuerMemberId, message){
     if(!message?.author?.id) message.author = getUnkownMember()
 
     let author = serverconfig.servermembers[message.author.id] || getUnkownMember()
     if(!author) throw new Error("Message author member object not found");
+    let isBanned = await isIdentifierBanned(message.author?.id)
+    message.author.isBanned = isBanned;
 
-    let shouldAnonymize = (author?.isBanned == true || message?.anon === true) || false
+    let shouldAnonymize = (isBanned || message?.anon === true) || false
     if(shouldAnonymize){
-        return anonymizeMessage(message, author?.isBanned, hasPermission(issuerMemberId, "viewAnonymizedMessages"), issuerMemberId);
+        return await anonymizeMessage(message, isBanned, hasPermission(issuerMemberId, "viewAnonymizedMessages"), issuerMemberId);
     }
     else{
         return message;
     }
 }
 
-export function anonymizeMessage(message, hideContentForMembers = false, isAdmin = false, issuerMemberId) {
+export async function anonymizeMessage(message, hideContentForMembers = false, isAdmin = false, issuerMemberId) {
     message = copyObject(message);
 
     if (!message || typeof message !== "object") {
-        console.log(message)
         console.error("getCastingMemberObject Message: Invalid input: Expected an object");
         return;
     }
 
 
     let originalAuthor = serverconfig.servermembers[message.author.id] || getUnkownMember();
-    let isBanned = originalAuthor?.isBanned;
+    let isBanned = message.author.isBanned;
 
     // anonymize message author
     if(message?.author?.name){
-        message.author = autoAnonymizeMember(issuerMemberId, originalAuthor);
+        message.author = await autoAnonymizeMember(issuerMemberId, originalAuthor);
     }
 
     // anonymize message reply author
     if(message?.reply?.author?.name){
-        message.reply.author = autoAnonymizeMember(issuerMemberId, serverconfig.servermembers[message.reply.author.id]);
+        message.reply.author = await autoAnonymizeMember(issuerMemberId, serverconfig.servermembers[message.reply.author.id]);
     }
 
     if(message?.id) delete message?.id;
@@ -1362,19 +1382,15 @@ export function anonymizeMessage(message, hideContentForMembers = false, isAdmin
         message.author.id = isAdmin ? originalAuthor?.id : 0
     }
 
-    if(hideContentForMembers || isBanned){
+    if(hideContentForMembers){
         if(isAdmin){
-            if(isBanned){
-                message.isAdmin = isAdmin;
-            }
+            message.isAdmin = isAdmin;
         }
         else{
-            if(isBanned){
-                message.message = `${serverconfig.serverinfo.moderation.bans.displayMessageNotice}`
-                message.author.name = `${serverconfig.serverinfo.moderation.bans.displayName}`
-                message.author = anonymizeMember(message.author, true, isAdmin);
-                message.author.isBanned = true;
-            }
+            message.message = `${serverconfig.serverinfo.moderation.bans.displayMessageNotice}`
+            message.author.name = `${serverconfig.serverinfo.moderation.bans.displayName}`
+            message.author = await anonymizeMember(message.author, true, isAdmin);
+            message.author.isBanned = true;
         }
     }
 
@@ -1399,7 +1415,7 @@ export function getUnkownMember(){
     }
 }
 
-export function getCastingMemberObject(member) {
+export async function getCastingMemberObject(member) {
     if(!member) member = getUnkownMember();
     member = copyObject(member);
 
@@ -1423,6 +1439,10 @@ export function getCastingMemberObject(member) {
             delete member[key];
         }
     });
+
+    if(await getBan(member?.id)){
+        member.isBanned = true;
+    }
 
     member = setMemberObjColor(member)
     return member;

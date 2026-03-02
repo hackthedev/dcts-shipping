@@ -52,9 +52,9 @@ export async function getMemberLatestMessage(memberId, issuerMemberId){
     let messageObj = messageRow[0]?.message;
     if(typeof messageObj === "string") messageObj = JSONTools.tryParse(messageObj);
 
-    messageObj = checkMessageObjAuthor(messageObj)
+    messageObj = await checkMessageObjAuthor(messageObj)
     messageObj = await checkMessageObjReactions(messageObj);
-    if(issuerMemberId) messageObj = autoAnonymizeMessage(issuerMemberId, messageObj);
+    if(issuerMemberId) messageObj = await autoAnonymizeMessage(issuerMemberId, messageObj);
 
     return messageObj;
 }

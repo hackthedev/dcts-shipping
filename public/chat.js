@@ -1435,7 +1435,6 @@ async function sendMessageToServer(authorId = UserManager.getID(),
         socket.emit("messageSend", msgPayload, async function (response) {
             Clock.stop("send_message");
 
-            console.log(response)
             if (response?.error) {
                 // do smth in the future with this
                 console.error(response);

@@ -90,8 +90,8 @@ export default (io) => (socket) => {
                             );
                             if (!msg) return response?.({ type: "error", msg: "Message not found" });
 
-                            const reporterObj = getCastingMemberObject(serverconfig.servermembers[me]);
-                            const reportedObj = getCastingMemberObject(serverconfig.servermembers[msg.authorId]);
+                            const reporterObj = await getCastingMemberObject(serverconfig.servermembers[me]);
+                            const reportedObj = await getCastingMemberObject(serverconfig.servermembers[msg.authorId]);
 
                             const reportData = {
                                 author: {

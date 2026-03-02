@@ -865,7 +865,6 @@ async function createMsgHTML({
     let isBanned = message?.author?.isBanned;
     let isAdmin = message?.isAdmin
 
-    console.log(message, isBanned, isAdmin)
     let messageReactionsRow = await getMessageReactionsHTML(message);
 
     let messageRow =

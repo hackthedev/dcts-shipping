@@ -1303,7 +1303,7 @@ export async function anonymizeMember(member, shouldHide, isAdmin) {
 
     // avoid re-checking anon members
     if(member?.id === 0) return member;
-    
+
     member = await getCastingMemberObject(member)
 
     if (!member || typeof member !== "object") {

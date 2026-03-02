@@ -372,7 +372,7 @@ export default (io) => (socket) => {
             socket.data.memberId = myId;
             socket.join(myId);
 
-            const members = Object.values(copyObject(serverconfig.servermembers) || {}).map(getCastingMemberObject);
+            const members = Object.values(copyObject(serverconfig.servermembers) || {}).map(await getCastingMemberObject);
 
             const threads = await queryDatabase(
                 `SELECT t.threadId, t.type, t.title, k.status
@@ -664,10 +664,10 @@ export default (io) => (socket) => {
 
 
 
-    function getMemberForReport(uid) {
+    async function getMemberForReport(uid) {
         try {
             const m = (serverconfig?.servermembers || {})[uid];
-            if (m) return getCastingMemberObject(m);
+            if (m) return await getCastingMemberObject(m);
         } catch { }
         return { id: null, name: null, icon: null };
     }

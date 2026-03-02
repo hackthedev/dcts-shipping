@@ -5,7 +5,7 @@ import { copyObject, getCastingMemberObject, sendMessageToUser, validateMemberId
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('checkChannelPermission', function (member, response) {
+    socket.on('checkChannelPermission', async function (member, response) {
         if (validateMemberId(member.id, socket) == true) {
 
             member.id = xssFilters.inHTMLData(member.id);
@@ -13,7 +13,7 @@ export default (io) => (socket) => {
             member.permission = xssFilters.inHTMLData(member.permission);
             member.channel = xssFilters.inHTMLData(member.channel);
 
-            var userObj = getCastingMemberObject(serverconfig.servermembers[member.id]);
+            var userObj = await getCastingMemberObject(serverconfig.servermembers[member.id]);
 
             if (Array.isArray(member.permission)) {
 

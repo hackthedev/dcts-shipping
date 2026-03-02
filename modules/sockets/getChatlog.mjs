@@ -36,8 +36,8 @@ export default (io) => (socket) => {
                     await Clock.start("Chatlog Message Anon", async () => {
                         messages = await Promise.all(
                             messages.map(async m => {
-                                let msg = autoAnonymizeMessage(member.id, structuredClone(m));
-                                if (msg?.reply?.messageId) msg.reply = autoAnonymizeMessage(member.id, structuredClone(msg.reply));
+                                let msg = await autoAnonymizeMessage(member.id, structuredClone(m));
+                                if (msg?.reply?.messageId) msg.reply = await autoAnonymizeMessage(member.id, structuredClone(msg.reply));
 
                                 if (msg?.author?.icon?.startsWith("data:image")) msg.author.icon = "";
                                 if (msg?.author?.banner?.startsWith("data:image")) msg.author.banner = "";

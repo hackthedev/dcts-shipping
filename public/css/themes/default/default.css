@@ -357,3 +357,7 @@ img {
     border: 1px solid hsl(from var(--main) h s calc(l * 8) / 20%);
 }
  */
+
+.content-hidden{
+    color: indianred;
+}

@@ -337,7 +337,7 @@ export async function getMemberIpInfo(socket){
 }
 
 
-export function getMemberList(member, channel) {
+export async function getMemberList(member, channel) {
     var members = serverconfig.servermembers;
     const memberKeys = Object.keys(members);
     let sortedMembers = {};
@@ -355,7 +355,7 @@ export function getMemberList(member, channel) {
         if(!hasPermission(memberId, "viewChannel", channel)) continue
 
         var highestMemberRole = getMemberHighestRole(memberId);
-        sortedMembers[memberId] = getCastingMemberObject(memberObj);
+        sortedMembers[memberId] = await getCastingMemberObject(memberObj);
         sortedMembers[memberId].highestRole = getRoleCastingObject(highestMemberRole);
 
         const { isOnline, minutesPassed } = getMemberLastOnline(memberId);

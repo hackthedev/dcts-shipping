@@ -6,8 +6,8 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('getAllRoles', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
+    socket.on('getAllRoles', async function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
             if (!hasPermission(member.id, ["manageRoles", "manageChannels", "manageGroups"], member.group)) {
                 return;

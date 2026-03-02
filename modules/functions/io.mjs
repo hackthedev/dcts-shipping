@@ -240,7 +240,7 @@ export async function getSavedChatMessage(group, category, channel, index = -1) 
                 if (message?.message) {
                     // new, enhanced message system
                     if (message?.author?.id) {
-                        message.author = getCastingMemberObject(serverconfig.servermembers[message?.author?.id || message?.id]);
+                        message.author = await getCastingMemberObject(serverconfig.servermembers[message?.author?.id || message?.id]);
                     }
 
                     // resolve the reply too
@@ -250,7 +250,7 @@ export async function getSavedChatMessage(group, category, channel, index = -1) 
 
                     }
 
-                    message = checkMessageObjAuthor(message);
+                    message = await checkMessageObjAuthor(message);
                     message = await checkMessageObjReactions(message);
 
 

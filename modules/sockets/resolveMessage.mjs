@@ -31,7 +31,7 @@ export function decodeAndParseJSON(data){
 }
 
 export async function checkMessageObjReactions(message){
-    if(!message.messageId) throw new Error("Message id was not provided");
+    if(!message?.messageId) throw new Error("Message id was not provided");
 
     if (!message.reactions || Object.keys(message.reactions).length === 0) {
         const rows = await getMessageReactionsById(message.messageId);
@@ -51,9 +51,9 @@ export async function checkMessageObjReactions(message){
     return message
 }
 
-export function checkMessageObjAuthor(message){
+export async function checkMessageObjAuthor(message){
     if(!message?.author?.name){
-        message.author = getCastingMemberObject(serverconfig.servermembers[message.author.id]);
+        message.author = await getCastingMemberObject(serverconfig.servermembers[message.author.id]);
     }
     return message;
 }
@@ -75,7 +75,7 @@ export async function getMessageObjectById(messageId){
     if(message?.id) delete message.id;
     if(message?.color) delete message.color;
 
-    message = checkMessageObjAuthor(message);
+    message = await checkMessageObjAuthor(message);
     message = await checkMessageObjReactions(message);
     return { error: null, message };
 }
@@ -110,7 +110,7 @@ export default (io) => (socket) => {
                 return;
             }
 
-            if(messageObj?.message) messageObj = autoAnonymizeMessage(member.id, messageObj);
+            if(messageObj?.message) messageObj = await autoAnonymizeMessage(member.id, messageObj);
             response(messageObj)
         }
     });

@@ -5,7 +5,7 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('getMemberList', function (member, response) {
+    socket.on('getMemberList', async function (member, response) {
         if (validateMemberId(member?.id, socket, member?.token) === true) {
 
             if (!hasPermission(member.id, "viewGroup", member.group)) {
@@ -15,7 +15,7 @@ export default (io) => (socket) => {
 
             if(!member?.channel) return response({ members: {}, index: 0, error: "No channel id provided" });
 
-            let {members, index} = getMemberList(member, member?.channel, member?.lastIndex);
+            let {members, index} = await getMemberList(member, member?.channel, member?.lastIndex);
             
             response({ members, index })
         }

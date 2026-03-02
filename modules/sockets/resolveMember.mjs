@@ -13,7 +13,7 @@ import {getMemberHighestRole} from "../functions/chat/helper.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('resolveMember', function (member, response) {
+    socket.on('resolveMember', async function (member, response) {
         if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
             if(!member?.id) return response({error: "No member ID provided"});
@@ -21,13 +21,13 @@ export default (io) => (socket) => {
             if(!member?.target) return response({error: "No target member id provided"});
 
             try {
-                var resolved = getCastingMemberObject(serverconfig.servermembers[member?.target]);
+                var resolved = await getCastingMemberObject(serverconfig.servermembers[member?.target]);
 
                 if(!resolved){
                     return response({error: "Target member not found"});
                 }
 
-                resolved = autoAnonymizeMember(member.id, resolved);
+                resolved = await autoAnonymizeMember(member.id, resolved);
 
                 response({ type: "success", msg: "User Data was resolved", data: resolved });
             }

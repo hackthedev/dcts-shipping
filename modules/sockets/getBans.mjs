@@ -33,8 +33,8 @@ export default (io) => (socket) => {
 
                 if(banDataObj?.length > 0){
                     for(let banEntry of banDataObj){
-                        if(banEntry?.memberId) banEntry.bannedUserObj = getCastingMemberObject(serverconfig.servermembers[banEntry.memberId]) || null
-                        if(banEntry?.issuerId) banEntry.bannedModObj = getCastingMemberObject(serverconfig.servermembers[banEntry.issuerId]) || null
+                        if(banEntry?.memberId) banEntry.bannedUserObj = await getCastingMemberObject(serverconfig.servermembers[banEntry.memberId]) || null
+                        if(banEntry?.issuerId) banEntry.bannedModObj = await getCastingMemberObject(serverconfig.servermembers[banEntry.issuerId]) || null
                     }
                 }
 

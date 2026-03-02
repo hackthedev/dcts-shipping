@@ -12,7 +12,7 @@ import {loadMembersFromDB} from "../functions/mysql/helper.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on("getServerMembers", function (member, response) {
+    socket.on("getServerMembers", async function (member, response) {
         if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
             if (hasPermission(member.id, "manageMembers")) {
@@ -21,7 +21,7 @@ export default (io) => (socket) => {
             else {
                 let members = copyObject(serverconfig.servermembers);
                 for(let memberId of Object.keys(members)){
-                    members[memberId] = getCastingMemberObject(members[memberId])
+                    members[memberId] = await getCastingMemberObject(members[memberId])
                 }
 
                 response(members);

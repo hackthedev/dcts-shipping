@@ -360,13 +360,13 @@ export default (io) => (socket) => {
 
                 // set some values this way because it may cauz errors
                 // and i dont wanna manually encode shit etc...
-                if (member?.icon) serverconfig.servermembers[member.id].icon = member.icon;
-                if (member?.banner) serverconfig.servermembers[member.id].banner = member.banner;
-                if (member?.aboutme) serverconfig.servermembers[member.id].aboutme = member.aboutme;
-                if (member?.status) serverconfig.servermembers[member.id].status = member.status;
-                if (member?.name) serverconfig.servermembers[member.id].name = member.name || "Member";
-                if (member?.country_code) serverconfig.servermembers[member.id].country_code = member.country_code;
-                if (member?.publicKey) serverconfig.servermembers[member.id].publicKey = member?.publicKey;
+                if (member?.icon) serverconfig.servermembers[member.id].icon = xssFilters.inHTMLData(member.icon);
+                if (member?.banner) serverconfig.servermembers[member.id].banner = xssFilters.inHTMLData(member.banner);
+                if (member?.aboutme) serverconfig.servermembers[member.id].aboutme = xssFilters.inHTMLData(member.aboutme);
+                if (member?.status) serverconfig.servermembers[member.id].status = xssFilters.inHTMLData(member.status);
+                if (member?.name) serverconfig.servermembers[member.id].name = xssFilters.inHTMLData(member.name || "Member");
+                if (member?.country_code) serverconfig.servermembers[member.id].country_code = xssFilters.inHTMLData(member.country_code);
+                if (member?.publicKey) serverconfig.servermembers[member.id].publicKey = xssFilters.inHTMLData(member?.publicKey);
 
                 serverconfig.servermembers[member.id].onboarding = true;
 

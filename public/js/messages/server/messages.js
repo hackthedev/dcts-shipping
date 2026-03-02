@@ -591,23 +591,23 @@ async function showMessageInChat({
     // create message code structure
     var messagecode = "";
     if (message.isSystemMsg === true) {
-        messagecode = sanitizeHtmlForRender(await createMsgHTML({
+        messagecode = await createMsgHTML({
             message,
             append: append,
             isSystem: true,
             isMention,
             waitWithDisplay
-        }));
+        });
     } else {
         // dont append if the previous message was a system message
         if (messageElement?.element?.classList.contains("system")) append = false;
-        messagecode = sanitizeHtmlForRender(await createMsgHTML({
+        messagecode = await createMsgHTML({
             message,
             append,
             isSystem: false,
             isMention,
             waitWithDisplay
-        }));
+        });
     }
 
     // display it
@@ -818,7 +818,7 @@ async function getMessageReactionsHTML(messageObj){
     return row.innerHTML;
 
     function getEmojiReactionRowEntryHTML(messageObj, emojiObj){
-        let emojiPath = emojiObj?.code ? `/img/default_emojis/${emojiObj.code}.svg` : `/emojis/${emojiObj.filename}`;
+        let emojiPath = emojiObj?.code ? `/img/default_emojis/${sanitizeHtmlForRender(emojiObj.code, false)}.svg` : `/emojis/${sanitizeHtmlForRender(emojiObj.filename, false)}`;
         let emojiDetails = extractEmojiDetails(emojiObj);
         let emojiHash = emojiDetails[0]
 
@@ -870,9 +870,9 @@ async function createMsgHTML({
     let messageRow =
         `
         <div class="content ${isSystem ? "system" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}"  
-            ${message?.plainText ? `data-plain-text="${encodeURIComponent(message.plainText)}"` : ""}
+            ${message?.plainText ? `data-plain-text="${sanitizeHtmlForRender(encodeURIComponent(message.plainText), false)}"` : ""}
             data-message-id="${message.messageId}" 
-            data-member-id="${message?.author?.id}" 
+            data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" 
             data-timestamp="${message.timestamp}">
             
             ${createActions === true ? createMsgActions(message?.author?.id, isSystem) : ""}
@@ -893,19 +893,19 @@ async function createMsgHTML({
     let replyCode = "";
     if(reply?.messageId){
         replyCode = `
-            <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${reply?.author?.id}">            
+            <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}">            
                 <!-- very creative name indeed -->
                 <div class="box"></div>
             
                 <div class="icon-container">    
-                    <img class="icon" draggable="false" src="${reply?.author?.icon}" data-member-id="${reply?.author?.id}" onerror="this.src = '/img/default_pfp.png';">
+                    <img class="icon" draggable="false" src="${sanitizeHtmlForRender(reply?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>
                 <div class="meta">
-                    <label class="username" data-member-id="${reply?.author?.id}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
-                        ${sanitizeHtmlForRender(truncateText(reply?.author?.name, 25))}
+                    <label class="username" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
+                        ${sanitizeHtmlForRender(truncateText(reply?.author?.name, 25), false)}
                     </label>
                 </div>
-                <div class="content reply" data-message-id="${reply?.messageId}" data-member-id="${reply?.author?.id}" data-timestamp="${reply?.timestamp}">
+                <div class="content reply" data-message-id="${reply?.messageId}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" data-timestamp="${reply?.timestamp}">
                     ${unescapeHtmlEntities(sanitizeHtmlForRender(reply?.message), false) || "[ Click to view message ]"} 
                 </div>
             </div>
@@ -919,13 +919,13 @@ async function createMsgHTML({
             <div class="row ${isSystem === true ? `system` : ""}" data-message-id="${message?.messageId}" data-member-id="${message?.id}">
                 ${isSystem !== true ?
                 `<div class="icon-container">
-                    <img class="icon" draggable="false" src="${message?.author?.icon}" data-member-id="${message?.author?.id}" onerror="this.src = '/img/default_pfp.png';">
+                    <img class="icon" draggable="false" src="${sanitizeHtmlForRender(message?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>` : ""}
                 
                <div class="content-container" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}"> <!-- for the flex layout -->
                  <div class="meta">
                     ${isSystem !== true ?
-                    `<label class="username" data-member-id="${message?.author?.id}" style="color: ${message?.author?.color}; background: ${message?.author?.background}; background-clip: ${message?.author?.backgroundClip};">${sanitizeHtmlForRender(truncateText(message?.author?.name, 30))}</label>` : ""}
+                    `<label class="username" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" style="color: ${message?.author?.color}; background: ${message?.author?.background}; background-clip: ${message?.author?.backgroundClip};">${sanitizeHtmlForRender(truncateText(message?.author?.name, 30))}</label>` : ""}
                     <label class="timestamp" data-timestamp="${message.timestamp}">
                         ${new Date(message.timestamp).toLocaleString("narrow")}
                         
@@ -941,7 +941,7 @@ async function createMsgHTML({
                     </label>
                  </div>
                 
-                 <div class="contentRows" data-member-id="${message?.author?.id}">
+                 <div class="contentRows" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}">
                     ${messageRow}
                  </div>
                 

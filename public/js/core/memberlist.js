@@ -86,7 +86,7 @@ function getMemberList() {
                     insertMemberIntoRole(
                         member,
                         entry.role.info.id,
-                        sanitizeHtmlForRender(getMemberHTML(member, entry.role), false)
+                        getMemberHTML(member, entry.role)
                     );
                 }
             }

@@ -456,7 +456,7 @@ class UserManager {
 
     static getUsername() {
 
-        var username = CookieManager.getCookie("username");
+        var username = sanitizeHtmlForRender(CookieManager.getCookie("username"), false);
 
         if (username == null || username.length <= 0) {
             return UserManager.getRandomUsername();
@@ -470,7 +470,7 @@ class UserManager {
     }
 
     static getAboutme() {
-        var aboutme = CookieManager.getCookie("aboutme");
+        var aboutme = sanitizeHtmlForRender(CookieManager.getCookie("aboutme"), false);
 
         if (aboutme == null || aboutme.length <= 0) {
             return "";
@@ -484,7 +484,7 @@ class UserManager {
     }
 
     static getBanner() {
-        var banner = localStorage.getItem("banner");
+        var banner = sanitizeHtmlForRender(localStorage.getItem("banner"), false);
 
         if (banner == null || banner.length <= 0) {
             return "";
@@ -549,30 +549,35 @@ class UserManager {
 
     static setUser(username) {
         // renamed setUser. May be used. legacy function lol
-        UserManager.setUsername(username)
+        UserManager.setUsername(sanitizeHtmlForRender(username, false))
     }
 
     static setUsername(username) {
+        username = sanitizeHtmlForRender(username, false);
         CookieManager.setCookie("username", username, 360);
         UserManager.updateUsernameOnUI(username);
     }
 
     static setBanner(banner) {
+        banner = sanitizeHtmlForRender(banner, false)
         CookieManager.setCookie("banner", banner, 360);
         localStorage.setItem("banner", banner);
     }
 
     static setStatus(status) {
+        status = sanitizeHtmlForRender(status, false);
         CookieManager.setCookie("status", status, 360);
         UserManager.updateUsernameOnUI(status);
     }
 
     static setPFP(pfp) {
+        pfp = sanitizeHtmlForRender(pfp, false)
         localStorage.setItem("pfp", pfp);
         UserManager.updateUsernameOnUI(pfp);
     }
 
     static setAboutme(aboutme) {
+        aboutme = sanitizeHtmlForRender(aboutme, false);
         CookieManager.setCookie("aboutme", aboutme, 360);
         UserManager.updateUsernameOnUI(aboutme);
     }

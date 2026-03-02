@@ -296,7 +296,7 @@ class ChatManager {
         let infoData;
         if(socket.connected){
             infoData = await getServerInfo(true);
-            infoData = infoData.serverinfo
+            if(infoData) infoData = infoData.serverinfo
         }
 
         // fallback to /discover
@@ -349,7 +349,7 @@ class ChatManager {
              <div style="display: flex; gap: 80px;">
                 <div style="display: flex; flex-direction: column; justify-content: start;">
                     <h3 style="margin-bottom: 0;">Contact Information</h3>
-                    <p style="margin-top: 8px;">This instance is run by:<br> ${contactData.owner.name}</p>
+                    ${contactData.owner.name ? `<p style="margin-top: 8px;">This instance is run by:<br> ${contactData.owner.name}</p>`: ""}
                     
                     <ul style="padding-left: 20px;line-height: 1.5;">
                         ${contactData.email ? `<li>Email: <a href=mailto:"${contactData.email}" target="_blank">${contactData.email}</a></li>` : ""}
@@ -362,12 +362,11 @@ class ChatManager {
                     
                 </div>
                 
-                <div style="display: flex; flex-direction: column; margin-left: auto;">
+                <div style="display: flex; flex-direction: column; margin-left: auto; gap: 4px;">
                     <h3 style="margin-bottom: 6px;">Instance Information</h3>
                     
-                    <a onclick="Docs.open('/Web Client/Main/Instance Info.md')">Documentation</a>
-                    <a href="https://github.com/hackthedev/dcts-shipping/releases/tag/${versionText}" target="_blank">Version ${versionText}</a>
-                    
+                    <a onclick="Docs.open('/Web Client/Main/Instance Info.md')"><u>Documentation</u></a>
+                    <a href="https://github.com/hackthedev/dcts-shipping/releases/tag/${versionText}" target="_blank">Version ${versionText}</a>                    
                 </div>
             </div>    
              

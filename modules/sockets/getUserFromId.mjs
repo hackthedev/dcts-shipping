@@ -5,10 +5,10 @@ import { copyObject, getCastingMemberObject, sendMessageToUser, validateMemberId
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('getUserFromId', function (member, response) {
+    socket.on('getUserFromId', async function (member, response) {
         if (validateMemberId(member.id, socket) == true
         ) {
-            response({ type: "success", user: getCastingMemberObject(serverconfig.servermembers[member.target]) });
+            response({ type: "success", user: await getCastingMemberObject(serverconfig.servermembers[member.target]) });
         }
     });
 }

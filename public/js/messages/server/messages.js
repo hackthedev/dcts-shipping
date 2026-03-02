@@ -354,9 +354,31 @@ function cancelMessageReply() {
 }
 
 function cancelMessageEdit() {
-    editor.innerHTML = "<p><br></p>";
     editMessageId = null;
+    editor.innerHTML = "";
     if(editorHints) editorHints.innerHTML = ""
+}
+
+function showRateLimitNotice(){
+    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+    if (replyMessageId == null && editorHints ) {
+        if(editorHints?.querySelector("#ratelimitHint") != null) editorHints?.querySelector("#ratelimitHint").remove();
+
+        editorHints.insertAdjacentHTML("afterbegin", `<p id="ratelimitHint" >You have been rate limited</p>`)
+    }
+
+    if(isScrolledDown) scrollDown("showRateLimitNotice")
+}
+
+function showSlowmodeNotice(timestamp){
+    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+    if (replyMessageId == null && editorHints ) {
+        if(editorHints?.querySelector("#slowmodeHint") != null) editorHints?.querySelector("#slowmodeHint").remove();
+
+        editorHints.insertAdjacentHTML("afterbegin", `<p id="slowmodeHint" >Slowmode is active! You need to wait for ${getReadableDuration(new Date(timestamp))}</p>`)
+    }
+
+    if(isScrolledDown) scrollDown("showSlowmodeNotice")
 }
 
 function replyToMessage(messageId) {
@@ -367,6 +389,38 @@ function replyToMessage(messageId) {
     replyMessageId = messageId;
 
     if(focusEditor) focusEditor()
+}
+
+function replaceUrlEmbeds(element){
+    let embeds = element.querySelectorAll(".markdown-urlEmbed-container");
+
+    if(embeds?.length > 0){
+        for(let embed of embeds) {
+            let embedLink = embed.querySelector(".markdown-urlEmbed");
+            if(!embedLink) continue;
+
+            let url = embedLink.getAttribute("href");
+            let wrapper = embed.closest("[data-markdown-done]");
+
+            if(wrapper && wrapper !== element) {
+                wrapper.outerHTML = url;
+            } else {
+                embed.outerHTML = url;
+            }
+        }
+
+        // in case we have duplicate shit
+        let emptyDivs = element.querySelectorAll("div:empty");
+        emptyDivs.forEach(d => d.remove());
+
+        // wrap shit if needed
+        if(!element.querySelector("p")) {
+            let text = element.textContent.trim();
+            if(text) element.innerHTML = `<p>${text}</p>`;
+        }
+
+        element.innerHTML = element.innerHTML.replace(/\s+/g, " ").trim();
+    }
 }
 
 function editMessage(id) {
@@ -428,15 +482,7 @@ function editMessage(id) {
     }
     editMessageId = msgContent.getAttribute("data-message-id");
 
-    // remove all url embeds
-    let embeds = msgContent.querySelectorAll(".markdown-urlEmbed");
-    if(embeds?.length > 0){
-        for(let embed of embeds) {
-            let url = embed.getAttribute("href");
-            embed.replaceWith(url);
-        }
-        msgContent.innerHTML = msgContent.innerHTML.replace(/\s+/g, " ").trim();
-    }
+    replaceUrlEmbeds(msgContent);
 
     setTimeout(() => {
         const regex = /<p>\s*<\/p>/gm;
@@ -527,17 +573,17 @@ async function showMessageInChat({
     // convert mentions and check if own userid is in it
     let convertedMentions = await convertMention(message);
     let isMention = false;
-    message.message = convertedMentions.text
+    message.message = sanitizeHtmlForRender(convertedMentions.text)
 
     // convert emojis
-    try{ message.message = await text2Emoji(message.message) } catch {}
+    try{ message.message = sanitizeHtmlForRender(await text2Emoji(message.message)) } catch {}
 
     // convert emojis and mentions for replies too
     if(message?.reply?.message) {
-        try{ message.reply.message = await text2Emoji(message.reply.message); } catch {}
+        try{ message.reply.message = sanitizeHtmlForRender(await text2Emoji(message.reply.message)); } catch {}
 
         let convertedReplyMentions = await convertMention(message.reply);
-        message.reply.message = convertedReplyMentions.text
+        message.reply.message = sanitizeHtmlForRender(convertedReplyMentions.text)
     }
 
     let messageElement = appendTop ? getFirstMessage(container) : getLastMessage(container);
@@ -738,7 +784,7 @@ async function updateMessageReactionsElementById(messageId, container = document
     let messageObj = await ChatManager.resolveMessage(messageId);
     if(!messageObj) return console.error(`Couldnt find message object for message reaction update ${messageId}`);
 
-    // no reactions were present so add the container
+    // no reactions were presen^t so add the container
     if(!reactionRow) {
         contentContainer.innerHTML += await getMessageReactionsHTML(messageObj);
         reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
@@ -772,7 +818,7 @@ async function getMessageReactionsHTML(messageObj){
     return row.innerHTML;
 
     function getEmojiReactionRowEntryHTML(messageObj, emojiObj){
-        let emojiPath = emojiObj?.code ? `/img/default_emojis/${emojiObj.code}.svg` : `/emojis/${emojiObj.filename}`;
+        let emojiPath = emojiObj?.code ? `/img/default_emojis/${sanitizeHtmlForRender(emojiObj.code, false)}.svg` : `/emojis/${sanitizeHtmlForRender(emojiObj.filename, false)}`;
         let emojiDetails = extractEmojiDetails(emojiObj);
         let emojiHash = emojiDetails[0]
 
@@ -817,14 +863,16 @@ async function createMsgHTML({
     }
 
     let isBanned = message?.author?.isBanned;
+    let isAdmin = message?.isAdmin
+
     let messageReactionsRow = await getMessageReactionsHTML(message);
 
     let messageRow =
         `
         <div class="content ${isSystem ? "system" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}"  
-            ${message?.plainText ? `data-plain-text="${encodeURIComponent(message.plainText)}"` : ""}
+            ${message?.plainText ? `data-plain-text="${sanitizeHtmlForRender(encodeURIComponent(message.plainText), false)}"` : ""}
             data-message-id="${message.messageId}" 
-            data-member-id="${message?.author?.id}" 
+            data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" 
             data-timestamp="${message.timestamp}">
             
             ${createActions === true ? createMsgActions(message?.author?.id, isSystem) : ""}
@@ -845,19 +893,19 @@ async function createMsgHTML({
     let replyCode = "";
     if(reply?.messageId){
         replyCode = `
-            <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${reply?.author?.id}">            
+            <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}">            
                 <!-- very creative name indeed -->
                 <div class="box"></div>
             
                 <div class="icon-container">    
-                    <img class="icon" draggable="false" src="${reply?.author?.icon}" data-member-id="${reply?.author?.id}" onerror="this.src = '/img/default_pfp.png';">
+                    <img class="icon" draggable="false" src="${sanitizeHtmlForRender(reply?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>
                 <div class="meta">
-                    <label class="username" data-member-id="${reply?.author?.id}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
-                        ${sanitizeHtmlForRender(truncateText(reply?.author?.name, 25))}
+                    <label class="username" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
+                        ${sanitizeHtmlForRender(truncateText(reply?.author?.name, 25), false)}
                     </label>
                 </div>
-                <div class="content reply" data-message-id="${reply?.messageId}" data-member-id="${reply?.author?.id}" data-timestamp="${reply?.timestamp}">
+                <div class="content reply" data-message-id="${reply?.messageId}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" data-timestamp="${reply?.timestamp}">
                     ${unescapeHtmlEntities(sanitizeHtmlForRender(reply?.message), false) || "[ Click to view message ]"} 
                 </div>
             </div>
@@ -865,19 +913,19 @@ async function createMsgHTML({
     }
 
     return `
-        <div class="message-container ${isSystem ? "system" : ""} ${isBanned && message?.isAdmin ? "banned" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}" data-member-id="${message?.author?.id}">
+        <div class="message-container ${isSystem ? "system" : ""} ${isBanned && isAdmin ? "banned" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}" data-member-id="${message?.author?.id}">
             
             ${replyCode}
             <div class="row ${isSystem === true ? `system` : ""}" data-message-id="${message?.messageId}" data-member-id="${message?.id}">
                 ${isSystem !== true ?
                 `<div class="icon-container">
-                    <img class="icon" draggable="false" src="${message?.author?.icon}" data-member-id="${message?.author?.id}" onerror="this.src = '/img/default_pfp.png';">
+                    <img class="icon" draggable="false" src="${sanitizeHtmlForRender(message?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>` : ""}
                 
                <div class="content-container" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}"> <!-- for the flex layout -->
                  <div class="meta">
                     ${isSystem !== true ?
-                    `<label class="username" data-member-id="${message?.author?.id}" style="color: ${message?.author?.color}; background: ${message?.author?.background}; background-clip: ${message?.author?.backgroundClip};">${sanitizeHtmlForRender(truncateText(message?.author?.name, 25))}</label>` : ""}
+                    `<label class="username" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" style="color: ${message?.author?.color}; background: ${message?.author?.background}; background-clip: ${message?.author?.backgroundClip};">${sanitizeHtmlForRender(truncateText(message?.author?.name, 30))}</label>` : ""}
                     <label class="timestamp" data-timestamp="${message.timestamp}">
                         ${new Date(message.timestamp).toLocaleString("narrow")}
                         
@@ -893,7 +941,7 @@ async function createMsgHTML({
                     </label>
                  </div>
                 
-                 <div class="contentRows" data-member-id="${message?.author?.id}">
+                 <div class="contentRows" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}">
                     ${messageRow}
                  </div>
                 
@@ -1212,6 +1260,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
         }
 
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())
+        ChatManager.setChannelMarker(UserManager.getChannel(), false)
 
         if (!appendTop) {
             displayAwaitedMessages(container)

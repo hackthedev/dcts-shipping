@@ -211,15 +211,15 @@ function getMemberList() {
 
                     let newSrc = ChatManager.proxyUrl(memberObject.icon);
                     if(memberIcon.src !== newSrc){
-                        memberIcon.src = newSrc;
+                        memberIcon.src = sanitizeHtmlForRender(newSrc, false);
                     }
                 }
 
                 if(memberName && memberName.innerText !== memberObject.name){
-                    memberName.innerText = unescapeHtmlEntities(memberObject.name);
+                    memberName.innerText = unescapeHtmlEntities(sanitizeHtmlForRender(memberObject.name, false));
                 }
                 if(memberStatus && memberStatus.innerText !== memberObject.status){
-                    memberStatus.innerText = memberObject.status;
+                    memberStatus.innerText = sanitizeHtmlForRender(memberObject.status, false);
                 }
             }
         });
@@ -239,16 +239,16 @@ function getMemberList() {
 
     function getMemberHTML(member, role){
         return `<div class="memberlist-container" data-member-id="${member.id}">
-                        <img draggable="false" class="memberlist-img ${member?.isOffline ? "offline_pfp" : ""}" data-member-id="${member.id}" src="${ChatManager.proxyUrl(member.icon)}" onerror="this.src = '/img/default_pfp.png'">
+                        <img draggable="false" class="memberlist-img ${member?.isOffline ? "offline_pfp" : ""}" data-member-id="${member.id}" src="${ChatManager.proxyUrl(sanitizeHtmlForRender(member.icon))}" onerror="this.src = '/img/default_pfp.png'">
                         
                         <div style="display:flex;flex-direction: column;width: calc(100% - 35px);">
                             <div class="memberlist-member-info name" 
-                                onclick="getMemberProfile('${member.id}');" data-member-id="${member.id}"" 
+                                onclick="getMemberProfile('${sanitizeHtmlForRender(member.id, false)}');" data-member-id="${sanitizeHtmlForRender(member.id, false)}"" 
                                 >
-                                <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${getDisplayString(member?.name, member, role.info.color)}</span>
+                                <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${sanitizeHtmlForRender(getDisplayString(member?.name, member, role.info.color), false)}</span>
                             </div>
                             <div class="memberlist-member-info status" data-member-id="${member.id}">
-                                <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${getDisplayString(member?.status, member, role.info.color)}</span>
+                                <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${sanitizeHtmlForRender(getDisplayString(member?.status, member, role.info.color), false)}</span>
                             </div>
                         </div>
                 </div>`

@@ -5,19 +5,22 @@
   "main": "index.mjs",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "author": "",
   "license": "",
   "dependencies": {
     "@hackthedev/arraytools": "^1.0.2",
-    "@hackthedev/datetools": "^1.0.1",
+    "@hackthedev/datetools": "^1.0.3",
     "@hackthedev/dsync": "^1.0.8",
     "@hackthedev/dsync-auth": "^1.0.9",
     "@hackthedev/dsync-files": "^1.0.9",
     "@hackthedev/dsync-ipsec": "^1.0.12",
     "@hackthedev/dsync-pay": "^1.0.8",
-    "@hackthedev/dsync-ratelimit": "^1.0.1",
+    "@hackthedev/dsync-ratelimit": "^1.0.3",
     "@hackthedev/dsync-shop": "^1.0.1",
     "@hackthedev/dsync-sign": "^1.0.10",
     "@hackthedev/dsync-sql": "^1.0.10",
@@ -26,6 +29,7 @@
     "@hackthedev/terminal-logger": "^1.0.0",
     "archiver": "^7.0.1",
     "bcrypt": "^6.0.0",
+    "chartjs-node-canvas": "^5.0.0",
     "colors": "^1.4.0",
     "cookie-parser": "^1.4.7",
     "express": "^5.2.1",
@@ -49,6 +53,8 @@
     "zip": "^1.2.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitepress": "^2.0.0-alpha.16",
+    "vitepress-sidebar": "^1.33.1"
   }
 }

@@ -257,6 +257,10 @@
                         <div class='emoji-box-header' id="emoji-box-gifs" onclick="getGifs(); selectEmojiTab(this);">
                             <h2>GIFs</h2>
                         </div>
+                        <div class='emoji-box-header' id="emoji-box-upload" onclick="document.getElementById('uploadCaller').click();">
+                            <input type="file" id="uploadCaller" style="display:none" accept="image/*,video/*" /> 
+                            <h2>Upload</h2>
+                        </div>
                     </div>
 
                     <div id="emoji-entry-container"></div>

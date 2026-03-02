@@ -211,6 +211,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     initUploadDragAndDrop()
+    initUploadFileDialog()
 
     socket.on("connect", async () => {
         // sick af in my opinion
@@ -379,8 +380,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     if(!messageId) throw new Error("Couldnt find inbox reply message id")
 
                     replyMessageId = messageId;
-                    let wasSent = sendMessageToServer(null, null, null, html, true);
-
+                    let wasSent = await sendMessageToServer(null, null, null, html, true);
                     if(wasSent){
                         Inbox.markAsRead(inboxId)
                         editor.clear()
@@ -921,10 +921,10 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
             if (response?.token) CookieManager.setCookie("token", response.token);
             if (response?.icon) CookieManager.setCookie("pfp", response.icon);
             if (response?.banner) CookieManager.setCookie("banner", response.banner);
-            if (response?.aboutme) CookieManager.setCookie("banner", response.aboutme);
-            if (response?.status) CookieManager.setCookie("banner", response.status);
-            if (response?.loginName) CookieManager.setCookie("banner", response.loginName);
-            if (response?.id) CookieManager.setCookie("banner", response.id);
+            if (response?.aboutme) CookieManager.setCookie("aboutme", response.aboutme);
+            if (response?.status) CookieManager.setCookie("status", response.status);
+            if (response?.loginName) CookieManager.setCookie("loginName", response.loginName);
+            if (response?.id) CookieManager.setCookie("id", response.id);
 
             // if we finished onboarding
             if (!response?.error && response.finishedOnboarding === true && initial) {
@@ -1431,31 +1431,76 @@ async function sendMessageToServer(authorId = UserManager.getID(),
         msgPayload = await Client().SignJson(msgPayload);
     }
 
-    socket.emit("messageSend", msgPayload, async function (response) {
-        if (response.error) {
-            // do smth in the future with this
-            console.error(response.error);
-        } else {
-            // mark channel as read
-            ChatManager.increaseChannelMarkerCount(UserManager.getChannel())
-            // mark channel as read
-            ChatManager.setChannelMarkerCounter(UserManager.getChannel())
-        }
-    });
+    return new Promise((resolve, reject) => {
+        socket.emit("messageSend", msgPayload, async function (response) {
+            Clock.stop("send_message");
 
-    // reset all flags
-    editMessageId = null;
-    replyMessageId = null;
-    cancelMessageEdit();
-    cancelMessageReply();
+            if (response?.error) {
+                // do smth in the future with this
+                console.error(response);
 
-    scrollDown("sendMessageToServer"); // forgot that
-    setTimeout(() => focusEditor(), 1)
-    Clock.stop("send_message");
+                // check for slowmode
+                if(response?.slowmode){
+                    showSlowmodeNotice(response.slowmode)
+                }
+                // check for ratelimit
+                if(response?.rateLimited){
+                    showRateLimitNotice()
+                }
 
-    return true;
+                resolve(false)
+            } else {
+                // mark channel as read
+                ChatManager.increaseChannelMarkerCount(UserManager.getChannel())
+                // mark channel as read
+                ChatManager.setChannelMarkerCounter(UserManager.getChannel())
+
+                // reset all flags
+                editMessageId = null;
+                replyMessageId = null;
+                cancelMessageEdit();
+                cancelMessageReply();
+
+                scrollDown("sendMessageToServer"); // forgot that
+                setTimeout(() => focusEditor(), 1)
+
+                console.log("clearing editor")
+                editor.innerHTML = "<p><br></p>"
+
+                resolve(true);
+            }
+        });
+    })
 }
 
+function getReadableDuration(date) {
+    let untilTimestamp = date.getTime();
+
+    const remainingTime = untilTimestamp - Date.now();
+    if (remainingTime <= 0) return "Expired";
+
+    let secondsTotal = Math.floor(remainingTime / 1000);
+
+    const years = Math.floor(secondsTotal / (60 * 60 * 24 * 365));
+    secondsTotal %= 60 * 60 * 24 * 365;
+
+    const days = Math.floor(secondsTotal / (60 * 60 * 24));
+    secondsTotal %= 60 * 60 * 24;
+
+    const hours = Math.floor(secondsTotal / (60 * 60));
+    secondsTotal %= 60 * 60;
+
+    const minutes = Math.floor(secondsTotal / 60);
+    const seconds = secondsTotal % 60;
+
+    return [
+        years ? `${years}y` : null,
+        days ? `${days}d` : null,
+        hours ? `${hours}h` : null,
+        minutes ? `${minutes}m` : null,
+        seconds ? `${seconds}s` : null
+    ].filter(Boolean).join(" ");
+}
 
 var audio = new Audio();
 
@@ -2068,7 +2113,10 @@ async function getEmojis(callback = null) {
             for (let emoji of response.data.reverse()) {
                 const base = emoji.filename.replace(/\.[^/.]+$/, "");
                 const parts = base.split("_");
-                const emojiId = parts[0];
+
+                let parsed = parseEmojiFilename(emoji.filename)
+                const emojiId = parsed.hash;
+                const emojiName = parsed.name;
 
                 if (hasEmojiInContainer(emojiId)) {
                     let existingEmojiElement = contentContainer.querySelector(`.emoji-entry[data-hash="${emojiId}"]`);
@@ -2079,7 +2127,7 @@ async function getEmojis(callback = null) {
                 const entry = document.createElement("div");
                 entry.className = "emoji-entry";
                 entry.setAttribute("data-hash", emojiId);
-                entry.title = emoji.name;
+                entry.title = emojiName;
 
                 const imgWrap = document.createElement("div");
                 imgWrap.className = "emoji-img";
@@ -2562,7 +2610,7 @@ function sleep(ms) {
 
 async function testDb(length) {
     for (let i = 1; i < length; i++) {
-        await sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${i}`);
+        await sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${i}`, true);
         await sleep(500);
     }
 }
@@ -2577,6 +2625,39 @@ socket.on("uploadProgress", ({filename, bytes, total}) => {
         duration: 2000
     });
 });
+
+function initUploadFileDialog(){
+    //Setting up to trigger once Input-Dialog element receives a new file
+    const fileInput = document.getElementById('uploadCaller');
+    fileInput.addEventListener('change', async function () {
+        if (fileInput.files.length > 0) {
+            //Code borrowed from initUploadDragAndDrop.
+            try {
+                let result = await ChatManager.uploadFile(fileInput.files);
+                console.log("upload result: ", result);
+                if (result.ok === true) {
+                    console.log("All files uploaded successfully. URLs:", result.path);
+                    // Process the URLs array
+                    sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${window.location.origin}${result.path}`, true); // Sending all URLs at once
+                } else {
+                    console.error("Upload encountered an error:", result.error);
+                    showSystemMessage({
+                        title: `Error uploading file`,
+                        text: `${result.error}`,
+                        icon: "error",
+                        type: "error",
+                        duration: 1500
+                    });
+                }
+            } catch (error) {
+                console.error("An error occurred during the upload process:", error);
+            }
+            //End of borrowed code
+        } else {
+            console.log('No file selected from dialog.')
+        }
+    })
+}
 
 function initUploadDragAndDrop(){
 

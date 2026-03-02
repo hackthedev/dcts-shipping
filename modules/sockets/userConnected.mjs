@@ -9,39 +9,30 @@ import {
 } from "../../index.mjs";
 import {
     formatDateTime,
-    generateGid,
     getJson,
-    getMemberFromKey, getMemberIpInfo,
+    getMemberIpInfo,
     getMemberLastOnline,
     hasVerifiedKey,
     resolveCategoryByChannelId,
-    resolveChannelById,
     resolveGroupByChannelId,
 } from "../functions/chat/main.mjs";
 import {saveChatMessage} from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
 import {
-    checkMemberBan,
     checkMemberMute,
     checkRateLimit,
-    copyObject,
     emitBasedOnMemberId,
-    escapeHtml,
     generateId,
     getCastingMemberObject,
     hashPassword,
     removeFromArray,
     sendMessageToUser,
-    validateMemberId,
 } from "../functions/main.mjs";
 import {sendSystemMessage} from "./home/general.mjs";
 import {discoverHosts} from "../functions/discovery.mjs";
 import {isValidProof, powVerifiedUsers} from "./pow.mjs";
-import logger from "../functions/logger.mjs";
-import {channel} from "node:diagnostics_channel";
 import {saveMemberToDB} from "../functions/mysql/helper.mjs";
-import {runInWorker} from "../functions/offload.mjs";
-import {listThemes, loadThemeCache} from "./routes/themes.mjs";
+import {checkMemberBan} from "../functions/ban-system/helpers.mjs";
 
 function normaliseString(v) {
     if (v === null || v === undefined) return "";
@@ -369,13 +360,13 @@ export default (io) => (socket) => {
 
                 // set some values this way because it may cauz errors
                 // and i dont wanna manually encode shit etc...
-                if (member?.icon) serverconfig.servermembers[member.id].icon = member.icon;
-                if (member?.banner) serverconfig.servermembers[member.id].banner = member.banner;
-                if (member?.aboutme) serverconfig.servermembers[member.id].aboutme = member.aboutme;
-                if (member?.status) serverconfig.servermembers[member.id].status = member.status;
-                if (member?.name) serverconfig.servermembers[member.id].name = member.name || "Member";
-                if (member?.country_code) serverconfig.servermembers[member.id].country_code = member.country_code;
-                if (member?.publicKey) serverconfig.servermembers[member.id].publicKey = member?.publicKey;
+                if (member?.icon) serverconfig.servermembers[member.id].icon = xssFilters.inHTMLData(member.icon);
+                if (member?.banner) serverconfig.servermembers[member.id].banner = xssFilters.inHTMLData(member.banner);
+                if (member?.aboutme) serverconfig.servermembers[member.id].aboutme = xssFilters.inHTMLData(member.aboutme);
+                if (member?.status) serverconfig.servermembers[member.id].status = xssFilters.inHTMLData(member.status);
+                if (member?.name) serverconfig.servermembers[member.id].name = xssFilters.inHTMLData(member.name || "Member");
+                if (member?.country_code) serverconfig.servermembers[member.id].country_code = xssFilters.inHTMLData(member.country_code);
+                if (member?.publicKey) serverconfig.servermembers[member.id].publicKey = xssFilters.inHTMLData(member?.publicKey);
 
                 serverconfig.servermembers[member.id].onboarding = true;
 
@@ -424,7 +415,7 @@ export default (io) => (socket) => {
                 }
 
                 // create copy of server member without token etc
-                var castingMember = getCastingMemberObject(
+                var castingMember = await getCastingMemberObject(
                     serverconfig.servermembers[member.id],
                 );
                 delete castingMember.token;

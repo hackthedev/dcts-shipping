@@ -230,7 +230,13 @@ let permList = {
         name: "Bypass Slowmode",
         type: "checkbox",
         category: ["channelPerms", "serverRoles"],
-        description: "Ignores chat slow done. *to be implemented*"
+        description: "Ignores chat slow done."
+    },
+    "bypassRatelimit": {
+        name: "Bypass Ratelimit",
+        type: "checkbox",
+        category: ["channelPerms", "serverRoles"],
+        description: "Ignores chat rate limit."
     },
     "useVOIP": {
         name: "Use Voice Chat",
@@ -306,10 +312,10 @@ export default (io) => (socket) => {
 
 
     // socket.on code here
-    socket.on('checkPermission', function (member, response) {
+    socket.on('checkPermission', async function (member, response) {
         if (validateMemberId(member?.id, socket, member?.token) === true) {
 
-            var userObj = getCastingMemberObject(serverconfig.servermembers[member.id]);
+            var userObj = await getCastingMemberObject(serverconfig.servermembers[member.id]);
 
             if (Array.isArray(member.permission)) {
 

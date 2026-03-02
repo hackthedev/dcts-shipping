@@ -141,3 +141,15 @@
     text-align: center;
     width: 100%;
 }
+
+.charts{
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    gap: 10px;
+}
+
+.charts img{
+    border-radius: 10px;
+    border: 1px solid hsl(from var(--main) h s calc(l * 10) / 20%);
+}

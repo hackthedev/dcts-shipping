@@ -1,4 +1,10 @@
-displayThemes();
+document.addEventListener("pagechange", e => {
+    console.log(e.detail.page);
+    if (e.detail.page !== "themes") return;
+
+    displayThemes()
+});
+
 document.querySelector("#accentPicker").addEventListener("change", function () {
     UserManager.setThemeAccent(this.value);
 })

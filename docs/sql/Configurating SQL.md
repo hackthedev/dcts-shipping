@@ -2,8 +2,6 @@
 
 This document will explain the SQL Setup and requirements as well as benefits. The chat app was developed for MySQL / MariaDB compatible SQL servers.
 
-[TOC]
-
 ------
 
 ## Setting up credentials

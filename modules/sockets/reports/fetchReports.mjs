@@ -16,9 +16,9 @@ export default (io) => (socket) => {
             if (hasPermission(member.id, "manageReports")) {
                 try {
                     let reports = await getReports();
-                    Object.keys(reports).forEach(function (report) {
-                        reports[report].reportCreator = getCastingMemberObject(decodeAndParseJSON(reports[report].reportCreator))
-                        reports[report].reportedUser = getCastingMemberObject(decodeAndParseJSON(reports[report].reportedUser))
+                    Object.keys(reports).forEach(async function (report) {
+                        reports[report].reportCreator = await getCastingMemberObject(decodeAndParseJSON(reports[report].reportCreator))
+                        reports[report].reportedUser = await getCastingMemberObject(decodeAndParseJSON(reports[report].reportedUser))
                         reports[report].reportData = decodeAndParseJSON(reports[report].reportData)
 
                         if(reports[report].reportData?.message) reports[report].reportData.message = decodeString(reports[report].reportData.message)

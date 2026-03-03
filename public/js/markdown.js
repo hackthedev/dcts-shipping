@@ -124,7 +124,7 @@ async function markdown(msg, msgid) {
         let proxy = ChatManager.proxyUrl(url);
         let urlMeta = await getUrlMeta(url);
 
-        if (url.includes("youtu.be") || url.includes("youtube")) {
+        if (url.includes("youtu.be") || url.includes("youtube.com/watch")) {
             msg = msg.replace(url, createYouTubeEmbed(url, msgid));
             changed = true;
             continue;

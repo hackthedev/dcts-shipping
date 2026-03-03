@@ -306,7 +306,7 @@ function chooseRole(arg = {}) {
                   <div class="role-menu-entry" style="display:flex;align-items:center;gap:8px;margin:6px 0;padding:6px 8px;border-radius:6px;">
                     <input type="checkbox" id="role_${r.id}" name="role_${r.id}" ${preset}
                            class="role-menu-entry-checkbox" style="margin:0;">
-                    <label for="role_${r.id}" style="cursor:pointer;color:${r.color};user-select:none;">${r.name}</label>
+                    <label for="role_${r.id}" style="cursor:pointer;color:${r.color};background:${r.background};backgroundClip:${r.backgroundClip};user-select:none;">${r.name}</label>
                   </div>`;
             }).join("");
 

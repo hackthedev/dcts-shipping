@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "VoIP Setup.md",
+                "file": "Getting started.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "VoIP Setup"
+              "title": "Getting started"
             }
           }
         ]
@@ -185,10 +185,10 @@
   },
   "active": "37a4cdff02af2a98",
   "lastOpenFiles": [
+    "VoIP Setup.md",
     "network/DNS Setup.md",
     "network/Port forwarding.md",
     "network/DynDNS.md",
-    "VoIP Setup.md",
     "network/Reverse Proxy Setup.md",
     "network/Caddy Setup.md",
     "sql/Configure SQL.md",

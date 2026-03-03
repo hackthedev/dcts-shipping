@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Lore/Architecture.md",
+                "file": "VoIP Setup.md",
                 "mode": "source",
-                "source": true
+                "source": false
               },
               "icon": "lucide-file",
-              "title": "Architecture"
+              "title": "VoIP Setup"
             }
           }
         ]
@@ -185,15 +185,21 @@
   },
   "active": "37a4cdff02af2a98",
   "lastOpenFiles": [
-    "index.md",
-    "Getting started.md",
+    "network/DNS Setup.md",
+    "network/Port forwarding.md",
+    "network/DynDNS.md",
+    "VoIP Setup.md",
     "network/Reverse Proxy Setup.md",
+    "network/Caddy Setup.md",
+    "sql/Configure SQL.md",
+    "Getting started.md",
+    "sql/errors/SQL Tables and Columns not setting up automatically.md",
+    "install NodeJS.md",
+    "Feature List.md",
+    "Lore/Architecture.md",
+    "index.md",
     "markdown-examples.md",
     "api-examples.md",
-    "sql/Configurating SQL.md",
-    "sql/errors/SQL Tables and Columns not setting up automatically.md",
-    "Feature List.md",
-    "VoIP Setup.md",
     "DCTS Docs Base.base",
     "ssl/errors/Cant access cert files.md",
     "Unbenannt.base",

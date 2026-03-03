@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Lore/Architecture.md",
+                "file": "Lore/Threat model.md",
                 "mode": "source",
-                "source": true
+                "source": false
               },
               "icon": "lucide-file",
-              "title": "Architecture"
+              "title": "Threat model"
             }
           }
         ]
@@ -183,17 +183,28 @@
       "bases:Neue Base erstellen": false
     }
   },
-  "active": "37a4cdff02af2a98",
+  "active": "1c4490349bf68a2c",
   "lastOpenFiles": [
-    "index.md",
+    "Lore/Technical overview.md",
+    "Lore/Terminology.md",
+    "Lore/Moderation.md",
+    "Lore/Threat model.md",
+    "Web Client/Main/Instance Info.md",
+    "Lore/Principles.md",
     "Getting started.md",
+    "VoIP Setup.md",
+    "network/DNS Setup.md",
+    "network/Port forwarding.md",
+    "network/DynDNS.md",
     "network/Reverse Proxy Setup.md",
+    "network/Caddy Setup.md",
+    "sql/Configure SQL.md",
+    "sql/errors/SQL Tables and Columns not setting up automatically.md",
+    "install NodeJS.md",
+    "Feature List.md",
+    "index.md",
     "markdown-examples.md",
     "api-examples.md",
-    "sql/Configurating SQL.md",
-    "sql/errors/SQL Tables and Columns not setting up automatically.md",
-    "Feature List.md",
-    "VoIP Setup.md",
     "DCTS Docs Base.base",
     "ssl/errors/Cant access cert files.md",
     "Unbenannt.base",

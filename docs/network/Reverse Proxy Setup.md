@@ -4,14 +4,16 @@ This document will explain how to use the chat software and setup a reverse prox
 
 > [!TIP]
 >
-> Its recommended to use a reverse proxy as you wont have to manually deal with cert files inside the `config.json` file if your domain already uses a letsencrypt certificate.
+> Its recommended to use a reverse proxy as you wont have to manually deal with cert files inside the `config.json` file if your domain already uses a letsencrypt certificate. 
+> 
+> Generally its recommended to use caddy. Instructions for caddy can be found in [Caddy Setup](Caddy%20Setup.md).
 
 ------
 
 ## Chat
 ### nginx Setup
 
-The following configuration is a example on how you can use the chat app using the reverse proxy. It will change the address from https://you-domain.com:2052 to https://app.your-domain.com. 
+The following configuration is an example on how you can use the chat app using the reverse proxy. It will change the address from https://you-domain.com:2052 to https://app.your-domain.com. 
 
 ```nginx
 location / {
@@ -46,7 +48,7 @@ location /socket.io/ {
 
 Caddy may be simpler to use and already takes care of SSL (TLS) as well and may be preferred. Personally i would recommend it to anyone thats new to it or isnt running nginx already.
 
-```
+```nginx
 # DCTS-$domain
 chat.your-domain.com {
     reverse_proxy 127.0.0.1:2052 # or localhost instead of 127.0.0.1
@@ -106,6 +108,8 @@ lk.your-domain.com {
 - If you run nginx and caddy you will run into possible conflicts. Use either one, not both.
 - When using caddy make sure it always runs as it will handle the reverse proxy
 - If you're new and want a more simpler experience, i would recommend using a VPS to avoid having to port forward and it has some other benefits too.
+- If you self-host from your own network and have a dynamic public ip you may want to use a DynDns Service like no-ip or similar.
+- If you're behind a CNAT you may experience issues and need to request your own IP from your carrier. Usually you can do so for free.
 
 [^portnote]: The port configured inside of your config.json file
 

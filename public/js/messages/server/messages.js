@@ -264,7 +264,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let convertedMentions = await convertMention(message);
 
 
-        let lastMsg = getLastMessage(container)
+        let lastMsg = getLastMessage(document.getElementById("content"))
         await withScrollLock(null, lastMsg?.element, async () => {
             editElement.innerHTML = convertedMentions.text
             editElement.innerHTML = sanitizeHtmlForRender(convertedMentions.text)

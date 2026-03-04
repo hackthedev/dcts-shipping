@@ -3,7 +3,7 @@ function watchMediaLoads(container = document.getElementById("content")) {
     if (container._mediaCleanup) container._mediaCleanup()
 
     let anchor = null
-    let skipScroll = false
+    let correcting = false
     let pendingCorrection = null
 
     function findAnchor() {
@@ -35,10 +35,9 @@ function watchMediaLoads(container = document.getElementById("content")) {
 
         if (Math.abs(drift) < 2) return
 
-        skipScroll = true
-        toggleSmoothScroll(container, false)
+        correcting = true
+        container.style.scrollBehavior = "auto"
         container.scrollTop += drift
-        toggleSmoothScroll(container, true)
         anchor.offset = anchor.el.getBoundingClientRect().top - rect.top
     }
 
@@ -47,16 +46,15 @@ function watchMediaLoads(container = document.getElementById("content")) {
         pendingCorrection = requestAnimationFrame(() => {
             pendingCorrection = null
             correct()
+            requestAnimationFrame(() => {
+                correcting = false
+            })
         })
     }
 
     container.addEventListener("scroll", () => {
         if (container._scrollLocked) return
-
-        if (skipScroll) {
-            skipScroll = false
-            return
-        }
+        if (correcting) return
 
         anchor = findAnchor()
     }, { passive: true })

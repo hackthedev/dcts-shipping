@@ -57,7 +57,6 @@ async function updateMarkdownLinks(delay) {
     let elements = container.querySelectorAll(".contentRows .content p")
     let markdownChanged = false
 
-    await withScrollLock(container, lastMsg?.element, async () => {
         for (let i = elements.length - 1; i >= 0; i--) {
             let el = elements[i]
             if (!el) continue
@@ -79,17 +78,20 @@ async function updateMarkdownLinks(delay) {
                 let marked = await markdown(originalText, messageId)
                 if (!marked.isMarkdown) continue
 
-                let wrapper = document.createElement("div")
-                wrapper.innerHTML = sanitizeHtmlForRender(marked.message)
-                let node = wrapper.firstElementChild || wrapper
-                el.replaceWith(node)
-                node.setAttribute("data-markdown-done", "true")
+
+                await withScrollLock(container, lastMsg?.element, async () => {
+                    let wrapper = document.createElement("div")
+                    wrapper.innerHTML = sanitizeHtmlForRender(marked.message)
+                    let node = wrapper.firstElementChild || wrapper
+                    el.replaceWith(node)
+                    node.setAttribute("data-markdown-done", "true")
+                });
+
                 markdownChanged = true
             } catch (err) {
                 console.log(err)
             }
         }
-    })
 
     // adjust new media stuff. would have been mindblowing to think about that earlier
     if (markdownChanged) {
@@ -128,9 +130,12 @@ async function markdown(msg, msgid) {
         let existing = isAlreadyLink(msg, url, msgid);
         if (existing) continue;
 
-        let media = await checkMediaTypeAsync(url);
         let proxy = ChatManager.proxyUrl(url);
-        let urlMeta = await getUrlMeta(url);
+
+        let [media, urlMeta] = await Promise.all([
+            checkMediaTypeAsync(url),
+            getUrlMeta(url)
+        ]);
 
         if (url.includes("youtu.be") || url.includes("youtube.com/watch")) {
             msg = msg.replace(url, createYouTubeEmbed(url, msgid));
@@ -141,7 +146,7 @@ async function markdown(msg, msgid) {
         if (media === "image") {
             msg = msg.replace(
                 url,
-                ` <img draggable="false" class="image-embed"
+                ` <img decoding="async" loading="lazy" draggable="false" class="image-embed"
                          src="${proxy}"
                          data-original-url="${url}"
                          data-media-type="image">`

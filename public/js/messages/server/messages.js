@@ -1268,48 +1268,6 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
     });
 }
 
-function watchMediaLoads(container = document.getElementById("content")) {
-    if (!container) return
-
-    let media = container.querySelectorAll(
-        "img:not(.icon):not(.memberlist-img):not([data-media-watched]), " +
-        "video:not([data-media-watched]), " +
-        "audio:not([data-media-watched]), " +
-        "iframe:not([data-media-watched])"
-    )
-
-    for (let el of media) {
-        if (el.tagName === "IMG" && el.complete && el.naturalHeight !== 0) continue
-        if ((el.tagName === "VIDEO" || el.tagName === "AUDIO") && el.readyState >= 1) continue
-
-        el.setAttribute("data-media-watched", "true")
-
-        let heightBefore = el.offsetHeight
-
-        let adjust = function () {
-            let newHeight = el.offsetHeight
-            let grew = newHeight - heightBefore
-            if (grew <= 0) return
-
-            if (el.getBoundingClientRect().top < container.getBoundingClientRect().top) {
-                toggleSmoothScroll(container, false)
-                container.scrollTop += grew
-                toggleSmoothScroll(container, true)
-            }
-
-            heightBefore = newHeight
-        }
-
-        if (el.tagName === "IMG") {
-            el.addEventListener("load", adjust, { once: true })
-        } else if (el.tagName === "VIDEO" || el.tagName === "AUDIO") {
-            el.addEventListener("loadedmetadata", adjust, { once: true })
-        } else if (el.tagName === "IFRAME") {
-            el.addEventListener("load", adjust, { once: true })
-        }
-    }
-}
-
 function waitForStableValue(getValueFn, stableMs, callback) {
     let last = getValueFn();
     let timeout = null;
@@ -1326,54 +1284,6 @@ function waitForStableValue(getValueFn, stableMs, callback) {
 
     requestAnimationFrame(check);
 }
-
-
-function toggleSmoothScroll(element = document.getElementById("content"), toggle){
-    if(toggle === true){
-        element.style.scrollBehavior = "smooth";
-    }
-    else{
-        element.style.scrollBehavior = "auto";
-    }
-}
-
-function getScrollPosition(container, refEl) {
-    return {
-        ref: refEl,
-        offset: refEl ? refEl.getBoundingClientRect().top : 0
-    };
-}
-
-async function withScrollLock(container = document.getElementById("content"), refEl, callback) {
-    toggleSmoothScroll(container, false)
-
-    let heightBefore = container.scrollHeight
-    let scrollBefore = container.scrollTop
-
-    if (callback) await callback()
-
-    let heightAfter = container.scrollHeight
-    let delta = heightAfter - heightBefore
-
-    if (delta !== 0) container.scrollTop = scrollBefore + delta
-
-    toggleSmoothScroll(container, true)
-}
-
-function setScrollPosition(container, info) {
-    if(typeof info === "number") return container.scrollTop = info;
-
-    if (!info?.ref) return;
-
-    let newOffset = info.ref.getBoundingClientRect().top;
-    let diff = newOffset - info.offset;
-
-    container.scrollTop += diff;
-}
-
-
-
-
 
 function displayAwaitedMessages(container){
     let messages = container.querySelectorAll(".waitForDisplay");

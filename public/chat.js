@@ -188,6 +188,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     window.addEventListener('resize', function (event) {
         // do stuff here
 
+        let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+
         var emojiContainer = document.getElementById("emoji-box-container");
         var profileContainer = document.getElementById("profile_container");
 
@@ -198,6 +200,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (profileContainer.style.display == "flex") {
             profileContainer.style.display = "none";
         }
+
+        if(isScrolledDown) scrollDown("window resizer");
     });
 
     document.addEventListener("keydown", (event) => {
@@ -1671,7 +1675,8 @@ function initQuillShit(){
 
     // editor resize fix where chat wont scroll down
     const editorResizeObserver = new ResizeObserver(() => {
-        let isScrolledDown = isScrolledToBottom(editor, 4);
+        let isScrolledDown =  isScrolledToBottom(document.getElementById("content"));
+        console.log(isScrolledDown)
         if(isScrolledDown) scrollDown("editor resize observer");
     });
     editorResizeObserver.observe(editor);
@@ -2546,7 +2551,7 @@ function getRoles() {
     });
 }
 
-function isScrolledToBottom(element, tolerancePx = 2) {
+function isScrolledToBottom(element, tolerancePx = 100) {
     const maxTop = Math.max(0, element.scrollHeight - element.clientHeight);
     return (maxTop - element.scrollTop) <= tolerancePx;
 }

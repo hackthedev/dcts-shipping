@@ -1281,12 +1281,14 @@ function watchMediaLoads(container = document.getElementById("content")) {
     for (let el of media) {
         if (el.tagName === "IMG" && el.complete) continue
         if ((el.tagName === "VIDEO" || el.tagName === "AUDIO") && el.readyState >= 1) continue
+
         el.setAttribute("data-media-watched", "true")
 
         let heightBefore = el.offsetHeight
 
-        let adjust = function() {
-            let grew = el.offsetHeight - heightBefore
+        let adjust = function () {
+            let newHeight = el.offsetHeight
+            let grew = newHeight - heightBefore
             if (grew <= 0) return
 
             if (el.getBoundingClientRect().top < container.getBoundingClientRect().top) {
@@ -1295,25 +1297,15 @@ function watchMediaLoads(container = document.getElementById("content")) {
                 toggleSmoothScroll(container, true)
             }
 
-            heightBefore = el.offsetHeight
+            heightBefore = newHeight
         }
 
         if (el.tagName === "IMG") {
             el.addEventListener("load", adjust, { once: true })
-        } else {
-            let timeout = null
-            let observer = new ResizeObserver(() => {
-                adjust()
-                clearTimeout(timeout)
-                timeout = setTimeout(() => observer.disconnect(), 2000)
-            })
-            observer.observe(el)
-
-            el.addEventListener("error", () => {
-                //adjust()
-                clearTimeout(timeout)
-                observer.disconnect()
-            }, { once: true })
+        } else if (el.tagName === "VIDEO" || el.tagName === "AUDIO") {
+            el.addEventListener("loadedmetadata", adjust, { once: true })
+        } else if (el.tagName === "IFRAME") {
+            el.addEventListener("load", adjust, { once: true })
         }
     }
 }

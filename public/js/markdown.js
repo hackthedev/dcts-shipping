@@ -4,12 +4,16 @@ function isAlreadyLink(msg, url, msgid) {
     );
     if (!container) return null;
 
+    if (container.closest("code, pre, blockquote")) return null;
+
     let el =
         container.querySelector(`img[data-original-url="${url}"]`) ||
         container.querySelector(`video[data-original-url="${url}"]`) ||
         container.querySelector(`audio[data-original-url="${url}"]`) ||
         container.querySelector(`iframe[data-original-url="${url}"]`) ||
         container.querySelector(`a[data-original-url="${url}"]`);
+
+    if (el && el.closest("code, pre, blockquote")) return null;
 
     return el ? el.getAttribute("data-media-type") : null;
 }
@@ -77,8 +81,9 @@ async function updateMarkdownLinks(delay) {
 
                 let wrapper = document.createElement("div")
                 wrapper.innerHTML = sanitizeHtmlForRender(marked.message)
-                el.replaceWith(wrapper)
-                wrapper.setAttribute("data-markdown-done", "true")
+                let node = wrapper.firstElementChild || wrapper
+                el.replaceWith(node)
+                node.setAttribute("data-markdown-done", "true")
                 markdownChanged = true
             } catch (err) {
                 console.log(err)
@@ -88,11 +93,13 @@ async function updateMarkdownLinks(delay) {
 
     // adjust new media stuff. would have been mindblowing to think about that earlier
     if (markdownChanged) {
+        await updateMissingMeta()
         watchMediaLoads(container)
         if (isScrolledDown) scrollDown("updateMarkdown")
+    } else {
+        await updateMissingMeta()
     }
 
-    await updateMissingMeta()
     setTimeout(() => updateMarkdownLinks(delay), delay)
 }
 

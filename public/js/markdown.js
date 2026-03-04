@@ -54,7 +54,7 @@ async function updateMarkdownLinks(delay) {
     let isScrolledDown = isScrolledToBottom(container, 10)
     let lastMsg = getLastMessage(container)
 
-    let elements = document.querySelectorAll(".contentRows .content p")
+    let elements = container.querySelectorAll(".contentRows .content p")
     let markdownChanged = false
 
     await withScrollLock(container, lastMsg?.element, async () => {

@@ -1279,7 +1279,7 @@ function watchMediaLoads(container = document.getElementById("content")) {
     )
 
     for (let el of media) {
-        if (el.tagName === "IMG" && el.complete) continue
+        if (el.tagName === "IMG" && el.complete && el.naturalHeight !== 0) continue
         if ((el.tagName === "VIDEO" || el.tagName === "AUDIO") && el.readyState >= 1) continue
 
         el.setAttribute("data-media-watched", "true")
@@ -1345,19 +1345,18 @@ function getScrollPosition(container, refEl) {
 }
 
 async function withScrollLock(container = document.getElementById("content"), refEl, callback) {
-    toggleSmoothScroll(container, false);
-    if (!container || !refEl || typeof refEl.getBoundingClientRect !== "function") {
-        if(callback) await callback()
-        toggleSmoothScroll(container, true);
-        return;
-    }
+    toggleSmoothScroll(container, false)
 
-    let offsetBefore = refEl.getBoundingClientRect().top
+    let heightBefore = container.scrollHeight
+    let scrollBefore = container.scrollTop
 
-    await callback()
+    if (callback) await callback()
 
-    let diff = refEl.getBoundingClientRect().top - offsetBefore
-    if (diff !== 0) container.scrollTop += diff
+    let heightAfter = container.scrollHeight
+    let delta = heightAfter - heightBefore
+
+    if (delta !== 0) container.scrollTop = scrollBefore + delta
+
     toggleSmoothScroll(container, true)
 }
 

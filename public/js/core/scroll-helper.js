@@ -1,59 +1,133 @@
 function watchMediaLoads(container = document.getElementById("content")) {
     if (!container) return console.log("no container")
+    if (container._mediaCleanup) container._mediaCleanup()
 
-    let media = container.querySelectorAll(
-        "img:not(.icon):not(.memberlist-img):not([data-media-watched]), " +
-        "video:not([data-media-watched]), " +
-        "audio:not([data-media-watched]), " +
-        "iframe:not([data-media-watched])"
-    )
+    let anchor = null
+    let skipScroll = false
+    let pendingCorrection = null
 
-    for (let el of media) {
-        if (el.tagName === "IMG" && el.complete && el.naturalHeight !== 0) continue
-        if ((el.tagName === "VIDEO" || el.tagName === "AUDIO") && el.readyState >= 1) continue
+    function findAnchor() {
+        let scrollTop = container.scrollTop
+        let rect = container.getBoundingClientRect()
 
-        el.setAttribute("data-media-watched", "true")
-
-        let heightBefore = el.offsetHeight
-
-        let adjust = function () {
-            let newHeight = el.offsetHeight
-            let grew = newHeight - heightBefore
-            if (grew <= 0) return
-
-            if (el.getBoundingClientRect().top < container.getBoundingClientRect().top) {
-                toggleSmoothScroll(container, false)
-                container.scrollTop += grew
-                toggleSmoothScroll(container, true)
+        for (let child of container.children) {
+            if (child.offsetTop + child.offsetHeight > scrollTop) {
+                return {
+                    el: child,
+                    offset: child.getBoundingClientRect().top - rect.top
+                }
             }
+        }
+        return null
+    }
 
-            heightBefore = newHeight
+    function correct() {
+        if (!anchor || !anchor.el.isConnected) return
+
+        if (container._scrollLocked) {
+            anchor = findAnchor()
+            return
         }
 
-        if (el.tagName === "IMG") {
-            el.addEventListener("load", adjust, { once: true })
-        } else if (el.tagName === "VIDEO" || el.tagName === "AUDIO") {
-            el.addEventListener("loadedmetadata", adjust, { once: true })
-        } else if (el.tagName === "IFRAME") {
-            el.addEventListener("load", adjust, { once: true })
+        let rect = container.getBoundingClientRect()
+        let currentOffset = anchor.el.getBoundingClientRect().top - rect.top
+        let drift = currentOffset - anchor.offset
+
+        if (Math.abs(drift) < 1) return
+
+        skipScroll = true
+        toggleSmoothScroll(container, false)
+        container.scrollTop += drift
+        toggleSmoothScroll(container, true)
+        anchor.offset = anchor.el.getBoundingClientRect().top - rect.top
+    }
+
+    function scheduleCorrection() {
+        if (pendingCorrection || container._scrollLocked) return
+        pendingCorrection = requestAnimationFrame(() => {
+            pendingCorrection = null
+            correct()
+        })
+    }
+
+    container.addEventListener("scroll", () => {
+        if (container._scrollLocked) return
+
+        if (skipScroll) {
+            skipScroll = false
+            return
         }
+
+        anchor = findAnchor()
+    }, { passive: true })
+
+    anchor = findAnchor()
+
+    let ro = new ResizeObserver(() => correct())
+
+    function observe(el) {
+        if (el.hasAttribute("data-watched")) return
+        el.setAttribute("data-watched", "true")
+        ro.observe(el)
+    }
+
+    function scan() {
+        for (let el of container.querySelectorAll(".message-container:not([data-watched])")) {
+            observe(el)
+        }
+    }
+
+    scan()
+
+    let mo = new MutationObserver(mutations => {
+        let added = false
+        for (let m of mutations) {
+            if (m.addedNodes.length) { added = true; break }
+        }
+        if (!added) return
+
+        scan()
+        scheduleCorrection()
+    })
+
+    mo.observe(container, { childList: true, subtree: true })
+
+    container._mediaCleanup = () => {
+        ro.disconnect()
+        mo.disconnect()
+        if (pendingCorrection) cancelAnimationFrame(pendingCorrection)
+        delete container._mediaCleanup
+        delete container._scrollLocked
     }
 }
 
 async function withScrollLock(container = document.getElementById("content"), refEl, callback) {
+    container._scrollLocked = true
     toggleSmoothScroll(container, false)
 
     let pos = getScrollPosition(container, refEl)
+    let heightBefore = container.scrollHeight
 
     if (callback) await callback()
 
+    if (typeof pos === "number") {
+        container.scrollTop = pos + (container.scrollHeight - heightBefore)
+    } else {
+        setScrollPosition(container, pos)
+    }
+
+    await new Promise(requestAnimationFrame)
     await new Promise(requestAnimationFrame)
 
-    setScrollPosition(container, pos)
+    if (typeof pos === "number") {
+        container.scrollTop = pos + (container.scrollHeight - heightBefore)
+    } else {
+        setScrollPosition(container, pos)
+    }
 
     toggleSmoothScroll(container, true)
+    container._scrollLocked = false
 }
-
 function setScrollPosition(container, info) {
     if (typeof info === "number") {
         container.scrollTop = info
@@ -80,11 +154,7 @@ function getScrollPosition(container, refEl) {
         offset: rTop - cTop
     }
 }
-function toggleSmoothScroll(element = document.getElementById("content"), toggle){
-    if(toggle === true){
-        element.style.scrollBehavior = "smooth";
-    }
-    else{
-        element.style.scrollBehavior = "auto";
-    }
+
+function toggleSmoothScroll(element = document.getElementById("content"), toggle) {
+    element.style.scrollBehavior = toggle ? "smooth" : "auto"
 }

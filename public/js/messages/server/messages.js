@@ -1271,24 +1271,50 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
 function watchMediaLoads(container = document.getElementById("content")) {
     if (!container) return
 
-    let images = container.querySelectorAll("img:not(.icon):not(.memberlist-img):not(.inline-text-emoji):not([data-media-watched])")
+    let media = container.querySelectorAll(
+        "img:not(.icon):not(.memberlist-img):not([data-media-watched]), " +
+        "video:not([data-media-watched]), " +
+        "audio:not([data-media-watched]), " +
+        "iframe:not([data-media-watched])"
+    )
 
-    for (let img of images) {
-        if (img.complete) continue
-        img.setAttribute("data-media-watched", "true")
+    for (let el of media) {
+        if (el.tagName === "IMG" && el.complete) continue
+        if ((el.tagName === "VIDEO" || el.tagName === "AUDIO") && el.readyState >= 1) continue
+        el.setAttribute("data-media-watched", "true")
 
-        let heightBefore = img.offsetHeight
+        let heightBefore = el.offsetHeight
 
-        img.addEventListener("load", function() {
-            let grew = this.offsetHeight - heightBefore
+        let adjust = function() {
+            let grew = el.offsetHeight - heightBefore
             if (grew <= 0) return
 
-            if (this.getBoundingClientRect().top < container.getBoundingClientRect().top) {
+            if (el.getBoundingClientRect().top < container.getBoundingClientRect().top) {
                 toggleSmoothScroll(container, false)
                 container.scrollTop += grew
                 toggleSmoothScroll(container, true)
             }
-        }, { once: true })
+
+            heightBefore = el.offsetHeight
+        }
+
+        if (el.tagName === "IMG") {
+            el.addEventListener("load", adjust, { once: true })
+        } else {
+            let timeout = null
+            let observer = new ResizeObserver(() => {
+                adjust()
+                clearTimeout(timeout)
+                timeout = setTimeout(() => observer.disconnect(), 2000)
+            })
+            observer.observe(el)
+
+            el.addEventListener("error", () => {
+                //adjust()
+                clearTimeout(timeout)
+                observer.disconnect()
+            }, { once: true })
+        }
     }
 }
 
@@ -1423,7 +1449,6 @@ function getLastMessage(container) {
 function handleChannelMessageDrafting(channelId){
     if(!channelId) throw new Error("Channel id is missing");
     let channelDraft = getChannelMessageDraft(channelId);
-    console.log(channelDraft, "channel draft")
 
     if(channelDraft){
         const regex = /<p>\s*<\/p>/gm;
@@ -1434,12 +1459,16 @@ function handleChannelMessageDrafting(channelId){
     }
 }
 
-function saveChannelMessageDraft(channelId, overwrite = null){
+function saveChannelMessageDraft(channelId, overwrite){
     if(!channelId) throw new Error("Channel id is missing");
-    localStorage.setItem(`message_draft_${channelId}`, overwrite ? overwrite : editor?.innerHTML || null)
+    localStorage.setItem(`message_draft_${channelId}`, overwrite !== undefined ? overwrite : editor?.innerHTML || null)
 }
 
 function getChannelMessageDraft(channelId){
     if(!channelId) throw new Error("Channel id is missing");
-    return localStorage.getItem(`message_draft_${channelId}`)
+
+    let data = localStorage.getItem(`message_draft_${channelId}`);
+    if(data === "null") return null;
+
+    return data
 }

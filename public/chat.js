@@ -1476,7 +1476,7 @@ async function sendMessageToServer(authorId = UserManager.getID(),
                 console.log("clearing editor")
                 editor.innerHTML = "<p><br></p>"
 
-                saveChannelMessageDraft(UserManager.getID())
+                saveChannelMessageDraft(UserManager.getChannel(), null)
 
                 resolve(true);
             }
@@ -2444,27 +2444,24 @@ async function setUrl(param, isVC = false) {
         }, function (response) {
             switchLeftSideMenu(true)
 
+            // lets prioritize loading the chat lol
+            changedChannel()
+            chatlog.innerHTML = "";
+            document.getElementById("messagebox").style.display = "flex";
+            getChatlog(document.getElementById("content"));
+
             // update grouplist and channel tree if we only
             // click on a group
             if (groupId && !categoryId && !channelId) {
                 getChannelTree();
             }
 
-            changedChannel()
             if(channelId) ChatManager.setChannelMarker(channelId, false)
-
-            chatlog.innerHTML = "";
-            document.getElementById("messagebox").style.display = "flex";
-            getChatlog(document.getElementById("content"));
             showGroupStats();
 
             if (response.permission !== "granted") {
                 toggleEditor(false);
             } else {
-
-
-
-
                 // to avoid confusion
                 if(!channelId){
                     toggleEditor(false);

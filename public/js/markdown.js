@@ -47,7 +47,7 @@ async function updateMissingMeta() {
 
 async function updateMarkdownLinks(delay) {
     let container = document.getElementById("content")
-    let isScrolledDown = isScrolledToBottom(container)
+    let isScrolledDown = isScrolledToBottom(container, 10)
     let lastMsg = getLastMessage(container)
 
     let elements = document.querySelectorAll(".contentRows .content p")
@@ -75,21 +75,22 @@ async function updateMarkdownLinks(delay) {
                 let marked = await markdown(originalText, messageId)
                 if (!marked.isMarkdown) continue
 
-                let lastMsg = getLastMessage(container)
-                await withScrollLock(container, lastMsg?.element, async () => {
-                    let wrapper = document.createElement("div")
-                    wrapper.innerHTML = sanitizeHtmlForRender(marked.message)
-                    el.replaceWith(wrapper)
-                    wrapper.setAttribute("data-markdown-done", "true")
-                    markdownChanged = true
-                })
+                let wrapper = document.createElement("div")
+                wrapper.innerHTML = sanitizeHtmlForRender(marked.message)
+                el.replaceWith(wrapper)
+                wrapper.setAttribute("data-markdown-done", "true")
+                markdownChanged = true
             } catch (err) {
                 console.log(err)
             }
         }
     })
 
-    if (markdownChanged && isScrolledDown) scrollDown("updateMarkdown")
+    // adjust new media stuff. would have been mindblowing to think about that earlier
+    if (markdownChanged) {
+        watchMediaLoads(container)
+        if (isScrolledDown) scrollDown("updateMarkdown")
+    }
 
     await updateMissingMeta()
     setTimeout(() => updateMarkdownLinks(delay), delay)

@@ -262,13 +262,18 @@ document.addEventListener("DOMContentLoaded", function () {
         //editElement.innerHTML = message.message;
 
         let convertedMentions = await convertMention(message);
-        editElement.innerHTML= convertedMentions.text
-        editElement.innerHTML= sanitizeHtmlForRender(convertedMentions.text)
 
-        editElement.innerHTML += getMessageEditedHTML(message);
-        editElement.innerHTML += createMsgActions(message.messageId);
 
-        if(isScrolledToBottom(document.getElementById("content"))) scrollDown("messageEdited")
+        let lastMsg = getLastMessage(container)
+        await withScrollLock(null, lastMsg?.element, async () => {
+            editElement.innerHTML = convertedMentions.text
+            editElement.innerHTML = sanitizeHtmlForRender(convertedMentions.text)
+
+            editElement.innerHTML += getMessageEditedHTML(message);
+            editElement.innerHTML += createMsgActions(message.messageId);
+
+            if(isScrolledToBottom(document.getElementById("content"))) scrollDown("messageEdited")
+        })
     });
 })
 
@@ -784,13 +789,16 @@ async function updateMessageReactionsElementById(messageId, container = document
     let messageObj = await ChatManager.resolveMessage(messageId);
     if(!messageObj) return console.error(`Couldnt find message object for message reaction update ${messageId}`);
 
-    // no reactions were presen^t so add the container
-    if(!reactionRow) {
-        contentContainer.innerHTML += await getMessageReactionsHTML(messageObj);
-        reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
-    }
+    await withScrollLock(container, lastMsg?.element, async () => {
+        // no reactions were presen^t so add the container
+        if(!reactionRow) {
+            contentContainer.innerHTML += await getMessageReactionsHTML(messageObj);
+            reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
+        }
 
-    reactionRow.outerHTML = await getMessageReactionsHTML(messageObj);
+        reactionRow.outerHTML = await getMessageReactionsHTML(messageObj);
+    })
+
     if(wasScrolledDown) scrollDown()
 }
 
@@ -1203,52 +1211,6 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
             refElement,
         })
 
-        // set min-height on all images and listen for load
-        const images = [...renderer.querySelectorAll("img:not(.icon):not(.memberlist-img):not(.inline-text-emoji)")];
-        images.forEach(img => {
-            img.style.minHeight = "200px";
-            img.style.display = "block";
-
-            // remove min-height as soon as image loads
-            if (img.complete) {
-                img.style.minHeight = "";
-            } else {
-                img.addEventListener("load", () => {
-                    img.style.minHeight = "";
-                }, { once: true });
-
-                img.addEventListener("error", () => {
-                    img.style.minHeight = "";
-                }, { once: true });
-            }
-        });
-
-        // wait max 500ms for images to load
-        await Promise.race([
-            Promise.all(
-                images.map(el => {
-                    return el.complete
-                        ? Promise.resolve()
-                        : el.decode().catch(() => {});
-                })
-            ),
-            new Promise(resolve => setTimeout(resolve, 500))
-        ]);
-
-        // wait for videos
-        await Promise.race([
-            Promise.all(
-                [...renderer.querySelectorAll("video")].map(el => {
-                    if (el.readyState >= 1) return Promise.resolve();
-                    return new Promise(res => {
-                        el.addEventListener("loadedmetadata", res, { once: true });
-                        el.addEventListener("error", res, { once: true });
-                    });
-                })
-            ),
-            new Promise(resolve => setTimeout(resolve, 500))
-        ]);
-
         if(channelId !== UserManager.getChannel()){
             ElementLoader.stop(channelbar);
             Clock.stop("load_messages_processing")
@@ -1261,7 +1223,13 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
             frag.appendChild(renderer.firstElementChild);
         }
         renderer.remove();
-        container.insertBefore(frag, container.firstElementChild);
+
+
+        let lastMsg = getLastMessage(container)
+        await withScrollLock(container, lastMsg?.element, async () => {
+            container.insertBefore(frag, container.firstElementChild);
+        });
+
         Clock.stop("load_messages_processing")
 
         if (response.data.length === 0 && UserManager.getChannel() && document.getElementById("content").innerText.trim().length === 0) {
@@ -1271,46 +1239,26 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())
         ChatManager.setChannelMarker(UserManager.getChannel(), false)
 
+
         if (!appendTop) {
             displayAwaitedMessages(container)
-            await fixScrollAfterMediaLoad(container, container.scrollHeight, true)
 
-            // lock scroll position while remaining images load
-            const remainingImages = [...container.querySelectorAll("img:not(.icon):not(.memberlist-img):not(.inline-text-emoji)")].filter(img => !img.complete);
-            if (remainingImages.length > 0) {
-                const lastMsg = getLastMessage(container);
-                if (lastMsg?.element) {
-                    const scrollPos = getScrollPosition(container, lastMsg.element);
+            // just scroll down as we dont have any anchor anyway
+            toggleSmoothScroll(container, false)
+            scrollDown();
+            toggleSmoothScroll(container, true)
 
-                    remainingImages.forEach(img => {
-                        img.addEventListener("load", () => {
-                            requestAnimationFrame(() => {
-                                setScrollPosition(container, scrollPos);
-                            });
-                        }, { once: true });
-                    });
-                }
-            }
-
+            watchMediaLoads(container, lastMsg?.element)
             updateMarkdownLinks(2000)
         }
         else{
             if (appendTop && scrollPosition !== null) {
-                await fixScrollAfterMediaLoad(container, scrollPosition, true)
 
-                // lock scroll position while remaining images load
-                const remainingImages = [...container.querySelectorAll("img:not(.icon):not(.memberlist-img):not(.inline-text-emoji)")].filter(img => !img.complete);
-                if (remainingImages.length > 0) {
-                    remainingImages.forEach(img => {
-                        img.addEventListener("load", () => {
-                            requestAnimationFrame(() => {
-                                setScrollPosition(container, scrollPosition);
-                            });
-                        }, { once: true });
-                    });
-                }
+                await withScrollLock(container, lastMsg?.element, async () => {
+                    displayAwaitedMessages(container)
+                })
+                watchMediaLoads(container, lastMsg?.element)
             }
-            displayAwaitedMessages(container)
         }
 
         Clock.stop("load_messages_total")
@@ -1318,6 +1266,30 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
 
         Inbox.updateInboxMessageEntries();
     });
+}
+
+function watchMediaLoads(container = document.getElementById("content")) {
+    if (!container) return
+
+    let images = container.querySelectorAll("img:not(.icon):not(.memberlist-img):not(.inline-text-emoji):not([data-media-watched])")
+
+    for (let img of images) {
+        if (img.complete) continue
+        img.setAttribute("data-media-watched", "true")
+
+        let heightBefore = img.offsetHeight
+
+        img.addEventListener("load", function() {
+            let grew = this.offsetHeight - heightBefore
+            if (grew <= 0) return
+
+            if (this.getBoundingClientRect().top < container.getBoundingClientRect().top) {
+                toggleSmoothScroll(container, false)
+                container.scrollTop += grew
+                toggleSmoothScroll(container, true)
+            }
+        }, { once: true })
+    }
 }
 
 function waitForStableValue(getValueFn, stableMs, callback) {
@@ -1338,7 +1310,7 @@ function waitForStableValue(getValueFn, stableMs, callback) {
 }
 
 
-function toggleSmoothScroll(element, toggle){
+function toggleSmoothScroll(element = document.getElementById("content"), toggle){
     if(toggle === true){
         element.style.scrollBehavior = "smooth";
     }
@@ -1354,6 +1326,22 @@ function getScrollPosition(container, refEl) {
     };
 }
 
+async function withScrollLock(container = document.getElementById("content"), refEl, callback) {
+    toggleSmoothScroll(container, false);
+    if (!container || !refEl || typeof refEl.getBoundingClientRect !== "function") {
+        if(callback) await callback()
+        toggleSmoothScroll(container, true);
+        return;
+    }
+
+    let offsetBefore = refEl.getBoundingClientRect().top
+
+    await callback()
+
+    let diff = refEl.getBoundingClientRect().top - offsetBefore
+    if (diff !== 0) container.scrollTop += diff
+    toggleSmoothScroll(container, true)
+}
 
 function setScrollPosition(container, info) {
     if(typeof info === "number") return container.scrollTop = info;
@@ -1446,9 +1434,9 @@ function handleChannelMessageDrafting(channelId){
     }
 }
 
-function saveChannelMessageDraft(channelId){
+function saveChannelMessageDraft(channelId, overwrite = null){
     if(!channelId) throw new Error("Channel id is missing");
-    localStorage.setItem(`message_draft_${channelId}`, editor?.innerHTML || null)
+    localStorage.setItem(`message_draft_${channelId}`, overwrite ? overwrite : editor?.innerHTML || null)
 }
 
 function getChannelMessageDraft(channelId){

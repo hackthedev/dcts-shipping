@@ -29,72 +29,72 @@ async function updateMissingMeta() {
             let urlMeta = await getUrlMeta(url);
             if (!urlMeta?.meta) continue;
 
-            if (titleEl) titleEl.textContent = truncateText(urlMeta.meta.title || "", 75);
-            if (descEl) descEl.textContent = truncateText(urlMeta.meta.description || "", 300);
+            let container = document.getElementById("content");
+            let lastMsg = getLastMessage(container)
+            await withScrollLock(container, lastMsg?.element, async () => {
+                if (titleEl) titleEl.textContent = truncateText(urlMeta.meta.title || "", 75);
+                if (descEl) descEl.textContent = truncateText(urlMeta.meta.description || "", 300);
 
-            embed.childNodes.forEach(n => {
-                if (n.nodeType === 3 && n.textContent.trim().includes(url)) {
-                    n.textContent = "";
-                }
-            });
+                embed.childNodes.forEach(n => {
+                    if (n.nodeType === 3 && n.textContent.trim().includes(url)) {
+                        n.textContent = "";
+                    }
+                });
+            })
         } catch (e) {}
     }
 }
 
 async function updateMarkdownLinks(delay) {
-    const elements = document.querySelectorAll(".contentRows .content p");
-    const container = document.getElementById("content");
-    const isScrolledDown = isScrolledToBottom(container);
+    let container = document.getElementById("content")
+    let isScrolledDown = isScrolledToBottom(container)
+    let lastMsg = getLastMessage(container)
 
-    let firstElement = getLastMessage(container);
-    let scrollPosition = getScrollPosition(container, firstElement?.element);
+    let elements = document.querySelectorAll(".contentRows .content p")
+    let markdownChanged = false
 
-    let markdownChanged = false;
+    await withScrollLock(container, lastMsg?.element, async () => {
+        for (let i = elements.length - 1; i >= 0; i--) {
+            let el = elements[i]
+            if (!el) continue
+            if (el.className.includes("hljs")) continue
+            if (el.hasAttribute("data-markdown-done")) continue
+            if (!isElementVisible(el)) continue
+            if (el.querySelector(".markdown-urlEmbed-container")) continue
+            if (el.closest(".markdown-urlEmbed-container")) continue
 
-    for (let i = elements.length - 1; i >= 0; i--) {
-        const el = elements[i];
-        if (!el) continue;
-        if (el.className.includes("hljs")) continue;
-        if (el.hasAttribute("data-markdown-done")) continue;
-        if (!isElementVisible(el)) continue;
+            let messageId =
+                el.getAttribute("data-message-id") ||
+                el.parentNode?.getAttribute("data-message-id")
+            if (!messageId) continue
 
-        // avoid duplicate markdown bs
-        if (el.querySelector(".markdown-urlEmbed-container")) continue;
-        if (el.closest(".markdown-urlEmbed-container")) continue;
+            let originalText = el.textContent
+            if (!originalText?.trim()) continue
 
-        const messageId =
-            el.getAttribute("data-message-id") ||
-            el.parentNode?.getAttribute("data-message-id");
+            try {
+                let marked = await markdown(originalText, messageId)
+                if (!marked.isMarkdown) continue
 
-        if (!messageId) continue;
-
-        const originalText = el.textContent;
-        if (!originalText || !originalText.trim()) continue;
-
-        try {
-            const marked = await markdown(originalText, messageId);
-            if (!marked.isMarkdown) continue;
-
-            const wrapper = document.createElement("div");
-            wrapper.innerHTML = sanitizeHtmlForRender(marked.message);
-
-            el.replaceWith(wrapper);
-            wrapper.setAttribute("data-markdown-done", "true");
-
-            markdownChanged = true;
-            fixScrollAfterMediaLoad(container, scrollPosition);
-        } catch (err) {
-            console.log(err);
+                let lastMsg = getLastMessage(container)
+                await withScrollLock(container, lastMsg?.element, async () => {
+                    let wrapper = document.createElement("div")
+                    wrapper.innerHTML = sanitizeHtmlForRender(marked.message)
+                    el.replaceWith(wrapper)
+                    wrapper.setAttribute("data-markdown-done", "true")
+                    markdownChanged = true
+                })
+            } catch (err) {
+                console.log(err)
+            }
         }
-    }
+    })
 
-    if (markdownChanged && isScrolledDown) {
-        scrollDown("updateMarkdown");
-    }
+    if (markdownChanged && isScrolledDown) scrollDown("updateMarkdown")
 
-    await updateMissingMeta();
-    setTimeout(() => updateMarkdownLinks(delay), delay);
+    await updateMissingMeta()
+    setTimeout(() => updateMarkdownLinks(delay), delay)
 }
+
 async function getUrlMeta(url){
     try{
 

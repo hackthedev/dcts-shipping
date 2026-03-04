@@ -1347,7 +1347,8 @@ export async function autoAnonymizeMessage(issuerMemberId, message){
 
     let author = serverconfig.servermembers[message.author.id] || getUnkownMember()
     if(!author) throw new Error("Message author member object not found");
-    let isBanned = await isIdentifierBanned(message.author?.id)
+
+    let isBanned = message?.author?.id ? await isIdentifierBanned(message.author?.id) : false;
     message.author.isBanned = isBanned;
 
     let shouldAnonymize = (isBanned || message?.anon === true) || false
@@ -1444,8 +1445,11 @@ export async function getCastingMemberObject(member) {
         }
     });
 
-    if(await getBan(member?.id || member?.author?.id)){
-        member.isBanned = true;
+    let memberId = member?.id || member?.author?.id;
+    if(memberId != null && memberId?.length === 12){
+        if(await getBan(member?.id || member?.author?.id)){
+            member.isBanned = true;
+        }
     }
 
     member = setMemberObjColor(member)

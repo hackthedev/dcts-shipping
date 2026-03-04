@@ -1476,6 +1476,8 @@ async function sendMessageToServer(authorId = UserManager.getID(),
                 console.log("clearing editor")
                 editor.innerHTML = "<p><br></p>"
 
+                saveChannelMessageDraft(UserManager.getID())
+
                 resolve(true);
             }
         });
@@ -1676,8 +1678,7 @@ function initQuillShit(){
     // editor resize fix where chat wont scroll down
     const editorResizeObserver = new ResizeObserver(() => {
         let isScrolledDown =  isScrolledToBottom(document.getElementById("content"));
-        console.log(isScrolledDown)
-        if(isScrolledDown) scrollDown("editor resize observer");
+        if(isScrolledDown) scrollDown();
     });
     editorResizeObserver.observe(editor);
 

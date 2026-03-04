@@ -33,7 +33,7 @@ function watchMediaLoads(container = document.getElementById("content")) {
         let currentOffset = anchor.el.getBoundingClientRect().top - rect.top
         let drift = currentOffset - anchor.offset
 
-        if (Math.abs(drift) < 1) return
+        if (Math.abs(drift) < 2) return
 
         skipScroll = true
         toggleSmoothScroll(container, false)
@@ -63,7 +63,7 @@ function watchMediaLoads(container = document.getElementById("content")) {
 
     anchor = findAnchor()
 
-    let ro = new ResizeObserver(() => correct())
+    let ro = new ResizeObserver(() => scheduleCorrection())
 
     function observe(el) {
         if (el.hasAttribute("data-watched")) return

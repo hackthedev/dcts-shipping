@@ -1431,3 +1431,27 @@ function getLastMessage(container) {
         console.warn("couldnt get last message")
     }
 }
+
+function handleChannelMessageDrafting(channelId){
+    if(!channelId) throw new Error("Channel id is missing");
+    let channelDraft = getChannelMessageDraft(channelId);
+    console.log(channelDraft, "channel draft")
+
+    if(channelDraft){
+        const regex = /<p>\s*<\/p>/gm;
+        if(quill) quill.pasteUnconverted(channelDraft.replace(regex, ''));
+    }
+    else{
+        editor.innerHTML = "";
+    }
+}
+
+function saveChannelMessageDraft(channelId){
+    if(!channelId) throw new Error("Channel id is missing");
+    localStorage.setItem(`message_draft_${channelId}`, editor?.innerHTML || null)
+}
+
+function getChannelMessageDraft(channelId){
+    if(!channelId) throw new Error("Channel id is missing");
+    return localStorage.getItem(`message_draft_${channelId}`)
+}

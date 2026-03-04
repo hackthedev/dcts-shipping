@@ -28,7 +28,6 @@ function rewriteImg(img){
 
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll("img").forEach(rewriteImg);
-
     new MutationObserver(mutations => {
         for(const m of mutations){
             for(const n of m.addedNodes){
@@ -120,6 +119,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     initQuillShit();
+
+    handleChannelMessageDrafting(UserManager.getChannel());
 
     // manual click event listener because its too general
     document.body.addEventListener("click", (event) => {
@@ -1663,12 +1664,16 @@ function initQuillShit(){
         setTyping();
     });
 
+    // save message draft
+    editor.addEventListener('keyup', function (event) {
+        saveChannelMessageDraft(UserManager.getChannel());
+    });
+
     // editor resize fix where chat wont scroll down
     const editorResizeObserver = new ResizeObserver(() => {
         let isScrolledDown = isScrolledToBottom(editor, 4);
         if(isScrolledDown) scrollDown("editor resize observer");
     });
-
     editorResizeObserver.observe(editor);
 
     editor.addEventListener('keydown', function (event) {
@@ -2389,13 +2394,17 @@ async function waitFor(callback, timeout = 0) {
 }
 
 async function setUrl(param, isVC = false) {
+    if (!isVC) {
+        showHome(true)
+        saveChannelMessageDraft(UserManager.getID());
+    }
+
+
     let urlData = param.split("&")
     let groupId = urlData[0]?.replace("?group=", "")
     let categoryId = urlData[1]?.replace("category=", "")
     let channelId = urlData[2]?.replace("channel=", "")
     focusEditor()
-
-    if (!isVC) showHome(true)
 
     // channel already open, dont reload it
     if (UserManager.getChannel() === channelId && channelId && UserManager.getChannel() && isVC === false) return;
@@ -2446,6 +2455,10 @@ async function setUrl(param, isVC = false) {
             if (response.permission !== "granted") {
                 toggleEditor(false);
             } else {
+
+
+
+
                 // to avoid confusion
                 if(!channelId){
                     toggleEditor(false);
@@ -2453,6 +2466,7 @@ async function setUrl(param, isVC = false) {
                 else{
                     toggleEditor(true);
                     focusEditor();
+                    handleChannelMessageDrafting(channelId);
                 }
             }
         });

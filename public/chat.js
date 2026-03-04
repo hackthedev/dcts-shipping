@@ -6,6 +6,10 @@ document.addEventListener("error", (e) => {
     if (el.tagName === "IMG") {
         el.setAttribute("data-src", el.src)
         el.src = "/img/error.png";
+
+        // lets see if this will break something
+        el.style.maxHeight = "50px"
+        el.style.maxWidth = "50px"
     }
 }, true);
 
@@ -1659,6 +1663,14 @@ function initQuillShit(){
         setTyping();
     });
 
+    // editor resize fix where chat wont scroll down
+    const editorResizeObserver = new ResizeObserver(() => {
+        let isScrolledDown = isScrolledToBottom(editor, 4);
+        if(isScrolledDown) scrollDown("editor resize observer");
+    });
+
+    editorResizeObserver.observe(editor);
+
     editor.addEventListener('keydown', function (event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
@@ -2424,18 +2436,24 @@ async function setUrl(param, isVC = false) {
             }
 
             changedChannel()
-            ChatManager.setChannelMarker(channelId, false)
+            if(channelId) ChatManager.setChannelMarker(channelId, false)
 
             chatlog.innerHTML = "";
             document.getElementById("messagebox").style.display = "flex";
-            focusEditor();
             getChatlog(document.getElementById("content"));
             showGroupStats();
 
             if (response.permission !== "granted") {
                 toggleEditor(false);
             } else {
-                toggleEditor(true);
+                // to avoid confusion
+                if(!channelId){
+                    toggleEditor(false);
+                }
+                else{
+                    toggleEditor(true);
+                    focusEditor();
+                }
             }
         });
     }

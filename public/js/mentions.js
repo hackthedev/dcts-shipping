@@ -201,7 +201,7 @@ async function getUserMentions(text) {
             const member = await ChatManager.resolveMember(id);
             if (!member) continue;
 
-            const html = `<label class="mention member" data-member-id="${id}">@${member.name}</label>`;
+            const html = `<label class="mention member" data-member-id="${id}">@${unescapeHtmlEntities(sanitizeHtmlForRender(member?.name, false), false)}</label>`;
             text = text.replace(match[0], html);
         }
 
@@ -325,7 +325,7 @@ async function updateMentionAutocompleteData() {
         const member = serverMembers[memberId];
         if (!member) continue;
 
-        const name = member.name;
+        let name = unescapeHtmlEntities(sanitizeHtmlForRender(member.name, false), false);
         const html = `<img 
                                 style="background-color: black;
                                 width: 20px; 

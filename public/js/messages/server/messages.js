@@ -870,9 +870,9 @@ async function createMsgHTML({
     let messageRow =
         `
         <div class="content ${isSystem ? "system" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}"  
-            ${message?.plainText ? `data-plain-text="${sanitizeHtmlForRender(encodeURIComponent(message.plainText), false)}"` : ""}
+            ${message?.plainText ? `data-plain-text="${unescapeHtmlEntities(sanitizeHtmlForRender(encodeURIComponent(message.plainText), false), true)}"` : ""}
             data-message-id="${message.messageId}" 
-            data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" 
+            data-member-id="${unescapeHtmlEntities(sanitizeHtmlForRender(message?.author?.id, false), true)}" 
             data-timestamp="${message.timestamp}">
             
             ${createActions === true ? createMsgActions(message?.author?.id, isSystem) : ""}
@@ -901,7 +901,7 @@ async function createMsgHTML({
                     <img class="icon" draggable="false" src="${sanitizeHtmlForRender(reply?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>
                 <div class="meta">
-                    <label class="username" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
+                    <label class="username" data-member-id="${unescapeHtmlEntities(sanitizeHtmlForRender(reply?.author?.id, false), true)}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
                         ${sanitizeHtmlForRender(truncateText(reply?.author?.name, 25), false)}
                     </label>
                 </div>
@@ -924,8 +924,17 @@ async function createMsgHTML({
                 
                <div class="content-container" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}"> <!-- for the flex layout -->
                  <div class="meta">
+                 
                     ${isSystem !== true ?
-                    `<label class="username" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" style="color: ${message?.author?.color}; background: ${message?.author?.background}; background-clip: ${message?.author?.backgroundClip};">${sanitizeHtmlForRender(truncateText(message?.author?.name, 30))}</label>` : ""}
+                    `<label class="username" 
+                        data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" 
+                        style="color: ${message?.author?.color}; background: ${message?.author?.background}; 
+                        background-clip: ${message?.author?.backgroundClip};"
+                        >
+                            ${unescapeHtmlEntities(sanitizeHtmlForRender(truncateText(message?.author?.name, 30), true))
+                    }</label>` : ""}
+                    
+                    
                     <label class="timestamp" data-timestamp="${message.timestamp}">
                         ${new Date(message.timestamp).toLocaleString("narrow")}
                         

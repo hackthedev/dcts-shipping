@@ -1,60 +1,51 @@
 function watchMediaLoads(container = document.getElementById("content")) {
-    if (!container) return console.log("no container")
+    if (!container) return
     if (container._mediaCleanup) container._mediaCleanup()
 
     let anchor = null
-    let correcting = false
     let pendingCorrection = null
 
     function findAnchor() {
-        let scrollTop = container.scrollTop
         let rect = container.getBoundingClientRect()
 
         for (let child of container.children) {
-            if (child.offsetTop + child.offsetHeight > scrollTop) {
-                return {
-                    el: child,
-                    offset: child.getBoundingClientRect().top - rect.top
-                }
+            let r = child.getBoundingClientRect()
+
+            if (r.bottom > rect.top) {
+                return { el: child, offset: r.top - rect.top }
             }
         }
+
         return null
     }
 
     function correct() {
-        if (!anchor || !anchor.el.isConnected) return
-
-        if (container._scrollLocked) {
-            anchor = findAnchor()
-            return
-        }
+        if (!anchor || !anchor.el.isConnected || container._scrollLocked) return
 
         let rect = container.getBoundingClientRect()
-        let currentOffset = anchor.el.getBoundingClientRect().top - rect.top
-        let drift = currentOffset - anchor.offset
+        let now = anchor.el.getBoundingClientRect().top - rect.top
+        let drift = now - anchor.offset
 
-        if (Math.abs(drift) < 2) return
+        if (Math.abs(drift) < 1) return
 
-        correcting = true
         container.style.scrollBehavior = "auto"
         container.scrollTop += drift
-        anchor.offset = anchor.el.getBoundingClientRect().top - rect.top
     }
 
     function scheduleCorrection() {
-        if (pendingCorrection || container._scrollLocked) return
+        if (container._scrollLocked) return
+
+        if (pendingCorrection) cancelAnimationFrame(pendingCorrection)
+
         pendingCorrection = requestAnimationFrame(() => {
             pendingCorrection = null
             correct()
-            requestAnimationFrame(() => {
-                correcting = false
-            })
         })
     }
 
     container.addEventListener("scroll", () => {
         if (container._scrollLocked) return
-        if (correcting) return
+        if (pendingCorrection) return
 
         anchor = findAnchor()
     }, { passive: true })
@@ -79,9 +70,11 @@ function watchMediaLoads(container = document.getElementById("content")) {
 
     let mo = new MutationObserver(mutations => {
         let added = false
+
         for (let m of mutations) {
             if (m.addedNodes.length) { added = true; break }
         }
+
         if (!added) return
 
         scan()
@@ -98,7 +91,6 @@ function watchMediaLoads(container = document.getElementById("content")) {
         delete container._scrollLocked
     }
 }
-
 async function withScrollLock(container = document.getElementById("content"), refEl, callback) {
     container._scrollLocked = true
     toggleSmoothScroll(container, false)
@@ -126,6 +118,7 @@ async function withScrollLock(container = document.getElementById("content"), re
     toggleSmoothScroll(container, true)
     container._scrollLocked = false
 }
+
 function setScrollPosition(container, info) {
     if (typeof info === "number") {
         container.scrollTop = info

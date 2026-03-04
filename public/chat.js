@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     initQuillShit();
 
-    handleChannelMessageDrafting(UserManager.getChannel());
+    if(UserManager.getChannel()) handleChannelMessageDrafting(UserManager.getChannel());
 
     // manual click event listener because its too general
     document.body.addEventListener("click", (event) => {
@@ -2469,7 +2469,7 @@ async function setUrl(param, isVC = false) {
                 else{
                     toggleEditor(true);
                     focusEditor();
-                    handleChannelMessageDrafting(channelId);
+                    if(channelId) handleChannelMessageDrafting(channelId);
                 }
             }
         });

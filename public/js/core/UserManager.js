@@ -84,7 +84,7 @@ class UserManager {
         
             <div id="profile_content">       
                 <div id="profile_username"><h2 style="margin: 0 !important;">${unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.name))}</h2></div>                
-                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? sanitizeHtmlForRender(memberObj?.status) : ""}</i></div>  
+                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.status), false) : ""}</i></div>  
                 
                 ${memberObj?.aboutme?.trim()?.length > 0 ?                
                `

@@ -92,7 +92,8 @@ function watchMediaLoads(container = document.getElementById("content")) {
     }
 }
 async function withScrollLock(container = document.getElementById("content"), refEl, callback) {
-    container._scrollLocked = true
+    if(!container) container = document.getElementById("content");
+    if(container?._scrollLocked) container._scrollLocked = true
     toggleSmoothScroll(container, false)
 
     let pos = getScrollPosition(container, refEl)
@@ -116,10 +117,11 @@ async function withScrollLock(container = document.getElementById("content"), re
     }
 
     toggleSmoothScroll(container, true)
-    container._scrollLocked = false
+    if(container?._scrollLocked) container._scrollLocked = false
 }
 
 function setScrollPosition(container, info) {
+    if(!container) throw new Error("Could not set scroll position because container not set")
     if (typeof info === "number") {
         container.scrollTop = info
         return
@@ -135,6 +137,7 @@ function setScrollPosition(container, info) {
 }
 
 function getScrollPosition(container, refEl) {
+    if(!container) throw new Error("Could not find scroll position because container not set")
     if (!refEl) return container.scrollTop
 
     let cTop = container.getBoundingClientRect().top
@@ -147,5 +150,6 @@ function getScrollPosition(container, refEl) {
 }
 
 function toggleSmoothScroll(element = document.getElementById("content"), toggle) {
+    if(!element) throw new Error("Could not toggle smooth scroll container not set")
     element.style.scrollBehavior = toggle ? "smooth" : "auto"
 }

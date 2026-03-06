@@ -933,7 +933,10 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
             if (response?.aboutme) CookieManager.setCookie("aboutme", response.aboutme);
             if (response?.status) CookieManager.setCookie("status", response.status);
             if (response?.loginName) CookieManager.setCookie("loginName", response.loginName);
+            if (response?.name) CookieManager.setCookie("username", response.name);
             if (response?.id) CookieManager.setCookie("id", response.id);
+
+            console.log(response)
 
             // if we finished onboarding
             if (!response?.error && response.finishedOnboarding === true && initial) {

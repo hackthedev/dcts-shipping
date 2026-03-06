@@ -1,4 +1,3 @@
-
 const SANITIZE_OPTIONS = {
     ALLOWED_TAGS: [
         'div',
@@ -45,13 +44,44 @@ const SANITIZE_OPTIONS = {
         'title',
         'data-member-id',
         'data-message-id'
-    ]
+    ],
+
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    ALLOW_DATA_ATTR: false,
+    FORBID_ATTR: ['style', 'onerror', 'onclick', 'onload', 'onmouseover', 'onfocus', 'onblur'],
 };
+
+let _hooksInstalled = false;
+
+function installDomPurifyHooks() {
+    if (_hooksInstalled || !window.DOMPurify) return;
+    _hooksInstalled = true;
+
+    DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+        if (node.tagName === 'A') {
+            node.setAttribute('target', '_blank');
+            node.setAttribute('rel', 'noopener noreferrer nofollow');
+
+            const href = (node.getAttribute('href') || '').toLowerCase().trim();
+            if (href.startsWith('javascript:') || href.startsWith('data:') || href.startsWith('vbscript:')) {
+                node.removeAttribute('href');
+            }
+        }
+
+        if (node.tagName === 'IMG') {
+            const src = (node.getAttribute('src') || '').toLowerCase().trim();
+            if (src.startsWith('javascript:') || src.startsWith('data:') || src.startsWith('vbscript:')) {
+                node.remove();
+            }
+        }
+    });
+}
 
 function sanitizeHtmlForRender(html, wrapParagraphs = true) {
     if (html == null) return '';
+    installDomPurifyHooks();
 
-    let raw = unescapeHtmlEntities(String(html || ''), true).trim();
+    let raw = String(html || '').trim();
 
     const hasTags = /<\/?[a-z][\s\S]*?>/i.test(raw);
     if (!hasTags) {
@@ -95,16 +125,16 @@ function unescapeHtmlEntities(str, raw = false) {
 
     if(raw === true){
         const txt = document.createElement('textarea');
-        txt.innerHTML = String(str);
+        txt.innerHTML = DOMPurify.sanitize(String(str), SANITIZE_OPTIONS);
         return txt.value;
     }
 
     const txt = document.createElement('label');
-    txt.innerHTML = String(str);
+    txt.innerHTML = DOMPurify.sanitize(String(str), SANITIZE_OPTIONS);
     let unescaped = txt.textContent;
 
     const div = document.createElement('div');
-    div.innerHTML = unescaped;
+    div.innerHTML = DOMPurify.sanitize(unescaped, SANITIZE_OPTIONS);
     return div.textContent || "";
 }
 
@@ -129,7 +159,10 @@ function ensureDomPurify(src = "https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dis
     });
 
     return new Promise((resolve, reject) => {
-        const finish = () => resolve(window.DOMPurify);
+        const finish = () => {
+            installDomPurifyHooks();
+            resolve(window.DOMPurify);
+        };
         const waitForGlobal = () => {
             if (window.DOMPurify) return finish();
             setTimeout(waitForGlobal, 25);

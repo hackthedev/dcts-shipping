@@ -770,6 +770,7 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockTor", true)
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockAbuser", true)
 
+    checkObjectKeys(serverconfig, "serverinfo.moderation.bans.allowXSSTesting", false)
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayName", "Banned")
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayMessageNotice", `<span class="content-hidden">[ Content hidden ]</span>`)
     

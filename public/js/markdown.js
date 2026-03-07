@@ -113,7 +113,7 @@ async function getUrlMeta(url){
     try{
 
         let meta = await fetch(`/meta/${encodeURIComponent(url)}`)
-        if(meta.status === 200){
+        if(meta?.status === 200){
             return await meta.json()
         }
     }

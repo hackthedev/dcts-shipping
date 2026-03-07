@@ -28,6 +28,8 @@ export default (io) => (socket) => {
             sortedRoles = sortedRoles.reverse().map((key) => roles[key]);
 
 
+            console.log(member)
+
 
             // Only returns roles that are can be assigned
             Object.keys(sortedRoles).reverse().forEach(function (role) {

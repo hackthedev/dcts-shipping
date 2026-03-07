@@ -816,9 +816,10 @@ label.mention.channel {
 
 #profile-role-menu {
     position: fixed;
-    z-index: 100000;
+    z-index: 3;
     width: calc(208px - 16px + 8px);
-    height: 150px;
+    max-height: 50vh;
+    min-height: 150px;
 
     padding: 8px;
 
@@ -836,8 +837,7 @@ label.mention.channel {
 
 #role-menu-header,
 #role-menu-search-input {
-    display: inline-block;
-    float: left;
+    width: 100%;
 }
 
 #role-menu-header {
@@ -848,6 +848,8 @@ label.mention.channel {
 
 #role-menu-search-input {
     outline: none !important;
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
 #role-menu-search-icon {
@@ -864,13 +866,12 @@ label.mention.channel {
 }
 
 #role-menu-list {
-    height: 120px;
+    display: flex;
+    flex-direction: column;
     width: 100%;
 
     margin-top: 8px;
 
-    display: block;
-    float: left;
 
     overflow-y: auto;
 }

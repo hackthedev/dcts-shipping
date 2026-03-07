@@ -137,7 +137,7 @@ class UserManager {
             <div id="profile_roles">
                 <h2 class="profile_headline">Roles</h2>
                 ${roleCode}
-                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${sanitizeHtmlForRender(memberObj.id)}');" class="role addRoleMenuTrigger" data-member-id="${memberObj.id}" id="addRole-${memberObj.id}">+</code>
+                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${sanitizeHtmlForRender(memberObj.id, false)}');" class="role addRoleMenuTrigger" data-member-id="${memberObj.id}" id="addRole-${memberObj.id}">+</code>
             </div>`;
     }
 

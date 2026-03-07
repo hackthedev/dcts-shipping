@@ -361,3 +361,9 @@ img {
 .content-hidden{
     color: indianred;
 }
+
+#role-menu-search-input{
+    background-color: hsl(from var(--main) h s calc(l * 2) / 100%);
+    color: hsl(from var(--main) h s calc(l * 10) / 100%);
+    border: 1px solid hsl(from var(--main) h s calc(l * 8) / 30%);
+}

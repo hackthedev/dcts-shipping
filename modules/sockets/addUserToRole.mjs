@@ -3,17 +3,19 @@ import { getMemberHighestRole } from "../functions/chat/helper.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import {stripHTML} from "../functions/sanitizing/functions.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('addUserToRole', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
-        ) {
+        if (validateMemberId(member?.id, socket, member?.token) === true) {
 
-            member.id = xssFilters.inHTMLData(member.id)
-            member.token = xssFilters.inHTMLData(member.token)
-            member.target = xssFilters.inHTMLData(member.target)
+            if(!member?.target) return response ({error: "Missing target user id"})
+            if(!member?.role) return response ({error: "Missing target role id"})
+
+            member.id = stripHTML(member.id)
+            member.token = stripHTML(member.token)
+            member.target = stripHTML(member.target)
 
             if (hasPermission(member.id, "manageMembers")) {
                 try {

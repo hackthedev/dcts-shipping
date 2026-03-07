@@ -311,8 +311,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             ".addRoleMenuTrigger"
         ],
         async (data) => {
-            console.log(data)
-
             let memberId = data.element.getAttribute("data-member-id");
             if (!memberId) {
                 console.warn("Couldnt get member profile from click event because memberid wasnt found");

@@ -1043,10 +1043,6 @@ async function addMessageReaction(messageId, emojiHash, isDefault = false){
     })
 }
 
-async function searchParentElement(element, selector){
-
-}
-
 async function removeMessageReaction(messageId, emojiHash){
     socket.emit("removeMessageReaction", {
         id: UserManager.getID(),
@@ -1144,7 +1140,7 @@ async function displayMessagesInElement({
 
             // this will help with the mentions etc
             if(Inbox.isUnread(message?.messageId) && message?.messageId){
-                await Inbox.markAsRead(Inbox.getInboxIdFromMessageId(message.messageId))
+                Inbox.markAsRead(Inbox.getInboxIdFromMessageId(message.messageId))
             }
 
             loaded++;

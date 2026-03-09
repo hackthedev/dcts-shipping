@@ -684,6 +684,11 @@ async function checkMediaTypeAsync(url) {
             return;
         }
 
+        // try to cache urls etc for speed
+        if(localStorage.getItem(`mediaType_cache_${url}`)) {
+            resolve(localStorage.getItem(`mediaType_cache_${url}`))
+        }
+
         socket.emit("checkMediaUrlCache", {
             id: UserManager.getID(),
             token: UserManager.getToken(),
@@ -691,6 +696,11 @@ async function checkMediaTypeAsync(url) {
         }, function (response) {
 
             if (response.isCached === true) {
+
+                if(response?.mediaType){
+                    localStorage.setItem(`mediaType_cache_${url}`, response.mediaType)
+                }
+
                 // return cached media type
                 resolve(response.mediaType);
             } else {

@@ -110,11 +110,15 @@ async function updateMarkdownLinks(delay) {
 }
 
 async function getUrlMeta(url){
-    try{
+    if(localStorage.getItem(`urlMetaJson_${url}`)) return localStorage.getItem(`urlMetaJson_${url}`);
 
+    try{
         let meta = await fetch(`/meta/${encodeURIComponent(url)}`)
         if(meta?.status === 200){
-            return await meta.json()
+            let metaJson = await meta.json();
+
+            if(metaJson) localStorage.setItem(`urlMetaJson_${url}`, metaJson)
+            return await metaJson;
         }
     }
     catch{}

@@ -177,7 +177,8 @@ async function markdown(msg, msgid) {
             continue;
         }
 
-        let embed = `
+        if (urlMeta?.meta?.title || urlMeta?.meta?.description) {
+            let embed = `
             <div class="markdown-urlEmbed-container">
                 <a class="markdown-urlEmbed"
                    data-media-type="link"
@@ -192,7 +193,14 @@ async function markdown(msg, msgid) {
                 </a>
             </div>`;
 
-        msg = msg.replace(url, embed);
+            msg = msg.replace(url, embed);
+            changed = true;
+            continue;
+        }
+
+        msg = msg.replace(url,
+            `<a draggable="false" data-media-type="link" data-message-id="${msgid.replace("msg-", "")}" href="${url}" ${url.startsWith(location.origin) ? "" : "target=\"_blank\""}> ${url} </a>`
+        );
         changed = true;
     }
 

@@ -199,7 +199,7 @@ async function markdown(msg, msgid) {
         }
 
         msg = msg.replace(url,
-            `<a draggable="false" data-media-type="link" data-message-id="${msgid.replace("msg-", "")}" href="${url}" ${url.startsWith(location.origin) ? "" : "target=\"_blank\""}> ${url} </a>`
+            `<a draggable="false" data-media-type="link" data-message-id="${msgid.replace("msg-", "")}" href="${url}" ${url.startsWith(location.origin) ? "" : "target=\"_blank\""}> ${unescapeHtmlEntities(sanitizeHtmlForRender(url))} </a>`
         );
         changed = true;
     }

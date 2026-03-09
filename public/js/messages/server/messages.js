@@ -789,8 +789,9 @@ async function updateMessageReactionsElementById(messageId, container = document
     let messageObj = await ChatManager.resolveMessage(messageId);
     if(!messageObj) return console.error(`Couldnt find message object for message reaction update ${messageId}`);
 
+    let lastMsg = getLastMessage(container)
     await withScrollLock(container, lastMsg?.element, async () => {
-        // no reactions were presen^t so add the container
+        // no reactions were present so add the container
         if(!reactionRow) {
             contentContainer.innerHTML += await getMessageReactionsHTML(messageObj);
             reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);

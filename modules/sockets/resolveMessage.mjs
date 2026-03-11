@@ -52,6 +52,8 @@ export async function checkMessageObjReactions(message){
 }
 
 export async function checkMessageObjAuthor(message){
+    if(!message?.author) throw new Error("No message author object found");
+
     if(!message?.author?.name){
         message.author = await getCastingMemberObject(serverconfig.servermembers[message.author.id]);
     }

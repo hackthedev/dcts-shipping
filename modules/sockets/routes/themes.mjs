@@ -38,7 +38,10 @@ export async function listThemes() {
             .map(d => d.name)
         : [];
 
-    return Array.from(new Set([...localThemes, ...githubThemes]));
+    const a = Array.isArray(localThemes) ? localThemes : [];
+    const b = Array.isArray(githubThemes) ? githubThemes : [];
+    
+    return Array.from(new Set([...a, ...b]));
 }
 
 export async function downloadTheme(themeName){

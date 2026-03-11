@@ -34,6 +34,7 @@ import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./migrations/
 import archiver from "archiver";
 import {banIp, checkMemberBan, getBan, isIdentifierBanned, removeBan} from "./ban-system/helpers.mjs";
 import checkPermission from "../sockets/checkPermission.mjs";
+import {sanitizeHTML} from "./sanitizing/functions.mjs";
 
 var serverconfigEditable;
 
@@ -105,62 +106,7 @@ export function removeFileExtension(filename) {
 }
 
 export function sanitizeInput(input) {
-
-    // ignore files
-    if (Buffer.isBuffer(input)) return input;
-
-    return sanitizeHtml(input, {
-        allowedTags: [
-            'div',
-            'source',
-            'video',
-            'audio',
-            'span',
-            'p',
-            'br',
-            'b',
-            'i',
-            'u',
-            's',
-            'a',
-            'ul',
-            'ol',
-            'li',
-            'h1',
-            'h2',
-            'h3',
-            'pre',
-            'code',
-            "label",
-            'blockquote',
-            'strong',
-            'em',
-            'img',
-            'mark'
-        ],
-        allowedAttributes: {
-            'a': ['href', 'target', 'rel'],
-            'img': ['src', 'alt', 'title'],
-            'div': ['class', 'style'],
-            'strong': ['class'],
-            'em': ['class'],
-            'u': ['class'],
-            's': ['class'],
-            'span': ['class', 'style'],
-            '*': ['class', 'style']
-        },
-        transformTags: {
-            'a': sanitizeHtml.simpleTransform('a', {target: '_blank', rel: 'noopener noreferrer'})
-        },
-        allowedSchemesByTag: {
-            img: ['http', 'https', 'data'] // Erlaubt das data-Schema für img-Tags
-        },
-        allowedSchemesAppliedToAttributes: ['src'], // Nur auf das 'src'-Attribut anwenden
-        textFilter: (text) => {
-            // Entfernt alle 'data:'-URLs außer 'data:image/png;base64' und 'data:image/jpeg;base64'
-            return text.replace(/data:image\/(?!png|jpeg)[^;]+;base64[^"]*/g, '');
-        }
-    });
+    return sanitizeHTML(input);
 }
 
 export function sanitizeFilename(filename) {

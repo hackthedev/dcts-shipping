@@ -504,9 +504,13 @@
 
     function normalizeMember(raw) {
         if (!raw) return null;
+
+        if (raw?.icon === "null") raw.icon = "/img/default_pfp.png";
+        if (raw.icon?.trim()?.length === 0) raw.icon = "/img/default_pfp.png";
+
         return {
             id: String(raw.id ?? raw.userId ?? raw.uid ?? ''),
-            name: raw.name ?? raw.nickname ?? raw.loginName ?? String(raw.id ?? ''),
+            name: raw.name ?? raw.nickname ?? String(raw.id ?? ''),
             status: raw.status ?? "",
             icon: raw.icon ?? null,
             banner: raw.banner ?? null,
@@ -600,10 +604,13 @@
     function avatarHTML(member, size = 'normal') {
         const cls = size === 'small' ? 'avatar small' : size === 'tiny' ? 'avatar tiny' : 'avatar';
         const dot = `<span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span>`;
+
+        console.log(member)
+
         if (member.icon || member.id === "system") {
             return `<div class="${cls}"><img src="${member.id === "system" ? "/img/default_icon.png" : member.icon}" alt=""><span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span></div>`;
         }
-        return `<div class="${cls}" aria-label="${encodePlainText(member.name)}">${initials(member.name)}${dot}</div>`;
+        return `<div class="${cls}" aria-label="${encodePlainText(sanitizeHtmlForRender(member.name, false))}">${initials(sanitizeHtmlForRender(member.name, false))}${dot}</div>`;
     }
 
     function avatarStackHTML(ids, size = 'normal') {
@@ -616,9 +623,10 @@
         if (ids[1] !== UserManager.getID()) code += `<div class="a2">${avatarHTML(b, small ? 'small' : 'normal')}</div>`;
 
         return `
-      <div class="avatarStack ${small ? 'small' : ''}">
-        ${code}
-      </div>`;
+          <div class="avatarStack ${small ? 'small' : ''}">
+            ${code}
+          </div>
+        `;
     }
 
     function authorChip(authorId, small = false) {
@@ -756,7 +764,6 @@
             // show normal dms
             sorted.forEach(async t => {
                 if (t.type !== "ticket") { // dont show tickets in normal dms
-
                     if(isEncryptedMessage(t.last)){
                         t.last = getEncryptedMessageNotice();
                     }
@@ -769,8 +776,8 @@
                     row.innerHTML = `
                         ${avatarStackHTML(t.participants)}
                         <div>
-                          <div class="dmName">${encodePlainText(title)}</div>
-                          <div class="dmPreview">${unescapeHtmlEntities(t.last || "")}</div>
+                          <div class="dmName">${encodePlainText(sanitizeHtmlForRender(title, false))}</div>
+                          <div class="dmPreview">${unescapeHtmlEntities(sanitizeHtmlForRender(t.last || "", false))}</div>
                         </div>
                         ${t.unread > 0 ?
                                     `<div class="dmBadge">${t.unread ? `<span>${t.unread}</span>` : ''}</div>` : ""
@@ -829,7 +836,7 @@
             </div>` : ''}
           </div>
           <div style="display:flex;align-items:center;gap:8px;margin:6px 0 4px 0">${authorChip(n.authorId, true)}<span class="meta">${fmtDate(n.createdAt)}</span></div>
-          <div style="color:var(--muted);font-size:13px">${sanitizeHtmlForRender(truncateText(n.body, 100) || '')}</div>`;
+          <div style="color:var(--muted);font-size:13px">${sanitizeHtmlForRender(truncateText(n.body, 100) || '', false)}</div>`;
 
                 if (STATE.unreadContent.has(contentKey)) {
                     const badge = document.createElement('div');
@@ -877,7 +884,7 @@
             </div>
 
             <div style="color:var(--muted);font-size:13px">
-              ${sanitizeHtmlForRender(truncateText(h.body, 100) || '')}
+              ${sanitizeHtmlForRender(truncateText(h.body, 100) || '', false)}
             </div>
           `;
 
@@ -1056,7 +1063,7 @@
                 ${isAdmin ? `<button class="iconBtn" style="float: right;" title="Edit" onclick="editHeroAbout()">${ICONS.edit}</button>` : ""}
               </h3>
               
-              <div style="color:var(--muted)">${sanitizeHtmlForRender(CONFIG.aboutHtml) || ''}</div>
+              <div style="color:var(--muted)">${sanitizeHtmlForRender(CONFIG.aboutHtml, false) || ''}</div>
             </div>
             <div style="height:12px"></div>
             <div class="homeCard">
@@ -1106,7 +1113,7 @@
               </div>` : ''}
             </div>
             <div style="display:flex;align-items:center;gap:8px;margin:6px 0 4px 0">${authorChip(p.authorId, true)}<span class="meta">${fmtDate(p.createdAt)} • ${encodePlainText(p.tag || '')}</span></div>
-            <div style="color:var(--muted);font-size:13px; margin-top:4px">${sanitizeHtmlForRender(truncateText(p.body, 100) || '')}</div>`;
+            <div style="color:var(--muted);font-size:13px; margin-top:4px">${sanitizeHtmlForRender(truncateText(p.body, 100) || '', false)}</div>`;
 
                 // append element
                 postWrap.appendChild(el);
@@ -1184,7 +1191,7 @@
       <div class="threadArea" id="newsFull" style="padding:24px">
         <h2 style="margin-top:0">${encodePlainText(n.title)} ${n.pinned ? '<span class="tag pinned">Pinned</span>' : ''}</h2>
         <div style="display:flex;align-items:center;gap:8px;margin:6px 0 14px 0">${authorChip(n.authorId)} </div>
-        <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(n.body || '')}</div>
+        <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(n.body || '', false)}</div>
         ${isAdmin ? `<div class="adminRow">
           <button class="btn ghost" onclick="onEditNews(${Number(n.id)})">Edit</button>
           <button class="btn" onclick="onTogglePinNews(${Number(n.id)})">${n.pinned ? 'Unpin' : 'Pin'}</button>
@@ -1231,7 +1238,7 @@
         <div class="threadArea" id="postFull" style="padding:24px">
           <h2 style="margin-top:0">${encodePlainText(p.title)} ${p.pinned ? '<span class="tag pinned">Pinned</span>' : ''}</h2>
           <div style="display:flex;align-items:center;gap:8px;margin:6px 0 14px 0">${authorChip(p.authorId)}</div>
-          <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(p.body || '')}</div>
+          <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(p.body || '', false)}</div>
           ${isAdmin ? `<div class="adminRow">
             <button class="btn ghost" onclick="onEditPost(${Number(p.id)})">Edit</button>
             <button class="btn" onclick="onTogglePinPost(${Number(p.id)})">${p.pinned ? 'Unpin' : 'Pin'}</button>
@@ -1277,7 +1284,7 @@
       <div class="threadArea" id="helpArea" style="padding:24px">
         <h2 style="margin-top:0">${encodePlainText(doc.title)}</h2>
         <div style="display:flex;align-items:center;gap:8px;margin:6px 0 14px 0">${authorChip(doc.authorId)}</div>
-        <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(doc.body || '')}</div>
+        <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(doc.body || '', false)}</div>
         ${isAdmin ?
             `<div class="adminRow">
             <button class="btn ghost" onclick="onEditHelp('${doc.slug}')">Edit</button>

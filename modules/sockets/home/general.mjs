@@ -1,13 +1,15 @@
 import {io, serverconfig, signer, usersocket, xssFilters} from "../../../index.mjs";
-import { hasPermission } from "../../functions/chat/main.mjs";
+import {hasPermission, shouldIgnoreMember} from "../../functions/chat/main.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import { copyObject, emitBasedOnPermission, getCastingMemberObject, sanitizeInput, sendMessageToUser, validateMemberId } from "../../functions/main.mjs";
 import { decodeFromBase64, encodeToBase64 } from "../../functions/mysql/helper.mjs";
 import { queryDatabase } from "../../functions/mysql/mysql.mjs";
+import {sanitizeHTML} from "../../functions/sanitizing/functions.mjs";
+import JSONTools from "@hackthedev/json-tools";
 
 
 
-const clean = (s) => xssFilters.inHTMLData(String(s ?? ""));
+const clean = (s) => sanitizeHTML(String(s ?? ""));
 const rid = (p) => `${p}_${crypto.randomUUID()}`;
 
 export async function deleteDMMessage(socket, data, response){
@@ -327,7 +329,7 @@ export default (io) => (socket) => {
                     try {
                         text = JSON.parse(decodeFromBase64(r.message));
                     } catch {
-                        text = JSON.parse(r.message);
+                        text = JSONTools.tryParse(r.message);
                     }
 
                     return {
@@ -372,7 +374,10 @@ export default (io) => (socket) => {
             socket.data.memberId = myId;
             socket.join(myId);
 
-            const members = Object.values(copyObject(serverconfig.servermembers) || {}).map(await getCastingMemberObject);
+            const unfilteredMembers = await Promise.all(
+                Object.values(copyObject(serverconfig.servermembers) || {}).map(await getCastingMemberObject)
+            );
+            const members = unfilteredMembers.filter(member => !shouldIgnoreMember(member));
 
             const threads = await queryDatabase(
                 `SELECT t.threadId, t.type, t.title, k.status
@@ -486,7 +491,7 @@ export default (io) => (socket) => {
 
                 const threadId = rid("t");
                 const type = data?.type || "dm";
-                const title = clean(data?.title || "");
+                const title = clean(data?.title || null);
                 const participants = Array.from(new Set(data?.participants || []));
                 if (!participants.includes(me)) participants.push(me);
 
@@ -533,7 +538,7 @@ export default (io) => (socket) => {
 
 
     socket.on("fetchThreads", async function (_member, response) {
-        if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[_member.id].token == _member.token) {
+        if (validateMemberId(socket.data.memberId, socket, _member.token) === true) {
             try {
                 const threads = await queryDatabase(
                     `SELECT threadId, type, title FROM dms_threads`,
@@ -565,14 +570,14 @@ export default (io) => (socket) => {
 
     socket.on("sendMessage", async (data, response) => {
         try {
-            if (!validateMemberId(socket.data.memberId, socket)) {
+            if (!validateMemberId(socket.data.memberId, socket, data.token)) {
                 return response?.({ type: 'error', msg: 'unauthorized' });
             }
             if (serverconfig.servermembers[data.id].token !== data.token) {
                 return response?.({ type: 'error', msg: 'invalid token' });
             }
 
-            const me = socket.data.memberId;
+            const me = data.id;
             const messageId = "m_" + Date.now();
             const now = new Date();
 
@@ -600,15 +605,17 @@ export default (io) => (socket) => {
             } else if (data.supportIdentity === "support_tagged") {
                 displayName = `[Support Team] ${data.authorName || "Staff"}`.trim();
             }
+            else{
+                displayName = sanitizeInput(data.authorName)
+            }
 
             /*
                 Potential automod text checking
             */
-
             await queryDatabase(
                 `INSERT INTO dms_messages (messageId, threadId, authorId, message, createdAt, supportIdentity, displayName)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                [messageId, data.threadId, me, sanitizeInput(JSON.stringify(data.text)), now, data.supportIdentity || "self", displayName]
+                [messageId, data.threadId, me, JSON.stringify(data.text), now, data.supportIdentity || "self", displayName]
             );
 
             // mark as read for sender

@@ -1,4 +1,46 @@
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const container = document.getElementById("content");
+    let savedHeight = 0;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+
+            if(container.scrollHeight !== savedHeight){
+                let diff = container.scrollHeight - savedHeight;
+                console.log(diff)
+
+                toggleSmoothScroll(container, false)
+                container.scrollTop += diff;
+                toggleSmoothScroll(container, true)
+                savedHeight = container.scrollHeight;
+            }
+        }
+    });
+
+    const observeNode = (node) => {
+        if (node.nodeType !== 1) return;
+        resizeObserver.observe(node);
+        for (const child of node.querySelectorAll("*")) {
+            resizeObserver.observe(child);
+        }
+    };
+
+    observeNode(container);
+
+    // for other fucking elements
+    new MutationObserver((mutations) => {
+        for (const m of mutations) {
+            for (const node of m.addedNodes) observeNode(node);
+        }
+    }).observe(container, { childList: true, subtree: true });
+})
+
+
 function watchMediaLoads(container = document.getElementById("content")) {
+
+
+    /*
     if (!container) return
     if (container._mediaCleanup) container._mediaCleanup()
 
@@ -90,34 +132,11 @@ function watchMediaLoads(container = document.getElementById("content")) {
         delete container._mediaCleanup
         delete container._scrollLocked
     }
+
+     */
 }
 async function withScrollLock(container = document.getElementById("content"), refEl, callback) {
-    if(!container) container = document.getElementById("content");
-    if(container?._scrollLocked) container._scrollLocked = true
-    toggleSmoothScroll(container, false)
-
-    let pos = getScrollPosition(container, refEl)
-    let heightBefore = container.scrollHeight
-
     if (callback) await callback()
-
-    if (typeof pos === "number") {
-        container.scrollTop = pos + (container.scrollHeight - heightBefore)
-    } else {
-        setScrollPosition(container, pos)
-    }
-
-    await new Promise(requestAnimationFrame)
-    await new Promise(requestAnimationFrame)
-
-    if (typeof pos === "number") {
-        container.scrollTop = pos + (container.scrollHeight - heightBefore)
-    } else {
-        setScrollPosition(container, pos)
-    }
-
-    toggleSmoothScroll(container, true)
-    if(container?._scrollLocked) container._scrollLocked = false
 }
 
 function setScrollPosition(container, info) {

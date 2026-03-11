@@ -83,13 +83,11 @@ async function updateMarkdownLinks(delay) {
             let marked = await markdown(originalText, messageId)
             if (!marked.isMarkdown) continue
 
-            await withScrollLock(container, null, async () => {
-                let wrapper = document.createElement("div")
-                wrapper.innerHTML = sanitizeHtmlForRender(marked.message)
-                let node = wrapper.firstElementChild || wrapper
-                el.replaceWith(node)
-                node.setAttribute("data-markdown-done", "true")
-            });
+            let wrapper = document.createElement("div")
+            wrapper.innerHTML = sanitizeHtmlForRender(marked.message)
+            let node = wrapper.firstElementChild || wrapper
+            el.replaceWith(node)
+            node.setAttribute("data-markdown-done", "true")
 
             markdownChanged = true
         } catch (err) {

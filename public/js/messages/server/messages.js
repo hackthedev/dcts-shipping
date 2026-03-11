@@ -578,17 +578,17 @@ async function showMessageInChat({
     // convert mentions and check if own userid is in it
     let convertedMentions = await convertMention(message);
     let isMention = false;
-    message.message = sanitizeHtmlForRender(convertedMentions.text)
+    message.message = sanitizeHtmlForRender(convertedMentions.text, false)
 
     // convert emojis
-    try{ message.message = sanitizeHtmlForRender(await text2Emoji(message.message)) } catch {}
+    try{ message.message = sanitizeHtmlForRender(await text2Emoji(message.message), false) } catch {}
 
     // convert emojis and mentions for replies too
     if(message?.reply?.message) {
-        try{ message.reply.message = sanitizeHtmlForRender(await text2Emoji(message.reply.message)); } catch {}
+        try{ message.reply.message = sanitizeHtmlForRender(await text2Emoji(message.reply.message), false); } catch {}
 
         let convertedReplyMentions = await convertMention(message.reply);
-        message.reply.message = sanitizeHtmlForRender(convertedReplyMentions.text)
+        message.reply.message = sanitizeHtmlForRender(convertedReplyMentions.text, false)
     }
 
     let messageElement = appendTop ? getFirstMessage(container) : getLastMessage(container);
@@ -867,6 +867,9 @@ async function createMsgHTML({
         message.timestamp = message.ts;
     }
 
+    // consider this a fallback. should be avoided as it makes the
+    // chat slower. if this would happen a lot consider something wrong with
+    // the server as the server should supply it already.
     if(!message?.author?.name && message?.author?.id !== 0){
         message.author = await ChatManager.resolveMember(message?.author?.id) || message.author;
     }

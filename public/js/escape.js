@@ -101,9 +101,7 @@ function sanitizeHtmlForRender(html, wrapParagraphs = true) {
     let clean = DOMPurify.sanitize(raw, SANITIZE_OPTIONS);
 
     if (wrapParagraphs) {
-        clean = clean.replace(/<p[^>]*>\s*(?:&nbsp;|\s|\u00A0)*<\/p>/gi, '');
-    } else {
-        clean = clean.replace(/<\/?p[^>]*>/gi, '');
+        clean = `<p>${clean}</p>`;
     }
 
     clean = clean.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');

@@ -757,11 +757,10 @@ label.mention .inline-text-emoji{
 }
 
 label.mention {
-    display: inline;
-    all: unset;
+    display: inline-flex;
     background: rgba(135, 206, 235, 0.2);
-    padding: 0 4px;
-    margin: 0 4px;
+    padding: 0 2px;
+    margin: 0 2px;
     border-radius: 4px;
     cursor: pointer;
 }

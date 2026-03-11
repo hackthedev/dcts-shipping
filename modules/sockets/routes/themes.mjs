@@ -40,7 +40,7 @@ export async function listThemes() {
 
     const a = Array.isArray(localThemes) ? localThemes : [];
     const b = Array.isArray(githubThemes) ? githubThemes : [];
-    
+
     return Array.from(new Set([...a, ...b]));
 }
 

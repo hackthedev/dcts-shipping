@@ -33,7 +33,7 @@ class MobilePanel {
         panel.style.left = "0";
         panel.style.height = "100%";
         panel.style.width = "100%";
-        panel.style.background = "black";
+        panel.style.background = "hsl(from var(--main) h s calc(l * 2))";
         panel.style.transition = "transform 0.25s ease";
         panel.style.zIndex = "6";
         panel.style.overflow = "auto";

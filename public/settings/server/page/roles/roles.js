@@ -44,8 +44,7 @@ function initServerRoles() {
 
     socket.emit("getServerRoles", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
 
-        MobilePanel.setRightMenu(serverRolesRightPanel, "right")
-        ;
+        MobilePanel.setRightMenu(serverRolesRightPanel, "right");
 
         rolelist = document.getElementById("rolelist");
         roleStyle = computeRoleStyle();
@@ -365,7 +364,7 @@ function loadRolePerms(roleId) {
             }
 
             // get members of the role
-            var memberlist = document.getElementById("memberlist");
+            /*var memberlist = document.getElementById("memberlist");
             memberlist.innerHTML = "";
 
             let roleMembersHeader = document.getElementById("roleMembersHeader");
@@ -397,6 +396,8 @@ function loadRolePerms(roleId) {
 
                 });
             });
+
+             */
 
             if (MobilePanel.isMobile()) {
                 console.log("render rightr")

@@ -6,20 +6,17 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('disconnectUser', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token) {
+    socket.on('disconnectUser', async function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token) === true) {
 
-            if (member.id == member.target) {
-                response({ error: "Cant disconnect yourself", msg: "You cant disconnect yourself!", type: "error" })
-                return;
+            if (member.id === member.target) {
+                return response({ error: "Cant disconnect yourself", msg: "You cant disconnect yourself!", type: "error" })
             }
             else {
                 member.reason = xssFilters.inHTMLData(member.reason);
 
-                if (hasPermission(member.id, "disconnectUsers") == false) {
-                    response({ error: "Missing permission disconnectUsers", msg: "You cant disconnect others!", type: "error" })
-                    return;
+                if (await hasPermission(member.id, "disconnectUsers") === false) {
+                    return response({ error: "Missing permission disconnectUsers", msg: "You cant disconnect others!", type: "error" })
                 }
                 else {
                     
@@ -27,8 +24,7 @@ export default (io) => (socket) => {
                     var userToDisconnect = getMemberHighestRole(member.target);
 
                     if (mod.info.sortId <= userToDisconnect.info.sortId) {
-                        response({ error: "Cant disconnect user with higher or equal role", msg: "Cant disconnect user with higher or equal role", type: "error" })
-                        return;
+                        return response({ error: "Cant disconnect user with higher or equal role", msg: "Cant disconnect user with higher or equal role", type: "error" })
                     }
 
                     var disconnectResult = disconnectUser(usersocket[member.target], member.reason);

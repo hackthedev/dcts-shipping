@@ -5,7 +5,7 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('getChannelTree', function (member, response) {
+    socket.on('getChannelTree', async function (member, response) {
         if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
@@ -13,12 +13,12 @@ export default (io) => (socket) => {
             member.token = xssFilters.inHTMLData(member.token)
             member.group = xssFilters.inHTMLData(member.group)
 
-            if (!hasPermission(member.id, ["viewGroup", "manageChannels"], member.group)) {
+            if (!await hasPermission(member.id, ["viewGroup", "manageChannels"], member.group)) {
                 response({ type: "error", error: "Your access to this group was denied" });
                 return;
             }
 
-            response({ type: "success", data: getChannelTree(member) });
+            response({ type: "success", data: await getChannelTree(member) });
             //io.to(usersocket[member.id]).emit("receiveChannelTree", getChannelTree(member));
         }
     });

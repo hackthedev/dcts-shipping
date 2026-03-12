@@ -6,23 +6,20 @@ import Logger from "@hackthedev/terminal-logger";
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('updateChannelTreeSorting', function (member, response) {
-            if (validateMemberId(member.id, socket) == true
-                && serverconfig.servermembers[member.id].token == member.token
+    socket.on('updateChannelTreeSorting', async function (member, response) {
+            if (validateMemberId(member?.id, socket, member?.token) === true
             ) {
                 member.id = xssFilters.inHTMLData(member.id)
                 member.token = xssFilters.inHTMLData(member.token)
                 member.group = xssFilters.inHTMLData(member.group)
                 member.data = xssFilters.inHTMLData(member.data)
     
-                if (!hasPermission(member.id, "manageChannels")) {
+                if (!await hasPermission(member.id, "manageChannels")) {
                     // secretly die cauz no need for error
                     return;
                 }
-    
                 
                 let channelStructure = JSON.parse(member.data);
-    
     
                 //  categories are sorted numerically before assigning sortId
                 let sortedCategories = Object.keys(serverconfig.groups[member.group].channels.categories)

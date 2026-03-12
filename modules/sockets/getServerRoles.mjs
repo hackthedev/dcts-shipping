@@ -5,10 +5,10 @@ import {copyObject, getRoleCastingObject, sendMessageToUser, validateMemberId} f
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on("getServerRoles", function (member, response) {
+    socket.on("getServerRoles", async function (member, response) {
         if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            if (hasPermission(member.id, "manageRoles")) {
+            if (await hasPermission(member.id, "manageRoles")) {
                 response(serverconfig.serverroles);
             }
             else { // users wont get full role object access

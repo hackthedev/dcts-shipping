@@ -15,7 +15,7 @@ export default (io) => (socket) => {
             if(!member?.emojiName) response({ type: "error", msg: "No emoji name supplied. Needed for updating. Supply old one for no changes" });
 
             try {
-                if (!hasPermission(member.id, "manageEmojis")) {
+                if (!await hasPermission(member.id, "manageEmojis")) {
                     sendMessageToUser(socket.id, JSON.parse(
                         `{
                             "title": "Missing permissions!",

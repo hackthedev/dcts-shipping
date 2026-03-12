@@ -5,10 +5,10 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('getGroupList', function (member) {
+    socket.on('getGroupList', async function (member) {
         if (validateMemberId(member.id, socket) == true
             && serverconfig.servermembers[member.id].token == member.token) {
-            io.to(usersocket[member.id]).emit("receiveGroupList", getGroupList(member)); 
+            io.to(usersocket[member.id]).emit("receiveGroupList", await getGroupList(member));
         }
     });
 }

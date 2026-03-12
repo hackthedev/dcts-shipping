@@ -5,12 +5,11 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('deleteCategory', function (member, response) {
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+    socket.on('deleteCategory', async function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
-            if (!hasPermission(member.id, "manageChannels")) {
+            if (!await hasPermission(member.id, "manageChannels")) {
                 response({ msg: "You arent allowed to delete categories", type: "error", error: "Cant delete category, missing permission manageChannels" })
                 return;
             }
@@ -20,7 +19,7 @@ export default (io) => (socket) => {
                 saveConfig(serverconfig);
  
                 response({ msg: "Category deleted", type: "success", error: null })
-                io.emit("receiveChannelTree", getChannelTree(member));
+                io.emit("receiveChannelTree", await getChannelTree(member));
             }
             catch (e) {
                 Logger.error("Couldnt delete category");

@@ -9,13 +9,13 @@ export default (io) => (socket) => {
     socket.on('getAllRoles', async function (member, response) {
         if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            if (!hasPermission(member.id, ["manageRoles", "manageChannels", "manageGroups"], member.group)) {
+            if (!await hasPermission(member.id, ["manageRoles", "manageChannels", "manageGroups"], member.group)) {
                 return;
             }
 
             var highestRole = getMemberHighestRole(member.id);
             var emitUpdate = member.emitUpdate || true;
-            let isAdmin = hasPermission(member.id, "administrator", member.group);
+            let isAdmin = await hasPermission(member.id, "administrator", member.group);
 
             var roles = serverconfig.serverroles;
             var sortIndex = 0;

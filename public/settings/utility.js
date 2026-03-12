@@ -181,19 +181,22 @@ async function getServerInfo(){
     })
 }
 async function saveServerInfoSettings(jsonData){
-    socket.emit("saveServerInfo", {id: UserManager.getID(), token: UserManager.getToken(), serverinfo: jsonData.serverinfo }, function (response) {
-        if(response.error){
-            showSystemMessage({
-                title: "Error while saving settings",
-                text: response.error,
-                type: "error",
-                icon: "error"
-            })
-        }
-        else{
-            originalnfo = jsonData;
-        }
-    });
+    return new Promise(resolve => {
+        socket.emit("saveServerInfo", {id: UserManager.getID(), token: UserManager.getToken(), serverinfo: jsonData.serverinfo }, function (response) {
+            if(response.error){
+                showSystemMessage({
+                    title: "Error while saving settings",
+                    text: response.error,
+                    type: "error",
+                    icon: "error"
+                })
+            }
+            else{
+                originalnfo = jsonData;
+                resolve(jsonData);
+            }
+        });
+    })
 }
 async function getChannelTree(){
     return new Promise((resolve, reject) => {

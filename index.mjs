@@ -244,11 +244,9 @@ import {
     findInJson,
     changeKeyVerification,
     getSocketIp,
-    hasPermission,
 } from "./modules/functions/chat/main.mjs";
 
 import {
-    checkAndCreateTable,
     queryDatabase,
 } from "./modules/functions/mysql/mysql.mjs";
 

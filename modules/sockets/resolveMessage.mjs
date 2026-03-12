@@ -107,7 +107,7 @@ export default (io) => (socket) => {
                 messageObj.reply = replyResult.message;
             }
 
-            if (!hasPermission(member.id, "viewChannel", messageObj?.channel)) {
+            if (!await hasPermission(member.id, "viewChannel", messageObj?.channel)) {
                 response({ error: "You dont have permission to resolve the message", message: null})
                 return;
             }

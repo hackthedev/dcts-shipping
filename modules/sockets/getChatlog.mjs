@@ -25,7 +25,7 @@ export default (io) => (socket) => {
                 if(!member?.token) return response({type: "error", error: "No member token provided"});
 
                 let channel = resolveChannelById(member?.channelId);
-                if (hasPermission(member.id, ["viewChannel", "viewChannelHistory"], member.channelId)) {
+                if (await hasPermission(member.id, ["viewChannel", "viewChannelHistory"], member.channelId)) {
 
                     // filter messages
                     let messages

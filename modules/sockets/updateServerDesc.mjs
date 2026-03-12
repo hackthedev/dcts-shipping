@@ -6,11 +6,10 @@ import { copyObject, escapeHtml, limitString, sendMessageToUser, validateMemberI
 export default (io) => (socket) => {
     // socket.on code here
 
-    socket.on('updateServerDesc', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token) {
+    socket.on('updateServerDesc', async function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token) === true) {
 
-            if (hasPermission(member.id, "manageServerInfo")) {
+            if (await hasPermission(member.id, "manageServerInfo")) {
                 Logger.warn(`Changing server description from ${serverconfig.serverinfo.description} to ${escapeHtml(limitString(member.value, 500))}`, "Debug");
                 
                 serverconfig.serverinfo.description = member.value;

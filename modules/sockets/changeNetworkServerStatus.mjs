@@ -29,7 +29,7 @@ export default (io) => (socket) => {
             return;
         }
 
-        if(!hasPermission(member?.id, "manageNetworkServer")){
+        if(!await hasPermission(member?.id, "manageNetworkServer")){
             response({ error: "You do not have permission to change the network server status." })
             return;
         }

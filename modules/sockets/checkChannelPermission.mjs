@@ -18,7 +18,7 @@ export default (io) => (socket) => {
             if (Array.isArray(member.permission)) {
 
                 for (var i = 0; i < member.permission.length; i++) {
-                    if (hasPermission(member.id, member.permission[i], member.channel)) {
+                    if (await hasPermission(member.id, member.permission[i], member.channel)) {
                         response({ type: "success", permission: "granted", user: userObj });
                         return;
                     }
@@ -28,7 +28,7 @@ export default (io) => (socket) => {
             }
             else { // Single permission check
 
-                if (hasPermission(member.id, member.permission, member.channel)) {
+                if (await hasPermission(member.id, member.permission, member.channel)) {
                     response({ type: "success", permission: "granted", user: userObj });
                 } else {
                     response({ type: "success", permission: "denied", user: userObj });

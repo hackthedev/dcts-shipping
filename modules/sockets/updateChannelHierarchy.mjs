@@ -5,15 +5,15 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('updateChannelHierarchy', function (member, response) {
+    socket.on('updateChannelHierarchy', async function (member, response) {
         checkRateLimit(socket);
 
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
-            if (hasPermission(member.id, "manageChannels") ||
-                hasPermission(member.id, "manageGroups")) {
+            if (await hasPermission(member.id, "manageChannels") ||
+                await hasPermission(member.id, "manageGroups")) {
+
                 try {
                     serverconfig.groups = member.sorted;
 

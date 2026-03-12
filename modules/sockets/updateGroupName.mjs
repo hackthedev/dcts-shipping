@@ -5,13 +5,12 @@ import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('updateGroupName', function (member, response) {
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+    socket.on('updateGroupName', async function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
             
-            if (!hasPermission(member.id, "manageGroups")) {
-                sendMessageToUser(socket.id, JSON.parse(
+            if (!await hasPermission(member.id, "manageGroups")) {
+                return sendMessageToUser(socket.id, JSON.parse(
                     `{
                             "title": "Missing permissions!",
                             "message": "You arent allowed to change the group name",
@@ -24,7 +23,6 @@ export default (io) => (socket) => {
                             "type": "error",
                             "popup_type": "confirm"
                         }`));
-                return;
             }
 
             try {

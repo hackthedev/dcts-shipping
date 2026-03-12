@@ -5,12 +5,11 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('updateRoleAppearance', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+    socket.on('updateRoleAppearance', async  function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
-            if (hasPermission(member.id, "manageRoles")) {
+            if (await hasPermission(member.id, "manageRoles")) {
                 try {
                     serverconfig.serverroles[member.roleId].info.name = member.data.info.name;
                     serverconfig.serverroles[member.roleId].info.color = member.data.info.color;

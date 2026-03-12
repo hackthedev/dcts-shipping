@@ -37,10 +37,10 @@ export default (io) => (socket) => {
         }
     });
 
-    socket.on('getVcChannelMembers', function (member, response) {
+    socket.on('getVcChannelMembers', async function (member, response) {
         if(validateMemberId(member?.id, socket, member?.token) === true){
 
-            if (!hasPermission(member.id, ["useVOIP", "viewChannel"], member.channelId, "all")) {
+            if (!await hasPermission(member.id, ["useVOIP", "viewChannel"], member.channelId, "all")) {
                 response({error: "You dont have permissions to view the channel's vc participants"})
                 return;
             }

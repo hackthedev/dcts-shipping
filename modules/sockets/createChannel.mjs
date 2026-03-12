@@ -5,20 +5,19 @@ import { copyObject, escapeHtml, generateId, sendMessageToUser, validateMemberId
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('createChannel', function (member, response) {
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+    socket.on('createChannel', async function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
-            if (!hasPermission(member.id, "manageChannels")) {
+            if (!await hasPermission(member.id, "manageChannels")) {
                 response({ msg: "You are not allowed to create a channel", type: "error", error: "Missing permissions to create channel" })
                 return;
             }
 
             try {
-                var channelId = generateId(4); 
+                var channelId = generateId(4);
 
-                const channelData = {
+                serverconfig.groups[member.group].channels.categories[member.category].channel[channelId] = {
                     id: channelId,
                     name: xssFilters.inHTMLData(escapeHtml(member.value)),
                     type: member.type,
@@ -33,8 +32,6 @@ export default (io) => (socket) => {
                         }
                     }
                 };
-
-                serverconfig.groups[member.group].channels.categories[member.category].channel[channelId] = channelData
 
                 saveConfig(serverconfig);
                 io.emit("receiveChannelTree", getChannelTree(member));

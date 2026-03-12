@@ -5,12 +5,11 @@ import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('updateGroupBanner', function (member) {
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+    socket.on('updateGroupBanner', async function (member) {
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
-            if (!hasPermission(member.id, "manageGroups")) {
+            if (!await hasPermission(member.id, "manageGroups")) {
                 sendMessageToUser(socket.id, JSON.parse(
                     `{
                             "title": "Missing permissions!",

@@ -48,7 +48,7 @@ export default (io) => (socket) => {
             })
 
             // check results
-            if (rateLimitResult?.slowmode === true && !hasPermission(member.author.id, "bypassSlowmode", member.channel)) {
+            if (rateLimitResult?.slowmode === true && !await hasPermission(member.author.id, "bypassSlowmode", member.channel)) {
                 // get last message sent from member here so we can check the timestamp
                 let lastMemberMessageObj = await getMemberLatestMessage(member.author.id, member.author.id);
                 if (!lastMemberMessageObj) return Logger.debug("No message found. Possibly first message") // allow if none found
@@ -69,7 +69,7 @@ export default (io) => (socket) => {
                     return response({error: "Slow mode active!", slowmode: slowmodeDate})
                 }
             }
-            else if(rateLimitResult?.rateLimited === true && !hasPermission(member.author.id, "bypassRatelimit", member.channel)){
+            else if(rateLimitResult?.rateLimited === true && !await hasPermission(member.author.id, "bypassRatelimit", member.channel)){
                 return response({error: "The server has been rate limited!", rateLimited: true})
             }
 
@@ -149,7 +149,7 @@ export default (io) => (socket) => {
                 }
             }
 
-            if (!hasPermission(member.author?.id, ["sendMessages", "viewChannel"], member.channel, "all")) {
+            if (!await hasPermission(member.author?.id, ["sendMessages", "viewChannel"], member.channel, "all")) {
                 sendMessageToUser(socket.id, JSON.parse(
                     `{
                         "title": "You cant chat here",

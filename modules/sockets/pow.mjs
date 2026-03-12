@@ -24,7 +24,7 @@ export function listenToPow(socket) {
             powVerifiedUsers.push(socket.id);
 
             // only works after powVerifiedUsers includes the socket id
-            checkConnectionLimit(socket, data?.token, data?.id);
+            await checkConnectionLimit(socket, data?.token, data?.id);
 
             if (data?.token !== null && data?.id !== null) {
                 // lets make sure the account data is correct and save the pow

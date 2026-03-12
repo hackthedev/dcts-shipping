@@ -402,7 +402,7 @@ async function listRoomsMembers(io, usersocket = {}) {
 }
 
 
-export function checkConnectionLimit(socket, token = null, id = null) {
+export async function checkConnectionLimit(socket, token = null, id = null) {
 
     // get the connected clients
     const connectedClients = io.engine.clientsCount;
@@ -420,7 +420,7 @@ export function checkConnectionLimit(socket, token = null, id = null) {
             && serverconfig.servermembers[id].token == token) {
 
             // check if user is allowed to bypass based on roles
-            if (hasPermission(id, ["bypassSlots"])) canBypassWithRoles = true;
+            if (await hasPermission(id, ["bypassSlots"])) canBypassWithRoles = true;
         }
     }
 

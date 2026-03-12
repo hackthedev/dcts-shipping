@@ -5,11 +5,10 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on("saveRateSettings", function (member, response) {
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+    socket.on("saveRateSettings", async function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            if (hasPermission(member.id, "manageRateSettings")) {
+            if (await hasPermission(member.id, "manageRateSettings")) {
                 try {
                     serverconfig.serverinfo.rateLimit = member.newRateLimit;
                     serverconfig.serverinfo.dropInterval = member.newDropInterval;

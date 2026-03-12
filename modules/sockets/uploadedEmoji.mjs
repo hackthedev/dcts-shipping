@@ -6,10 +6,10 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
 
-    socket.on('uploadedEmoji', function (member) {
+    socket.on('uploadedEmoji', async function (member) {
         // some code
         if(validateMemberId(member?.id, socket, member?.token) === true){
-            if (hasPermission(member.id, "manageEmojis") === false) {
+            if (await hasPermission(member.id, "manageEmojis") === false) {
                 return;
             }
 

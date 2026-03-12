@@ -5,16 +5,15 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('saveChannelPermissions', function (member, response) {
+    socket.on('saveChannelPermissions', async function (member, response) {
         /* DEPRECATED */
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
             member.id = xssFilters.inHTMLData(member.id)
             member.token = xssFilters.inHTMLData(member.token)
 
-            if (hasPermission(member.id, "manageChannels")) {
+            if (await hasPermission(member.id, "manageChannels")) {
                 try {
                     var memberChannel = member.channel.replace("channel-", "");
                     var group = resolveGroupByChannelId(memberChannel);

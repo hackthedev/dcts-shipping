@@ -13,7 +13,7 @@ export default (io) => (socket) => {
         if (validateMemberId(member.id, socket, member.token) === true
         ) {
 
-            if (hasPermission(member.id, "manageReports")) {
+            if (await hasPermission(member.id, "manageReports")) {
                 try {
                     let reports = await getReports();
                     Object.keys(reports).forEach(async function (report) {

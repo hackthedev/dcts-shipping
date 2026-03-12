@@ -18,7 +18,7 @@ export default (io) => (socket) => {
         if(validateMemberId(member?.id, socket, member?.token) === true){
 
             // check permission
-            if(hasPermission(member?.id, "manageInvites") === false){
+            if(await hasPermission(member?.id, "manageInvites") === false){
                 response({ error: "You're not allowed to managed invites" })
                 return;
             }

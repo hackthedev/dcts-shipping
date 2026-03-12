@@ -7,15 +7,14 @@ import {removeBan} from "../functions/ban-system/helpers.mjs";
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('unbanUser', async function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
             member.id = xssFilters.inHTMLData(member.id)
             member.token = xssFilters.inHTMLData(member.token)
             member.duration = xssFilters.inHTMLData(member.duration)
 
-            if (hasPermission(member.id, "manageBans")) {
+            if (await hasPermission(member.id, "manageBans")) {
                 try {
                     await removeBan(member?.target);
                     response({ type: "success", msg: `The user ${serverconfig.servermembers[member.target].name} has been unbanned` });

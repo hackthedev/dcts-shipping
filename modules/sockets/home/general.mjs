@@ -377,7 +377,7 @@ export default (io) => (socket) => {
             const unfilteredMembers = await Promise.all(
                 Object.values(copyObject(serverconfig.servermembers) || {}).map(await getCastingMemberObject)
             );
-            const members = unfilteredMembers.filter(member => !shouldIgnoreMember(member));
+            const members = unfilteredMembers.filter(async member => !await shouldIgnoreMember(member));
 
             const threads = await queryDatabase(
                 `SELECT t.threadId, t.type, t.title, k.status

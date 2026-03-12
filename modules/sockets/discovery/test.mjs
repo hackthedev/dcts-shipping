@@ -29,7 +29,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/discover", pingLimiter, express.json(), (req, res) => {
+app.get("/discover", pingLimiter, express.json(), async (req, res) => {
     res.set("Cache-Control", "no-store");
 
     try {
@@ -48,7 +48,7 @@ app.get("/discover", pingLimiter, express.json(), (req, res) => {
                     banner: serverconfig.serverinfo.home.banner_url || null,
                     icon: group?.info?.icon || null,
                     slots: {
-                        online: getOnlineMemberCount(),
+                        online: await getOnlineMemberCount(),
                         limit: serverconfig.serverinfo.slots.limit,
                         reserved: serverconfig.serverinfo.slots.reserved,
                     },

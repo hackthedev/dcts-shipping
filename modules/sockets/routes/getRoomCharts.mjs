@@ -14,7 +14,7 @@ export default (io) => (socket) => {
 
             if(!member?.room) return response({ error: "No room argument passed." })
 
-            if (hasPermission(member.id, "manageRateSettings")) {
+            if (await hasPermission(member.id, "manageRateSettings")) {
                 response({ error: null, paths: await renderRoomCharts(member.room) });
             }
             else {

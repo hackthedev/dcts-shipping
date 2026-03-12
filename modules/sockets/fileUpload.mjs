@@ -32,13 +32,13 @@ export default (io) => (socket) => {
 
         let localUploadPath;
         if (type === "emoji") {
-            if (!hasPermission(id, "manageEmojis")) {
+            if (!await hasPermission(id, "manageEmojis")) {
                 response({ type: "error", msg: "You don't have permissions to manage Emojis" });
                 return;
             }
             localUploadPath = "./public/emojis";
         } else {
-            if (!hasPermission(id, "uploadFiles")) {
+            if (!await hasPermission(id, "uploadFiles")) {
                 response({ type: "error", msg: "You don't have permissions to upload files" });
                 return;
             }

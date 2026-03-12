@@ -5,12 +5,11 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('removeRoleFromGroup', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+    socket.on('removeRoleFromGroup', async function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
-            if (hasPermission(member.id, "manageGroups")) {
+            if (await hasPermission(member.id, "manageGroups")) {
                 try {
                     delete serverconfig.groups[member.group].permissions[member.role];
                     saveConfig(serverconfig);

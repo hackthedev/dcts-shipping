@@ -5,12 +5,11 @@ import { generateId, validateMemberId } from "../functions/main.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('createRole', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+    socket.on('createRole', async function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
-            if (hasPermission(member.id, "manageRoles")) {
+            if (await hasPermission(member.id, "manageRoles")) {
                 try {
                     var roleid = generateId(4);
                     

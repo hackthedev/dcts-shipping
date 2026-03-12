@@ -5,10 +5,10 @@ import {saveConfig, serverconfig} from "../../index.mjs";
 export default (io) => (socket) => {
     // socket.on code here
 
-    socket.on('updateRegistration', function (member, response) {
+    socket.on('updateRegistration', async function (member, response) {
         // some code
         if(validateMemberId(member?.id, socket, member?.token) === true){
-            if(!hasPermission(member?.id, "manageServer")){
+            if(!await hasPermission(member?.id, "manageServer")){
                 response({ error: "You dont have permissions to change the registraion settings." })
                 return;
             }

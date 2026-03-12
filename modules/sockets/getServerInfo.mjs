@@ -25,7 +25,7 @@ export async function getPublicServerInfoObject(){
             banner: serverconfig.serverinfo.home.banner_url || null,
             icon: group?.info?.icon || null,
             slots: {
-                online: getOnlineMemberCount(),
+                online: await getOnlineMemberCount(),
                 limit: serverconfig.serverinfo.slots.limit,
                 reserved: serverconfig.serverinfo.slots.reserved,
             },
@@ -49,10 +49,9 @@ export default (io) => (socket) => {
     socket.on("getServerInfo", async function (member, response) {
         if (validateMemberId(member?.id, socket,  member?.token) === true
         ) {
+            let serverInfoObj = await getPublicServerInfoObject();
 
-            var serverInfoObj = await getPublicServerInfoObject();
-
-            if (hasPermission(member.id, "manageServer")) {
+            if (await hasPermission(member.id, "manageServer")) {
                 // add more objects here
                 serverInfoObj.serverinfo.useCloudflareImageCDN = serverconfig.serverinfo.useCloudflareImageCDN
                 serverInfoObj.serverinfo.cfAccountId = serverconfig.serverinfo.cfAccountId
@@ -81,7 +80,7 @@ export default (io) => (socket) => {
     socket.on("saveServerInfo", async function (member, response) {
         if (validateMemberId(member?.id, socket,  member?.token) === true
         ) {
-            if (hasPermission(member.id, "manageServer")) {
+            if (await hasPermission(member.id, "manageServer")) {
                 if(member?.serverinfo?.name != null) serverconfig.serverinfo.name = member.serverinfo.name;
                 if(member?.serverinfo?.description != null) serverconfig.serverinfo.description = member.serverinfo.description;
                 if(member?.serverinfo?.countryCode != null) serverconfig.serverinfo.countryCode = member.serverinfo.countryCode;
@@ -110,6 +109,10 @@ export default (io) => (socket) => {
                 if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode_duration != null) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration = member.serverinfo.moderation.ratelimit.actions.user_slowmode_duration;
                 if(member?.serverinfo?.moderation?.ratelimit?.actions?.ratelimit != null) serverconfig.serverinfo.moderation.ratelimit.actions.ratelimit = member.serverinfo.moderation.ratelimit.actions.ratelimit;
                 if(member?.serverinfo?.moderation?.ratelimit?.record_history != null) serverconfig.serverinfo.moderation.ratelimit.record_history = member.serverinfo.moderation.ratelimit.record_history;
+
+                // some other mod settings
+                if(member?.serverinfo?.moderation?.bans?.memberListHideBanned != null) serverconfig.serverinfo.moderation.bans.memberListHideBanned = member.serverinfo.moderation.bans.memberListHideBanned;
+                if(member?.serverinfo?.moderation?.bans?.ipBanDuration != null) serverconfig.serverinfo.moderation.bans.ipBanDuration = member.serverinfo.moderation.bans.ipBanDuration;
 
                 await saveConfig(serverconfig);
                 return response({error: null})

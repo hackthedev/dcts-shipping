@@ -10,7 +10,7 @@ export default (io) => (socket) => {
         if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
             try {
-                if (!hasPermission(member.id, "manageBans")) {
+                if (!await hasPermission(member.id, "manageBans")) {
                     sendMessageToUser(socket.id, JSON.parse(
                         `{
                             "title": "Missing permissions!",

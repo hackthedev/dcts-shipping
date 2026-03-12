@@ -69,7 +69,7 @@ export function initPaymentSystem(app){
             const userId = req.headers['x-user-id'];
             if (!token || !userId) return false
 
-            return validateMemberId(userId, null, token) && hasPermission(userId, "manageShop");
+            return validateMemberId(userId, null, token) && await hasPermission(userId, "manageShop");
         },
         enrichMetadata: async (req) => {
             const token = req.headers['x-token'];

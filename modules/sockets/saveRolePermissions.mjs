@@ -5,16 +5,15 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('saveRolePermissions', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+    socket.on('saveRolePermissions', async function (member, response) {
+        if (validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
             member.id = xssFilters.inHTMLData(member.id)
             member.token = xssFilters.inHTMLData(member.token)
             member.permissions = JSON.parse(xssFilters.inHTMLData(JSON.stringify(member.permissions)))
 
-            if (hasPermission(member.id, "manageRoles")) {
+            if (await hasPermission(member.id, "manageRoles")) {
                 try {
                     serverconfig.serverroles[member.role].permissions = member.permissions;
                     saveConfig(serverconfig);

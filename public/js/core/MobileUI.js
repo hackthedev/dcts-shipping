@@ -56,7 +56,7 @@ class MobilePanel {
                 parent.appendChild(wrapper);
 
                 const render = ()=>{
-                    wrapper.replaceChildren(item.cloneNode(true));
+                    wrapper.replaceChildren(item);
                 };
 
                 render();

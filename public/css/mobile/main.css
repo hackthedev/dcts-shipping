@@ -163,8 +163,15 @@
         display: none !important;
     }
 
-    .mobile-ui-panel #channellist {
-        flex-grow: 1;
+    .mobile-ui-panel #channellist,
+    .mobile-ui-panel #header,
+    .mobile-ui-panel #infolist {
+        flex-grow: 1 !important;
+    }
+
+    .mobile-ui-panel #infolist{
+        width: 100vw !important;
+        height: 100vh !important;
     }
 
     #contentLayout #serverbanner-container,
@@ -188,23 +195,22 @@
         flex-shrink: 0;
     }
 
-    img {
-        width: 100%;
-        /* Forces it to scale */
+    img, video, iframe {
+        width: fit-content;
+        max-width: 100%;
         height: auto;
-        /* Maintains aspect ratio */
-        max-width: none;
-        /* Allows resizing beyond parent limits */
+        object-fit: contain;
+        background-color: transparent;
+        background-position: center center;
     }
 
     #channelname {
-        font-size: 18px;
-
+        font-size: 14px;
         width: 100% !important;
     }
 
     #header {
-        width: calc(100% - 16px);
+        width: calc(100%);
     }
 
     #message-actions-image{
@@ -219,7 +225,7 @@
     }
 
     .editor-container {
-        margin-top: -40px;
+        margin-top: -16px;
     }
 
     .message-container {

@@ -27,7 +27,7 @@ function rewriteImg(img){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    MobilePanel.renderPanel([
+    MobilePanel.setLeftMenu([
         {
             direction: "column",
             children: [
@@ -46,6 +46,15 @@ document.addEventListener("DOMContentLoaded", () => {
             ]
         }
     ], "left");
+
+    MobilePanel.setRightMenu([
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#mainLayout #infolist")
+            ]
+        }
+    ], "right");
 
 
     document.querySelectorAll("img").forEach(rewriteImg);
@@ -174,13 +183,13 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         var clickedElement = document.elementFromPoint(x, y)
 
-        if (clickedElement.id != "message-actions-image") {
+        if (clickedElement.id !== "message-actions-image") {
             return;
         }
 
         showEmojiPicker(x,y, (emojiObj) => {
             insertEmoji(emojiObj, true);
-            focusEditor();
+            if(!MobilePanel.isMobile()) focusEditor();
         })
     }
 
@@ -193,7 +202,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         var emojiContainer = document.getElementById("emoji-box-container");
         var profileContainer = document.getElementById("profile_container");
 
-        if (emojiContainer.style.display == "flex") {
+        if (emojiContainer.style.display == "flex" && !MobilePanel.isMobile()) {
             //emojiContainer.style.display = "none";
             closeEmojiBox()
         }
@@ -1555,6 +1564,7 @@ socket.on('updateGroupList', function (author) {
 
 function focusEditor() {
     if (!quill) return;
+    if(MobilePanel.isMobile()) return;
 
     quill.focus();
 
@@ -2210,7 +2220,7 @@ async function getEmojis(callback = null) {
                                 ["data-code"]: e.code
                             });
                             quill.setSelection(sel.index + 1);
-                            focusEditor();
+                            if(!MobilePanel.isMobile()) focusEditor();
                             getEmojiContainerElement().style.display = "none";
                         }
                     });

@@ -1,8 +1,18 @@
 class MobilePanel {
 
     static active = [];
+    static leftMenu = null;
+    static rightMenu = null;
+    static swipeInitialized = false;
+    static swipeLocked = false;
+
+    static isMobile(){
+        return window.matchMedia("(pointer: coarse)").matches;
+    }
 
     static renderPanel(elements, side = "left"){
+        MobilePanel.swipeLocked = true;
+
         const overlay = document.createElement("div");
         overlay.classList.add("mobile-ui");
         overlay.style.position = "fixed";
@@ -93,6 +103,10 @@ class MobilePanel {
             panel.style.transform = "translateX(0)";
         });
 
+        setTimeout(()=>{
+            MobilePanel.swipeLocked = false;
+        }, 300);
+
         let startX = 0;
         let currentX = 0;
 
@@ -119,6 +133,8 @@ class MobilePanel {
     }
 
     static close(){
+        MobilePanel.swipeLocked = true;
+
         MobilePanel.active.forEach(({panel, overlay, observers, side})=>{
             if(side === "left"){
                 panel.style.transform = "translateX(-100%)";
@@ -134,6 +150,70 @@ class MobilePanel {
         });
 
         MobilePanel.active = [];
+
+        setTimeout(()=>{
+            MobilePanel.swipeLocked = false;
+        }, 350);
+    }
+
+    static setLeftMenu(elements){
+        MobilePanel.leftMenu = elements;
+        MobilePanel.initSwipe();
+    }
+
+    static setRightMenu(elements){
+        MobilePanel.rightMenu = elements;
+        MobilePanel.initSwipe();
+    }
+
+    static initSwipe(){
+        if(MobilePanel.swipeInitialized) return;
+        MobilePanel.swipeInitialized = true;
+
+        let startX = 0;
+        let startY = 0;
+        let currentX = 0;
+        let currentY = 0;
+
+        document.addEventListener("touchstart", (e)=>{
+            if(MobilePanel.active.length) return;
+            if(MobilePanel.swipeLocked) return;
+
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            currentX = startX;
+            currentY = startY;
+        }, { passive: true });
+
+        document.addEventListener("touchmove", (e)=>{
+            if(MobilePanel.active.length) return;
+            if(MobilePanel.swipeLocked) return;
+
+            const touch = e.touches[0];
+            currentX = touch.clientX;
+            currentY = touch.clientY;
+        }, { passive: true });
+
+        document.addEventListener("touchend", ()=>{
+            if(MobilePanel.active.length) return;
+            if(MobilePanel.swipeLocked) return;
+
+            const diffX = currentX - startX;
+            const diffY = currentY - startY;
+
+            if(Math.abs(diffY) > Math.abs(diffX)) return;
+            if(Math.abs(diffX) < 80) return;
+
+            if(diffX > 0 && MobilePanel.leftMenu){
+                MobilePanel.renderPanel(MobilePanel.leftMenu, "left");
+                return;
+            }
+
+            if(diffX < 0 && MobilePanel.rightMenu){
+                MobilePanel.renderPanel(MobilePanel.rightMenu, "right");
+            }
+        }, { passive: true });
     }
 
 }

@@ -20,8 +20,10 @@ class MobilePanel {
         overlay.style.left = "0";
         overlay.style.width = "100%";
         overlay.style.height = "100%";
-        overlay.style.background = "rgba(0,0,0,0.4)";
+        overlay.style.backgroundColor = "hsl(from var(--main) h s calc(l * 1.5) / 100%)";
         overlay.style.zIndex = "5";
+        overlay.style.opacity = "0";
+        overlay.style.transition = "opacity 0.25s ease";
 
         const panel = document.createElement("div");
         panel.classList.add("mobile-ui-panel");
@@ -33,16 +35,17 @@ class MobilePanel {
         panel.style.left = "0";
         panel.style.height = "100%";
         panel.style.width = "100%";
-        panel.style.background = "hsl(from var(--main) h s calc(l * 2))";
+        panel.style.backgroundColor = "hsl(from var(--main) h s calc(l * 1.5) / 100%)";
         panel.style.transition = "transform 0.25s ease";
         panel.style.zIndex = "6";
         panel.style.overflow = "auto";
         panel.style.minHeight = "0";
+        panel.style.willChange = "transform";
 
         if(side === "left"){
-            panel.style.transform = "translateX(-100%)";
+            panel.style.transform = "translate3d(-100%,0,0)";
         }else{
-            panel.style.transform = "translateX(100%)";
+            panel.style.transform = "translate3d(100%,0,0)";
         }
 
         if(!Array.isArray(elements)) elements = [elements];
@@ -99,8 +102,12 @@ class MobilePanel {
 
         MobilePanel.active.push({panel, overlay, observers, side});
 
+        panel.offsetHeight;
+        overlay.offsetHeight;
+
         requestAnimationFrame(()=>{
-            panel.style.transform = "translateX(0)";
+            overlay.style.opacity = "1";
+            panel.style.transform = "translate3d(0,0,0)";
         });
 
         setTimeout(()=>{
@@ -136,10 +143,12 @@ class MobilePanel {
         MobilePanel.swipeLocked = true;
 
         MobilePanel.active.forEach(({panel, overlay, observers, side})=>{
+            overlay.style.opacity = "0";
+
             if(side === "left"){
-                panel.style.transform = "translateX(-100%)";
+                panel.style.transform = "translate3d(-100%,0,0)";
             }else{
-                panel.style.transform = "translateX(100%)";
+                panel.style.transform = "translate3d(100%,0,0)";
             }
 
             setTimeout(()=>{

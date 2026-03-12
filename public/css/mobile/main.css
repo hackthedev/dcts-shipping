@@ -161,6 +161,7 @@
 
     #networkServers,
     .settings-wrapper #navigation,
+    .settings-wrapper #preview,
     .settings-wrapper #permissionlist{
         display: none !important;
     }

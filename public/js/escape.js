@@ -78,35 +78,34 @@ function installDomPurifyHooks() {
 }
 
 function sanitizeHtmlForRender(html, wrapParagraphs = true) {
-    if (html == null) return '';
+    if (!html) return '';
     installDomPurifyHooks();
 
-    let raw = String(html || '').trim();
-
+    const raw = String(html).trim();
     const hasTags = /<\/?[a-z][\s\S]*?>/i.test(raw);
+
     if (!hasTags) {
         const paras = raw.replace(/\r/g, '').split(/\n{2,}/)
             .map(s => s.trim())
             .filter(Boolean);
 
-        let out = paras.map(p => {
+        const out = paras.map(p => {
             const withBreaks = p.replace(/\n/g, '<br>');
             return wrapParagraphs ? `<p>${withBreaks}</p>` : withBreaks;
-        }).join(wrapParagraphs ? '' : '<br><br>');
+        }).join('');
 
-        const clean = DOMPurify.sanitize(out, SANITIZE_OPTIONS);
-        return `${clean}`;
+        return DOMPurify.sanitize(out, SANITIZE_OPTIONS);
     }
 
     let clean = DOMPurify.sanitize(raw, SANITIZE_OPTIONS);
 
     if (wrapParagraphs) {
-        clean = `<p>${clean}</p>`;
+        clean = clean.replace(/<p[^>]*>\s*(?:&nbsp;|\s|\u00A0)*<\/p>/gi, '');
     }
 
     clean = clean.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');
 
-    return `${clean.trim()}`;
+    return clean.trim();
 }
 
 function encodePlainText(s) {

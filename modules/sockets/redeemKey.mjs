@@ -5,7 +5,7 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('redeemKey', async function (member, response) {
-        if (await validateMemberIdmember?.id, socket, member?.token)
+        if (await validateMemberId(member?.id, socket, member?.token)
         ) {
             if(response && !member?.id) response({ error: "Missing ID for Auth!" })
             if(response && !member?.token) response({ error: "Missing Token for Auth!" })

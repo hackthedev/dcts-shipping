@@ -7,7 +7,7 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('muteUser', async function (member, response) {
-        if (await validateMemberIdmember?.id, socket, member?.token) === true) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
             if (member.id === member.target) {
                 return response({ error: "Cant mute yourself", msg: "You cant mute yourself!", type: "error" })

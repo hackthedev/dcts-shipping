@@ -12,7 +12,7 @@ import {
 export default (io) => (socket) => {
     // socket.on code here
     socket.on("getIpInfoSettings", async function (member, response) {
-        if (await validateMemberIdmember?.id, socket,  member?.token) === true
+        if (await validateMemberId(member?.id, socket,  member?.token) === true
         ) {
             if (await hasPermission(member.id, "manageIpSettings")) {
                 return response({ip: serverconfig.serverinfo.moderation.ip})
@@ -28,7 +28,7 @@ export default (io) => (socket) => {
     });
 
     socket.on("saveIpInfoSettings", async function (member, response) {
-        if (await validateMemberIdmember?.id, socket,  member?.token) === true
+        if (await validateMemberId(member?.id, socket,  member?.token) === true
         ) {
             if (await hasPermission(member.id, "manageIpSettings")) {
                 if(member?.ip?.blockedCountryCodes != null) serverconfig.serverinfo.moderation.ip.blockedCountryCodes = member.ip.blockedCountryCodes;

@@ -8,7 +8,7 @@ export default (io) => (socket) => {
     // socket.on code here
     socket.on('getAllUnread', async function (member, response) {
         try {
-            if (await validateMemberIdmember.id, socket, member?.token) !== true) {
+            if (await validateMemberId(member.id, socket, member?.token) !== true) {
                 return response?.({ type: 'error', msg: 'unauthorized' });
             }
             const cfgMember = serverconfig?.servermembers?.[String(member.id)];

@@ -7,7 +7,7 @@ import { leaveAllRooms } from "../functions/mysql/helper.mjs";
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('setRoom', async function (member) {
-        if (await validateMemberIdmember?.id, socket, member?.token) === true
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
             leaveAllRooms(socket, member.id);
 

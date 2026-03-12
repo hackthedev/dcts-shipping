@@ -9,7 +9,7 @@ export default (io) => (socket) => {
     socket.on('updateEmoji', async function (member, response) {
         checkRateLimit(socket);
 
-        if (await validateMemberIdmember.id, socket, serverconfig.servermembers[member.id].token) === true
+        if (await validateMemberId(member.id, socket, serverconfig.servermembers[member.id].token) === true
         ) {
             if(!member?.filehash) response({ type: "error", msg: "No filehash supplied. Its needed to identify emojis" });
             if(!member?.emojiName) response({ type: "error", msg: "No emoji name supplied. Needed for updating. Supply old one for no changes" });

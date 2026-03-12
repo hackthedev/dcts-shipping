@@ -6,7 +6,7 @@ import { copyObject, searchTenor, sendMessageToUser, validateMemberId } from "..
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('searchTenorGif', async function (member, response) {
-        if (await validateMemberIdmember.id, socket) == true
+        if (await validateMemberId(member.id, socket) == true
         ) {
             response({ type: "error", msg: "Tenor has been deprecated" });
             member.id = xssFilters.inHTMLData(member.id)

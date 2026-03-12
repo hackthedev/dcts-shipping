@@ -7,7 +7,7 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('disconnectUser', async function (member, response) {
-        if (await validateMemberIdmember?.id, socket, member?.token) === true) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
             if (member.id === member.target) {
                 return response({ error: "Cant disconnect yourself", msg: "You cant disconnect yourself!", type: "error" })

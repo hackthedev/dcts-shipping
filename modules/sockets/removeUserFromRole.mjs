@@ -7,7 +7,7 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('removeUserFromRole', async function (member, response) {
-        if (await validateMemberIdmember?.id, socket, member?.token) === true
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
             Logger.debug(`trying to remove role`)

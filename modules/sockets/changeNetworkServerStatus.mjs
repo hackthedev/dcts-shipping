@@ -9,7 +9,7 @@ export default (io) => (socket) => {
 
     socket.on('changeNetworkServerStatus', async function (member, response) {
         // some code
-        if(await validateMemberIdmember?.id, socket, member?.token) === false){
+        if(await validateMemberId(member?.id, socket, member?.token) === false){
             response({ error: null })
             return;
         }

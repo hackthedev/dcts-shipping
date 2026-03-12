@@ -7,7 +7,7 @@ export default (io) => (socket) => {
     // socket.on code here
 
     socket.on('stoppedTyping', async function (member) {
-        if (await validateMemberIdmember.id, socket) == true
+        if (await validateMemberId(member.id, socket) == true
             && serverconfig.servermembers[member.id].token == member.token) {
 
             var username = serverconfig.servermembers[member.id].name;

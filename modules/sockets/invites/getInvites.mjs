@@ -15,7 +15,7 @@ export default (io) => (socket) => {
 
     socket.on('getInvites', async function (member, response) {
         // some code
-        if(await validateMemberIdmember?.id, socket, member?.token) === true){
+        if(await validateMemberId(member?.id, socket, member?.token) === true){
 
             // check permission
             if(await hasPermission(member?.id, "manageInvites") === false){

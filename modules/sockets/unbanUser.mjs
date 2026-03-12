@@ -7,7 +7,7 @@ import {removeBan} from "../functions/ban-system/helpers.mjs";
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('unbanUser', async function (member, response) {
-        if (await validateMemberIdmember?.id, socket, member?.token) === true
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
             member.id = xssFilters.inHTMLData(member.id)

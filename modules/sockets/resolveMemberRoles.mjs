@@ -22,7 +22,7 @@ export function resolveMemberRoles(memberId){
 export default (io) => (socket) => {
     // socket.on code here
     socket.on("resolveMemberRoles", async function (member, response) {
-        if (await validateMemberIdmember?.id, socket, member?.token) === true
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
             if(!member?.target) return response({error: "Member not found"})
             let resolved = resolveMemberRoles(member?.target);

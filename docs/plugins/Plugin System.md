@@ -76,7 +76,7 @@ import { serverconfig } from "../../../index.mjs";
 export default (socket) => {    
     socket.on('test', async (oMember, response) => {
         // Always include this if block for security!
-        if (await validateMemberIdoMember?.id, socket, oMember?.token) === true) {
+        if (await validateMemberId(oMember?.id, socket, oMember?.token) === true) {
             /* Add your custom code here */
             response({ type: 'success', message: "Worked!" });
             

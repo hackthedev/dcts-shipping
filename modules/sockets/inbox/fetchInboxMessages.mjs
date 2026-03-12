@@ -7,7 +7,7 @@ export default (io) => (socket) => {
 
     socket.on('fetchInboxMessages', async function (member, response) {
         // some code
-        if(await validateMemberIdmember?.id, socket, member?.token) === true){
+        if(await validateMemberId(member?.id, socket, member?.token) === true){
             response({ error: null, items:  await getInboxMessages({
                     memberId: member.id,
                     index: member?.index,

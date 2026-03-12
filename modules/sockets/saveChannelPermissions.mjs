@@ -7,7 +7,7 @@ export default (io) => (socket) => {
     // socket.on code here
     socket.on('saveChannelPermissions', async function (member, response) {
         /* DEPRECATED */
-        if (await validateMemberIdmember?.id, socket, member?.token) === true
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
             member.id = xssFilters.inHTMLData(member.id)

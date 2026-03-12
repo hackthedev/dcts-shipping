@@ -6,7 +6,7 @@ import { copyObject, generateId, sendMessageToUser, validateMemberId } from "../
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('createGroup', async function (member) {
-        if (await validateMemberIdmember.id, socket) == true &&
+        if (await validateMemberId(member.id, socket) == true &&
             serverconfig.servermembers[member.id].token == member.token
         ) {
 

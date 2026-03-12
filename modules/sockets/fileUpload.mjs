@@ -22,7 +22,7 @@ export default (io) => (socket) => {
 
         let { id, token, filename, type, totalChunks, chunkIndex, fileId } = metadata; // Expect fileId in metadata
         
-        if (await validateMemberIdid, socket, token) !== true) {
+        if (await validateMemberId(id, socket, token) !== true) {
             response({ type: "error", msg: "Invalid authentication" });
             return;
         }

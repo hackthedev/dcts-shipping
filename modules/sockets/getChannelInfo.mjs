@@ -11,7 +11,7 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on("getChannelInfo", async function (member, response) {
-        if (await validateMemberIdmember?.id, socket, member?.token) === true
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
             if (await hasPermission(member.id, "manageChannels")) {
                 var channelObj = resolveChannelById(member.channel.replace("channel-", ""));
@@ -29,7 +29,7 @@ export default (io) => (socket) => {
     });
 
     socket.on("updateChannel", async function (member, response) {
-        if (await validateMemberIdmember?.id, socket, member?.token)) {
+        if (await validateMemberId(member?.id, socket, member?.token)) {
             if (await hasPermission(member.id, "manageChannels")) {
                 if(!member?.data) return response({ type: "error", msg: "No data provided" });
                 if(!member?.channelId) return response({ type: "error", msg: "No channelId provided" })

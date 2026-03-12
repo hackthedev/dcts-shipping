@@ -7,7 +7,7 @@ export default (io) => (socket) => {
 
     socket.on('updateDiscovery', async function (member, response) {
         // some code
-        if(await validateMemberIdmember?.id, socket, member?.token) === true){
+        if(await validateMemberId(member?.id, socket, member?.token) === true){
             if(!await hasPermission(member?.id, "manageServer")){
                 response({ error: "You dont have permissions to change the discovery settings." })
                 return;

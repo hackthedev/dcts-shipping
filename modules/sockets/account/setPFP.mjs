@@ -4,7 +4,7 @@ import { validateMemberId } from "../../functions/main.mjs";
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('setPFP', async function (member) {
-        if (await validateMemberIdmember.id, socket) == true
+        if (await validateMemberId(member.id, socket) == true
             && serverconfig.servermembers[member.id].token == member.token) {
 
             serverconfig.servermembers[member.id].icon = member.icon;

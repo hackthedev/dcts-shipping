@@ -9,7 +9,7 @@ import {
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('resolveChannel', async function (member, response) {
-        if (await validateMemberIdmember?.id, socket, member?.token) === true) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
             try {
                 if(!member?.channelId){
                     return response({ type: "error", msg: "Channel ID is missing" });

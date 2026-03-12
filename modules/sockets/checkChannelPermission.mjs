@@ -6,7 +6,7 @@ import { copyObject, getCastingMemberObject, sendMessageToUser, validateMemberId
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('checkChannelPermission', async function (member, response) {
-        if (await validateMemberIdmember.id, socket) == true) {
+        if (await validateMemberId(member.id, socket) == true) {
 
             member.id = xssFilters.inHTMLData(member.id);
             member.token = xssFilters.inHTMLData(member.token);

@@ -14,7 +14,7 @@ import {getMemberHighestRole} from "../functions/chat/helper.mjs";
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('resolveMember', async function (member, response) {
-        if (await validateMemberIdmember?.id, socket, member?.token) === true
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
             if(!member?.id) return response({error: "No member ID provided"});
             if(!member?.token) return response({error: "No token provided"});

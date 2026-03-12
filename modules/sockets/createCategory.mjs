@@ -7,7 +7,7 @@ export default (io) => (socket) => {
     // socket.on code here
 
     socket.on('createCategory', async function (member, response) {
-        if (await validateMemberIdmember?.id, socket, member?.token) === true
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
             member.id = xssFilters.inHTMLData(member.id)

@@ -4,7 +4,7 @@ import { copyObject, escapeHtml, limitString, sendMessageToUser, validateMemberI
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('setUsername', async function (member) {
-        if (await validateMemberIdmember.id, socket) == true
+        if (await validateMemberId(member.id, socket) == true
             && serverconfig.servermembers[member.id].token == member.token) {
 
             serverconfig.servermembers[member.id].name = escapeHtml(limitString(member.username, 30));

@@ -7,7 +7,7 @@ export default (io) => (socket) => {
     // socket.on code here
 
     socket.on('updateServerDesc', async function (member, response) {
-        if (await validateMemberIdmember?.id, socket, member?.token) === true) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
             if (await hasPermission(member.id, "manageServerInfo")) {
                 Logger.warn(`Changing server description from ${serverconfig.serverinfo.description} to ${escapeHtml(limitString(member.value, 500))}`, "Debug");

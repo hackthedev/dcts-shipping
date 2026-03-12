@@ -54,7 +54,7 @@ export default (io) => (socket) => {
         }
     });
 
-    socket.on("disconnect", function(){
+    socket.on("disconnect", async function(){
         for(let vcChannel of Object.keys(vcUsers)){
             let entry = vcUsers[vcChannel];
 

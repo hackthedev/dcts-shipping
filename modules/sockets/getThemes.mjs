@@ -51,7 +51,7 @@ export default (io) => (socket) => {
         response({ error: null, themes: merged });
     });
 
-    socket.on("getThemeFiles", (theme, response) => {
+    socket.on("getThemeFiles", async (theme, response) => {
         const files = getThemeFiles(theme);
         response({ error: null, files });
     });

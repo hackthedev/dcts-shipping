@@ -311,7 +311,7 @@ async function updatePowProgress(currentBits, targetLevel, challenge = null) {
 
 
 function initPow(onAcceptedCallback) {
-    socket.on('powChallenge', (pow) => {
+    socket.on('powChallenge', async (pow) => {
         console.log('Received PoW challenge:', pow.challenge, 'Difficulty:', pow.difficulty);
 
         // Check if the solution is already stored
@@ -326,7 +326,7 @@ function initPow(onAcceptedCallback) {
         }
     });
 
-    socket.on('powAccepted', (data) => {
+    socket.on('powAccepted', async (data) => {
         console.log('PoW accepted:', data);
         if (typeof onAcceptedCallback === "function") {
             onAcceptedCallback(data);

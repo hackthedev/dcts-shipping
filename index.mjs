@@ -1094,7 +1094,7 @@ async function listenToIO(){
 
         registerSocketEvents(socket);
 
-        socket.on("disconnect", () => {
+        socket.on("disconnect", async () => {
             //Logger.info(`Socket ${socket.id} disconnected, cleaning up handlers...`);
             if (activeSockets.has(socket.id)) {
                 activeSockets.get(socket.id).forEach((cleanup) => cleanup());

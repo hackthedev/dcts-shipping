@@ -7,7 +7,7 @@ var serverRoleResponse = "";
 var editedServerRoleResponse = [];
 var editedPermissions = {};
 var currentRoleId = "";
-
+let serverRolesRightPanel = null;
 
 document.addEventListener("pagechange", e => {
     console.log(e.detail.page);
@@ -17,20 +17,35 @@ document.addEventListener("pagechange", e => {
 });
 
 
-function initServerRoles(){
-    socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: ["manageRoles", "manageGroups"] }, function (response) {
+function initServerRoles() {
+    socket.emit("checkPermission", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        permission: ["manageRoles", "manageGroups"]
+    }, function (response) {
 
         if (response.permission == "denied") {
             window.location.href = window.location.origin + "/settings/server";
-        }
-        else {
+        } else {
             document.getElementById("pagebody").style.display = "block";
         }
     });
 
 
+    serverRolesRightPanel = [
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#permissionlist")
+            ]
+        }
+    ];
 
-    socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
+
+    socket.emit("getServerRoles", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
+
+        MobilePanel.setRightMenu(serverRolesRightPanel, "right")
+        ;
 
         rolelist = document.getElementById("rolelist");
         roleStyle = computeRoleStyle();
@@ -83,18 +98,22 @@ function saveAppearance() {
 
     serverRoleResponse[currentRoleId].info.name = roleName.value;
     var roleStyle = computeRoleStyle();
-    serverRoleResponse[currentRoleId].info.color= roleStyle.color;
-    serverRoleResponse[currentRoleId].info.background= roleStyle.background;
-    serverRoleResponse[currentRoleId].info.backgroundClip= roleStyle.backgroundClip;
+    serverRoleResponse[currentRoleId].info.color = roleStyle.color;
+    serverRoleResponse[currentRoleId].info.background = roleStyle.background;
+    serverRoleResponse[currentRoleId].info.backgroundClip = roleStyle.backgroundClip;
 
     if (document.getElementById("displaySeperate").checked == true) {
         serverRoleResponse[currentRoleId].info.displaySeperate = 1;
-    }
-    else {
+    } else {
         serverRoleResponse[currentRoleId].info.displaySeperate = 0;
     }
 
-    socket.emit("updateRoleAppearance", { id: UserManager.getID(), token: UserManager.getToken(), roleId: currentRoleId, data: serverRoleResponse[currentRoleId] }, function (response) {
+    socket.emit("updateRoleAppearance", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        roleId: currentRoleId,
+        data: serverRoleResponse[currentRoleId]
+    }, function (response) {
         alert(response.msg);
         window.location.reload();
     });
@@ -102,15 +121,14 @@ function saveAppearance() {
 
 function computeRoleStyle() {
     var roleStyle = document.getElementById('roleMenuEntryExample').style
-    if(document.getElementById('gradientsEnabled').checked) {
+    if (document.getElementById('gradientsEnabled').checked) {
         var roleColorValue = document.getElementById("roleColor").value;
-        var roleColorGradient1Value = document.getElementById("roleColorGradient1").value; 
+        var roleColorGradient1Value = document.getElementById("roleColorGradient1").value;
         var roleColorGradient2Value = document.getElementById("roleColorGradient2").value;
         roleStyle.background = `linear-gradient(90deg, ${roleColorValue}, ${roleColorGradient1Value}, ${roleColorGradient2Value})`;
         roleStyle.backgroundClip = "text";
         roleStyle.color = "transparent";
-    }
-    else {
+    } else {
         roleStyle.color = document.getElementById("roleColor").value;
         roleStyle.background = "none";
         roleStyle.backgroundClip = "initial";
@@ -124,10 +142,9 @@ function appearanceChanged() {
     document.getElementById('roleMenuEntryExample').style.background = roleStyle.background;
     document.getElementById('roleMenuEntryExample').style.backgroundClip = roleStyle.backgroundClip;
     document.getElementById('roleMenuEntryExample').style.color = roleStyle.color;
-    if(document.getElementById('gradientsEnabled').checked) {
+    if (document.getElementById('gradientsEnabled').checked) {
         document.getElementById('gradientOptions').style.display = "block";
-    }
-    else {
+    } else {
         document.getElementById('gradientOptions').style.display = "none";
     }
     document.getElementById("saveAppearanceButton").style.display = "inline-block";
@@ -142,7 +159,11 @@ function saveSorting() {
         sortArray.push(role.id);
     })
 
-    socket.emit("updateRoleHierarchy", { id: UserManager.getID(), token: UserManager.getToken(), sorted: sortArray }, function (response) {
+    socket.emit("updateRoleHierarchy", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        sorted: sortArray
+    }, function (response) {
 
         alert(response.msg);
         window.location.reload();
@@ -151,7 +172,12 @@ function saveSorting() {
 
 function removeFromRole(roleId, userId) {
 
-    socket.emit("removeUserFromRole", { id: UserManager.getID(), token: UserManager.getToken(), role: roleId, target: userId }, function (response) {
+    socket.emit("removeUserFromRole", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        role: roleId,
+        target: userId
+    }, function (response) {
         alert(response.msg);
         window.location.reload();
     });
@@ -163,7 +189,12 @@ function savePermissions() {
     console.log(editedServerRoleResponse[currentRoleId].permissions)
 
 
-    socket.emit("saveRolePermissions", { id: UserManager.getID(), token: UserManager.getToken(), role: currentRoleId, permissions: editedServerRoleResponse[currentRoleId].permissions }, function (response) {
+    socket.emit("saveRolePermissions", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        role: currentRoleId,
+        permissions: editedServerRoleResponse[currentRoleId].permissions
+    }, function (response) {
         alert(response.msg);
         window.location.reload();
     });
@@ -178,7 +209,12 @@ function addToRole() {
         return;
     }
 
-    socket.emit("addUserToRole", { id: UserManager.getID(), token: UserManager.getToken(), role: currentRoleId, target: userId }, function (response) {
+    socket.emit("addUserToRole", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        role: currentRoleId,
+        target: userId
+    }, function (response) {
         alert(response.msg);
         window.location.reload();
     });
@@ -186,7 +222,7 @@ function addToRole() {
 
 function createRole() {
     console.log(socket.connected)
-    socket.emit("createRole", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
+    socket.emit("createRole", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
         alert(response.msg);
         window.location.reload();
     });
@@ -221,20 +257,15 @@ function moveRoleDown(id) {
 }
 
 function deleteRole() {
-    socket.emit("deleteRole", { id: UserManager.getID(), token: UserManager.getToken(), roleId: currentRoleId }, function (response) {
+    socket.emit("deleteRole", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        roleId: currentRoleId
+    }, function (response) {
         alert(response.msg);
         window.location.reload();
     });
 }
-
-function rgbToHex(rgbString) {
-  const [r, g, b] = rgbString.match(/\d+/g).map(Number);
-  if(r === undefined) return rgbString
-  if(g === undefined) return rgbString
-  if(b === undefined) return rgbString
-  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
-}
-
 
 function loadRolePerms(roleId) {
     PermUI.init();
@@ -242,7 +273,11 @@ function loadRolePerms(roleId) {
     let permContainer = document.getElementById("permList");
     permContainer.innerHTML = "";
 
-    socket.emit("getPermissions", { id: UserManager.getID(), token: UserManager.getToken(), categories: ["serverRoles"] }, function (response) {
+    socket.emit("getPermissions", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        categories: ["serverRoles"]
+    }, function (response) {
         if (response.error !== null) {
             showSystemMessage({
                 title: response.error || "",
@@ -252,20 +287,19 @@ function loadRolePerms(roleId) {
                 type: "error",
                 duration: response.displayTime || 3000
             });
-        }
-        else {
+        } else {
             // display the permission html stuff
             Object.entries(response.permissions).forEach(([permName, permission]) => {
                 const currentValue = serverRoleResponse[roleId]?.permissions?.[permName] ?? 0;
-    
+
                 const callback = (value) => {
                     editedServerRoleResponse[currentRoleId].permissions[permName] = value;
-            
+
                     // Always show save/cancel buttons
                     document.getElementById("saveButton").style.display = "inline-block";
                     document.getElementById("cancelButton").style.display = "inline-block";
                 };
-            
+
                 PermUI.showSetting(
                     permContainer,
                     permName,
@@ -276,9 +310,6 @@ function loadRolePerms(roleId) {
                     callback
                 );
             });
-            
-            
-            
 
 
             // Mark the current role that is being edited
@@ -289,14 +320,12 @@ function loadRolePerms(roleId) {
 
                 if (role.id == roleId) {
                     role.style.backgroundColor = "#292B2F";
-                }
-                else {
+                } else {
                     role.style.backgroundColor = "transparent";
                 }
             })
 
             document.getElementById("displaySeperate").checked = serverRoleResponse[roleId].displaySeperate;
-
 
 
             // Get Permissions
@@ -309,7 +338,7 @@ function loadRolePerms(roleId) {
             currentRoleId = roleId;
 
             // Style and Name
-            if(serverRoleResponse[roleId].info.color == 'transparent') {
+            if (serverRoleResponse[roleId].info.color == 'transparent') {
                 document.getElementById('gradientsEnabled').checked = true;
                 document.getElementById('gradientOptions').style.display = "block";
                 var roleColors = serverRoleResponse[roleId].info.background.match(/(rgb\(.*,.*,.*\)), (rgb\(.*,.*,*\)), (rgb\(.*,.*,.*[^)]\))/);
@@ -317,8 +346,7 @@ function loadRolePerms(roleId) {
                 roleColor.value = rgbToHex(roleColors[1]);
                 roleColorGradient1.value = rgbToHex(roleColors[2])
                 roleColorGradient2.value = rgbToHex(roleColors[3])
-            }
-            else {
+            } else {
                 document.getElementById('gradientsEnabled').checked = false;
                 document.getElementById('gradientOptions').style.display = "none";
                 roleColor.value = rgbToHex(serverRoleResponse[roleId].info.color);
@@ -329,46 +357,10 @@ function loadRolePerms(roleId) {
             roleMenuEntryExample.backgroundClip = roleStyle.backgroundClip;
             roleName.value = serverRoleResponse[roleId].info.name;
 
-            /*
-            // Uncheck everything before checking the permissions for the specific role
-            // 1. Reset numeric inputs and permission boxes
-            document.querySelectorAll(`#permList p input[type="number"]`).forEach(input => {
-                input.value = "";
-            });
-
-            document.querySelectorAll(`#permList .permStateBox`).forEach(box => {
-                box.setAttribute("data-state", "0"); // reset to inherited
-                box.parentElement.setAttribute("data-state", "0");
-            });
-*/
-            /*
-            // 2. Apply permission values
-            Object.keys(roleperms).forEach(function (perm) {
-                const value = roleperms[perm];
-
-                try {
-                    const numberInput = document.querySelector(`#${perm} input[type="number"]`);
-                    const box = document.querySelector(`#${perm} .permStateBox`);
-
-                    if (numberInput && !isNaN(value)) {
-                        numberInput.value = parseInt(value);
-                    } else if (box) {
-                        // This is a checkbox-like permission (styled div)
-                        box.setAttribute("data-state", value);
-                        box.parentElement.setAttribute("data-state", value);
-                    }
-                } catch (ex) {
-                    console.log("Failed to apply permission for", perm, ex);
-                }
-            });
-            */
-
-
             // Set appearance checkbox down here, otherwise always unchecked
             if (serverRoleResponse[roleId].info.displaySeperate == 1) {
                 document.getElementById("displaySeperate").checked = true;
-            }
-            else {
+            } else {
                 document.getElementById("displaySeperate").checked = false;
             }
 
@@ -383,9 +375,13 @@ function loadRolePerms(roleId) {
 
                 // resolve member
 
-                socket.emit("resolveMember", { id: UserManager.getID(), token: UserManager.getToken(), target: serverRoleResponse[currentRoleId].members[member] }, function (response) {
+                socket.emit("resolveMember", {
+                    id: UserManager.getID(),
+                    token: UserManager.getToken(),
+                    target: serverRoleResponse[currentRoleId].members[member]
+                }, function (response) {
 
-                    if(response.data == null) return;
+                    if (response.data == null) return;
 
                     var code = `<div class="memberlist-container">
                                     <div class="memberlist-banner" style="background-image: url('${response.data?.banner}');"></div>
@@ -401,6 +397,11 @@ function loadRolePerms(roleId) {
 
                 });
             });
+
+            if (MobilePanel.isMobile()) {
+                console.log("render rightr")
+                MobilePanel.renderPanel(serverRolesRightPanel, "right")
+            }
         }
     });
 }

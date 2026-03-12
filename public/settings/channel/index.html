@@ -13,7 +13,10 @@
     ></script>
 
     <link rel="stylesheet" href="/css/themes/default/default.css">
+    <link rel="stylesheet" href="/css/mobile/main.css">
+    <link rel="stylesheet" href="/css/settings.css">
 
+    <script src="/js/core/MobileUI.js"></script>
     <script src="/js/core/JsonEditor.js"></script>
     <script src="/js/escape.js"></script>
     <script src="/js/core/purify.js"></script>
@@ -60,102 +63,12 @@
 </script>
 
 <style>
-
-    #wrapper{
-        background-color: hsl(from var(--main) h s calc(l * 2));
+    #rolelist {
+        min-width: 200px;
     }
-
-    #navigation{
-        background-color: hsl(from var(--main) h s calc(l * 1));
-
-        padding: 32px;
-
-        width: calc(20%);
-        height: calc(100%);
-        font-style: normal;
-
-        float: left;
-    }
-
-    #nav_settings {
-        float: right;
-        width: 150px;
-
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
-
-    #nav_settings h2 {
-        text-transform: uppercase;
-        font-size: 12px;
-    }
-    
-    #nav_settings a{
-        cursor: pointer;
-        line-height: 175%;
-
-        text-decoration: none;
-        color: #ABB8BB;
-        font-style: normal;
-
-    }
-
-    #nav_settings a:hover{
-        color: #fafcff;
-        transition: all 200ms;
-    }
-
-    #nav_settings hr {
-        border: 1px solid #36393F;
-        background-color: #36393F;
-        color: #36393F;
-
-        margin: 16px 0 16px 0;
-    }
-
-    #content {
-
-        width: calc(100% - 64px - 20%);
-        height: calc(100% - 64px - 50px);
-        padding: 32px;
-
-        display:block;
-        float: left;
-
-        overflow-y: auto;
-    }
-
-    #back {
-        width: 30px;
-        height: 30px;
-
-        margin: 20px 20px 0 0;
-
-        background-color: red;
-        float: right;
-        display: block;
-
-        background-image: url("/img/back.png");
-        transform: scaleX(-1);
-        background-size: cover;
-
-        object-fit: cover;
-        background-color: transparent;
-        background-position: center center;
-    }
-
-    #wrapper {
-        display: block;
-        width: 100%;
-        height: 100%;
-    }
-
-
-
 </style>
 
-
-<div id="wrapper">
+<div id="wrapper" class="settings-wrapper">
     <div id="navigation">
 
         <div id="nav_settings">

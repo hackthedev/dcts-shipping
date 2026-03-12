@@ -159,16 +159,24 @@
         overflow-x: hidden;
     }
 
-    #networkServers {
+    #networkServers,
+    .settings-wrapper #navigation,
+    .settings-wrapper #permissionlist{
         display: none !important;
+    }
+
+    .settings-wrapper #rolelist {
+        width: 100%;
     }
 
     .mobile-ui-panel #channellist,
     .mobile-ui-panel #header,
-    .mobile-ui-panel #infolist {
+    .mobile-ui-panel #infolist,
+    .mobile-ui-panel #navigation {
         flex-grow: 1 !important;
     }
 
+    .mobile-ui-panel #navigation,
     .mobile-ui-panel #infolist{
         width: 100vw !important;
         height: 100vh !important;

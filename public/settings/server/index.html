@@ -14,8 +14,11 @@
 
     <link rel="stylesheet" href="/css/themes/default/default.css">
     <link rel="stylesheet" href="/css/notes.css">
+    <link rel="stylesheet" href="/css/settings.css">
+    <link rel="stylesheet" href="/css/mobile/main.css">
 
 
+    <script src="/js/core/MobileUI.js"></script>
     <script src="/js/sysmsg.js"></script>
 
     <script src="/js/prompts.js"></script>
@@ -50,119 +53,8 @@
 </head>
 <body id="pagebody" style="display: none;">
 
-<style>
 
-    #navigation{
-        background-color: hsl(from var(--main) h s calc(l * 1));
-        color: hsl(from var(--main) h s calc(l * 10));
-        flex-shrink: 0;
-        min-width: 200px;
-
-        padding: 32px;
-
-        width: calc(20%);
-        height: calc(100%);
-        font-style: normal;
-
-        float: left;
-        overflow-y: auto;
-    }
-
-    #navigation a {
-        color: hsl(from var(--main) h s calc(l * 8) / 100%);
-        font-style: normal;
-    }
-
-    #nav_settings {
-        float: right;
-        width: 150px;
-
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
-
-    #nav_settings h2 {
-        color: hsl(from var(--main) h s calc(l * 8.5) / 100%) !important;
-        text-transform: uppercase;
-        font-size: 12px;
-    }
-    
-    #nav_settings a{
-        cursor: pointer;
-        line-height: 175%;
-
-        text-decoration: none;
-    }
-
-    #nav_settings a:hover{
-        color: hsl(from var(--main) h s calc(l * 12));
-        transition: all 200ms;
-    }
-
-    #nav_settings hr {
-        border: 1px solid hsl(from var(--main) h s calc(l * 8) / 10%);
-        background-color: hsl(from var(--main) h s calc(l * 8) / 10%);
-
-        margin: 16px 0 16px 0;
-    }
-
-    #content {
-        width: calc(80% );
-        height: calc(100%);
-        padding: 32px;
-
-        display:block;
-        float: left;
-
-        overflow-y: auto;
-        background-color: hsl(from var(--main) h s calc(l * 2));
-    }
-
-    #content {
-        color: hsl(from var(--main) h s calc(l * 10) / 100%);
-    }
-
-    #back {
-        width: 30px;
-        height: 30px;
-
-        margin: 20px 20px 0 0;
-        position: absolute;
-        right: 0;
-
-        float: right;
-        display: block;
-
-        background-image: url("/img/back.png");
-        transform: scaleX(-1);
-        background-size: cover;
-
-        object-fit: cover;
-        background-color: transparent;
-        background-position: center center;
-    }
-
-    #wrapper {
-        display: block;
-        width: 100%;
-        height: 100%;
-
-        background: linear-gradient(
-                90deg,
-                hsl(from var(--main) h s calc(l * 2)),
-                hsl(from var(--main) h s calc(l * 2))
-        );
-    }
-
-    input[type=text], input[type=number]{
-        border: 2px solid #3c3f44 !important;
-    }
-
-
-</style>
-
-
-<div id="wrapper">
+<div id="wrapper" class="settings-wrapper">
     <div id="navigation">
 
         <div id="nav_settings">

@@ -36,7 +36,7 @@ class MobilePanel {
         panel.style.background = "black";
         panel.style.transition = "transform 0.25s ease";
         panel.style.zIndex = "6";
-        panel.style.overflow = "hidden";
+        panel.style.overflow = "auto";
         panel.style.minHeight = "0";
 
         if(side === "left"){

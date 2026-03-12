@@ -7,8 +7,8 @@ import {stripHTML} from "../functions/sanitizing/functions.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('addUserToRole', function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true) {
+    socket.on('addUserToRole', async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
             if(!member?.target) return response ({error: "Missing target user id"})
             if(!member?.role) return response ({error: "Missing target role id"})
@@ -17,7 +17,7 @@ export default (io) => (socket) => {
             member.token = stripHTML(member.token)
             member.target = stripHTML(member.target)
 
-            if (hasPermission(member.id, "manageMembers")) {
+            if (await hasPermission(member.id, "manageMembers")) {
                 try {
 
                     var executer = getMemberHighestRole(member.id);
@@ -25,7 +25,7 @@ export default (io) => (socket) => {
 
                     if (executer.info.sortId <= targetRole.info.sortId) {
                         // only administrators can bypass this
-                        if (!hasPermission(member.id, "administrator")) {
+                        if (!await hasPermission(member.id, "administrator")) {
                             sendMessageToUser(socket.id, JSON.parse(
                                 `{
                                         "title": "Error!",

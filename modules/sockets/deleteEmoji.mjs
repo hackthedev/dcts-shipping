@@ -5,7 +5,7 @@ import { checkRateLimit, copyObject, sendMessageToUser, validateMemberId } from 
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('deleteEmoji', function (member, response) {
+    socket.on('deleteEmoji', async function (member, response) {
         checkRateLimit(socket);
         
         member.id = xssFilters.inHTMLData(member.id)
@@ -13,10 +13,10 @@ export default (io) => (socket) => {
         member.filename = xssFilters.inHTMLData(member.filename)
         if (member.filename.includes("..")) return;
         
-        if (validateMemberId(member.id, socket, member?.token) === true
+        if (await validateMemberId(member.id, socket, member?.token) === true
         ) {
 
-            if (hasPermission(member.id, "manageEmojis")) {
+            if (await hasPermission(member.id, "manageEmojis")) {
                 try {
 
                     try {

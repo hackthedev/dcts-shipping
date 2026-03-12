@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ]
     );
 
-    socket.on('receiveDeleteMessage', function (id) {
+    socket.on('receiveDeleteMessage', async function(id) {
         try {
             var message = getMessageElementFromId(id)
             if (!message) {
@@ -278,7 +278,7 @@ document.addEventListener("DOMContentLoaded", function () {
 })
 
 function registerMessageCreateEvent(){
-    socket.on('updateReactions', function (messageObj) {
+    socket.on('updateReactions', async function(messageObj) {
         updateMessageReactionsElementById(messageObj?.messageId);
     });
 

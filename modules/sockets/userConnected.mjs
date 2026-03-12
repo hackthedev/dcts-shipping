@@ -133,8 +133,8 @@ export default (io) => (socket) => {
         const memberId = socket.data?.memberId || socket?.memberId;
         if (!memberId) return;
 
-        setTimeout(() => {
-            const info = getMemberLastOnline(memberId);
+        setTimeout(async () => {
+            const info = await getMemberLastOnline(memberId);
             if (info && !info.isOnline && info.minutesPassed >= 1) {
                 io.emit("updateMemberList");
             }

@@ -7,10 +7,10 @@ import {getBans} from "../functions/ban-system/helpers.mjs"
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('getBans', async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
             try {
-                if (!hasPermission(member.id, "manageBans")) {
+                if (!await hasPermission(member.id, "manageBans")) {
                     sendMessageToUser(socket.id, JSON.parse(
                         `{
                             "title": "Missing permissions!",

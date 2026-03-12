@@ -6,12 +6,11 @@ import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('kickUser', function (member) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token) {
+    socket.on('kickUser', async function (member) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
-            if (member.id == member.target) {
-                sendMessageToUser(socket.id, JSON.parse(
+            if (member.id === member.target) {
+                return sendMessageToUser(socket.id, JSON.parse(
                     `{
                             "title": "You cant kick yourself!",
                             "message": "",
@@ -24,10 +23,9 @@ export default (io) => (socket) => {
                             "type": "error",
                             "popup_type": "confirm"
                         }`));
-                return;
             }
             else {
-                if (hasPermission(member.id, "kickUsers") == false) {
+                if (await hasPermission(member.id, "kickUsers") === false) {
 
                     sendMessageToUser(socket.id, JSON.parse(
                         `{
@@ -48,7 +46,7 @@ export default (io) => (socket) => {
                     var kicking = getMemberHighestRole(member.target);
 
                     if (kicker.info.sortId <= kicking.info.sortId) {
-                        sendMessageToUser(socket.id, JSON.parse(
+                        return sendMessageToUser(socket.id, JSON.parse(
                             `{
                                         "title": "Error!",
                                         "message": "You cant kick that person because its role is higher then yours",
@@ -61,7 +59,6 @@ export default (io) => (socket) => {
                                         "type": "success",
                                         "popup_type": "confirm"
                                     }`));
-                        return;
                     }
                     member.target = escapeHtml(member.target);
                     

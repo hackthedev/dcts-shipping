@@ -5,12 +5,11 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('deleteGroup', function (member) {
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+    socket.on('deleteGroup', async function (member) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            if (serverconfig.groups[member.group].info.isDeletable == 0) {
-                sendMessageToUser(socket.id, JSON.parse(
+            if (serverconfig.groups[member.group].info.isDeletable === 0) {
+                return sendMessageToUser(socket.id, JSON.parse(
                     `{
                         "title": "Error!",
                         "message": "This group cant be deleted.",
@@ -23,11 +22,10 @@ export default (io) => (socket) => {
                         "type": "error",
                         "popup_type": "confirm"
                     }`));
-                return;
             }
 
-            if (!hasPermission(member.id, "manageGroups")) {
-                sendMessageToUser(socket.id, JSON.parse(
+            if (!await hasPermission(member.id, "manageGroups")) {
+                return sendMessageToUser(socket.id, JSON.parse(
                     `{
                         "title": "Missing permissions!",
                         "message": "You arent allowed to delete groups",
@@ -40,7 +38,6 @@ export default (io) => (socket) => {
                         "type": "error",
                         "popup_type": "confirm"
                     }`));
-                return;
             }
 
 

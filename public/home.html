@@ -253,7 +253,7 @@
     }
 
 
-    socket.on('receiveHydrate', (p) => {
+    socket.on('receiveHydrate', async (p) => {
         CONFIG.members = Array.isArray(p.members) ? p.members.map(normalizeMember) : [];
 
         upsertMember({
@@ -302,12 +302,12 @@
         }
     });
 
-    socket.on('ticket:new', ({thread}) => {
+    socket.on('ticket:new', async ({thread}) => {
         upsertThread(thread);
         renderDMs();
     });
 
-    socket.on('ticket:message', ({threadId, message}) => {
+    socket.on('ticket:message', async ({threadId, message}) => {
         const t = CONFIG.threads.find(x => x.id === threadId);
         if (t && t.participants?.includes(CURRENT_USER_ID)) return;
 
@@ -329,7 +329,7 @@
         renderDMs();
     });
 
-    socket.on('ticket:update', ({thread}) => {
+    socket.on('ticket:update', async ({thread}) => {
         upsertThread(thread);
         renderDMs();
     });
@@ -367,7 +367,7 @@
         });
     }
 
-    socket.on('receiveThreadNew', ({thread}) => {
+    socket.on('receiveThreadNew', async ({thread}) => {
         upsertThread(thread);
         renderDMs();
     });
@@ -382,7 +382,7 @@
         t.lastAt = message.ts || new Date().toISOString();
     }
 
-    socket.on('receiveMessage', ({threadId, message}) => {
+    socket.on('receiveMessage', async ({threadId, message}) => {
         const t = CONFIG.threads.find(x => x.id === threadId);
         if (!t) return;
         addMessage(threadId, message);
@@ -394,7 +394,7 @@
         renderDMs();
     });
 
-    socket.on('receiveMessageEdit', ({threadId, message}) => {
+    socket.on('receiveMessageEdit', async ({threadId, message}) => {
         const t = CONFIG.threads.find(x => x.id === threadId);
         if (!t) return;
         const i = (t.messages || []).findIndex(m => m.id === message.id);
@@ -403,7 +403,7 @@
             renderMessages(t);
         }
     });
-    socket.on('receiveMessageDelete', ({threadId, messageId}) => {
+    socket.on('receiveMessageDelete', async ({threadId, messageId}) => {
         const t = CONFIG.threads.find(x => x.id === threadId);
         if (!t) return;
         const i = (t.messages || []).findIndex(m => m.id === messageId);
@@ -414,7 +414,7 @@
     });
 
     // content posts/news/help
-    socket.on('receiveContentNew', ({type, item}) => {
+    socket.on('receiveContentNew', async ({type, item}) => {
         const list = listByType(type);
         list.unshift(item);
 
@@ -431,7 +431,7 @@
     });
 
 
-    socket.on('contentReadUpdate', ({type, contentId, unreadCount}) => {
+    socket.on('contentReadUpdate', async ({type, contentId, unreadCount}) => {
         const key = `${type}:${contentId}`;
         const card = document.querySelector(`.content-card[data-content-key="${key}"]`);
         if (card) {
@@ -455,7 +455,7 @@
     });
 
 
-    socket.on('receiveContentUpdate', ({type, item}) => {
+    socket.on('receiveContentUpdate', async ({type, item}) => {
         const list = listByType(type);
         const key = keyFor(type, item);
         const i = list.findIndex(x => keyFor(type, x) === key);
@@ -468,7 +468,7 @@
             renderRight(); /*showHelpDoc(item);*/
         }
     });
-    socket.on('receiveContentDelete', ({type, id}) => {
+    socket.on('receiveContentDelete', async ({type, id}) => {
         try {
             const list = listByType(type);
             const idStr = String(id ?? '');
@@ -1483,7 +1483,7 @@
     }
 
 
-    socket.on('threadDeleted', ({threadId}) => {
+    socket.on('threadDeleted', async ({threadId}) => {
         const i = CONFIG.threads.findIndex(t => t.id === threadId);
         if (i > -1) CONFIG.threads.splice(i, 1);
         if (STATE.activeThreadId === threadId) showServerHome();
@@ -1857,7 +1857,7 @@
     }
 
 
-    socket.on('threadRead', ({threadId, last_read_at}) => {
+    socket.on('threadRead', async ({threadId, last_read_at}) => {
         const t = CONFIG.threads.find(x => x.id === threadId);
         if (!t) return;
         t.lastReadAt = last_read_at;
@@ -2534,13 +2534,13 @@
             console.log(response)
         });
 
-        socket.on('connect', () => console.info('socket connected', socket.id));
-        socket.on('reconnect', (attempt) => console.info('reconnect attempt', attempt, 'socket', socket.id));
-        socket.on('disconnect', (reason) => console.warn('socket disconnected', reason));
-        socket.on('connect_error', (err) => console.error('connect_error', err));
+        socket.on('connect', async () => console.info('socket connected', socket.id));
+        socket.on('reconnect', async (attempt) => console.info('reconnect attempt', attempt, 'socket', socket.id));
+        socket.on('disconnect', async (reason) => console.warn('socket disconnected', reason));
+        socket.on('connect_error', async (err) => console.error('connect_error', err));
 
         // update config on the fly if something changes
-        socket.on('updatedHome', (data) => {
+        socket.on('updatedHome', async (data) => {
             CONFIG.aboutHtml = data.about;
             CONFIG.heroTitle = data.title;
             CONFIG.heroSubtitle = data.subtitle;

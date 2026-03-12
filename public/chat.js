@@ -27,6 +27,36 @@ function rewriteImg(img){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    MobilePanel.setLeftMenu([
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#mainLayout #header")
+            ]
+        },
+        {
+            direction: "row",
+            flex: "1 1 0",
+            flexGrow: 1,
+            flexShrink: 1,
+            height: "100%",
+            children: [
+                document.querySelector("#mainLayout #serverlist"),
+                document.querySelector("#mainLayout #channellist")
+            ]
+        }
+    ], "left");
+
+    MobilePanel.setRightMenu([
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#mainLayout #infolist")
+            ]
+        }
+    ], "right");
+
+
     document.querySelectorAll("img").forEach(rewriteImg);
     new MutationObserver(mutations => {
         for(const m of mutations){
@@ -147,40 +177,19 @@ document.addEventListener("DOMContentLoaded", async function () {
         ModActions.hideRoleMenu()
     });
 
-    // mobile swiping
-    const contentLayout = document.getElementById("contentLayout");
-    contentLayout.addEventListener("touchstart", e => {
-        const t = e.touches[0];
-        startX = t.clientX;
-        startY = t.clientY;
-    });
-
-    contentLayout.addEventListener("touchend", e => {
-        const t = e.changedTouches[0];
-        const dx = t.clientX - startX;
-        const dy = t.clientY - startY;
-
-        if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
-
-        if (Math.abs(dx) > Math.abs(dy)) {
-            onSwipe(dx > 0 ? "right" : "left");
-        }
-    });
-
-
     document.getElementById("message-actions-image").onclick = function (e) {
         var x = e.clientX;
         var y = e.clientY;
 
         var clickedElement = document.elementFromPoint(x, y)
 
-        if (clickedElement.id != "message-actions-image") {
+        if (clickedElement.id !== "message-actions-image") {
             return;
         }
 
         showEmojiPicker(x,y, (emojiObj) => {
             insertEmoji(emojiObj, true);
-            focusEditor();
+            if(!MobilePanel.isMobile()) focusEditor();
         })
     }
 
@@ -193,7 +202,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         var emojiContainer = document.getElementById("emoji-box-container");
         var profileContainer = document.getElementById("profile_container");
 
-        if (emojiContainer.style.display == "flex") {
+        if (emojiContainer.style.display == "flex" && !MobilePanel.isMobile()) {
             //emojiContainer.style.display = "none";
             closeEmojiBox()
         }
@@ -584,7 +593,7 @@ var socket = io.connect()
 
 registerMentionClickEvent()
 
-socket.on("updatedEmojis", function () {
+socket.on("updatedEmojis", async function() {
     fetchEmojis();
 })
 
@@ -596,30 +605,30 @@ voip = new VoIP(`${window.location.origin.includes("https") ? "wss" : "ws"}://{{
 
 
 
-socket.on('receiveThreadNew', ({}) => {
+socket.on('receiveThreadNew', async ({}) => {
     console.log("receiveThreadNew")
     displayHomeUnread()
 });
 
-socket.on('updateUnread', () => {
+socket.on('updateUnread', async () => {
     displayHomeUnread()
 });
 
-socket.on('receiveMessage', ({}) => {
+socket.on('receiveMessage', async ({}) => {
     displayHomeUnread()
 });
 
-socket.on('receiveContentNew', ({type, item}) => {
+socket.on('receiveContentNew', async ({type, item}) => {
     if (item?.notifyAll && String(item.authorId) !== String(UserManager.getID())) {
         displayHomeUnread()
     }
 });
 
-socket.on('newReport', () => {
+socket.on('newReport', async () => {
     UserReports.getReports();
 });
 
-socket.on('verifyPublicKey', () => {
+socket.on('verifyPublicKey', async () => {
     Crypto.dSyncTest();
 });
 
@@ -1537,7 +1546,7 @@ socket.on('doAccountOnboarding', async function (message) {
 });
 
 
-socket.on('showUserJoinMessage', function (author) {
+socket.on('showUserJoinMessage', async function(author) {
 
     // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
     var message = '<div class="systemAnnouncementChat">' + '            <p>User <label class="systemAnnouncementChatUsername" id="">' + author.username + '</label> joined the chat!</p>' + '        </div>';
@@ -1546,7 +1555,7 @@ socket.on('showUserJoinMessage', function (author) {
     scrollDown("userJoinMessage");
 });
 
-socket.on('updateGroupList', function (author) {
+socket.on('updateGroupList', async function(author) {
 
     getGroupList();
 })
@@ -1555,6 +1564,7 @@ socket.on('updateGroupList', function (author) {
 
 function focusEditor() {
     if (!quill) return;
+    if(MobilePanel.isMobile()) return;
 
     quill.focus();
 
@@ -1754,7 +1764,7 @@ socket.on('memberTyping', members => {
 });
 
 
-socket.on('receiveChannelTree', function (data) {
+socket.on('receiveChannelTree', async function(data) {
     getChannelTree()
     markCurrentChannelStyle(UserManager.getChannel())
 });
@@ -1804,21 +1814,21 @@ function reapplyUnreadFromCookies() {
 */
 
 
-socket.on('markChannel', function (data) {
+socket.on('markChannel', async function(data) {
     markChannel(data.channelId, false, data?.count);
 });
 
-socket.on('createMessageEmbed', function (data) {
+socket.on('createMessageEmbed', async function(data) {
     document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
     scrollDown("createMessageEmbed");
 });
 
-socket.on('createMessageLink', function (data) {
+socket.on('createMessageLink', async function(data) {
     document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
     scrollDown("createMessageLink");
 });
 
-socket.on('receiveCurrentChannel', function (channel) {
+socket.on('receiveCurrentChannel', async function(channel) {
     try {
         if (channel.name == null) {
             channel.name = "";
@@ -1836,11 +1846,11 @@ socket.on('updateMemberList', async function (data) {
     await updateMentionAutocompleteData();
 });
 
-socket.on('updateGroupList', function (data) {
+socket.on('updateGroupList', async function(data) {
     getGroupList();
 });
 
-socket.on('receiveGroupList', function (data) {
+socket.on('receiveGroupList', async function(data) {
     if (serverlist.innerHTML !== data) {
         serverlist.innerHTML = "";
         serverlist.innerHTML = data;
@@ -1853,7 +1863,7 @@ socket.on('receiveGroupList', function (data) {
 });
 
 
-socket.on('newMemberJoined', function (author) {
+socket.on('newMemberJoined', async function(author) {
 
     // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
     var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + author.name + '</label> joined the server! <label class="timestamp" id="' + author.timestamp + '">' + author.timestamp.toLocaleString("narrow") + '</p>' + '        </div>';
@@ -1863,7 +1873,7 @@ socket.on('newMemberJoined', function (author) {
 
 });
 
-socket.on('memberOnline', function (member) {
+socket.on('memberOnline', async function(member) {
 
     // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
     var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + member.username + '</label> is now online!</p>' + '        </div>';
@@ -1872,10 +1882,10 @@ socket.on('memberOnline', function (member) {
     scrollDown("memberOnline");
 });
 
-socket.on('memberPresent', function (member) {
+socket.on('memberPresent', async function(member) {
 });
 
-socket.on('receiveGifImage', function (response) {
+socket.on('receiveGifImage', async function(response) {
     clearGifContainer()
 
     if (response?.gifs) {
@@ -1894,11 +1904,11 @@ socket.on('receiveGifImage', function (response) {
 });
 
 
-socket.on('receiveToken', function (data) {
+socket.on('receiveToken', async function(data) {
     CookieManager.setCookie("dcts_token", data, 365);
 });
 
-socket.on('modalMessage', function (data) {
+socket.on('modalMessage', async function(data) {
     var buttonArray = [];
     if (data.buttons) {
         Object.keys(data.buttons).forEach(function (button) {
@@ -2210,7 +2220,7 @@ async function getEmojis(callback = null) {
                                 ["data-code"]: e.code
                             });
                             quill.setSelection(sel.index + 1);
-                            focusEditor();
+                            if(!MobilePanel.isMobile()) focusEditor();
                             getEmojiContainerElement().style.display = "none";
                         }
                     });
@@ -2292,7 +2302,7 @@ async function getEmojis(callback = null) {
     }
 }
 
-socket.on('receiveGroupBanner', function (data) {
+socket.on('receiveGroupBanner', async function(data) {
     groupbanner.src = ChatManager.proxyUrl(data);
     document.getElementById("mobile_groupBannerDisplay").src = ChatManager.proxyUrl(data);
 });
@@ -2452,7 +2462,8 @@ async function setUrl(param, isVC = false) {
             token: UserManager.getToken(),
             permission: "sendMessages"
         }, function (response) {
-            switchLeftSideMenu(true)
+
+            MobilePanel.close()
 
             // lets prioritize loading the chat lol
             changedChannel()
@@ -2660,7 +2671,7 @@ async function testDb(length) {
     }
 }
 
-socket.on("uploadProgress", ({filename, bytes, total}) => {
+socket.on("uploadProgress", async ({filename, bytes, total}) => {
     const percent = total ? Math.min(100, (bytes / total) * 100) : 0;
     showSystemMessage({
         title: `File ${percent}% uploaded`,

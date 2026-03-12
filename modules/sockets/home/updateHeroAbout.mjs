@@ -7,7 +7,7 @@ import { sanitizeInput, validateMemberId } from "../../functions/main.mjs";
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('updateHeroAbout', async function (member, response) {
-        if (validateMemberId(member?.id, socket) == true && serverconfig.servermembers[member?.id]?.token == member?.token
+        if (await validateMemberId(member?.id, socket) == true && serverconfig.servermembers[member?.id]?.token == member?.token
         ) {
             try{
                 // for now only admins can change the server home info and pic

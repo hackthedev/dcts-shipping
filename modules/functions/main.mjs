@@ -402,7 +402,7 @@ async function listRoomsMembers(io, usersocket = {}) {
 }
 
 
-export function checkConnectionLimit(socket, token = null, id = null) {
+export async function checkConnectionLimit(socket, token = null, id = null) {
 
     // get the connected clients
     const connectedClients = io.engine.clientsCount;
@@ -416,11 +416,11 @@ export function checkConnectionLimit(socket, token = null, id = null) {
     if (token !== null && id !== null) {
 
         // lets make sure the account data is correct
-        if (validateMemberId(id, socket, true) == true
-            && serverconfig.servermembers[id].token == token) {
+        if (await validateMemberId(id, socket, true) === true
+            && serverconfig.servermembers[id].token === token) {
 
             // check if user is allowed to bypass based on roles
-            if (hasPermission(id, ["bypassSlots"])) canBypassWithRoles = true;
+            if (await hasPermission(id, ["bypassSlots"])) canBypassWithRoles = true;
         }
     }
 
@@ -987,7 +987,7 @@ export function generateId(length) {
     return result;
 }
 
-export function validateMemberId(id, socket, token, bypass = false) {
+export async function validateMemberId(id, socket, token, bypass = false) {
     id = String(id)
 
     if (bypass === false && socket) {
@@ -1005,6 +1005,8 @@ export function validateMemberId(id, socket, token, bypass = false) {
     // check member token if present
     if(id && token){
         let memberObject = serverconfig.servermembers[id];
+
+        // this needs to be improved
         if(memberObject && socket) checkMemberBan(socket, memberObject);
 
         if(serverconfig.servermembers[id]?.token !== token){

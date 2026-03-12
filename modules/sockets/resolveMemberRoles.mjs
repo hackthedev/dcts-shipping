@@ -21,14 +21,14 @@ export function resolveMemberRoles(memberId){
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on("resolveMemberRoles", function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true
+    socket.on("resolveMemberRoles", async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
             if(!member?.target) return response({error: "Member not found"})
             let resolved = resolveMemberRoles(member?.target);
 
             if(serverconfig.servermembers[member?.target]?.isBanned){
-                if(hasPermission(member.id, ["viewAnonymousMessages"])){
+                if(await hasPermission(member.id, ["viewAnonymousMessages"])){
                     resolved = [0];
                 }
             }

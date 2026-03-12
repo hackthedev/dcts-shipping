@@ -9,7 +9,7 @@ export default (io) => (socket) => {
 
     socket.on('changeNetworkServerStatus', async function (member, response) {
         // some code
-        if(validateMemberId(member?.id, socket, member?.token) === false){
+        if(await validateMemberId(member?.id, socket, member?.token) === false){
             response({ error: null })
             return;
         }
@@ -29,7 +29,7 @@ export default (io) => (socket) => {
             return;
         }
 
-        if(!hasPermission(member?.id, "manageNetworkServer")){
+        if(!await hasPermission(member?.id, "manageNetworkServer")){
             response({ error: "You do not have permission to change the network server status." })
             return;
         }

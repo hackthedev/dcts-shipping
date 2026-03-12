@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", async event => {
     setInterval(checkPipVisibility, 500);
     setInterval(() => voip.ensureVcAudioRouting(), 500);
 
-    socket.on("connect", () => {
+    socket.on("connect", async () => {
         document.querySelectorAll("#channellist li[data-channel-id]").forEach(li => {
             syncVcChannelMembers(li.dataset.channelId);
         });

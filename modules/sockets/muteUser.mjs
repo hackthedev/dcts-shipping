@@ -6,21 +6,18 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('muteUser', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token) {
+    socket.on('muteUser', async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
-            if (member.id == member.target) {
-                response({ error: "Cant mute yourself", msg: "You cant mute yourself!", type: "error" })
-                return;
+            if (member.id === member.target) {
+                return response({ error: "Cant mute yourself", msg: "You cant mute yourself!", type: "error" })
             }
             else {
                 member.time = xssFilters.inHTMLData(member.time);
                 member.reason = xssFilters.inHTMLData(member.reason);
 
-                if (hasPermission(member.id, "muteUsers") == false) {
-                    response({ error: "Missing permission muteUsers", msg: "You cant mute others!", type: "error" })
-                    return;
+                if (await hasPermission(member.id, "muteUsers") === false) {
+                    return response({ error: "Missing permission muteUsers", msg: "You cant mute others!", type: "error" })
                 }
                 else {
                     
@@ -28,8 +25,7 @@ export default (io) => (socket) => {
                     var userToMute = getMemberHighestRole(member.target);
 
                     if (mod.info.sortId <= userToMute.info.sortId) {
-                        response({ error: "Cant mute user with higher or equal role", msg: "Cant mute user with higher or equal role", type: "error" })
-                        return;
+                        return response({ error: "Cant mute user with higher or equal role", msg: "Cant mute user with higher or equal role", type: "error" })
                     }
 
                     var muteResult = muteUser(member);
@@ -48,7 +44,7 @@ export default (io) => (socket) => {
                         reasonText = `##Reason:#${member.reason}`;
 
 
-                    if (new Date(muteResult.duration).getFullYear() == "9999") {
+                    if (new Date(muteResult.duration).getFullYear() === "9999") {
                         // You have been muted
                         sendMessageToUser(usersocket[member.target], JSON.parse(
                             `{

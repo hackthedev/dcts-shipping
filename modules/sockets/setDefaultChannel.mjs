@@ -5,11 +5,10 @@ import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('setDefaultChannel', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token) {
+    socket.on('setDefaultChannel', async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
-            if (hasPermission(member.id, "manageServer")) {
+            if (await hasPermission(member.id, "manageServer")) {
 
                 // Try to resolve channel first to see if it even exists
                 let channel = resolveChannelById(member.value);

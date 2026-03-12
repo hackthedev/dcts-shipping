@@ -10,12 +10,12 @@ export default (io) => (socket) => {
 
     socket.on('getNetworkServers', async function (member, response) {
         // some code
-        if(validateMemberId(member?.id, socket, member?.token) === false){
+        if(await validateMemberId(member?.id, socket, member?.token) === false){
             response({ error: null })
             return;
         }
 
-        if(!hasPermission(member?.id, "manageNetworkServers")){
+        if(!await hasPermission(member?.id, "manageNetworkServers")){
             response({ error: "You do not have permission to manage network servers" })
             return;
         }

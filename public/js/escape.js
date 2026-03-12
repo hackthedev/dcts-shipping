@@ -78,34 +78,35 @@ function installDomPurifyHooks() {
 }
 
 function sanitizeHtmlForRender(html, wrapParagraphs = true) {
-    if (!html) return '';
+    if (html == null) return '';
     installDomPurifyHooks();
 
-    const raw = String(html).trim();
-    const hasTags = /<\/?[a-z][\s\S]*?>/i.test(raw);
+    let raw = String(html || '').trim();
 
+    const hasTags = /<\/?[a-z][\s\S]*?>/i.test(raw);
     if (!hasTags) {
         const paras = raw.replace(/\r/g, '').split(/\n{2,}/)
             .map(s => s.trim())
             .filter(Boolean);
 
-        const out = paras.map(p => {
-            const withBreaks = p.replace(/\n/g, '<br>');
+        let out = paras.map(p => {
+            const withBreaks = encodePlainText(p).replace(/\n/g, '<br>');
             return wrapParagraphs ? `<p>${withBreaks}</p>` : withBreaks;
-        }).join('');
+        }).join(wrapParagraphs ? '' : '<br><br>');
 
-        return DOMPurify.sanitize(out, SANITIZE_OPTIONS);
+        const clean = DOMPurify.sanitize(out, SANITIZE_OPTIONS);
+        return `${clean}`;
     }
 
     let clean = DOMPurify.sanitize(raw, SANITIZE_OPTIONS);
 
     if (wrapParagraphs) {
-        clean = clean.replace(/<p[^>]*>\s*(?:&nbsp;|\s|\u00A0)*<\/p>/gi, '');
+        clean = `<p>${clean}</p>`;
     }
 
     clean = clean.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');
 
-    return clean.trim();
+    return `${clean.trim()}`;
 }
 
 function encodePlainText(s) {

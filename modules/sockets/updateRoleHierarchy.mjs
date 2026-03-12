@@ -5,12 +5,12 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('updateRoleHierarchy', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+    socket.on('updateRoleHierarchy', async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true
+            && serverconfig.servermembers[member.id].token === member.token
         ) {
 
-            if (hasPermission(member.id, "manageRoles")) {
+            if (await hasPermission(member.id, "manageRoles")) {
                 try {
                     var sortedRoles = member.sorted.reverse();
 

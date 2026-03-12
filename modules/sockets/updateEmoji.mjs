@@ -9,13 +9,13 @@ export default (io) => (socket) => {
     socket.on('updateEmoji', async function (member, response) {
         checkRateLimit(socket);
 
-        if (validateMemberId(member.id, socket, serverconfig.servermembers[member.id].token) === true
+        if (await validateMemberId(member.id, socket, serverconfig.servermembers[member.id].token) === true
         ) {
             if(!member?.filehash) response({ type: "error", msg: "No filehash supplied. Its needed to identify emojis" });
             if(!member?.emojiName) response({ type: "error", msg: "No emoji name supplied. Needed for updating. Supply old one for no changes" });
 
             try {
-                if (!hasPermission(member.id, "manageEmojis")) {
+                if (!await hasPermission(member.id, "manageEmojis")) {
                     sendMessageToUser(socket.id, JSON.parse(
                         `{
                             "title": "Missing permissions!",

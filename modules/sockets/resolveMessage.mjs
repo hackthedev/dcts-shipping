@@ -88,7 +88,7 @@ export default (io) => (socket) => {
 
     socket.on('resolveMessage', async function (member, response) {
         // some code
-        if(validateMemberId(member?.id, socket, member?.token) === true){
+        if(await validateMemberId(member?.id, socket, member?.token) === true){
 
             if(!member?.messageId || (typeof member?.messageId !== "string" && typeof member?.messageId !== "number")) {
                 response({ error: "Message ID is required and needs to be a string or number", message: null})
@@ -107,7 +107,7 @@ export default (io) => (socket) => {
                 messageObj.reply = replyResult.message;
             }
 
-            if (!hasPermission(member.id, "viewChannel", messageObj?.channel)) {
+            if (!await hasPermission(member.id, "viewChannel", messageObj?.channel)) {
                 response({ error: "You dont have permission to resolve the message", message: null})
                 return;
             }

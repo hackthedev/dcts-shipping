@@ -5,12 +5,11 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('addRoleToGroup', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+    socket.on('addRoleToGroup', async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
-            if (hasPermission(member.id, "manageGroups")) {
+            if (await hasPermission(member.id, "manageGroups")) {
                 try {
                     serverconfig.groups[member.group].permissions[member.role] = JSON.parse(
                         `

@@ -416,8 +416,8 @@ export async function checkConnectionLimit(socket, token = null, id = null) {
     if (token !== null && id !== null) {
 
         // lets make sure the account data is correct
-        if (await validateMemberIdid, socket, true) == true
-            && serverconfig.servermembers[id].token == token) {
+        if (await validateMemberId(id, socket, true) === true
+            && serverconfig.servermembers[id].token === token) {
 
             // check if user is allowed to bypass based on roles
             if (await hasPermission(id, ["bypassSlots"])) canBypassWithRoles = true;

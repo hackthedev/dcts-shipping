@@ -172,6 +172,10 @@
         display: none !important;
     }
 
+    .message-container .row .icon-container{
+        width: 34px !important;
+        height: 34px !important;
+    }
     .message-container .row.reply .icon-container{
         width: 15px !important;
         height: 15px !important;
@@ -190,7 +194,7 @@
     }
 
     #channelname {
-        font-size: 14px;
+        font-size: 18px;
 
         width: 100% !important;
     }
@@ -215,7 +219,6 @@
     }
 
     .message-container {
-        margin: 0 0 30px 0;
         padding: 0;
         width: 100%;
     }

@@ -6,7 +6,7 @@ import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('updateGroupBanner', async function (member) {
-        if (validateMemberId(member?.id, socket, member?.token) === true
+        if (await validateMemberIdmember?.id, socket, member?.token) === true
         ) {
 
             if (!await hasPermission(member.id, "manageGroups")) {

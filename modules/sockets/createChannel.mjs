@@ -6,7 +6,7 @@ import { copyObject, escapeHtml, generateId, sendMessageToUser, validateMemberId
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('createChannel', async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true
+        if (await validateMemberIdmember?.id, socket, member?.token) === true
         ) {
 
             if (!await hasPermission(member.id, "manageChannels")) {

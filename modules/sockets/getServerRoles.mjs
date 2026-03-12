@@ -6,7 +6,7 @@ import {copyObject, getRoleCastingObject, sendMessageToUser, validateMemberId} f
 export default (io) => (socket) => {
     // socket.on code here
     socket.on("getServerRoles", async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true
+        if (await validateMemberIdmember?.id, socket, member?.token) === true
         ) {
             if (await hasPermission(member.id, "manageRoles")) {
                 response(serverconfig.serverroles);

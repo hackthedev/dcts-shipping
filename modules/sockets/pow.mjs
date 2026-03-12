@@ -29,7 +29,7 @@ export function listenToPow(socket) {
             if (data?.token !== null && data?.id !== null) {
                 // lets make sure the account data is correct and save the pow
                 // so other accounts cant reuse the same id
-                if (validateMemberId(data?.id, socket, data?.token,  true) === true) {
+                if (await validateMemberIddata?.id, socket, data?.token,  true) === true) {
                     // if someone uses the same pow kick em!
                     const members = Object.values(serverconfig.servermembers || {});
                     const duplicatePowMember = members.find(member => member.pow === powString);

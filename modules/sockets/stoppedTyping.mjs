@@ -6,8 +6,8 @@ import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../
 export default (io) => (socket) => {
     // socket.on code here
 
-    socket.on('stoppedTyping', function (member) {
-        if (validateMemberId(member.id, socket) == true
+    socket.on('stoppedTyping', async function (member) {
+        if (await validateMemberIdmember.id, socket) == true
             && serverconfig.servermembers[member.id].token == member.token) {
 
             var username = serverconfig.servermembers[member.id].name;

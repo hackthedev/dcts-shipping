@@ -227,7 +227,7 @@ async function buildThreadOut(threadId, memberId = null) {
 export default (io) => (socket) => {
 
     socket.on("deleteThread", async function (data, response) {
-        if (validateMemberId(data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
+        if (await validateMemberIddata.memberId, socket, data?.token) === true) {
             try {
                 const me = data.memberId;
                 const threadId = data?.threadId;
@@ -265,7 +265,7 @@ export default (io) => (socket) => {
 
 
     socket.on("markRead", async function (data, response) {
-        if (validateMemberId(data?.id, socket, data?.token) === true) {
+        if (await validateMemberIddata?.id, socket, data?.token) === true) {
             try {
                 const me = data.id;
                 const { threadId, ts } = data || {};
@@ -301,7 +301,7 @@ export default (io) => (socket) => {
     });
 
     socket.on("fetchMessages", async function (data, response) {
-        if (validateMemberId(socket.data.memberId, socket, serverconfig.servermembers[data.id].token) === true) {
+        if (await validateMemberIdsocket.data.memberId, socket, serverconfig.servermembers[data.id].token) === true) {
             try {
                 const me = socket.data.memberId;
                 const threadId = data?.threadId;
@@ -358,7 +358,7 @@ export default (io) => (socket) => {
 
     socket.on("joinServer", async function (_member, response) {
         try {
-            if (!validateMemberId(_member?.id, socket, serverconfig.servermembers[_member.id].token) === true) {
+            if (!await validateMemberId_member?.id, socket, serverconfig.servermembers[_member.id].token) === true) {
                 response?.({ type: "error", msg: "invalid member in join server home" });
                 return;
             }
@@ -484,7 +484,7 @@ export default (io) => (socket) => {
 
 
     socket.on("createThread", async function (data, response) {
-        if (validateMemberId(socket.data.memberId, socket, serverconfig.servermembers[data.id].token) === true) {
+        if (await validateMemberIdsocket.data.memberId, socket, serverconfig.servermembers[data.id].token) === true) {
             try {
                 const me = socket.data.memberId;
                 if (!me) return response?.({ type: "error", msg: "unauthorized" });
@@ -538,7 +538,7 @@ export default (io) => (socket) => {
 
 
     socket.on("fetchThreads", async function (_member, response) {
-        if (validateMemberId(socket.data.memberId, socket, _member.token) === true) {
+        if (await validateMemberIdsocket.data.memberId, socket, _member.token) === true) {
             try {
                 const threads = await queryDatabase(
                     `SELECT threadId, type, title FROM dms_threads`,
@@ -570,7 +570,7 @@ export default (io) => (socket) => {
 
     socket.on("sendMessage", async (data, response) => {
         try {
-            if (!validateMemberId(socket.data.memberId, socket, data.token)) {
+            if (!await validateMemberIdsocket.data.memberId, socket, data.token)) {
                 return response?.({ type: 'error', msg: 'unauthorized' });
             }
             if (serverconfig.servermembers[data.id].token !== data.token) {
@@ -681,7 +681,7 @@ export default (io) => (socket) => {
 
     /*
     socket.on("reportMessage", async (data, cb) => {
-        if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
+        if (await validateMemberIdsocket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
             try {
                 const me = socket.data.memberId;
                 if (!me) return cb?.({ type: "error", msg: "unauthorized" });
@@ -758,7 +758,7 @@ export default (io) => (socket) => {
 
 
     socket.on('fetchTickets', async ({ status = 'open', asStaff, id, token }, cb) => {
-        if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[id].token == token) {
+        if (await validateMemberIdsocket.data.memberId, socket) == true && serverconfig.servermembers[id].token == token) {
             try {
                 const me = socket.data.memberId;
                 if (!me) return cb?.({ type: 'error', msg: 'unauthorized' });
@@ -809,7 +809,7 @@ export default (io) => (socket) => {
 
 
     socket.on('joinStaff', async ({ userId, token }, cb) => {
-        if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[userId].token == token) {
+        if (await validateMemberIdsocket.data.memberId, socket) == true && serverconfig.servermembers[userId].token == token) {
             try {
                 const me = socket.data.memberId;
                 if (!me) return cb?.({ type: 'error', msg: 'unauthorized' });
@@ -826,7 +826,7 @@ export default (io) => (socket) => {
 
 
     socket.on("editMessage", async function (data, response) {
-        if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
+        if (await validateMemberIdsocket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
             try {
                 const me = socket.data.memberId;
                 let { messageId, payload } = data || {};
@@ -894,14 +894,14 @@ export default (io) => (socket) => {
 
 
     socket.on("deleteDMMessage", async function (data, response) {
-        if (validateMemberId(socket.data.memberId, socket, data.token) === true) {
+        if (await validateMemberIdsocket.data.memberId, socket, data.token) === true) {
             await deleteDMMessage(socket, data, response)
         }
     });
 
     socket.on("createContent", async function (data, response) {
         try {
-            if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
+            if (await validateMemberIdsocket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
 
                 if (!await hasPermission(data.id, ["managePosts"])) {
                     response?.({ type: "error", error: "Missing permission: managePosts" });
@@ -1028,7 +1028,7 @@ export default (io) => (socket) => {
 
     socket.on("markContentRead", async function (data, response) {
         try {
-            if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
+            if (await validateMemberIdsocket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
 
                 const userId = data.id || socket.data.memberId;
                 if (!userId) return response?.({ type: "error", msg: "unauthorized" });
@@ -1077,7 +1077,7 @@ export default (io) => (socket) => {
             return;
         }
 
-        if (!validateMemberId(userId, socket) || !(serverconfig.servermembers[userId] && serverconfig.servermembers[userId].token == data.token)) {
+        if (!await validateMemberIduserId, socket) || !(serverconfig.servermembers[userId] && serverconfig.servermembers[userId].token == data.token)) {
             response?.({ type: "error", error: "invalid_member_or_token" });
             return;
         }
@@ -1190,7 +1190,7 @@ export default (io) => (socket) => {
 
 
     socket.on("deleteContent", async function (data, response) {
-        if (validateMemberId(socket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
+        if (await validateMemberIdsocket.data.memberId, socket) == true && serverconfig.servermembers[data.id].token == data.token) {
             try {
 
                 if (!await hasPermission(data.id, ["managePosts"])) {

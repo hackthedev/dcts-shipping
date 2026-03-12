@@ -4,7 +4,7 @@ import { queryDatabase } from "../functions/mysql/mysql.mjs";
 
 export default (io) => (socket) => {
     socket.on('getGroupStats', async function (member, response) {
-        if (validateMemberId(member?.id, socket) == true
+        if (await validateMemberIdmember?.id, socket) == true
             && serverconfig.servermembers[member?.id]?.token == member?.token
         ) {
             if (member.group == undefined || member.group == null) {

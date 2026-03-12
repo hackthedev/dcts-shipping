@@ -10,7 +10,7 @@ export default (io) => (socket) => {
 
     socket.on('getNetworkServers', async function (member, response) {
         // some code
-        if(validateMemberId(member?.id, socket, member?.token) === false){
+        if(await validateMemberIdmember?.id, socket, member?.token) === false){
             response({ error: null })
             return;
         }

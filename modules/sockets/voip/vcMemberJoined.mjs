@@ -12,8 +12,8 @@ function setupVcChannel(channelId){
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('notifyVcMemberJoined', function (oMember, response) {
-        if(validateMemberId(oMember?.id, socket, oMember?.token) === true){
+    socket.on('notifyVcMemberJoined', async function (oMember, response) {
+        if(await validateMemberIdoMember?.id, socket, oMember?.token) === true){
 
             setupVcChannel(oMember.channelId);
 
@@ -25,8 +25,8 @@ export default (io) => (socket) => {
         }
     });
 
-    socket.on('notifyVcMemberLeft', function (oMember, response) {
-        if(validateMemberId(oMember?.id, socket, oMember?.token) === true){
+    socket.on('notifyVcMemberLeft', async function (oMember, response) {
+        if(await validateMemberIdoMember?.id, socket, oMember?.token) === true){
             setupVcChannel(oMember.channelId);
 
             if(vcUsers[oMember.channelId].members.includes(oMember.id)){
@@ -38,7 +38,7 @@ export default (io) => (socket) => {
     });
 
     socket.on('getVcChannelMembers', async function (member, response) {
-        if(validateMemberId(member?.id, socket, member?.token) === true){
+        if(await validateMemberIdmember?.id, socket, member?.token) === true){
 
             if (!await hasPermission(member.id, ["useVOIP", "viewChannel"], member.channelId, "all")) {
                 response({error: "You dont have permissions to view the channel's vc participants"})

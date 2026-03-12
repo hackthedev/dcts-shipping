@@ -6,7 +6,7 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('deleteGroup', async function (member) {
-        if (validateMemberId(member?.id, socket, member?.token) === true
+        if (await validateMemberIdmember?.id, socket, member?.token) === true
         ) {
             if (serverconfig.groups[member.group].info.isDeletable === 0) {
                 return sendMessageToUser(socket.id, JSON.parse(

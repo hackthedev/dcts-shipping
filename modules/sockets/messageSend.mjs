@@ -32,7 +32,7 @@ export function getMentionIdsFromText(text) {
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('messageSend', async function (member, response) {
-        if (validateMemberId(member?.author?.id, socket, member?.token) === true) {
+        if (await validateMemberIdmember?.author?.id, socket, member?.token) === true) {
 
             // some new handling
             if (!member?.message) return response({error: "No message provided"})

@@ -8,7 +8,7 @@ export default (io) => (socket) => {
     socket.on('updateChannelHierarchy', async function (member, response) {
         checkRateLimit(socket);
 
-        if (validateMemberId(member?.id, socket, member?.token) === true
+        if (await validateMemberIdmember?.id, socket, member?.token) === true
         ) {
 
             if (await hasPermission(member.id, "manageChannels") ||

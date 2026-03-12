@@ -10,7 +10,7 @@ export default (io) => (socket) => {
 
     // socket.on code here
     socket.on('getRoomCharts', async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true) {
+        if (await validateMemberIdmember?.id, socket, member?.token) === true) {
 
             if(!member?.room) return response({ error: "No room argument passed." })
 

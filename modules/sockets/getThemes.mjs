@@ -44,7 +44,7 @@ export async function getThemes(){
 
 export default (io) => (socket) => {
     socket.on("getThemes", async (member, response) => {
-        if (validateMemberId(member?.id, socket, member?.token) !== true) return;
+        if (await validateMemberIdmember?.id, socket, member?.token) !== true) return;
         const local = getLocalThemes();
         const remote = await fetchGithubThemes();
         const merged = Array.from(new Set([...local, ...remote]));

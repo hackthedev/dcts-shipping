@@ -7,7 +7,7 @@ import { deleteChatMessagesFromDb, getChatMessagesFromDb } from "../functions/my
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('deleteMessage', async function (member) {
-        if (validateMemberId(member.id, socket) === true && serverconfig.servermembers[member.id].token === member.token) {
+        if (await validateMemberIdmember.id, socket) === true && serverconfig.servermembers[member.id].token === member.token) {
             if(!member?.messageId){
                 Logger.warn("Tried deleting a message without supplying the id");
                 return;

@@ -296,8 +296,8 @@ let permList = {
 
 export default (io) => (socket) => {
 
-    socket.on('getPermissions', function (member, response) {
-        if (validateMemberId(member?.id, socket) === true && serverconfig.servermembers[member?.id].token === member?.token) {
+    socket.on('getPermissions', async function (member, response) {
+        if (await validateMemberIdmember?.id, socket) === true && serverconfig.servermembers[member?.id].token === member?.token) {
             const categories = member.categories || []; // optional filter
 
             let filteredPerms = {};
@@ -319,7 +319,7 @@ export default (io) => (socket) => {
 
     // socket.on code here
     socket.on('checkPermission', async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true) {
+        if (await validateMemberIdmember?.id, socket, member?.token) === true) {
 
             var userObj = await getCastingMemberObject(serverconfig.servermembers[member.id]);
 

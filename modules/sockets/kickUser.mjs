@@ -7,7 +7,7 @@ import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('kickUser', async function (member) {
-        if (validateMemberId(member?.id, socket, member?.token) === true) {
+        if (await validateMemberIdmember?.id, socket, member?.token) === true) {
 
             if (member.id === member.target) {
                 return sendMessageToUser(socket.id, JSON.parse(

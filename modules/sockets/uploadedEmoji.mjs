@@ -8,7 +8,7 @@ export default (io) => (socket) => {
 
     socket.on('uploadedEmoji', async function (member) {
         // some code
-        if(validateMemberId(member?.id, socket, member?.token) === true){
+        if(await validateMemberIdmember?.id, socket, member?.token) === true){
             if (await hasPermission(member.id, "manageEmojis") === false) {
                 return;
             }

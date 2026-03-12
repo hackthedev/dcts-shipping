@@ -7,7 +7,7 @@ export default (io) => (socket) => {
 
     socket.on('updateRegistration', async function (member, response) {
         // some code
-        if(validateMemberId(member?.id, socket, member?.token) === true){
+        if(await validateMemberIdmember?.id, socket, member?.token) === true){
             if(!await hasPermission(member?.id, "manageServer")){
                 response({ error: "You dont have permissions to change the registraion settings." })
                 return;

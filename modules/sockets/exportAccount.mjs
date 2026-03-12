@@ -6,7 +6,7 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('exportAccount', function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token)
+        if (await validateMemberIdmember?.id, socket, member?.token)
         ) {
             try{
                 // some funky code here

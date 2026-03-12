@@ -13,7 +13,7 @@ export default (io) => (socket) => {
         member.filename = xssFilters.inHTMLData(member.filename)
         if (member.filename.includes("..")) return;
         
-        if (validateMemberId(member.id, socket, member?.token) === true
+        if (await validateMemberIdmember.id, socket, member?.token) === true
         ) {
 
             if (await hasPermission(member.id, "manageEmojis")) {

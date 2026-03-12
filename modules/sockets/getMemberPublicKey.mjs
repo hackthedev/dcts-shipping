@@ -6,8 +6,8 @@ import {copyObject, emitBasedOnMemberId, sendMessageToUser, validateMemberId} fr
 export default (io) => (socket) => {
     // socket.on code here
 
-    socket.on('getMemberPublicKey', function (member, response) {
-        if(validateMemberId(member?.id, socket, member?.token) === true){
+    socket.on('getMemberPublicKey', async function (member, response) {
+        if(await validateMemberIdmember?.id, socket, member?.token) === true){
 
             if(!member?.target){
                 response({ error: "No target member specified"})

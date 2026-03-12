@@ -4,7 +4,7 @@ import Auditlog from "../functions/Audit.mjs";
 
 export default (io) => (socket) => {
     socket.on('getAuditlog', async function (member, response) {
-        if(validateMemberId(member?.id, socket, member?.token) === true){
+        if(await validateMemberIdmember?.id, socket, member?.token) === true){
             if(!await hasPermission(member?.id, "viewAuditLog")){
                 response({ error: "You're not allowed to view the Audit log" });
                 return;

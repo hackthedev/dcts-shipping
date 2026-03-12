@@ -69,14 +69,14 @@ export function initPaymentSystem(app){
             const userId = req.headers['x-user-id'];
             if (!token || !userId) return false
 
-            return validateMemberId(userId, null, token) && await hasPermission(userId, "manageShop");
+            return await validateMemberIduserId, null, token) && await hasPermission(userId, "manageShop");
         },
         enrichMetadata: async (req) => {
             const token = req.headers['x-token'];
             const userId = req.headers['x-user-id'];
             if (!token || !userId) throw new Error('missing auth headers');
 
-            if(!validateMemberId(userId, null, token)) throw new Error('Failed auth');
+            if(!await validateMemberIduserId, null, token)) throw new Error('Failed auth');
 
             return { userId, token };
         },

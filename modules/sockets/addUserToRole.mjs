@@ -8,7 +8,7 @@ import {stripHTML} from "../functions/sanitizing/functions.mjs";
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('addUserToRole', async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true) {
+        if (await validateMemberIdmember?.id, socket, member?.token) === true) {
 
             if(!member?.target) return response ({error: "Missing target user id"})
             if(!member?.role) return response ({error: "Missing target role id"})

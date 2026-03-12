@@ -6,7 +6,7 @@ import { generateId, validateMemberId } from "../functions/main.mjs";
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('createRole', async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true
+        if (await validateMemberIdmember?.id, socket, member?.token) === true
         ) {
 
             if (await hasPermission(member.id, "manageRoles")) {

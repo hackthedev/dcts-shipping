@@ -47,7 +47,7 @@ export async function getPublicServerInfoObject(){
 export default (io) => (socket) => {
     // socket.on code here
     socket.on("getServerInfo", async function (member, response) {
-        if (validateMemberId(member?.id, socket,  member?.token) === true
+        if (await validateMemberIdmember?.id, socket,  member?.token) === true
         ) {
             let serverInfoObj = await getPublicServerInfoObject();
 
@@ -78,7 +78,7 @@ export default (io) => (socket) => {
     });
 
     socket.on("saveServerInfo", async function (member, response) {
-        if (validateMemberId(member?.id, socket,  member?.token) === true
+        if (await validateMemberIdmember?.id, socket,  member?.token) === true
         ) {
             if (await hasPermission(member.id, "manageServer")) {
                 if(member?.serverinfo?.name != null) serverconfig.serverinfo.name = member.serverinfo.name;

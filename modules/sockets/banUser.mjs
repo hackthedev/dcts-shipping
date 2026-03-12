@@ -8,7 +8,7 @@ import {banUser} from "../functions/ban-system/helpers.mjs";
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('banUser', async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true) {
+        if (await validateMemberIdmember?.id, socket, member?.token) === true) {
 
             if (member.id === member.target) {
                 return response({ type: "error", msg: "You cant ban yourself!", error: "You cant ban yourself." });

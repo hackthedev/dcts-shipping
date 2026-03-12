@@ -6,9 +6,9 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
 
-    socket.on('MyEvent', function (member, response) {
+    socket.on('MyEvent', async function (member, response) {
         // some code
-        if(validateMemberId(member?.id, socket, member?.token) === false){
+        if(await validateMemberIdmember?.id, socket, member?.token) === false){
             response({ error: null })
             return;
         }

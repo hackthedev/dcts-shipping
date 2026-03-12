@@ -6,7 +6,7 @@ import {copyObject, escapeHtml, sendMessageToUser, validateMemberId} from "../fu
 export default (io) => (socket) => {
     // socket.on code here
     socket.on("getGroupInfo", async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true
+        if (await validateMemberIdmember?.id, socket, member?.token) === true
         ) {
             if (await hasPermission(member.id, "manageGroups")) {
 
@@ -25,7 +25,7 @@ export default (io) => (socket) => {
     });
 
     socket.on("updateGroup", async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token)) {
+        if (await validateMemberIdmember?.id, socket, member?.token)) {
             if (await hasPermission(member.id, "manageChannels")) {
                 if(!member?.data) return response({ type: "error", msg: "No data provided" });
                 if(!member?.groupId) return response({ type: "error", msg: "No groupId provided" })

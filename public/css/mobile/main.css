@@ -163,12 +163,16 @@
         display: none !important;
     }
 
-    #serverbanner-container,
-    #profile-qa,
-    #channeltree,
-    #channellist,
-    #infolist,
-    #serverlist {
+    .mobile-ui-panel #channellist {
+        flex-grow: 1;
+    }
+
+    #contentLayout #serverbanner-container,
+    #contentLayout #profile-qa,
+    #contentLayout #channeltree,
+    #contentLayout #channellist,
+    #contentLayout #infolist,
+    #contentLayout #serverlist {
         display: none !important;
     }
 

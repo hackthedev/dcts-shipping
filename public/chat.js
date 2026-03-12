@@ -27,6 +27,27 @@ function rewriteImg(img){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    MobilePanel.renderPanel([
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#mainLayout #header")
+            ]
+        },
+        {
+            direction: "row",
+            flex: "1 1 0",
+            flexGrow: 1,
+            flexShrink: 1,
+            height: "100%",
+            children: [
+                document.querySelector("#mainLayout #serverlist"),
+                document.querySelector("#mainLayout #channellist")
+            ]
+        }
+    ], "left");
+
+
     document.querySelectorAll("img").forEach(rewriteImg);
     new MutationObserver(mutations => {
         for(const m of mutations){
@@ -146,27 +167,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         profileContent.innerHTML = "";
         ModActions.hideRoleMenu()
     });
-
-    // mobile swiping
-    const contentLayout = document.getElementById("contentLayout");
-    contentLayout.addEventListener("touchstart", e => {
-        const t = e.touches[0];
-        startX = t.clientX;
-        startY = t.clientY;
-    });
-
-    contentLayout.addEventListener("touchend", e => {
-        const t = e.changedTouches[0];
-        const dx = t.clientX - startX;
-        const dy = t.clientY - startY;
-
-        if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
-
-        if (Math.abs(dx) > Math.abs(dy)) {
-            onSwipe(dx > 0 ? "right" : "left");
-        }
-    });
-
 
     document.getElementById("message-actions-image").onclick = function (e) {
         var x = e.clientX;
@@ -2452,7 +2452,8 @@ async function setUrl(param, isVC = false) {
             token: UserManager.getToken(),
             permission: "sendMessages"
         }, function (response) {
-            switchLeftSideMenu(true)
+
+            MobilePanel.close()
 
             // lets prioritize loading the chat lol
             changedChannel()

@@ -334,6 +334,7 @@ export async function saveChatMessage(message, editedMsgId = null) {
     saveConfig(serverconfig);
 
     let mentions = getMentionIdsFromText(message.message)
+
     // add mentions to to inbox based on user mention
     for (const memberId of mentions.userIds) {
         if (memberId !== message?.author?.id) await addInboxMessage(memberId, {messageId: message.messageId}, "message", `${memberId}-${message.messageId}`);

@@ -166,13 +166,6 @@ export function decodeFromBase64(base64String) {
     return decodeURIComponent(atob(base64String));
 }
 
-export function escapeJSONString(str) {
-    return str.replace(/\\/g, '\\\\')  // Escape backslashes
-        .replace(/"/g, '\\"')    // Escape double quotes
-        .replace(/\n/g, '\\n')   // Escape newlines
-        .replace(/\r/g, '\\r')   // Escape carriage returns
-        .replace(/\t/g, '\\t');  // Escape tabs
-}
 
 export async function markInboxMessageAsRead(memberId, inboxId) {
     if (!memberId) throw new Error("No member id provided");

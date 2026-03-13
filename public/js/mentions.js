@@ -20,9 +20,6 @@ async function updateUIMentions(){
             let mention = mentions.items[mentionKey]
             let mentionType = mention?.type;
 
-            // parse this shit
-            mention.data = JSON.parse(mention?.data || "{}");
-
             if(mentionType === "message"){
                 await handleMessageMentionType(mention)
             }

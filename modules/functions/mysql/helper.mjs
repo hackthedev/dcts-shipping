@@ -3,6 +3,9 @@ import {XMLHttpRequest, fetch, serverconfig} from "../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import fs from "fs";
 import {spawn} from "child_process";
+import JSONTools from "@hackthedev/json-tools";
+import {getMessageObjectById} from "../../sockets/resolveMessage.mjs";
+import {autoAnonymizeMessage} from "../main.mjs";
 
 
 export async function exportDatabaseFromPool(pool, outFile) {
@@ -207,6 +210,7 @@ export async function getInboxMessages({
                                            inboxId = null,
                                            onlyUnread = false
                                        } = {}) {
+    index = Number(index ?? -1);
 
     if (inboxId !== null) {
         const query = `SELECT *
@@ -223,7 +227,24 @@ export async function getInboxMessages({
         return await queryDatabase(query, [memberId]);
     }
 
-    return await getUnreadInbox(memberId, index);
+    let inboxEntries = await getUnreadInbox(memberId, index);
+
+    if(inboxEntries?.length > 0){
+        for(let i = 0; i < inboxEntries.length; i++){
+            let inboxEntry = inboxEntries[i];
+
+
+            if(inboxEntry?.data) inboxEntry.data = JSONTools.tryParse(inboxEntry.data);
+            if(inboxEntry?.data?.messageId){
+                inboxEntry.message = (await autoAnonymizeMessage(memberId, await getMessageObjectById(inboxEntry.data.messageId)))?.message ?? null
+            }
+
+
+            console.log(inboxEntry);
+        }
+    }
+
+    return inboxEntries;
 
     async function getUnreadInbox(memberId, index = -1){
         if(index !== -1){

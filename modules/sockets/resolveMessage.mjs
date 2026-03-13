@@ -79,6 +79,11 @@ export async function getMessageObjectById(messageId){
 
     message = await checkMessageObjAuthor(message);
     message = await checkMessageObjReactions(message);
+
+    if(message?.group && message?.category && message?.channel){
+        message.channelName = serverconfig.groups[message.group].channels.categories[message.category].channel[message.channel].name
+    }
+
     return { error: null, message };
 }
 

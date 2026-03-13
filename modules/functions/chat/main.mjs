@@ -22,9 +22,11 @@ var serverconfigEditable = serverconfig;
 
 export async function getMemberLastOnline(memberId) {
     if (!memberId || !serverconfig.servermembers[memberId]) return null;
-    if(await shouldIgnoreMember(serverconfig.servermembers[memberId])) return null;
 
-    const lastOnline = serverconfig.servermembers[memberId].lastOnline;
+    const member = serverconfig.servermembers[memberId];
+    if (await shouldIgnoreMember(member)) return null;
+
+    const lastOnline = Number(member.lastOnline || 0);
     const now = Date.now();
     const minutesPassed = Math.floor((now - lastOnline) / 60000);
     const isOnline = Array.from(io.sockets.sockets.values()).some(s => s.data?.memberId === memberId);
@@ -32,12 +34,24 @@ export async function getMemberLastOnline(memberId) {
     return { isOnline, minutesPassed };
 }
 
-
 export async function getOnlineMemberCount() {
-    const onlineMembers = Object.values(serverconfig.servermembers)
-        .filter(async m => !await shouldIgnoreMember(m) && m?.id && Number(await getMemberLastOnline(m.id).minutesPassed) <= 5);
+    const sockets = Array.from(io.sockets.sockets.values());
+    const uniqueMembers = new Set();
 
-    return onlineMembers.length;
+    for (const s of sockets) {
+        const memberId = s.data?.memberId;
+        if (!memberId) continue;
+
+        const member = serverconfig.servermembers[memberId];
+        if (!member) continue;
+
+        if (await shouldIgnoreMember(member)) continue;
+        if(Number((await getMemberLastOnline(member.id)).minutesPassed) > 5) continue
+
+        uniqueMembers.add(memberId);
+    }
+
+    return uniqueMembers.size;
 }
 
 export async function hasPermission(userId, permissions, channelOrGroupId = null, mode = "any") {

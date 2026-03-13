@@ -913,6 +913,32 @@ function getMessageId(element) {
     }
 }
 
+function extractHost(url){
+    if(!url) return null;
+    const s = String(url).trim();
+
+    const looksLikeBareIPv6 = !s.includes('://') && !s.includes('/') && s.includes(':') && /^[0-9A-Fa-f:.]+$/.test(s);
+    const withProto = looksLikeBareIPv6 ? `https://[${s}]` : (s.includes('://') ? s : `https://${s}`);
+
+    try {
+        const u = new URL(withProto);
+        const host = u.hostname; // IPv6 returned without brackets
+        const port = u.port;
+        if (host.includes(':')) {
+            return port ? `[${host}]:${port}` : host;
+        }
+        return port ? `${host}:${port}` : host;
+    } catch (e) {
+        const re = /^(?:https?:\/\/)?(?:[^@\/\n]+@)?([^:\/?#]+)(?::(\d+))?(?:[\/?#]|$)/i;
+        const m = s.match(re);
+        if (!m) return null;
+        const hostname = m[1].replace(/^\[(.*)\]$/, '$1');
+        const port = m[2];
+        if (hostname.includes(':')) return port ? `[${hostname}]:${port}` : hostname;
+        return port ? `${hostname}:${port}` : hostname;
+    }
+}
+
 async function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false) {
     if (UserManager.getUsername() != null) {
         var username = UserManager.getUsername();
@@ -941,7 +967,7 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                 challenge: localStorage.getItem("pow_challenge"),
                 solution: localStorage.getItem("pow_solution")
             }
-        }, function (response) {
+        }, async function (response) {
 
             // sync data
             if (response?.token) CookieManager.setCookie("token", response.token);
@@ -953,7 +979,16 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
             if (response?.name) CookieManager.setCookie("username", response.name);
             if (response?.id) CookieManager.setCookie("id", response.id);
 
-            console.log(response)
+            // account manager soon?
+            if (await isLauncher()) {
+                if (await Client().setAccountCredentials) {
+                    await Client().setAccountCredentials(
+                        extractHost(window.location.origin),
+                        UserManager.getID(),
+                        UserManager.getToken()
+                    );
+                }
+            }
 
             // if we finished onboarding
             if (!response?.error && response.finishedOnboarding === true && initial) {
@@ -1459,6 +1494,8 @@ async function sendMessageToServer(authorId = UserManager.getID(),
     if (await Client()) {
         msgPayload = await Client().SignJson(msgPayload);
     }
+
+    console.error(JSON.stringify(msgPayload, null, 4));
 
     return new Promise((resolve, reject) => {
         socket.emit("messageSend", msgPayload, async function (response) {

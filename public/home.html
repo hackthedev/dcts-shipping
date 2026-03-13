@@ -37,6 +37,7 @@
     <script src="/js/core/Client.js"></script>
 
     <title>{{server.name}} – Server Home & DMs</title>
+    <script src="../../dcts-client-shipping/electron/modules/EncryptData.mjs"></script>
 </head>
 
 <body>
@@ -604,8 +605,6 @@
     function avatarHTML(member, size = 'normal') {
         const cls = size === 'small' ? 'avatar small' : size === 'tiny' ? 'avatar tiny' : 'avatar';
         const dot = `<span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span>`;
-
-        console.log(member)
 
         if (member.icon || member.id === "system") {
             return `<div class="${cls}"><img src="${member.id === "system" ? "/img/default_icon.png" : member.icon}" alt=""><span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span></div>`;
@@ -1550,7 +1549,6 @@
             if(!decryptedPlain || decryptedPlain.trim().length === 0){
                 return getFailedDecryptionNotice();
             }
-
             if(message?.text?.plainSig){
 
                 // get the public key from the other participant, and try to
@@ -1563,11 +1561,13 @@
                 // keep it just in case.
                 if(isMine) publicKey = await Crypto.getPublicKey();
 
-                let isValidPlainTextSig = publicKey ? await Client().VerifyString(decryptedPlain, message?.text?.plainSig, publicKey) : false;
-
                 // for my next magic trick, we shall verify the entire message object too
                 // to make sure nothing was modified, like the entire thing aka message.text object
-                let isOriginalTextObject = publicKey ? await Client().VerifyJson(message?.text, publicKey) : false;
+                let sigRaw = publicKey ? await Client().VerifyString(decryptedPlain, message?.text?.plainSig, publicKey) : false;
+                let objRaw = publicKey ? await Client().VerifyJson(message?.text, publicKey) : false;
+
+                let isValidPlainTextSig = sigRaw === true || sigRaw === "true";
+                let isOriginalTextObject = objRaw === true || objRaw === "true";
 
                 // shows failed error message
                 if(isValidPlainTextSig !== true || isOriginalTextObject !== true){
@@ -1916,6 +1916,7 @@
                 console.warn(targetPublicKey)
             }
         }
+
         socket.emit("sendMessage", payload, (ack) => {
             if (ack?.type === "success") inp.value = "";
         });

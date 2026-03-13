@@ -233,14 +233,10 @@ export async function getInboxMessages({
         for(let i = 0; i < inboxEntries.length; i++){
             let inboxEntry = inboxEntries[i];
 
-
             if(inboxEntry?.data) inboxEntry.data = JSONTools.tryParse(inboxEntry.data);
             if(inboxEntry?.data?.messageId){
                 inboxEntry.message = (await autoAnonymizeMessage(memberId, await getMessageObjectById(inboxEntry.data.messageId)))?.message ?? null
             }
-
-
-            console.log(inboxEntry);
         }
     }
 

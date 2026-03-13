@@ -209,14 +209,14 @@ export default (io) => (socket) => {
 
         // check if public key was supplied
         if (member?.publicKey && member?.publicKey?.length > 10) {
-            member.publicKey = sanitizeHTML(
+            member.publicKey = stripHTML(
                 normaliseString(member?.publicKey),
             );
         }
 
         // check if knownServers was supplied
         if (member?.knownServers && member?.knownServers?.length > 2) {
-            member.knownServers = sanitizeHTML(member?.knownServers);
+            member.knownServers = stripHTML(member?.knownServers);
             discoverHosts(member.knownServers);
         }
 

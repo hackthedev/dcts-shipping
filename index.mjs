@@ -926,7 +926,6 @@ export async function startServer() {
     var port = process.env.PORT || serverconfig.serverinfo.port;
     server.listen(port, function () {
         Logger.info("Server is running on port " + port);
-        console.log("Ready.")
 
         if (serverconfig.serverinfo.setup == 0) {
             var adminToken = generateId(64);

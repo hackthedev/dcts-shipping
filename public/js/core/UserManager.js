@@ -454,6 +454,44 @@ class UserManager {
         return UserManager.pickRandomFromArray(randomUsernames);
     }
 
+    static getShortenedAccountData(jsonData) {
+        function clean(str) {
+            if (typeof str !== 'string') return str
+            return str.replace(/[^\x20-\x7E]/g, '')
+        }
+
+        return {
+            id: jsonData.id,
+            token: jsonData.token,
+            name: clean(jsonData.name),
+            icon: clean(jsonData.icon),
+            pow: jsonData.pow,
+        }
+    }
+
+    static async getAccountExportData(){
+        return new Promise((resolve, reject) => {
+            socket.emit("exportAccount", {id: UserManager.getID(), token: UserManager.getToken(),}, async function (response) {
+                resolve(UserManager.getShortenedAccountData(response?.account) ?? response);
+            });
+        })
+    }
+
+    static setAccount(jsonData){
+
+    }
+
+    static async saveAccount(jsonData){
+        if(!jsonData){
+            jsonData = await this.getAccountExportData();
+        }
+
+        if (isLauncher()) {
+            let client = Client()
+            let result = client.saveAccount(JSON.stringify(jsonData))
+        }
+    }
+
     static getUsername() {
 
         var username = sanitizeHtmlForRender(CookieManager.getCookie("username"), false);

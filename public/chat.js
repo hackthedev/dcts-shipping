@@ -988,6 +988,8 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                         UserManager.getToken()
                     );
                 }
+
+                UserManager.saveAccount()
             }
 
             // if we finished onboarding

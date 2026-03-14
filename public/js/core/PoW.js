@@ -77,6 +77,10 @@ function setupAccountFromData(data) {
 }
 
 async function setupAccount(challenge, difficulty) {
+    if(await isLauncher()){
+        if(await Client().pickAccount) await Client().pickAccount();
+    }
+
     customPrompts.showPrompt(
         "Welcome!",
         `

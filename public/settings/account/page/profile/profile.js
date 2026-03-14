@@ -106,20 +106,25 @@ async function exportAccount() {
             response.account.banner = `${window.location.origin}${response.account.banner}`
         }
 
-
         customPrompts.showConfirm("Generate a QR code?",
             [["Yes", "success"], ["No", "error"]],
             (selectedOption) => {
                 if (selectedOption === "yes") {
                     let qrcodeElement = document.getElementById("export-account-qrcode");
-                    new QRCode(qrcodeElement, JSON.stringify(response.account))
+
+                    console.log(UserManager.getShortenedAccountData(response.account))
+                    new QRCode(qrcodeElement, {
+                        text: JSON.stringify(UserManager.getShortenedAccountData(response.account)),
+                        correctLevel: QRCode.CorrectLevel.L,
+                        typeNumber: 40,
+                    })
                 }
 
                 customPrompts.showConfirm("Export as file?",
                     [["Yes", "success"], ["No", "error"]],
                     async (selectedOption2) => {
                         if (selectedOption2 === "yes") {
-                            await FileManager.saveFile(JSON.stringify(response.account, null, 4), `${window.location.origin}_identity_${UserManager.getUsername()}.json`)
+                            await FileManager.saveFile(JSON.stringify(response.account), `${window.location.origin}_identity_${UserManager.getUsername()}.json`)
                         }
                     })
             })

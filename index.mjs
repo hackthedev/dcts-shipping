@@ -124,11 +124,6 @@ if (nodeArgs.includes("--debug") || debugmode === true) {
     flipDebug();
 }
 
-if (nodeArgs.includes("--halt-manual-db") || debugmode === true) {
-    Logger.warn("")
-    process.exit(0)
-}
-
 // check if needed directories are setup
 checkServerDirectories();
 

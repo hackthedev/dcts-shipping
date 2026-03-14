@@ -1,6 +1,7 @@
 import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
 
 console.clear();
+console.log("Starting...");
 
 let versionPath = path.join(path.resolve(), "version");
 if(!fs.existsSync(versionPath)) {

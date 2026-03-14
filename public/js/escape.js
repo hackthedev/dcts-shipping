@@ -90,7 +90,8 @@ function sanitizeHtmlForRender(html, wrapParagraphs = true) {
             .filter(Boolean);
 
         let out = paras.map(p => {
-            const withBreaks = encodePlainText(p).replace(/\n/g, '<br>');
+            const decoded = Object.assign(document.createElement('textarea'), { innerHTML: p }).value;
+            const withBreaks = encodePlainText(decoded).replace(/\n/g, '<br>');
             return wrapParagraphs ? `<p>${withBreaks}</p>` : withBreaks;
         }).join(wrapParagraphs ? '' : '<br><br>');
 

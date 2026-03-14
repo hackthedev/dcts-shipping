@@ -366,7 +366,7 @@ class ChatManager {
                     <h3 style="margin-bottom: 6px;">Instance Information</h3>
                     
                     <a onclick="Docs.open('/Web Client/Main/Instance Info.md')"><u>Documentation</u></a>
-                    <a href="https://github.com/hackthedev/dcts-shipping/releases/tag/${versionText}" target="_blank">Version ${versionText}</a>                    
+                    <a href="https://github.com/hackthedev/dcts-shipping/releases/tag/${versionText}" target="_blank">Version ${versionText}</a>               
                 </div>
             </div>    
              

@@ -1,15 +1,15 @@
-var settings_username  = null
+var settings_username = null
 var settings_loginName = null
 var settings_status = null
 var settings_aboutme = null
-var settings_icon  = null
+var settings_icon = null
 var settings_banner = null
 var preview_username = null
-var preview_status  = null
+var preview_status = null
 var preview_aboutme = null
-var preview_icon  = null
+var preview_icon = null
 var preview_banner = null
-var saveButton  = null
+var saveButton = null
 
 
 document.addEventListener("pagechange", e => {
@@ -95,18 +95,34 @@ function setPreview() {
 
 async function exportAccount() {
 
-    socket.emit("exportAccount", { id: UserManager.getID(), token: UserManager.getToken(), }, async function (response) {
+    socket.emit("exportAccount", {id: UserManager.getID(), token: UserManager.getToken(),}, async function (response) {
         console.log(response)
 
-        if(response.account.icon.substring(0, 1).includes("/")){
-            response.account.icon = await elementImageToBase64(preview_icon)
+        if (response.account.icon.substring(0, 1).includes("/")) {
+            response.account.icon = `${window.location.origin}${response.account.icon}`
         }
 
-        if(response.account.banner.substring(0, 1).includes("/")){
-            response.account.banner = await elementImageToBase64(preview_banner)
+        if (response.account.banner.substring(0, 1).includes("/")) {
+            response.account.banner = `${window.location.origin}${response.account.banner}`
         }
 
-        await FileManager.saveFile(JSON.stringify(response.account, null, 4), "identity_" + UserManager.getUsername() + ".json")
+
+        customPrompts.showConfirm("Generate a QR code?",
+            [["Yes", "success"], ["No", "error"]],
+            (selectedOption) => {
+                if (selectedOption === "yes") {
+                    let qrcodeElement = document.getElementById("export-account-qrcode");
+                    new QRCode(qrcodeElement, JSON.stringify(response.account))
+                }
+
+                customPrompts.showConfirm("Export as file?",
+                    [["Yes", "success"], ["No", "error"]],
+                    async (selectedOption2) => {
+                        if (selectedOption2 === "yes") {
+                            await FileManager.saveFile(JSON.stringify(response.account, null, 4), `${window.location.origin}_identity_${UserManager.getUsername()}.json`)
+                        }
+                    })
+            })
     });
 
     /*
@@ -142,8 +158,7 @@ function importAccount() {
 
             // refresh ui
             setPreview()
-        }
-        catch (err) {
+        } catch (err) {
             console.log(err)
             showSystemMessage({
                 title: "Error while importing account",
@@ -201,15 +216,14 @@ function saveSettings() {
         }
 
         saveButton.style.display = "none";
-    }
-    catch (error) {
+    } catch (error) {
         alert("Error while trying to save settings: " + error);
         return;
     }
 }
 
 function limitString(text, limit) {
-    if(!text) return "";
+    if (!text) return "";
 
     if (text?.length <= limit) return text?.substring(0, limit);
     else return text?.substring(0, limit) + "...";
@@ -255,13 +269,11 @@ function updatePreview(id) {
         ) {
             console.log("NOt same");
             saveButton.style.display = "block";
-        }
-        else {
+        } else {
             console.log("same");
             saveButton.style.display = "none";
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.log(e);
     }
 

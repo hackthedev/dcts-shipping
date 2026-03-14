@@ -999,3 +999,10 @@ li.info span.bullet::before {
 li.info:hover {
     background-color: transparent !important;
 }
+
+.qr-code img{
+    margin: 8px;
+    padding: 8px;
+    border-radius: 10px;
+    background-color: white;
+}

@@ -1,6 +1,5 @@
 #profile_container{
-    display: flex;
-    flex-direction: column;
+    display: block;
 
     padding: 4px;
     z-index: 20 !important;
@@ -12,6 +11,13 @@
     background-color: hsl(from var(--main) h s calc(l * 2));
     border: 2px solid hsl(from var(--main) h s calc(l * 4));
     position: absolute;
+}
+
+#export-account-qrcode img{
+    padding: 10px;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 10px;
 }
 
 #profile-role-menu{
@@ -110,6 +116,11 @@
     font-weight: bold;
 }
 
+#profile-settings-flex-container{
+    display: flex;
+    flex-direction: column;
+}
+
 #profile_username {
     float: left;
     display: block;
@@ -178,6 +189,7 @@
 #profile_change_container {
     float: left;
     display: block;
+    width: fit-content;
 
     margin: 0 60px 0 0;
 }
@@ -243,9 +255,8 @@
 #profile_container .profile_meta{
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: start;
     margin: auto;
-    margin-top: 10px;
 
     flex-wrap: wrap;
 

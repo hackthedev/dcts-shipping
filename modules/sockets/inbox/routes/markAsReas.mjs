@@ -4,7 +4,7 @@ import {getDiscoveredHosts} from "../../../functions/discovery.mjs";
 import Logger from "../../../functions/logger.mjs";
 import express from "express";
 import {validateMemberId} from "../../../functions/main.mjs";
-import {markInboxMessageAsRead} from "../../../functions/mysql/helper.mjs";
+import {getInboxMessages, markInboxMessageAsRead} from "../../../functions/mysql/helper.mjs";
 
 const pingLimiter = rateLimit({
     windowMs: 60_000,
@@ -49,6 +49,33 @@ app.post("/inbox/:inboxId/read", pingLimiter, async (req, res) => {
     }
 
     res.json({error: "Discovery is not enabled on this server"});
+});
+
+app.post("/inbox/fetch{/:index}", pingLimiter, express.json(), async (req, res) => {
+    const {id = null, token = null} = req.body || {};
+    const {index} = req.params;
+
+    if(!id) return res.status(403).json( { error: "Member id missing" });
+    if(!token) return res.status(403).json( { error: "Member token missing" });
+
+    if(!serverconfig?.servermembers[id]) return res.status(404).json( { error: "Member not found" });
+    if(serverconfig.servermembers[id].token !== token) return res.status(403).json( { error: "Member token incorrect" });
+
+    let inbox = await getInboxMessages({
+        memberId: id,
+        index: index,
+        onlyUnread: true
+    })
+
+    try {
+        return res.status(200).json({
+            error: null,
+            inbox
+        })
+    } catch (e) {
+        Logger.error(e);
+        res.json({error: "Internal server error"})
+    }
 });
 
 

@@ -6,7 +6,7 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
 
-    socket.on('getTestFiles', function (member, response) {
+    socket.on('getTestFiles', async function(member, response) {
         // some code
         if(debugmode === true){
             const testFolder = './public/testing/tests';

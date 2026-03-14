@@ -5,11 +5,10 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('getGroupBanner', function (member) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token) {
+    socket.on('getGroupBanner', async function (member) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
-            if (!hasPermission(member.id, "viewGroup", member.group)) {
+            if (!await hasPermission(member.id, "viewGroup", member.group)) {
                 return;
             }
 

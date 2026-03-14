@@ -6,9 +6,9 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('getMemberList', async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
-            if (!hasPermission(member.id, "viewGroup", member.group)) {
+            if (!await hasPermission(member.id, "viewGroup", member.group)) {
                 response({ error: true, msg: "You arent allowed to view this group", type: "error" })
                 return;
             }

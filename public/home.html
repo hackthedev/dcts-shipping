@@ -37,6 +37,7 @@
     <script src="/js/core/Client.js"></script>
 
     <title>{{server.name}} – Server Home & DMs</title>
+    <script src="../../dcts-client-shipping/electron/modules/EncryptData.mjs"></script>
 </head>
 
 <body>
@@ -253,7 +254,7 @@
     }
 
 
-    socket.on('receiveHydrate', (p) => {
+    socket.on('receiveHydrate', async (p) => {
         CONFIG.members = Array.isArray(p.members) ? p.members.map(normalizeMember) : [];
 
         upsertMember({
@@ -302,12 +303,12 @@
         }
     });
 
-    socket.on('ticket:new', ({thread}) => {
+    socket.on('ticket:new', async ({thread}) => {
         upsertThread(thread);
         renderDMs();
     });
 
-    socket.on('ticket:message', ({threadId, message}) => {
+    socket.on('ticket:message', async ({threadId, message}) => {
         const t = CONFIG.threads.find(x => x.id === threadId);
         if (t && t.participants?.includes(CURRENT_USER_ID)) return;
 
@@ -329,7 +330,7 @@
         renderDMs();
     });
 
-    socket.on('ticket:update', ({thread}) => {
+    socket.on('ticket:update', async ({thread}) => {
         upsertThread(thread);
         renderDMs();
     });
@@ -367,7 +368,7 @@
         });
     }
 
-    socket.on('receiveThreadNew', ({thread}) => {
+    socket.on('receiveThreadNew', async ({thread}) => {
         upsertThread(thread);
         renderDMs();
     });
@@ -382,7 +383,7 @@
         t.lastAt = message.ts || new Date().toISOString();
     }
 
-    socket.on('receiveMessage', ({threadId, message}) => {
+    socket.on('receiveMessage', async ({threadId, message}) => {
         const t = CONFIG.threads.find(x => x.id === threadId);
         if (!t) return;
         addMessage(threadId, message);
@@ -394,7 +395,7 @@
         renderDMs();
     });
 
-    socket.on('receiveMessageEdit', ({threadId, message}) => {
+    socket.on('receiveMessageEdit', async ({threadId, message}) => {
         const t = CONFIG.threads.find(x => x.id === threadId);
         if (!t) return;
         const i = (t.messages || []).findIndex(m => m.id === message.id);
@@ -403,7 +404,7 @@
             renderMessages(t);
         }
     });
-    socket.on('receiveMessageDelete', ({threadId, messageId}) => {
+    socket.on('receiveMessageDelete', async ({threadId, messageId}) => {
         const t = CONFIG.threads.find(x => x.id === threadId);
         if (!t) return;
         const i = (t.messages || []).findIndex(m => m.id === messageId);
@@ -414,7 +415,7 @@
     });
 
     // content posts/news/help
-    socket.on('receiveContentNew', ({type, item}) => {
+    socket.on('receiveContentNew', async ({type, item}) => {
         const list = listByType(type);
         list.unshift(item);
 
@@ -431,7 +432,7 @@
     });
 
 
-    socket.on('contentReadUpdate', ({type, contentId, unreadCount}) => {
+    socket.on('contentReadUpdate', async ({type, contentId, unreadCount}) => {
         const key = `${type}:${contentId}`;
         const card = document.querySelector(`.content-card[data-content-key="${key}"]`);
         if (card) {
@@ -455,7 +456,7 @@
     });
 
 
-    socket.on('receiveContentUpdate', ({type, item}) => {
+    socket.on('receiveContentUpdate', async ({type, item}) => {
         const list = listByType(type);
         const key = keyFor(type, item);
         const i = list.findIndex(x => keyFor(type, x) === key);
@@ -468,7 +469,7 @@
             renderRight(); /*showHelpDoc(item);*/
         }
     });
-    socket.on('receiveContentDelete', ({type, id}) => {
+    socket.on('receiveContentDelete', async ({type, id}) => {
         try {
             const list = listByType(type);
             const idStr = String(id ?? '');
@@ -504,9 +505,13 @@
 
     function normalizeMember(raw) {
         if (!raw) return null;
+
+        if (raw?.icon === "null") raw.icon = "/img/default_pfp.png";
+        if (raw.icon?.trim()?.length === 0) raw.icon = "/img/default_pfp.png";
+
         return {
             id: String(raw.id ?? raw.userId ?? raw.uid ?? ''),
-            name: raw.name ?? raw.nickname ?? raw.loginName ?? String(raw.id ?? ''),
+            name: raw.name ?? raw.nickname ?? String(raw.id ?? ''),
             status: raw.status ?? "",
             icon: raw.icon ?? null,
             banner: raw.banner ?? null,
@@ -600,10 +605,11 @@
     function avatarHTML(member, size = 'normal') {
         const cls = size === 'small' ? 'avatar small' : size === 'tiny' ? 'avatar tiny' : 'avatar';
         const dot = `<span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span>`;
+
         if (member.icon || member.id === "system") {
             return `<div class="${cls}"><img src="${member.id === "system" ? "/img/default_icon.png" : member.icon}" alt=""><span class="statusDot ${member.isOnline ? "online" : 'offline'}"></span></div>`;
         }
-        return `<div class="${cls}" aria-label="${encodePlainText(member.name)}">${initials(member.name)}${dot}</div>`;
+        return `<div class="${cls}" aria-label="${encodePlainText(sanitizeHtmlForRender(member.name, false))}">${initials(sanitizeHtmlForRender(member.name, false))}${dot}</div>`;
     }
 
     function avatarStackHTML(ids, size = 'normal') {
@@ -616,9 +622,10 @@
         if (ids[1] !== UserManager.getID()) code += `<div class="a2">${avatarHTML(b, small ? 'small' : 'normal')}</div>`;
 
         return `
-      <div class="avatarStack ${small ? 'small' : ''}">
-        ${code}
-      </div>`;
+          <div class="avatarStack ${small ? 'small' : ''}">
+            ${code}
+          </div>
+        `;
     }
 
     function authorChip(authorId, small = false) {
@@ -756,7 +763,6 @@
             // show normal dms
             sorted.forEach(async t => {
                 if (t.type !== "ticket") { // dont show tickets in normal dms
-
                     if(isEncryptedMessage(t.last)){
                         t.last = getEncryptedMessageNotice();
                     }
@@ -769,8 +775,8 @@
                     row.innerHTML = `
                         ${avatarStackHTML(t.participants)}
                         <div>
-                          <div class="dmName">${encodePlainText(title)}</div>
-                          <div class="dmPreview">${unescapeHtmlEntities(t.last || "")}</div>
+                          <div class="dmName">${encodePlainText(sanitizeHtmlForRender(title, false))}</div>
+                          <div class="dmPreview">${unescapeHtmlEntities(sanitizeHtmlForRender(t.last || "", false))}</div>
                         </div>
                         ${t.unread > 0 ?
                                     `<div class="dmBadge">${t.unread ? `<span>${t.unread}</span>` : ''}</div>` : ""
@@ -829,7 +835,7 @@
             </div>` : ''}
           </div>
           <div style="display:flex;align-items:center;gap:8px;margin:6px 0 4px 0">${authorChip(n.authorId, true)}<span class="meta">${fmtDate(n.createdAt)}</span></div>
-          <div style="color:var(--muted);font-size:13px">${sanitizeHtmlForRender(truncateText(n.body, 100) || '')}</div>`;
+          <div style="color:var(--muted);font-size:13px">${sanitizeHtmlForRender(truncateText(n.body, 100) || '', false)}</div>`;
 
                 if (STATE.unreadContent.has(contentKey)) {
                     const badge = document.createElement('div');
@@ -877,7 +883,7 @@
             </div>
 
             <div style="color:var(--muted);font-size:13px">
-              ${sanitizeHtmlForRender(truncateText(h.body, 100) || '')}
+              ${sanitizeHtmlForRender(truncateText(h.body, 100) || '', false)}
             </div>
           `;
 
@@ -1056,7 +1062,7 @@
                 ${isAdmin ? `<button class="iconBtn" style="float: right;" title="Edit" onclick="editHeroAbout()">${ICONS.edit}</button>` : ""}
               </h3>
               
-              <div style="color:var(--muted)">${sanitizeHtmlForRender(CONFIG.aboutHtml) || ''}</div>
+              <div style="color:var(--muted)">${sanitizeHtmlForRender(CONFIG.aboutHtml, false) || ''}</div>
             </div>
             <div style="height:12px"></div>
             <div class="homeCard">
@@ -1106,7 +1112,7 @@
               </div>` : ''}
             </div>
             <div style="display:flex;align-items:center;gap:8px;margin:6px 0 4px 0">${authorChip(p.authorId, true)}<span class="meta">${fmtDate(p.createdAt)} • ${encodePlainText(p.tag || '')}</span></div>
-            <div style="color:var(--muted);font-size:13px; margin-top:4px">${sanitizeHtmlForRender(truncateText(p.body, 100) || '')}</div>`;
+            <div style="color:var(--muted);font-size:13px; margin-top:4px">${sanitizeHtmlForRender(truncateText(p.body, 100) || '', false)}</div>`;
 
                 // append element
                 postWrap.appendChild(el);
@@ -1184,7 +1190,7 @@
       <div class="threadArea" id="newsFull" style="padding:24px">
         <h2 style="margin-top:0">${encodePlainText(n.title)} ${n.pinned ? '<span class="tag pinned">Pinned</span>' : ''}</h2>
         <div style="display:flex;align-items:center;gap:8px;margin:6px 0 14px 0">${authorChip(n.authorId)} </div>
-        <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(n.body || '')}</div>
+        <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(n.body || '', false)}</div>
         ${isAdmin ? `<div class="adminRow">
           <button class="btn ghost" onclick="onEditNews(${Number(n.id)})">Edit</button>
           <button class="btn" onclick="onTogglePinNews(${Number(n.id)})">${n.pinned ? 'Unpin' : 'Pin'}</button>
@@ -1231,7 +1237,7 @@
         <div class="threadArea" id="postFull" style="padding:24px">
           <h2 style="margin-top:0">${encodePlainText(p.title)} ${p.pinned ? '<span class="tag pinned">Pinned</span>' : ''}</h2>
           <div style="display:flex;align-items:center;gap:8px;margin:6px 0 14px 0">${authorChip(p.authorId)}</div>
-          <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(p.body || '')}</div>
+          <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(p.body || '', false)}</div>
           ${isAdmin ? `<div class="adminRow">
             <button class="btn ghost" onclick="onEditPost(${Number(p.id)})">Edit</button>
             <button class="btn" onclick="onTogglePinPost(${Number(p.id)})">${p.pinned ? 'Unpin' : 'Pin'}</button>
@@ -1277,7 +1283,7 @@
       <div class="threadArea" id="helpArea" style="padding:24px">
         <h2 style="margin-top:0">${encodePlainText(doc.title)}</h2>
         <div style="display:flex;align-items:center;gap:8px;margin:6px 0 14px 0">${authorChip(doc.authorId)}</div>
-        <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(doc.body || '')}</div>
+        <div style="color:var(--muted);line-height:1.6;">${sanitizeHtmlForRender(doc.body || '', false)}</div>
         ${isAdmin ?
             `<div class="adminRow">
             <button class="btn ghost" onclick="onEditHelp('${doc.slug}')">Edit</button>
@@ -1476,7 +1482,7 @@
     }
 
 
-    socket.on('threadDeleted', ({threadId}) => {
+    socket.on('threadDeleted', async ({threadId}) => {
         const i = CONFIG.threads.findIndex(t => t.id === threadId);
         if (i > -1) CONFIG.threads.splice(i, 1);
         if (STATE.activeThreadId === threadId) showServerHome();
@@ -1543,7 +1549,6 @@
             if(!decryptedPlain || decryptedPlain.trim().length === 0){
                 return getFailedDecryptionNotice();
             }
-
             if(message?.text?.plainSig){
 
                 // get the public key from the other participant, and try to
@@ -1556,11 +1561,13 @@
                 // keep it just in case.
                 if(isMine) publicKey = await Crypto.getPublicKey();
 
-                let isValidPlainTextSig = publicKey ? await Client().VerifyString(decryptedPlain, message?.text?.plainSig, publicKey) : false;
-
                 // for my next magic trick, we shall verify the entire message object too
                 // to make sure nothing was modified, like the entire thing aka message.text object
-                let isOriginalTextObject = publicKey ? await Client().VerifyJson(message?.text, publicKey) : false;
+                let sigRaw = publicKey ? await Client().VerifyString(decryptedPlain, message?.text?.plainSig, publicKey) : false;
+                let objRaw = publicKey ? await Client().VerifyJson(message?.text, publicKey) : false;
+
+                let isValidPlainTextSig = sigRaw === true || sigRaw === "true";
+                let isOriginalTextObject = objRaw === true || objRaw === "true";
 
                 // shows failed error message
                 if(isValidPlainTextSig !== true || isOriginalTextObject !== true){
@@ -1850,7 +1857,7 @@
     }
 
 
-    socket.on('threadRead', ({threadId, last_read_at}) => {
+    socket.on('threadRead', async ({threadId, last_read_at}) => {
         const t = CONFIG.threads.find(x => x.id === threadId);
         if (!t) return;
         t.lastReadAt = last_read_at;
@@ -1909,6 +1916,7 @@
                 console.warn(targetPublicKey)
             }
         }
+
         socket.emit("sendMessage", payload, (ack) => {
             if (ack?.type === "success") inp.value = "";
         });
@@ -2527,13 +2535,13 @@
             console.log(response)
         });
 
-        socket.on('connect', () => console.info('socket connected', socket.id));
-        socket.on('reconnect', (attempt) => console.info('reconnect attempt', attempt, 'socket', socket.id));
-        socket.on('disconnect', (reason) => console.warn('socket disconnected', reason));
-        socket.on('connect_error', (err) => console.error('connect_error', err));
+        socket.on('connect', async () => console.info('socket connected', socket.id));
+        socket.on('reconnect', async (attempt) => console.info('reconnect attempt', attempt, 'socket', socket.id));
+        socket.on('disconnect', async (reason) => console.warn('socket disconnected', reason));
+        socket.on('connect_error', async (err) => console.error('connect_error', err));
 
         // update config on the fly if something changes
-        socket.on('updatedHome', (data) => {
+        socket.on('updatedHome', async (data) => {
             CONFIG.aboutHtml = data.about;
             CONFIG.heroTitle = data.title;
             CONFIG.heroSubtitle = data.subtitle;

@@ -13,9 +13,9 @@ import {loadMembersFromDB} from "../functions/mysql/helper.mjs";
 export default (io) => (socket) => {
     // socket.on code here
     socket.on("getServerMembers", async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            if (hasPermission(member.id, "manageMembers")) {
+            if (await hasPermission(member.id, "manageMembers")) {
                 response(serverconfig.servermembers);
             }
             else {

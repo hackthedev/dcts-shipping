@@ -10,10 +10,10 @@ export default (io) => (socket) => {
 
     // socket.on code here
     socket.on('fetchReports', async function (member, response) {
-        if (validateMemberId(member.id, socket, member.token) === true
+        if (await validateMemberId(member.id, socket, member.token) === true
         ) {
 
-            if (hasPermission(member.id, "manageReports")) {
+            if (await hasPermission(member.id, "manageReports")) {
                 try {
                     let reports = await getReports();
                     Object.keys(reports).forEach(async function (report) {

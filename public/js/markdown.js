@@ -4,6 +4,8 @@ function isAlreadyLink(msg, url, msgid) {
     );
     if (!container) return null;
 
+    if (container.closest("code, pre, blockquote")) return null;
+
     let el =
         container.querySelector(`img[data-original-url="${url}"]`) ||
         container.querySelector(`video[data-original-url="${url}"]`) ||
@@ -11,11 +13,15 @@ function isAlreadyLink(msg, url, msgid) {
         container.querySelector(`iframe[data-original-url="${url}"]`) ||
         container.querySelector(`a[data-original-url="${url}"]`);
 
+    if (el && el.closest("code, pre, blockquote")) return null;
+
     return el ? el.getAttribute("data-media-type") : null;
 }
 
 async function updateMissingMeta() {
     let embeds = document.querySelectorAll(".markdown-urlEmbed");
+    let updates = []
+
     for (let embed of embeds) {
         let titleEl = embed.querySelector(".meta-info.title");
         let descEl = embed.querySelector(".meta-info.description");
@@ -28,7 +34,15 @@ async function updateMissingMeta() {
         try {
             let urlMeta = await getUrlMeta(url);
             if (!urlMeta?.meta) continue;
+            updates.push({ titleEl, descEl, urlMeta, embed, url })
+        } catch (e) {}
+    }
 
+    if (updates.length === 0) return
+
+    let container = document.getElementById("content")
+    await withScrollLock(container, null, () => {
+        for (let { titleEl, descEl, urlMeta, embed, url } of updates) {
             if (titleEl) titleEl.textContent = truncateText(urlMeta.meta.title || "", 75);
             if (descEl) descEl.textContent = truncateText(urlMeta.meta.description || "", 300);
 
@@ -37,70 +51,72 @@ async function updateMissingMeta() {
                     n.textContent = "";
                 }
             });
-        } catch (e) {}
-    }
+        }
+    })
 }
 
 async function updateMarkdownLinks(delay) {
-    const elements = document.querySelectorAll(".contentRows .content p");
-    const container = document.getElementById("content");
-    const isScrolledDown = isScrolledToBottom(container);
+    let container = document.getElementById("content")
+    let isScrolledDown = isScrolledToBottom(container, 10)
 
-    let firstElement = getLastMessage(container);
-    let scrollPosition = getScrollPosition(container, firstElement?.element);
-
-    let markdownChanged = false;
+    let elements = container.querySelectorAll(".contentRows .content p")
+    let markdownChanged = false
 
     for (let i = elements.length - 1; i >= 0; i--) {
-        const el = elements[i];
-        if (!el) continue;
-        if (el.className.includes("hljs")) continue;
-        if (el.hasAttribute("data-markdown-done")) continue;
-        if (!isElementVisible(el)) continue;
+        let el = elements[i]
+        if (!el) continue
+        if (el.className.includes("hljs")) continue
+        if (el.hasAttribute("data-markdown-done")) continue
+        if (!isElementVisible(el)) continue
+        if (el.querySelector(".markdown-urlEmbed-container")) continue
+        if (el.closest(".markdown-urlEmbed-container")) continue
 
-        // avoid duplicate markdown bs
-        if (el.querySelector(".markdown-urlEmbed-container")) continue;
-        if (el.closest(".markdown-urlEmbed-container")) continue;
-
-        const messageId =
+        let messageId =
             el.getAttribute("data-message-id") ||
-            el.parentNode?.getAttribute("data-message-id");
+            el.parentNode?.getAttribute("data-message-id")
+        if (!messageId) continue
 
-        if (!messageId) continue;
-
-        const originalText = el.textContent;
-        if (!originalText || !originalText.trim()) continue;
+        let originalText = el.textContent
+        if (!originalText?.trim()) continue
 
         try {
-            const marked = await markdown(originalText, messageId);
-            if (!marked.isMarkdown) continue;
+            let marked = await markdown(originalText, messageId)
+            if (!marked.isMarkdown) continue
 
-            const wrapper = document.createElement("div");
-            wrapper.innerHTML = sanitizeHtmlForRender(marked.message);
+            let wrapper = document.createElement("div")
+            wrapper.innerHTML = sanitizeHtmlForRender(marked.message)
+            let node = wrapper.firstElementChild || wrapper
+            el.replaceWith(node)
+            node.setAttribute("data-markdown-done", "true")
 
-            el.replaceWith(wrapper);
-            wrapper.setAttribute("data-markdown-done", "true");
-
-            markdownChanged = true;
-            fixScrollAfterMediaLoad(container, scrollPosition);
+            markdownChanged = true
         } catch (err) {
-            console.log(err);
+            console.log(err)
         }
     }
 
-    if (markdownChanged && isScrolledDown) {
-        scrollDown("updateMarkdown");
+    // adjust new media stuff. would have been mindblowing to think about that earlier
+    if (markdownChanged) {
+        await updateMissingMeta()
+        watchMediaLoads(container)
+        if (isScrolledDown) scrollDown("updateMarkdown")
+    } else {
+        await updateMissingMeta()
     }
 
-    await updateMissingMeta();
-    setTimeout(() => updateMarkdownLinks(delay), delay);
+    setTimeout(() => updateMarkdownLinks(delay), delay)
 }
-async function getUrlMeta(url){
-    try{
 
+async function getUrlMeta(url){
+    if(localStorage.getItem(`urlMetaJson_${url}`)) return localStorage.getItem(`urlMetaJson_${url}`);
+
+    try{
         let meta = await fetch(`/meta/${encodeURIComponent(url)}`)
-        if(meta.status === 200){
-            return await meta.json()
+        if(meta?.status === 200){
+            let metaJson = await meta.json();
+
+            if(metaJson) localStorage.setItem(`urlMetaJson_${url}`, metaJson)
+            return await metaJson;
         }
     }
     catch{}
@@ -120,9 +136,12 @@ async function markdown(msg, msgid) {
         let existing = isAlreadyLink(msg, url, msgid);
         if (existing) continue;
 
-        let media = await checkMediaTypeAsync(url);
         let proxy = ChatManager.proxyUrl(url);
-        let urlMeta = await getUrlMeta(url);
+
+        let [media, urlMeta] = await Promise.all([
+            checkMediaTypeAsync(url),
+            getUrlMeta(url)
+        ]);
 
         if (url.includes("youtu.be") || url.includes("youtube.com/watch")) {
             msg = msg.replace(url, createYouTubeEmbed(url, msgid));
@@ -133,7 +152,7 @@ async function markdown(msg, msgid) {
         if (media === "image") {
             msg = msg.replace(
                 url,
-                ` <img draggable="false" class="image-embed"
+                ` <img decoding="async" loading="lazy" draggable="false" class="image-embed"
                          src="${proxy}"
                          data-original-url="${url}"
                          data-media-type="image">`
@@ -160,7 +179,8 @@ async function markdown(msg, msgid) {
             continue;
         }
 
-        let embed = `
+        if (urlMeta?.meta?.title || urlMeta?.meta?.description) {
+            let embed = `
             <div class="markdown-urlEmbed-container">
                 <a class="markdown-urlEmbed"
                    data-media-type="link"
@@ -175,7 +195,14 @@ async function markdown(msg, msgid) {
                 </a>
             </div>`;
 
-        msg = msg.replace(url, embed);
+            msg = msg.replace(url, embed);
+            changed = true;
+            continue;
+        }
+
+        msg = msg.replace(url,
+            `<a draggable="false" data-media-type="link" data-message-id="${msgid.replace("msg-", "")}" href="${url}" ${url.startsWith(location.origin) ? "" : "target=\"_blank\""}> ${unescapeHtmlEntities(sanitizeHtmlForRender(url))} </a>`
+        );
         changed = true;
     }
 

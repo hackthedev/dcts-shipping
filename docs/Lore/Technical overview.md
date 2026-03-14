@@ -2,6 +2,7 @@
 
 DCTS is a system made of various sub systems that will be explained in this document. The purpose of this document is to shine some light on how things work. You may want to check out [Terminology](Terminology.md) first.
 
+
 ---
 
 ## System overview
@@ -57,6 +58,8 @@ The web client and DCTS server mostly communicate with each other using web sock
 Example flow: 
 > 
  >User sends message » Web Client » Socket » Server » RAM Data » DB » Broadcast » Client
+ >
+
 
 ---
 

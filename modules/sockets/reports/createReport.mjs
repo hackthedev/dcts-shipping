@@ -11,8 +11,8 @@ export default (io) => (socket) => {
     function notifyReportAdmins() {
 
         // for each user, check if they are allowed to manage reports to notify them
-        Object.keys(usersocket).forEach(function (user) {
-            if (hasPermission(user, "manageReports")) {
+        Object.keys(usersocket).forEach(async function (user) {
+            if (await hasPermission(user, "manageReports")) {
                 io.to(usersocket[user]).emit("newReport");
             }
         });
@@ -21,10 +21,8 @@ export default (io) => (socket) => {
 
     // socket.on code here
     socket.on('createReport', async function (member, response) {
-        if (validateMemberId(member.id, socket, member.token) === true
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            // waiting until permissions overhaul
-            //if (hasPermission(member.id, "createReports")) {
             try {
                 let reportCreatorId = xssFilters.inHTMLData(member.id);
                 let reportTargetId = xssFilters.inHTMLData(member.targetId);

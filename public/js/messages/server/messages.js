@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ]
     );
 
-    socket.on('receiveDeleteMessage', function (id) {
+    socket.on('receiveDeleteMessage', async function(id) {
         try {
             var message = getMessageElementFromId(id)
             if (!message) {
@@ -262,18 +262,23 @@ document.addEventListener("DOMContentLoaded", function () {
         //editElement.innerHTML = message.message;
 
         let convertedMentions = await convertMention(message);
-        editElement.innerHTML= convertedMentions.text
-        editElement.innerHTML= sanitizeHtmlForRender(convertedMentions.text)
 
-        editElement.innerHTML += getMessageEditedHTML(message);
-        editElement.innerHTML += createMsgActions(message.messageId);
 
-        if(isScrolledToBottom(document.getElementById("content"))) scrollDown("messageEdited")
+        let lastMsg = getLastMessage(document.getElementById("content"))
+        await withScrollLock(null, lastMsg?.element, async () => {
+            editElement.innerHTML = convertedMentions.text
+            editElement.innerHTML = sanitizeHtmlForRender(convertedMentions.text)
+
+            editElement.innerHTML += getMessageEditedHTML(message);
+            editElement.innerHTML += createMsgActions(message.messageId);
+
+            if(isScrolledToBottom(document.getElementById("content"))) scrollDown("messageEdited")
+        })
     });
 })
 
 function registerMessageCreateEvent(){
-    socket.on('updateReactions', function (messageObj) {
+    socket.on('updateReactions', async function(messageObj) {
         updateMessageReactionsElementById(messageObj?.messageId);
     });
 
@@ -573,17 +578,17 @@ async function showMessageInChat({
     // convert mentions and check if own userid is in it
     let convertedMentions = await convertMention(message);
     let isMention = false;
-    message.message = sanitizeHtmlForRender(convertedMentions.text)
+    message.message = sanitizeHtmlForRender(convertedMentions.text, false)
 
     // convert emojis
-    try{ message.message = sanitizeHtmlForRender(await text2Emoji(message.message)) } catch {}
+    try{ message.message = sanitizeHtmlForRender(await text2Emoji(message.message), false) } catch {}
 
     // convert emojis and mentions for replies too
     if(message?.reply?.message) {
-        try{ message.reply.message = sanitizeHtmlForRender(await text2Emoji(message.reply.message)); } catch {}
+        try{ message.reply.message = sanitizeHtmlForRender(await text2Emoji(message.reply.message), false); } catch {}
 
         let convertedReplyMentions = await convertMention(message.reply);
-        message.reply.message = sanitizeHtmlForRender(convertedReplyMentions.text)
+        message.reply.message = sanitizeHtmlForRender(convertedReplyMentions.text, false)
     }
 
     let messageElement = appendTop ? getFirstMessage(container) : getLastMessage(container);
@@ -784,13 +789,17 @@ async function updateMessageReactionsElementById(messageId, container = document
     let messageObj = await ChatManager.resolveMessage(messageId);
     if(!messageObj) return console.error(`Couldnt find message object for message reaction update ${messageId}`);
 
-    // no reactions were presen^t so add the container
-    if(!reactionRow) {
-        contentContainer.innerHTML += await getMessageReactionsHTML(messageObj);
-        reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
-    }
+    let lastMsg = getLastMessage(container)
+    await withScrollLock(container, lastMsg?.element, async () => {
+        // no reactions were present so add the container
+        if(!reactionRow) {
+            contentContainer.innerHTML += await getMessageReactionsHTML(messageObj);
+            reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
+        }
 
-    reactionRow.outerHTML = await getMessageReactionsHTML(messageObj);
+        reactionRow.outerHTML = await getMessageReactionsHTML(messageObj);
+    })
+
     if(wasScrolledDown) scrollDown()
 }
 
@@ -858,6 +867,9 @@ async function createMsgHTML({
         message.timestamp = message.ts;
     }
 
+    // consider this a fallback. should be avoided as it makes the
+    // chat slower. if this would happen a lot consider something wrong with
+    // the server as the server should supply it already.
     if(!message?.author?.name && message?.author?.id !== 0){
         message.author = await ChatManager.resolveMember(message?.author?.id) || message.author;
     }
@@ -870,9 +882,9 @@ async function createMsgHTML({
     let messageRow =
         `
         <div class="content ${isSystem ? "system" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}"  
-            ${message?.plainText ? `data-plain-text="${sanitizeHtmlForRender(encodeURIComponent(message.plainText), false)}"` : ""}
+            ${message?.plainText ? `data-plain-text="${unescapeHtmlEntities(sanitizeHtmlForRender(encodeURIComponent(message.plainText), false), true)}"` : ""}
             data-message-id="${message.messageId}" 
-            data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" 
+            data-member-id="${unescapeHtmlEntities(sanitizeHtmlForRender(message?.author?.id, false), true)}" 
             data-timestamp="${message.timestamp}">
             
             ${createActions === true ? createMsgActions(message?.author?.id, isSystem) : ""}
@@ -901,7 +913,7 @@ async function createMsgHTML({
                     <img class="icon" draggable="false" src="${sanitizeHtmlForRender(reply?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>
                 <div class="meta">
-                    <label class="username" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
+                    <label class="username" data-member-id="${unescapeHtmlEntities(sanitizeHtmlForRender(reply?.author?.id, false), true)}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
                         ${sanitizeHtmlForRender(truncateText(reply?.author?.name, 25), false)}
                     </label>
                 </div>
@@ -924,8 +936,17 @@ async function createMsgHTML({
                 
                <div class="content-container" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}"> <!-- for the flex layout -->
                  <div class="meta">
+                 
                     ${isSystem !== true ?
-                    `<label class="username" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" style="color: ${message?.author?.color}; background: ${message?.author?.background}; background-clip: ${message?.author?.backgroundClip};">${sanitizeHtmlForRender(truncateText(message?.author?.name, 30))}</label>` : ""}
+                    `<label class="username" 
+                        data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" 
+                        style="color: ${message?.author?.color}; background: ${message?.author?.background}; 
+                        background-clip: ${message?.author?.backgroundClip};"
+                        >
+                            ${unescapeHtmlEntities(sanitizeHtmlForRender(truncateText(message?.author?.name, 30), true))
+                    }</label>` : ""}
+                    
+                    
                     <label class="timestamp" data-timestamp="${message.timestamp}">
                         ${new Date(message.timestamp).toLocaleString("narrow")}
                         
@@ -1025,10 +1046,6 @@ async function addMessageReaction(messageId, emojiHash, isDefault = false){
     })
 }
 
-async function searchParentElement(element, selector){
-
-}
-
 async function removeMessageReaction(messageId, emojiHash){
     socket.emit("removeMessageReaction", {
         id: UserManager.getID(),
@@ -1126,7 +1143,7 @@ async function displayMessagesInElement({
 
             // this will help with the mentions etc
             if(Inbox.isUnread(message?.messageId) && message?.messageId){
-                await Inbox.markAsRead(Inbox.getInboxIdFromMessageId(message.messageId))
+                Inbox.markAsRead(Inbox.getInboxIdFromMessageId(message.messageId))
             }
 
             loaded++;
@@ -1194,52 +1211,6 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
             refElement,
         })
 
-        // set min-height on all images and listen for load
-        const images = [...renderer.querySelectorAll("img:not(.icon):not(.memberlist-img):not(.inline-text-emoji)")];
-        images.forEach(img => {
-            img.style.minHeight = "200px";
-            img.style.display = "block";
-
-            // remove min-height as soon as image loads
-            if (img.complete) {
-                img.style.minHeight = "";
-            } else {
-                img.addEventListener("load", () => {
-                    img.style.minHeight = "";
-                }, { once: true });
-
-                img.addEventListener("error", () => {
-                    img.style.minHeight = "";
-                }, { once: true });
-            }
-        });
-
-        // wait max 500ms for images to load
-        await Promise.race([
-            Promise.all(
-                images.map(el => {
-                    return el.complete
-                        ? Promise.resolve()
-                        : el.decode().catch(() => {});
-                })
-            ),
-            new Promise(resolve => setTimeout(resolve, 500))
-        ]);
-
-        // wait for videos
-        await Promise.race([
-            Promise.all(
-                [...renderer.querySelectorAll("video")].map(el => {
-                    if (el.readyState >= 1) return Promise.resolve();
-                    return new Promise(res => {
-                        el.addEventListener("loadedmetadata", res, { once: true });
-                        el.addEventListener("error", res, { once: true });
-                    });
-                })
-            ),
-            new Promise(resolve => setTimeout(resolve, 500))
-        ]);
-
         if(channelId !== UserManager.getChannel()){
             ElementLoader.stop(channelbar);
             Clock.stop("load_messages_processing")
@@ -1252,7 +1223,13 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
             frag.appendChild(renderer.firstElementChild);
         }
         renderer.remove();
-        container.insertBefore(frag, container.firstElementChild);
+
+
+        let lastMsg = getLastMessage(container)
+        await withScrollLock(container, lastMsg?.element, async () => {
+            container.insertBefore(frag, container.firstElementChild);
+        });
+
         Clock.stop("load_messages_processing")
 
         if (response.data.length === 0 && UserManager.getChannel() && document.getElementById("content").innerText.trim().length === 0) {
@@ -1262,46 +1239,26 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())
         ChatManager.setChannelMarker(UserManager.getChannel(), false)
 
+
         if (!appendTop) {
             displayAwaitedMessages(container)
-            await fixScrollAfterMediaLoad(container, container.scrollHeight, true)
 
-            // lock scroll position while remaining images load
-            const remainingImages = [...container.querySelectorAll("img:not(.icon):not(.memberlist-img):not(.inline-text-emoji)")].filter(img => !img.complete);
-            if (remainingImages.length > 0) {
-                const lastMsg = getLastMessage(container);
-                if (lastMsg?.element) {
-                    const scrollPos = getScrollPosition(container, lastMsg.element);
+            // just scroll down as we dont have any anchor anyway
+            toggleSmoothScroll(container, false)
+            scrollDown();
+            toggleSmoothScroll(container, true)
 
-                    remainingImages.forEach(img => {
-                        img.addEventListener("load", () => {
-                            requestAnimationFrame(() => {
-                                setScrollPosition(container, scrollPos);
-                            });
-                        }, { once: true });
-                    });
-                }
-            }
-
+            watchMediaLoads(container, lastMsg?.element)
             updateMarkdownLinks(2000)
         }
         else{
             if (appendTop && scrollPosition !== null) {
-                await fixScrollAfterMediaLoad(container, scrollPosition, true)
 
-                // lock scroll position while remaining images load
-                const remainingImages = [...container.querySelectorAll("img:not(.icon):not(.memberlist-img):not(.inline-text-emoji)")].filter(img => !img.complete);
-                if (remainingImages.length > 0) {
-                    remainingImages.forEach(img => {
-                        img.addEventListener("load", () => {
-                            requestAnimationFrame(() => {
-                                setScrollPosition(container, scrollPosition);
-                            });
-                        }, { once: true });
-                    });
-                }
+                await withScrollLock(container, lastMsg?.element, async () => {
+                    displayAwaitedMessages(container)
+                })
+                watchMediaLoads(container, lastMsg?.element)
             }
-            displayAwaitedMessages(container)
         }
 
         Clock.stop("load_messages_total")
@@ -1327,39 +1284,6 @@ function waitForStableValue(getValueFn, stableMs, callback) {
 
     requestAnimationFrame(check);
 }
-
-
-function toggleSmoothScroll(element, toggle){
-    if(toggle === true){
-        element.style.scrollBehavior = "smooth";
-    }
-    else{
-        element.style.scrollBehavior = "auto";
-    }
-}
-
-function getScrollPosition(container, refEl) {
-    return {
-        ref: refEl,
-        offset: refEl ? refEl.getBoundingClientRect().top : 0
-    };
-}
-
-
-function setScrollPosition(container, info) {
-    if(typeof info === "number") return container.scrollTop = info;
-
-    if (!info?.ref) return;
-
-    let newOffset = info.ref.getBoundingClientRect().top;
-    let diff = newOffset - info.offset;
-
-    container.scrollTop += diff;
-}
-
-
-
-
 
 function displayAwaitedMessages(container){
     let messages = container.querySelectorAll(".waitForDisplay");
@@ -1421,4 +1345,31 @@ function getLastMessage(container) {
     } else {
         console.warn("couldnt get last message")
     }
+}
+
+function handleChannelMessageDrafting(channelId){
+    if(!channelId) throw new Error("Channel id is missing");
+    let channelDraft = getChannelMessageDraft(channelId);
+
+    if(channelDraft){
+        const regex = /<p>\s*<\/p>/gm;
+        if(quill) quill.pasteUnconverted(channelDraft.replace(regex, ''));
+    }
+    else{
+        editor.innerHTML = "";
+    }
+}
+
+function saveChannelMessageDraft(channelId, overwrite){
+    if(!channelId) throw new Error("Channel id is missing");
+    localStorage.setItem(`message_draft_${channelId}`, overwrite !== undefined ? overwrite : editor?.innerHTML || null)
+}
+
+function getChannelMessageDraft(channelId){
+    if(!channelId) throw new Error("Channel id is missing");
+
+    let data = localStorage.getItem(`message_draft_${channelId}`);
+    if(data === "null") return null;
+
+    return data
 }

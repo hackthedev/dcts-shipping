@@ -12,8 +12,8 @@ function setupVcChannel(channelId){
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('notifyVcMemberJoined', function (oMember, response) {
-        if(validateMemberId(oMember?.id, socket, oMember?.token) === true){
+    socket.on('notifyVcMemberJoined', async function (oMember, response) {
+        if(await validateMemberId(oMember?.id, socket, oMember?.token) === true){
 
             setupVcChannel(oMember.channelId);
 
@@ -25,8 +25,8 @@ export default (io) => (socket) => {
         }
     });
 
-    socket.on('notifyVcMemberLeft', function (oMember, response) {
-        if(validateMemberId(oMember?.id, socket, oMember?.token) === true){
+    socket.on('notifyVcMemberLeft', async function (oMember, response) {
+        if(await validateMemberId(oMember?.id, socket, oMember?.token) === true){
             setupVcChannel(oMember.channelId);
 
             if(vcUsers[oMember.channelId].members.includes(oMember.id)){
@@ -37,10 +37,10 @@ export default (io) => (socket) => {
         }
     });
 
-    socket.on('getVcChannelMembers', function (member, response) {
-        if(validateMemberId(member?.id, socket, member?.token) === true){
+    socket.on('getVcChannelMembers', async function (member, response) {
+        if(await validateMemberId(member?.id, socket, member?.token) === true){
 
-            if (!hasPermission(member.id, ["useVOIP", "viewChannel"], member.channelId, "all")) {
+            if (!await hasPermission(member.id, ["useVOIP", "viewChannel"], member.channelId, "all")) {
                 response({error: "You dont have permissions to view the channel's vc participants"})
                 return;
             }
@@ -54,7 +54,7 @@ export default (io) => (socket) => {
         }
     });
 
-    socket.on("disconnect", function(){
+    socket.on("disconnect", async function(){
         for(let vcChannel of Object.keys(vcUsers)){
             let entry = vcUsers[vcChannel];
 

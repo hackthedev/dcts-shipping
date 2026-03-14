@@ -6,6 +6,10 @@ document.addEventListener("error", (e) => {
     if (el.tagName === "IMG") {
         el.setAttribute("data-src", el.src)
         el.src = "/img/error.png";
+
+        // lets see if this will break something
+        el.style.maxHeight = "50px"
+        el.style.maxWidth = "50px"
     }
 }, true);
 
@@ -23,8 +27,37 @@ function rewriteImg(img){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("img").forEach(rewriteImg);
+    MobilePanel.setLeftMenu([
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#mainLayout #header")
+            ]
+        },
+        {
+            direction: "row",
+            flex: "1 1 0",
+            flexGrow: 1,
+            flexShrink: 1,
+            height: "100%",
+            children: [
+                document.querySelector("#mainLayout #serverlist"),
+                document.querySelector("#mainLayout #channellist")
+            ]
+        }
+    ], "left");
 
+    MobilePanel.setRightMenu([
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#mainLayout #infolist")
+            ]
+        }
+    ], "right");
+
+
+    document.querySelectorAll("img").forEach(rewriteImg);
     new MutationObserver(mutations => {
         for(const m of mutations){
             for(const n of m.addedNodes){
@@ -117,6 +150,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     initQuillShit();
 
+    if(UserManager.getChannel()) handleChannelMessageDrafting(UserManager.getChannel());
+
     // manual click event listener because its too general
     document.body.addEventListener("click", (event) => {
         const {clientX: mouseX, clientY: mouseY} = event;
@@ -142,40 +177,19 @@ document.addEventListener("DOMContentLoaded", async function () {
         ModActions.hideRoleMenu()
     });
 
-    // mobile swiping
-    const contentLayout = document.getElementById("contentLayout");
-    contentLayout.addEventListener("touchstart", e => {
-        const t = e.touches[0];
-        startX = t.clientX;
-        startY = t.clientY;
-    });
-
-    contentLayout.addEventListener("touchend", e => {
-        const t = e.changedTouches[0];
-        const dx = t.clientX - startX;
-        const dy = t.clientY - startY;
-
-        if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
-
-        if (Math.abs(dx) > Math.abs(dy)) {
-            onSwipe(dx > 0 ? "right" : "left");
-        }
-    });
-
-
     document.getElementById("message-actions-image").onclick = function (e) {
         var x = e.clientX;
         var y = e.clientY;
 
         var clickedElement = document.elementFromPoint(x, y)
 
-        if (clickedElement.id != "message-actions-image") {
+        if (clickedElement.id !== "message-actions-image") {
             return;
         }
 
         showEmojiPicker(x,y, (emojiObj) => {
             insertEmoji(emojiObj, true);
-            focusEditor();
+            if(!MobilePanel.isMobile()) focusEditor();
         })
     }
 
@@ -183,16 +197,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     window.addEventListener('resize', function (event) {
         // do stuff here
 
+        let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+
         var emojiContainer = document.getElementById("emoji-box-container");
         var profileContainer = document.getElementById("profile_container");
 
-        if (emojiContainer.style.display == "flex") {
+        if (emojiContainer.style.display == "flex" && !MobilePanel.isMobile()) {
             //emojiContainer.style.display = "none";
             closeEmojiBox()
         }
         if (profileContainer.style.display == "flex") {
             profileContainer.style.display = "none";
         }
+
+        if(isScrolledDown) scrollDown("window resizer");
     });
 
     document.addEventListener("keydown", (event) => {
@@ -302,8 +320,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             ".addRoleMenuTrigger"
         ],
         async (data) => {
-            console.log(data)
-
             let memberId = data.element.getAttribute("data-member-id");
             if (!memberId) {
                 console.warn("Couldnt get member profile from click event because memberid wasnt found");
@@ -577,7 +593,7 @@ var socket = io.connect()
 
 registerMentionClickEvent()
 
-socket.on("updatedEmojis", function () {
+socket.on("updatedEmojis", async function() {
     fetchEmojis();
 })
 
@@ -589,30 +605,30 @@ voip = new VoIP(`${window.location.origin.includes("https") ? "wss" : "ws"}://{{
 
 
 
-socket.on('receiveThreadNew', ({}) => {
+socket.on('receiveThreadNew', async ({}) => {
     console.log("receiveThreadNew")
     displayHomeUnread()
 });
 
-socket.on('updateUnread', () => {
+socket.on('updateUnread', async () => {
     displayHomeUnread()
 });
 
-socket.on('receiveMessage', ({}) => {
+socket.on('receiveMessage', async ({}) => {
     displayHomeUnread()
 });
 
-socket.on('receiveContentNew', ({type, item}) => {
+socket.on('receiveContentNew', async ({type, item}) => {
     if (item?.notifyAll && String(item.authorId) !== String(UserManager.getID())) {
         displayHomeUnread()
     }
 });
 
-socket.on('newReport', () => {
+socket.on('newReport', async () => {
     UserReports.getReports();
 });
 
-socket.on('verifyPublicKey', () => {
+socket.on('verifyPublicKey', async () => {
     Crypto.dSyncTest();
 });
 
@@ -677,6 +693,11 @@ async function checkMediaTypeAsync(url) {
             return;
         }
 
+        // try to cache urls etc for speed
+        if(localStorage.getItem(`mediaType_cache_${url}`)) {
+            resolve(localStorage.getItem(`mediaType_cache_${url}`))
+        }
+
         socket.emit("checkMediaUrlCache", {
             id: UserManager.getID(),
             token: UserManager.getToken(),
@@ -684,6 +705,11 @@ async function checkMediaTypeAsync(url) {
         }, function (response) {
 
             if (response.isCached === true) {
+
+                if(response?.mediaType){
+                    localStorage.setItem(`mediaType_cache_${url}`, response.mediaType)
+                }
+
                 // return cached media type
                 resolve(response.mediaType);
             } else {
@@ -887,6 +913,32 @@ function getMessageId(element) {
     }
 }
 
+function extractHost(url){
+    if(!url) return null;
+    const s = String(url).trim();
+
+    const looksLikeBareIPv6 = !s.includes('://') && !s.includes('/') && s.includes(':') && /^[0-9A-Fa-f:.]+$/.test(s);
+    const withProto = looksLikeBareIPv6 ? `https://[${s}]` : (s.includes('://') ? s : `https://${s}`);
+
+    try {
+        const u = new URL(withProto);
+        const host = u.hostname; // IPv6 returned without brackets
+        const port = u.port;
+        if (host.includes(':')) {
+            return port ? `[${host}]:${port}` : host;
+        }
+        return port ? `${host}:${port}` : host;
+    } catch (e) {
+        const re = /^(?:https?:\/\/)?(?:[^@\/\n]+@)?([^:\/?#]+)(?::(\d+))?(?:[\/?#]|$)/i;
+        const m = s.match(re);
+        if (!m) return null;
+        const hostname = m[1].replace(/^\[(.*)\]$/, '$1');
+        const port = m[2];
+        if (hostname.includes(':')) return port ? `[${hostname}]:${port}` : hostname;
+        return port ? `${hostname}:${port}` : hostname;
+    }
+}
+
 async function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false) {
     if (UserManager.getUsername() != null) {
         var username = UserManager.getUsername();
@@ -915,7 +967,7 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                 challenge: localStorage.getItem("pow_challenge"),
                 solution: localStorage.getItem("pow_solution")
             }
-        }, function (response) {
+        }, async function (response) {
 
             // sync data
             if (response?.token) CookieManager.setCookie("token", response.token);
@@ -924,7 +976,21 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
             if (response?.aboutme) CookieManager.setCookie("aboutme", response.aboutme);
             if (response?.status) CookieManager.setCookie("status", response.status);
             if (response?.loginName) CookieManager.setCookie("loginName", response.loginName);
+            if (response?.name) CookieManager.setCookie("username", response.name);
             if (response?.id) CookieManager.setCookie("id", response.id);
+
+            // account manager soon?
+            if (await isLauncher()) {
+                if (await Client().setAccountCredentials) {
+                    await Client().setAccountCredentials(
+                        extractHost(window.location.origin),
+                        UserManager.getID(),
+                        UserManager.getToken()
+                    );
+                }
+
+                UserManager.saveAccount()
+            }
 
             // if we finished onboarding
             if (!response?.error && response.finishedOnboarding === true && initial) {
@@ -958,12 +1024,12 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                 });
 
                 if (initial) {
+                    getChatlog(document.getElementById("content"));
                     getMemberList()
                     getChannelTree()
                     getServerInfo();
                     showGroupStats();
                     focusEditor()
-                    getChatlog(document.getElementById("content"));
 
                     /* Quill Emoji Autocomplete */
                     initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
@@ -1431,6 +1497,8 @@ async function sendMessageToServer(authorId = UserManager.getID(),
         msgPayload = await Client().SignJson(msgPayload);
     }
 
+    console.error(JSON.stringify(msgPayload, null, 4));
+
     return new Promise((resolve, reject) => {
         socket.emit("messageSend", msgPayload, async function (response) {
             Clock.stop("send_message");
@@ -1466,6 +1534,8 @@ async function sendMessageToServer(authorId = UserManager.getID(),
 
                 console.log("clearing editor")
                 editor.innerHTML = "<p><br></p>"
+
+                saveChannelMessageDraft(UserManager.getChannel(), null)
 
                 resolve(true);
             }
@@ -1515,7 +1585,7 @@ socket.on('doAccountOnboarding', async function (message) {
 });
 
 
-socket.on('showUserJoinMessage', function (author) {
+socket.on('showUserJoinMessage', async function(author) {
 
     // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
     var message = '<div class="systemAnnouncementChat">' + '            <p>User <label class="systemAnnouncementChatUsername" id="">' + author.username + '</label> joined the chat!</p>' + '        </div>';
@@ -1524,7 +1594,7 @@ socket.on('showUserJoinMessage', function (author) {
     scrollDown("userJoinMessage");
 });
 
-socket.on('updateGroupList', function (author) {
+socket.on('updateGroupList', async function(author) {
 
     getGroupList();
 })
@@ -1533,6 +1603,7 @@ socket.on('updateGroupList', function (author) {
 
 function focusEditor() {
     if (!quill) return;
+    if(MobilePanel.isMobile()) return;
 
     quill.focus();
 
@@ -1659,6 +1730,18 @@ function initQuillShit(){
         setTyping();
     });
 
+    // save message draft
+    editor.addEventListener('keyup', function (event) {
+        saveChannelMessageDraft(UserManager.getChannel());
+    });
+
+    // editor resize fix where chat wont scroll down
+    const editorResizeObserver = new ResizeObserver(() => {
+        let isScrolledDown =  isScrolledToBottom(document.getElementById("content"));
+        if(isScrolledDown) scrollDown();
+    });
+    editorResizeObserver.observe(editor);
+
     editor.addEventListener('keydown', function (event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
@@ -1720,7 +1803,7 @@ socket.on('memberTyping', members => {
 });
 
 
-socket.on('receiveChannelTree', function (data) {
+socket.on('receiveChannelTree', async function(data) {
     getChannelTree()
     markCurrentChannelStyle(UserManager.getChannel())
 });
@@ -1770,21 +1853,21 @@ function reapplyUnreadFromCookies() {
 */
 
 
-socket.on('markChannel', function (data) {
+socket.on('markChannel', async function(data) {
     markChannel(data.channelId, false, data?.count);
 });
 
-socket.on('createMessageEmbed', function (data) {
+socket.on('createMessageEmbed', async function(data) {
     document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
     scrollDown("createMessageEmbed");
 });
 
-socket.on('createMessageLink', function (data) {
+socket.on('createMessageLink', async function(data) {
     document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
     scrollDown("createMessageLink");
 });
 
-socket.on('receiveCurrentChannel', function (channel) {
+socket.on('receiveCurrentChannel', async function(channel) {
     try {
         if (channel.name == null) {
             channel.name = "";
@@ -1802,11 +1885,11 @@ socket.on('updateMemberList', async function (data) {
     await updateMentionAutocompleteData();
 });
 
-socket.on('updateGroupList', function (data) {
+socket.on('updateGroupList', async function(data) {
     getGroupList();
 });
 
-socket.on('receiveGroupList', function (data) {
+socket.on('receiveGroupList', async function(data) {
     if (serverlist.innerHTML !== data) {
         serverlist.innerHTML = "";
         serverlist.innerHTML = data;
@@ -1819,7 +1902,7 @@ socket.on('receiveGroupList', function (data) {
 });
 
 
-socket.on('newMemberJoined', function (author) {
+socket.on('newMemberJoined', async function(author) {
 
     // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
     var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + author.name + '</label> joined the server! <label class="timestamp" id="' + author.timestamp + '">' + author.timestamp.toLocaleString("narrow") + '</p>' + '        </div>';
@@ -1829,7 +1912,7 @@ socket.on('newMemberJoined', function (author) {
 
 });
 
-socket.on('memberOnline', function (member) {
+socket.on('memberOnline', async function(member) {
 
     // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
     var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + member.username + '</label> is now online!</p>' + '        </div>';
@@ -1838,10 +1921,10 @@ socket.on('memberOnline', function (member) {
     scrollDown("memberOnline");
 });
 
-socket.on('memberPresent', function (member) {
+socket.on('memberPresent', async function(member) {
 });
 
-socket.on('receiveGifImage', function (response) {
+socket.on('receiveGifImage', async function(response) {
     clearGifContainer()
 
     if (response?.gifs) {
@@ -1860,11 +1943,11 @@ socket.on('receiveGifImage', function (response) {
 });
 
 
-socket.on('receiveToken', function (data) {
+socket.on('receiveToken', async function(data) {
     CookieManager.setCookie("dcts_token", data, 365);
 });
 
-socket.on('modalMessage', function (data) {
+socket.on('modalMessage', async function(data) {
     var buttonArray = [];
     if (data.buttons) {
         Object.keys(data.buttons).forEach(function (button) {
@@ -1922,7 +2005,6 @@ function setActiveGroup(group) {
 }
 
 function displayHomeUnread() {
-
     socket.emit("getAllUnread", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
         let unread = Number(response?.unread ?? 0);
 
@@ -2177,7 +2259,7 @@ async function getEmojis(callback = null) {
                                 ["data-code"]: e.code
                             });
                             quill.setSelection(sel.index + 1);
-                            focusEditor();
+                            if(!MobilePanel.isMobile()) focusEditor();
                             getEmojiContainerElement().style.display = "none";
                         }
                     });
@@ -2259,7 +2341,7 @@ async function getEmojis(callback = null) {
     }
 }
 
-socket.on('receiveGroupBanner', function (data) {
+socket.on('receiveGroupBanner', async function(data) {
     groupbanner.src = ChatManager.proxyUrl(data);
     document.getElementById("mobile_groupBannerDisplay").src = ChatManager.proxyUrl(data);
 });
@@ -2377,13 +2459,17 @@ async function waitFor(callback, timeout = 0) {
 }
 
 async function setUrl(param, isVC = false) {
+    if (!isVC) {
+        showHome(true)
+        saveChannelMessageDraft(UserManager.getID());
+    }
+
+
     let urlData = param.split("&")
     let groupId = urlData[0]?.replace("?group=", "")
     let categoryId = urlData[1]?.replace("category=", "")
     let channelId = urlData[2]?.replace("channel=", "")
     focusEditor()
-
-    if (!isVC) showHome(true)
 
     // channel already open, dont reload it
     if (UserManager.getChannel() === channelId && channelId && UserManager.getChannel() && isVC === false) return;
@@ -2415,7 +2501,14 @@ async function setUrl(param, isVC = false) {
             token: UserManager.getToken(),
             permission: "sendMessages"
         }, function (response) {
-            switchLeftSideMenu(true)
+
+            MobilePanel.close()
+
+            // lets prioritize loading the chat lol
+            changedChannel()
+            chatlog.innerHTML = "";
+            document.getElementById("messagebox").style.display = "flex";
+            getChatlog(document.getElementById("content"));
 
             // update grouplist and channel tree if we only
             // click on a group
@@ -2423,19 +2516,21 @@ async function setUrl(param, isVC = false) {
                 getChannelTree();
             }
 
-            changedChannel()
-            ChatManager.setChannelMarker(channelId, false)
-
-            chatlog.innerHTML = "";
-            document.getElementById("messagebox").style.display = "flex";
-            focusEditor();
-            getChatlog(document.getElementById("content"));
+            if(channelId) ChatManager.setChannelMarker(channelId, false)
             showGroupStats();
 
             if (response.permission !== "granted") {
                 toggleEditor(false);
             } else {
-                toggleEditor(true);
+                // to avoid confusion
+                if(!channelId){
+                    toggleEditor(false);
+                }
+                else{
+                    toggleEditor(true);
+                    focusEditor();
+                    if(channelId) handleChannelMessageDrafting(channelId);
+                }
             }
         });
     }
@@ -2514,7 +2609,7 @@ function getRoles() {
     });
 }
 
-function isScrolledToBottom(element, tolerancePx = 2) {
+function isScrolledToBottom(element, tolerancePx = 100) {
     const maxTop = Math.max(0, element.scrollHeight - element.clientHeight);
     return (maxTop - element.scrollTop) <= tolerancePx;
 }
@@ -2615,7 +2710,7 @@ async function testDb(length) {
     }
 }
 
-socket.on("uploadProgress", ({filename, bytes, total}) => {
+socket.on("uploadProgress", async ({filename, bytes, total}) => {
     const percent = total ? Math.min(100, (bytes / total) * 100) : 0;
     showSystemMessage({
         title: `File ${percent}% uploaded`,

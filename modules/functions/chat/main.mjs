@@ -16,14 +16,17 @@ import {encodeToBase64} from "../mysql/helper.mjs";
 import {signer} from "../../../index.mjs"
 import Logger from "@hackthedev/terminal-logger"
 import {queryDatabase} from "../mysql/mysql.mjs";
+import {getBan} from "../ban-system/helpers.mjs";
 
 var serverconfigEditable = serverconfig;
 
-export function getMemberLastOnline(memberId) {
+export async function getMemberLastOnline(memberId) {
     if (!memberId || !serverconfig.servermembers[memberId]) return null;
-    if(shouldIgnoreMember(serverconfig.servermembers[memberId])) return null;
 
-    const lastOnline = serverconfig.servermembers[memberId].lastOnline;
+    const member = serverconfig.servermembers[memberId];
+    if (await shouldIgnoreMember(member)) return null;
+
+    const lastOnline = Number(member.lastOnline || 0);
     const now = Date.now();
     const minutesPassed = Math.floor((now - lastOnline) / 60000);
     const isOnline = Array.from(io.sockets.sockets.values()).some(s => s.data?.memberId === memberId);
@@ -31,22 +34,34 @@ export function getMemberLastOnline(memberId) {
     return { isOnline, minutesPassed };
 }
 
+export async function getOnlineMemberCount() {
+    const sockets = Array.from(io.sockets.sockets.values());
+    const uniqueMembers = new Set();
 
-export function getOnlineMemberCount() {
-    const onlineMembers = Object.values(serverconfig.servermembers)
-        .filter(m => !shouldIgnoreMember(m) && m?.id && Number(getMemberLastOnline(m.id).minutesPassed) <= 5);
+    for (const s of sockets) {
+        const memberId = s.data?.memberId;
+        if (!memberId) continue;
 
-    return onlineMembers.length;
+        const member = serverconfig.servermembers[memberId];
+        if (!member) continue;
+
+        if (await shouldIgnoreMember(member)) continue;
+        if(Number((await getMemberLastOnline(member.id)).minutesPassed) > 5) continue
+
+        uniqueMembers.add(memberId);
+    }
+
+    return uniqueMembers.size;
 }
 
-export function hasPermission(userId, permissions, channelOrGroupId = null, mode = "any") {
-    if(shouldIgnoreMember(serverconfig.servermembers[userId])) return false;
+export async function hasPermission(userId, permissions, channelOrGroupId = null, mode = "any") {
+    if(await shouldIgnoreMember(serverconfig.servermembers[userId])) return false;
 
     const permsToCheck = Array.isArray(permissions) ? permissions : [permissions];
 
     if (permsToCheck.length > 1) {
-        if (mode === "all") return permsToCheck.every(p => hasPermission(userId, p, channelOrGroupId));
-        return permsToCheck.some(p => hasPermission(userId, p, channelOrGroupId));
+        if (mode === "all") return permsToCheck.every(async p => await hasPermission(userId, p, channelOrGroupId));
+        return permsToCheck.some(async p => await hasPermission(userId, p, channelOrGroupId));
     }
 
     const perm = permsToCheck[0];
@@ -151,12 +166,6 @@ export function hasPermission(userId, permissions, channelOrGroupId = null, mode
     //default deny
     return false;
 }
-
-
-export function checkUserChannelPermission(channel, userId, perms) {
-    return hasPermission(userId, perms, channel);
-}
-
 
 export function resolveGroupByChannelId(id) {
     for (const group of Object.keys(serverconfig.groups).reverse()) {
@@ -291,8 +300,14 @@ export async function getMemberProfile(id) {
     return null;
 }
 
-export function shouldIgnoreMember(member){
+export async function shouldIgnoreMember(member){
     if (!member?.lastOnline) return true;
+
+    if(member?.author?.id || member?.id){
+        let isBanned = await getBan(member?.author?.id ?? member?.id);
+        if(isBanned !== null) return true;
+    }
+
     return new Date(member?.lastOnline) <= getNewDate(`-${serverconfig.serverinfo.system.members.ignoreTimeout}`);
 }
 
@@ -349,16 +364,15 @@ export async function getMemberList(member, channel) {
 
         // didnt finish onboarding yet
         if(!memberObj.loginName) continue;
-        if(memberObj?.isBanned === true) continue;
-        if(shouldIgnoreMember(memberObj)) continue;
+        if(await shouldIgnoreMember(memberObj)) continue;
 
-        if(!hasPermission(memberId, "viewChannel", channel)) continue
+        if(!await hasPermission(memberId, "viewChannel", channel)) continue
 
         var highestMemberRole = getMemberHighestRole(memberId);
         sortedMembers[memberId] = await getCastingMemberObject(memberObj);
         sortedMembers[memberId].highestRole = getRoleCastingObject(highestMemberRole);
 
-        const { isOnline, minutesPassed } = getMemberLastOnline(memberId);
+        const { isOnline, minutesPassed } = await getMemberLastOnline(memberId);
 
         // if the user is offline
         if (!isOnline){
@@ -369,7 +383,7 @@ export async function getMemberList(member, channel) {
     return {members: sortedMembers, index: -1};
 }
 
-export function getGroupList(member) {
+export async function getGroupList(member) {
 
     member.id = xssFilters.inHTMLData(member.id)
     member.token = xssFilters.inHTMLData(member.token)
@@ -394,11 +408,11 @@ export function getGroupList(member) {
 
     // Foreach channel in the category, display it on the web page
     sortedGroups = sortedGroups.map((key) => groupCollection[key]);
-    sortedGroups.forEach(group => {
+    for (const group of sortedGroups) {
 
         // Admin
-        if (hasPermission(member.id, "manageGroups") &&
-            addedGroups.includes(group.info.id) == false
+        if (await hasPermission(member.id, "manageGroups") &&
+            addedGroups.includes(group.info.id) === false
         ) {
             addedGroups.push(group.info.id);
             code += `
@@ -438,7 +452,7 @@ export function getGroupList(member) {
             });
         }
 
-    });
+    }
 
 
     return code;
@@ -541,7 +555,7 @@ export function getJson(obj, pathOrPaths) {
 }
 
 
-export function getChannelTree(member) {
+export async function getChannelTree(member) {
 
     member.id = xssFilters.inHTMLData(member.id)
     member.token = xssFilters.inHTMLData(member.token)
@@ -577,12 +591,12 @@ export function getChannelTree(member) {
 
     // Foreach channel in the category, display it on the web page
     sortedCats = sortedCats.map((key) => catCollection[key]);
-    sortedCats.forEach(cat => {
+    for (const cat of sortedCats) {
 
         showedCategory = false;
 
         // Show Category if can edit channels (grammar 101)
-        if (hasPermission(member.id, "manageChannels", group) == true) {
+        if (await hasPermission(member.id, "manageChannels", group) === true) {
 
             // show group name etc if allowed to
             //if(!addedInitialCode) treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`; addedInitialCode = true;
@@ -602,16 +616,16 @@ export function getChannelTree(member) {
 
         // For each Category, sort the category's channels
         sortedChans = sortedChans.map((key) => chanCollection[key]);
-        sortedChans.forEach(chan => {
+        for (const chan of sortedChans) {
 
             // if has the permission to view the current group
             // and the category wasnt already shown
             // and the category has at least one channel
             // and the user is allowed to view the channel
             if (
-                hasPermission(member.id, ["viewGroup"], group) &&
-                showedCategory == false && sortedChans.length > 0 &&
-                hasPermission(member.id, ["viewChannel"], chan.id)
+                await hasPermission(member.id, ["viewGroup"], group) &&
+                showedCategory === false && sortedChans.length > 0 &&
+                await hasPermission(member.id, ["viewChannel"], chan.id)
             ) {
                 // show group name etc if allowed to
                 if (!addedInitialCode) treecode = `<h2>${serverconfig.groups[group].info.name}</h2><hr>`;
@@ -625,23 +639,23 @@ export function getChannelTree(member) {
             }
 
             // Foreach server role
-            Object.keys(roles).forEach(function (role) {
+            for (const role of Object.keys(roles)) {
 
                 // if the member is part of the role
                 if (roles[role].members.includes(member.id)) {
 
                     // if the user has the permission to either view the channel or manage channels
-                    if (hasPermission(member.id, "viewChannel", chan.id) || hasPermission(member.id, "manageChannels", member.group)) {
+                    if (await hasPermission(member.id, "viewChannel", chan.id) || await hasPermission(member.id, "manageChannels", member.group)) {
 
 
                         setJson(channeltree, `groups.${group}.categories.${cat.info.id}.channel.${chan.id}`, serverconfig.groups[group].channels.categories[cat.info.id].channel[chan.id])
 
-                        if (added_channels.includes(chan.id + "_" + chan.name) == false) {
+                        if (added_channels.includes(chan.id + "_" + chan.name) === false) {
 
                             // if text channel
-                            if (chan.type == "text") {
+                            if (chan.type === "text") {
                                 added_channels.push(chan.id + "_" + chan.name)
-                            } else if (chan.type == "voice") {
+                            } else if (chan.type === "voice") {
                                 added_channels.push(chan.id + "_" + chan.name)
                             }
                         }
@@ -650,11 +664,11 @@ export function getChannelTree(member) {
                         //console.log(`User ${serverconfig.servermembers[member.id].name} was denied`)
                     }
                 }
-            });
+            }
 
-        });
+        }
 
-    });
+    }
 
     return channeltree;
 }

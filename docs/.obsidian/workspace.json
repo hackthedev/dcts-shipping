@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Lore/Threat model.md",
+                "file": "Lore/Technical overview.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Threat model"
+              "title": "Technical overview"
             }
           }
         ]
@@ -185,22 +185,25 @@
   },
   "active": "1c4490349bf68a2c",
   "lastOpenFiles": [
-    "Lore/Technical overview.md",
-    "Lore/Terminology.md",
-    "Lore/Moderation.md",
-    "Lore/Threat model.md",
-    "Web Client/Main/Instance Info.md",
     "Lore/Principles.md",
-    "Getting started.md",
-    "VoIP Setup.md",
-    "network/DNS Setup.md",
+    "Lore/Moderation.md",
+    "Lore/Architecture.md",
+    "sql/Configure SQL.md",
     "network/Port forwarding.md",
     "network/DynDNS.md",
-    "network/Reverse Proxy Setup.md",
+    "network/DNS Setup.md",
     "network/Caddy Setup.md",
-    "sql/Configure SQL.md",
-    "sql/errors/SQL Tables and Columns not setting up automatically.md",
     "install NodeJS.md",
+    "Lore/Threat model.md",
+    "Lore/Terminology.md",
+    "Lore/Technical overview.md",
+    "sql/errors/SQL Tables and Columns not setting up automatically.md",
+    "sql/errors",
+    "sql/Configurating SQL.md",
+    "Web Client/Main/Instance Info.md",
+    "Getting started.md",
+    "VoIP Setup.md",
+    "network/Reverse Proxy Setup.md",
     "Feature List.md",
     "index.md",
     "markdown-examples.md",

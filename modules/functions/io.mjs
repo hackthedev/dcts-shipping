@@ -334,6 +334,7 @@ export async function saveChatMessage(message, editedMsgId = null) {
     saveConfig(serverconfig);
 
     let mentions = getMentionIdsFromText(message.message)
+
     // add mentions to to inbox based on user mention
     for (const memberId of mentions.userIds) {
         if (memberId !== message?.author?.id) await addInboxMessage(memberId, {messageId: message.messageId}, "message", `${memberId}-${message.messageId}`);
@@ -345,12 +346,12 @@ export async function saveChatMessage(message, editedMsgId = null) {
 
         if (roleId === 1) continue; // offline role
         if (roleId === 0) { // member role
-            if (!hasPermission(message.id, "pingEveryone")) continue;
+            if (!await hasPermission(message.id, "pingEveryone")) continue;
         }
 
         for (const memberId of serverconfig.serverroles[roleId]?.members || []) {
             if (!memberId) continue;
-            if (shouldIgnoreMember(serverconfig.servermembers[memberId])) continue;
+            if (await shouldIgnoreMember(serverconfig.servermembers[memberId])) continue;
             if (message?.id === memberId) continue;
 
             await addInboxMessage(memberId, {messageId: message.messageId}, "message", `${memberId}-${message.messageId}`);

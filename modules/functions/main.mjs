@@ -34,6 +34,7 @@ import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./migrations/
 import archiver from "archiver";
 import {banIp, checkMemberBan, getBan, isIdentifierBanned, removeBan} from "./ban-system/helpers.mjs";
 import checkPermission from "../sockets/checkPermission.mjs";
+import {sanitizeHTML} from "./sanitizing/functions.mjs";
 
 var serverconfigEditable;
 
@@ -105,62 +106,7 @@ export function removeFileExtension(filename) {
 }
 
 export function sanitizeInput(input) {
-
-    // ignore files
-    if (Buffer.isBuffer(input)) return input;
-
-    return sanitizeHtml(input, {
-        allowedTags: [
-            'div',
-            'source',
-            'video',
-            'audio',
-            'span',
-            'p',
-            'br',
-            'b',
-            'i',
-            'u',
-            's',
-            'a',
-            'ul',
-            'ol',
-            'li',
-            'h1',
-            'h2',
-            'h3',
-            'pre',
-            'code',
-            "label",
-            'blockquote',
-            'strong',
-            'em',
-            'img',
-            'mark'
-        ],
-        allowedAttributes: {
-            'a': ['href', 'target', 'rel'],
-            'img': ['src', 'alt', 'title'],
-            'div': ['class', 'style'],
-            'strong': ['class'],
-            'em': ['class'],
-            'u': ['class'],
-            's': ['class'],
-            'span': ['class', 'style'],
-            '*': ['class', 'style']
-        },
-        transformTags: {
-            'a': sanitizeHtml.simpleTransform('a', {target: '_blank', rel: 'noopener noreferrer'})
-        },
-        allowedSchemesByTag: {
-            img: ['http', 'https', 'data'] // Erlaubt das data-Schema für img-Tags
-        },
-        allowedSchemesAppliedToAttributes: ['src'], // Nur auf das 'src'-Attribut anwenden
-        textFilter: (text) => {
-            // Entfernt alle 'data:'-URLs außer 'data:image/png;base64' und 'data:image/jpeg;base64'
-            return text.replace(/data:image\/(?!png|jpeg)[^;]+;base64[^"]*/g, '');
-        }
-    });
+    return sanitizeHTML(input);
 }
 
 export function sanitizeFilename(filename) {
@@ -456,7 +402,7 @@ async function listRoomsMembers(io, usersocket = {}) {
 }
 
 
-export function checkConnectionLimit(socket, token = null, id = null) {
+export async function checkConnectionLimit(socket, token = null, id = null) {
 
     // get the connected clients
     const connectedClients = io.engine.clientsCount;
@@ -470,11 +416,11 @@ export function checkConnectionLimit(socket, token = null, id = null) {
     if (token !== null && id !== null) {
 
         // lets make sure the account data is correct
-        if (validateMemberId(id, socket, true) == true
-            && serverconfig.servermembers[id].token == token) {
+        if (await validateMemberId(id, socket, true) === true
+            && serverconfig.servermembers[id].token === token) {
 
             // check if user is allowed to bypass based on roles
-            if (hasPermission(id, ["bypassSlots"])) canBypassWithRoles = true;
+            if (await hasPermission(id, ["bypassSlots"])) canBypassWithRoles = true;
         }
     }
 
@@ -770,6 +716,7 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockTor", true)
     checkObjectKeys(serverconfig, "serverinfo.moderation.ip.blockAbuser", true)
 
+    checkObjectKeys(serverconfig, "serverinfo.moderation.bans.allowXSSTesting", false)
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayName", "Banned")
     checkObjectKeys(serverconfig, "serverinfo.moderation.bans.displayMessageNotice", `<span class="content-hidden">[ Content hidden ]</span>`)
     
@@ -1040,7 +987,7 @@ export function generateId(length) {
     return result;
 }
 
-export function validateMemberId(id, socket, token, bypass = false) {
+export async function validateMemberId(id, socket, token, bypass = false) {
     id = String(id)
 
     if (bypass === false && socket) {
@@ -1058,6 +1005,8 @@ export function validateMemberId(id, socket, token, bypass = false) {
     // check member token if present
     if(id && token){
         let memberObject = serverconfig.servermembers[id];
+
+        // this needs to be improved
         if(memberObject && socket) checkMemberBan(socket, memberObject);
 
         if(serverconfig.servermembers[id]?.token !== token){
@@ -1347,7 +1296,8 @@ export async function autoAnonymizeMessage(issuerMemberId, message){
 
     let author = serverconfig.servermembers[message.author.id] || getUnkownMember()
     if(!author) throw new Error("Message author member object not found");
-    let isBanned = await isIdentifierBanned(message.author?.id)
+
+    let isBanned = message?.author?.id ? await isIdentifierBanned(message.author?.id) : false;
     message.author.isBanned = isBanned;
 
     let shouldAnonymize = (isBanned || message?.anon === true) || false
@@ -1444,8 +1394,11 @@ export async function getCastingMemberObject(member) {
         }
     });
 
-    if(await getBan(member?.id || member?.author?.id)){
-        member.isBanned = true;
+    let memberId = member?.id || member?.author?.id;
+    if(memberId != null && memberId?.length === 12){
+        if(await getBan(member?.id || member?.author?.id)){
+            member.isBanned = true;
+        }
     }
 
     member = setMemberObjColor(member)

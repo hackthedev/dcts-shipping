@@ -84,7 +84,7 @@ class UserManager {
         
             <div id="profile_content">       
                 <div id="profile_username"><h2 style="margin: 0 !important;">${unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.name))}</h2></div>                
-                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? sanitizeHtmlForRender(memberObj?.status) : ""}</i></div>  
+                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.status), false) : ""}</i></div>  
                 
                 ${memberObj?.aboutme?.trim()?.length > 0 ?                
                `
@@ -106,7 +106,7 @@ class UserManager {
                ` : ""}
             <hr>
                        
-            <a id="dm_action" href="/home.html?dm=${sanitizeHtmlForRender(memberObj?.id)}">&#10149; Send Message</a>
+            <a id="dm_action" href="/home.html?dm=${sanitizeHtmlForRender(memberObj?.id, false)}">&#10149; Send Message</a>
 
             <div class="profile_meta">
                 <div class="info">
@@ -137,7 +137,7 @@ class UserManager {
             <div id="profile_roles">
                 <h2 class="profile_headline">Roles</h2>
                 ${roleCode}
-                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${sanitizeHtmlForRender(memberObj.id)}');" class="role addRoleMenuTrigger" data-member-id="${memberObj.id}" id="addRole-${memberObj.id}">+</code>
+                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${sanitizeHtmlForRender(memberObj.id, false)}');" class="role addRoleMenuTrigger" data-member-id="${memberObj.id}" id="addRole-${memberObj.id}">+</code>
             </div>`;
     }
 
@@ -452,6 +452,44 @@ class UserManager {
         ];
 
         return UserManager.pickRandomFromArray(randomUsernames);
+    }
+
+    static getShortenedAccountData(jsonData) {
+        function clean(str) {
+            if (typeof str !== 'string') return str
+            return str.replace(/[^\x20-\x7E]/g, '')
+        }
+
+        return {
+            id: jsonData.id,
+            token: jsonData.token,
+            name: clean(jsonData.name),
+            icon: clean(jsonData.icon),
+            pow: jsonData.pow,
+        }
+    }
+
+    static async getAccountExportData(){
+        return new Promise((resolve, reject) => {
+            socket.emit("exportAccount", {id: UserManager.getID(), token: UserManager.getToken(),}, async function (response) {
+                resolve(UserManager.getShortenedAccountData(response?.account) ?? response);
+            });
+        })
+    }
+
+    static setAccount(jsonData){
+
+    }
+
+    static async saveAccount(jsonData){
+        if(!jsonData){
+            jsonData = await this.getAccountExportData();
+        }
+
+        if (isLauncher()) {
+            let client = Client()
+            let result = client.saveAccount(JSON.stringify(jsonData))
+        }
     }
 
     static getUsername() {

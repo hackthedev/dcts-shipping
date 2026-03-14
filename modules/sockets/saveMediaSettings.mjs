@@ -5,12 +5,11 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on("saveMediaSettings", function (member, response) {
+    socket.on("saveMediaSettings", async function (member, response) {
 
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            if (hasPermission(member.id, "manageUploads")) {
+            if (await hasPermission(member.id, "manageUploads")) {
                 try {
                     serverconfig.serverinfo.maxUploadStorage = member.maxLocalUpload;
                     serverconfig.serverinfo.useCloudflareImageCDN = member.useCloudflare;

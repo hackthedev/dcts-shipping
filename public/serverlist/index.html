@@ -27,8 +27,6 @@
 <body>
 
 <div id="savedServers">
-
-
     <div class="savedServersHeader">
         <h1>Discovery</h1>
 
@@ -37,17 +35,9 @@
             <a href="#" class="last" onclick="submitServerUI()">&#9998; Submit a server</a>
         </div>
 
-        <!--
-        <div id="connectContainer">
-            <h2>... or connect via url</h2>
-
-            <div id="connectInputs">
-                <input type="text" id="connectUrl" placeholder="Enter a url">
-                <button id="connectButton" onclick="connectToServer(document.getElementById('connectUrl').value)">Connect</button>
-                <p id="connectionStatus"></p>
-            </div>
-        </div>
-        -->
+        <br>
+        <input type="text" id="manualUrl" placeholder="Connect manually via url...">
+        <button onclick="window.location.href = manualUrl.value">Connect</button>
     </div>
 
     <div class="serverlistingContainer">

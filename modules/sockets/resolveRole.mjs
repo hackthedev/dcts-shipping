@@ -11,8 +11,8 @@ import {
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('resolveRole', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
+    socket.on('resolveRole', async function (member, response) {
+        if (await validateMemberId(member.id, socket) == true
             && serverconfig.servermembers[member.id].token == member.token
         ) {
 

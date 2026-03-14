@@ -5,11 +5,10 @@ import {copyObject, escapeHtml, sendMessageToUser, validateMemberId} from "../fu
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on("getGroupInfo", function (member, response) {
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+    socket.on("getGroupInfo", async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            if (hasPermission(member.id, "manageGroups")) {
+            if (await hasPermission(member.id, "manageGroups")) {
 
                 var groupObj = serverconfig.groups[member.group];
                 response({ type: "success", msg: "Successfully resolved group", data: groupObj });
@@ -26,8 +25,8 @@ export default (io) => (socket) => {
     });
 
     socket.on("updateGroup", async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token)) {
-            if (hasPermission(member.id, "manageChannels")) {
+        if (await validateMemberId(member?.id, socket, member?.token)) {
+            if (await hasPermission(member.id, "manageChannels")) {
                 if(!member?.data) return response({ type: "error", msg: "No data provided" });
                 if(!member?.groupId) return response({ type: "error", msg: "No groupId provided" })
 

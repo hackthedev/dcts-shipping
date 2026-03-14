@@ -73,7 +73,7 @@ class Inbox {
             updateUIMentions()
 
             for (let item of data.items) {
-                let itemData = JSON.parse(item.data);
+                let itemData = item.data;
                 let itemType = item.type;
 
                 if (itemType === "message") {

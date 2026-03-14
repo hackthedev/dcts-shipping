@@ -5,11 +5,10 @@ import { copyObject, escapeHtml, limitString, sendMessageToUser, validateMemberI
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('updateServerName', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token) {
+    socket.on('updateServerName', async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
-            if (hasPermission(member.id, "manageServerInfo")) {
+            if (await hasPermission(member.id, "manageServerInfo")) {
                 Logger.warn(`Changing servername from ${serverconfig.serverinfo.name} to ${escapeHtml(limitString(member.value, 300))}`);
                 
                 serverconfig.serverinfo.name = member.value;

@@ -50,22 +50,22 @@ app.post("/upload", async (req, res) => {
                 const clean = sanitizeFilename(filename);
                 const dir = type === "emoji" ? "./public/emojis" : UPLOAD_DIR;
 
-                if (type === "upload" && !hasPermission(id, "uploadFiles"))
+                if (type === "upload" && !await hasPermission(id, "uploadFiles"))
                     return res.status(403).json({ ok: false, error: "no_permission" });
 
-                if (type === "emoji" && !hasPermission(id, "manageEmojis"))
+                if (type === "emoji" && !await hasPermission(id, "manageEmojis"))
                     return res.status(403).json({ ok: false });
 
                 const role = getMemberHighestRole(id);
                 const maxBytes = (role?.permissions?.maxUpload || 10) * 1024 * 1024;
 
-                if (chunkIndex == 0 &&
+                if (chunkIndex === 0 &&
                     getFolderSize(dir) >= serverconfig.serverinfo.maxUploadStorage * 1024 * 1024)
                     return res.status(507).json({ ok: false, error: "storage_full" });
 
                 const temp = path.join(dir, `${fileId}_${clean}`);
 
-                if (chunkIndex == 0) {
+                if (chunkIndex === 0) {
                     const { mime } = (await fileTypeFromBuffer(headerBuf)) || {};
                     if (!mime || !serverconfig.serverinfo.uploadFileTypes.includes(mime))
                         return res.status(415).json({ ok: false, error: "mime_not_allowed" });

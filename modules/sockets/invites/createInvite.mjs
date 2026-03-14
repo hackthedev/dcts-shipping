@@ -5,12 +5,12 @@ import {hasPermission} from "../../functions/chat/main.mjs";
 export default (io) => (socket) => {
     // socket.on code here
 
-    socket.on('createInvite', function (member, response) {
+    socket.on('createInvite', async function (member, response) {
         // some code
-        if(validateMemberId(member?.id, socket, member?.token) === true){
+        if(await validateMemberId(member?.id, socket, member?.token) === true){
 
             // check permission
-            if(hasPermission(member?.id, "manageInvites") === false){
+            if(await hasPermission(member?.id, "manageInvites") === false){
                 response({ error: "You're not allowed to managed invites" })
                 return;
             }

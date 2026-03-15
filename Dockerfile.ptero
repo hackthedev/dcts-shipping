@@ -12,7 +12,7 @@ WORKDIR /home/container
 WORKDIR /home/container
 
 COPY package.json bun.lock ./
-COPY ./ptero/entrypoint.sh /entrypoint.sh
+COPY --chmod=755 ./ptero/entrypoint.sh /entrypoint.sh
 
 RUN mkdir sv && \
   mkdir configs && \

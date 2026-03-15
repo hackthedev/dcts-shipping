@@ -22,7 +22,7 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!\/bin\/bash\n# DCTS\n#\n# Server Files: \/mnt\/server\n# All required packages are installed in the used install image \n\nexport HOME=\/mnt\/server\nmkdir -p \/mnt\/server\ncd \/mnt\/server\n\nif [ ! -d \".git\" ]; then\n  echo -e \"Cloning from github...\"\n  git clone -b beta-ptero https:\/\/github.com\/hackthedev\/dcts-shipping.git .\nelse\n  echo -e \"Updating existing installation...\"\n  git pull origin beta-ptero\nfi\n\necho -e \"Preparing directories and fixing permissions...\"\n\nmkdir -p sv configs public\/uploads public\/emojis plugins themes\n\necho -e \"Installation completed.\\nDependencies will be installed on first start.\"",
+            "script": "#!\/bin\/bash\n# DCTS\n#\n# Server Files: \/mnt\/server\n# All required packages are installed in the used install image \n\nexport HOME=\/mnt\/server\nmkdir -p \/mnt\/server\ncd \/mnt\/server\n\nif [ ! -d \".git\" ]; then\n  echo -e \"Cloning from github...\"\n  git clone https:\/\/github.com\/hackthedev\/dcts-shipping.git .\nelse\n  echo -e \"Updating existing installation...\"\n  git pull origin main\nfi\n\necho -e \"Preparing directories and fixing permissions...\"\n\nmkdir -p sv configs public\/uploads public\/emojis plugins themes\n\necho -e \"Installation completed.\\nDependencies will be installed on first start.\"",
             "container": "ghcr.io\/pterodactyl\/installers:debian",
             "entrypoint": "bash"
         }

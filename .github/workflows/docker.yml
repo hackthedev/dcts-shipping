@@ -77,4 +77,4 @@ jobs:
           context: .
           file: ./Dockerfile.ptero
           push: true
-          tags: ${{ steps.ptero-release.outputs.tags || steps.ptero-release.outputs.tags }}
+          tags: ${{ steps.meta-branch.outputs.tags || steps.meta-branch.outputs.tags }}

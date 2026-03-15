@@ -12,6 +12,7 @@ WORKDIR /home/container
 WORKDIR /home/container
 
 COPY package.json bun.lock ./
+COPY ./ptero/entrypoint.sh /entrypoint.sh
 
 RUN mkdir sv && \
   mkdir configs && \
@@ -20,8 +21,11 @@ RUN mkdir sv && \
   mkdir public/uploads && \
   mkdir plugins && \
   mkdir themes && \
-  bun install
+  bun install && \\
+  chmod +x ./ptero/entrypoint.sh
 
 COPY . .
 
 EXPOSE 2052
+
+CMD ["/bin/bash", "/entrypoint.sh"]

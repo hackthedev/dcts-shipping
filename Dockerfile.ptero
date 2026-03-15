@@ -4,10 +4,10 @@
 
 FROM oven/bun:1-slim
 
-RUN adduser --disabled-password --home /home/container container
+RUN useradd -m -d /home/container container
 
-USER container
-ENV  USER=container HOME=/home/container
+ENV USER=container HOME=/home/container
+WORKDIR /home/container
 
 WORKDIR /home/container
 

@@ -164,15 +164,18 @@ if (fs.existsSync("./configs/sql.txt")) {
     serverconfig.serverinfo.sql.enabled = true; // enabled it because the file doesnt exist for fun
 }
 
-// overwrites for docker
-if (process.env.DB_HOST) serverconfig.serverinfo.sql.host = process.env.DB_HOST;
-if (process.env.DB_USER)
-    serverconfig.serverinfo.sql.username = process.env.DB_USER;
-if (process.env.DB_PASS)
-    serverconfig.serverinfo.sql.password = process.env.DB_PASS;
-if (process.env.DB_NAME)
-    serverconfig.serverinfo.sql.database = process.env.DB_NAME;
-if (process.env.DB_HOST || process.env.DB_USER || process.env.DB_PASS || process.env.DB_NAME) {
+// overwrites for docker and pterodactyl panel databases
+let dbHost = process.env.DATABASE_HOST || process.env.DB_HOST;
+let dbUser = process.env.DATABASE_USER || process.env.DB_USER;
+let dbPass = process.env.DATABASE_PASSWORD || process.env.DB_PASS;
+let dbName = process.env.DATABASE_NAME || process.env.DB_NAME;
+
+if (dbHost) serverconfig.serverinfo.sql.host = dbHost;
+if (dbUser) serverconfig.serverinfo.sql.username = dbUser;
+if (dbPass) serverconfig.serverinfo.sql.password = dbPass;
+if (dbName) serverconfig.serverinfo.sql.database = dbName;
+
+if (dbHost || dbUser || dbPass || dbName) {
     serverconfig.serverinfo.sql.enabled = true;
 }
 saveConfig(serverconfig);

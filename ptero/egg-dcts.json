@@ -54,7 +54,7 @@
             "env_variable": "DB_HOST",
             "default_value": "172.18.0.1",
             "user_viewable": true,
-            "user_editable": false,
+            "user_editable": true,
             "rules": "required|string",
             "field_type": "text"
         },
@@ -64,7 +64,7 @@
             "env_variable": "DB_USER",
             "default_value": "dcts",
             "user_viewable": true,
-            "user_editable": false,
+            "user_editable": true,
             "rules": "required|string",
             "field_type": "text"
         },
@@ -74,7 +74,7 @@
             "env_variable": "DB_PASS",
             "default_value": "",
             "user_viewable": true,
-            "user_editable": false,
+            "user_editable": true,
             "rules": "nullable|string",
             "field_type": "text"
         },
@@ -84,7 +84,7 @@
             "env_variable": "DB_NAME",
             "default_value": "dcts",
             "user_viewable": true,
-            "user_editable": false,
+            "user_editable": true,
             "rules": "required|string",
             "field_type": "text"
         },
@@ -94,7 +94,7 @@
             "env_variable": "REDIS_HOST",
             "default_value": "172.18.0.1",
             "user_viewable": true,
-            "user_editable": false,
+            "user_editable": true,
             "rules": "required|string",
             "field_type": "text"
         },
@@ -104,7 +104,7 @@
             "env_variable": "REDIS_PORT",
             "default_value": "6379",
             "user_viewable": true,
-            "user_editable": false,
+            "user_editable": true,
             "rules": "required|integer",
             "field_type": "text"
         },

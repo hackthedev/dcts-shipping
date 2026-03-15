@@ -15,8 +15,9 @@ WORKDIR /home/container
 
 # Copy entrypoint and fix line endings without needing root
 COPY --chown=container:container ./ptero/entrypoint.sh /entrypoint.sh
-RUN tr -d '\r' < /entrypoint.sh > /tmp/entrypoint.sh \
-    && mv /tmp/entrypoint.sh /entrypoint.sh \
+
+# Fix Windows newlines using sed without intermediate file (does not require root)
+RUN sed -i 's/\r$//' /entrypoint.sh \
     && chmod +x /entrypoint.sh
 
 CMD ["/bin/bash", "/entrypoint.sh"]

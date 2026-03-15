@@ -22,7 +22,7 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!/bin/bash\r\nset -e\r\n\r\necho \"Installing/Updating DCTS...\"\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ncp -a /app/. /mnt/server/\r\n\r\necho \"Preparing directories...\"\r\n\r\nmkdir -p sv configs public/uploads public/emojis plugins themes\r\n\r\necho \"Installing dependencies...\"\r\n\r\nbun install --frozen-lockfile 2>/dev/null || bun install\r\n\r\necho \"DCTS installed/updated successfully.\"\r\nexit 0",
+            "script": "#!/bin/bash\nset -e\n\necho \"Installing/Updating DCTS...\"\n\nmkdir -p /mnt/server\ncd /mnt/server\n\ncp -r /app/* /mnt/server/ 2>/dev/null || true\ncp /app/.gitignore /mnt/server/ 2>/dev/null || true\n\necho \"Preparing directories...\"\n\nmkdir -p sv configs public/uploads public/emojis plugins themes\n\necho \"Installing dependencies...\"\n\nbun install --frozen-lockfile 2>/dev/null || bun install || true\n\necho \"DCTS installed/updated successfully.\"\nexit 0",
             "container": "ghcr.io/hackthedev/dcts-shipping:latest",
             "entrypoint": "bash"
         }

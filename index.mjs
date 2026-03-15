@@ -870,6 +870,11 @@ async function waitForTable(table, interval = 1000) {
     // after the tables exist etc we will fire up our awesome new job(s)
     scheduleDbTasks(dbTasks);
 
+
+    initPaymentSystem(app)
+    startServer();
+    listenToIO();
+    
     try{
         let libDir = path.join(path.resolve(), "public", "js", "libs");
         const results = await FrontendLibs.installMultiple([
@@ -889,10 +894,6 @@ async function waitForTable(table, interval = 1000) {
     catch(exc){
         Logger.error(exc);
     }
-
-    initPaymentSystem(app)
-    startServer();
-    listenToIO();
 })();
 
 async function initIPSec(){

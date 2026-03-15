@@ -13,7 +13,7 @@
         "DCTS Beta": "ghcr.io\/hackthedev\/dcts-shipping:beta-ptero"
     },
     "file_denylist": [],
-    "startup": "bun .",
+    "startup": "bun . --ptero",
     "config": {
         "files": "{}",
         "startup": "{\r\n    \"done\": \"Welcome to DCTS\"\r\n}",

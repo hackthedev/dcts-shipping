@@ -65,8 +65,8 @@ jobs:
         if: github.event_name == 'release'
         id: ptero-release
         run: |
-          VERSION="${GITHUB_REF_NAME}_ptero"
-          VERSION="${VERSION#v}"  # "v1.0.0" -> "1.0.0"
+          VERSION="${GITHUB_REF_NAME}-ptero"
+          VERSION="${VERSION#v}-ptero"  # "v1.0.0" -> "1.0.0"
           TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 

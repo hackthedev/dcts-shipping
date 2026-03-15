@@ -134,7 +134,6 @@ export function enforceFolderSizeLimitMB(dir, maxMB) {
 
 
 export function checkServerDirectories() {
-    console.log(process.cwd());
     // Emoji storage
     if (!fs.existsSync("./public/emojis")) {
         fs.mkdirSync("./public/emojis");

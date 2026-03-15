@@ -870,20 +870,25 @@ async function waitForTable(table, interval = 1000) {
     // after the tables exist etc we will fire up our awesome new job(s)
     scheduleDbTasks(dbTasks);
 
-    let libDir = path.join(path.resolve(), "public", "js", "libs");
-    const results = await FrontendLibs.installMultiple([
-        { package: '@hackthedev/file-manager@1.0.0', path: libDir },
-        { package: '@hackthedev/element-loader@1.0.0', path: libDir },
-    ]);
+    try{
+        let libDir = path.join(path.resolve(), "public", "js", "libs");
+        const results = await FrontendLibs.installMultiple([
+            { package: '@hackthedev/file-manager@1.0.0', path: libDir },
+            { package: '@hackthedev/element-loader@1.0.0', path: libDir },
+        ]);
 
-    results.forEach((r) => {
-        if(r?.success || r?.skipped){
-            Logger.debug(r?.message)
-        }
-        else{
-            Logger.error(r?.message)
-        }
-    });
+        results.forEach((r) => {
+            if(r?.success || r?.skipped){
+                Logger.debug(r?.message)
+            }
+            else{
+                Logger.error(r?.message)
+            }
+        });
+    }
+    catch(exc){
+        Logger.error(exc);
+    }
 
     initPaymentSystem(app)
     startServer();

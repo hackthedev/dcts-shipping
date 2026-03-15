@@ -21,8 +21,7 @@ RUN mkdir sv && \
   mkdir public/uploads && \
   mkdir plugins && \
   mkdir themes && \
-  bun install && \
-  chmod +x ./ptero/entrypoint.sh
+  bun install
 
 COPY . .
 

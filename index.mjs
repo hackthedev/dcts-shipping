@@ -874,7 +874,7 @@ async function waitForTable(table, interval = 1000) {
     initPaymentSystem(app)
     startServer();
     listenToIO();
-    
+
     try{
         let libDir = path.join(path.resolve(), "public", "js", "libs");
         const results = await FrontendLibs.installMultiple([

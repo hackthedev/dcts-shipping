@@ -63,7 +63,7 @@ jobs:
 
       - name: Set image tags ptero (release)
         if: github.event_name == 'release'
-        id: meta-release
+        id: ptero-release
         run: |
           VERSION="${GITHUB_REF_NAME}_ptero"
           VERSION="${VERSION#v}"  # "v1.0.0" -> "1.0.0"

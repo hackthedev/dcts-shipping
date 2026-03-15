@@ -6,7 +6,7 @@ on:
       - main
       - beta
   release:
-    types: [published]
+    types: [ published ]
 
 env:
   REGISTRY: ghcr.io
@@ -49,7 +49,7 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME}"
           VERSION="${VERSION#v}"  # "v1.0.0" -> "1.0.0"
-          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"l
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
@@ -57,5 +57,24 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           context: .
+          push: true
+          tags: ${{ steps.meta-branch.outputs.tags || steps.meta-release.outputs.tags }}
+
+
+      - name: Set image tags ptero (release)
+        if: github.event_name == 'release'
+        id: meta-release
+        run: |
+          VERSION="${GITHUB_REF_NAME}_ptero"
+          VERSION="${VERSION#v}"  # "v1.0.0" -> "1.0.0"
+          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: Build and push ptero shit
+        uses: docker/build-push-action@v5
+        with:
+          platforms: linux/amd64,linux/arm64
+          context: .
+          file: ./Dockerfile.ptero
           push: true
           tags: ${{ steps.meta-branch.outputs.tags || steps.meta-release.outputs.tags }}

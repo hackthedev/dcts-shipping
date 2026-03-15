@@ -1,0 +1,32 @@
+# ---------------------------
+# Dockerfile for DCTS Shipping (Bun)
+# ---------------------------
+
+FROM oven/bun:1-slim
+
+RUN adduser --disabled-password --home /home/container container
+
+USER container
+ENV  USER=container HOME=/home/container
+
+WORKDIR /home/container
+
+COPY package.json bun.lock ./
+
+RUN mkdir sv && \
+  mkdir configs && \
+  mkdir public && \
+  mkdir public/emojis && \
+  mkdir public/uploads && \
+  mkdir plugins && \
+  mkdir themes && \
+  bun install
+
+COPY . .
+
+EXPOSE 2052
+
+CMD ["bun", "."]
+
+LABEL org.opencontainers.image.source=https://github.com/hackthedev/dcts-shipping
+LABEL org.opencontainers.image.description="Free Open Source Decentralized Chat App"

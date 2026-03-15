@@ -1,7 +1,6 @@
 import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
 
 console.clear();
-console.log("Starting...");
 
 let versionPath = path.join(path.resolve(), "version");
 if(!fs.existsSync(versionPath)) {
@@ -736,6 +735,12 @@ Logger.success(`Checkout our subreddit at https://www.reddit.com/r/dcts/`);
 Logger.success(
     `The Official Github Repo: https://github.com/hackthedev/dcts-shipping/`,
 );
+
+
+if (nodeArgs.includes("--ptero")) {
+   console.log("Ptero running");
+}
+
 
 Logger.space();
 Logger.info(

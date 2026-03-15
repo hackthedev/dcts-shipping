@@ -16,7 +16,7 @@
     "startup": "bun .",
     "config": {
         "files": "{}",
-        "startup": "{\r\n    \"done\": \"Starting...\"}",
+        "startup": "{\r\n    \"done\": \"Welcome to DCTS\"}",
         "logs": "{}",
         "stop": "^C"
     },

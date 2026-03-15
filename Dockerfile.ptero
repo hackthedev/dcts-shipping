@@ -4,14 +4,17 @@
 # ---------------------------
 FROM oven/bun:1-alpine
 
-RUN apk add --no-cache --update curl ca-certificates openssl git tar bash unzip \
+# Install dependencies and create container user
+RUN apk add --no-cache --update curl ca-certificates openssl git tar bash sqlite fontconfig tzdata iproute2 \
     && adduser -D -h /home/container container
 
+# Set environment
 USER container
 ENV USER=container HOME=/home/container
-
 WORKDIR /home/container
 
-COPY ./ptero/entrypoint.sh /entrypoint.sh
+# Copy entrypoint and fix line endings without needing root
+COPY --chown=container:container ./ptero/entrypoint.sh /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 CMD ["/bin/bash", "/entrypoint.sh"]

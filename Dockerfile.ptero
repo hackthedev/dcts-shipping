@@ -13,10 +13,8 @@ USER container
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
 
-# Copy entrypoint and fix line endings without needing root
-COPY --chown=container:container ./ptero/entrypoint.sh /home/container/entrypoint.sh
-RUN tr -d '\r' < /home/container/entrypoint.sh > /tmp/entrypoint.sh \
-    && mv /tmp/entrypoint.sh /home/container/entrypoint.sh \
-    && chmod +x /home/container/entrypoint.sh
+# Copy entrypoint
+COPY --chown=container:container ./ptero/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-CMD ["/bin/bash", "/home/container/entrypoint.sh"]
+CMD ["/bin/bash", "/entrypoint.sh"]

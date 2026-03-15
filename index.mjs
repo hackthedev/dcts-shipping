@@ -1,7 +1,6 @@
 import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
 
 console.clear();
-console.log("Starting...");
 
 let versionPath = path.join(path.resolve(), "version");
 if(!fs.existsSync(versionPath)) {
@@ -164,15 +163,18 @@ if (fs.existsSync("./configs/sql.txt")) {
     serverconfig.serverinfo.sql.enabled = true; // enabled it because the file doesnt exist for fun
 }
 
-// overwrites for docker
-if (process.env.DB_HOST) serverconfig.serverinfo.sql.host = process.env.DB_HOST;
-if (process.env.DB_USER)
-    serverconfig.serverinfo.sql.username = process.env.DB_USER;
-if (process.env.DB_PASS)
-    serverconfig.serverinfo.sql.password = process.env.DB_PASS;
-if (process.env.DB_NAME)
-    serverconfig.serverinfo.sql.database = process.env.DB_NAME;
-if (process.env.DB_HOST || process.env.DB_USER || process.env.DB_PASS || process.env.DB_NAME) {
+// overwrites for docker and pterodactyl panel databases
+let dbHost = process.env.DATABASE_HOST || process.env.DB_HOST;
+let dbUser = process.env.DATABASE_USER || process.env.DB_USER;
+let dbPass = process.env.DATABASE_PASSWORD || process.env.DB_PASS;
+let dbName = process.env.DATABASE_NAME || process.env.DB_NAME;
+
+if (dbHost) serverconfig.serverinfo.sql.host = dbHost;
+if (dbUser) serverconfig.serverinfo.sql.username = dbUser;
+if (dbPass) serverconfig.serverinfo.sql.password = dbPass;
+if (dbName) serverconfig.serverinfo.sql.database = dbName;
+
+if (dbHost || dbUser || dbPass || dbName) {
     serverconfig.serverinfo.sql.enabled = true;
 }
 saveConfig(serverconfig);
@@ -184,18 +186,41 @@ if(!serverconfig?.serverinfo?.sql?.username){
     process.exit(0);
 }
 
+export let db
 
 // create sql pool
-export let db = new dSyncSql({
-    host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
-    port: process.env.DB_PORT || serverconfig.serverinfo.sql.port,
-    user: process.env.DB_USER || serverconfig.serverinfo.sql.username,
-    password: process.env.DB_PASS || serverconfig.serverinfo.sql.password,
-    database: process.env.DB_NAME || serverconfig.serverinfo.sql.database,
-    waitForConnections: true,
-    connectionLimit: serverconfig.serverinfo.sql.connectionLimit,
-    queueLimit: 0,
-});
+try {
+    db = new dSyncSql({
+        host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
+        port: process.env.DB_PORT || serverconfig.serverinfo.sql.port,
+        user: "-" || process.env.DB_USER || serverconfig.serverinfo.sql.username,
+        password: process.env.DB_PASS || serverconfig.serverinfo.sql.password,
+        database: process.env.DB_NAME || serverconfig.serverinfo.sql.database,
+        waitForConnections: true,
+        connectionLimit: serverconfig.serverinfo.sql.connectionLimit,
+        queueLimit: 0,
+    });
+
+    await db.ready;
+} catch (e) {
+    if(isPtero()){
+        if(debugmode === false) console.clear();
+        Logger.space(2);
+        Logger.success("===================================")
+        Logger.success("Setup successful!")
+        Logger.space()
+        Logger.warn("Important steps now!")
+        Logger.warn("1) On the top, click on 'Databases'")
+        Logger.warn("1) Click on 'New Database'")
+        Logger.warn("1) Enter any name, ignore host setting, then click 'Create Database'")
+        Logger.warn("1) Once successful, click the eye symbol and copy the username, database name and password.")
+        Logger.warn("1) Go to 'Startup on the top'")
+        Logger.warn("1) Edit the database related settings");
+        Logger.space();
+        Logger.info("Once you've done that try starting the server again in the 'Console' tab.")
+    }
+}
+
 // Import functions etc from files (= better organisation)
 // Special thanks to Kannustin <3
 
@@ -734,6 +759,7 @@ Logger.success(
     `The Official Github Repo: https://github.com/hackthedev/dcts-shipping/`,
 );
 
+
 Logger.space();
 Logger.info(
     `♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥`,
@@ -1257,4 +1283,8 @@ export function setRatelimit(ip, value) {
 
 export function flipDebug() {
     debugmode = !debugmode;
+}
+
+export function isPtero(){
+    return nodeArgs?.includes("--ptero")
 }

@@ -68,7 +68,7 @@ jobs:
           VERSION="${GITHUB_REF_NAME}-ptero"
           VERSION="${VERSION#v}-ptero"  # "v1.0.0" -> "1.0.0"
           TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
-          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+          echo "ptero-tags=$TAGS" >> $GITHUB_OUTPUT
 
       - name: Build and push ptero shit
         uses: docker/build-push-action@v5
@@ -77,4 +77,4 @@ jobs:
           context: .
           file: ./Dockerfile.ptero
           push: true
-          tags: ${{ steps.ptero-release.outputs.tags }}
+          tags: ${{ steps.ptero-release.outputs.ptero-tags }}

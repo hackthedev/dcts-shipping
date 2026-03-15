@@ -64,9 +64,9 @@ jobs:
         if: github.event_name == 'push'
         id: ptero-release
         run: |
-          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
+          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-ptero"
           if [ "${{ github.ref_name }}" = "main" ]; then
-            TAGS="$TAGS,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+            TAGS="$TAGS,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-ptero"
           fi
           echo "ptero-tags=$TAGS" >> $GITHUB_OUTPUT
 

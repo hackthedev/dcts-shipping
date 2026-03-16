@@ -19,8 +19,8 @@ privatekey.json
 /dcts/
 /Private_Certs/
 
-/config.env
-/livekit.yaml
+Docker/config.env
+Docker/livekit.yaml
 /public/plugins
 public/css/themes/your-name/background.gif
 public/css/themes/your-name/config.json

@@ -1,6 +1,11 @@
 #!/bin/bash
 cd /home/container
 
+if [ -d ".git" ]; then
+  echo "Pulling latest updates..."
+  git pull
+fi
+
 bun --version
 
 if [ -f "package.json" ]; then

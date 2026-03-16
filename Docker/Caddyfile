@@ -1,7 +1,7 @@
 #change this to your domain for where livekit is going to live
 {$LIVEKIT_URL} {
     #For setting your own cert
-    tls /etc/caddy/certs/certificate.pem /etc/caddy/certs/private.pem
+    tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem
 
     encode gzip zstd
 
@@ -23,7 +23,7 @@
 #change this to your domain for the webui to live
 {$APP_URL} {
     #For setting your own cert
-    tls /etc/caddy/certs/certificate.pem /etc/caddy/certs/private.pem
+    tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem
 
     encode gzip zstd
 

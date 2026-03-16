@@ -8,6 +8,8 @@ FROM oven/bun:1-alpine
 RUN apk add --no-cache --update curl ca-certificates openssl git tar bash sqlite fontconfig tzdata iproute2 \
     && adduser -D -h /home/container container
 
+RUN mkdir -p /home/container/.bun && chown -R container:container /home/container
+
 # Set environment
 USER container
 ENV USER=container HOME=/home/container
@@ -18,3 +20,4 @@ COPY --chown=container:container ./ptero/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 CMD ["/bin/bash", "/entrypoint.sh"]
+

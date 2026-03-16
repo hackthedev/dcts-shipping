@@ -225,6 +225,9 @@ try {
 
         process.exit(0);
     }
+    else{
+        Logger.error(e)
+    }
 }
 
 // Import functions etc from files (= better organisation)

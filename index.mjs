@@ -192,7 +192,7 @@ try {
     db = new dSyncSql({
         host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
         port: process.env.DB_PORT || serverconfig.serverinfo.sql.port,
-        user: "sddfd" || process.env.DB_USER || serverconfig.serverinfo.sql.username,
+        user: process.env.DB_USER || serverconfig.serverinfo.sql.username,
         password: process.env.DB_PASS || serverconfig.serverinfo.sql.password,
         database: process.env.DB_NAME || serverconfig.serverinfo.sql.database,
         waitForConnections: true,

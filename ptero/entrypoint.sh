@@ -7,14 +7,12 @@ REPO_URL="${GIT_REPO:-https://github.com/hackthedev/dcts-shipping.git}"
 REPO_BRANCH="${GIT_BRANCH:-beta}"
 
 if [ ! -d ".git" ]; then
-  echo "No git repo found, cloning ${REPO_BRANCH}..."
-  rm -rf /home/container/*
-  git clone --branch "${REPO_BRANCH}" --single-branch "${REPO_URL}" /home/container
+  echo "Force cloning repo..."
+  rm -rf /home/container/* /home/container/.[!.]* 2>/dev/null || true
+  git clone --branch "${GIT_BRANCH:-beta}" "${GIT_REPO:-https://github.com/hackthedev/dcts-shipping.git}" /home/container
 else
-  echo "Updating repository..."
-  git fetch origin "${REPO_BRANCH}"
-  git checkout "${REPO_BRANCH}" || git checkout -b "${REPO_BRANCH}" "origin/${REPO_BRANCH}"
-  git reset --hard "origin/${REPO_BRANCH}"
+  git fetch origin "${GIT_BRANCH:-beta}"
+  git reset --hard "origin/${GIT_BRANCH:-beta}"
   git clean -fd
 fi
 

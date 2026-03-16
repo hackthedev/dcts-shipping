@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-03-15T17:39:32+00:00",
+    "exported_at": "2026-03-16T06:14:48+00:00",
     "name": "DCTS_OLD",
     "author": "marcel@dcts.community",
     "description": "DCTS - self-hosted Discord\/TeamSpeak-style chat platform with E2E encrypted DMs and decentralized server discovery.",
@@ -22,7 +22,7 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!\/bin\/bash\n# DCTS\n#\n# Server Files: \/mnt\/server\n# All required packages are installed in the used install image \n\nexport HOME=\/mnt\/server\nmkdir -p \/mnt\/server\ncd \/mnt\/server\n\nif [ ! -d \".git\" ]; then\n  echo -e \"Cloning from github...\"\n  git clone https:\/\/github.com\/hackthedev\/dcts-shipping.git .\nelse\n  echo -e \"Updating existing installation...\"\n  git pull origin main\nfi\n\necho -e \"Preparing directories and fixing permissions...\"\n\nmkdir -p sv configs public\/uploads public\/emojis plugins themes\n\necho -e \"Installation completed.\\nDependencies will be installed on first start.\"",
+            "script": "#!\/bin\/bash\r\n# DCTS\r\n#\r\n# Server Files: \/mnt\/server\r\n# All required packages are installed in the used install image \r\n\r\nexport HOME=\/mnt\/server\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\n\r\ngit config --global --add safe.directory \/mnt\/server\r\n\r\nif [ ! -d \".git\" ]; then\r\n  echo \"Cloning from github...\"\r\n  git clone -b beta https:\/\/github.com\/hackthedev\/dcts-shipping.git .\r\nelse\r\n  echo \"Updating existing installation...\"\r\n  git fetch origin beta\r\n  git reset --hard origin\/beta\r\nfi\r\n\r\necho -e \"Preparing directories and fixing permissions...\"\r\n\r\nmkdir -p sv configs public\/uploads public\/emojis plugins themes\r\n\r\necho -e \"Installation completed.\\nDependencies will be installed on first start.\"",
             "container": "ghcr.io\/pterodactyl\/installers:debian",
             "entrypoint": "bash"
         }

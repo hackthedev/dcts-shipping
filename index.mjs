@@ -192,7 +192,7 @@ try {
     db = new dSyncSql({
         host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
         port: process.env.DB_PORT || serverconfig.serverinfo.sql.port,
-        user: process.env.DB_USER || serverconfig.serverinfo.sql.username,
+        user: "sddfd" || process.env.DB_USER || serverconfig.serverinfo.sql.username,
         password: process.env.DB_PASS || serverconfig.serverinfo.sql.password,
         database: process.env.DB_NAME || serverconfig.serverinfo.sql.database,
         waitForConnections: true,
@@ -210,11 +210,11 @@ try {
         Logger.space()
         Logger.warn("Important steps now!")
         Logger.warn("1) On the top, click on 'Databases'")
-        Logger.warn("1) Click on 'New Database'")
-        Logger.warn("1) Enter any name, ignore host setting, then click 'Create Database'")
-        Logger.warn("1) Once successful, click the eye symbol and copy the username, database name and password.")
-        Logger.warn("1) Go to 'Startup on the top'")
-        Logger.warn("1) Edit the database related settings");
+        Logger.warn("2) Click on 'New Database'")
+        Logger.warn("3) Enter any name, ignore host setting, then click 'Create Database'")
+        Logger.warn("4) Once successful, click the eye symbol and copy the username, database name and password.")
+        Logger.warn("5) Go to 'Startup on the top'")
+        Logger.warn("6) Edit the database related settings");
         Logger.space();
         Logger.info("Once you've done that try starting the server again in the 'Console' tab.")
     }
@@ -1281,4 +1281,8 @@ export function setRatelimit(ip, value) {
 
 export function flipDebug() {
     debugmode = !debugmode;
+}
+
+export function isPtero(){
+    return nodeArgs?.includes("--ptero")
 }

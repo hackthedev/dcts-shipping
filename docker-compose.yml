@@ -4,6 +4,10 @@ services:
     
     env_file:
       - config.env
+    environment:
+      - LIVEKIT_YAML_PATH=${LIVEKIT_YAML_PATH:-/etc/livekit.yaml}
+      - APP_URL=${APP_URL:-app.example.com}
+      - LIVEKIT_URL=${LIVEKIT_URL:-livekit.example.com}
     entrypoint: sh -c "/initialize.sh"
     volumes:
       - ./config.env:/config.env
@@ -29,11 +33,13 @@ services:
     env_file:
       - config.env
     environment:
-      - DB_HOST=dcts-mariadb
-      - DB_USER=dcts
-      - DB_PASS=dcts
-      - DB_NAME=dcts
-      - DEBUG=false # optional
+      - LIVEKIT_YAML_PATH=${LIVEKIT_YAML_PATH:-/etc/livekit.yaml}
+      - APP_URL=${APP_URL:-app.example.com}
+      - DB_HOST=${DB_HOST:-dcts-mariadb}
+      - DB_USER=${DB_USER:-dcts}
+      - DB_PASS=${DB_PASS:-dcts}
+      - DB_NAME=${DB_NAME:-dcts}
+      - DEBUG=${DEBUG:-false}
     ports:
       - 2052:2052
     restart: unless-stopped
@@ -50,9 +56,9 @@ services:
     image: mariadb:latest
     environment:
       - MARIADB_RANDOM_ROOT_PASSWORD=1
-      - MARIADB_DATABASE=dcts
-      - MARIADB_USER=dcts
-      - MARIADB_PASSWORD=dcts
+      - MARIADB_DATABASE=${DB_NAME:-dcts}
+      - MARIADB_USER=${MARIADB_USER:-dcts}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD:-dcts}
     volumes:
       - dcts-mariadb-data:/var/lib/mysql
     healthcheck:

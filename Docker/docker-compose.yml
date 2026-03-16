@@ -22,8 +22,11 @@ services:
     restart: unless-stopped
 
   dcts-app:
-    #build: ./ #For local development, uncomment this and comment out the image line below
-    image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:latest}
+    #For local development
+    build:
+      context: ../
+      dockerfile: ./Docker/Dockerfile
+    #image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:latest}
     depends_on:
       dcts-mariadb:
         condition: service_healthy

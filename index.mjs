@@ -204,7 +204,7 @@ try {
 } catch (e) {
     if(isPtero()){
         if(debugmode === false) console.clear();
-        Logger.space(2);
+        Logger.space();
         Logger.success("===================================")
         Logger.success("Setup successful!")
         Logger.success("===================================")

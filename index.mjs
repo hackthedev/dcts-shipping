@@ -968,7 +968,7 @@ export async function startServer() {
     server.listen(port, function () {
         Logger.info("Server is running on port " + port);
 
-        if (serverconfig.serverinfo.setup == 0) {
+        if (serverconfig.serverinfo.setup === 0) {
             var adminToken = generateId(64);
             serverconfig.serverinfo.setup = 1;
             serverconfig.serverroles["1111"].token.push(adminToken);

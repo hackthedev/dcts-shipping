@@ -1143,7 +1143,8 @@ async function displayMessagesInElement({
 
             // this will help with the mentions etc
             if(Inbox.isUnread(message?.messageId) && message?.messageId){
-                Inbox.markAsRead(Inbox.getInboxIdFromMessageId(message.messageId))
+                console.log("is unread")
+                await Inbox.markAsRead(Inbox.getInboxIdFromMessageId(message.messageId))
             }
 
             loaded++;

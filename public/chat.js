@@ -669,22 +669,6 @@ function isElementVisible(element) {
         rect.right > 0;
 }
 
-
-function escapeHtml(text) {
-
-    if (text == null || text.length <= 0) {
-        return text;
-    }
-
-    var map = {
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-    };
-
-    return text.replace(/[&<>"']/g, function (m) {
-        return map[m];
-    });
-}
-
 async function checkMediaTypeAsync(url) {
     return new Promise((resolve, reject) => {
 
@@ -805,18 +789,6 @@ async function checkPermission(perms, any = false) {
             resolve(response)
         });
     })
-}
-
-
-function stopRecording() {
-    socket.emit("leftVC", {
-        id: UserManager.getID(),
-        username: UserManager.getUsername(),
-        icon: UserManager.getPFP(),
-        room: UserManager.getRoom(),
-        token: UserManager.getToken()
-    });
-    //leaveRoom(UserManager.getRoom());
 }
 
 function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
@@ -1024,16 +996,17 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                 });
 
                 if (initial) {
-                    getChatlog(document.getElementById("content"));
-                    getMemberList()
-                    getChannelTree()
-                    getServerInfo();
-                    showGroupStats();
-                    focusEditor()
-
                     /* Quill Emoji Autocomplete */
                     initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
                     initializeMentionAutocomplete(document.querySelector('.ql-editor'));
+
+                    await getServerInfo();
+                    getChatlog(document.getElementById("content"));
+
+                    getMemberList()
+                    getChannelTree()
+                    showGroupStats();
+                    focusEditor()
                 }
 
                 socket.emit("checkPermission", {
@@ -2424,7 +2397,6 @@ async function getServerInfo(returnData = false) {
             let countryCode = response.serverinfo.countryCode;
 
             headline.innerHTML = `
-
             <div id="main_header">
                 ${countryCode ? `${ChatManager.countryCodeToEmoji(countryCode)} ` : ""}${sanitizeHtmlForRender(servername, false)} ${serverdesc ? ` - ${sanitizeHtmlForRender(serverdesc, false)}` : ""}
             </div>
@@ -2441,11 +2413,10 @@ async function getServerInfo(returnData = false) {
             </div>
             `;
 
-
             UserManager.displayServerBadges();
+            displayDiscoveredHosts()
+            resolve(null)
         });
-
-        displayDiscoveredHosts();
     })
 }
 

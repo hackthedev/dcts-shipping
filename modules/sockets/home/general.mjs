@@ -31,5 +31,5 @@ async function emitToThread(threadId, event, payload) {
 }
 
 export default (io) => (socket) => {
-    
+
 };

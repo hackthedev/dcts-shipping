@@ -37,7 +37,6 @@
     <script src="/js/core/Client.js"></script>
 
     <title>{{server.name}} – Server Home & DMs</title>
-    <script src="../../dcts-client-shipping/electron/modules/EncryptData.mjs"></script>
 </head>
 
 <body>
@@ -767,6 +766,7 @@
                         t.last = getEncryptedMessageNotice();
                     }
 
+                    console.log(t)
                     const target = otherParticipant(t);
                     const title = t.type === 'ticket' ? (t.title || target.name || `Ticket ${t.id}`) : (t.title || target.name || `Chat ${t.id}`);
                     const row = document.createElement('div');
@@ -798,6 +798,7 @@
             {id: UserManager.getID(), token: UserManager.getToken()},
             function (response) {
                 let unread = Number(response?.unread ?? 0);
+                console.log(response)
 
                 // glory to the template system
                 unread > 0 ? document.title = `(${unread}) {{server.name}} – Server Home & DMs` : document.title = "{{server.name}} – Server Home & DMs"
@@ -1416,7 +1417,6 @@
             renderMessages(t);
 
             t.unread = 0;
-            renderDMs();
 
             socket.emit('markRead', {
                 threadId: t.id,
@@ -1429,6 +1429,7 @@
                     t.lastReadAt = ack.last_read_at;
                     t.unread = 0;
                 }
+                renderDMs();
             });
         });
     }

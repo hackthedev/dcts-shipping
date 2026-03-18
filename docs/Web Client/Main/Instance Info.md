@@ -2,6 +2,8 @@
 
 The instance info screen is a small compact popup showing some information about the server and or community in general. As you can see in the screenshot, it will show some general information and has the option to even show some social urls if set, including an email.
 
+It can be found in the top right corner by pressing the question mark.
+
 ![image-20251229133215753](./assets/image-20251229133215753.png)
 
 ------

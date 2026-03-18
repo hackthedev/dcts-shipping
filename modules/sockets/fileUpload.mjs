@@ -22,7 +22,7 @@ export default (io) => (socket) => {
 
         let { id, token, filename, type, totalChunks, chunkIndex, fileId } = metadata; // Expect fileId in metadata
         
-        if (validateMemberId(id, socket, token) !== true) {
+        if (await validateMemberId(id, socket, token) !== true) {
             response({ type: "error", msg: "Invalid authentication" });
             return;
         }
@@ -32,13 +32,13 @@ export default (io) => (socket) => {
 
         let localUploadPath;
         if (type === "emoji") {
-            if (!hasPermission(id, "manageEmojis")) {
+            if (!await hasPermission(id, "manageEmojis")) {
                 response({ type: "error", msg: "You don't have permissions to manage Emojis" });
                 return;
             }
             localUploadPath = "./public/emojis";
         } else {
-            if (!hasPermission(id, "uploadFiles")) {
+            if (!await hasPermission(id, "uploadFiles")) {
                 response({ type: "error", msg: "You don't have permissions to upload files" });
                 return;
             }

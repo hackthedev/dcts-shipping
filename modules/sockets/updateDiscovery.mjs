@@ -12,10 +12,10 @@ import {
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('updateDiscovery', function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true){
+    socket.on('updateDiscovery', async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true){
 
-            if (hasPermission(member.id, "manageServer")) {
+            if (await hasPermission(member.id, "manageServer")) {
                 
                 serverconfig.serverinfo.discovery.enabled = member.enabled
                 serverconfig.serverinfo.discovery.hosts = member.hosts;

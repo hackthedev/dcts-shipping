@@ -36,7 +36,7 @@ app.post("/token", async (req, res) => {
         return;
     }
 
-    if (!hasPermission(memberId, "useVOIP", channelId)) {
+    if (!await hasPermission(memberId, "useVOIP", channelId)) {
         res.status(403).json({error: "You're not allowed to chat here"});
         return;
     }

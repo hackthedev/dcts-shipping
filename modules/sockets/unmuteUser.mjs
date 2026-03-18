@@ -5,15 +5,14 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('unmuteUser', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+    socket.on('unmuteUser', async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
             member.id = xssFilters.inHTMLData(member.id)
             member.token = xssFilters.inHTMLData(member.token)
 
-            if (hasPermission(member.id, "muteUsers")) {
+            if (await hasPermission(member.id, "muteUsers")) {
 
                 if (serverconfig.mutelist.hasOwnProperty(member.target)) {
                     delete serverconfig.mutelist[member.target];

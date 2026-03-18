@@ -19,13 +19,13 @@ export default (io) => (socket) => {
 
     socket.on('getChatlog', async function (member, response) {
         Clock.start("chatlog_total", async () => {
-            if (validateMemberId(member?.id, socket,  member?.token) === true) {
+            if (await validateMemberId(member?.id, socket,  member?.token) === true) {
 
                 if(!member?.id) return response({type: "error", error: "No member id provided"});
                 if(!member?.token) return response({type: "error", error: "No member token provided"});
 
                 let channel = resolveChannelById(member?.channelId);
-                if (hasPermission(member.id, ["viewChannel", "viewChannelHistory"], member.channelId)) {
+                if (await hasPermission(member.id, ["viewChannel", "viewChannelHistory"], member.channelId)) {
 
                     // filter messages
                     let messages

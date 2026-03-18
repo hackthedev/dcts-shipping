@@ -8,17 +8,14 @@ import {banUser} from "../functions/ban-system/helpers.mjs";
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('banUser', async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
-            if (member.id == member.target) {
-                response({ type: "error", msg: "You cant ban yourself!", error: "You cant ban yourself." });
-                return;
+            if (member.id === member.target) {
+                return response({ type: "error", msg: "You cant ban yourself!", error: "You cant ban yourself." });
             }
             else {
-                if (hasPermission(member.id, "banMember") == false) {
-
-                    response({ type: "error", msg: "You dont have permissions to ban members", error: "Missing permission banMember" });
-                    return;
+                if (await hasPermission(member.id, "banMember") === false) {
+                    return response({ type: "error", msg: "You dont have permissions to ban members", error: "Missing permission banMember" });
                 }
                 else {
 
@@ -26,12 +23,11 @@ export default (io) => (socket) => {
                     var banning = getMemberHighestRole(member.target);
 
                     if (banner.info.sortId <= banning.info.sortId) {
-                        response({
+                        return response({
                             type: "error",
                             msg: "User cant be banned because their role is higher or qual then yours",
                             error: "Cant ban user whos role is higher or qual yours"
                         });
-                        return;
                     }
 
                     let targetSocket = findSocketByMemberId(io, member.target);

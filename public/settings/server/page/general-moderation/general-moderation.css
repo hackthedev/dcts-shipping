@@ -1,0 +1,38 @@
+table#auditlog tr td{
+    padding: 10px 40px;
+}
+
+table#auditlog thead td{
+    background-color: hsl(from var(--main) h s calc(l * 10));
+    color: hsl(from var(--main) h s calc(l * 1));
+    font-weight: bold;
+}
+
+table#auditlog tr:nth-child(even){
+    background-color: hsl(from var(--main) h s calc(l * 4));
+}
+
+table#auditlog tr:nth-child(odd){
+    background-color: hsl(from var(--main) h s calc(l * 3));
+}
+
+
+table#auditlog{
+    background-color: hsl(from var(--main) h s calc(l * 3));
+    border-collapse: collapse;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.icon {
+    background-size: cover;
+
+    object-fit: cover;
+    background-color: transparent;
+    background-position: center center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    user-select: none;
+    margin: 4px auto;
+}

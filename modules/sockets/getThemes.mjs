@@ -44,14 +44,14 @@ export async function getThemes(){
 
 export default (io) => (socket) => {
     socket.on("getThemes", async (member, response) => {
-        if (validateMemberId(member?.id, socket, member?.token) !== true) return;
+        if (await validateMemberId(member?.id, socket, member?.token) !== true) return;
         const local = getLocalThemes();
         const remote = await fetchGithubThemes();
         const merged = Array.from(new Set([...local, ...remote]));
         response({ error: null, themes: merged });
     });
 
-    socket.on("getThemeFiles", (theme, response) => {
+    socket.on("getThemeFiles", async (theme, response) => {
         const files = getThemeFiles(theme);
         response({ error: null, files });
     });

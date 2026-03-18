@@ -3,7 +3,7 @@ import { serverconfig, path } from "../../index.mjs";
 import { scanDirectory } from "../functions/io.mjs";
 
 export default (io) => (socket) => {
-    socket.on('getPluginList', (member, response) => {
+    socket.on('getPluginList', async (member, response) => {
         let plugins = scanDirectory("./public/plugins", { includeFiles: false, recursive: false });
         let pluginObj = {};
 

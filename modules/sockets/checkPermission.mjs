@@ -76,6 +76,12 @@ let permList = {
         category: ["serverRoles"],
         description: "Edit settings like IP based abuse, spam, VPN detection and more"
     },
+    "generalModeration": {
+        name: "General Moderation",
+        type: "checkbox",
+        category: ["serverRoles"],
+        description: "Some very general moderation settings"
+    },
     "manageInvites": {
         name: "Manage Invites",
         type: "checkbox",
@@ -290,8 +296,8 @@ let permList = {
 
 export default (io) => (socket) => {
 
-    socket.on('getPermissions', function (member, response) {
-        if (validateMemberId(member?.id, socket) === true && serverconfig.servermembers[member?.id].token === member?.token) {
+    socket.on('getPermissions', async function (member, response) {
+        if (await validateMemberId(member?.id, socket) === true && serverconfig.servermembers[member?.id].token === member?.token) {
             const categories = member.categories || []; // optional filter
 
             let filteredPerms = {};
@@ -313,7 +319,7 @@ export default (io) => (socket) => {
 
     // socket.on code here
     socket.on('checkPermission', async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
             var userObj = await getCastingMemberObject(serverconfig.servermembers[member.id]);
 
@@ -330,7 +336,7 @@ export default (io) => (socket) => {
                         continue;
                     }
 
-                    if (hasPermission(member.id, member.permission[i])) {
+                    if (await hasPermission(member.id, member.permission[i])) {
                         if (member.any) {
                             response({ permission: "granted", user: userObj });
                             return;
@@ -353,7 +359,7 @@ export default (io) => (socket) => {
                     return;
                 }
 
-                if (hasPermission(member.id, member.permission)) {
+                if (await hasPermission(member.id, member.permission)) {
                     response({ permission: "granted", user: userObj });
                 } else {
                     response({ permission: "denied", user: userObj });

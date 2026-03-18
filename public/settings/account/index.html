@@ -18,9 +18,12 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/themes/default/default.css">
-    <link rel="stylesheet" href="/css/mobile/profile_settings.css?v={{random}}">
+    <link rel="stylesheet" href="/css/mobile/main.css?v={{random}}">
+    <link rel="stylesheet" href="/css/settings.css?v={{random}}">
 
 
+    <script defer src="/js/core/qrcode.js?v={{random}}"></script>
+    <script defer src="/js/core/MobileUI.js?v={{random}}"></script>
     <script defer src="/js/prompts.js?v={{random}}"></script>
     <script defer src="/js/core/PageRenderer.js"></script>
     <script defer src="/js/escape.js"></script>
@@ -48,102 +51,7 @@
 </head>
 <body>
 
-<style>
-    html, body{
-        margin: 0;
-        padding: 0;
-
-        font-family: 'Roboto', sans-serif;
-        color: #ABB8BE;
-        background: hsl(from var(--main) h s calc(l * 1.9)) !important;
-
-        width: 100%;
-        height: 100%;
-    }
-
-    #navigation{
-        background-color: hsl(from var(--main) h s calc(l * 1));
-        color: hsl(from var(--main) h s calc(l * 8.5) / 100%) !important;
-
-        padding: 32px;
-
-        width: calc(20% );
-        height: calc(100%);
-
-        float: left;
-    }
-
-    #nav_settings {
-        float: right;
-        width: 150px;
-
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
-
-    #nav_settings h2 {
-        text-transform: uppercase;
-        font-size: 12px;
-    }
-    
-    #nav_settings a{
-        color: hsl(from var(--main) h s calc(l * 7) / 100%) !important;
-        cursor: pointer;
-        display: block;
-        margin-top: 12px;
-        font-style: normal;
-    }
-
-    #nav_settings hr {
-        border: 1.5px solid #36393F;
-        background-color: #36393F;
-        color: #36393F;
-
-        margin: 16px 0 16px 0;
-    }
-
-    #content {
-
-        width: calc(100% - 20%);
-        height: calc(100% );
-        padding: 32px;
-
-        display:block;
-        float: left;
-
-        overflow-y: auto;
-    }
-
-    #back {
-        width: 30px;
-        height: 30px;
-
-        margin: 20px 20px 0 0;
-
-        float: right;
-        display: block;
-        right: 10px;
-        position: absolute;
-
-        background-image: url("/img/back.png");
-        transform: scaleX(-1);
-        background-size: cover;
-
-        object-fit: cover;
-        background-color: transparent;
-        background-position: center center;
-    }
-
-    #wrapper {
-        display: block;
-        width: 100%;
-        height: 100%;
-    }
-
-</style>
-
-
-<div id="wrapper">
+<div id="wrapper" class="settings-wrapper">
     <div id="navigation">
 
         <div id="nav_settings">

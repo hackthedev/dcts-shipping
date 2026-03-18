@@ -6,9 +6,8 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('removeUserFromRole', function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+    socket.on('removeUserFromRole', async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
             Logger.debug(`trying to remove role`)
@@ -19,7 +18,7 @@ export default (io) => (socket) => {
             try {
                 var executer = getMemberHighestRole(member.id);
                 var target = getMemberHighestRole(member.target);
-                let hasPerms = hasPermission(member.id, "manageMembers")
+                let hasPerms = await hasPermission(member.id, "manageMembers")
 
 
                 // If user is not a admin they cant assign roles that are higher

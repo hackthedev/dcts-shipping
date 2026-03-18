@@ -6,7 +6,7 @@ on:
       - main
       - beta
   release:
-    types: [published]
+    types: [ published ]
 
 env:
   REGISTRY: ghcr.io
@@ -57,5 +57,25 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           context: .
+          file: ./Docker/Dockerfile
           push: true
           tags: ${{ steps.meta-branch.outputs.tags || steps.meta-release.outputs.tags }}
+
+      - name: Set image tags  ptero (branch)
+        if: github.event_name == 'push'
+        id: ptero-release
+        run: |
+          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-ptero"
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            TAGS="$TAGS,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-ptero"
+          fi
+          echo "ptero-tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: Build and push ptero shit
+        uses: docker/build-push-action@v5
+        with:
+          platforms: linux/amd64,linux/arm64
+          context: .
+          file: ./Dockerfile.ptero
+          push: true
+          tags: ${{ steps.ptero-release.outputs.ptero-tags }}

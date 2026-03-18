@@ -331,59 +331,51 @@ class Prompt {
         this.currentCallback = callback;
         this.afterSubmitAction = afterSubmitAction;
 
-        // Update the title
         const titleElement = this.modal.querySelector('h2');
         if (titleElement) {
             titleElement.innerText = titleText;
         }
 
-        // Clear the previous content
         this.promptContent.innerHTML = '';
-
-        // Hide the submit button for the confirm dialog
         this.submitButton.style.display = 'none';
         this.helpButton.style.display = 'none';
         this.closeButton.style.display = 'none';
 
-        // Create a container for the buttons with flex display
         const buttonContainer = document.createElement('div');
         buttonContainer.style.display = 'flex';
-        buttonContainer.style.gap = '10px'; // Add space between buttons
-        buttonContainer.style.justifyContent = 'center'; // Center-align the buttons
+        buttonContainer.style.gap = '10px';
+        buttonContainer.style.justifyContent = 'center';
         buttonContainer.style.marginTop = '20px';
 
-        // Create buttons for each option
         options.forEach(([label, color]) => {
             const button = document.createElement('button');
             button.className = 'prompt-button';
             button.innerText = label;
 
-            // Apply custom color
             if (color) {
                 if (color === "success") {
-                    button.style.backgroundColor = "#5CCD5C"; // Green for success
+                    button.style.backgroundColor = "#5CCD5C";
                     button.style.color = "#fff";
                 } else if (color === "error") {
-                    button.style.backgroundColor = "indianred"; // Red for error
+                    button.style.backgroundColor = "indianred";
                     button.style.color = "#fff";
                 } else {
-                    button.style.backgroundColor = color || "#2B3035";
+                    button.style.backgroundColor = color;
                     button.style.color = "#fff";
                 }
             }
 
             button.onclick = () => {
-                this.closePrompt(false); // Indicate that this was a valid selection
+                const selected = label.toLowerCase();
+                const cb = this.currentCallback;
+                const afterCb = this.afterSubmitAction;
 
-                // Ensure callback is executed only once
-                if (this.currentCallback) {
-                    this.currentCallback(label.toLowerCase());
-                    this.currentCallback = null; // Prevent duplicate execution
-                }
+                this.currentCallback = null;
+                this.afterSubmitAction = null;
+                this.modal.style.display = 'none';
 
-                if (this.afterSubmitAction) {
-                    this.afterSubmitAction({ canceled: false, selectedOption: label.toLowerCase() });
-                }
+                if (cb) cb(selected);
+                if (afterCb) afterCb({ canceled: false, selectedOption: selected });
             };
 
             buttonContainer.appendChild(button);
@@ -392,11 +384,6 @@ class Prompt {
         this.promptContent.appendChild(buttonContainer);
         this.modal.style.display = 'flex';
     }
-
-
-
-
-
 
     handleSelect(element, value) {
         if (this.multiSelect) {
@@ -416,27 +403,15 @@ class Prompt {
         }
     }
 
-
     closePrompt(canceled = true) {
         this.modal.style.display = 'none';
-
-        if (!canceled && this.currentCallback) {
-            this.currentCallback({ canceled });
-        }
 
         if (this.afterSubmitAction) {
             this.afterSubmitAction({ canceled, values: null });
         }
 
-        // Only reset the callback if it wasn't from `showConfirm()`
-        if (canceled) {
-            this.currentCallback = null;
-        }
+        this.currentCallback = null;
     }
-
-
-
-
 
     previewImage(event) {
         const inputId = event.target.id;

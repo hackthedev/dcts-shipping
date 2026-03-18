@@ -4,6 +4,15 @@ let customPrompts;
 document.addEventListener("DOMContentLoaded", () => {
     socket = io.connect();
     customPrompts = new Prompt();
+
+    MobilePanel.setLeftMenu([
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#navigation")
+            ]
+        }
+    ], "left");
 })
 
 function findAttributeUp(element, attr, maxDepth = 10) {
@@ -108,6 +117,12 @@ async function loadPageContent(page = "server-info") {
 
 
     console.log("emitting pagechange", page);
+
+    // close nav
+    if(MobilePanel.isMobile()){
+        MobilePanel.close();
+    }
+
     document.dispatchEvent(
         new CustomEvent("pagechange", { detail: { page } })
     );
@@ -117,6 +132,21 @@ async function loadPageContent(page = "server-info") {
     });
 
     setUrl(`?page=${page}`)
+}
+
+function rgbToHex(rgbString) {
+    if (typeof rgbString !== "string") return rgbString;
+
+    const matches = rgbString.match(/\d+/g);
+    if (!matches || matches.length < 3) return rgbString;
+
+    const [r, g, b] = matches.map(Number);
+
+    if (r === undefined) return rgbString;
+    if (g === undefined) return rgbString;
+    if (b === undefined) return rgbString;
+
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
 }
 
 function displayGraph(type, path, element = null){
@@ -151,19 +181,22 @@ async function getServerInfo(){
     })
 }
 async function saveServerInfoSettings(jsonData){
-    socket.emit("saveServerInfo", {id: UserManager.getID(), token: UserManager.getToken(), serverinfo: jsonData.serverinfo }, function (response) {
-        if(response.error){
-            showSystemMessage({
-                title: "Error while saving settings",
-                text: response.error,
-                type: "error",
-                icon: "error"
-            })
-        }
-        else{
-            originalnfo = jsonData;
-        }
-    });
+    return new Promise(resolve => {
+        socket.emit("saveServerInfo", {id: UserManager.getID(), token: UserManager.getToken(), serverinfo: jsonData.serverinfo }, function (response) {
+            if(response.error){
+                showSystemMessage({
+                    title: "Error while saving settings",
+                    text: response.error,
+                    type: "error",
+                    icon: "error"
+                })
+            }
+            else{
+                originalnfo = jsonData;
+                resolve(jsonData);
+            }
+        });
+    })
 }
 async function getChannelTree(){
     return new Promise((resolve, reject) => {
@@ -306,7 +339,7 @@ function chooseRole(arg = {}) {
                   <div class="role-menu-entry" style="display:flex;align-items:center;gap:8px;margin:6px 0;padding:6px 8px;border-radius:6px;">
                     <input type="checkbox" id="role_${r.id}" name="role_${r.id}" ${preset}
                            class="role-menu-entry-checkbox" style="margin:0;">
-                    <label for="role_${r.id}" style="cursor:pointer;color:${r.color};user-select:none;">${r.name}</label>
+                    <label for="role_${r.id}" style="cursor:pointer;color:${r.color};background:${r.background};backgroundClip:${r.backgroundClip};user-select:none;">${r.name}</label>
                   </div>`;
             }).join("");
 

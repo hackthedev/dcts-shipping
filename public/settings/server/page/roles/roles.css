@@ -29,13 +29,19 @@
     max-width: 400px;
 }
 
+.role-entry-container{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .role-entry {
     width: calc(100% - 60px);
     padding: 8px !important;
 }
 
-.role-entry, #permList div.entry {
-    display: block;
+.role-entry{
+    display: flex;
     padding: 2px;
     margin: 2px;
 

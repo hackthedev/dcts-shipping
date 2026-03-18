@@ -1,0 +1,152 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-03-16T12:52:53+00:00",
+    "name": "DCTS_OLD",
+    "author": "marcel@dcts.community",
+    "description": "DCTS - self-hosted Discord\/TeamSpeak-style chat platform with E2E encrypted DMs and decentralized server discovery.",
+    "features": [],
+    "docker_images": {
+        "DCTS Beta": "ghcr.io\/hackthedev\/dcts-shipping:beta-ptero"
+    },
+    "file_denylist": [],
+    "startup": "PORT={{SERVER_PORT}} bun . --ptero",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Welcome to DCTS\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# DCTS\r\n#\r\n# Server Files: \/mnt\/server\r\n# All required packages are installed in the used install image \r\n\r\nexport HOME=\/mnt\/server\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\n\r\ngit config --global --add safe.directory \/mnt\/server\r\n\r\nif [ ! -d \".git\" ]; then\r\n  echo \"Cloning from github...\"\r\n  git clone -b beta https:\/\/github.com\/hackthedev\/dcts-shipping.git .\r\nelse\r\n  echo \"Updating existing installation...\"\r\n  git fetch origin beta\r\n  git reset --hard origin\/beta\r\nfi\r\n\r\necho -e \"Preparing directories and fixing permissions...\"\r\n\r\nmkdir -p sv configs public\/uploads public\/emojis plugins themes\r\n\r\necho -e \"Installation completed.\\nDependencies will be installed on first start.\"",
+            "container": "ghcr.io\/pterodactyl\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Port",
+            "description": "Main HTTP port for the DCTS web interface.",
+            "env_variable": "PORT",
+            "default_value": "2052",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Display name of the DCTS server.",
+            "env_variable": "DCTS_NAME",
+            "default_value": "My DCTS Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Database Host",
+            "description": "MariaDB host. Use Docker gateway IP (usually 172.18.0.1) for host DB.",
+            "env_variable": "DB_HOST",
+            "default_value": "172.18.0.1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Database User",
+            "description": "MariaDB username.",
+            "env_variable": "DB_USER",
+            "default_value": "dcts",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Database Password",
+            "description": "MariaDB password.",
+            "env_variable": "DB_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Database Name",
+            "description": "MariaDB database name.",
+            "env_variable": "DB_NAME",
+            "default_value": "dcts",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Redis Host",
+            "description": "Redis host. Use Docker gateway IP for host Redis.",
+            "env_variable": "REDIS_HOST",
+            "default_value": "172.18.0.1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Redis Port",
+            "description": "Redis port.",
+            "env_variable": "REDIS_PORT",
+            "default_value": "6379",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+        },
+        {
+            "name": "LiveKit URL",
+            "description": "URL of the shared LiveKit server. Leave empty to disable voice\/video.",
+            "env_variable": "LIVEKIT_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "LiveKit API Key",
+            "description": "API key for LiveKit authentication.",
+            "env_variable": "LIVEKIT_API_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "LiveKit API Secret",
+            "description": "API secret for LiveKit authentication.",
+            "env_variable": "LIVEKIT_API_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Debug Mode",
+            "description": "Enable debug logging.",
+            "env_variable": "DEBUG",
+            "default_value": "false",
+            "user_viewable": false,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        }
+    ]
+}

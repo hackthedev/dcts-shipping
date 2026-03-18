@@ -34,7 +34,7 @@ export function setEmojiConfig(filename, newData = {}) {
 
 export default (io) => (socket) => {
     socket.on("getEmojis", async function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === false) return;
+        if (await validateMemberId(member?.id, socket, member?.token) === false) return;
         try {
             const emojiList = fs
                 .readdirSync("./public/emojis")

@@ -9,13 +9,10 @@ export default (io) => (socket) => {
     // socket.on code here
 
     socket.on('getMessageLogs', async function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token) {
-
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
             let messageLogs = await getMessageLogsById(member.msgId);
 
-
-            if (hasPermission(member.id, "manageMessages")) {
+            if (await hasPermission(member.id, "manageMessages")) {
                 response({ type: "success", logs: messageLogs, error: null });
             }
             else {

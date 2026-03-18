@@ -25,7 +25,11 @@ export default (io) => (socket) => {
                     if (importAccountData?.loginName && importAccountData?.loginName === loginName) importAccountData.loginName += generateId(4);
                 });
 
-                serverconfig.servermembers[importAccountData?.id] = importAccountData
+                serverconfig.servermembers[importAccountData?.id].id = importAccountData.id
+                serverconfig.servermembers[importAccountData?.id].token = importAccountData.token
+                serverconfig.servermembers[importAccountData?.id].password = importAccountData.password
+                serverconfig.servermembers[importAccountData?.id].pow = importAccountData.pow
+                serverconfig.servermembers[importAccountData?.id].loginName = importAccountData.loginName
                 saveConfig(serverconfig)
             }
 

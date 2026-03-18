@@ -1,0 +1,50 @@
+*{
+    box-sizing: border-box;
+}
+
+#navigation.home {
+    width: fit-content !important;
+    min-width: 300px !important;
+    gap: 8px;
+    padding: 10px;
+}
+
+#navigation.home hr{
+    display: flex;
+    width: calc(100% + 20px);
+    margin-left: -10px;
+    margin-right: -10px;
+}
+
+#navigation.home .dms{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.layout{
+    display: flex;
+}
+
+.layout .content{
+    display: flex;
+    flex-grow: 1;
+    overflow: auto;
+
+    background-color: rgba(205, 92, 92, 0.08);
+}
+
+
+.layout .content .site-banner{
+    width: 100vw;
+    max-width: 100vw;
+    height: 30vh;
+    overflow: hidden;
+    background-color: black;
+}
+.layout .content .site-banner img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-position: center;
+}

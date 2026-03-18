@@ -26,9 +26,11 @@
     <script src="/js/messages/server/messages.js"></script>
 
     <link href="/css/themes/default/default.css" rel="stylesheet">
-    <link href="/css/home.css" rel="stylesheet">
+    <link href="/css/home/general.css" rel="stylesheet">
+    <link href="/css/home/dms.css" rel="stylesheet">
     <link href="/css/messages.css" rel="stylesheet">
     <link href="/css/message_actions.css" rel="stylesheet">
+    <link href="/css/settings.css" rel="stylesheet">
 
 
     <script src="/js/tooltips/dialogs/introduceServerHome.js"></script>
@@ -37,6 +39,8 @@
     <script src="/js/core/Client.js"></script>
 
 
+    <script src="/home/main.js"></script>
+    <script src="/home/home.js"></script>
     <script src="/home/dms/dms.js"></script>
     <script src="/home/dms/crypto.js"></script>
 
@@ -44,6 +48,39 @@
 </head>
 
 <body>
+
+<div class="layout">
+    <div id="navigation" class="home">
+        <a class="entry nav selected">
+            <img class="icon nav" src="/img/home.jpg">
+            <div class="info">
+                <p>Home</p>
+            </div>
+        </a>
+
+        <a class="entry nav">
+            <img class="icon nav" src="/img/mail.png">
+            <div class="info">
+                <p>Posts</p>
+            </div>
+        </a>
+
+        <a class="entry nav">
+            <img class="icon nav" src="/img/eye.png">
+            <div class="info">
+                <p>Rules</p>
+            </div>
+        </a>
+        <hr>
+
+        <div class="dms"></div>
+    </div>
+
+    <div class="content">
+
+    </div>
+</div>
+
 
 </body>
 

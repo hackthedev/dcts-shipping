@@ -5,7 +5,6 @@ socket.emit = () => {}
 let tooltipSystem;
 let customPrompts;
 
-
 function rewriteImg(img) {
     if (!img || !img.src) return;
 
@@ -502,3 +501,63 @@ socket.emit("userConnected", {
         //introduceNewHome();
     });
 });
+
+async function getDMs(timestamp = null){
+
+    return [
+        {
+            author:{
+                id: 1234,
+                name: "Your mom",
+                status: "ligma ballz",
+                icon: "/img/default_pfp.png"
+            }
+        },
+        {
+            author:{
+                id: 56789,
+                name: "WhiskeyCat",
+                status: "yooooo",
+                icon: "/img/default_pfp.png"
+            }
+        }
+    ]
+
+    return new Promise((resolve, reject) => {
+        socket.emit('fetchDMs', {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            timestamp
+        }, (response) => {
+            console.log(response)
+        });
+    })
+}
+
+function getDMsNavContainer(){
+    return document.querySelector("#navigation.home .dms");
+}
+
+async function renderDMs(){
+    let dms = await getDMs();
+
+    console.log(dms)
+
+    let firstDm = false
+    if(dms?.length > 0){
+        for(let dm of dms){
+
+            getDMsNavContainer().insertAdjacentHTML('beforeend',
+            `<a class="entry ${!firstDm ? "selected" : ""}">
+                        <img class="icon" src="${stripHTML(sanitizeHtmlForRender(dm.author.icon, false))}">
+                        <div class="info">
+                            <p>${dm.author.name}</p>
+                            <p class="status">${dm.author.status ?? ""}</p>
+                        </div>
+                    </a>`
+            )
+
+            firstDm = true
+        }
+    }
+}

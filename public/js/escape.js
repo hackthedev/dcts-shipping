@@ -77,6 +77,11 @@ function installDomPurifyHooks() {
     });
 }
 
+function stripHTML(html) {
+    if (html == null) return '';
+    return DOMPurify.sanitize(String(html), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+}
+
 function sanitizeHtmlForRender(html, wrapParagraphs = true) {
     if (html == null) return '';
     installDomPurifyHooks();

@@ -7,6 +7,7 @@
     /* purple: #1d1635;*/
     --main: #131415;
     --border-color: hsl(from var(--main) h s calc(l * 8) / 20%);
+    --border-color-bright: hsl(from var(--main) h s calc(l * 8) / 60%);
 }
 
 html,
@@ -339,11 +340,12 @@ img {
 }
  */
 
-.svg-icon{
+.svg-icon,
+.edit-icon .svg-icon{
     display: flex;
     background-color: hsl(from var(--main) h s calc(l * 1) / 40%);
-    color: hsl(from var(--main) h s calc(l * 8) / 60%);
-    border: 2px solid hsl(from var(--main) h s calc(l * 8) / 40%);
+    color: hsl(from var(--main) h s calc(l * 10) / 100%);
+    border: 2px solid var(--border-color);
     border-radius: 6px;
 
     padding: 4px;
@@ -352,12 +354,24 @@ img {
     transition: all 0.2s ease-in-out;
 }
 
+.edit-icon .svg-icon:hover,
 .svg-icon:hover{
-    background-color: hsl(from var(--main) h s calc(l * 1) / 60%);
-    border: 2px solid hsl(from var(--main) h s calc(l * 8) / 60%);
-    color: hsl(from var(--main) h s calc(l * 8) / 80%);
+    background-color: hsl(from var(--main) h s calc(l * 1) / 80%);
+    border: 2px solid var(--border-color-bright);
 }
 
+.edit-icon.dark .svg-icon{
+    background-color: hsl(from var(--main) h s calc(l * 1) / 20%);
+    color: hsl(from var(--main) h s calc(l * 10) / 40%);
+}
+.edit-icon.dark .svg-icon:hover{
+    background-color: hsl(from var(--main) h s calc(l * 1) / 100%);
+    color: hsl(from var(--main) h s calc(l * 10) / 80%);
+}
+
+
+
+.edit-icon .svg-icon path,
 .svg-icon path{
     fill: currentColor !important;
 }

@@ -360,8 +360,8 @@ async function getDMs(timestamp = null){
         {
             author:{
                 id: 1234,
-                name: "Your mom",
-                status: "ligma ballz",
+                name: "ImaginaryFriend",
+                status: "Busy or smth",
                 icon: "/img/default_pfp.png"
             }
         },
@@ -370,6 +370,22 @@ async function getDMs(timestamp = null){
                 id: 56789,
                 name: "WhiskeyCat",
                 status: "yooooo",
+                icon: "/img/default_pfp.png"
+            }
+        },
+        {
+            author:{
+                id: 56789,
+                name: "Django",
+                status: "pow",
+                icon: "/img/default_pfp.png"
+            }
+        },
+        {
+            author:{
+                id: 56789,
+                name: "'Devi'",
+                status: "lol",
                 icon: "/img/default_pfp.png"
             }
         }
@@ -393,22 +409,18 @@ function getDMsNavContainer(){
 async function renderDMs(){
     let dms = await getDMs();
 
-    let firstDm = false
+    let firstDm = true
     if(dms?.length > 0){
-        for(let i = 0; i < 200; i++){
-            for(let dm of dms){
-                getDMsNavContainer().insertAdjacentHTML('beforeend',
-                    `<a class="entry ${!firstDm ? "selected" : ""}">
+        for(let dm of dms){
+            getDMsNavContainer().insertAdjacentHTML('beforeend',
+                `<a class="entry ${!firstDm ? "selected" : ""}">
                         <img class="icon" src="${stripHTML(sanitizeHtmlForRender(dm.author.icon, false))}">
                         <div class="info">
                             <p>${dm.author.name}</p>
                             <p class="status">${dm.author.status ?? ""}</p>
                         </div>
                     </a>`
-                )
-
-                firstDm = true
-            }
+            )
         }
     }
 

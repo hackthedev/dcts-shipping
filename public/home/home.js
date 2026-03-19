@@ -11,7 +11,7 @@ async function renderHome() {
     getContentElement().insertAdjacentHTML('beforeend',
         `
             <div class="site-banner">            
-                <div class="editBannerIcon" onclick="editHero()">${ICONS.edit}</div>
+                <div class="edit-icon" onclick="editHero()">${ICONS.edit}</div>
                 <div class="content">
                     <p class="title" data-text="{{server.home.title}}">${server?.serverinfo?.home?.title ?? ""}</p>
                     <p class="subtitle" data-text="{{server.home.subtitle}}">${server?.serverinfo?.home?.subtitle ?? ""}</p>  
@@ -21,12 +21,14 @@ async function renderHome() {
             
             <div class="home-container">
                 <div class="about">
+                    <div class="edit-icon dark" onclick="editHero()">${ICONS.edit}</div>
                     ${server?.serverinfo?.home?.about}
                 </div>
                 
                 <div class="info">
                     <div class="contact">                
                        <label class="hint-label" style="margin: 0;">Contact Information</label>       
+                       <div class="edit-icon dark" onclick="editHero()">${ICONS.edit}</div>
                        <ul style="padding-left: 20px;line-height: 1.5;">
                             ${contactData.email ? `<li>Email: <a href=mailto:"${contactData.email}" target="_blank">${contactData.email}</a></li>` : ""}
                             ${contactData.website ? `<li>Website: <a href="${contactData.website}" target="_blank">${contactData.website}</a></li>` : ""}

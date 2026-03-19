@@ -6,7 +6,7 @@ on:
       - main
       - beta
   release:
-    types: [ published ]
+    types: [published]
 
 env:
   REGISTRY: ghcr.io
@@ -48,7 +48,7 @@ jobs:
         id: meta-release
         run: |
           VERSION="${GITHUB_REF_NAME}"
-          VERSION="${VERSION#v}"  # "v1.0.0" -> "1.0.0"
+          VERSION="${VERSION#v}"
           TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
@@ -61,21 +61,30 @@ jobs:
           push: true
           tags: ${{ steps.meta-branch.outputs.tags || steps.meta-release.outputs.tags }}
 
-      - name: Set image tags  ptero (branch)
+      - name: Set image tags ptero (branch)
         if: github.event_name == 'push'
-        id: ptero-release
+        id: ptero-branch
         run: |
           TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-ptero"
           if [ "${{ github.ref_name }}" = "main" ]; then
             TAGS="$TAGS,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-ptero"
           fi
-          echo "ptero-tags=$TAGS" >> $GITHUB_OUTPUT
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
-      - name: Build and push ptero shit
+      - name: Set image tags ptero (release)
+        if: github.event_name == 'release'
+        id: ptero-release
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          VERSION="${VERSION#v}"
+          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-ptero,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-ptero"
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: Build and push ptero image
         uses: docker/build-push-action@v5
         with:
           platforms: linux/amd64,linux/arm64
           context: .
           file: ./Dockerfile.ptero
           push: true
-          tags: ${{ steps.ptero-release.outputs.ptero-tags }}
+          tags: ${{ steps.ptero-branch.outputs.tags || steps.ptero-release.outputs.tags }}

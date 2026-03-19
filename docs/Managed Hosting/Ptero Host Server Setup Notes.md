@@ -1,3 +1,5 @@
+# Ptero Node Setup Notes
+
 When setting up a node server there are some tricky things to keep in mind.
 
 - The mariadb server's bind-address needs to be set to 0.0.0.0

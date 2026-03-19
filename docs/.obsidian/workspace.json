@@ -185,8 +185,9 @@
   },
   "active": "3a0469dcedf99830",
   "lastOpenFiles": [
-    "Lore/Terminology.md",
+    "install NodeJS.md",
     "Managed Hosting/Ptero Host Server Setup Notes.md",
+    "Lore/Terminology.md",
     "Lore/Technical overview.md",
     "Managed Hosting",
     "Lore/Principles.md",
@@ -197,7 +198,6 @@
     "network/DynDNS.md",
     "network/DNS Setup.md",
     "network/Caddy Setup.md",
-    "install NodeJS.md",
     "Lore/Threat model.md",
     "sql/errors/SQL Tables and Columns not setting up automatically.md",
     "sql/errors",

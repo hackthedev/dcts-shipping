@@ -4,10 +4,11 @@ import Logger from "../functions/logger.mjs";
 import {
     checkObjectKeys,
     copyObject,
-    getCastingMemberObject,
+    getCastingMemberObject, sanitizeInput,
     sendMessageToUser,
     validateMemberId
 } from "../functions/main.mjs";
+import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
 
 export async function getPublicServerInfoObject(){
     let groupId = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);
@@ -19,10 +20,9 @@ export async function getPublicServerInfoObject(){
     return {
         serverinfo: {
             name: serverconfig.serverinfo.name,
+            home: serverconfig.serverinfo.home,
             description: serverconfig.serverinfo.description,
             countryCode: serverconfig.serverinfo.countryCode,
-            about: serverconfig.serverinfo.home.about || null,
-            banner: serverconfig.serverinfo.home.banner_url || null,
             icon: group?.info?.icon || null,
             slots: {
                 online: await getOnlineMemberCount(),
@@ -33,7 +33,6 @@ export async function getPublicServerInfoObject(){
             uploadFileTypes: serverconfig.serverinfo.uploadFileTypes,
             messageLoadLimit: serverconfig.serverinfo.messageLoadLimit,
             voip: serverconfig.serverinfo.livekit.enabled,
-            sqlEnabled: serverconfig.serverinfo.sql.enabled,
             registration: serverconfig.serverinfo.registration.enabled,
             instance: {
                 contact: serverconfig.serverinfo.instance.contact
@@ -42,6 +41,10 @@ export async function getPublicServerInfoObject(){
             public_key: await signer.getPublicKey()
         }
     };
+}
+
+function updateServerInfoProperty(property){
+    if(property !== undefined) serverconfig.serverinfo.name = property
 }
 
 export default (io) => (socket) => {
@@ -81,38 +84,44 @@ export default (io) => (socket) => {
         if (await validateMemberId(member?.id, socket,  member?.token) === true
         ) {
             if (await hasPermission(member.id, "manageServer")) {
-                if(member?.serverinfo?.name !== undefined) serverconfig.serverinfo.name = member.serverinfo.name;
-                if(member?.serverinfo?.description !== undefined) serverconfig.serverinfo.description = member.serverinfo.description;
-                if(member?.serverinfo?.countryCode !== undefined) serverconfig.serverinfo.countryCode = member.serverinfo.countryCode;
+                if(member?.serverinfo?.name !== undefined) serverconfig.serverinfo.name = sanitizeHTML(member.serverinfo.name);
+                if(member?.serverinfo?.description !== undefined) serverconfig.serverinfo.description = sanitizeHTML(member.serverinfo.description);
+                if(member?.serverinfo?.countryCode !== undefined) serverconfig.serverinfo.countryCode = stripHTML(member.serverinfo.countryCode);
 
-                if(member?.serverinfo?.uploadFileTypes !== undefined) serverconfig.serverinfo.uploadFileTypes = member.serverinfo.uploadFileTypes;
-                if(member?.serverinfo?.defaultChannel !== undefined) serverconfig.serverinfo.defaultChannel = member.serverinfo.defaultChannel;
+                if(member?.serverinfo?.uploadFileTypes !== undefined) serverconfig.serverinfo.uploadFileTypes = stripHTML(member.serverinfo.uploadFileTypes);
+                if(member?.serverinfo?.defaultChannel !== undefined) serverconfig.serverinfo.defaultChannel = stripHTML(member.serverinfo.defaultChannel);
+                if(member?.serverinfo?.registration?.enabled !== undefined) serverconfig.serverinfo.registration.enabled = stripHTML(member.serverinfo.registration.enabled);
+                if(member?.serverinfo?.discovery?.enabled !== undefined) serverconfig.serverinfo.discovery.enabled = stripHTML(member.serverinfo.discovery.enabled);
+                if(member?.serverinfo?.discovery?.defaultStatus !== undefined) serverconfig.serverinfo.discovery.defaultStatus = stripHTML(member.serverinfo.discovery.defaultStatus);
 
-                if(member?.serverinfo?.registration?.enabled !== undefined) serverconfig.serverinfo.registration.enabled = member.serverinfo.registration.enabled;
-                if(member?.serverinfo?.discovery?.enabled !== undefined) serverconfig.serverinfo.discovery.enabled = member.serverinfo.discovery.enabled;
-                if(member?.serverinfo?.discovery?.defaultStatus !== undefined) serverconfig.serverinfo.discovery.defaultStatus = member.serverinfo.discovery.defaultStatus;
+                if(member?.serverinfo?.instance?.contact?.email !== undefined) serverconfig.serverinfo.instance.contact.email = stripHTML(member.serverinfo.instance.contact.email);
+                if(member?.serverinfo?.instance?.contact?.website !== undefined) serverconfig.serverinfo.instance.contact.website = stripHTML(member.serverinfo.instance.contact.website);
+                if(member?.serverinfo?.instance?.contact?.reddit !== undefined) serverconfig.serverinfo.instance.contact.reddit = stripHTML(member.serverinfo.instance.contact.reddit);
+                if(member?.serverinfo?.instance?.contact?.discord !== undefined) serverconfig.serverinfo.instance.contact.discord = stripHTML(member.serverinfo.instance.contact.discord);
+                if(member?.serverinfo?.instance?.contact?.github !== undefined) serverconfig.serverinfo.instance.contact.github = stripHTML(member.serverinfo.instance.contact.github);
+                if(member?.serverinfo?.instance?.contact?.owner?.name !== undefined) serverconfig.serverinfo.instance.contact.owner.name = stripHTML(member.serverinfo.instance.contact.owner.name);
+                if(member?.serverinfo?.instance?.contact?.signal !== undefined) serverconfig.serverinfo.instance.contact.signal = stripHTML(member.serverinfo.instance.contact.signal);
 
-                if(member?.serverinfo?.instance?.contact?.email !== undefined) serverconfig.serverinfo.instance.contact.email = member.serverinfo.instance.contact.email;
-                if(member?.serverinfo?.instance?.contact?.website !== undefined) serverconfig.serverinfo.instance.contact.website = member.serverinfo.instance.contact.website;
-                if(member?.serverinfo?.instance?.contact?.reddit !== undefined) serverconfig.serverinfo.instance.contact.reddit = member.serverinfo.instance.contact.reddit;
-                if(member?.serverinfo?.instance?.contact?.discord !== undefined) serverconfig.serverinfo.instance.contact.discord = member.serverinfo.instance.contact.discord;
-                if(member?.serverinfo?.instance?.contact?.github !== undefined) serverconfig.serverinfo.instance.contact.github = member.serverinfo.instance.contact.github;
-                if(member?.serverinfo?.instance?.contact?.owner?.name !== undefined) serverconfig.serverinfo.instance.contact.owner.name = member.serverinfo.instance.contact.owner.name;
-                if(member?.serverinfo?.instance?.contact?.signal !== undefined) serverconfig.serverinfo.instance.contact.signal = member.serverinfo.instance.contact.signal;
-
-                if(member?.serverinfo?.maxUploadStorage !== undefined) serverconfig.serverinfo.maxUploadStorage = member.serverinfo.maxUploadStorage;
-                if(member?.serverinfo?.rateLimit !== undefined) serverconfig.serverinfo.rateLimit = member.serverinfo.rateLimit;
-                if(member?.serverinfo?.dropInterval !== undefined) serverconfig.serverinfo.dropInterval = member.serverinfo.dropInterval;
+                if(member?.serverinfo?.maxUploadStorage !== undefined) serverconfig.serverinfo.maxUploadStorage = stripHTML(member.serverinfo.maxUploadStorage);
+                if(member?.serverinfo?.rateLimit !== undefined) serverconfig.serverinfo.rateLimit = stripHTML(member.serverinfo.rateLimit);
+                if(member?.serverinfo?.dropInterval !== undefined) serverconfig.serverinfo.dropInterval = stripHTML(member.serverinfo.dropInterval);
 
                 // new rate limit settings
-                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode = member.serverinfo.moderation.ratelimit.actions.user_slowmode;
-                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode_duration !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration = member.serverinfo.moderation.ratelimit.actions.user_slowmode_duration;
-                if(member?.serverinfo?.moderation?.ratelimit?.actions?.ratelimit !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.ratelimit = member.serverinfo.moderation.ratelimit.actions.ratelimit;
-                if(member?.serverinfo?.moderation?.ratelimit?.record_history !== undefined) serverconfig.serverinfo.moderation.ratelimit.record_history = member.serverinfo.moderation.ratelimit.record_history;
+                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode = stripHTML(member.serverinfo.moderation.ratelimit.actions.user_slowmode);
+                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode_duration !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration = stripHTML(member.serverinfo.moderation.ratelimit.actions.user_slowmode_duration);
+                if(member?.serverinfo?.moderation?.ratelimit?.actions?.ratelimit !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.ratelimit = stripHTML(member.serverinfo.moderation.ratelimit.actions.ratelimit);
+                if(member?.serverinfo?.moderation?.ratelimit?.record_history !== undefined) serverconfig.serverinfo.moderation.ratelimit.record_history = stripHTML(member.serverinfo.moderation.ratelimit.record_history);
 
                 // some other mod settings
-                if(member?.serverinfo?.moderation?.bans?.memberListHideBanned !== undefined) serverconfig.serverinfo.moderation.bans.memberListHideBanned = member.serverinfo.moderation.bans.memberListHideBanned;
-                if(member?.serverinfo?.moderation?.bans?.ipBanDuration !== undefined) serverconfig.serverinfo.moderation.bans.ipBanDuration = member.serverinfo.moderation.bans.ipBanDuration;
+                if(member?.serverinfo?.moderation?.bans?.memberListHideBanned !== undefined) serverconfig.serverinfo.moderation.bans.memberListHideBanned = stripHTML(member.serverinfo.moderation.bans.memberListHideBanned);
+                if(member?.serverinfo?.moderation?.bans?.ipBanDuration !== undefined) serverconfig.serverinfo.moderation.bans.ipBanDuration = stripHTML(member.serverinfo.moderation.bans.ipBanDuration);
+
+                // server home
+                if (member?.serverinfo?.home?.banner_url) serverconfig.serverinfo.home.banner_url = stripHTML(member.serverinfo.home.banner_url);
+                if (member?.serverinfo?.home?.title) serverconfig.serverinfo.home.title = sanitizeHTML(member.serverinfo.home.title);
+                if (member?.serverinfo?.home?.subtitle) serverconfig.serverinfo.home.subtitle = sanitizeHTML(member.serverinfo.home.subtitle);
+                if (member?.serverinfo?.home?.about) serverconfig.serverinfo.home.about = sanitizeHTML(member.serverinfo.home.about);
+
 
                 await saveConfig(serverconfig);
                 return response({error: null})

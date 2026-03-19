@@ -436,6 +436,30 @@ const processPlugins = async () => {
 // +1 convenience
 const tables = [
     {
+        name: "dm_rooms",
+        columns: [
+
+            {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "roomId", type: "varchar(20) NOT NULL"},
+            {name: "participants", type: "varchar(204) NOT NULL"},
+            {name: "title", type: "varchar(204) NOT NULL DEFAULT 'New Chat'"},
+            {name: "creatorId", type: "varchar(20) NOT NULL"},
+            {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+        ]
+    },
+    {
+        name: "dms",
+        columns: [
+
+            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "authorId", type: "varchar(100) NOT NULL"},
+            {name: "roomId", type: "varchar(100) NOT NULL"},
+            {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
+            {name: "message", type: "longtext NOT NULL"},
+            {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+        ]
+    },
+    {
         name: "messages",
         columns: [
             {name: "authorId", type: "varchar(100) NOT NULL"},
@@ -1020,7 +1044,7 @@ async function listenToIO(){
         if (serverconfig.ipblacklist.hasOwnProperty(ip)) {
             if (Date.now() <= serverconfig.ipblacklist[ip]) {
                 let detailText = "";
-                let banListResult = findInJson(serverconfig.banlist, "ip", ip);
+                let banListResult = findInJson(serverconfig?.banlist, "ip", ip);
                 if (banListResult != null) {
                     let bannedUntilDate = new Date(banListResult.until);
                     bannedUntilDate.getFullYear() === "9999"

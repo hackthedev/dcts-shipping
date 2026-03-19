@@ -379,8 +379,8 @@ img {
 
 .layout .content .about{
     border: 1px solid var(--border-color);
+    background-color: hsl(from var(--main) h s calc(l * 1.75));
 }
-
 .hint-label{
     color: hsl(from var(--main) h s calc(l * 6) / 100%);
 }
@@ -389,9 +389,6 @@ img {
 }
 .layout.home .content{
     background-color: hsl(from var(--main) h s calc(l * 1.25));
-}
-.layout.home .content .about{
-    background-color: hsl(from var(--main) h s calc(l * 1.75));
 }
 
 #navigation.home .entry.selected {
@@ -402,4 +399,10 @@ img {
 }
 .layout .content{
     color: hsl(from var(--main) h s calc(l * 8) / 100%);
+}
+
+.layout.home .content .public-key,
+.layout.home .content .contact {
+    background-color: hsl(from var(--main) h s calc(l * 1.75));
+    border: 1px solid var(--border-color);
 }

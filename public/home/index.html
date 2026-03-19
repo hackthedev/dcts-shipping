@@ -4,11 +4,23 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <script src="/js/core/socket.io.js" crossorigin="anonymous"></script>
 
+    <link href="/css/themes/default/default.css" rel="stylesheet">
+    <link href="/css/home/general.css" rel="stylesheet">
+    <link href="/css/home/dms.css" rel="stylesheet">
+    <link href="/css/home/home.css" rel="stylesheet">
+    <link href="/css/messages.css" rel="stylesheet">
+    <link href="/css/markdown-parser.css" rel="stylesheet">
+    <link href="/css/message_actions.css" rel="stylesheet">
+    <link href="/css/settings.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
+
+    <script src="/js/effects/splashscreen.js"></script>
     <script src="/js/core/socket.io.js"></script>
     <script src="/js/core/PoW.js"></script>
     <script src="/js/docs.js"></script>
+    <script src="/js/core/qrcode.js"></script>
+    <script src="/js/effects/glitch.js"></script>
     <script src="/js/core/ContextMenu.js"></script>
     <script src="/js/core/CookieManager.js"></script>
     <script src="/js/core/ChatManager.js"></script>
@@ -27,14 +39,6 @@
     <script src="/js/upload.js"></script>
     <script src="/js/messages/server/messages.js"></script>
 
-    <link href="/css/themes/default/default.css" rel="stylesheet">
-    <link href="/css/home/general.css" rel="stylesheet">
-    <link href="/css/home/dms.css" rel="stylesheet">
-    <link href="/css/home/home.css" rel="stylesheet">
-    <link href="/css/messages.css" rel="stylesheet">
-    <link href="/css/message_actions.css" rel="stylesheet">
-    <link href="/css/settings.css" rel="stylesheet">
-
 
     <script src="/js/tooltips/dialogs/introduceServerHome.js"></script>
     <script src="/js/core/purify.js"></script>
@@ -46,7 +50,12 @@
     <script src="/home/dms/dms.js"></script>
     <script src="/home/dms/crypto.js"></script>
 
+    <meta content="{{meta.page.description}}" name="description">
     <title>{{server.name}} – Server Home & DMs</title>
+
+    <script>
+        ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
+    </script>
 </head>
 
 <body>

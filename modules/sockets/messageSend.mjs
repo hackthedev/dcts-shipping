@@ -33,7 +33,6 @@ export default (io) => (socket) => {
     // socket.on code here
     socket.on('messageSend', async function (member, response) {
         if (await validateMemberId(member?.author?.id, socket, member?.token) === true) {
-
             // some new handling
             if (!member?.message) return response({error: "No message provided"})
             if (!member?.group) return response({error: "No group provided"})
@@ -176,6 +175,7 @@ export default (io) => (socket) => {
                     member.timestamp = new Date().getTime();
                     member.messageId = messageid;
                     member.message = sanitizeInput(member.message);
+
                     member.reply = {
                         messageId: null,
                     }

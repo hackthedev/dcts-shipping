@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         await initPow()
 
         // join first
-        await userJoined(null, null, null, null, true);
+        await ChatManager.userJoined(null, null, null, null, true);
 
         setTimeout(() => {
             splash.hide()
@@ -911,175 +911,6 @@ function extractHost(url){
     }
 }
 
-async function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false) {
-    if (UserManager.getUsername() != null) {
-        var username = UserManager.getUsername();
-
-        let knownServers = "";
-        if (isLauncher() && initial) {
-            await syncHostData()
-            knownServers = await Client().GetServers();
-        }
-
-        socket.emit("userConnected", {
-            id: UserManager.getID(),
-            name: username,
-            icon: UserManager.getPFP(),
-            status: UserManager.getStatus(),
-            token: UserManager.getToken(),
-            password: passwordFlag,
-            onboarding: onboardingFlag,
-            aboutme: UserManager.getAboutme(),
-            banner: UserManager.getBanner(),
-            loginName: loginNameFlag,
-            publicKey: await UserManager.getPublicKey(),
-            knownServers,
-            code: accessCode,
-            pow: {
-                challenge: localStorage.getItem("pow_challenge"),
-                solution: localStorage.getItem("pow_solution")
-            }
-        }, async function (response) {
-
-            // sync data
-            if (response?.token) CookieManager.setCookie("token", response.token);
-            if (response?.icon) CookieManager.setCookie("pfp", response.icon);
-            if (response?.banner) CookieManager.setCookie("banner", response.banner);
-            if (response?.aboutme) CookieManager.setCookie("aboutme", response.aboutme);
-            if (response?.status) CookieManager.setCookie("status", response.status);
-            if (response?.loginName) CookieManager.setCookie("loginName", response.loginName);
-            if (response?.name) CookieManager.setCookie("username", response.name);
-            if (response?.id) CookieManager.setCookie("id", response.id);
-
-            // account manager soon?
-            if (await isLauncher()) {
-                if (await Client().setAccountCredentials) {
-                    await Client().setAccountCredentials(
-                        extractHost(window.location.origin),
-                        UserManager.getID(),
-                        UserManager.getToken()
-                    );
-                }
-
-                UserManager.saveAccount()
-            }
-
-            // if we finished onboarding
-            if (!response?.error && response.finishedOnboarding === true && initial) {
-                socket.emit("setRoom", {
-                    id: UserManager.getID(),
-                    room: UserManager.getRoom(),
-                    token: UserManager.getToken()
-                });
-                getGroupBanner();
-                socket.emit("getGroupList", {
-                    id: UserManager.getID(),
-                    group: UserManager.getGroup(),
-                    token: UserManager.getToken(),
-                    username: UserManager.getUsername(),
-                    icon: UserManager.getPFP()
-                });
-
-                socket.emit("getCurrentChannel", {
-                    id: UserManager.getID(),
-                    token: UserManager.getToken(),
-                    username: UserManager.getUsername(),
-                    icon: UserManager.getPFP(),
-                    group: UserManager.getGroup(),
-                    category: UserManager.getCategory(),
-                    channel: UserManager.getChannel()
-                });
-                socket.emit("setRoom", {
-                    id: UserManager.getID(),
-                    room: UserManager.getRoom(),
-                    token: UserManager.getToken()
-                });
-
-                if (initial) {
-                    /* Quill Emoji Autocomplete */
-                    initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
-                    initializeMentionAutocomplete(document.querySelector('.ql-editor'));
-
-                    await ChatManager.getServerInfo();
-                    getChatlog(document.getElementById("content"));
-
-                    getMemberList()
-                    getChannelTree()
-                    showGroupStats();
-                    focusEditor()
-                }
-
-                socket.emit("checkPermission", {
-                    id: UserManager.getID(),
-                    token: UserManager.getToken(),
-                    permission: "manageReports"
-                }, function (response) {
-                    if (response.permission === "granted" && initial) {
-                        ModView.init();
-                        UserReports.getReports();
-                    }
-                });
-
-            } else {
-                if (response.error) {
-                    splash.hide()
-                    if(response.error.includes("banned")){
-                        ChatManager.showInstanceInfo(response.error, "indianred");
-                        return;
-                    }
-
-
-                    showSystemMessage({
-                        title: response.title || "",
-                        text: response.msg || response.error || "",
-                        icon: "error",
-                        img: null,
-                        type: "error",
-                        duration: response.displayTime || 3000
-                    });
-
-                    if (response?.registration === false) {
-                        // show registration prompt
-                        customPrompts.showPrompt(
-                            `Invite Code`,
-                            `
-                             <div class="prompt-form-group">
-                                 <p>
-                                    This server is an invite-only server. <br>
-                                    Please enter an invite code to join the server.
-                                 </p>
-                                 <p>
-                                 Already have an account? <a href="#" onclick="UserManager.doAccountLogin()">Log in instead</a>
-                                </p>
-                             </div>
-
-                             <div class="prompt-form-group">
-                                <input class="prompt-input" autocomplete="off" type="text" name="inviteCode" id="inviteCode" placeholder="Enter an invite code" value="">
-                                <label style="color: indianred;" class="prompt-label error-text"></label>
-                             </div>
-                            `,
-                            async function (values) {
-                                let inviteCode = values?.inviteCode;
-
-                                if (inviteCode && inviteCode.length > 0) {
-                                    requestAnimationFrame(function () {
-                                        UserManager.doAccountOnboarding(null, inviteCode)
-                                    })
-                                    //userJoined(false, null, null, inviteCode);
-                                }
-
-                                if (!inviteCode) {
-                                    userJoined();
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-        });
-    }
-}
-
 let lastTypingEmitted = 0;
 
 function setTyping() {
@@ -1470,8 +1301,6 @@ async function sendMessageToServer(authorId = UserManager.getID(),
         msgPayload = await Client().SignJson(msgPayload);
     }
 
-    console.error(JSON.stringify(msgPayload, null, 4));
-
     return new Promise((resolve, reject) => {
         socket.emit("messageSend", msgPayload, async function (response) {
             Clock.stop("send_message");
@@ -1504,8 +1333,6 @@ async function sendMessageToServer(authorId = UserManager.getID(),
 
                 scrollDown("sendMessageToServer"); // forgot that
                 setTimeout(() => focusEditor(), 1)
-
-                console.log("clearing editor")
                 editor.innerHTML = "<p><br></p>"
 
                 saveChannelMessageDraft(UserManager.getChannel(), null)
@@ -2329,7 +2156,7 @@ function refreshValues() {
     /* Deprecated? */
     var username = UserManager.getUsername();
     getRoles();
-    userJoined();
+    ChatManager.userJoined();
     ChatManager.getServerInfo();
 
     socket.emit("setRoom", {

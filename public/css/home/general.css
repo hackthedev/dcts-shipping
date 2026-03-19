@@ -19,31 +19,33 @@
     margin-right: -10px;
 }
 
-#navigation.home .dms{
+.layout.home{
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    width: 100%;
+    height: 100%;
 }
 
-.layout{
-    display: flex;
-}
-
-.layout .content{
-    display: flex;
+.layout.home .content{
+    display: none;
     flex-direction: column;
     flex-grow: 1;
     overflow: auto;
+    padding: 2rem;
+
+    max-height: 100%;
 }
 
 
-.layout .content .site-banner{
+.layout.home .content .site-banner{
+    margin: -2rem;
+    margin-bottom: 2rem;
+
     position: relative;
-    width: 100%;
-    max-width: 100%;
+    width: calc(100% + 4rem);
     height: 30vh;
-    overflow: hidden;
     background-color: black;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 .layout .content .site-banner::after {
     content: "";
@@ -65,7 +67,7 @@
 }
 
 .layout .content .site-banner .editBannerIcon{
-    position: fixed;
+    position: absolute;
     right: 10px;
     width: 30px;
     height: 30px;

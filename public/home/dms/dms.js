@@ -411,4 +411,6 @@ async function renderDMs(){
             }
         }
     }
+
+    getDMsNavContainer().fadeIn(200, "flex")
 }

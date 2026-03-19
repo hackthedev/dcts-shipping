@@ -43,7 +43,8 @@
 }
 
 #navigation.home .dms{
-    display: flex;
+    display: none;
     flex-direction: column;
     overflow: auto;
+    gap: 2px;
 }

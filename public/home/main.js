@@ -1,11 +1,59 @@
 var socket = io.connect();
+let splash;
+
+Element.prototype.fadeIn = function (duration = 300, display = "block") {
+    const el = this;
+
+    if (getComputedStyle(el).display !== "none") return;
+    if (el._fadeAnim) cancelAnimationFrame(el._fadeAnim);
+
+    el.style.opacity = 0;
+    el.style.display = display;
+
+    const start = performance.now();
+
+    function tick(now) {
+        const progress = (now - start) / duration;
+        const value = Math.min(progress, 1);
+
+        el.style.opacity = value;
+
+        if (value < 1) {
+            el._fadeAnim = requestAnimationFrame(tick);
+        } else {
+            el.style.opacity = "";
+            el._fadeAnim = null;
+        }
+    }
+
+    el._fadeAnim = requestAnimationFrame(tick);
+};
 
 document.addEventListener("DOMContentLoaded", async () => {
+    splash = new SplashScreen(document.body);
+    splash.show()
+
+    ChatManager.checkConnection(2000)
     await ChatManager.waitForSocket(socket);
+    ChatManager.wasConnected = true;
     ContextMenu.init()
-    ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
-    renderDMs();
-    renderHome();
+
+    await ChatManager.userJoined(
+        null,
+        null,
+        null,
+        null,
+        null,
+        async (response) => {
+            renderDMs();
+            renderHome();
+            registerHomeContextMenu();
+
+            splash.hide();
+        },
+    );
+
+    getContentElement().fadeIn(250, "flex")
 })
 
 function getContentElement(){

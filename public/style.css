@@ -1001,6 +1001,8 @@ li.info:hover {
 }
 
 .qr-code img{
+    width: 200px;
+    height: 200px;
     margin: 8px;
     padding: 8px;
     border-radius: 10px;

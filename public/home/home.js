@@ -1,10 +1,13 @@
 async function renderHome() {
-    registerHomeContextMenu();
-
     // get server info and clear the html in case its being re-rendered
     let server = await getServerInfo();
-    getContentElement().innerHTML = "";
+    let contactData = server?.serverinfo?.instance?.contact
 
+    let shortRedditUrl = `r/${contactData?.reddit?.split("/r/")[1]}`;
+    let shortGithubUrl = `${contactData?.github?.split(".com/")[1]}`;
+    let shortDiscordUrl = `gg/${contactData?.discord?.split(".gg/")[1]}`;
+
+    getContentElement().innerHTML = "";
     getContentElement().insertAdjacentHTML('beforeend',
         `
             <div class="site-banner">            
@@ -16,12 +19,46 @@ async function renderHome() {
                 <img src="${server?.serverinfo?.home?.banner_url ?? ""}">
             </div>
             
-            <div class="about">
-                ${server?.serverinfo?.home?.about}
+            <div class="home-container">
+                <div class="about">
+                    ${server?.serverinfo?.home?.about}
+                </div>
+                
+                <div class="info">
+                    <div class="contact">                
+                       <label class="hint-label" style="margin: 0;">Contact Information</label>       
+                       <ul style="padding-left: 20px;line-height: 1.5;">
+                            ${contactData.email ? `<li>Email: <a href=mailto:"${contactData.email}" target="_blank">${contactData.email}</a></li>` : ""}
+                            ${contactData.website ? `<li>Website: <a href="${contactData.website}" target="_blank">${contactData.website}</a></li>` : ""}
+                            ${contactData.reddit ? `<li>Reddit: <a href="${contactData.reddit}" target="_blank">${shortRedditUrl}</a></li>` : ""}
+                            ${contactData.github ? `<li>Github: <a href="${contactData.github}" target="_blank">${shortGithubUrl}</a></li>` : ""}
+                            ${contactData.discord ? `<li>Discord: <a href="${contactData.discord}" target="_blank">${shortDiscordUrl}</a></li>` : ""}
+                            ${contactData.signal ? `<li>Signal: ${contactData.signal}</li>` : ""}
+                        </ul>    
+                    </div>
+                    
+                    <div class="public-key">
+                        <label class="hint-label" style="margin: 0;">Server Public Key</label>                    
+                        <div class="details">                        
+                            <div class="qr-code"></div>
+                            
+                            <div class="plain">
+                                <pre>${server.serverinfo.public_key}</pre>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
             </div>
         `
     )
 
+
+    new QRCode(getContentElement().querySelector(".public-key .qr-code"), {
+        text: server.serverinfo.public_key,
+        correctLevel: QRCode.CorrectLevel.L,
+        typeNumber: 40,
+    })
 }
 
 function registerHomeContextMenu() {

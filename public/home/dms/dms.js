@@ -1,7 +1,3 @@
-let socket = {};
-socket.on = () => {}
-socket.emit = () => {}
-
 let tooltipSystem;
 let customPrompts;
 
@@ -503,7 +499,6 @@ socket.emit("userConnected", {
 });
 
 async function getDMs(timestamp = null){
-
     return [
         {
             author:{
@@ -541,23 +536,22 @@ function getDMsNavContainer(){
 async function renderDMs(){
     let dms = await getDMs();
 
-    console.log(dms)
-
     let firstDm = false
     if(dms?.length > 0){
-        for(let dm of dms){
-
-            getDMsNavContainer().insertAdjacentHTML('beforeend',
-            `<a class="entry ${!firstDm ? "selected" : ""}">
+        for(let i = 0; i < 200; i++){
+            for(let dm of dms){
+                getDMsNavContainer().insertAdjacentHTML('beforeend',
+                    `<a class="entry ${!firstDm ? "selected" : ""}">
                         <img class="icon" src="${stripHTML(sanitizeHtmlForRender(dm.author.icon, false))}">
                         <div class="info">
                             <p>${dm.author.name}</p>
                             <p class="status">${dm.author.status ?? ""}</p>
                         </div>
                     </a>`
-            )
+                )
 
-            firstDm = true
+                firstDm = true
+            }
         }
     }
 }

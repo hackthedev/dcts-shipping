@@ -6,6 +6,7 @@
     /* cyan: #012724;*/
     /* purple: #1d1635;*/
     --main: #131415;
+    --border-color: hsl(from var(--main) h s calc(l * 8) / 20%);
 }
 
 html,
@@ -131,22 +132,6 @@ a {
 }
 
 /* Server Home Page */
-#ticketIdentity option,
-.panel,
-.homeCard,
-.modalCard,
-.searchCard {
-    background-color: hsl(from var(--main) h s calc(l * 1.7));
-}
-
-.statusDot{
-    border: 2px solid hsl(from var(--main) h s calc(l * 1.7));
-}
-
-#ticketIdentity option {
-    border: 2px solid  hsl(from var(--main) h s calc(l * 1.7));
-}
-
 body{
     background: linear-gradient(180deg, hsl(from var(--main) h s calc(l * 0.8)), hsl(from var(--main) h s calc(l * 1.4)));
 }
@@ -155,17 +140,13 @@ body{
     background-color: hsl(from var(--main) h s calc(l * 1.7));
 }
 
-.hero{
-    background: hsl(from var(--main) h s calc(l * 1.7)) center/cover no-repeat;
-}
-
 blockquote {
     border-left: 3px solid hsl(from var(--main) h s calc(l * 9));
     color: hsl(from var(--main) h s calc(l * 9));
     background-color: hsla(from var(--main) h s calc(l * 6) / 10%);
 }
 
-.video-embed {
+.video-embed, video {
     /*
         Man i love css sometimes. the following two lines are just
         so amazing to me. works perfectly
@@ -366,4 +347,36 @@ img {
     background-color: hsl(from var(--main) h s calc(l * 2) / 100%);
     color: hsl(from var(--main) h s calc(l * 10) / 100%);
     border: 1px solid hsl(from var(--main) h s calc(l * 8) / 30%);
+}
+
+/* home */
+#navigation.home {
+    border-right: 1px solid var(--border-color);
+}
+
+.layout .content .about{
+    border: 1px solid var(--border-color);
+}
+
+.hint-label{
+    color: hsl(from var(--main) h s calc(l * 6) / 100%);
+}
+.layout.home #navigation{
+    background-color: hsl(from var(--main) h s calc(l * 1));
+}
+.layout.home .content{
+    background-color: hsl(from var(--main) h s calc(l * 1.25));
+}
+.layout.home .content .about{
+    background-color: hsl(from var(--main) h s calc(l * 1.75));
+}
+
+#navigation.home .entry.selected {
+    background-color: hsl(from var(--main) h s calc(l * 6) / 10%);
+}
+#navigation.home .entry:hover{
+    background-color: hsl(from var(--main) h s calc(l * 8) / 10%);
+}
+.layout .content{
+    color: hsl(from var(--main) h s calc(l * 8) / 100%);
 }

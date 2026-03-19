@@ -59,26 +59,6 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
         }
     }
 
-    function resolveFilePath(reqPath, publicDir, path, fs) {
-        if (reqPath === '/') reqPath = '/index.html'
-
-        const ext = path.extname(reqPath).toLowerCase()
-
-        if (ext === '') {
-            const htmlPath = path.join(publicDir, reqPath + '.html')
-            if (fs.existsSync(htmlPath)) return { fullPath: htmlPath, ext: '.html' }
-
-            const indexPath = path.join(publicDir, reqPath, 'index.html')
-            if (fs.existsSync(indexPath)) return { fullPath: indexPath, ext: '.html' }
-
-            return null
-        }
-
-        if (!['.html', '.js'].includes(ext)) return null
-
-        return { fullPath: path.join(publicDir, reqPath), ext }
-    }
-
     function renderTemplate(template, query) {
         const { group, category, channel } = query;
 
@@ -92,7 +72,7 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
 
             // vc
             ["livekit.url", () => `${process.env.LIVEKIT_URL || config.serverinfo.livekit.url}`],
-            
+
             ["version", () => versionCode],
             ["random", () => generateId(20)],
             ["default_theme", () => config.serverinfo.defaultTheme || "default.css"],
@@ -111,21 +91,50 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
         });
     }
 
+    function resolveFilePath(reqPath, publicDir, path, fs) {
+        if (reqPath === '/') reqPath = '/index.html';
+
+        const ext = path.extname(reqPath).toLowerCase();
+
+        if (ext === '') {
+            const htmlPath = path.join(publicDir, reqPath + '.html');
+            if (fs.existsSync(htmlPath)) {
+                return { fullPath: htmlPath, ext: '.html', isDirectoryIndex: false };
+            }
+
+            const indexPath = path.join(publicDir, reqPath, 'index.html');
+            if (fs.existsSync(indexPath)) {
+                return { fullPath: indexPath, ext: '.html', isDirectoryIndex: true };
+            }
+
+            return null;
+        }
+
+        if (!['.html', '.js'].includes(ext)) return null;
+
+        return { fullPath: path.join(publicDir, reqPath), ext, isDirectoryIndex: false };
+    }
+
     app.use((req, res, next) => {
-        const resolved = resolveFilePath(req.path, publicDir, path, fs)
-        if (!resolved) return next()
+        const resolved = resolveFilePath(req.path, publicDir, path, fs);
+        if (!resolved) return next();
+
+        if (resolved.isDirectoryIndex && !req.path.endsWith('/')) {
+            const q = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+            return res.redirect(301, req.path + '/' + q);
+        }
 
         fs.readFile(resolved.fullPath, 'utf8', (err, content) => {
-            if (err) return next()
+            if (err) return next();
 
-            const rendered = renderTemplate(content, req.query)
+            const rendered = renderTemplate(content, req.query);
             const contentType = {
                 '.html': 'text/html',
                 '.js': 'application/javascript',
-            }[resolved.ext] || 'text/plain'
+            }[resolved.ext] || 'text/plain';
 
-            res.setHeader('Content-Type', contentType)
-            res.send(rendered)
-        })
-    })
+            res.setHeader('Content-Type', contentType);
+            res.send(rendered);
+        });
+    });
 }

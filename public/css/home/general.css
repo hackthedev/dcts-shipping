@@ -3,15 +3,18 @@
 }
 
 #navigation.home {
+    display: flex;
     width: fit-content !important;
     min-width: 300px !important;
-    gap: 8px;
+    gap: 2px;
     padding: 10px;
+    max-height: 100%;
 }
 
 #navigation.home hr{
     display: flex;
     width: calc(100% + 20px);
+    border: 0.5px solid var(--border-color);
     margin-left: -10px;
     margin-right: -10px;
 }
@@ -28,16 +31,16 @@
 
 .layout .content{
     display: flex;
+    flex-direction: column;
     flex-grow: 1;
     overflow: auto;
-
-    background-color: rgba(205, 92, 92, 0.08);
 }
 
 
 .layout .content .site-banner{
-    width: 100vw;
-    max-width: 100vw;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
     height: 30vh;
     overflow: hidden;
     background-color: black;
@@ -47,4 +50,17 @@
     height: 100%;
     object-fit: cover;
     background-position: center;
+}
+
+.layout .content .site-banner .content{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+}
+
+.hint-label{
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: bold;
+    margin: 8px 2px;
 }

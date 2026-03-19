@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <script src="/js/core/socket.io.js" crossorigin="anonymous"></script>
 
+    <script src="/js/core/socket.io.js"></script>
     <script src="/js/core/PoW.js"></script>
+    <script src="/js/docs.js"></script>
     <script src="/js/core/ContextMenu.js"></script>
     <script src="/js/core/CookieManager.js"></script>
     <script src="/js/core/ChatManager.js"></script>
@@ -28,6 +30,7 @@
     <link href="/css/themes/default/default.css" rel="stylesheet">
     <link href="/css/home/general.css" rel="stylesheet">
     <link href="/css/home/dms.css" rel="stylesheet">
+    <link href="/css/home/home.css" rel="stylesheet">
     <link href="/css/messages.css" rel="stylesheet">
     <link href="/css/message_actions.css" rel="stylesheet">
     <link href="/css/settings.css" rel="stylesheet">
@@ -37,7 +40,6 @@
     <script src="/js/core/purify.js"></script>
     <script src="/js/core/Crypto.js"></script>
     <script src="/js/core/Client.js"></script>
-
 
     <script src="/home/main.js"></script>
     <script src="/home/home.js"></script>
@@ -49,10 +51,10 @@
 
 <body>
 
-<div class="layout">
+<div class="layout home">
     <div id="navigation" class="home">
         <a class="entry nav selected">
-            <img class="icon nav" src="/img/home.jpg">
+            <img class="icon nav" src="/img/discover.png">
             <div class="info">
                 <p>Home</p>
             </div>
@@ -73,6 +75,7 @@
         </a>
         <hr>
 
+        <label class="hint-label">Direct Messages</label>
         <div class="dms"></div>
     </div>
 
@@ -80,7 +83,6 @@
 
     </div>
 </div>
-
 
 </body>
 

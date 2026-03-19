@@ -1,14 +1,5 @@
-
 #navigation.home .entry.selected{
-    background-color: rgba(211, 211, 211, 0.1);
-}
-
-#navigation.home .entry:hover{
-    background-color: rgba(211, 211, 211, 0.1);
-}
-
-#navigation.home .entry.nav{
-    font-weight: bold;
+    backdrop-filter: blur(6px);
 }
 
 #navigation.home .entry{
@@ -49,4 +40,10 @@
 
 #navigation.home .entry .info p.status{
     font-size: 12px;
+}
+
+#navigation.home .dms{
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
 }

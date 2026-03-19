@@ -1,0 +1,26 @@
+.layout .content .site-banner .content .title{
+    font-weight: bold;
+    font-size: 40px;
+}
+
+.layout .content .site-banner .content{
+    align-content: center;
+    align-self: center;
+    margin-left: 4rem;
+    background-color: transparent;
+
+    text-shadow: -1px 0 0 var(--main), 1px 0 0 var(--main),
+    0 -1px 0 var(--main), 0 1px 0 var(--main),
+    0 0 8px var(--main);
+}
+
+.layout .content .site-banner .content p{
+    margin: 0;
+}
+
+.layout.home .content .about{
+    margin: 2rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    backdrop-filter: blur(6px);
+}

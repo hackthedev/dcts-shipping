@@ -4,6 +4,15 @@ class ChatManager {
     static connectionLost = false;
     static wasConnected = false;
 
+    static async waitForSocket(socket) {
+        return new Promise((resolve, reject) => {
+            if (socket.connected) return resolve();
+
+            socket.once("connect", resolve);
+            socket.once("connect_error", reject);
+        });
+    }
+
     static countryCodeToEmoji(code) {
         if (!code || code.length !== 2) {
             return `<img src="/img/default_emojis/1f30d.svg" class="inline-text-emoji">`;
@@ -292,10 +301,53 @@ class ChatManager {
         }
     }
 
+    static async getServerInfo(returnData = false) {
+        return new Promise((resolve, reject) => {
+
+            // reject if we get disconnected or something
+            setTimeout(() => {
+                if(!socket.connected){
+                    resolve(null);
+                }
+            }, 1000)
+
+            //Official <span style="font-weight: bold; color: skyblue;">DCTS <span style="font-weight: bold; color: cadetblue;">Community</span></span>
+            socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken()}, async function (response) {
+                if(returnData) return resolve(response);
+                var headline = document.getElementById("header");
+
+                let servername = response.serverinfo.name;
+                let serverdesc = response.serverinfo.description;
+                let countryCode = response.serverinfo.countryCode;
+
+                headline.innerHTML = `
+                    <div id="main_header">
+                        ${countryCode ? `${ChatManager.countryCodeToEmoji(countryCode)} ` : ""}${sanitizeHtmlForRender(servername, false)} ${serverdesc ? ` - ${sanitizeHtmlForRender(serverdesc, false)}` : ""}
+                    </div>
+        
+                    <div id="badges"></div>          
+                    <div id="headerRight">
+                        <div class="headerIcon help" onclick="ChatManager.showInstanceInfo()"></div>
+                        <div class="headerIcon donators" onclick="UserManager.showDonatorList('https://shy-devil.me/app/dcts/');"></div>
+                        <div class="headerIcon inbox">
+                            <span id="inbox-indicator"></span>
+        
+                            ${await Inbox.getContentHTML()}
+                        </div>
+                    </div>
+                    `;
+
+                UserManager.displayServerBadges();
+                displayDiscoveredHosts()
+                resolve(null)
+            });
+        })
+    }
+
     static async showInstanceInfo(notice = null, noticeColor = "transparent"){
         let infoData;
         if(socket.connected){
-            infoData = await getServerInfo(true);
+            infoData = await this.getServerInfo(true);
             if(infoData) infoData = infoData.serverinfo
         }
 

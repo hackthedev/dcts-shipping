@@ -81,38 +81,38 @@ export default (io) => (socket) => {
         if (await validateMemberId(member?.id, socket,  member?.token) === true
         ) {
             if (await hasPermission(member.id, "manageServer")) {
-                if(member?.serverinfo?.name != null) serverconfig.serverinfo.name = member.serverinfo.name;
-                if(member?.serverinfo?.description != null) serverconfig.serverinfo.description = member.serverinfo.description;
-                if(member?.serverinfo?.countryCode != null) serverconfig.serverinfo.countryCode = member.serverinfo.countryCode;
+                if(member?.serverinfo?.name !== undefined) serverconfig.serverinfo.name = member.serverinfo.name;
+                if(member?.serverinfo?.description !== undefined) serverconfig.serverinfo.description = member.serverinfo.description;
+                if(member?.serverinfo?.countryCode !== undefined) serverconfig.serverinfo.countryCode = member.serverinfo.countryCode;
 
-                if(member?.serverinfo?.uploadFileTypes != null) serverconfig.serverinfo.uploadFileTypes = member.serverinfo.uploadFileTypes;
-                if(member?.serverinfo?.defaultChannel != null) serverconfig.serverinfo.defaultChannel = member.serverinfo.defaultChannel;
+                if(member?.serverinfo?.uploadFileTypes !== undefined) serverconfig.serverinfo.uploadFileTypes = member.serverinfo.uploadFileTypes;
+                if(member?.serverinfo?.defaultChannel !== undefined) serverconfig.serverinfo.defaultChannel = member.serverinfo.defaultChannel;
 
-                if(member?.serverinfo?.registration?.enabled != null) serverconfig.serverinfo.registration.enabled = member.serverinfo.registration.enabled;
-                if(member?.serverinfo?.discovery?.enabled != null) serverconfig.serverinfo.discovery.enabled = member.serverinfo.discovery.enabled;
-                if(member?.serverinfo?.discovery?.defaultStatus != null) serverconfig.serverinfo.discovery.defaultStatus = member.serverinfo.discovery.defaultStatus;
+                if(member?.serverinfo?.registration?.enabled !== undefined) serverconfig.serverinfo.registration.enabled = member.serverinfo.registration.enabled;
+                if(member?.serverinfo?.discovery?.enabled !== undefined) serverconfig.serverinfo.discovery.enabled = member.serverinfo.discovery.enabled;
+                if(member?.serverinfo?.discovery?.defaultStatus !== undefined) serverconfig.serverinfo.discovery.defaultStatus = member.serverinfo.discovery.defaultStatus;
 
-                if(member?.serverinfo?.instance?.contact?.email != null) serverconfig.serverinfo.instance.contact.email = member.serverinfo.instance.contact.email;
-                if(member?.serverinfo?.instance?.contact?.website != null) serverconfig.serverinfo.instance.contact.website = member.serverinfo.instance.contact.website;
-                if(member?.serverinfo?.instance?.contact?.reddit != null) serverconfig.serverinfo.instance.contact.reddit = member.serverinfo.instance.contact.reddit;
-                if(member?.serverinfo?.instance?.contact?.discord != null) serverconfig.serverinfo.instance.contact.discord = member.serverinfo.instance.contact.discord;
-                if(member?.serverinfo?.instance?.contact?.github != null) serverconfig.serverinfo.instance.contact.github = member.serverinfo.instance.contact.github;
-                if(member?.serverinfo?.instance?.contact?.owner?.name != null) serverconfig.serverinfo.instance.contact.owner.name = member.serverinfo.instance.contact.owner.name;
-                if(member?.serverinfo?.instance?.contact?.signal != null) serverconfig.serverinfo.instance.contact.signal = member.serverinfo.instance.contact.signal;
+                if(member?.serverinfo?.instance?.contact?.email !== undefined) serverconfig.serverinfo.instance.contact.email = member.serverinfo.instance.contact.email;
+                if(member?.serverinfo?.instance?.contact?.website !== undefined) serverconfig.serverinfo.instance.contact.website = member.serverinfo.instance.contact.website;
+                if(member?.serverinfo?.instance?.contact?.reddit !== undefined) serverconfig.serverinfo.instance.contact.reddit = member.serverinfo.instance.contact.reddit;
+                if(member?.serverinfo?.instance?.contact?.discord !== undefined) serverconfig.serverinfo.instance.contact.discord = member.serverinfo.instance.contact.discord;
+                if(member?.serverinfo?.instance?.contact?.github !== undefined) serverconfig.serverinfo.instance.contact.github = member.serverinfo.instance.contact.github;
+                if(member?.serverinfo?.instance?.contact?.owner?.name !== undefined) serverconfig.serverinfo.instance.contact.owner.name = member.serverinfo.instance.contact.owner.name;
+                if(member?.serverinfo?.instance?.contact?.signal !== undefined) serverconfig.serverinfo.instance.contact.signal = member.serverinfo.instance.contact.signal;
 
-                if(member?.serverinfo?.maxUploadStorage != null) serverconfig.serverinfo.maxUploadStorage = member.serverinfo.maxUploadStorage;
-                if(member?.serverinfo?.rateLimit != null) serverconfig.serverinfo.rateLimit = member.serverinfo.rateLimit;
-                if(member?.serverinfo?.dropInterval != null) serverconfig.serverinfo.dropInterval = member.serverinfo.dropInterval;
+                if(member?.serverinfo?.maxUploadStorage !== undefined) serverconfig.serverinfo.maxUploadStorage = member.serverinfo.maxUploadStorage;
+                if(member?.serverinfo?.rateLimit !== undefined) serverconfig.serverinfo.rateLimit = member.serverinfo.rateLimit;
+                if(member?.serverinfo?.dropInterval !== undefined) serverconfig.serverinfo.dropInterval = member.serverinfo.dropInterval;
 
                 // new rate limit settings
-                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode != null) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode = member.serverinfo.moderation.ratelimit.actions.user_slowmode;
-                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode_duration != null) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration = member.serverinfo.moderation.ratelimit.actions.user_slowmode_duration;
-                if(member?.serverinfo?.moderation?.ratelimit?.actions?.ratelimit != null) serverconfig.serverinfo.moderation.ratelimit.actions.ratelimit = member.serverinfo.moderation.ratelimit.actions.ratelimit;
-                if(member?.serverinfo?.moderation?.ratelimit?.record_history != null) serverconfig.serverinfo.moderation.ratelimit.record_history = member.serverinfo.moderation.ratelimit.record_history;
+                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode = member.serverinfo.moderation.ratelimit.actions.user_slowmode;
+                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode_duration !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration = member.serverinfo.moderation.ratelimit.actions.user_slowmode_duration;
+                if(member?.serverinfo?.moderation?.ratelimit?.actions?.ratelimit !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.ratelimit = member.serverinfo.moderation.ratelimit.actions.ratelimit;
+                if(member?.serverinfo?.moderation?.ratelimit?.record_history !== undefined) serverconfig.serverinfo.moderation.ratelimit.record_history = member.serverinfo.moderation.ratelimit.record_history;
 
                 // some other mod settings
-                if(member?.serverinfo?.moderation?.bans?.memberListHideBanned != null) serverconfig.serverinfo.moderation.bans.memberListHideBanned = member.serverinfo.moderation.bans.memberListHideBanned;
-                if(member?.serverinfo?.moderation?.bans?.ipBanDuration != null) serverconfig.serverinfo.moderation.bans.ipBanDuration = member.serverinfo.moderation.bans.ipBanDuration;
+                if(member?.serverinfo?.moderation?.bans?.memberListHideBanned !== undefined) serverconfig.serverinfo.moderation.bans.memberListHideBanned = member.serverinfo.moderation.bans.memberListHideBanned;
+                if(member?.serverinfo?.moderation?.bans?.ipBanDuration !== undefined) serverconfig.serverinfo.moderation.bans.ipBanDuration = member.serverinfo.moderation.bans.ipBanDuration;
 
                 await saveConfig(serverconfig);
                 return response({error: null})

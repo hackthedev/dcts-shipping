@@ -1000,7 +1000,7 @@ async function userJoined(onboardingFlag = false, passwordFlag = null, loginName
                     initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
                     initializeMentionAutocomplete(document.querySelector('.ql-editor'));
 
-                    await getServerInfo();
+                    await ChatManager.getServerInfo();
                     getChatlog(document.getElementById("content"));
 
                     getMemberList()
@@ -2330,7 +2330,7 @@ function refreshValues() {
     var username = UserManager.getUsername();
     getRoles();
     userJoined();
-    getServerInfo();
+    ChatManager.getServerInfo();
 
     socket.emit("setRoom", {
         id: UserManager.getID(),
@@ -2372,52 +2372,6 @@ function getGroupBanner() {
         icon: UserManager.getPFP(),
         group: UserManager.getGroup()
     });
-}
-
-var serverName;
-var serverDesc;
-
-async function getServerInfo(returnData = false) {
-    return new Promise((resolve, reject) => {
-
-        // reject if we get disconnected or something
-        setTimeout(() => {
-            if(!socket.connected){
-                resolve(null);
-            }
-        }, 1000)
-
-        //Official <span style="font-weight: bold; color: skyblue;">DCTS <span style="font-weight: bold; color: cadetblue;">Community</span></span>
-        socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken()}, async function (response) {
-            if(returnData) return resolve(response);
-            var headline = document.getElementById("header");
-
-            servername = response.serverinfo.name;
-            serverdesc = response.serverinfo.description;
-            let countryCode = response.serverinfo.countryCode;
-
-            headline.innerHTML = `
-            <div id="main_header">
-                ${countryCode ? `${ChatManager.countryCodeToEmoji(countryCode)} ` : ""}${sanitizeHtmlForRender(servername, false)} ${serverdesc ? ` - ${sanitizeHtmlForRender(serverdesc, false)}` : ""}
-            </div>
-
-            <div id="badges"></div>          
-            <div id="headerRight">
-                <div class="headerIcon help" onclick="ChatManager.showInstanceInfo()"></div>
-                <div class="headerIcon donators" onclick="UserManager.showDonatorList('https://shy-devil.me/app/dcts/');"></div>
-                <div class="headerIcon inbox">
-                    <span id="inbox-indicator"></span>
-
-                    ${await Inbox.getContentHTML()}
-                </div>
-            </div>
-            `;
-
-            UserManager.displayServerBadges();
-            displayDiscoveredHosts()
-            resolve(null)
-        });
-    })
 }
 
 async function waitFor(callback, timeout = 0) {

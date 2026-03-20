@@ -497,11 +497,14 @@ async function sendDmMessage(text){
 }
 
 
-async function createDmRoom(){
+async function createDmRoom(participants){
+    if(!participants) throw new Error("participants is required");
+    if(!Array.isArray(participants)) throw new Error("participants is not an array");
+
     socket.emit("createDmRoom", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
-        participants: ["123456789012"]
+        participants
     }, function (response) {
         console.log(response)
     });

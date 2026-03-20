@@ -417,7 +417,7 @@ class ChatManager {
                                     }
 
                                     if (!inviteCode) {
-                                        userJoined();
+                                        ChatManager.userJoined();
                                     }
                                 }
                             )
@@ -639,11 +639,11 @@ class ChatManager {
                 let inviteCode = values?.inviteCode;
 
                 if (inviteCode && inviteCode.length > 0) {
-                    userJoined(false, null, null, inviteCode);
+                    ChatManager.userJoined(false, null, null, inviteCode);
                 }
 
                 if (!inviteCode) {
-                    userJoined();
+                    ChatManager.userJoined();
                 }
             },
             ["Ok", null],

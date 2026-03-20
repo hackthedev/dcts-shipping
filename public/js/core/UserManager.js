@@ -1136,7 +1136,7 @@ class UserManager {
 
 
                 // resubmit userjoin but with onboarding done
-                await userJoined(true, values.password, values.loginName, code)
+                await ChatManager.userJoined(true, values.password, values.loginName, code)
             },
             null,
             null,

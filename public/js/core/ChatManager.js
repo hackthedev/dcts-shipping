@@ -484,12 +484,28 @@ class ChatManager {
         loadPageContent(page)
     }
 
-    static getUrlParams(param) {
-        let url = window.location.search;
-        let urlParams = new URLSearchParams(url);
-        let urlParamValue = urlParams.get(param);
+    static setUrlParam(key, value, { replace = true } = {}) {
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
 
-        return urlParamValue;
+        if (params.has(key)) {
+            params.set(key, value);
+        } else {
+            params.append(key, value);
+        }
+
+        if (replace) {
+            window.history.replaceState({}, '', url);
+        } else {
+            window.history.pushState({}, '', url);
+        }
+    }
+
+    static getUrlParams(param) {
+        var url = window.location.search;
+        var urlParams = new URLSearchParams(url);
+        var value = urlParams.get(param);
+        return value;
     }
 
 

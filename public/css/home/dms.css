@@ -48,3 +48,22 @@
     overflow: auto;
     gap: 2px;
 }
+
+.layout.home .content .dm-container{
+    display: flex;
+    flex-direction: column;
+}
+
+.layout.home .content .dm-container .header{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    margin: -2rem;
+}
+.layout.home .content .dm-container .header img{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: black;
+}

@@ -301,62 +301,42 @@ function startDmWith(id) {
 
     window.history.replaceState(null, null, `?dm=${id}`);
 
-    // find an existing 1:1 DM
-    const existing = CONFIG.threads.find(t => {
-        if (!t || t.type === 'ticket') return false;
-        const parts = Array.isArray(t.participants) ? t.participants.map(String) : [];
-        // only consider true 1:1 threads
-        if (parts.length !== 2) return false;
-        return parts.includes(String(id)) && parts.includes(String(CURRENT_USER_ID));
-    });
-
-    if (existing) {
-        openThread(existing.id);
-        return;
-    }
-
-    // no existing 1:1 DM
-    socket.emit('createThread', {
-        type: 'dm',
-        title: null,
-        participants: [CURRENT_USER_ID, id],
-        token: UserManager.getToken(),
-        id: UserManager.getID()
-    }, (ack) => {
-        if (ack?.type !== 'success' || !ack.threadId) {
-            console.warn('createThread failed', ack);
-            return;
-        }
-        openThread(ack.threadId);
-    });
+    // check if exists etc
 }
-
 
 function slugify(str) {
     return (str || '').toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').substring(0, 60);
 }
 
-// user connected must always happen before
-socket.emit("userConnected", {
-    id: UserManager.getID(), name: UserManager.getUsername(), icon: UserManager.getPFP(),
-    status: UserManager.getStatus(), token: UserManager.getToken(),
-    aboutme: UserManager.getAboutme(), banner: UserManager.getBanner(),
-    pow: {
-        challenge: localStorage.getItem("pow_challenge"),
-        solution: localStorage.getItem("pow_solution")
-    }
-}, function (response) {
-
-    // basically entry point
-    initPow(() => {
-
-
-        //introduceNewHome();
-    });
-});
-
 function getDMsNavContainer(){
     return document.querySelector("#navigation.home .dms");
+}
+
+function getDmRoomCount(dm){
+    if(dm.roomId === "154293005235") console.log(dm?.participants)
+    return Object.keys(dm?.participants).length;
+}
+
+function getDmRoomInfo(dm){
+    let participantCount = getDmRoomCount(dm);
+
+    let dmRoomIcon = null;
+    let dmRoomName = null;
+
+    if(participantCount > 2){
+        dmRoomIcon = "/img/default_pfp.png";
+        dmRoomName = dm.title.replaceAll(",", ", ");
+    }
+    else if(participantCount === 2){
+        let oppositeParticipant = Object.values(dm.participants).find(x => x.id !== UserManager.getID());
+        dmRoomIcon = oppositeParticipant?.icon ?? "/img/default_icon.png";
+        dmRoomName = oppositeParticipant?.name;
+    }
+
+    return {
+        icon: dmRoomIcon,
+        title: dmRoomName,
+    }
 }
 
 async function renderDMs(){
@@ -370,29 +350,16 @@ async function renderDMs(){
         // we will loop through all of em
         for(let dm of dmRooms){
 
-            let dmRoomIcon = null;
-            let dmRoomName = null;
-
             // here we get the amount of members inside one dm room.
             // 2 members are pretty much just a normal dm, whereas more than 2
             // could be considered a dm group chat.
-            let participantCount = Object.keys(dm?.participants).length
-
-            if(participantCount > 2){
-                dmRoomIcon = "/img/default_pfp.png";
-                dmRoomName = dm.title.replaceAll(",", ", ");
-            }
-            else if(participantCount === 2){
-                let oppositeParticipant = Object.values(dm.participants).find(x => x.id !== UserManager.getID());
-                dmRoomIcon = oppositeParticipant?.icon ?? "/img/default_icon.png";
-                dmRoomName = oppositeParticipant?.name;
-            }
+            let {icon, title} = getDmRoomInfo(dm);
 
             getDMsNavContainer().insertAdjacentHTML('beforeend',
-                `<a class="entry ${!firstDm ? "selected" : ""}">
-                        <img class="icon" src="${stripHTML(dmRoomIcon)}">
+                `<a class="entry ${!firstDm ? "selected" : ""}" data-room-id="${dm.roomId}" onclick="renderDmRoom('${dm.roomId}')">
+                        <img class="icon" src="${stripHTML(icon)}">
                         <div class="info">
-                            <p>${dmRoomName}</p>
+                            <p>${title}</p>
                             <p class="status">${dm.status ?? ""}</p>
                         </div>
                     </a>`
@@ -403,8 +370,31 @@ async function renderDMs(){
     getDMsNavContainer().fadeIn(200, "flex")
 }
 
-function renderDmRoom(){
+async function renderDmRoom(roomId){
+    if(!roomId) throw new Error("Room ID is required");
 
+    ChatManager.setUrlParam("dm", roomId)
+
+    let dms = await getDmRooms();
+    let dmRooms = dms?.rooms;
+
+    let targetRoom = Object.values(dmRooms).find(x => x.roomId === roomId);
+    if(targetRoom){
+        getContentElement().innerHTML = "";
+
+        let {icon, title} = getDmRoomInfo(targetRoom);
+
+        getContentElement().insertAdjacentHTML("beforeend",
+            `
+                <div class="dm-container">
+                    <div class="header">
+                        <div class="icon"><img src="${icon}"></div>
+                        <div class="title">${title}</div>
+                    </div>
+                </div>
+            `
+        )
+    }
 }
 
 async function createDmRoom(){

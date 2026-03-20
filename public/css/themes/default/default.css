@@ -412,7 +412,10 @@ img {
     background-color: hsl(from var(--main) h s calc(l * 8) / 10%);
 }
 .layout .content{
-    color: hsl(from var(--main) h s calc(l * 8) / 100%);
+    color: hsl(from var(--main) h s calc(l * 10) / 100%);
+}
+.layout.home .content .site-banner .content{
+    color: hsl(from var(--main) h s calc(l * 12) / 100%);
 }
 
 .layout.home .content .public-key,

@@ -46,7 +46,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         null,
         async (response) => {
             renderDMs();
-            renderHome();
+
+            if(ChatManager.getUrlParams("dm")){
+                renderDmRoom(ChatManager.getUrlParams("dm"));
+            }
+            else{
+                renderHome();
+            }
+
             registerHomeContextMenu();
 
             splash.hide();

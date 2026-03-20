@@ -17,19 +17,37 @@ export async function getMemberDmRooms(memberId) {
     // basically what we're doing here is looking through all rooms found
     // and resolve the member objects using the id stuff and later overwrite it.
     // why? because this is actually A LOT faster than having the client resolve it for each member.
-    let resolvedRoomParticipants = {};
+    //
+    let resolvedRoomParticipants = {}; // cache
+
     for(let i = 0; i < roomsRow.length; i++) {
         let room = roomsRow[i];
+        let roomSpecificParticipants = {};
 
+        // for each room participant we will look up the member obj
         let roomParticipants = room.participants.split(",");
         if(roomParticipants?.length > 0){
             for(let participant of roomParticipants){
-                let memberObj = resolvedRoomParticipants[participant] ?? await getCastingMemberObject(serverconfig.servermembers[participant])
-                if(memberObj) resolvedRoomParticipants[participant] = memberObj;
+                let memberObj;
+
+                // if the same member has been resolved before we can use it again
+                // as some sort of cache and will prevent fetching data from the
+                // database again.
+                if(resolvedRoomParticipants[participant]){
+                    memberObj = resolvedRoomParticipants[participant];
+                }
+                // if the member was not found in resolvedRoomParticipants, we will have
+                // to fetch it anyway. after that tho we will store it for possible reuse.
+                else{
+                    memberObj = await getCastingMemberObject(serverconfig.servermembers[participant])
+                    if(memberObj) resolvedRoomParticipants[participant] = memberObj;
+                }
+
+                if(memberObj) roomSpecificParticipants[participant] = memberObj;
             }
         }
 
-        room.participants = resolvedRoomParticipants;
+        room.participants = roomSpecificParticipants;
     }
 
     return roomsRow;
@@ -43,7 +61,7 @@ export async function createMemberDmRoom(memberId, participants) {
     let title = "";
 
     // lets add us aka the creator first for the title
-    if(!participants[memberId]) participants.push(memberId);
+    if(!participants.includes(memberId)) participants.push(memberId);
 
     // lets validate members for the room here
     for(let i = 0; i < participants.length; i++) {
@@ -70,8 +88,6 @@ export async function createMemberDmRoom(memberId, participants) {
 
     // make the sql string.. id1,id2,id3,...
     let participantsString = participants.join(",");
-
-    console.log([String(generateId(12)), participantsString, title, memberId]);
 
     return await queryDatabase(
         `INSERT INTO dm_rooms (roomId, participants, title, creatorId) VALUES (?, ?, ?, ?)`,

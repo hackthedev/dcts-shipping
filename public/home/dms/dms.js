@@ -400,12 +400,10 @@ async function renderDmRoom(roomId){
         )
 
         let dmMessages = await getDmRoomMessages(roomId);
-        console.log(dmMessages)
-        console.log(dmMessages.messages)
 
         if(Object.keys(dmMessages.messages).length > 0){
             await displayMessagesInElement({
-                data: Object.values(dmMessages.messages),
+                data: Object.values(dmMessages.messages).reverse(),
                 channelId: roomId,
                 container: getContentElement().querySelector(".dm-container .content"),
                 appendTop: false,

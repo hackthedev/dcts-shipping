@@ -437,6 +437,7 @@ async function renderDmRoom(roomId){
                 scrollDown("dm", {
                     tolerancePx: 10
                 });
+                console.log("scrolled down")
             })
         }
 

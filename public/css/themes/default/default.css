@@ -36,13 +36,14 @@ a {
     font-style: italic;
 }
 .message-container .content{
+    background-color: transparent !important;
     font-size: 14px;
 }
 .message-container .meta .username{
     font-size: 16px;
 }
 .message-container .content:hover{
-    background-color: hsl(from var(--main) h s calc(l * 2.25))
+    background-color: hsl(from var(--main) h s calc(l * 2.25)) !important;
 }
 
 /* Main Server Chat */
@@ -401,18 +402,15 @@ img {
 .layout.home #navigation{
     background-color: hsl(from var(--main) h s calc(l * 1));
 }
-.layout.home .content{
+.layout.home > .content{
     background-color: hsl(from var(--main) h s calc(l * 1.25));
+    color: hsl(from var(--main) h s calc(l * 10) / 100%);
 }
-
 #navigation.home .entry.selected {
     background-color: hsl(from var(--main) h s calc(l * 6) / 10%);
 }
 #navigation.home .entry:hover{
     background-color: hsl(from var(--main) h s calc(l * 8) / 10%);
-}
-.layout .content{
-    color: hsl(from var(--main) h s calc(l * 10) / 100%);
 }
 .layout.home .content .site-banner .content{
     color: hsl(from var(--main) h s calc(l * 12) / 100%);

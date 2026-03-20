@@ -87,7 +87,7 @@ function isScrolledToBottom(element, tolerancePx = 100) {
 }
 
 function scrollDown(functionCaller, opts = {}) {
-    const el = document.getElementById("content");
+    const el = getContentMainContainer();
     if (!el) return;
 
     const tolerancePx = Number.isFinite(opts.tolerancePx) ? opts.tolerancePx : 2;

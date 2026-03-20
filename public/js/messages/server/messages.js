@@ -28,11 +28,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     let messageId = getMessageIdFromElement(element);
                     let isDM = !!document.querySelector(".threadArea")
 
-                    if(isDM){
+                    if (isDM) {
                         let msgElement = element.closest(".msg");
                         let threadId = msgElement.getAttribute("data-thread-id")
                         let targetId = msgElement.getAttribute("data-target-id")
-                        if(onEditMsg){
+                        if (onEditMsg) {
                             onEditMsg(threadId, messageId, targetId)
                             return;
                         }
@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 callback: async (data) => {
                     let element = data.element;
                     let messageId = getMessageIdFromElement(element);
-                    
+
                     let isDM = !!document.querySelector(".threadArea")
                     let plainText = decodeURIComponent(element?.closest(".content")?.getAttribute("data-plain-text"))
                     UserReports.reportMessage(messageId, isDM ? "dm" : "message", plainText)
@@ -93,26 +93,24 @@ document.addEventListener("DOMContentLoaded", function () {
         "openProfileDbl",
         [".content"],
         async (data) => {
-            if(data?.element){
+            if (data?.element) {
                 let contentDiv = data.element.closest(".content:not(.reply)");
-                if(!contentDiv) return;
+                if (!contentDiv) return;
 
                 let messageId = contentDiv.getAttribute("data-message-id");
                 let memberId = contentDiv.getAttribute("data-member-id");
-                if(!messageId) return;
+                if (!messageId) return;
 
                 // if we double click our message, lets edit it,
                 // otherwise reply to it
-                if(memberId === UserManager.getID()) {
+                if (memberId === UserManager.getID()) {
                     editMessage(messageId)
-                }
-                else{
+                } else {
                     replyToMessage(messageId)
                 }
             }
         }
     );
-
 
 
     ContextMenu.registerClickEvent(
@@ -129,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             // no img viewer on reactions
-            if(data.element.parentNode?.classList?.contains("message-reaction-entry")) return;
+            if (data.element.parentNode?.classList?.contains("message-reaction-entry")) return;
 
 
             showImagePopup(src)
@@ -144,10 +142,9 @@ document.addEventListener("DOMContentLoaded", function () {
         ],
         async (data) => {
             let messageId = data.element.getAttribute("data-message-id");
-            if(messageId) {
+            if (messageId) {
                 navigateToMessage(messageId)
-            }
-            else{
+            } else {
                 console.warn("Couldnt navigate to message from reply because messageid wasnt found")
             }
         }
@@ -173,11 +170,10 @@ document.addEventListener("DOMContentLoaded", function () {
             let emojiHash = findAttributeUp(data.element, "data-emoji-hash")
 
             let messageObj = await ChatManager.resolveMessage(messageId);
-            if(messageObj?.reactions.hasOwnProperty(emojiHash)){
-                if(messageObj.reactions[emojiHash]?.includes(UserManager.getID() )){
+            if (messageObj?.reactions.hasOwnProperty(emojiHash)) {
+                if (messageObj.reactions[emojiHash]?.includes(UserManager.getID())) {
                     removeMessageReaction(messageId, emojiHash)
-                }
-                else{
+                } else {
                     addMessageReaction(messageId, emojiHash)
                 }
             }
@@ -225,7 +221,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ]
     );
 
-    socket.on('receiveDeleteMessage', async function(id) {
+    socket.on('receiveDeleteMessage', async function (id) {
         try {
             var message = getMessageElementFromId(id)
             if (!message) {
@@ -243,12 +239,12 @@ document.addEventListener("DOMContentLoaded", function () {
             message.remove();
 
             // also remove message actions
-            if(container.querySelector(".row.reply")){
+            if (container.querySelector(".row.reply")) {
                 container.querySelector(".row.reply").remove();
             }
 
             // if no message left, delete entire container too
-            if(container.querySelectorAll(".content").length === 0){
+            if (container.querySelectorAll(".content").length === 0) {
                 container.remove();
             }
 
@@ -259,14 +255,16 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
-
     socket.on('messageEdited', async function (message) {
         let markdownResult = await markdown(message.message, message.messageId);
         if (!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
         if (markdownResult.isMarkdown) message.message = markdownResult.message;
 
         let editElement = getMessageElementFromId(message.messageId);
-        try{ message.message = await text2Emoji(message.message) } catch {}
+        try {
+            message.message = await text2Emoji(message.message)
+        } catch {
+        }
         //editElement.innerHTML = message.message;
 
         let convertedMentions = await convertMention(message);
@@ -280,14 +278,14 @@ document.addEventListener("DOMContentLoaded", function () {
             editElement.innerHTML += getMessageEditedHTML(message);
             editElement.innerHTML += createMsgActions(message.messageId);
 
-            if(isScrolledToBottom(getContentMainContainer())) scrollDown("messageEdited")
+            if (isScrolledToBottom(getContentMainContainer())) scrollDown("messageEdited")
         })
     });
 })
 
 function focusEditor() {
     if (!quill) return;
-    if(MobilePanel.isMobile()) return;
+    if (MobilePanel.isMobile()) return;
 
     quill.focus();
 
@@ -313,23 +311,23 @@ function toggleEditor(value) {
     messageInputBox.parentNode.parentNode.style.visibility = value === true ? "visible" : "hidden";
 }
 
-async function addNewMessageToChatLog(message, type = null){
+async function addNewMessageToChatLog(message, type = null) {
     let container = getContentMainContainer();
     let isScrolledDown = isScrolledToBottom(container, 20);
 
-    if(!message) throw new Error("No message found to display");
+    if (!message) throw new Error("No message found to display");
     message.type = type;
 
     // lets increase the channel count first
     // then mark it for ourselves
-    if(message?.channel) {
+    if (message?.channel) {
         ChatManager.increaseChannelMarkerCount(message.channel)
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())
     }
 
     // the message was not created in the room we're currently in, but thats fine.
     // we will instead show the notification icon and return;
-    if(message.room !== UserManager.getRoom() && type === null){
+    if (message.room !== UserManager.getRoom() && type === null) {
         ChatManager.setChannelMarker(message.channel, true);
         await updateUIIndicators(message)
         return;
@@ -356,33 +354,33 @@ async function addNewMessageToChatLog(message, type = null){
     }
 
 
-    if(isScrolledDown) {
+    if (isScrolledDown) {
         scrollDown("messageCreated");
     }
 
     await updateUIIndicators(message)
 }
 
-function registerMessageCreateEvent(){
-    socket.on('updateReactions', async function(messageObj) {
+function registerMessageCreateEvent() {
+    socket.on('updateReactions', async function (messageObj) {
         updateMessageReactionsElementById(messageObj?.messageId);
     });
 
-    
+
     socket.on('messageCreate', async function (message) {
         addNewMessageToChatLog(message)
     });
 }
 
-async function updateUIIndicators(message){
-    if(message.channel === UserManager.getChannel()) await Inbox.markAsRead(`${UserManager.getID()}-${message.messageId}`)
+async function updateUIIndicators(message) {
+    if (message.channel === UserManager.getChannel()) await Inbox.markAsRead(`${UserManager.getID()}-${message.messageId}`)
 
     setTimeout(() => {
         Inbox.updateInboxMessageEntries()
     }, 500)
 }
 
-function registerMessageInfiniteLoad(element){
+function registerMessageInfiniteLoad(element) {
     element.addEventListener("scroll", async function () {
         if (element.scrollTop === 0) {
             const topElement = getFirstMessage(element);
@@ -400,35 +398,35 @@ let replyMessageId = null;
 
 function cancelMessageReply() {
     replyMessageId = null;
-    if(editorHints) editorHints.innerHTML = ""
+    if (editorHints) editorHints.innerHTML = ""
 }
 
 function cancelMessageEdit() {
     editMessageId = null;
     editor.innerHTML = "";
-    if(editorHints) editorHints.innerHTML = ""
+    if (editorHints) editorHints.innerHTML = ""
 }
 
-function showRateLimitNotice(){
+function showRateLimitNotice() {
     let isScrolledDown = isScrolledToBottom(getContentMainContainer());
-    if (replyMessageId == null && editorHints ) {
-        if(editorHints?.querySelector("#ratelimitHint") != null) editorHints?.querySelector("#ratelimitHint").remove();
+    if (replyMessageId == null && editorHints) {
+        if (editorHints?.querySelector("#ratelimitHint") != null) editorHints?.querySelector("#ratelimitHint").remove();
 
         editorHints.insertAdjacentHTML("afterbegin", `<p id="ratelimitHint" >You have been rate limited</p>`)
     }
 
-    if(isScrolledDown) scrollDown("showRateLimitNotice")
+    if (isScrolledDown) scrollDown("showRateLimitNotice")
 }
 
-function showSlowmodeNotice(timestamp){
+function showSlowmodeNotice(timestamp) {
     let isScrolledDown = isScrolledToBottom(getContentMainContainer());
-    if (replyMessageId == null && editorHints ) {
-        if(editorHints?.querySelector("#slowmodeHint") != null) editorHints?.querySelector("#slowmodeHint").remove();
+    if (replyMessageId == null && editorHints) {
+        if (editorHints?.querySelector("#slowmodeHint") != null) editorHints?.querySelector("#slowmodeHint").remove();
 
         editorHints.insertAdjacentHTML("afterbegin", `<p id="slowmodeHint" >Slowmode is active! You need to wait for ${getReadableDuration(new Date(timestamp))}</p>`)
     }
 
-    if(isScrolledDown) scrollDown("showSlowmodeNotice")
+    if (isScrolledDown) scrollDown("showSlowmodeNotice")
 }
 
 function replyToMessage(messageId) {
@@ -438,21 +436,21 @@ function replyToMessage(messageId) {
     }
     replyMessageId = messageId;
 
-    if(focusEditor) focusEditor()
+    if (focusEditor) focusEditor()
 }
 
-function replaceUrlEmbeds(element){
+function replaceUrlEmbeds(element) {
     let embeds = element.querySelectorAll(".markdown-urlEmbed-container");
 
-    if(embeds?.length > 0){
-        for(let embed of embeds) {
+    if (embeds?.length > 0) {
+        for (let embed of embeds) {
             let embedLink = embed.querySelector(".markdown-urlEmbed");
-            if(!embedLink) continue;
+            if (!embedLink) continue;
 
             let url = embedLink.getAttribute("href");
             let wrapper = embed.closest("[data-markdown-done]");
 
-            if(wrapper && wrapper !== element) {
+            if (wrapper && wrapper !== element) {
                 wrapper.outerHTML = url;
             } else {
                 embed.outerHTML = url;
@@ -464,9 +462,9 @@ function replaceUrlEmbeds(element){
         emptyDivs.forEach(d => d.remove());
 
         // wrap shit if needed
-        if(!element.querySelector("p")) {
+        if (!element.querySelector("p")) {
             let text = element.textContent.trim();
-            if(text) element.innerHTML = `<p>${text}</p>`;
+            if (text) element.innerHTML = `<p>${text}</p>`;
         }
 
         element.innerHTML = element.innerHTML.replace(/\s+/g, " ").trim();
@@ -474,7 +472,7 @@ function replaceUrlEmbeds(element){
 }
 
 function editMessage(id) {
-    if(!id) throw new Error("No messag editing id found!")
+    if (!id) throw new Error("No messag editing id found!")
     if (replyMessageId) cancelMessageReply();
 
     if (editMessageId == null && editorHints && editorHints?.querySelector("pre.editMsgHint") == null) {
@@ -540,7 +538,7 @@ function editMessage(id) {
     setTimeout(() => {
         const regex = /<p>\s*<\/p>/gm;
         console.log(quill)
-        if(quill) quill.pasteUnconverted(msgContent.innerHTML.replace(regex, ''));
+        if (quill) quill.pasteUnconverted(msgContent.innerHTML.replace(regex, ''));
 
         focusEditor()
     }, 1);
@@ -560,7 +558,6 @@ function findAttributeUp(element, attr, maxDepth = 10) {
 }
 
 
-
 function getMessageIdFromElement(element) {
     return findAttributeUp(element, "data-message-id");
 }
@@ -578,7 +575,7 @@ function getMessageCountFromContainer(element) {
 }
 
 async function shouldAppendMessage(container, message, appendTop = false) {
-    if(!container) throw new Error("Container wasnt supplied for shouldAppendMessage");
+    if (!container) throw new Error("Container wasnt supplied for shouldAppendMessage");
     let messageElement = appendTop === true ? getFirstMessage(container) : getLastMessage(container)
     let timestamp = 0
 
@@ -631,11 +628,17 @@ async function showMessageInChat({
     message.message = sanitizeHtmlForRender(convertedMentions.text, false)
 
     // convert emojis
-    try{ message.message = sanitizeHtmlForRender(await text2Emoji(message.message), false) } catch {}
+    try {
+        message.message = sanitizeHtmlForRender(await text2Emoji(message.message), false)
+    } catch {
+    }
 
     // convert emojis and mentions for replies too
-    if(message?.reply?.message) {
-        try{ message.reply.message = sanitizeHtmlForRender(await text2Emoji(message.reply.message), false); } catch {}
+    if (message?.reply?.message) {
+        try {
+            message.reply.message = sanitizeHtmlForRender(await text2Emoji(message.reply.message), false);
+        } catch {
+        }
 
         let convertedReplyMentions = await convertMention(message.reply);
         message.reply.message = sanitizeHtmlForRender(convertedReplyMentions.text, false)
@@ -730,9 +733,6 @@ async function fixScrollAfterMediaLoad(container, scrollPosition, manualScroll =
 }
 
 
-
-
-
 function truncateText(text, length) {
     let actualLength = 0;
     if (text?.length <= length) {
@@ -741,7 +741,7 @@ function truncateText(text, length) {
         actualLength = length;
     }
 
-    if(text?.length > length){
+    if (text?.length > length) {
         return text?.substring(0, actualLength) + "..."
     }
 
@@ -794,19 +794,18 @@ function showImagePopup(src) {
     }
 }
 
-function navigateToMessage(messageId){
+function navigateToMessage(messageId) {
     let message = document.querySelector(`.message-container .content:not(.reply)[data-message-id="${messageId}"]`);
-    if(message){
+    if (message) {
         message.scrollIntoView({behavior: "smooth"});
 
-        if(!message.classList.contains("highlight")){
+        if (!message.classList.contains("highlight")) {
             message.classList.add("highlight");
             setTimeout(() => {
                 message.classList.remove("highlight");
             }, 2000)
         }
-    }
-    else{
+    } else {
         console.log("Couldnt find message for navigation")
     }
 }
@@ -823,19 +822,19 @@ function deleteMessageFromChat(id, type = "message") {
     });
 }
 
-async function updateMessageReactionsElementById(messageId, container = getContentMainContainer()){
+async function updateMessageReactionsElementById(messageId, container = getContentMainContainer()) {
     let wasScrolledDown = isScrolledToBottom(container);
 
     let contentContainer = document.querySelector(`.message-container .content:not(.reply)[data-message-id="${messageId}"]`);
     let reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
 
     let messageObj = await ChatManager.resolveMessage(messageId);
-    if(!messageObj) return console.error(`Couldnt find message object for message reaction update ${messageId}`);
+    if (!messageObj) return console.error(`Couldnt find message object for message reaction update ${messageId}`);
 
     let lastMsg = getLastMessage(container)
     await withScrollLock(container, lastMsg?.element, async () => {
         // no reactions were present so add the container
-        if(!reactionRow) {
+        if (!reactionRow) {
             contentContainer.innerHTML += await getMessageReactionsHTML(messageObj);
             reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
         }
@@ -843,11 +842,11 @@ async function updateMessageReactionsElementById(messageId, container = getConte
         reactionRow.outerHTML = await getMessageReactionsHTML(messageObj);
     })
 
-    if(wasScrolledDown) scrollDown()
+    if (wasScrolledDown) scrollDown()
 }
 
-async function getMessageReactionsHTML(messageObj){
-    if(!messageObj?.reactions || Object.keys(messageObj?.reactions)?.length === 0) return "";
+async function getMessageReactionsHTML(messageObj) {
+    if (!messageObj?.reactions || Object.keys(messageObj?.reactions)?.length === 0) return "";
 
     let row = document.createElement("div");
     row.innerHTML =
@@ -857,9 +856,9 @@ async function getMessageReactionsHTML(messageObj){
 
     let reactionRowContainer = row.querySelector(".message-reaction-row");
 
-    for(let emojiHash in messageObj.reactions){
+    for (let emojiHash in messageObj.reactions) {
         let emojiObj = findEmojiByID(emojiHash);
-        if(!emojiObj) {
+        if (!emojiObj) {
             console.error("Emoji Obj not found")
             continue
         }
@@ -869,12 +868,12 @@ async function getMessageReactionsHTML(messageObj){
 
     return row.innerHTML;
 
-    function getEmojiReactionRowEntryHTML(messageObj, emojiObj){
+    function getEmojiReactionRowEntryHTML(messageObj, emojiObj) {
         let emojiPath = emojiObj?.code ? `/img/default_emojis/${sanitizeHtmlForRender(emojiObj.code, false)}.svg` : `/emojis/${sanitizeHtmlForRender(emojiObj.filename, false)}`;
         let emojiDetails = extractEmojiDetails(emojiObj);
         let emojiHash = emojiDetails[0]
 
-        if(!emojiHash){
+        if (!emojiHash) {
             console.error(`Emoji hash not found for emoji in reactions for message ${messageObj.messageId}: ${emojiObj?.filename} { ${emojiDetails}`)
             return "";
         }
@@ -898,7 +897,7 @@ async function createMsgHTML({
                                  waitWithDisplay = false,
                                  createActions = true,
                                  messageType = null
-} = {}) {
+                             } = {}) {
 
     let isSigned = message?.sig?.length > 10;
     let reply = message?.reply;
@@ -908,14 +907,14 @@ async function createMsgHTML({
     }
 
     // dm compatibility
-    if(!message?.timestamp && message?.ts){
+    if (!message?.timestamp && message?.ts) {
         message.timestamp = message.ts;
     }
 
     // consider this a fallback. should be avoided as it makes the
     // chat slower. if this would happen a lot consider something wrong with
     // the server as the server should supply it already.
-    if(!message?.author?.name && message?.author?.id !== 0){
+    if (!message?.author?.name && message?.author?.id !== 0) {
         message.author = await ChatManager.resolveMember(message?.author?.id) || message.author;
     }
 
@@ -944,12 +943,12 @@ async function createMsgHTML({
         return messageRow;
     }
 
-    if(!message?.author?.name) message.author.name = "Unkown Member?";
-    if(reply?.messageId && !reply?.author?.name) message.author.name = "Unkown Member?";
+    if (!message?.author?.name) message.author.name = "Unkown Member?";
+    if (reply?.messageId && !reply?.author?.name) message.author.name = "Unkown Member?";
 
     // if message was a reply
     let replyCode = "";
-    if(reply?.messageId){
+    if (reply?.messageId) {
         replyCode = `
             <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${stripHTML(reply?.author?.id, false)} ${messageType ? `data-message-type="${messageType}"` : ""}">            
                 <!-- very creative name indeed -->
@@ -978,7 +977,7 @@ async function createMsgHTML({
             ${replyCode}
             <div class="row ${isSystem === true ? `system` : ""}" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}">
                 ${isSystem !== true ?
-                `<div class="icon-container">
+        `<div class="icon-container">
                     <img class="icon" draggable="false" src="${sanitizeHtmlForRender(message?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>` : ""}
                 
@@ -986,13 +985,13 @@ async function createMsgHTML({
                  <div class="meta">
                  
                     ${isSystem !== true ?
-                    `<label class="username" 
+        `<label class="username" 
                         data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" 
                         style="color: ${message?.author?.color}; background: ${message?.author?.background}; 
                         background-clip: ${message?.author?.backgroundClip};"
                         >
                             ${unescapeHtmlEntities(sanitizeHtmlForRender(truncateText(message?.author?.name, 30), true))
-                    }</label>` : ""}
+        }</label>` : ""}
                     
                     
                     <label class="timestamp" data-timestamp="${message.timestamp}">
@@ -1046,14 +1045,14 @@ function actionReply(element) {
     replyToMessage(messageId);
 }
 
-function reactToMessageFromAction(element){
-    if(!element){
+function reactToMessageFromAction(element) {
+    if (!element) {
         console.error("couldnt react to message from action as element wasnt found");
         return;
     }
 
     let contentContainer = element.closest(".content");
-    if(!contentContainer){
+    if (!contentContainer) {
         console.error("couldnt react to message from action as content container wasnt found");
         return;
     }
@@ -1062,7 +1061,7 @@ function reactToMessageFromAction(element){
     let memberId = contentContainer.getAttribute("data-member-id");
 
     let clientRec = element.getBoundingClientRect();
-    if(!messageId){
+    if (!messageId) {
         console.error("couldnt react to message from action as message id wasnt found");
         return;
     }
@@ -1075,7 +1074,7 @@ function reactToMessageFromAction(element){
     }, true);
 }
 
-async function addMessageReaction(messageId, emojiHash, isDefault = false){
+async function addMessageReaction(messageId, emojiHash, isDefault = false) {
     socket.emit("addMessageReaction", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
@@ -1083,7 +1082,7 @@ async function addMessageReaction(messageId, emojiHash, isDefault = false){
         emojiHash,
         default: isDefault
     }, async (response) => {
-        if(response?.error){
+        if (response?.error) {
             console.log(response.error);
             showSystemMessage({
                 title: "Error while reacting",
@@ -1094,14 +1093,14 @@ async function addMessageReaction(messageId, emojiHash, isDefault = false){
     })
 }
 
-async function removeMessageReaction(messageId, emojiHash){
+async function removeMessageReaction(messageId, emojiHash) {
     socket.emit("removeMessageReaction", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
         messageId,
         emojiHash
     }, async (response) => {
-        if(response?.error){
+        if (response?.error) {
             console.log(response.error);
             showSystemMessage({
                 title: "Error while reacting",
@@ -1115,8 +1114,8 @@ async function removeMessageReaction(messageId, emojiHash){
 function createMsgActions(messageId, isSystem = false) {
 
     return `<div class="messageActions">
-                ${isSystem === false ? `<button style="" title="React" class="react" onclick="reactToMessageFromAction(this)">&#x1f412;</button>`: ""}
-                ${isSystem === false ? `<button style="" title="Reply" onclick="actionReply(this)">&#10149;</button>`: ""}
+                ${isSystem === false ? `<button style="" title="React" class="react" onclick="reactToMessageFromAction(this)">&#x1f412;</button>` : ""}
+                ${isSystem === false ? `<button style="" title="Reply" onclick="actionReply(this)">&#10149;</button>` : ""}
                 
                 <!--
                 <button class="approve">&#10004;</button>
@@ -1140,7 +1139,7 @@ async function displayMessagesInElement({
                                             scrollPosition = null,
                                             getChannel = null,
                                             messageType = null
-                                        } = {}){
+                                        } = {}) {
 
     let firstMessage = getFirstMessage(container);
 
@@ -1150,13 +1149,28 @@ async function displayMessagesInElement({
     for (let message of appendTop ? data.reverse() : data) {
         // if user switches channel we cancel this shit
 
-        if(!getChannel){
-            if(channelId !== UserManager.getChannel()) return;
-        }
-        else{
-            if(channelId !== await getChannel()) return;
+        if (!getChannel) {
+            if (channelId !== UserManager.getChannel()) return;
+        } else {
+            if (channelId !== await getChannel()) return;
         }
 
+        // take care of displaying decrypted messages
+        if(messageType === "dm"){
+            try {
+                let messageAuthorId = message?.data?.author?.id;
+                let isMine = messageAuthorId === UserManager.getID();
+
+                // verification will be handled above so we just make the dms compatible now
+                message.message = await getMessageText(message, isMine, messageAuthorId);
+                message.author = message.meta.author;
+                message.timestamp = message.meta.timestamp;
+                message.sig = message.data.sig
+                message.messageId = message.meta.messageId;
+            } catch (err) {
+                console.log(err);
+            }
+        }
 
         try {
             // stop trying to fetch new messages on last message
@@ -1206,7 +1220,7 @@ async function displayMessagesInElement({
             }
 
             // this will help with the mentions etc
-            if(Inbox.isUnread(message?.messageId) && message?.messageId){
+            if (Inbox.isUnread(message?.messageId) && message?.messageId) {
                 console.log("is unread")
                 await Inbox.markAsRead(Inbox.getInboxIdFromMessageId(message.messageId))
             }
@@ -1221,10 +1235,10 @@ async function displayMessagesInElement({
 }
 
 function getChatlog(container, index = -1, appendTop = false, scrollPosition = null) {
-    if(UserManager.getChannel() === null) return
-    if(UserManager.getCategory() === null) return
-    if(UserManager.getGroup() === null) return
-    if(!container) throw new Error("Container wasnt supplied for chatlog");
+    if (UserManager.getChannel() === null) return
+    if (UserManager.getCategory() === null) return
+    if (UserManager.getGroup() === null) return
+    if (!container) throw new Error("Container wasnt supplied for chatlog");
 
     let channelId = UserManager.getChannel();
     let refElement = getFirstMessage(container)?.element
@@ -1276,7 +1290,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
             refElement,
         })
 
-        if(channelId !== UserManager.getChannel()){
+        if (channelId !== UserManager.getChannel()) {
             ElementLoader.stop(channelbar);
             Clock.stop("load_messages_processing")
             renderer.remove();
@@ -1315,8 +1329,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
 
             watchMediaLoads(container, lastMsg?.element)
             updateMarkdownLinks(2000)
-        }
-        else{
+        } else {
             if (appendTop && scrollPosition !== null) {
 
                 await withScrollLock(container, lastMsg?.element, async () => {
@@ -1350,7 +1363,7 @@ function waitForStableValue(getValueFn, stableMs, callback) {
     requestAnimationFrame(check);
 }
 
-function displayAwaitedMessages(container){
+function displayAwaitedMessages(container) {
     let messages = container.querySelectorAll(".waitForDisplay");
     messages.forEach(message => {
         message.classList.remove("waitForDisplay");
@@ -1363,7 +1376,7 @@ function addToChatLog(element, text, appendTop = false, force = true) {
 
 
 function getFirstMessage(container) {
-    if(!container) throw new Error("Container wasnt supplied");
+    if (!container) throw new Error("Container wasnt supplied");
     let message = container.querySelectorAll(".message-container .content:not(.reply)")[0];
     if (!message) {
         return null;
@@ -1382,7 +1395,7 @@ function getFirstMessage(container) {
 }
 
 function getLastMessage(container) {
-    if(!container) throw new Error("Container wasnt supplied");
+    if (!container) throw new Error("Container wasnt supplied");
     let elements = container.querySelectorAll(".message-container .content:not(.reply)");
     let lastMessageInChat = elements[elements.length - 1];
 
@@ -1412,29 +1425,28 @@ function getLastMessage(container) {
     }
 }
 
-function handleChannelMessageDrafting(channelId){
-    if(!channelId) throw new Error("Channel id is missing");
+function handleChannelMessageDrafting(channelId) {
+    if (!channelId) throw new Error("Channel id is missing");
     let channelDraft = getChannelMessageDraft(channelId);
 
-    if(channelDraft){
+    if (channelDraft) {
         const regex = /<p>\s*<\/p>/gm;
-        if(quill) quill.pasteUnconverted(channelDraft.replace(regex, ''));
-    }
-    else{
+        if (quill) quill.pasteUnconverted(channelDraft.replace(regex, ''));
+    } else {
         editor.innerHTML = "";
     }
 }
 
-function saveChannelMessageDraft(channelId, overwrite){
-    if(!channelId) throw new Error("Channel id is missing");
+function saveChannelMessageDraft(channelId, overwrite) {
+    if (!channelId) throw new Error("Channel id is missing");
     localStorage.setItem(`message_draft_${channelId}`, overwrite !== undefined ? overwrite : editor?.innerHTML || null)
 }
 
-function getChannelMessageDraft(channelId){
-    if(!channelId) throw new Error("Channel id is missing");
+function getChannelMessageDraft(channelId) {
+    if (!channelId) throw new Error("Channel id is missing");
 
     let data = localStorage.getItem(`message_draft_${channelId}`);
-    if(data === "null") return null;
+    if (data === "null") return null;
 
     return data
 }

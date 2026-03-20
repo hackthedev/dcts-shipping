@@ -52,6 +52,7 @@ export async function checkMessageObjReactions(message){
 }
 
 export async function processMessageObject(message, issuer){
+    message = copyObject(message)
     if(!message) throw new Error("Message id was not provided");
     if(!issuer) throw new Error("Issuer id was not provided");
 

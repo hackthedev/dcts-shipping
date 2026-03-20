@@ -37,6 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
         childList: true,
         subtree: true
     });
+
+
+    socket.on('newDmMessage', async function (response) {
+        addNewMessageToChatLog(response.message, "dm")
+    })
 });
 
 async function renderMessages(thread) {
@@ -79,8 +84,6 @@ async function renderMessages(thread) {
 
         // get other participant
         let target = otherParticipant(thread);
-        let messageText = await getMessageText(message, mine, target.id);
-        let isEncrypted = isEncryptedMessage(message, mine);
 
         message.plainText = messageText;
         message = makeMessageCompatible(message, messageText, isSystem);
@@ -140,27 +143,6 @@ async function renderMessages(thread) {
             thread.unread = 0;
         }
     });
-}
-
-function makeMessageCompatible(message, messageText, isSystem) {
-    // ok now we need to make this shit compatible now.
-    // make structure compatible for message display pipeline
-    message.message = messageText;
-    if (!message?.author) {
-        message.author = {
-            id: message?.authorId.replace("m_", ""),
-        }
-    }
-    // fix sig structure check
-    if (message?.text?.plainSig) message.sig = message.text.plainSig;
-    // fix system message type to not show system notification
-    // like member joined messages
-    if (isSystem) {
-        message.author.name = "System";
-    }
-
-    if (!message?.messageId) message.messageId = message.id.replace("m_", "");
-    return message;
 }
 
 async function onEditMsg(threadId, messageId, targetId) {
@@ -238,61 +220,6 @@ async function onEditMsg(threadId, messageId, targetId) {
 }
 
 
-async function sendMessage(thread) {
-    const identity = document.getElementById("ticketIdentity")?.value || "self";
-    const inp = document.getElementById("sendInput");
-    const txt = (inp?.value || "").trim();
-    if (!txt) return;
-
-    let payload = {
-        threadId: STATE.activeThreadId,
-        authorId: CURRENT_USER_ID,
-        text: {
-            content: txt,
-            sender: null,
-            encrypted: false,
-            plainSig: null,
-        },
-        supportIdentity: identity,
-        authorName: UserManager.getUsername(),
-        token: UserManager.getToken(),
-        id: UserManager.getID()
-    }
-
-
-    if (await Client() && thread.type !== "ticket") {
-        let target = (thread.participants.filter(x => x !== UserManager.getID()))[0];
-        let targetPublicKey = await UserManager.requestPublicKey(target);
-
-        if (targetPublicKey?.error === null && targetPublicKey?.publicKey?.length > 10) {
-            let plainText = payload.text.content;
-            try {
-                console.log(await Crypto.EncryptEnvelope(plainText, targetPublicKey?.publicKey))
-                payload.text.content = await Crypto.EncryptEnvelope(plainText, targetPublicKey?.publicKey); // encrypt for receiver
-                payload.text.sender = await Crypto.EncryptEnvelope(plainText);  // encrypt so you can read it yourself lol
-                payload.text.encrypted = true; // just a simple flag
-                payload.text.plainSig = await Client().SignString(plainText); // used to verify plaintext
-
-                payload.text = await Crypto.signJson(payload.text); // signs everything to make it tamper proof
-                // its shit like this that i absolutely love!!
-                // theoretically other platforms could implement a plain text sig too
-                // and still be able to handle encrypted message reports securely
-                // without ever having to decrypt the data etc, therefore ensuring
-                // privacy and moderation without compromises.
-            } catch (msgEncryptionError) {
-                console.error(msgEncryptionError);
-            }
-        } else {
-            console.warn("Couldnt get public key from target user ", target);
-            console.warn(targetPublicKey)
-        }
-    }
-
-    socket.emit("sendMessage", payload, (ack) => {
-        if (ack?.type === "success") inp.value = "";
-    });
-}
-
 function startDmWith(id) {
     if (!id) {
         id = ChatManager.getDMFromUrl();
@@ -304,9 +231,6 @@ function startDmWith(id) {
     // check if exists etc
 }
 
-function slugify(str) {
-    return (str || '').toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').substring(0, 60);
-}
 
 function getDMsNavContainer(){
     return document.querySelector("#navigation.home .dms");
@@ -353,6 +277,7 @@ async function renderDMs(){
             // 2 members are pretty much just a normal dm, whereas more than 2
             // could be considered a dm group chat.
             let {icon, title} = getDmRoomInfo(dm);
+            joinDmRoom(dm.roomId)
 
             getDMsNavContainer().insertAdjacentHTML('beforeend',
                 `<a class="entry ${!firstDm ? "selected" : ""}" data-room-id="${dm.roomId}" onclick="renderDmRoom('${dm.roomId}')">
@@ -377,9 +302,10 @@ async function renderDmRoom(roomId){
     let dms = await getDmRooms();
     let dmRooms = dms?.rooms;
 
-    let targetRoom = Object.values(dmRooms).find(x => x.roomId === roomId);
-    if(targetRoom){
-        let {icon, title} = getDmRoomInfo(targetRoom);
+    let currentDmObj = Object.values(dmRooms).find(x => x.roomId === roomId);
+
+    if(currentDmObj){
+        let {icon, title} = getDmRoomInfo(currentDmObj);
         let dmContainer = getContentElement().querySelector(".dm-container");
 
         if(dmContainer){
@@ -414,6 +340,7 @@ async function renderDmRoom(roomId){
 
         observeContainer();
         let dmMessages = await getDmRoomMessages(roomId);
+        console.log(dmMessages);
 
         // display messages if no messages are found.
         // that if could be used to show when there are no messages.
@@ -457,7 +384,7 @@ async function renderDmRoom(roomId){
                 editor.insertImage(upload.path)
             },
             onSend: async(html) => {
-                let wasSent = await sendDmMessage(html)
+                let wasSent = await sendDmMessage(html, currentDmObj)
                 dmEditor.clear()
             }
         });
@@ -468,30 +395,57 @@ async function renderDmRoom(roomId){
     }
 }
 
-async function sendDmMessage(text){
+async function sendDmMessage(text, currentDmObj){
     if(!text) throw new Error("text is required");
 
     let payload = {
-        message: text,
-        roomId: ChatManager.getUrlParams("dm"),
-        author: {
-            id: UserManager.getID(),
-        },
-        reply: {
-            id: replyMessageId ?? null
+        data: {
+            message: text,
+            roomId: ChatManager.getUrlParams("dm"),
+            author: {
+                id: UserManager.getID(),
+            },
+            reply: {
+                id: replyMessageId ?? null
+            },
+            timestamp: new Date().getTime()
         }
     }
 
-    // todo: add signing and crypto shit
+    if (await Client() && getDmRoomCount(currentDmObj) <= 2) {
+        let target = Object.values(currentDmObj.participants).find(x => x.id !== UserManager.getID())
+        let targetPublicKey = await UserManager.requestPublicKey(target);
+
+        if (true /*targetPublicKey?.error === null && targetPublicKey?.publicKey?.length > 10*/) {
+            let plainText = payload.data.message;
+            try {
+                payload.data.message = await Crypto.EncryptEnvelope(plainText, targetPublicKey?.publicKey); // encrypt for receiver
+                payload.data.sender = await Crypto.EncryptEnvelope(plainText);  // encrypt so you can read it yourself lol
+                payload.data.encrypted = true; // just a simple flag
+                payload.data.plainSig = await Client().SignString(plainText); // used to verify plaintext
+
+                payload.data = await Crypto.signJson(payload.data); // signs everything to make it tamper proof
+                // its shit like this that i absolutely love!!
+                // theoretically other platforms could implement a plain text sig too
+                // and still be able to handle encrypted message reports securely
+                // without ever having to decrypt the data etc, therefore ensuring
+                // privacy and moderation without compromises.
+            } catch (msgEncryptionError) {
+                console.error(msgEncryptionError);
+            }
+        } else {
+            console.warn("Couldnt get public key from target user ", target);
+            console.warn(targetPublicKey)
+        }
+    }
 
     socket.emit("sendDmMessage", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
-        message: payload
+        payload
     }, function (response) {
-        console.log(response)
-        if(!response?.error && response.message){
-            addNewMessageToChatLog(response.message, "dm")
+        if(response?.error){
+            console.error("Couldnt send message:", response.error)
         }
     });
 }
@@ -515,6 +469,20 @@ async function getDmRoomMessages(roomId, timestamp = null){
 
     return new Promise((resolve, reject) => {
         socket.emit('getDmRoomMessages', {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            roomId,
+        }, (response) => {
+            resolve(response)
+        });
+    })
+}
+
+async function joinDmRoom(roomId){
+    if(!roomId) throw new Error("Room ID is required");
+
+    return new Promise((resolve, reject) => {
+        socket.emit('joinDmRoom', {
             id: UserManager.getID(),
             token: UserManager.getToken(),
             roomId,

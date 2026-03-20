@@ -23,6 +23,8 @@ const SANITIZE_OPTIONS = {
         "label",
         'blockquote',
         'strong',
+        "details",
+        "summary",
         'em',
         'img',
         'mark',

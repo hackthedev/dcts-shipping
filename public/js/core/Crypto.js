@@ -113,10 +113,8 @@ class Crypto {
         };
     }
 
-    static async DecryptEnvelope(envelopeInput, keyOrPass = null) {
+    static async DecryptEnvelope(envelopeInput) {
         if (!isLauncher()) return;
-
-        console.log("DecryptEnvelope input:", envelopeInput);
 
         if (!envelopeInput) {
             console.error("Cant decrypt envelope because of missing data");
@@ -124,7 +122,6 @@ class Crypto {
         }
 
         const env = this.GetEnvelopeStructure(envelopeInput);
-        console.log("DecryptEnvelope parsed:", env);
 
         if (!env.method || !env.ciphertext) {
             console.error("Cant decrypt envelope because of missing data");

@@ -62,34 +62,42 @@ export async function getMemberDmRooms(memberId) {
     return roomsRow;
 }
 
-export async function saveRoomDmMessage(roomId, message){
-    if(!roomId) throw new Error("missing roomid")
-    if(!message) throw new Error("missing message")
+function isValidTimestamp(ts) {
+    if (typeof ts !== "number") return false;
+    if (!Number.isFinite(ts)) return false;
+    return !isNaN(new Date(ts).getTime());
+}
 
-    if(!message?.author?.id) throw new Error("missing message author id")
-    if(typeof message !== "object") throw new Error("Message is not an object");
+export async function saveRoomDmMessage(payload){
+    if(!payload) throw new Error("missing message")
+    if(!payload?.data?.roomId) throw new Error("missing roomid")
+    if(!payload?.data?.author?.id) throw new Error("missing author id")
+    if(typeof payload !== "object") throw new Error("Payload is not an object");
+
+    let authorId = payload?.data?.author?.id;
+    let roomId = payload?.data?.roomId;
 
     // we ONLY wanna store the id as reference and not possible the entire author object on accident
-    if(message?.author?.id) message.author = {id: message?.author.id};
+    if(authorId) payload.data.author = {id: authorId};
 
+    // we CANT edit the data itself as its signed, so
+    // we will create a meta object within it
     let messageId = generateId(12);
-    message.messageId = messageId;
-    message.timestamp = new Date().getTime();
+    payload.meta = {
+        messageId,
+        timestamp: new Date().getTime()
+    }
 
-    let result = await queryDatabase(
+    return await queryDatabase(
         `INSERT INTO dms (authorId, roomId, messageId, message, createdAt) VALUES (?,?,?,?,?)`,
         [
-            message?.author?.id,
+            authorId,
             roomId,
             messageId,
-            JSON.stringify(message),
-            message.timestamp
+            JSON.stringify(payload),
+            payload.meta.timestamp
         ]
     )
-
-    message = await processMessageObject(message, message.author.id);
-
-    return {result, message};
 }
 
 export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = null){
@@ -134,11 +142,12 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
     for(let i = 0; i < messageRows.length; i++){
         let messageRow = messageRows[i];
         let message = JSONTools.tryParse(messageRow.message);
-        message = JSONTools.tryParse(messageRow.message);
-        message.messageId
 
-        message = await processMessageObject(message, requesterMemberId);
-        message.timestamp = message.timestamp ?? messageRow.createdAt;
+        // only store specific stuff in the meta obj
+        let resolvedMessageObj = await processMessageObject(message.data, requesterMemberId);
+        message.meta.author = resolvedMessageObj?.author ?? {id: 0};
+        message.meta.reply = resolvedMessageObj?.reply ?? {id: null};
+
         messages[messageRow.messageId] = message;
     }
 
@@ -208,22 +217,40 @@ export default (io) => (socket) => {
         response({ error: null, messages: await getDmRoomMessages(member.roomId, member.id)});
     });
 
+    socket.on('joinDmRoom', async function (member, response) {
+        if (await validateMemberId(member.id, socket, member?.token) !== true) {
+            return response?.({type: 'error', msg: 'unauthorized'});
+        }
+
+        if(member?.roomId === undefined) return response({ error: "roomId missing"});
+        if(!socket.rooms.has(member.roomId)){
+            socket.join(member.roomId);
+        }
+
+        response({error: null})
+    });
+
+
     socket.on('sendDmMessage', async function (member, response) {
         if (await validateMemberId(member.id, socket, member?.token) !== true) {
             return response?.({type: 'error', msg: 'unauthorized'});
         }
 
-        if(member?.message?.roomId === undefined) return response({ error: "roomId missing"})
-        if(member?.message?.roomId?.length !== 12) return response({ error: "Invalid roomId format"})
-        if(!member?.message) return response({ error: "Missing message object"})
-        if(typeof member?.message !== "object") return response({ error: "Message is not an object"})
-        if(!member?.message?.author?.id) return response({ error: "Message doesnt contain author information"})
+        let payload = member?.payload
+        if(typeof payload !== "object") return response({ error: "Missing message payload"})
+        console.log(payload)
 
-        let {result, message} = await saveRoomDmMessage(member.message.roomId, member.message);
+        if(payload?.data?.roomId === undefined) return response({ error: "roomId missing"})
+        if(payload?.data?.roomId?.length !== 12) return response({ error: "Invalid roomId format"})
+        if(!payload?.data) return response({ error: "Missing data object"})
+        if(typeof payload?.data !== "object") return response({ error: "Message is not an object"})
+        if(!payload?.data?.author?.id) return response({ error: "Message doesnt contain author information"})
+
+        let result = await saveRoomDmMessage(payload);
         let hasError = result?.affectedRows > 0 ? null : "Error while sending DM"
 
         if(!hasError){
-            io.in(member.roomId).emit("newDmMessage", message);
+            io.in(member.message.roomId).emit("newDmMessage", { message });
         }
 
         response({ error: hasError, message});

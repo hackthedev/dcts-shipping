@@ -313,7 +313,6 @@ function getDMsNavContainer(){
 }
 
 function getDmRoomCount(dm){
-    if(dm.roomId === "154293005235") console.log(dm?.participants)
     return Object.keys(dm?.participants).length;
 }
 
@@ -391,11 +390,76 @@ async function renderDmRoom(roomId){
                         <div class="icon"><img src="${icon}"></div>
                         <div class="title">${title}</div>
                     </div>
+                    
+                    <div class="content"></div>
+                    <div class="footer">
+                        <div class="editor"></div>
+                    </div>
                 </div>
             `
         )
+
+        let dmMessages = await getDmRoomMessages(roomId);
+        console.log(dmMessages)
+        console.log(dmMessages.messages)
+
+        if(Object.keys(dmMessages.messages).length > 0){
+            await displayMessagesInElement({
+                data: Object.values(dmMessages.messages),
+                channelId: roomId,
+                container: getContentElement().querySelector(".dm-container .content"),
+                appendTop: false,
+                index: null,
+                refElement: null,
+                getChannel: () => {
+                    return roomId
+                }
+            })
+
+            displayAwaitedMessages(getContentElement().querySelector(".dm-container .content"))
+        }
+
+        const editor = new RichEditor({
+            selector: ".layout.home .content .dm-container .footer .editor",
+            toolbar: [
+                ["bold", "italic", "underline"],
+                ["code-block", "link"]
+            ],
+            onImg: async (src) => {
+                console.log("Uploading and replacing src " + src)
+                let upload = await ChatManager.srcToFile(src);
+                editor.insertImage(upload.path)
+            },
+            onSend: async(html) => {
+                let wasSent = await sendDmMessage(html)
+                editor.clear()
+            }
+        });
     }
 }
+
+async function sendDmMessage(text){
+    if(!text) throw new Error("text is required");
+
+    let payload = {
+        message: text,
+        roomId: ChatManager.getUrlParams("dm"),
+        author: {
+            id: UserManager.getID(),
+        }
+    }
+
+    // todo: add signing and crypto shit
+
+    socket.emit("sendDmMessage", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        message: payload
+    }, function (response) {
+        console.log(response)
+    });
+}
+
 
 async function createDmRoom(){
     socket.emit("createDmRoom", {
@@ -405,6 +469,20 @@ async function createDmRoom(){
     }, function (response) {
         console.log(response)
     });
+}
+
+async function getDmRoomMessages(roomId, timestamp = null){
+    if(!roomId) throw new Error("Room ID is required");
+
+    return new Promise((resolve, reject) => {
+        socket.emit('getDmRoomMessages', {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            roomId,
+        }, (response) => {
+            resolve(response)
+        });
+    })
 }
 
 async function getDmRooms(){

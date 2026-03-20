@@ -1050,12 +1050,6 @@ function isVideo(url) {
     });
 }
 
-
-function getUrlFromText(text) {
-    var geturl = new RegExp("(^|[ \t\r\n])((ftp|http|https|mailto|file):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))", "g");
-    return text.match(geturl)
-}
-
 var isValidUrl = []
 
 function isURL(text) {

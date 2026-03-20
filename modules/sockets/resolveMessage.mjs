@@ -51,6 +51,17 @@ export async function checkMessageObjReactions(message){
     return message
 }
 
+export async function processMessageObject(message, issuer){
+    if(!message) throw new Error("Message id was not provided");
+    if(!issuer) throw new Error("Issuer id was not provided");
+
+    message = await checkMessageObjAuthor(message);
+    message.author = await autoAnonymizeMember(issuer, message.author);
+    message = await autoAnonymizeMessage(issuer, message);
+
+    return message;
+}
+
 export async function checkMessageObjAuthor(message){
     if(!message?.author) throw new Error("No message author object found");
 

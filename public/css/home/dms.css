@@ -52,18 +52,43 @@
 .layout.home .content .dm-container{
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 .layout.home .content .dm-container .header{
     display: flex;
     flex-direction: row;
     align-items: center;
+
     gap: 0.5rem;
+    padding: 0.5rem;
     margin: -2rem;
+    margin-bottom: 0;
 }
 .layout.home .content .dm-container .header img{
     width: 30px;
     height: 30px;
     border-radius: 50%;
     background-color: black;
+}
+.layout.home .content .dm-container > .content{
+    display: flex;
+    flex-direction: column;
+    margin: 0 -2rem;
+    padding: 1rem;
+    flex: 1 1 0;
+}
+.layout.home .content .dm-container .footer{
+    display: flex;
+    flex-direction: row;
+
+    bottom: 0;
+
+    padding: 1rem;
+    margin: -2rem;
+    margin-top: 0;
+}
+.layout.home .content .dm-container .footer .editor{
+    margin: auto;
+    width: 100%;
 }

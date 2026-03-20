@@ -20,6 +20,8 @@
 }
 
 .message-container .content-container {
+    display: flex;
+    flex-direction: column;
     box-sizing: border-box;
     width: 100%;
     overflow-y: auto;
@@ -127,13 +129,16 @@
 .message-container .content.mention {
     background-color: rgba(255, 174, 0, 0.12);
 }
-.message-container .content {
+.message-container .contentRows .content {
     display: flex;
     flex-direction: column;
     justify-content: center !important;
     align-content: start;
     align-self: start;
     align-items: start;
+
+    margin: 0;
+    padding: 0;
 
     gap: 0;
     width: 100%;

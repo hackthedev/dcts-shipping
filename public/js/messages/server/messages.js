@@ -855,6 +855,8 @@ async function createMsgHTML({
                                  waitWithDisplay = false,
                                  createActions = true
 } = {}) {
+    console.log(message)
+
     let isSigned = message?.sig?.length > 10;
     let reply = message?.reply;
 
@@ -905,7 +907,7 @@ async function createMsgHTML({
     let replyCode = "";
     if(reply?.messageId){
         replyCode = `
-            <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}">            
+            <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${stripHTML(reply?.author?.id, false)}">            
                 <!-- very creative name indeed -->
                 <div class="box"></div>
             
@@ -1078,6 +1080,11 @@ function createMsgActions(messageId, isSystem = false) {
             </div>`
 }
 
+function getUrlFromText(text) {
+    var geturl = new RegExp("(^|[ \t\r\n])((ftp|http|https|mailto|file):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))", "g");
+    return text.match(geturl)
+}
+
 async function displayMessagesInElement({
                                             data,
                                             channelId,
@@ -1085,6 +1092,7 @@ async function displayMessagesInElement({
                                             appendTop = false,
                                             index = -1,
                                             scrollPosition = null,
+                                            getChannel = null
                                         } = {}){
 
     let firstMessage = getFirstMessage(container);
@@ -1094,7 +1102,14 @@ async function displayMessagesInElement({
 
     for (let message of appendTop ? data.reverse() : data) {
         // if user switches channel we cancel this shit
-        if(channelId !== UserManager.getChannel()) return;
+
+        if(!getChannel){
+            if(channelId !== UserManager.getChannel()) return;
+        }
+        else{
+            if(channelId !== await getChannel()) return;
+        }
+
 
         try {
             // stop trying to fetch new messages on last message

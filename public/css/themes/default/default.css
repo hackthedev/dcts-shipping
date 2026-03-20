@@ -423,3 +423,19 @@ img {
     background-color: hsl(from var(--main) h s calc(l * 1.75));
     border: 1px solid var(--border-color);
 }
+
+.layout.home .content .dm-container .header{
+    border-bottom: 1px solid var(--border-color);
+}
+.layout.home .content .dm-container .editor,
+.layout.home .content .dm-container .editor .ql-toolbar{
+    border: 1px solid var(--border-color);
+}
+.layout.home .content .dm-container .editor .ql-toolbar button svg,
+.layout.home .content .dm-container .editor .ql-stroke,
+.layout.home .content .dm-container .editor .ql-fill{
+    stroke: hsl(from var(--main) h s calc(l * 10));
+}
+.layout.home .content .dm-container .footer{
+    border-top: 1px solid var(--border-color);
+}

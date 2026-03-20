@@ -46,9 +46,9 @@ const SANITIZE_OPTIONS = {
         'data-message-id'
     ],
 
-    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
-    ALLOW_DATA_ATTR: false,
-    FORBID_ATTR: ['style', 'onerror', 'onclick', 'onload', 'onmouseover', 'onfocus', 'onblur'],
+    //ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    //ALLOW_DATA_ATTR: false,
+    //FORBID_ATTR: ['style', 'onerror', 'onclick', 'onload', 'onmouseover', 'onfocus', 'onblur'],
 };
 
 let _hooksInstalled = false;
@@ -82,37 +82,17 @@ function stripHTML(html) {
     return DOMPurify.sanitize(String(html), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 }
 
-function sanitizeHtmlForRender(html, wrapParagraphs = true) {
+function sanitizeHtmlForRender(html, wrapParagraphs = false) {
     if (html == null) return '';
+
     installDomPurifyHooks();
-
-    let raw = String(html || '').trim();
-
-    const hasTags = /<\/?[a-z][\s\S]*?>/i.test(raw);
-    if (!hasTags) {
-        const paras = raw.replace(/\r/g, '').split(/\n{2,}/)
-            .map(s => s.trim())
-            .filter(Boolean);
-
-        let out = paras.map(p => {
-            const decoded = Object.assign(document.createElement('textarea'), { innerHTML: p }).value;
-            const withBreaks = encodePlainText(decoded).replace(/\n/g, '<br>');
-            return wrapParagraphs ? `<p>${withBreaks}</p>` : withBreaks;
-        }).join(wrapParagraphs ? '' : '<br><br>');
-
-        const clean = DOMPurify.sanitize(out, SANITIZE_OPTIONS);
-        return `${clean}`;
-    }
-
-    let clean = DOMPurify.sanitize(raw, SANITIZE_OPTIONS);
+    let clean = DOMPurify.sanitize(String(html), SANITIZE_OPTIONS);
 
     if (wrapParagraphs) {
         clean = `<p>${clean}</p>`;
     }
 
-    clean = clean.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');
-
-    return `${clean.trim()}`;
+    return clean.trim();
 }
 
 function encodePlainText(s) {

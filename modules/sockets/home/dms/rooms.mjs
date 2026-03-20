@@ -74,14 +74,16 @@ export async function saveRoomDmMessage(roomId, message){
 
     let messageId = generateId(12);
     message.messageId = messageId;
+    message.timestamp = new Date().getTime();
 
     let result = await queryDatabase(
-        `INSERT INTO dms (authorId, roomId, messageId, message) VALUES (?,?,?,?)`,
+        `INSERT INTO dms (authorId, roomId, messageId, message, createdAt) VALUES (?,?,?,?,?)`,
         [
             message?.author?.id,
             roomId,
             messageId,
-            JSON.stringify(message)
+            JSON.stringify(message),
+            message.timestamp
         ]
     )
 
@@ -136,7 +138,7 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
         message.messageId
 
         message = await processMessageObject(message, requesterMemberId);
-        message.timestamp = messageRow.createdAt;
+        message.timestamp = message.timestamp ?? messageRow.createdAt;
         messages[messageRow.messageId] = message;
     }
 

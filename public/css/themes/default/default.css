@@ -439,3 +439,8 @@ img {
 .layout.home .content .dm-container .footer{
     border-top: 1px solid var(--border-color);
 }
+/* some markdown */
+.iframe-container iframe{
+    border: 1px solid var(--border-color);
+    margin: 8px 0;
+}

@@ -1,5 +1,12 @@
+var editorContainer;
+var editorToolbar;
+var editorHints;
 
 document.addEventListener("DOMContentLoaded", function () {
+    editorContainer = document.querySelector('.editor-container');
+    editorToolbar = document.getElementById("editor-toolbar");
+    editorHints = document.getElementById("editor-hints");
+
     ContextMenu.registerContextMenu(
         "servermessage",
         [
@@ -50,8 +57,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     let element = data.element;
                     let messageId = getMessageIdFromElement(element) || data.element?.getAttribute("data-message-id");
                     let isDM = !!document.querySelector(".threadArea")
+                    let messageType = findAttributeUp(element, "data-message-type");
 
-                    deleteMessageFromChat(messageId, isDM ? "dm" : "message");
+                    deleteMessageFromChat(messageId, messageType);
                 },
                 condition: async (data) => {
                     console.log(data)
@@ -264,7 +272,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let convertedMentions = await convertMention(message);
 
 
-        let lastMsg = getLastMessage(document.getElementById("content"))
+        let lastMsg = getLastMessage(getContentMainContainer())
         await withScrollLock(null, lastMsg?.element, async () => {
             editElement.innerHTML = convertedMentions.text
             editElement.innerHTML = sanitizeHtmlForRender(convertedMentions.text)
@@ -272,10 +280,88 @@ document.addEventListener("DOMContentLoaded", function () {
             editElement.innerHTML += getMessageEditedHTML(message);
             editElement.innerHTML += createMsgActions(message.messageId);
 
-            if(isScrolledToBottom(document.getElementById("content"))) scrollDown("messageEdited")
+            if(isScrolledToBottom(getContentMainContainer())) scrollDown("messageEdited")
         })
     });
 })
+
+function focusEditor() {
+    if (!quill) return;
+    if(MobilePanel.isMobile()) return;
+
+    quill.focus();
+
+    requestAnimationFrame(() => {
+        const len = quill.getLength();
+        quill.setSelection(len - 1, 0, Quill.sources.SILENT);
+    });
+}
+
+function focusElementInput(element) {
+    element?.focus();
+
+    const length =
+        element?.getLength?.() ??
+        element?.value?.length ??
+        0;
+
+    element?.setSelection?.(length, 0);
+    element?.setSelectionRange?.(length, length);
+}
+
+function toggleEditor(value) {
+    messageInputBox.parentNode.parentNode.style.visibility = value === true ? "visible" : "hidden";
+}
+
+async function addNewMessageToChatLog(message, type = null){
+    let container = getContentMainContainer();
+    let isScrolledDown = isScrolledToBottom(container, 20);
+
+    if(!message) throw new Error("No message found to display");
+    message.type = type;
+
+    // lets increase the channel count first
+    // then mark it for ourselves
+    if(message?.channel) {
+        ChatManager.increaseChannelMarkerCount(message.channel)
+        ChatManager.setChannelMarkerCounter(UserManager.getChannel())
+    }
+
+    // the message was not created in the room we're currently in, but thats fine.
+    // we will instead show the notification icon and return;
+    if(message.room !== UserManager.getRoom() && type === null){
+        ChatManager.setChannelMarker(message.channel, true);
+        await updateUIIndicators(message)
+        return;
+    }
+
+    if (await shouldAppendMessage(container, message) === true) {
+        await showMessageInChat({
+            container,
+            message,
+            append: true,
+            mentions: true,
+            pingMentions: true,
+            messageType: type
+        });
+    } else {
+        await showMessageInChat({
+            container,
+            message,
+            append: false,
+            mentions: true,
+            pingMentions: true,
+            messageType: type
+        });
+    }
+
+
+    if(isScrolledDown) {
+        scrollDown("messageCreated");
+    }
+
+    await updateUIIndicators(message)
+}
 
 function registerMessageCreateEvent(){
     socket.on('updateReactions', async function(messageObj) {
@@ -284,57 +370,16 @@ function registerMessageCreateEvent(){
 
     
     socket.on('messageCreate', async function (message) {
-        let container = document.getElementById("content");
-        let isScrolledDown = isScrolledToBottom(container, 20);
-
-
-
-        // lets increase the channel count first
-        ChatManager.increaseChannelMarkerCount(message.channel)
-        // then mark it for ourselves
-        ChatManager.setChannelMarkerCounter(UserManager.getChannel())
-
-        // the message was not created in the room we're currently in, but thats fine.
-        // we will instead show the notification icon and return;
-        if(message.room !== UserManager.getRoom()){
-            ChatManager.setChannelMarker(message.channel, true);
-            await updateUIIndicators(message)
-            return;
-        }
-
-        if (await shouldAppendMessage(container, message) === true) {
-            await showMessageInChat({
-                container,
-                message,
-                append: true,
-                mentions: true,
-                pingMentions: true
-            });
-        } else {
-            await showMessageInChat({
-                container,
-                message,
-                append: false,
-                mentions: true,
-                pingMentions: true
-            });
-        }
-
-
-        if(isScrolledDown) {
-            scrollDown("messageCreated");
-        }
-
-        await updateUIIndicators(message)
+        addNewMessageToChatLog(message)
     });
+}
 
-    async function updateUIIndicators(message){
-        if(message.channel === UserManager.getChannel()) await Inbox.markAsRead(`${UserManager.getID()}-${message.messageId}`)
+async function updateUIIndicators(message){
+    if(message.channel === UserManager.getChannel()) await Inbox.markAsRead(`${UserManager.getID()}-${message.messageId}`)
 
-        setTimeout(() => {
-            Inbox.updateInboxMessageEntries()
-        }, 500)
-    }
+    setTimeout(() => {
+        Inbox.updateInboxMessageEntries()
+    }, 500)
 }
 
 function registerMessageInfiniteLoad(element){
@@ -365,7 +410,7 @@ function cancelMessageEdit() {
 }
 
 function showRateLimitNotice(){
-    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+    let isScrolledDown = isScrolledToBottom(getContentMainContainer());
     if (replyMessageId == null && editorHints ) {
         if(editorHints?.querySelector("#ratelimitHint") != null) editorHints?.querySelector("#ratelimitHint").remove();
 
@@ -376,7 +421,7 @@ function showRateLimitNotice(){
 }
 
 function showSlowmodeNotice(timestamp){
-    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+    let isScrolledDown = isScrolledToBottom(getContentMainContainer());
     if (replyMessageId == null && editorHints ) {
         if(editorHints?.querySelector("#slowmodeHint") != null) editorHints?.querySelector("#slowmodeHint").remove();
 
@@ -429,10 +474,13 @@ function replaceUrlEmbeds(element){
 }
 
 function editMessage(id) {
+    if(!id) throw new Error("No messag editing id found!")
     if (replyMessageId) cancelMessageReply();
+
     if (editMessageId == null && editorHints && editorHints?.querySelector("pre.editMsgHint") == null) {
         editorHints.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageEdit()'>You are editing a message &#128942;</p>`)
     }
+    editMessageId = id
 
     let msgContent = document.querySelector(`.message-container .content[data-message-id="${id}"]`).cloneNode(true);
     if (msgContent.querySelector(".messageActions")) {
@@ -491,6 +539,7 @@ function editMessage(id) {
 
     setTimeout(() => {
         const regex = /<p>\s*<\/p>/gm;
+        console.log(quill)
         if(quill) quill.pasteUnconverted(msgContent.innerHTML.replace(regex, ''));
 
         focusEditor()
@@ -570,6 +619,7 @@ async function showMessageInChat({
                                      mentions = false,
                                      pingMentions = false,
                                      waitWithDisplay = false,
+                                     messageType = null,
                                  } = {}) {
 
     let markdownResult = await markdown(message.message, message.messageId);
@@ -601,7 +651,8 @@ async function showMessageInChat({
             append: append,
             isSystem: true,
             isMention,
-            waitWithDisplay
+            waitWithDisplay,
+            messageType
         });
     } else {
         // dont append if the previous message was a system message
@@ -611,7 +662,8 @@ async function showMessageInChat({
             append,
             isSystem: false,
             isMention,
-            waitWithDisplay
+            waitWithDisplay,
+            messageType
         });
     }
 
@@ -760,27 +812,18 @@ function navigateToMessage(messageId){
 }
 
 function deleteMessageFromChat(id, type = "message") {
-    if(type === "dm"){
-        socket.emit("deleteDMMessage", {messageId: id, token: UserManager.getToken(), id: UserManager.getID()}, (ack) => {
-            if (ack?.type !== "success"){
-                console.log(ack)
-            }
-        });
-
-        return;
-    }
-
     socket.emit("deleteMessage", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
         messageId: id,
         group: UserManager.getGroup(),
         category: UserManager.getCategory(),
-        channel: UserManager.getChannel()
+        channel: UserManager.getChannel(),
+        type
     });
 }
 
-async function updateMessageReactionsElementById(messageId, container = document.getElementById("content")){
+async function updateMessageReactionsElementById(messageId, container = getContentMainContainer()){
     let wasScrolledDown = isScrolledToBottom(container);
 
     let contentContainer = document.querySelector(`.message-container .content:not(.reply)[data-message-id="${messageId}"]`);
@@ -853,9 +896,9 @@ async function createMsgHTML({
                                  isSystem = false,
                                  isMention = false,
                                  waitWithDisplay = false,
-                                 createActions = true
+                                 createActions = true,
+                                 messageType = null
 } = {}) {
-    console.log(message)
 
     let isSigned = message?.sig?.length > 10;
     let reply = message?.reply;
@@ -887,7 +930,8 @@ async function createMsgHTML({
             ${message?.plainText ? `data-plain-text="${unescapeHtmlEntities(sanitizeHtmlForRender(encodeURIComponent(message.plainText), false), true)}"` : ""}
             data-message-id="${message.messageId}" 
             data-member-id="${unescapeHtmlEntities(sanitizeHtmlForRender(message?.author?.id, false), true)}" 
-            data-timestamp="${message.timestamp}">
+            data-timestamp="${message.timestamp}"
+            ${messageType ? `data-message-type="${messageType}"` : ""}>
             
             ${createActions === true ? createMsgActions(message?.author?.id, isSystem) : ""}
             ${sanitizeHtmlForRender(message.message)}  ${message?.editCode ? message?.editCode : ""}    
@@ -907,7 +951,7 @@ async function createMsgHTML({
     let replyCode = "";
     if(reply?.messageId){
         replyCode = `
-            <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${stripHTML(reply?.author?.id, false)}">            
+            <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${stripHTML(reply?.author?.id, false)} ${messageType ? `data-message-type="${messageType}"` : ""}">            
                 <!-- very creative name indeed -->
                 <div class="box"></div>
             
@@ -927,10 +971,12 @@ async function createMsgHTML({
     }
 
     return `
-        <div class="message-container ${isSystem ? "system" : ""} ${isBanned && isAdmin ? "banned" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}" data-member-id="${message?.author?.id}">
+        <div class="message-container ${isSystem ? "system" : ""} ${isBanned && isAdmin ? "banned" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}" 
+            data-member-id="${message?.author?.id}"
+            ${messageType ? `data-message-type="${messageType}"` : ""}>
             
             ${replyCode}
-            <div class="row ${isSystem === true ? `system` : ""}" data-message-id="${message?.messageId}" data-member-id="${message?.id}">
+            <div class="row ${isSystem === true ? `system` : ""}" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}">
                 ${isSystem !== true ?
                 `<div class="icon-container">
                     <img class="icon" draggable="false" src="${sanitizeHtmlForRender(message?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
@@ -1092,7 +1138,8 @@ async function displayMessagesInElement({
                                             appendTop = false,
                                             index = -1,
                                             scrollPosition = null,
-                                            getChannel = null
+                                            getChannel = null,
+                                            messageType = null
                                         } = {}){
 
     let firstMessage = getFirstMessage(container);
@@ -1142,7 +1189,8 @@ async function displayMessagesInElement({
                     append: true,
                     location,
                     appendTop,
-                    waitWithDisplay: true
+                    waitWithDisplay: true,
+                    messageType
                 });
             } else {
                 await showMessageInChat({
@@ -1152,7 +1200,8 @@ async function displayMessagesInElement({
                     append: false,
                     location,
                     appendTop,
-                    waitWithDisplay: true
+                    waitWithDisplay: true,
+                    messageType
                 });
             }
 
@@ -1248,8 +1297,8 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
 
         Clock.stop("load_messages_processing")
 
-        if (response.data.length === 0 && UserManager.getChannel() && document.getElementById("content").innerText.trim().length === 0) {
-            document.getElementById("content").insertAdjacentHTML("beforeend", `<div style="width: 100%;text-align: center; color: gray; font-style: italic;display: block !important; float: left !important;" id="msg-0">No messages yet... be the first one!</div>`);
+        if (response.data.length === 0 && UserManager.getChannel() && container.innerText.trim().length === 0) {
+            container.insertAdjacentHTML("beforeend", `<div style="width: 100%;text-align: center; color: gray; font-style: italic;display: block !important; float: left !important;" id="msg-0">No messages yet... be the first one!</div>`);
         }
 
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())

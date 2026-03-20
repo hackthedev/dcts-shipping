@@ -126,6 +126,7 @@ class Inbox {
     }
 
     static async updateInboxMessageEntries() {
+        if(!this.getInboxElement()?.querySelector(".inbox-content")) return console.warn("Inbox Element wasnt found")
         this.getInboxElement().querySelector(".inbox-content").innerHTML = await this.getContentHTML(true);
     }
 

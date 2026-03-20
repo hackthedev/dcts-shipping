@@ -7,50 +7,30 @@ import { deleteChatMessagesFromDb, getChatMessagesFromDb } from "../functions/my
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('deleteMessage', async function (member) {
-        if (await validateMemberId(member.id, socket) === true && serverconfig.servermembers[member.id].token === member.token) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
             if(!member?.messageId){
                 Logger.warn("Tried deleting a message without supplying the id");
                 return;
             }
 
-            // If SQL is enabled
-            if (serverconfig.serverinfo.sql.enabled === true) {
-                try { 
-                    // Check if user has permission
-                    let originalMessage = await getChatMessagesFromDb(null, -1, member.messageId);
-                    originalMessage = originalMessage[0];
+            try {
+                // Check if user has permission
+                let originalMessage = await getChatMessagesFromDb(null, -1, member.messageId);
+                originalMessage = originalMessage[0];
 
-                    if (originalMessage?.authorId === serverconfig.servermembers[member.id].id || await hasPermission(member.id, "manageMessages")) {
-                        await deleteChatMessagesFromDb(member.messageId);
-                        io.emit("receiveDeleteMessage", member.messageId);
-                    }
-                }
-                catch (error) {
-                    Logger.error(`Couldnt delete message ${member.messageId} from database`);
-                    Logger.error(error);
+                if (originalMessage?.authorId === serverconfig.servermembers[member.id].id || await hasPermission(member.id, "manageMessages")) {
+                    await deleteChatMessagesFromDb(member.messageId, member?.type);
+                    io.emit("receiveDeleteMessage", member.messageId);
                 }
             }
-            // If its disabled we use the filesystem
-            else {
-                try {
-                    var message = JSON.parse(fs.readFileSync(`./chats/${member.group}/${member.category}/${member.channel}/${member.messageId}`));
-                    if (message.id === member.id || await hasPermission(member.id, "manageMessages")) {
-
-                        let path = `${member.group}/${member.category}/${member.channel}/${member.messageId}`;
-                        if (path.includes("..")) return
-
-                        fs.unlinkSync(`./chats/${path}`);
-                        io.emit("receiveDeleteMessage", message.messageId);
-                    }
-                }
-                catch (error) {
-                    Logger.error(`Couldnt delete file ./chats/${member.group}/${member.category}/${member.channel}/${member.messageId}`);
-                    Logger.error(error);
-                }
+            catch (error) {
+                Logger.error(`Couldnt delete message ${member.messageId} from database`);
+                Logger.error(error);
             }
 
-
-            io.to(usersocket[member.id]).emit("receiveCurrentChannel", serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel]);
+            if(member?.group && member?.category && member?.channel){
+                io.to(member.id).emit("receiveCurrentChannel", serverconfig.groups[member.group].channels.categories[member.category].channel[member.channel]);
+            }
         }
     });
 }

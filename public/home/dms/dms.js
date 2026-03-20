@@ -379,49 +379,76 @@ async function renderDmRoom(roomId){
 
     let targetRoom = Object.values(dmRooms).find(x => x.roomId === roomId);
     if(targetRoom){
-        getContentElement().innerHTML = "";
-
         let {icon, title} = getDmRoomInfo(targetRoom);
+        let dmContainer = getContentElement().querySelector(".dm-container");
 
-        getContentElement().insertAdjacentHTML("beforeend",
-            `
+        if(dmContainer){
+            let iconEl = dmContainer?.querySelector(".header .icon img");
+            if(iconEl) iconEl.src = stripHTML(icon);
+
+            let titleEl = dmContainer.querySelector(".header .title");
+            if(titleEl) titleEl.innerHTML = sanitizeHtmlForRender(title, false)
+
+            let contentEl = dmContainer.querySelector(".content");
+            if(contentEl) contentEl.innerHTML = "";
+        }
+        else{
+            getContentElement().innerHTML = "";
+            getContentElement().insertAdjacentHTML("beforeend",
+                `
                 <div class="dm-container">
                     <div class="header">
-                        <div class="icon"><img src="${icon}"></div>
-                        <div class="title">${title}</div>
+                        <div class="icon"><img src="${stripHTML(icon)}"></div>
+                        <div class="title">${sanitizeHtmlForRender(title, false)}</div>
                     </div>
                     
                     <div class="content"></div>
                     <div class="footer">
+                        <div id="editor-hints"></div>
                         <div class="editor"></div>
                     </div>
                 </div>
             `
-        )
+            )
+        }
 
+        observeContainer();
         let dmMessages = await getDmRoomMessages(roomId);
 
-        if(Object.keys(dmMessages.messages).length > 0){
+        // display messages if no messages are found.
+        // that if could be used to show when there are no messages.
+        if(Object.keys(dmMessages?.messages || {})?.length > 0){
             await displayMessagesInElement({
                 data: Object.values(dmMessages.messages).reverse(),
                 channelId: roomId,
-                container: getContentElement().querySelector(".dm-container .content"),
+                container: getContentMainContainer(),
                 appendTop: false,
                 index: null,
                 refElement: null,
+                messageType: "dm",
                 getChannel: () => {
                     return roomId
                 }
             })
 
-            displayAwaitedMessages(getContentElement().querySelector(".dm-container .content"))
+            displayAwaitedMessages(getContentMainContainer())
+
+            requestAnimationFrame(() => {
+                scrollDown("dm", {
+                    tolerancePx: 10
+                });
+            })
         }
 
-        const editor = new RichEditor({
+        await updateMarkdownLinks(2000)
+
+        // after rendering stuff we will display the editor as it cant be placed into the html directly etc
+        const dmEditor = new RichEditor({
             selector: ".layout.home .content .dm-container .footer .editor",
             toolbar: [
-                ["bold", "italic", "underline"],
-                ["code-block", "link"]
+                ["bold", "italic", "underline", "strike"],
+                ["clean", "link", "image", "video"],
+                ["code", "code-block", "blockquote"]
             ],
             onImg: async (src) => {
                 console.log("Uploading and replacing src " + src)
@@ -430,9 +457,13 @@ async function renderDmRoom(roomId){
             },
             onSend: async(html) => {
                 let wasSent = await sendDmMessage(html)
-                editor.clear()
+                dmEditor.clear()
             }
         });
+
+        window.quill = dmEditor.quill;
+        editorHints = document.getElementById("editor-hints");
+        window.editor = dmEditor.editorEl.querySelector(".ql-editor");
     }
 }
 
@@ -444,6 +475,9 @@ async function sendDmMessage(text){
         roomId: ChatManager.getUrlParams("dm"),
         author: {
             id: UserManager.getID(),
+        },
+        reply: {
+            id: replyMessageId ?? null
         }
     }
 
@@ -455,6 +489,9 @@ async function sendDmMessage(text){
         message: payload
     }, function (response) {
         console.log(response)
+        if(!response?.error && response.message){
+            addNewMessageToChatLog(response.message, "dm")
+        }
     });
 }
 

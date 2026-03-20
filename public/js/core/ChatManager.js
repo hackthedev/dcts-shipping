@@ -867,14 +867,12 @@ class ChatManager {
     static increaseChannelMarkerCount(channelId) {
         let channelElement = ChatManager.getChannelElementById(channelId);
         if (!channelElement) {
-            console.error("couldnt increase channel marker count as the channel element wasnt found");
-            return
+            return console.error("couldnt increase channel marker count as the channel element wasnt found");
         }
 
         let msgCount = Number(channelElement.getAttribute("data-message-count"));
         if (!msgCount) {
-            console.error("Couldnt increase channel marker counter as counter attribute wasnt found")
-            return;
+            return console.error("Couldnt increase channel marker counter as counter attribute wasnt found")
         }
 
         // increase counter and update
@@ -885,12 +883,10 @@ class ChatManager {
     static setChannelMarker(channelId, mark = false) {
         let channelElement = ChatManager.getChannelElementById(channelId);
         if (!channelElement) {
-            console.error("couldnt set channel marker as the channel element wasnt found", channelId);
-            return
+            return console.error("couldnt set channel marker as the channel element wasnt found", channelId);
         }
 
         let indicator = channelElement.querySelector(".message-marker-icon");
-
         if (!channelElement || !indicator) {
             console.error("Couldnt set channel marker because channelelement wasnt found");
         }
@@ -910,6 +906,7 @@ class ChatManager {
             return;
         }
 
+        console.log(channelId)
         return document.querySelector(`#channeltree a.channelTrigger[data-channel-id='${channelId}']`);
     }
 }

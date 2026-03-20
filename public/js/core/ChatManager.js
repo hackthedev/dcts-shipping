@@ -478,16 +478,23 @@ class ChatManager {
         }
     }
 
-    static getDMFromUrl() {
-        var url = window.location.search;
-        var urlParams = new URLSearchParams(url);
-        var urlChannel = urlParams.get("dm");
+    static setUrl(param) {
+        window.history.replaceState(null, null, param); // or pushState
+        let page = param.replace("?page=", "");
+        loadPageContent(page)
+    }
 
-        if (urlChannel == null) {
-            return null;
-        } else {
-            return urlChannel;
-        }
+    static getUrlParams(param) {
+        let url = window.location.search;
+        let urlParams = new URLSearchParams(url);
+        let urlParamValue = urlParams.get(param);
+
+        return urlParamValue;
+    }
+
+
+    static getDMFromUrl() {
+        return this.getUrlParams("dm") || null;
     }
 
     static async getServerInfo(returnData = false) {

@@ -355,69 +355,45 @@ socket.emit("userConnected", {
     });
 });
 
-async function getDMs(timestamp = null){
-    return [
-        {
-            author:{
-                id: 1234,
-                name: "ImaginaryFriend",
-                status: "Busy or smth",
-                icon: "/img/default_pfp.png"
-            }
-        },
-        {
-            author:{
-                id: 56789,
-                name: "WhiskeyCat",
-                status: "yooooo",
-                icon: "/img/default_pfp.png"
-            }
-        },
-        {
-            author:{
-                id: 56789,
-                name: "Django",
-                status: "pow",
-                icon: "/img/default_pfp.png"
-            }
-        },
-        {
-            author:{
-                id: 56789,
-                name: "'Devi'",
-                status: "lol",
-                icon: "/img/default_pfp.png"
-            }
-        }
-    ]
-
-    return new Promise((resolve, reject) => {
-        socket.emit('fetchDMs', {
-            id: UserManager.getID(),
-            token: UserManager.getToken(),
-            timestamp
-        }, (response) => {
-            console.log(response)
-        });
-    })
-}
-
 function getDMsNavContainer(){
     return document.querySelector("#navigation.home .dms");
 }
 
 async function renderDMs(){
-    let dms = await getDMs();
+    let dms = await getDmRooms();
+    let dmRooms = dms?.rooms;
 
     let firstDm = true
-    if(dms?.length > 0){
-        for(let dm of dms){
+
+    // if we have actual dms
+    if(dmRooms?.length > 0){
+        // we will loop through all of em
+        for(let dm of dmRooms){
+
+            let dmRoomIcon = null;
+            let dmRoomName = null;
+
+            // here we get the amount of members inside one dm room.
+            // 2 members are pretty much just a normal dm, whereas more than 2
+            // could be considered a dm group chat.
+            let participantCount = Object.keys(dm?.participants).length
+
+            if(participantCount > 2){
+                dmRoomIcon = "/img/default_pfp.png";
+                dmRoomName = dm.title.replaceAll(",", ", ");
+            }
+            else if(participantCount === 2){
+                let oppositeParticipant = Object.values(dm.participants).find(x => x.id !== UserManager.getID());
+                dmRoomIcon = oppositeParticipant?.icon ?? "/img/default_icon.png";
+                dmRoomName = oppositeParticipant?.name;
+            }
+
             getDMsNavContainer().insertAdjacentHTML('beforeend',
                 `<a class="entry ${!firstDm ? "selected" : ""}">
-                        <img class="icon" src="${stripHTML(sanitizeHtmlForRender(dm.author.icon, false))}">
+                        <img class="icon" src="${stripHTML(dmRoomIcon)}">
                         <div class="info">
-                            <p>${dm.author.name}</p>
-                            <p class="status">${dm.author.status ?? ""}</p>
+                            <p>${dmRoomName}</p>
+                            <p class="status">${dm.status ?? ""}</p>
                         </div>
                     </a>`
             )
@@ -425,4 +401,29 @@ async function renderDMs(){
     }
 
     getDMsNavContainer().fadeIn(200, "flex")
+}
+
+function renderDmRoom(){
+
+}
+
+async function createDmRoom(){
+    socket.emit("createDmRoom", {
+        id: UserManager.getID(),
+        token: UserManager.getToken(),
+        participants: ["123456789012"]
+    }, function (response) {
+        console.log(response)
+    });
+}
+
+async function getDmRooms(){
+    return new Promise((resolve, reject) => {
+        socket.emit('getDmRooms', {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+        }, (response) => {
+            resolve(response)
+        });
+    })
 }

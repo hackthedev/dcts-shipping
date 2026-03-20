@@ -4,7 +4,7 @@
 
 #navigation.home {
     display: flex;
-    width: fit-content !important;
+    width: 300px !important;
     min-width: 300px !important;
     gap: 2px;
     padding: 10px;

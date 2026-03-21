@@ -1573,40 +1573,6 @@ socket.on('receiveGroupBanner', async function(data) {
     document.getElementById("mobile_groupBannerDisplay").src = ChatManager.proxyUrl(data);
 });
 
-function getChannelObjectFromTree(channelId) {
-    const id = String(channelId);
-    return (document.querySelector(`#channellist a#channel-${id}`) || document.querySelector(`#channellist li#channel-${id}`));
-}
-
-
-function refreshValues() {
-    /* Deprecated? */
-    var username = UserManager.getUsername();
-    getRoles();
-    ChatManager.userJoined();
-    ChatManager.getServerInfo();
-
-    socket.emit("setRoom", {
-        id: UserManager.getID(),
-        username: UserManager.getUsername(),
-        icon: UserManager.getPFP(),
-        room: UserManager.getRoom(),
-        token: UserManager.getToken()
-    });
-    getGroupList();
-    getMemberList();
-    getChannelTree();
-    socket.emit("getCurrentChannel", {
-        id: UserManager.getID(),
-        username: username,
-        icon: UserManager.getPFP(),
-        group: UserManager.getGroup(),
-        category: UserManager.getCategory(),
-        channel: UserManager.getChannel(),
-        token: UserManager.getToken()
-    });
-}
-
 function getGroupList() {
     socket.emit("getGroupList", {
         id: UserManager.getID(),

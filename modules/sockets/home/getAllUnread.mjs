@@ -76,7 +76,7 @@ export default (io) => (socket) => {
             // server side instead of having to deal with it in the 
             // client. if someone ever makes a custom client, it would
             // be nice to have things work out of the box if possible
-            
+
              */
         } catch (err) {
             Logger.error(err);

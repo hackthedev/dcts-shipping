@@ -190,19 +190,12 @@ export async function createMemberDmRoom(memberId, participants) {
     // that is actually creating the room is also a participant lol
     participants = [...new Set(participants.map(String))];
 
-    // lets validate members for the room here
-    for(let i = participants.length - 1; i >= 0; i--) {
-        let participant = participants[i];
-
-        // remove invalid member ids
-        if(participant?.length !== 12 && participant !== "system") {
-            participants.splice(i, 1);
-        }
-    }
-
     // check for existing room obviously, would become chaotic otherwise
     let existingRoom = await findExactDmRoom(participants);
     if(existingRoom) return { result: { affectedRows: 1 }, roomId: existingRoom.roomId };
+
+    // only valid participants
+    participants = participants.filter(p => p?.length === 12 || p === "system");
 
     for(let i = 0; i < participants.length; i++) {
         let participant = participants[i];
@@ -215,8 +208,12 @@ export async function createMemberDmRoom(memberId, participants) {
         // and if there are more participants we will just
         // add a ... there
         if(i === 3 && participants.length > 3){
-            title += ",...";
+            title += ", ...";
         }
+    }
+
+    if(participants.length < 1){
+        return { result: { affectedRows: 0 }, roomId: null };
     }
 
     let roomId = String(generateId(12));

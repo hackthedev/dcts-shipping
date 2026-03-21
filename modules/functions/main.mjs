@@ -1367,7 +1367,7 @@ export function setMemberObjColor(member){
 
 export function getUnkownMember(){
     return {
-        id: generateId(12),
+        id: 0,
         name: "Unkown Member"
     }
 }

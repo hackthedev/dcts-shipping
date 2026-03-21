@@ -481,7 +481,7 @@ class ChatManager {
     static setUrl(param) {
         window.history.replaceState(null, null, param); // or pushState
         let page = param.replace("?page=", "");
-        loadPageContent(page)
+        if(typeof loadPageContent === "function") loadPageContent(page)
     }
 
     static setUrlParam(key, value, { replace = true } = {}) {

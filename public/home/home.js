@@ -1,4 +1,6 @@
 async function renderHome() {
+    ChatManager.setUrl("/home")
+
     // get server info and clear the html in case its being re-rendered
     let server = await getServerInfo();
     let contactData = server?.serverinfo?.instance?.contact

@@ -166,13 +166,24 @@ function getDmRoomInfo(dm){
     }
     else if(participantCount === 2){
         let oppositeParticipant = Object.values(dm.participants).find(x => x.id !== UserManager.getID());
+        console.log(dm.participants)
 
         if(oppositeParticipant?.id === "system"){
             dmRoomIcon = "/img/default_icon.png";
             dmRoomName = "System"
-        }else{
+        }
+        else{
             dmRoomIcon = oppositeParticipant?.icon ?? "/img/default_icon.png";
             dmRoomName = oppositeParticipant?.name;
+        }
+    }
+    else if(participantCount === 1){
+        let participant = Object.values(dm.participants)[0];
+        console.log(participant)
+
+        if(participant?.id === UserManager.getID()){
+            dmRoomIcon = UserManager.getPFP()
+            dmRoomName = UserManager.getUsername() + " (You)"
         }
     }
 

@@ -71,6 +71,7 @@
     min-width: 150px;
 }
 .layout.home .content .home-container .public-key .details pre{
+    flex-shrink: 1;
     width: 100%;
     min-width: 0;
 }

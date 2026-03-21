@@ -11,6 +11,7 @@ import {serverconfig} from "../../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger";
 import JSONTools from "@hackthedev/json-tools";
 import {checkMessageObjAuthor, processMessageObject} from "../../resolveMessage.mjs";
+import {io} from "../../../../index.mjs";
 
 export async function getMemberDmRooms(memberId) {
     if(!memberId) throw new Error("Member Id is required");
@@ -174,7 +175,7 @@ export async function createMemberDmRoom(memberId, participants) {
         let participant = participants[i];
 
         // remove invalid member ids
-        if(participant?.length !== 12) removeFromArray(participants, participant);
+        if(participant?.length !== 12 && participant !== "system") removeFromArray(participants, participant);
 
         // we're gonna build the chat title here with the member names.
         if(i < 3){
@@ -200,6 +201,10 @@ export async function createMemberDmRoom(memberId, participants) {
         `INSERT INTO dm_rooms (roomId, participants, title, creatorId) VALUES (?, ?, ?, ?)`,
         [roomId, participantsString, title, memberId]
     );
+
+    participants.forEach((participant) => {
+        io.in(participant).emit("roomInvitation", { roomId });
+    })
 
     return {result, roomId};
 }
@@ -309,12 +314,6 @@ export default (io) => (socket) => {
         try{
             let {result, roomId} = await createMemberDmRoom(member.id, member?.participants);
             let error = result?.affectedRows > 0 ? null : "Error while creating room"
-
-            if(!error){
-                member.participants.forEach((participant) => {
-                    io.in(participant).emit("roomInvitation", { roomId });
-                })
-            }
 
             response({ error, roomId});
         }

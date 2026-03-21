@@ -1,15 +1,31 @@
 import {io, serverconfig, signer, usersocket, xssFilters} from "../../../index.mjs";
-import {hasPermission, shouldIgnoreMember} from "../../functions/chat/main.mjs";
 import Logger from "@hackthedev/terminal-logger"
-import { copyObject, emitBasedOnPermission, getCastingMemberObject, sanitizeInput, sendMessageToUser, validateMemberId } from "../../functions/main.mjs";
-import { decodeFromBase64, encodeToBase64 } from "../../functions/mysql/helper.mjs";
 import { queryDatabase } from "../../functions/mysql/mysql.mjs";
-import {sanitizeHTML} from "../../functions/sanitizing/functions.mjs";
-import JSONTools from "@hackthedev/json-tools";
+import {createMemberDmRoom, saveRoomDmMessage} from "./dms/rooms.mjs";
 
 
-export async function sendSystemMessage(targetUserId, text, opts = {}) {
-  return null;
+export async function sendSystemMessage(targetUserId, text) {
+    if (!targetUserId || !text) throw new Error("targetUserId and text required");
+
+    let { roomId } = await createMemberDmRoom("system", [targetUserId]);
+
+    let payload = {
+        data: {
+            message: text,
+            roomId,
+            author: { id: "system" },
+            reply: { id: null },
+            timestamp: new Date().getTime()
+        }
+    }
+
+    await saveRoomDmMessage(payload);
+
+    payload.meta.author = { id: "system", name: "System", icon: "/img/default_pfp.png" };
+    payload.meta.reply = { id: null };
+
+    io.in(roomId).emit("newDmMessage", { payload });
+    return payload;
 }
 
 async function emitToThread(threadId, event, payload) {

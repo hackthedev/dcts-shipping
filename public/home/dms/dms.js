@@ -39,7 +39,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     socket.on('newDmMessage', async function (response) {
-        addNewMessageToChatLog(response.payload, "dm")
+        if(response?.payload?.data?.roomId === ChatManager.getUrlParams("dm")){
+            console.log(response);
+            addNewMessageToChatLog(response.payload, "dm")
+        }
     })
 
     socket.on('roomInvitation', async function (response) {
@@ -132,7 +135,7 @@ async function startDmWith(id) {
         markDmInNav(createdRoom?.roomId)
     }
     else{
-        console.error(response.error)
+        console.error(createdRoom.error)
     }
     // check if exists etc
 }
@@ -163,8 +166,14 @@ function getDmRoomInfo(dm){
     }
     else if(participantCount === 2){
         let oppositeParticipant = Object.values(dm.participants).find(x => x.id !== UserManager.getID());
-        dmRoomIcon = oppositeParticipant?.icon ?? "/img/default_icon.png";
-        dmRoomName = oppositeParticipant?.name;
+
+        if(oppositeParticipant?.id === "system"){
+            dmRoomIcon = "/img/default_icon.png";
+            dmRoomName = "System"
+        }else{
+            dmRoomIcon = oppositeParticipant?.icon ?? "/img/default_icon.png";
+            dmRoomName = oppositeParticipant?.name;
+        }
     }
 
     return {
@@ -292,7 +301,7 @@ async function renderDmRoom(roomId){
             onImg: async (src) => {
                 console.log("Uploading and replacing src " + src)
                 let upload = await ChatManager.srcToFile(src);
-                editor.insertImage(upload.path)
+                dmEditor.insertImage(upload.path)
             },
             onSend: async(html) => {
                 let wasSent = await sendDmMessage(html, currentDmObj)

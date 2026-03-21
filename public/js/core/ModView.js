@@ -391,7 +391,7 @@ class ModView {
     static showReports(reports) {
         let messageReports = reports.filter(r => r.reportType === "message");
         let userReports = reports.filter(r => r.reportType === "user");
-        let dmReports = reports.filter(r => r.reportType === "dm_message");
+        let dmReports = reports.filter(r => r.reportType === "dm");
         this.reports = reports
 
         let html = `
@@ -457,8 +457,8 @@ class ModView {
         `;
 
         reports.forEach(report => {
-            let reportCreator = ModView.parseJson(report.reportCreator);
-            let reportedUser = ModView.parseJson(report.reportedUser);
+            let reportCreator = report.reportCreator;
+            let reportedUser = report.reportedUser;
 
             table += `
                 <tr class="modview_" onclick="ModView.showReportDetails(${report.id})">
@@ -507,9 +507,12 @@ class ModView {
             return;
         }
 
-        let reportCreator = this.parseJson(report.reportCreator);
-        let reportedUser = this.parseJson(report.reportedUser);
+        let reportCreator = report.reportCreator;
+        let reportedUser = report.reportedUser;
         let reportData = report.reportData
+        let reportType = report.reportType;
+        console.log(reportType)
+
         reportData.author = await ChatManager.resolveMember(reportData?.author?.id);
         if(!reportData?.author?.name){
             console.error("Unable to resolve reported message member")
@@ -518,10 +521,9 @@ class ModView {
         console.log(reportData)
 
         let reportMessage = "";
-        if(report.reportType === "dm_message") {
+        if(reportType === "dm") {
             // if is string parse it
-            if(typeof reportData.message === "string") reportData.message = JSON.parse(reportData.message);
-            reportMessage = reportData.message.content
+            reportMessage = reportData.payload.data.message
         }
         else{
             if(reportData.message.substring(0, 4).includes(("{"))){
@@ -651,7 +653,7 @@ class ModView {
 
         <div class="modview_action-buttons action-buttons" >
             <button class="delete-btn" onclick="ModView.deleteReport('${report.id}')">Delete Report</button>
-            <button class="kick-btn" onclick="ModView.deleteMessage('${reportData.messageId}', '${reportCreator.id}', '${reportedUser.id}')">Delete Reported Message</button>
+            <button class="kick-btn" onclick="ModView.deleteMessage('${reportData.messageId}', '${reportCreator.id}', '${reportedUser.id}', '${reportType}')">Delete Reported Message</button>
         </div>
 
         <button class="back-button" onclick="ModView.showReports(ModView.reports)">Back</button>
@@ -683,30 +685,43 @@ class ModView {
         })
     }
 
-    static deleteMessage(messageId, reporterId, reportedId) {
+    static deleteMessage(messageId, reporterId, reportedId, messageType) {
         ModView.close();
 
         customPrompts.showConfirm(
-            "Do you want to delete this report??",
+            "Do you want to delete the reported message??",
             [["Yes", "success"], ["No", "error"]],
             (selectedOption) => {
 
-                if (selectedOption == "yes") {
+                if (selectedOption === "yes") {
                     socket.emit("deleteMessageInReport", {
                         id: UserManager.getID(),
                         token: UserManager.getToken(),
-                        messageId: messageId,
-                        reporterId: reporterId,
-                        reportedId: reportedId,
+                        messageId,
+                        reporterId,
+                        reportedId,
+                        messageType
                     }, function (response) {
-                        showSystemMessage({
-                            title: response.msg,
-                            text: "",
-                            icon: response.type,
-                            img: null,
-                            type: response.type,
-                            duration: 4000
-                        });
+                        if(response?.error){
+                            showSystemMessage({
+                                title: "Error deleting message",
+                                text: response?.error,
+                                icon: "error",
+                                img: null,
+                                type: "error",
+                                duration: 4000
+                            });
+                        }
+                        else{
+                            showSystemMessage({
+                                title: "Message deleted",
+                                text: "",
+                                icon: "success",
+                                img: null,
+                                type: "success",
+                                duration: 4000
+                            });
+                        }
                     });
                 }
             },

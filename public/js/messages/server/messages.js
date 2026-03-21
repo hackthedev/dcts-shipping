@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     let element = data.element;
                     let messageId = getMessageIdFromElement(element);
 
-                    let isDM = !!document.querySelector(".threadArea")
+                    let isDM = !!document.querySelector(".dms")
                     let plainText = decodeURIComponent(element?.closest(".content")?.getAttribute("data-plain-text"))
                     UserReports.reportMessage(messageId, isDM ? "dm" : "message", plainText)
                 },
@@ -221,17 +221,17 @@ document.addEventListener("DOMContentLoaded", function () {
         ]
     );
 
-    socket.on('receiveDeleteMessage', async function (id) {
+    socket.on('receiveDeleteMessage', async function (data) {
         try {
-            var message = getMessageElementFromId(id)
+            var message = getMessageElementFromId(data.messageId ?? data)
             if (!message) {
-                console.warn("Couldnt get message object in delete event");
+                console.warn("Couldnt get message object in delete event", data);
                 return;
             }
 
             let container = getMessageContainerFromMessage(message);
             if (!container) {
-                console.warn("Couldnt get message cotnainer from message in delete event");
+                console.warn("Couldnt get message container from message in delete event");
                 return;
             }
 

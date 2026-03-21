@@ -39,7 +39,6 @@ export default (io) => (socket) => {
             if (!member?.category) return response({error: "No category provided"})
             if (!member?.channel) return response({error: "No channel provided"})
 
-
             // anti spam check
             let rateLimitResult = await getChannelRateLimit({
                 room: `${member.group}-${member.category}-${member.channel}`,
@@ -48,24 +47,27 @@ export default (io) => (socket) => {
 
             // check results
             if (rateLimitResult?.slowmode === true && !await hasPermission(member.author.id, "bypassSlowmode", member.channel)) {
+
                 // get last message sent from member here so we can check the timestamp
                 let lastMemberMessageObj = await getMemberLatestMessage(member.author.id, member.author.id);
-                if (!lastMemberMessageObj) return Logger.debug("No message found. Possibly first message") // allow if none found
 
-                // get future date where slowmode will be expired
-                let slowmodeDate = DateTools.getDateFromOffset(
-                    `+${serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration}`,
-                    new Date(lastMemberMessageObj.timestamp)
-                ).getTime();
+                if (lastMemberMessageObj){
 
-                if (lastMemberMessageObj?.timestamp &&
-                    new Date().getTime() >= slowmodeDate) {
-                    // member is allowed to send a message
-                } else {
-                    // we can use that in the client to check for it like if xx?.slowMode and if
-                    // it exists we can straight up use it to get a display date. this way we
-                    // save some data to transmit ig as that works too.
-                    return response({error: "Slow mode active!", slowmode: slowmodeDate})
+                    // get future date where slowmode will be expired
+                    let slowmodeDate = DateTools.getDateFromOffset(
+                        `+${serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration}`,
+                        new Date(lastMemberMessageObj.timestamp)
+                    ).getTime();
+
+                    if (lastMemberMessageObj?.timestamp &&
+                        new Date().getTime() >= slowmodeDate) {
+                        // member is allowed to send a message
+                    } else {
+                        // we can use that in the client to check for it like if xx?.slowMode and if
+                        // it exists we can straight up use it to get a display date. this way we
+                        // save some data to transmit ig as that works too.
+                        return response({error: "Slow mode active!", slowmode: slowmodeDate})
+                    }
                 }
             }
             else if(rateLimitResult?.rateLimited === true && !await hasPermission(member.author.id, "bypassRatelimit", member.channel)){
@@ -109,19 +111,19 @@ export default (io) => (socket) => {
 
             if (isNaN(member.group) === true) {
                 Logger.debug("Group was not a number");
-                return;
+                return response({error: "Group was not a number"});
             }
             if (isNaN(member.channel) === true) {
                 Logger.debug("Channel was not a number");
-                return;
+                return response({error: "Channel was not a number"});
             }
             if (isNaN(member.category) === true) {
                 Logger.debug("Category was not a number");
-                return;
+                return response({error: "Category was not a number"});
             }
             if (member.message.replaceAll(" ").length <= 0) {
                 Logger.debug("Message is shorter than 1 charachter");
-                return;
+                return response({error: "Message is shorter than 1 charachter"});
             }
 
             // if message is signed, verify the signature
@@ -143,8 +145,7 @@ export default (io) => (socket) => {
                                 "popup_type": "confirm"
                             }`));
 
-                    response({error: "Message rejected! Signature wasnt valid!"})
-                    return;
+                    return response({error: "Message rejected! Signature wasnt valid!"})
                 }
             }
 
@@ -163,9 +164,7 @@ export default (io) => (socket) => {
                         "popup_type": "confirm"
                    }`));
 
-                response({error: "You cant chat here!"})
-
-                return;
+                return response({error: "You cant chat here!"})
             }
 
             // Check if room exists
@@ -190,7 +189,7 @@ export default (io) => (socket) => {
 
                     if (member.message.trim() === "" || member.message.trim().length === 0) {
                         console.log("Message was empty")
-                        return;
+                        return response({error: "Message was empty"});
                     }
 
                     // If the message was edited
@@ -203,7 +202,7 @@ export default (io) => (socket) => {
                         // Check if the user who wants to edit the msg is even the original author lol
                         if (originalMsgObj.author.id !== member.author?.id) {
                             Logger.warn(`Unauthorized user (${member.name} - ${member.author?.id}) tried to edit another users message`);
-                            return;
+                            return response({error: "You cant edit others messages!"});
                         }
 
                         // Update the data for editing
@@ -281,6 +280,8 @@ export default (io) => (socket) => {
                             "type": "success",
                             "popup_type": "confirm"
                         }`));
+
+                    response({error: "Unable to find channel"})
                 }
             } catch (err) {
                 Logger.warn("Couldnt send message because room didnt exist");
@@ -307,10 +308,11 @@ export default (io) => (socket) => {
                             "type": "error",
                             "popup_type": "confirm"
                         }`));
-                return;
+                return response({error: "Channel not found!"});
             }
         } else {
             Logger.warn("Cant send message because member id wasnt valid");
+            response({error: "Member validation failed!"})
         }
     });
 

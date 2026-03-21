@@ -190,10 +190,13 @@ export async function createMemberDmRoom(memberId, participants) {
     // make the sql string.. id1,id2,id3,...
     let participantsString = participants.join(",");
 
-    return await queryDatabase(
+    let roomId = String(generateId(12));
+    let result = await queryDatabase(
         `INSERT INTO dm_rooms (roomId, participants, title, creatorId) VALUES (?, ?, ?, ?)`,
-        [String(generateId(12)), participantsString, title, memberId]
+        [roomId, participantsString, title, memberId]
     );
+
+    return {result, roomId};
 }
 
 
@@ -238,7 +241,6 @@ export default (io) => (socket) => {
 
         let payload = member?.payload
         if(typeof payload !== "object") return response({ error: "Missing message payload"})
-        console.log(payload)
 
         if(payload?.data?.roomId === undefined) return response({ error: "roomId missing"})
         if(payload?.data?.roomId?.length !== 12) return response({ error: "Invalid roomId format"})
@@ -249,11 +251,22 @@ export default (io) => (socket) => {
         let result = await saveRoomDmMessage(payload);
         let hasError = result?.affectedRows > 0 ? null : "Error while sending DM"
 
-        if(!hasError){
-            io.in(member.message.roomId).emit("newDmMessage", { message });
+        try{
+            // minimum structure needed for processMessageObj
+            let resolvedMessageObj = await processMessageObject(payload.data, member.id);
+            payload.meta.author = resolvedMessageObj?.author ?? { id: 0 };
+            payload.meta.reply = resolvedMessageObj?.reply ?? { id: null };
+        }
+        catch(processingError){
+            Logger.error(processingError);
+            response({ error: "Error processing message after saving", payload: null});
         }
 
-        response({ error: hasError, message});
+        if(!hasError){
+            io.in(payload.data.roomId).emit("newDmMessage", { payload });
+        }
+
+        response({ error: hasError, payload});
     });
 
 
@@ -266,8 +279,8 @@ export default (io) => (socket) => {
         if(!Array.isArray(member.participants)) return response({ error: "participants must be an array"})
 
         try{
-            let room = await createMemberDmRoom(member.id, member?.participants);
-            response({ error: room?.affectedRows > 0 ? null : "Error while creating room"});
+            let {result, roomId} = await createMemberDmRoom(member.id, member?.participants);
+            response({ error: result?.affectedRows > 0 ? null : "Error while creating room", roomId});
         }
         catch(ex){
             Logger.error(ex);

@@ -1039,7 +1039,7 @@ async function sendMessageToServer(authorId = UserManager.getID(),
                                    message,
                                    bypassQuill = false) {
     Clock.start("send_message");
-    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+    let isScrolledDown = isScrolledToBottom(getContentMainContainer());
 
     if (UserManager.getGroup() == null || UserManager.getGroup().length <= 0 || UserManager.getCategory() == null || UserManager.getCategory().length <= 0 || UserManager.getChannel() == null || UserManager.getChannel().length <= 0) {
         showSystemMessage({
@@ -1053,7 +1053,8 @@ async function sendMessageToServer(authorId = UserManager.getID(),
 
         Clock.stop("send_message");
         //alert("Please select any channel first");
-        return;
+        console.warn("Not sending as no channel found");
+        return
     }
 
     replaceInlineEmojis();
@@ -1077,7 +1078,7 @@ async function sendMessageToServer(authorId = UserManager.getID(),
     };
 
     // if we're using the client, sign the message
-    if (await Client()) {
+    if (isLauncher()) {
         msgPayload = await Client().SignJson(msgPayload);
     }
 
@@ -1289,17 +1290,10 @@ function initQuillShit(){
     });
     editorResizeObserver.observe(editor);
 
+    console.log(editor)
     editor.addEventListener('keydown', function (event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
-
-            /*
-            let msgContent = quill.root.innerHTML
-                //    .replace(/<p><br><\/p>/g, "")
-                .replace(/<p>\s*<br\s*\/?>\s*<\/p>/g, ""); // Clean up empty lines
-
-             */
-
             sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), quill.root.innerHTML);
         }
     });

@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
     tooltipSystem = new TooltipSystem();
     customPrompts = new Prompt();
 
-
     document.querySelectorAll("img").forEach(rewriteImg);
 
     new MutationObserver(mutations => {
@@ -40,110 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     socket.on('newDmMessage', async function (response) {
-        addNewMessageToChatLog(response.message, "dm")
+        addNewMessageToChatLog(response.payload, "dm")
     })
 });
-
-async function renderMessages(thread) {
-    if (!socket.connected) return;
-    const area = document.getElementById('threadArea');
-    if (!area) return;
-    area.innerHTML = "";
-
-    const cutoff = thread.lastReadAt ? +new Date(thread.lastReadAt) : null;
-    let dividerPlaced = false;
-
-    let previousMessage = null;
-    let previousElement = null;
-    for (let message of thread.messages) {
-        const ts = message.ts ? +new Date(message.ts) : 0;
-
-        // needed
-        if (!message?.text?.sender) message.text.sender = message?.text?.content;
-
-
-        if (!dividerPlaced && cutoff && ts > cutoff && message.authorId !== CURRENT_USER_ID) {
-            const divi = document.createElement('div');
-            divi.style.cssText = "text-align:center;opacity:.7;font-size:11px;margin:0 0;";
-            divi.textContent = "— New —";
-            area.appendChild(divi);
-            dividerPlaced = true;
-        }
-
-        const mine = message.authorId === CURRENT_USER_ID;
-        const name = displayNameForMessage(message);
-        const div = document.createElement('div');
-        div.className = 'msg' + (mine ? ' mine' : '');
-
-
-        const canEdit = message.authorId === CURRENT_USER_ID;
-        const canDelete = message.authorId === CURRENT_USER_ID;
-
-        // system is allowed to use html messages hehehe
-        const isSystem = message.authorId === "system";
-
-        // get other participant
-        let target = otherParticipant(thread);
-
-        message.plainText = messageText;
-        message = makeMessageCompatible(message, messageText, isSystem);
-
-        div.setAttribute("data-thread-id", thread.id);
-        div.setAttribute("data-target-id", target.id);
-
-        // now handle display logic
-        let minutesPassed = compareTimestamps(new Date(message.ts).getTime(), new Date(previousMessage?.ts).getTime());
-        let appendMessage = Math.abs(minutesPassed) <= 5 && message?.authorId === previousMessage?.authorId;
-        let previousElementContent = previousElement?.querySelector('.contentRows');
-        let duplicateMessage = previousElementContent?.querySelector(`.content[data-message-id="${message.messageId}"]`);
-
-        if (appendMessage && previousMessage && previousElementContent && !isSystem && !duplicateMessage) {
-            previousElementContent.innerHTML += await createMsgHTML({
-                message,
-                append: true,
-                createActions: false,
-            })
-
-            continue;
-        } else {
-            div.innerHTML = await createMsgHTML({
-                message,
-                append: false,
-                createActions: false,
-            })
-        }
-
-
-        area.appendChild(div);
-        previousElement = div;
-        previousMessage = JSON.parse(JSON.stringify(message));
-
-
-        /*div.innerHTML = `
-          <div>${messageText}</div>
-          <div class="meta">
-            ${encodePlainText(new Date(message.ts).toLocaleString() || '')}
-            <span style="margin-left:8px; opacity:.8;">
-              ${canEdit ? `<button class="linkBtn" onclick="onEditMsg('${thread.id}','${message.id}', '${target}')">Edit</button>` : ''}
-              ${canDelete ? `<button class="linkBtn" onclick="onDeleteMsg('${thread.id}','${message.id}')">Delete</button>` : ''}
-              ${mine === false && isSystem === false && ( (isEncrypted === false && isLauncher()) || (isEncrypted === true && isLauncher()) ) ? `<button class="linkBtn" onclick="onReportMsg('${thread.id}','${message.id}', '${messageText}')">Report</button>` : ""}
-            </span>
-          </div>`;*/
-    }
-
-    area.scrollTop = area.scrollHeight;
-
-    socket.emit('markRead', {
-        threadId: thread.id,
-        id: UserManager.getID(),
-        token: UserManager.getToken(),
-    }, (ack) => {
-        if (ack?.type === 'success') {
-            thread.lastReadAt = ack.last_read_at;
-            thread.unread = 0;
-        }
-    });
-}
 
 async function onEditMsg(threadId, messageId, targetId) {
     const t = CONFIG.threads.find(x => x.id === threadId);
@@ -220,14 +118,15 @@ async function onEditMsg(threadId, messageId, targetId) {
 }
 
 
-function startDmWith(id) {
-    if (!id) {
-        id = ChatManager.getDMFromUrl();
-        if (!id) return;
+async function startDmWith(id) {
+    if(!id || id?.length !== 12) throw new Error("id must be provided or was invalid");
+    let createdRoom = await createDmRoom([id])
+    if(!createdRoom?.error && createdRoom?.roomId){
+        ChatManager.setUrlParam("dm", createdRoom.roomId)
     }
-
-    window.history.replaceState(null, null, `?dm=${id}`);
-
+    else{
+        console.error(response.error)
+    }
     // check if exists etc
 }
 
@@ -283,8 +182,8 @@ async function renderDMs(){
                 `<a class="entry ${!firstDm ? "selected" : ""}" data-room-id="${dm.roomId}" onclick="renderDmRoom('${dm.roomId}')">
                         <img class="icon" src="${stripHTML(icon)}">
                         <div class="info">
-                            <p>${title}</p>
-                            <p class="status">${dm.status ?? ""}</p>
+                            <p>${stripHTML(title)}</p>
+                            <p class="status">${stripHTML(dm.status) ?? ""}</p>
                         </div>
                     </a>`
             )
@@ -340,7 +239,6 @@ async function renderDmRoom(roomId){
 
         observeContainer();
         let dmMessages = await getDmRoomMessages(roomId);
-        console.log(dmMessages);
 
         // display messages if no messages are found.
         // that if could be used to show when there are no messages.
@@ -392,6 +290,9 @@ async function renderDmRoom(roomId){
         window.quill = dmEditor.quill;
         editorHints = document.getElementById("editor-hints");
         window.editor = dmEditor.editorEl.querySelector(".ql-editor");
+    }
+    else{
+        startDmWith(ChatManager.getUrlParams("dm"))
     }
 }
 
@@ -455,13 +356,15 @@ async function createDmRoom(participants){
     if(!participants) throw new Error("participants is required");
     if(!Array.isArray(participants)) throw new Error("participants is not an array");
 
-    socket.emit("createDmRoom", {
-        id: UserManager.getID(),
-        token: UserManager.getToken(),
-        participants
-    }, function (response) {
-        console.log(response)
-    });
+    return new Promise(resolve => {
+        socket.emit("createDmRoom", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            participants
+        }, function (response) {
+            resolve(response)
+        });
+    })
 }
 
 async function getDmRoomMessages(roomId, timestamp = null){

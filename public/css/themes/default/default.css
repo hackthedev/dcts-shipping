@@ -444,9 +444,12 @@ img {
 }
 .encryption-notice{
     color: indianred;
-    background-color: rgba(209, 117, 117, 0.2);
-    border: 1.5px solid rgba(209, 117, 117, 0.2);
     text-shadow: -1px 0 0 var(--main), 1px 0 0 var(--main),
     0 -1px 0 var(--main), 0 1px 0 var(--main),
     0 0 8px var(--main);
+}
+
+details.encryption-notice.chat-notice{
+    background-color: rgba(209, 117, 117, 0.2);
+    border: 1.5px solid rgba(209, 117, 117, 0.2);
 }

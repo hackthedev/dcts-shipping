@@ -327,38 +327,43 @@ async function addNewMessageToChatLog(message, type = null) {
 
     // the message was not created in the room we're currently in, but thats fine.
     // we will instead show the notification icon and return;
-    if (message.room !== UserManager.getRoom() && type === null) {
+    if (message?.room !== UserManager.getRoom() && type === null) {
         ChatManager.setChannelMarker(message.channel, true);
         await updateUIIndicators(message)
-        return;
+        return console.warn("Not showing message");
     }
 
-    if (await shouldAppendMessage(container, message) === true) {
-        await showMessageInChat({
-            container,
-            message,
-            append: true,
-            mentions: true,
-            pingMentions: true,
-            messageType: type
-        });
-    } else {
-        await showMessageInChat({
-            container,
-            message,
-            append: false,
-            mentions: true,
-            pingMentions: true,
-            messageType: type
-        });
+    if(type === "dm"){
+        await displayMessagesInElement({
+            data: [message],
+            channelId: ChatManager.getUrlParams("dm"),
+            container: getContentMainContainer(),
+            appendTop: false,
+            index: null,
+            refElement: null,
+            messageType: "dm",
+            getChannel: () => {
+                return ChatManager.getUrlParams("dm")
+            }
+        })
+    }
+    else{
+        await displayMessagesInElement({
+            data: [message],
+            channelId: UserManager.getChannel(),
+            container: getContentMainContainer(),
+            appendTop: false,
+            index: null,
+            refElement: null,
+        })
     }
 
+    displayAwaitedMessages(getContentMainContainer())
+    await updateUIIndicators(message)
 
     if (isScrolledDown) {
         scrollDown("messageCreated");
     }
-
-    await updateUIIndicators(message)
 }
 
 function registerMessageCreateEvent() {
@@ -1130,6 +1135,26 @@ function getUrlFromText(text) {
     return text.match(geturl)
 }
 
+async function transformDmMessage(message, messageType){
+    if(messageType === "dm"){
+        try {
+            let messageAuthorId = message?.data?.author?.id;
+            let isMine = messageAuthorId === UserManager.getID();
+
+            // verification will be handled above so we just make the dms compatible now
+            message.message = await getMessageText(message, isMine, messageAuthorId);
+            message.author = message.meta.author;
+            message.timestamp = message.meta.timestamp;
+            message.sig = message.data.sig
+            message.messageId = message.meta.messageId;
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    return message;
+}
+
 async function displayMessagesInElement({
                                             data,
                                             channelId,
@@ -1148,28 +1173,12 @@ async function displayMessagesInElement({
 
     for (let message of appendTop ? data.reverse() : data) {
         // if user switches channel we cancel this shit
+        message = await transformDmMessage(message, messageType)
 
         if (!getChannel) {
             if (channelId !== UserManager.getChannel()) return;
         } else {
             if (channelId !== await getChannel()) return;
-        }
-
-        // take care of displaying decrypted messages
-        if(messageType === "dm"){
-            try {
-                let messageAuthorId = message?.data?.author?.id;
-                let isMine = messageAuthorId === UserManager.getID();
-
-                // verification will be handled above so we just make the dms compatible now
-                message.message = await getMessageText(message, isMine, messageAuthorId);
-                message.author = message.meta.author;
-                message.timestamp = message.meta.timestamp;
-                message.sig = message.data.sig
-                message.messageId = message.meta.messageId;
-            } catch (err) {
-                console.log(err);
-            }
         }
 
         try {

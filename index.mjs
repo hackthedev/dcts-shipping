@@ -440,7 +440,7 @@ const tables = [
         columns: [
 
             {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "roomId", type: "varchar(20) NOT NULL"},
+            {name: "roomId", type: "varchar(20) NOT NULL UNIQUE KEY"},
             {name: "participants", type: "varchar(204) NOT NULL"},
             {name: "title", type: "varchar(204) NOT NULL DEFAULT 'New Chat'"},
             {name: "creatorId", type: "varchar(20) NOT NULL"},

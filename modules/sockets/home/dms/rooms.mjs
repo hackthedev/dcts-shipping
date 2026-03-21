@@ -17,25 +17,46 @@ export async function getMemberDmRooms(memberId) {
     if(!memberId) throw new Error("Member Id is required");
 
     const roomsRow = await queryDatabase(
-        `SELECT * FROM dm_rooms WHERE FIND_IN_SET(?, participants) ORDER BY createdAt DESC LIMIT 50`,
+        `SELECT dm_rooms.*
+         FROM dm_rooms
+                  INNER JOIN dm_room_participants ON dm_room_participants.roomId = dm_rooms.roomId
+         WHERE dm_room_participants.memberId = ?
+         ORDER BY dm_rooms.createdAt DESC
+             LIMIT 50`,
         [String(memberId)]
     );
 
-
     if(roomsRow?.length === 0) return null;
+
+    const roomIds = roomsRow.map(room => room.roomId);
+    if(roomIds.length === 0) return null;
+
+    const participantRows = await queryDatabase(
+        `SELECT roomId, memberId
+         FROM dm_room_participants
+         WHERE roomId IN (${roomIds.map(() => "?").join(",")})`,
+        roomIds
+    );
 
     // basically what we're doing here is looking through all rooms found
     // and resolve the member objects using the id stuff and later overwrite it.
     // why? because this is actually A LOT faster than having the client resolve it for each member.
     //
     let resolvedRoomParticipants = {}; // cache
+    let roomParticipantsMap = {};
+
+    for(let i = 0; i < participantRows.length; i++) {
+        let row = participantRows[i];
+        if(!roomParticipantsMap[row.roomId]) roomParticipantsMap[row.roomId] = [];
+        roomParticipantsMap[row.roomId].push(String(row.memberId));
+    }
 
     for(let i = 0; i < roomsRow.length; i++) {
         let room = roomsRow[i];
         let roomSpecificParticipants = {};
 
         // for each room participant we will look up the member obj
-        let roomParticipants = room.participants.split(",");
+        let roomParticipants = roomParticipantsMap[room.roomId] || [];
         if(roomParticipants?.length > 0){
             for(let participant of roomParticipants){
                 let memberObj;
@@ -46,7 +67,7 @@ export async function getMemberDmRooms(memberId) {
                 if(resolvedRoomParticipants[participant]){
                     memberObj = resolvedRoomParticipants[participant];
                 }
-                // if the member was not found in resolvedRoomParticipants, we will have
+                    // if the member was not found in resolvedRoomParticipants, we will have
                 // to fetch it anyway. after that tho we will store it for possible reuse.
                 else{
                     memberObj = await getCastingMemberObject(serverconfig.servermembers[participant])
@@ -115,9 +136,9 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
         messageRows = await queryDatabase(
             `SELECT dms.*
              FROM dms
-                      INNER JOIN dm_rooms ON dm_rooms.roomId = dms.roomId
+                      INNER JOIN dm_room_participants ON dm_room_participants.roomId = dms.roomId
              WHERE dms.roomId = ?
-               AND FIND_IN_SET(?, dm_rooms.participants)
+               AND dm_room_participants.memberId = ?
              ORDER BY dms.createdAt DESC
                  LIMIT 50`,
             [roomId, requesterMemberId]
@@ -127,9 +148,9 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
         messageRows = await queryDatabase(
             `SELECT dms.*
              FROM dms
-                      INNER JOIN dm_rooms ON dm_rooms.roomId = dms.roomId
+                      INNER JOIN dm_room_participants ON dm_room_participants.roomId = dms.roomId
              WHERE dms.roomId = ?
-               AND FIND_IN_SET(?, dm_rooms.participants)
+               AND dm_room_participants.memberId = ?
                AND dms.createdAt <= ?
              ORDER BY dms.createdAt DESC
                  LIMIT 50`,
@@ -165,17 +186,26 @@ export async function createMemberDmRoom(memberId, participants) {
     // lets add us aka the creator first for the title
     if(!participants.includes(memberId)) participants.push(memberId);
 
+    // get rid of possible duplicates and then make sure the member
+    // that is actually creating the room is also a participant lol
+    participants = [...new Set(participants.map(String))];
+
+    // lets validate members for the room here
+    for(let i = participants.length - 1; i >= 0; i--) {
+        let participant = participants[i];
+
+        // remove invalid member ids
+        if(participant?.length !== 12 && participant !== "system") {
+            participants.splice(i, 1);
+        }
+    }
+
     // check for existing room obviously, would become chaotic otherwise
     let existingRoom = await findExactDmRoom(participants);
     if(existingRoom) return { result: { affectedRows: 1 }, roomId: existingRoom.roomId };
 
-
-    // lets validate members for the room here
     for(let i = 0; i < participants.length; i++) {
         let participant = participants[i];
-
-        // remove invalid member ids
-        if(participant?.length !== 12 && participant !== "system") removeFromArray(participants, participant);
 
         // we're gonna build the chat title here with the member names.
         if(i < 3){
@@ -189,18 +219,26 @@ export async function createMemberDmRoom(memberId, participants) {
         }
     }
 
-    // get rid of possible duplicates and then make sure the member
-    // that is actually creating the room is also a participant lol
-    participants = [...new Set(participants.map(String))];
-
-    // make the sql string.. id1,id2,id3,...
-    let participantsString = participants.join(",");
-
     let roomId = String(generateId(12));
     let result = await queryDatabase(
-        `INSERT INTO dm_rooms (roomId, participants, title, creatorId) VALUES (?, ?, ?, ?)`,
-        [roomId, participantsString, title, memberId]
+        `INSERT INTO dm_rooms (roomId, title, creatorId) VALUES (?, ?, ?)`,
+        [roomId, title, memberId]
     );
+
+    if(result?.affectedRows > 0 && participants.length > 0){
+        let values = [];
+        let placeholders = [];
+
+        for(let participant of participants){
+            placeholders.push("(?, ?)");
+            values.push(roomId, participant);
+        }
+
+        await queryDatabase(
+            `INSERT INTO dm_room_participants (roomId, memberId) VALUES ${placeholders.join(",")}`,
+            values
+        );
+    }
 
     participants.forEach((participant) => {
         io.in(participant).emit("roomInvitation", { roomId });
@@ -212,18 +250,43 @@ export async function createMemberDmRoom(memberId, participants) {
 async function findExactDmRoom(participants) {
     if(!participants?.length) return null;
 
-    // look through rooms to find a dm room that has all the participants already to save on storage n shit
-    let conditions = participants.map(() => `FIND_IN_SET(?, participants)`).join(" AND ");
-    let query = `SELECT * FROM dm_rooms WHERE ${conditions}`;
+    let rows = await queryDatabase(
+        `SELECT roomId
+         FROM dm_room_participants
+         WHERE memberId IN (${participants.map(() => "?").join(",")})
+         GROUP BY roomId
+         HAVING COUNT(DISTINCT memberId) = ?`,
+        [...participants, participants.length]
+    );
 
-    let rows = await queryDatabase(query, participants);
     if(!rows?.length) return null;
 
-    // then we need to check for participants if we find something
+    let candidateRoomIds = rows.map(row => row.roomId);
+    let participantRows = await queryDatabase(
+        `SELECT roomId, memberId
+         FROM dm_room_participants
+         WHERE roomId IN (${candidateRoomIds.map(() => "?").join(",")})`,
+        candidateRoomIds
+    );
+
     let sorted = participants.slice().sort().join(",");
-    for(let row of rows) {
-        let rowParticipants = row.participants.split(",").sort().join(",");
-        if(rowParticipants === sorted) return row;
+    let roomParticipantsMap = {};
+
+    // then we need to check for participants if we find something
+    for(let row of participantRows) {
+        if(!roomParticipantsMap[row.roomId]) roomParticipantsMap[row.roomId] = [];
+        roomParticipantsMap[row.roomId].push(String(row.memberId));
+    }
+
+    for(let roomId of candidateRoomIds) {
+        let rowParticipants = (roomParticipantsMap[roomId] || []).sort().join(",");
+        if(rowParticipants === sorted) {
+            let roomRows = await queryDatabase(
+                `SELECT * FROM dm_rooms WHERE roomId = ? LIMIT 1`,
+                [roomId]
+            );
+            if(roomRows?.[0]) return roomRows[0];
+        }
     }
 
     return null;

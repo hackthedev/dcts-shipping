@@ -441,10 +441,23 @@ const tables = [
 
             {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
             {name: "roomId", type: "varchar(20) NOT NULL UNIQUE KEY"},
-            {name: "participants", type: "varchar(204) NOT NULL"},
             {name: "title", type: "varchar(204) NOT NULL DEFAULT 'New Chat'"},
             {name: "creatorId", type: "varchar(20) NOT NULL"},
             {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+        ]
+    },
+    {
+        name: "dm_room_participants",
+        columns: [
+            {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "roomId", type: "varchar(20) NOT NULL"},
+            {name: "memberId", type: "varchar(204) NOT NULL"},
+            {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+        ],
+        keys: [
+            {name: "UNIQUE KEY", type: "unique_room_member (roomId, memberId)"},
+            {name: "KEY", type: "idx_memberId (memberId)"},
+            {name: "KEY", type: "idx_roomId (roomId)"},
         ]
     },
     {

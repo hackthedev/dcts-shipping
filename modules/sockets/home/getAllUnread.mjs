@@ -20,6 +20,7 @@ export default (io) => (socket) => {
             let unreadContent = 0;
             let isAdmin = await hasPermission(member.id, "manageTickets");
 
+            /*
             setTimeout(async () => {
                 if (isAdmin) {
                     const [dmsRow] = await queryDatabase(
@@ -75,6 +76,8 @@ export default (io) => (socket) => {
             // server side instead of having to deal with it in the 
             // client. if someone ever makes a custom client, it would
             // be nice to have things work out of the box if possible
+            
+             */
         } catch (err) {
             Logger.error(err);
             return response?.({ type: 'error', msg: 'getAllUnread failed' });

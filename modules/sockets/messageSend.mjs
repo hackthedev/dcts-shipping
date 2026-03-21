@@ -50,7 +50,6 @@ export default (io) => (socket) => {
 
                 // get last message sent from member here so we can check the timestamp
                 let lastMemberMessageObj = await getMemberLatestMessage(member.author.id, member.author.id);
-
                 if (lastMemberMessageObj){
 
                     // get future date where slowmode will be expired

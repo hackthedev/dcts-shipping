@@ -41,7 +41,8 @@
 
 .layout.home .content .home-container .public-key{
     flex-grow: 1;
-    min-width: 0;
+    flex-shrink: 1;
+    min-width: 100px;
 }
 .layout.home .content .home-container .public-key,
 .layout.home .content .home-container .contact {

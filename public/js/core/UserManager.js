@@ -486,9 +486,8 @@ class UserManager {
             jsonData = await this.getAccountExportData();
         }
 
-        if (isLauncher()) {
-            let client = Client()
-            let result = client.saveAccount(JSON.stringify(jsonData))
+        if (isLauncher() && Client().saveAccount) {
+            Client().saveAccount(JSON.stringify(jsonData))
         }
     }
 

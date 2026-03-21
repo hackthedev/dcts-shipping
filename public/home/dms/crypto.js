@@ -52,7 +52,6 @@ async function getDecryptedMessage(isMine, message){
         if(message?.data?.plainSig){
             // for my next magic trick, we shall verify the entire message object too
             // to make sure nothing was modified, like the entire thing aka message.text object
-            message.data.plainSig += "fdf"
             let sigRaw = publicKey ? await Client().VerifyString(decryptedPlain, message?.data?.plainSig, publicKey) : false;
             let objRaw = publicKey ? await Client().VerifyJson(message?.data, publicKey) : false;
 

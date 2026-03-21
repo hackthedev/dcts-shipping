@@ -61,6 +61,16 @@ async function renderHome() {
         correctLevel: QRCode.CorrectLevel.L,
         typeNumber: 40,
     })
+
+    markNavigationButton("home")
+}
+
+function markNavigationButton(name){
+    getNavContainer()?.querySelectorAll(`.entry`).forEach(x => {
+        if(x.classList.contains("selected")) x.classList.remove("selected");
+    })
+
+    getNavContainer()?.querySelector(`.entry[data-name='${name}']`).classList.add("selected");
 }
 
 function registerHomeContextMenu() {

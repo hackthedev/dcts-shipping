@@ -41,6 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.on('newDmMessage', async function (response) {
         addNewMessageToChatLog(response.payload, "dm")
     })
+
+    socket.on('roomInvitation', async function (response) {
+        renderDMs();
+    })
 });
 
 async function onEditMsg(threadId, messageId, targetId) {
@@ -123,6 +127,9 @@ async function startDmWith(id) {
     let createdRoom = await createDmRoom([id])
     if(!createdRoom?.error && createdRoom?.roomId){
         ChatManager.setUrlParam("dm", createdRoom.roomId)
+        renderDmRoom(createdRoom?.roomId)
+        renderDMs();
+        markDmInNav(createdRoom?.roomId)
     }
     else{
         console.error(response.error)
@@ -132,8 +139,13 @@ async function startDmWith(id) {
 
 
 function getDMsNavContainer(){
-    return document.querySelector("#navigation.home .dms");
+    return getNavContainer().querySelector(".dms");
 }
+
+function getNavContainer(){
+    return document.querySelector("#navigation.home");
+}
+
 
 function getDmRoomCount(dm){
     return Object.keys(dm?.participants).length;
@@ -170,6 +182,7 @@ async function renderDMs(){
     // if we have actual dms
     if(dmRooms?.length > 0){
         // we will loop through all of em
+        getDMsNavContainer().innerHTML = "";
         for(let dm of dmRooms){
 
             // here we get the amount of members inside one dm room.
@@ -201,7 +214,7 @@ async function renderDmRoom(roomId){
     let dms = await getDmRooms();
     let dmRooms = dms?.rooms;
 
-    let currentDmObj = Object.values(dmRooms).find(x => x.roomId === roomId);
+    let currentDmObj = Object.values(dmRooms ?? {}).find(x => x.roomId === roomId);
 
     if(currentDmObj){
         let {icon, title} = getDmRoomInfo(currentDmObj);
@@ -290,10 +303,19 @@ async function renderDmRoom(roomId){
         window.quill = dmEditor.quill;
         editorHints = document.getElementById("editor-hints");
         window.editor = dmEditor.editorEl.querySelector(".ql-editor");
+        markDmInNav(roomId);
     }
     else{
         startDmWith(ChatManager.getUrlParams("dm"))
     }
+
+}
+
+function markDmInNav(roomId){
+    getNavContainer()?.querySelectorAll(`.entry`).forEach(x => {
+        if(x?.classList.contains("selected")) x.classList.remove("selected");
+    })
+    getDMsNavContainer()?.querySelector(`.entry[data-room-id='${roomId}']`).classList.add("selected")
 }
 
 async function sendDmMessage(text, currentDmObj){

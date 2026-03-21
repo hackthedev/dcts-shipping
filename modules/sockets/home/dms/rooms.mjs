@@ -164,6 +164,11 @@ export async function createMemberDmRoom(memberId, participants) {
     // lets add us aka the creator first for the title
     if(!participants.includes(memberId)) participants.push(memberId);
 
+    // check for existing room obviously, would become chaotic otherwise
+    let existingRoom = await findExactDmRoom(participants);
+    if(existingRoom) return { result: { affectedRows: 1 }, roomId: existingRoom.roomId };
+
+
     // lets validate members for the room here
     for(let i = 0; i < participants.length; i++) {
         let participant = participants[i];
@@ -199,6 +204,25 @@ export async function createMemberDmRoom(memberId, participants) {
     return {result, roomId};
 }
 
+async function findExactDmRoom(participants) {
+    if(!participants?.length) return null;
+
+    // look through rooms to find a dm room that has all the participants already to save on storage n shit
+    let conditions = participants.map(() => `FIND_IN_SET(?, participants)`).join(" AND ");
+    let query = `SELECT * FROM dm_rooms WHERE ${conditions}`;
+
+    let rows = await queryDatabase(query, participants);
+    if(!rows?.length) return null;
+
+    // then we need to check for participants if we find something
+    let sorted = participants.slice().sort().join(",");
+    for(let row of rows) {
+        let rowParticipants = row.participants.split(",").sort().join(",");
+        if(rowParticipants === sorted) return row;
+    }
+
+    return null;
+}
 
 export default (io) => (socket) => {
     socket.on('getDmRooms', async function (member, response) {
@@ -278,9 +302,21 @@ export default (io) => (socket) => {
         if(member?.participants === undefined) return response({ error: "participants array missing"})
         if(!Array.isArray(member.participants)) return response({ error: "participants must be an array"})
 
+        if(member?.participants?.length > 10){
+            return response({ error: `You can only add up to ${serverconfig.serverinfo.dms.maxParticipants} participants}`})
+        }
+
         try{
             let {result, roomId} = await createMemberDmRoom(member.id, member?.participants);
-            response({ error: result?.affectedRows > 0 ? null : "Error while creating room", roomId});
+            let error = result?.affectedRows > 0 ? null : "Error while creating room"
+
+            if(!error){
+                member.participants.forEach((participant) => {
+                    io.in(participant).emit("roomInvitation", { roomId });
+                })
+            }
+
+            response({ error, roomId});
         }
         catch(ex){
             Logger.error(ex);

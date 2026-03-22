@@ -239,7 +239,7 @@ function getMemberList() {
 
     function getMemberHTML(member, role){
         return `<div class="memberlist-container" data-member-id="${member.id}">
-                        <img draggable="false" class="memberlist-img ${member?.isOffline ? "offline_pfp" : ""}" data-member-id="${member.id}" src="${ChatManager.proxyUrl(sanitizeHtmlForRender(member.icon))}" onerror="this.src = '/img/default_pfp.png'">
+                        <img draggable="false" class="memberlist-img ${member?.isOffline ? "offline_pfp" : ""}" data-member-id="${member.id}" src="${ChatManager.proxyUrl(member.icon)}" this.onerror=null;this.src='/img/default_pfp.png'">
                         
                         <div style="display:flex;flex-direction: column;width: calc(100% - 35px);">
                             <div class="memberlist-member-info name" 

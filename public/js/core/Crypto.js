@@ -113,6 +113,28 @@ class Crypto {
         };
     }
 
+    static setE2EE(value){
+        if(typeof value !== "boolean") throw new Error("Boolean required");
+        localStorage.setItem("enable-e2ee", value);
+
+        // absolutely required HERE so its impossible to forget!!
+        showSystemMessage({
+            text: `E2EE was ${value === true ? "enabled" : "disabled"}`,
+            type: value === true ? "success" : "warning",
+            duration: 1000
+        })
+
+        // for the sake of it and updating ui stuff.
+        // could be cool, lets see how it goes
+        document.dispatchEvent(
+            new CustomEvent("set-e2ee", { detail: { enabled: value } })
+        );
+    }
+
+    static getE2EE(){
+        return localStorage.getItem("enable-e2ee") === "true" ?? false;
+    }
+
     static async DecryptEnvelope(envelopeInput) {
         if (!isLauncher()) return;
 

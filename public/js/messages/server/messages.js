@@ -26,20 +26,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 callback: async (data) => {
                     let element = data.element;
                     let messageId = getMessageIdFromElement(element);
-                    let isDM = !!document.querySelector(".threadArea")
-
-                    if (isDM) {
-                        let msgElement = element.closest(".msg");
-                        let threadId = msgElement.getAttribute("data-thread-id")
-                        let targetId = msgElement.getAttribute("data-target-id")
-                        if (onEditMsg) {
-                            onEditMsg(threadId, messageId, targetId)
-                            return;
-                        }
-
-                        throw new Error("Editing messages in DMs is not supported yet")
-                    }
-
                     editMessage(messageId);
                 },
                 condition: async (data) => {

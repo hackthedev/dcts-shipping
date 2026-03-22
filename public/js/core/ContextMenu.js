@@ -8,6 +8,130 @@ class ContextMenu {
     static contextMenus = {};
     static ContextMenuHTML = null;
 
+    static tooltipEvents = {};
+    static tooltipEl = null;
+    static tooltipTimeout = null;
+
+    static injectTooltipCSS() {
+        if (document.querySelector("#context-tooltip-css")) return;
+
+        let el = document.createElement("div");
+        el.id = "context-tooltip-css";
+        el.innerHTML = `
+        <style>
+            #context-tooltip {
+                position: fixed;
+                z-index: 3;
+                padding: 6px 10px;
+                border-radius: 4px;
+                font-size: 12px;
+                color: #cfcfcf;
+                background: rgba(57,57,57,0.5);
+                border: 1px solid rgba(255,255,255,0.25);
+                backdrop-filter: blur(6px);
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.15s;
+                max-width: min(250px, calc(100vw - 16px));
+                width: max-content;
+                white-space: normal;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                line-height: 1.4;
+            }
+            #context-tooltip.visible {
+                opacity: 1;
+            }
+        </style>`;
+        document.body.appendChild(el);
+
+        let tooltip = document.createElement("div");
+        tooltip.id = "context-tooltip";
+        document.body.appendChild(tooltip);
+        this.tooltipEl = tooltip;
+    }
+
+    static registerTooltip(name, elements, text, condition) {
+        this.tooltipEvents[name] = { elements, text, condition };
+    }
+
+    static initTooltips() {
+        this.injectTooltipCSS();
+
+        let currentTarget = null;
+
+        ContextMenu.scope.addEventListener("mouseover", async (e) => {
+            let el = e.target;
+            if (el === currentTarget) return;
+
+            for (let [_, { elements, text, condition }] of Object.entries(this.tooltipEvents)) {
+                for (let sel of elements) {
+                    let matched = el.matches?.(sel) ? el : el.closest?.(sel);
+                    if (!matched) continue;
+                    if (matched === currentTarget) return;
+
+                    currentTarget = matched;
+                    let ctx = { element: matched, event: e };
+                    if (condition && (await condition(ctx)) !== true) continue;
+
+                    let content = typeof text === "function" ? await text(ctx) : text;
+                    if (!content) return;
+
+                    clearTimeout(this.tooltipTimeout);
+                    this.tooltipTimeout = setTimeout(() => {
+                        this.showTooltip(content, matched);
+                    }, 400);
+                    return;
+                }
+            }
+
+            this.clearTooltip();
+            currentTarget = null;
+        });
+
+        ContextMenu.scope.addEventListener("mouseout", (e) => {
+            let related = e.relatedTarget;
+            if (currentTarget && currentTarget.contains(related)) return;
+            this.clearTooltip();
+            currentTarget = null;
+        });
+    }
+
+    static showTooltip(content, anchor) {
+        let tip = this.tooltipEl;
+        tip.textContent = content;
+
+        // reset position for following measuremnt
+        tip.style.left = "0px";
+        tip.style.top = "0px";
+        tip.classList.add("visible");
+
+        let rect = anchor.getBoundingClientRect();
+        let tipRect = tip.getBoundingClientRect();
+
+        let left = rect.left + (rect.width / 2) - (tipRect.width / 2);
+        let top = rect.top - tipRect.height - 6;
+
+        // flip below if no space above
+        if (top < 4) top = rect.bottom + 6;
+
+        // clamp horizontal
+        if (left < 4) left = 4;
+        if (left + tipRect.width > window.innerWidth - 4) left = window.innerWidth - tipRect.width - 4;
+
+        // clamp vertical
+        if (top + tipRect.height > window.innerHeight - 4) top = window.innerHeight - tipRect.height - 4;
+        if (top < 4) top = 4;
+
+        tip.style.left = `${left}px`;
+        tip.style.top = `${top}px`;
+    }
+
+    static clearTooltip() {
+        clearTimeout(this.tooltipTimeout);
+        this.tooltipEl?.classList.remove("visible");
+    }
+
     static injectCSS() {
         let contextMenuHTML = document.getElementById("context-menu");
         if(!contextMenuHTML){
@@ -214,6 +338,8 @@ class ContextMenu {
 
             this.showContextMenu(mouseY, mouseX);
         });
+
+        this.initTooltips();
     }
 
     static registerClickEvent(name, elements, callback, condition){

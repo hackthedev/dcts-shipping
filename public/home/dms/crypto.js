@@ -1,13 +1,5 @@
-function isEncryptedMessage(msg, isMine){
-    let message = null;
-    if(msg?.data?.message){
-        message = isMine ? msg?.data?.sender : msg?.data?.message;
-    }
-    else{
-        message = msg
-    }
-
-    return msg?.data?.message ? msg?.data?.encrypted : msg?.data?.message?.toLowerCase()?.includes("rsa|");
+function isEncryptedMessage(msg) {
+    return msg?.data?.message[UserManager.getID()]?.toLowerCase()?.includes("rsa|");
 }
 
 function getEncryptedMessageNotice(){
@@ -35,42 +27,36 @@ async function getMessageText(message, isMine){
         return getDecryptedMessage(isMine, message);
     }
     else{
-        return message?.data?.message;
+        return message?.data?.message[UserManager.getID()];
     }
 }
 
-async function getDecryptedMessage(isMine, message){
-    if(isLauncher()){
-        let publicKey = isMine ? await Crypto.getPublicKey() : await UserManager.requestPublicKey(message?.data?.author?.id)
+async function getDecryptedMessage(isMine, message) {
+    if (!isLauncher()) return getEncryptedMessageNotice();
 
-        let decryptedPlain =  await Crypto.DecryptEnvelope(isMine ? message?.data?.sender : message?.data?.message );
-        let decrypted = decryptedPlain;
+    let encrypted = message?.data?.message[UserManager.getID()];
+    if (!encrypted) return getFailedDecryptionNotice();
 
-        if(!decryptedPlain || decryptedPlain.trim().length === 0){
-            return getFailedDecryptionNotice();
-        }
-        if(message?.data?.plainSig){
-            // for my next magic trick, we shall verify the entire message object too
-            // to make sure nothing was modified, like the entire thing aka message.text object
-            let sigRaw = publicKey ? await Client().VerifyString(decryptedPlain, message?.data?.plainSig, publicKey) : false;
-            let objRaw = publicKey ? await Client().VerifyJson(message?.data, publicKey) : false;
+    let decrypted = await Crypto.DecryptEnvelope(encrypted);
+    if (!decrypted || decrypted.trim().length === 0) return getFailedDecryptionNotice();
 
-            let isValidPlainTextSig = sigRaw === true || sigRaw === "true";
-            let isOriginalTextObject = objRaw === true || objRaw === "true";
+    if (!message?.data?.plainSig) return `${getFailedPlainSigNotice()}${decrypted}`;
 
-            // shows failed error message
-            if(isValidPlainTextSig !== true || isOriginalTextObject !== true){
-                return `${getFailedPlainSigNotice()}${decrypted}`;
-            }
-            else{
-                return decrypted;
-            }
-        }
-        else{
-            return `${getFailedPlainSigNotice()}${decrypted}`;
-        }
+    let authorId = message?.data?.author?.id;
+    let publicKey = isMine ? await Crypto.getPublicKey() : await UserManager.requestPublicKey(authorId);
+
+    // for my next magic trick, we shall verify the entire message object too
+    // to make sure nothing was modified, like the entire thing aka message.text object
+    let sigRaw = publicKey ? await Client().VerifyString(decrypted, message?.data?.plainSig, publicKey) : false;
+    let objRaw = publicKey ? await Client().VerifyJson(message?.data, publicKey) : false;
+
+    let isValidPlainTextSig = sigRaw === true || sigRaw === "true";
+    let isOriginalTextObject = objRaw === true || objRaw === "true";
+
+    // shows failed error message
+    if (!isValidPlainTextSig || !isOriginalTextObject) {
+        return `${getFailedPlainSigNotice()}${decrypted}`;
     }
-    else{
-        return getEncryptedMessageNotice();
-    }
+
+    return decrypted;
 }

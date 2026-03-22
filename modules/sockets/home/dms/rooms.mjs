@@ -132,25 +132,26 @@ export async function saveRoomDmMessage(payload) {
     if (payload?.messageEditId?.length === 12) {
         let editedAt = new Date().getTime();
 
-        await queryDatabase(
-            `UPDATE dms
-             SET message  = JSON_SET(message, '$.data.message', ?),
-                 editedAt = ?
-             WHERE messageId = ?`,
-            [
-                payload.data.message,
-                editedAt,
-                payload.messageEditId
-            ]
+        let rows = await queryDatabase(
+            `SELECT message FROM dms WHERE messageId = ?`,
+            [payload.messageEditId]
         );
 
-        payload.meta = {
-            messageId: payload.messageEditId,
-            messageEditId: payload.messageEditId,
-            editedAt
-        };
+        if (!rows?.length) return null;
 
-        return payload;
+        let original = JSONTools.tryParse(rows[0].message);
+        if (!original) return null;
+
+        original.data = payload.data;
+        original.meta.editedAt = editedAt;
+        original.meta.messageEditId = payload.messageEditId;
+
+        await queryDatabase(
+            `UPDATE dms SET message = ?, editedAt = ? WHERE messageId = ?`,
+            [JSON.stringify(original), editedAt, payload.messageEditId]
+        );
+
+        return original;
     } else {
         let messageId = generateId(12);
         payload.meta = {
@@ -218,7 +219,7 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
         let resolvedMessageObj = await processMessageObject(message.data, requesterMemberId);
         message.meta.author = resolvedMessageObj?.author ?? {id: 0};
         message.meta.reply = resolvedMessageObj?.reply ?? {id: null};
-        message.meta.editedAt = resolvedMessageObj?.editedAt
+        message.meta.editedAt = message.meta.editedAt = messageRow.editedAt ?? null;
 
         messages[messageRow.messageId] = message;
     }

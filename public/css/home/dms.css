@@ -192,3 +192,15 @@
     margin: auto;
     width: 100%;
 }
+.dms .entry .unread-badge {
+    margin-left: auto;
+    background: indianred;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+}

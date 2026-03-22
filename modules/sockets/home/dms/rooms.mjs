@@ -126,13 +126,29 @@ export async function getDmUnreadChannel(memberId, channelId) {
     return Number(rows?.[0]?.unread || 0);
 }
 
-export async function markDmAsRead(memberId, targetId) {
-    let now = new Date().getTime();
+export async function markDmAsRead(memberId, messageId = null, roomId = null) {
+    let targetId, timestamp;
+
+    if (messageId) {
+        let rows = await queryDatabase(
+            `SELECT roomId, createdAt FROM dms WHERE messageId = ?`,
+            [messageId]
+        );
+        if (!rows?.length) return null;
+        targetId = rows[0].roomId;
+        timestamp = rows[0].createdAt;
+    } else if (roomId) {
+        targetId = roomId;
+        timestamp = new Date().getTime();
+    } else {
+        return null;
+    }
+
     await queryDatabase(
         `INSERT INTO dm_reads (memberId, targetId, lastReadAt)
          VALUES (?, ?, ?)
-         ON DUPLICATE KEY UPDATE lastReadAt = ?`,
-        [memberId, targetId, now, now]
+             ON DUPLICATE KEY UPDATE lastReadAt = GREATEST(lastReadAt, ?)`,
+        [memberId, targetId, timestamp, timestamp]
     );
 }
 
@@ -490,5 +506,21 @@ export default (io) => (socket) => {
             Logger.error(ex);
             response({error: "Unable to create dm room :/"});
         }
+    });
+
+    socket.on('markDmAsRead', async function (member, response) {
+        if (await validateMemberId(member.id, socket, member?.token) !== true) {
+            return response?.({type: 'error', msg: 'unauthorized'});
+        }
+
+        let mid = member?.messageId;
+        let rid = member?.roomId;
+
+        if (!mid && !rid) return response?.({error: "messageId or roomId required"});
+        if (mid && mid.length !== 12) return response?.({error: "invalid messageId"});
+        if (rid && rid.length !== 12) return response?.({error: "invalid roomId"});
+
+        await markDmAsRead(member.id, mid || null, rid || null);
+        response?.({error: null});
     });
 };

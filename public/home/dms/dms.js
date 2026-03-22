@@ -64,14 +64,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     socket.on('newDmMessage', async function (response) {
-        if(response?.payload?.data?.roomId === ChatManager.getUrlParams("dm")){
+        let roomId = response?.payload?.data?.roomId;
+        let currentRoom = ChatManager.getUrlParams("dm");
 
+        if(roomId === currentRoom){
             if(response?.payload?.messageEditId){
                 updateEditedMessage(response.payload);
             }
             else{
                 addNewMessageToChatLog(response.payload, "dm")
+                await markAsRead(null, roomId);
             }
+        }
+        // when its not the same room BUT a room id is present lets update the indicator
+        else if(roomId){
+            let entry = getDMsNavContainer()?.querySelector(`.entry[data-room-id='${roomId}']`);
+            if(!entry) return;
+            let badge = entry.querySelector(".unread-badge");
+            let current = badge ? (parseInt(badge.textContent) || 0) : 0;
+            setDmCount(roomId, current + 1);
         }
     })
 
@@ -80,7 +91,27 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 });
 
+function setDmCount(roomId, count) {
+    if(!roomId) return;
+    let entry = getDMsNavContainer()?.querySelector(`.entry[data-room-id='${roomId}']`);
+    if(!entry) return;
 
+    let badge = entry.querySelector(".unread-badge");
+
+    if(!count || count <= 0){
+        if(badge) badge.remove();
+        return;
+    }
+
+    let text = count > 99 ? "99+" : count;
+
+    if(badge){
+        badge.textContent = text;
+    }
+    else{
+        entry.insertAdjacentHTML("beforeend", `<span class="unread-badge">${text}</span>`);
+    }
+}
 
 async function startDmWith(id) {
     if(!id || id?.length !== 12) throw new Error("id must be provided or was invalid");
@@ -164,34 +195,70 @@ async function checkDmParticipantPublicKey(participants) {
 async function renderDMs(){
     let dms = await getDmRooms();
     let dmRooms = dms?.rooms;
+    let unreads = await getAllUnread();
 
     let firstDm = true
 
-    // if we have actual dms
     if(dmRooms?.length > 0){
-        // we will loop through all of em
         getDMsNavContainer().innerHTML = "";
         for(let dm of dmRooms){
-
-            // here we get the amount of members inside one dm room.
-            // 2 members are pretty much just a normal dm, whereas more than 2
-            // could be considered a dm group chat.
             let {icon, title} = await getDmRoomInfo(dm);
             joinDmRoom(dm.roomId)
 
+            let unreadCount = unreads?.[dm.roomId] || 0;
+            let badge = unreadCount > 0
+                ? `<span class="unread-badge">${unreadCount > 99 ? "99+" : unreadCount}</span>`
+                : "";
+
             getDMsNavContainer().insertAdjacentHTML('beforeend',
                 `<a class="entry ${!firstDm ? "selected" : ""}" data-room-id="${dm.roomId}" onclick="renderDmRoom('${dm.roomId}')">
-                        <img class="icon" src="${stripHTML(icon)}">
-                        <div class="info">
-                            <p>${stripHTML(title)}</p>
-                            <p class="status">${stripHTML(dm.status) ?? ""}</p>
-                        </div>
-                    </a>`
+                            <img class="icon" src="${stripHTML(icon)}">
+                            <div class="info">
+                                <p>${stripHTML(title)}</p>
+                                <p class="status">${stripHTML(dm.status) ?? ""}</p>
+                            </div>
+                        </a>`
             )
+            setDmCount(dm.roomId, unreads?.[dm.roomId] || 0);
         }
     }
 
     getDMsNavContainer().fadeIn(200, "flex")
+}
+
+async function getAllUnread(){
+    return new Promise(resolve => {
+        socket.emit('getAllUnread', {
+            id: UserManager.getID(),
+            token: UserManager.getToken()
+        }, response => {
+            resolve(response?.unreads || {})
+        });
+    })
+}
+
+async function markAsRead(messageId = null, roomId = null){
+    if(!messageId && !roomId) return;
+
+    return new Promise(resolve => {
+        socket.emit('markDmAsRead', {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            messageId,
+            roomId
+        }, response => {
+            if(!response?.error) if(!response?.error) setDmCount(roomId, 0);
+            resolve(response)
+        });
+    })
+}
+
+function updateUnreadBadge(roomId){
+    if(!roomId) return;
+    let entry = getDMsNavContainer()?.querySelector(`.entry[data-room-id='${roomId}']`);
+    if(!entry) return;
+    let badge = entry.querySelector(".unread-badge");
+    if(badge) badge.remove();
 }
 
 const statusIcons = {
@@ -397,6 +464,7 @@ async function renderDmRoom(roomId){
             })
 
             displayAwaitedMessages(getContentMainContainer())
+            await markAsRead(null, roomId);
 
             requestAnimationFrame(() => {
                 scrollDown("dm", {
@@ -443,9 +511,10 @@ async function renderDmRoom(roomId){
 
 function markDmInNav(roomId){
     getNavContainer()?.querySelectorAll(`.entry`).forEach(x => {
-        if(x?.classList.contains("selected")) x.classList.remove("selected");
+        x.classList.remove("selected");
     })
-    getDMsNavContainer()?.querySelector(`.entry[data-room-id='${roomId}']`).classList.add("selected")
+    let entry = getDMsNavContainer()?.querySelector(`.entry[data-room-id='${roomId}']`);
+    if(entry) entry.classList.add("selected");
 }
 
 async function sendDmMessage(text, currentDmObj){

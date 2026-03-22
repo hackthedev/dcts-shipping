@@ -425,7 +425,6 @@ async function renderDmRoom(roomId){
             },
             onSend: async(html) => {
                 let wasSent = await sendDmMessage(html, currentDmObj)
-                console.log(wasSent)
                 cancelMessageReply()
                 cancelMessageReply()
                 dmEditor.clear()

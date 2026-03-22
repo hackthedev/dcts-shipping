@@ -1547,6 +1547,7 @@ function setActiveGroup(group) {
 
 function displayHomeUnread() {
     socket.emit("getAllUnread", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
+        console.log(response)
         let unread = Number(response?.unread ?? 0);
 
         let indicators = document.querySelectorAll('.home-indicator');

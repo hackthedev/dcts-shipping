@@ -83,10 +83,57 @@ export async function getMemberDmRooms(memberId) {
     return roomsRow;
 }
 
-function isValidTimestamp(ts) {
-    if (typeof ts !== "number") return false;
-    if (!Number.isFinite(ts)) return false;
-    return !isNaN(new Date(ts).getTime());
+export async function getUnreadDms(id) {
+    // try members first cauz lazy
+    let rows = await queryDatabase(
+        `SELECT d.roomId, COUNT(*) AS unread
+         FROM dms d
+                  INNER JOIN dm_room_participants p ON p.roomId = d.roomId AND p.memberId = ?
+                  LEFT JOIN dm_reads r ON r.targetId = d.roomId AND r.memberId = ?
+         WHERE d.authorId != ?
+         AND d.createdAt > COALESCE(r.lastReadAt, 0)
+         GROUP BY d.roomId`,
+        [id, id, id]
+    );
+
+    // if no member found try room
+    if (!rows?.length) {
+        rows = await queryDatabase(
+            `SELECT d.roomId, COUNT(*) AS unread
+             FROM dms d
+             LEFT JOIN dm_reads r ON r.targetId = d.roomId AND r.memberId = d.authorId
+             WHERE d.roomId = ?
+             AND d.createdAt > COALESCE(r.lastReadAt, 0)
+             GROUP BY d.roomId`,
+            [id]
+        );
+    }
+
+    let result = {};
+    for (let row of rows) result[row.roomId] = row.unread;
+    return result;
+}
+
+export async function getDmUnreadChannel(memberId, channelId) {
+    let rows = await queryDatabase(
+        `SELECT COUNT(*) AS unread
+         FROM messages m
+         LEFT JOIN dm_reads r ON r.targetId = m.room AND r.memberId = ?
+         WHERE m.room = ? AND m.authorId != ?
+         AND m.createdAt > COALESCE(r.lastReadAt, 0)`,
+        [memberId, channelId, memberId]
+    );
+    return Number(rows?.[0]?.unread || 0);
+}
+
+export async function markDmAsRead(memberId, targetId) {
+    let now = new Date().getTime();
+    await queryDatabase(
+        `INSERT INTO dm_reads (memberId, targetId, lastReadAt)
+         VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE lastReadAt = ?`,
+        [memberId, targetId, now, now]
+    );
 }
 
 export async function fetchDmMessageById(id, issuerId, noLoop = false) {

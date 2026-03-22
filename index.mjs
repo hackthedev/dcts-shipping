@@ -447,6 +447,19 @@ const tables = [
         ]
     },
     {
+        name: "dm_reads",
+        columns: [
+            {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "memberId", type: "varchar(204) NOT NULL"},
+            {name: "targetId", type: "varchar(100) NOT NULL"}, // roomId oder channelId
+            {name: "lastReadAt", type: "bigint NOT NULL DEFAULT 0"},
+        ],
+        keys: [
+            {name: "UNIQUE KEY", type: "unique_member_target (memberId, targetId)"},
+            {name: "KEY", type: "idx_memberId (memberId)"},
+        ]
+    },
+    {
         name: "dm_room_participants",
         columns: [
             {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},

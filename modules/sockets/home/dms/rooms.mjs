@@ -107,8 +107,10 @@ export async function fetchDmMessageById(id, issuerId, noLoop = false) {
     parsed.meta = parsed.meta || {};
     parsed.meta.author = resolvedMessageObj?.author ?? {id: 0};
 
-    if(parsed?.meta?.reply?.id?.length === 12 && !noLoop){
-        parsed.meta.reply = await fetchDmMessageById(id, parsed.meta, true);
+    // get reply stuff
+    if(parsed?.data?.reply?.messageId?.length === 12 && !noLoop){
+        let resolvedReply = await fetchDmMessageById(parsed.data.reply.messageId, issuerId, true);
+        if(resolvedReply) parsed.meta.reply = resolvedReply;
     }
 
     parsed.meta.editedAt = messageRow[0].editedAt ?? null;

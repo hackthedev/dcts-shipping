@@ -226,6 +226,17 @@ async function renderDMs(){
     getDMsNavContainer().fadeIn(200, "flex")
 }
 
+function setDmStatus(key, value){
+    if(key === "encrypted"){
+        if(value === false){
+
+        }
+        else if(value === true){
+
+        }
+    }
+}
+
 async function renderDmRoom(roomId){
     if(!roomId) throw new Error("Room ID is required");
 
@@ -257,7 +268,42 @@ async function renderDmRoom(roomId){
                 <div class="dm-container">
                     <div class="header">
                         <div class="icon"><img src="${stripHTML(icon)}"></div>
-                        <div class="title">${sanitizeHtmlForRender(title, false)}</div>
+                        <div class="title">${sanitizeHtmlForRender(truncateText(title, 50), false)}</div>
+                        
+                        <div class="right-side">    
+                                            
+                           <div class="indicators">                                
+                                <img class="icon" src="/img/shield-check.png">
+                                <img class="icon" src="/img/shield-off.png">
+                                <img class="icon" src="/img/shield-alert.png">
+                                <img class="icon" src="/img/shield-x.png">
+                            </div>
+                        
+                            <div class="menu">
+                                <img class="activator" src="/img/ellipsis.png">                                
+                                
+                                <ul>                                
+                                    <li>
+                                        <img src="/img/user-plus.png" class="icon"> Add Member
+                                    </li>    
+                                    ${
+                                        isLauncher() ? 
+                                            `
+                                            <li class="success">
+                                                <img src="/img/shield-check.png" class="icon"> Enable Encryption
+                                            </li>
+                                            <li class="warning">
+                                                <img src="/img/shield-off.png" class="icon"> Disable Encryption
+                                            </li>      
+                                            ` 
+                                            : ""
+                                    }
+                                    <li class="caution">
+                                        <img src="/img/trash.png" class="icon"> Delete Chat
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="content"></div>
@@ -269,6 +315,20 @@ async function renderDmRoom(roomId){
             `
             )
         }
+
+        // menu handler
+        getContentElement().addEventListener("click", e => {
+            const menu = e.target.closest(".menu");
+            console.log(menu)
+
+            getContentElement().querySelectorAll(".menu.open").forEach(m => {
+                if (m !== menu) m.classList.remove("open");
+            });
+
+            if (menu) {
+                menu.classList.toggle("open");
+            }
+        });
 
         observeContainer();
         let dmMessages = await getDmRoomMessages(roomId);

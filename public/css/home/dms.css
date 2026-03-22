@@ -17,12 +17,17 @@
     border-radius: 4px;
     user-select: none;
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #navigation.home .entry img{
     width: 30px;
     height: 30px;
     border-radius: 50%;
+    background-position: center center;
+    background-repeat: no-repeat;
+    object-fit: cover;
 }
 
 #navigation.home .entry img.nav{
@@ -37,8 +42,11 @@
 
 #navigation.home .entry .info p{
     margin: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: keep-all;
 }
-
 
 #navigation.home .entry .info p.status{
     font-size: 12px;
@@ -67,11 +75,90 @@
     margin: -2rem;
     margin-bottom: 0;
 }
+
+.layout.home .content .dm-container .header .right-side{
+    display: flex;
+    flex-direction: row;
+    margin-left: auto;
+    overflow: visible;
+    align-items: center;
+    gap: 1rem;
+}
+.layout.home .content .dm-container .header .right-side .icon{
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    background-color: transparent;
+}
+.layout.home .content .dm-container .header .right-side .indicators{
+    display: flex;
+    gap: .5rem;
+}
+.layout.home .content .dm-container .header .right-side .indicators .icon{
+    width: 20px;
+    height: 20px;
+}
+.layout.home .content .dm-container .header .right-side .menu{
+    position: relative;
+}
+.layout.home .content .dm-container .header .right-side .menu .activator{
+    display: flex;
+    justify-content: center;
+    background-color: transparent;
+    padding: 4px;
+}
+.layout.home .content .dm-container .header .right-side .menu ul{
+    display: none;
+    position: absolute;
+    top: calc(100% + 14px);
+    right: 20px;
+
+    flex-direction: column;
+    min-width: 180px;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border-radius: 2px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    z-index: 1000;
+}
+.layout.home .content .dm-container .header .right-side .menu.open ul{
+    display: flex;
+}
+.layout.home .content .dm-container .header .right-side .menu ul li{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 2px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.layout.home .content .dm-container .header .right-side .menu ul li:hover{
+    background: rgba(255,255,255,0.08);
+}
+.layout.home .content .dm-container .header .right-side .menu .caution{
+    color: indianred !important;
+}
+.layout.home .content .dm-container .header .right-side .menu .success{
+    color: mediumseagreen !important;
+}
+.layout.home .content .dm-container .header .right-side .menu .warning{
+    color: chocolate !important;
+}
+
+
+
 .layout.home .content .dm-container .header img{
     width: 30px;
     height: 30px;
     border-radius: 50%;
     background-color: black;
+
+    background-position: center center;
+    background-repeat: no-repeat;
+    object-fit: cover;
 }
 .layout.home .content .dm-container > .content{
     display: flex;

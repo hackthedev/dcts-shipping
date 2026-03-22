@@ -249,7 +249,7 @@ async function updateHeaderStatusIcons(data){
         // status icons etc
         let keyCheck = await checkDmParticipantPublicKey(data.currentDmObj.participants);
         if (keyCheck.allCanDecrypt === true) {
-            setDmStatus("encryption", "shield-check", "#87de54", "End-to-end encrypted")
+            setDmStatus("encryption", "shield-check", "mediumseagreen", "End-to-end Encryption is available to all members")
         } else {
             setDmStatus(
                 "encryption",
@@ -426,6 +426,9 @@ async function renderDmRoom(roomId){
             },
             onSend: async(html) => {
                 let wasSent = await sendDmMessage(html, currentDmObj)
+                console.log(wasSent)
+                cancelMessageReply()
+                cancelMessageReply()
                 dmEditor.clear()
             }
         });

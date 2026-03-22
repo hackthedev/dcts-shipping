@@ -92,7 +92,7 @@
 }
 .layout.home .content .dm-container .header .right-side .indicators{
     display: flex;
-    gap: .5rem;
+    gap: 1rem;
 }
 .layout.home .content .dm-container .header .right-side .indicators svg{
     width: 20px;
@@ -107,6 +107,7 @@
 }
 .layout.home .content .dm-container .header .right-side .menu{
     position: relative;
+    backdrop-filter: blur(6px);
 }
 .layout.home .content .dm-container .header .right-side .menu .activator{
     display: flex;

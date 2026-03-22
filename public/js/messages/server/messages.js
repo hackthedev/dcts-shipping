@@ -617,7 +617,6 @@ async function showMessageInChat({
                                      waitWithDisplay = false,
                                      messageType = null,
                                  } = {}) {
-
     let markdownResult = await markdown(message.message, message.messageId);
     if (markdownResult.isMarkdown) message.message = markdownResult.message;
 
@@ -1130,21 +1129,20 @@ function getUrlFromText(text) {
 }
 
 async function transformDmMessage(message, messageType){
-    if(messageType === "dm"){
-        try {
-            let messageAuthorId = message?.data?.author?.id;
-            let isMine = messageAuthorId === UserManager.getID();
+    if(messageType === "dm" && message?.message === undefined){
+        let messageAuthorId = message?.data?.author?.id;
+        let isMine = messageAuthorId === UserManager.getID();
 
-            // verification will be handled above so we just make the dms compatible now
-            message.message = await getMessageText(message, isMine, messageAuthorId);
-            message.author = message.meta.author;
-            message.timestamp = message.meta.timestamp;
-            message.sig = message.data.sig
-            message.messageId = message.meta.messageId;
-            message.lastEdited = message.meta.editedAt;
-        } catch (err) {
-            console.log(err);
-        }
+        // verification will be handled above so we just make the dms compatible now
+        message.message = await getMessageText(message, isMine, messageAuthorId);
+        message.author = message?.meta?.author;
+        message.timestamp = message?.meta?.timestamp;
+        message.sig = message?.data?.sig
+        message.messageId = message?.meta?.messageId;
+        message.lastEdited = message?.meta?.editedAt;
+    }
+    else{
+        console.log("message is not a dm")
     }
 
     return message;

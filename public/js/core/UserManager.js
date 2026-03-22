@@ -1182,7 +1182,6 @@ class UserManager {
                 token: UserManager.getToken(),
                 target: target,
             }, async function (response) {
-                console.warn(response)
                 resolve(response);
             });
 

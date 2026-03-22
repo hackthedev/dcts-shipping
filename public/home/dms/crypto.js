@@ -43,7 +43,7 @@ async function getDecryptedMessage(isMine, message) {
     if (!message?.data?.plainSig) return `${getFailedPlainSigNotice()}${decrypted}`;
 
     let authorId = message?.data?.author?.id;
-    let publicKey = isMine ? await Crypto.getPublicKey() : await UserManager.requestPublicKey(authorId);
+    let publicKey = isMine ? await Crypto.getPublicKey() : (await UserManager.requestPublicKey(authorId))?.publicKey
 
     // for my next magic trick, we shall verify the entire message object too
     // to make sure nothing was modified, like the entire thing aka message.text object

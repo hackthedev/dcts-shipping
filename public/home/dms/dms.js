@@ -483,7 +483,7 @@ async function sendDmMessage(text, currentDmObj){
 
             try {
                 for(let participant of Object.values(currentDmObj.participants)){
-                    if (!participant.publicKey || participant.publicKey.length === 0){
+                    if (!participant?.publicKey || participant?.publicKey?.length === 0){
                         // if the participant has NO public key, we will encrypt the message with our public key
                         // so that the participant will see its encrypted etc and the entire logic for showing the error etc
                         // will still work

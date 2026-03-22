@@ -4,8 +4,6 @@ function getMemberList() {
     let infolist = document.getElementById("infolist");
     if(localStorage.getItem("memberlist_html_cache") && infolist?.innerText?.trim()?.length  === 0) infolist.innerHTML = localStorage.getItem("memberlist_html_cache");
 
-    if(!UserManager.getChannel()) return;
-
     Clock.start("memberlist_request")
     socket.emit("getMemberList", {
         id: UserManager.getID(),

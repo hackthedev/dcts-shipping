@@ -14,22 +14,21 @@ import {checkMessageObjAuthor, processMessageObject} from "../../resolveMessage.
 import {io} from "../../../../index.mjs";
 
 export async function getMemberDmRooms(memberId) {
-    if(!memberId) throw new Error("Member Id is required");
+    if (!memberId) throw new Error("Member Id is required");
 
     const roomsRow = await queryDatabase(
         `SELECT dm_rooms.*
          FROM dm_rooms
                   INNER JOIN dm_room_participants ON dm_room_participants.roomId = dm_rooms.roomId
          WHERE dm_room_participants.memberId = ?
-         ORDER BY dm_rooms.createdAt DESC
-             LIMIT 50`,
+         ORDER BY dm_rooms.createdAt DESC LIMIT 50`,
         [String(memberId)]
     );
 
-    if(roomsRow?.length === 0) return null;
+    if (roomsRow?.length === 0) return null;
 
     const roomIds = roomsRow.map(room => room.roomId);
-    if(roomIds.length === 0) return null;
+    if (roomIds.length === 0) return null;
 
     const participantRows = await queryDatabase(
         `SELECT roomId, memberId
@@ -45,36 +44,36 @@ export async function getMemberDmRooms(memberId) {
     let resolvedRoomParticipants = {}; // cache
     let roomParticipantsMap = {};
 
-    for(let i = 0; i < participantRows.length; i++) {
+    for (let i = 0; i < participantRows.length; i++) {
         let row = participantRows[i];
-        if(!roomParticipantsMap[row.roomId]) roomParticipantsMap[row.roomId] = [];
+        if (!roomParticipantsMap[row.roomId]) roomParticipantsMap[row.roomId] = [];
         roomParticipantsMap[row.roomId].push(String(row.memberId));
     }
 
-    for(let i = 0; i < roomsRow.length; i++) {
+    for (let i = 0; i < roomsRow.length; i++) {
         let room = roomsRow[i];
         let roomSpecificParticipants = {};
 
         // for each room participant we will look up the member obj
         let roomParticipants = roomParticipantsMap[room.roomId] || [];
-        if(roomParticipants?.length > 0){
-            for(let participant of roomParticipants){
+        if (roomParticipants?.length > 0) {
+            for (let participant of roomParticipants) {
                 let memberObj;
 
                 // if the same member has been resolved before we can use it again
                 // as some sort of cache and will prevent fetching data from the
                 // database again.
-                if(resolvedRoomParticipants[participant]){
+                if (resolvedRoomParticipants[participant]) {
                     memberObj = resolvedRoomParticipants[participant];
                 }
                     // if the member was not found in resolvedRoomParticipants, we will have
                 // to fetch it anyway. after that tho we will store it for possible reuse.
-                else{
+                else {
                     memberObj = await getCastingMemberObject(serverconfig.servermembers[participant])
-                    if(memberObj) resolvedRoomParticipants[participant] = memberObj;
+                    if (memberObj) resolvedRoomParticipants[participant] = memberObj;
                 }
 
-                if(memberObj) roomSpecificParticipants[participant] = memberObj;
+                if (memberObj) roomSpecificParticipants[participant] = memberObj;
             }
         }
 
@@ -90,41 +89,94 @@ function isValidTimestamp(ts) {
     return !isNaN(new Date(ts).getTime());
 }
 
-export async function saveRoomDmMessage(payload){
-    if(!payload) throw new Error("missing message")
-    if(!payload?.data?.roomId) throw new Error("missing roomid")
-    if(!payload?.data?.author?.id) throw new Error("missing author id")
-    if(typeof payload !== "object") throw new Error("Payload is not an object");
+export async function fetchDmMessageById(id, issuerId) {
+    if (!id || id?.length !== 12) throw new Error("Missing ID or invalid");
+    if (!issuerId || issuerId?.length !== 12) throw new Error("Missing issuerId or invalid");
+
+    let messageRow = await queryDatabase(
+        `SELECT * FROM dms WHERE messageId = ?`,
+        [id]
+    );
+
+    if (messageRow?.length === 0) return null;
+
+    let parsed = JSONTools.tryParse(messageRow[0].message);
+    if (!parsed) return null;
+
+    let resolvedMessageObj = await processMessageObject(parsed.data, issuerId);
+
+    parsed.meta = parsed.meta || {};
+    parsed.meta.author = resolvedMessageObj?.author ?? {id: 0};
+    parsed.meta.reply = resolvedMessageObj?.reply ?? {id: null};
+    parsed.meta.editedAt = messageRow[0].editedAt ?? null;
+
+    return parsed;
+}
+
+export async function saveRoomDmMessage(payload) {
+    if (!payload) throw new Error("missing message")
+    if (!payload?.data?.roomId) throw new Error("missing roomid")
+    if (!payload?.data?.author?.id) throw new Error("missing author id")
+    if (typeof payload !== "object") throw new Error("Payload is not an object");
 
     let authorId = payload?.data?.author?.id;
     let roomId = payload?.data?.roomId;
 
     // we ONLY wanna store the id as reference and not possible the entire author object on accident
-    if(authorId) payload.data.author = {id: authorId};
+    if (authorId) payload.data.author = {id: authorId};
 
     // we CANT edit the data itself as its signed, so
     // we will create a meta object within it
-    let messageId = generateId(12);
-    payload.meta = {
-        messageId,
-        timestamp: new Date().getTime()
-    }
 
-    return await queryDatabase(
-        `INSERT INTO dms (authorId, roomId, messageId, message, createdAt) VALUES (?,?,?,?,?)`,
-        [
-            authorId,
-            roomId,
+    // if edited, update
+    if (payload?.messageEditId?.length === 12) {
+        let editedAt = new Date().getTime();
+
+        await queryDatabase(
+            `UPDATE dms
+             SET message  = JSON_SET(message, '$.data.message', ?),
+                 editedAt = ?
+             WHERE messageId = ?`,
+            [
+                payload.data.message,
+                editedAt,
+                payload.messageEditId
+            ]
+        );
+
+        payload.meta = {
+            messageId: payload.messageEditId,
+            messageEditId: payload.messageEditId,
+            editedAt
+        };
+
+        return payload;
+    } else {
+        let messageId = generateId(12);
+        payload.meta = {
             messageId,
-            JSON.stringify(payload),
-            payload.meta.timestamp
-        ]
-    )
+            timestamp: new Date().getTime()
+        }
+
+        await queryDatabase(
+            `INSERT INTO dms (authorId, roomId, messageId, message, createdAt)
+             VALUES (?, ?, ?, ?, ?)`,
+            [
+                authorId,
+                roomId,
+                messageId,
+                JSON.stringify(payload),
+                payload.meta.timestamp
+            ]
+        )
+
+        return payload;
+    }
 }
 
-export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = null){
-    if(!roomId) throw new Error("missing roomid")
-    if(!requesterMemberId) throw new Error("missing requesterMemberId")
+export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = null) {
+    if (!roomId) throw new Error("missing roomid")
+    if (!requesterMemberId) throw new Error("missing requesterMemberId")
     /*
         requesterMemberId needs to be passed and is the id of
         the member that tries to fetch the dm messages. Very important!
@@ -132,19 +184,17 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
 
     let messageRows;
 
-    if(!timestamp){
+    if (!timestamp) {
         messageRows = await queryDatabase(
             `SELECT dms.*
              FROM dms
                       INNER JOIN dm_room_participants ON dm_room_participants.roomId = dms.roomId
              WHERE dms.roomId = ?
                AND dm_room_participants.memberId = ?
-             ORDER BY dms.createdAt DESC
-                 LIMIT 50`,
+             ORDER BY dms.createdAt DESC LIMIT 50`,
             [roomId, requesterMemberId]
         );
-    }
-    else{
+    } else {
         messageRows = await queryDatabase(
             `SELECT dms.*
              FROM dms
@@ -152,16 +202,15 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
              WHERE dms.roomId = ?
                AND dm_room_participants.memberId = ?
                AND dms.createdAt <= ?
-             ORDER BY dms.createdAt DESC
-                 LIMIT 50`,
+             ORDER BY dms.createdAt DESC LIMIT 50`,
             [roomId, requesterMemberId, timestamp]
         );
     }
 
-    if(messageRows?.length === 0) return null;
+    if (messageRows?.length === 0) return null;
 
     let messages = {}
-    for(let i = 0; i < messageRows.length; i++){
+    for (let i = 0; i < messageRows.length; i++) {
         let messageRow = messageRows[i];
         let message = JSONTools.tryParse(messageRow.message);
 
@@ -169,6 +218,7 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
         let resolvedMessageObj = await processMessageObject(message.data, requesterMemberId);
         message.meta.author = resolvedMessageObj?.author ?? {id: 0};
         message.meta.reply = resolvedMessageObj?.reply ?? {id: null};
+        message.meta.editedAt = resolvedMessageObj?.editedAt
 
         messages[messageRow.messageId] = message;
     }
@@ -177,14 +227,14 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
 }
 
 export async function createMemberDmRoom(memberId, participants) {
-    if(!memberId) throw new Error("Member Id is required");
-    if(!Array.isArray(participants)) throw new Error("Participants must be an array");
+    if (!memberId) throw new Error("Member Id is required");
+    if (!Array.isArray(participants)) throw new Error("Participants must be an array");
 
     // used later for chat room title
     let title = "";
 
     // lets add us aka the creator first for the title
-    if(!participants.includes(memberId)) participants.push(memberId);
+    if (!participants.includes(memberId)) participants.push(memberId);
 
     // get rid of possible duplicates and then make sure the member
     // that is actually creating the room is also a participant lol
@@ -192,60 +242,62 @@ export async function createMemberDmRoom(memberId, participants) {
 
     // check for existing room obviously, would become chaotic otherwise
     let existingRoom = await findExactDmRoom(participants);
-    if(existingRoom) return { result: { affectedRows: 1 }, roomId: existingRoom.roomId };
+    if (existingRoom) return {result: {affectedRows: 1}, roomId: existingRoom.roomId};
 
     // only valid participants
     participants = participants.filter(p => p?.length === 12 || p === "system");
 
-    for(let i = 0; i < participants.length; i++) {
+    for (let i = 0; i < participants.length; i++) {
         let participant = participants[i];
 
         // we're gonna build the chat title here with the member names.
-        if(i < 3){
+        if (i < 3) {
             let member = await getCastingMemberObject(serverconfig.servermembers[participant]);
             title += i === 0 ? `${member?.name}` : `,${member?.name}`;
         }
         // and if there are more participants we will just
         // add a ... there
-        if(i === 3 && participants.length > 3){
+        if (i === 3 && participants.length > 3) {
             title += ", ...";
         }
     }
 
-    if(participants.length < 1){
-        return { result: { affectedRows: 0 }, roomId: null };
+    if (participants.length < 1) {
+        return {result: {affectedRows: 0}, roomId: null};
     }
 
     let roomId = String(generateId(12));
     let result = await queryDatabase(
-        `INSERT INTO dm_rooms (roomId, title, creatorId) VALUES (?, ?, ?)`,
+        `INSERT INTO dm_rooms (roomId, title, creatorId)
+         VALUES (?, ?, ?)`,
         [roomId, title, memberId]
     );
 
-    if(result?.affectedRows > 0 && participants.length > 0){
+    if (result?.affectedRows > 0 && participants.length > 0) {
         let values = [];
         let placeholders = [];
 
-        for(let participant of participants){
+        for (let participant of participants) {
             placeholders.push("(?, ?)");
             values.push(roomId, participant);
         }
 
         await queryDatabase(
-            `INSERT INTO dm_room_participants (roomId, memberId) VALUES ${placeholders.join(",")}`,
+            `INSERT INTO dm_room_participants (roomId, memberId)
+             VALUES ${placeholders.join(",")}`,
             values
         );
     }
 
     participants.forEach((participant) => {
-        io.in(participant).emit("roomInvitation", { roomId });
+        io.in(participant).emit("roomInvitation", {roomId});
     })
 
     return {result, roomId};
 }
 
 async function findExactDmRoom(participants) {
-    if(!participants?.length) return null;
+    if (!participants?.length) return null;
 
     let rows = await queryDatabase(
         `SELECT roomId
@@ -256,7 +308,7 @@ async function findExactDmRoom(participants) {
         [...participants, participants.length]
     );
 
-    if(!rows?.length) return null;
+    if (!rows?.length) return null;
 
     let candidateRoomIds = rows.map(row => row.roomId);
     let participantRows = await queryDatabase(
@@ -270,19 +322,21 @@ async function findExactDmRoom(participants) {
     let roomParticipantsMap = {};
 
     // then we need to check for participants if we find something
-    for(let row of participantRows) {
-        if(!roomParticipantsMap[row.roomId]) roomParticipantsMap[row.roomId] = [];
+    for (let row of participantRows) {
+        if (!roomParticipantsMap[row.roomId]) roomParticipantsMap[row.roomId] = [];
         roomParticipantsMap[row.roomId].push(String(row.memberId));
     }
 
-    for(let roomId of candidateRoomIds) {
+    for (let roomId of candidateRoomIds) {
         let rowParticipants = (roomParticipantsMap[roomId] || []).sort().join(",");
-        if(rowParticipants === sorted) {
+        if (rowParticipants === sorted) {
             let roomRows = await queryDatabase(
-                `SELECT * FROM dm_rooms WHERE roomId = ? LIMIT 1`,
+                `SELECT *
+                 FROM dm_rooms
+                 WHERE roomId = ? LIMIT 1`,
                 [roomId]
             );
-            if(roomRows?.[0]) return roomRows[0];
+            if (roomRows?.[0]) return roomRows[0];
         }
     }
 
@@ -295,7 +349,7 @@ export default (io) => (socket) => {
             return response?.({type: 'error', msg: 'unauthorized'});
         }
 
-        response({ error: null, rooms: await getMemberDmRooms(member.id)});
+        response({error: null, rooms: await getMemberDmRooms(member.id)});
     });
 
     socket.on('getDmRoomMessages', async function (member, response) {
@@ -303,10 +357,10 @@ export default (io) => (socket) => {
             return response?.({type: 'error', msg: 'unauthorized'});
         }
 
-        if(member?.roomId === undefined) return response({ error: "roomId missing"})
-        if(member?.roomId?.length !== 12) return response({ error: "Invalid roomId format"})
+        if (member?.roomId === undefined) return response({error: "roomId missing"})
+        if (member?.roomId?.length !== 12) return response({error: "Invalid roomId format"})
 
-        response({ error: null, messages: await getDmRoomMessages(member.roomId, member.id)});
+        response({error: null, messages: await getDmRoomMessages(member.roomId, member.id)});
     });
 
     socket.on('joinDmRoom', async function (member, response) {
@@ -314,14 +368,13 @@ export default (io) => (socket) => {
             return response?.({type: 'error', msg: 'unauthorized'});
         }
 
-        if(member?.roomId === undefined) return response({ error: "roomId missing"});
-        if(!socket.rooms.has(member.roomId)){
+        if (member?.roomId === undefined) return response({error: "roomId missing"});
+        if (!socket.rooms.has(member.roomId)) {
             socket.join(member.roomId);
         }
 
         response({error: null})
     });
-
 
     socket.on('sendDmMessage', async function (member, response) {
         if (await validateMemberId(member.id, socket, member?.token) !== true) {
@@ -329,57 +382,54 @@ export default (io) => (socket) => {
         }
 
         let payload = member?.payload
-        if(typeof payload !== "object") return response({ error: "Missing message payload"})
+        if (typeof payload !== "object") return response({error: "Missing message payload"})
 
-        if(payload?.data?.roomId === undefined) return response({ error: "roomId missing"})
-        if(payload?.data?.roomId?.length !== 12) return response({ error: "Invalid roomId format"})
-        if(!payload?.data) return response({ error: "Missing data object"})
-        if(typeof payload?.data !== "object") return response({ error: "Message is not an object"})
-        if(!payload?.data?.author?.id) return response({ error: "Message doesnt contain author information"})
+        if (payload?.data?.roomId === undefined) return response({error: "roomId missing"})
+        if (payload?.data?.roomId?.length !== 12) return response({error: "Invalid roomId format"})
+        if (!payload?.data) return response({error: "Missing data object"})
+        if (typeof payload?.data !== "object") return response({error: "Message is not an object"})
+        if (!payload?.data?.author?.id) return response({error: "Message doesnt contain author information"})
 
-        let result = await saveRoomDmMessage(payload);
-        let hasError = result?.affectedRows > 0 ? null : "Error while sending DM"
+        let saved = await saveRoomDmMessage(payload);
+        let hasError = saved ? null : "Error while sending DM";
 
-        try{
-            // minimum structure needed for processMessageObj
-            let resolvedMessageObj = await processMessageObject(payload.data, member.id);
-            payload.meta.author = resolvedMessageObj?.author ?? { id: 0 };
-            payload.meta.reply = resolvedMessageObj?.reply ?? { id: null };
+        if (!hasError) {
+            let fullMessage = await fetchDmMessageById(
+                saved.meta.messageId,
+                member.id
+            );
+
+            if (saved.meta.messageEditId) {
+                fullMessage.messageEditId = saved.meta.messageEditId;
+            }
+
+            io.in(fullMessage.data.roomId).emit("newDmMessage", { payload: fullMessage });
+            response({ error: null, payload: fullMessage });
+        } else {
+            response({ error: hasError, payload: null });
         }
-        catch(processingError){
-            Logger.error(processingError);
-            response({ error: "Error processing message after saving", payload: null});
-        }
-
-        if(!hasError){
-            io.in(payload.data.roomId).emit("newDmMessage", { payload });
-        }
-
-        response({ error: hasError, payload});
     });
-
 
     socket.on('createDmRoom', async function (member, response) {
         if (await validateMemberId(member.id, socket, member?.token) !== true) {
             return response?.({type: 'error', msg: 'unauthorized'});
         }
 
-        if(member?.participants === undefined) return response({ error: "participants array missing"})
-        if(!Array.isArray(member.participants)) return response({ error: "participants must be an array"})
+        if (member?.participants === undefined) return response({error: "participants array missing"})
+        if (!Array.isArray(member.participants)) return response({error: "participants must be an array"})
 
-        if(member?.participants?.length > 10){
-            return response({ error: `You can only add up to ${serverconfig.serverinfo.dms.maxParticipants} participants}`})
+        if (member?.participants?.length > 10) {
+            return response({error: `You can only add up to ${serverconfig.serverinfo.dms.maxParticipants} participants}`})
         }
 
-        try{
+        try {
             let {result, roomId} = await createMemberDmRoom(member.id, member?.participants);
             let error = result?.affectedRows > 0 ? null : "Error while creating room"
 
-            response({ error, roomId});
-        }
-        catch(ex){
+            response({error, roomId});
+        } catch (ex) {
             Logger.error(ex);
-            response({ error: "Unable to create dm room :/"});
+            response({error: "Unable to create dm room :/"});
         }
     });
 };

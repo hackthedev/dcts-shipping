@@ -463,13 +463,13 @@ const tables = [
     {
         name: "dms",
         columns: [
-
             {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
             {name: "authorId", type: "varchar(100) NOT NULL"},
             {name: "roomId", type: "varchar(100) NOT NULL"},
             {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
             {name: "message", type: "longtext NOT NULL"},
             {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+            {name: "editedAt", type: "bigint NULL"},
         ]
     },
     {

@@ -256,32 +256,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     socket.on('messageEdited', async function (message) {
-        let markdownResult = await markdown(message.message, message.messageId);
-        if (!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
-        if (markdownResult.isMarkdown) message.message = markdownResult.message;
-
-        let editElement = getMessageElementFromId(message.messageId);
-        try {
-            message.message = await text2Emoji(message.message)
-        } catch {
-        }
-        //editElement.innerHTML = message.message;
-
-        let convertedMentions = await convertMention(message);
-
-
-        let lastMsg = getLastMessage(getContentMainContainer())
-        await withScrollLock(null, lastMsg?.element, async () => {
-            editElement.innerHTML = convertedMentions.text
-            editElement.innerHTML = sanitizeHtmlForRender(convertedMentions.text)
-
-            editElement.innerHTML += getMessageEditedHTML(message);
-            editElement.innerHTML += createMsgActions(message.messageId);
-
-            if (isScrolledToBottom(getContentMainContainer())) scrollDown("messageEdited")
-        })
+        updateEditedMessage(message)
     });
 })
+
+async function updateEditedMessage(message){
+    // handling for dms
+    if(message?.data){
+        message = await transformDmMessage(message, "dm")
+    }
+
+    let markdownResult = await markdown(message.message, message.messageId);
+    if (!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
+    if (markdownResult.isMarkdown) message.message = markdownResult.message;
+
+    let editElement = getMessageElementFromId(message.messageId);
+    try {
+        message.message = await text2Emoji(message.message)
+    } catch {
+    }
+
+    let convertedMentions = await convertMention(message);
+
+
+    let lastMsg = getLastMessage(getContentMainContainer())
+    await withScrollLock(null, lastMsg?.element, async () => {
+        editElement.innerHTML = convertedMentions.text
+        editElement.innerHTML = sanitizeHtmlForRender(convertedMentions.text)
+
+        editElement.innerHTML += getMessageEditedHTML(message);
+        editElement.innerHTML += createMsgActions(message.messageId);
+
+        if (isScrolledToBottom(getContentMainContainer())) scrollDown("messageEdited")
+    })
+}
 
 function focusEditor() {
     if (!quill) return;
@@ -1147,6 +1155,7 @@ async function transformDmMessage(message, messageType){
             message.timestamp = message.meta.timestamp;
             message.sig = message.data.sig
             message.messageId = message.meta.messageId;
+            message.lastEdited = message.meta.editedAt;
         } catch (err) {
             console.log(err);
         }

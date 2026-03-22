@@ -41,7 +41,13 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.on('newDmMessage', async function (response) {
         if(response?.payload?.data?.roomId === ChatManager.getUrlParams("dm")){
             console.log(response);
-            addNewMessageToChatLog(response.payload, "dm")
+
+            if(response?.payload?.messageEditId){
+                updateEditedMessage(response.payload);
+            }
+            else{
+                addNewMessageToChatLog(response.payload, "dm")
+            }
         }
     })
 
@@ -412,7 +418,8 @@ async function sendDmMessage(text, currentDmObj){
                 id: replyMessageId ?? null
             },
             timestamp: new Date().getTime()
-        }
+        },
+        messageEditId: editMessageId,
     }
 
     if (await Client() && getDmRoomCount(currentDmObj) <= 2) {

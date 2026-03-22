@@ -429,6 +429,7 @@ function showSlowmodeNotice(timestamp) {
 }
 
 function replyToMessage(messageId) {
+    console.log(messageId)
     if (editMessageId) cancelMessageEdit();
     if (replyMessageId == null && editorHints && editorHints?.querySelector("pre#editMsgHint") == null) {
         editorHints.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageReply()'>You are replying to a message &#128942;</p>`)
@@ -1140,9 +1141,21 @@ async function transformDmMessage(message, messageType){
         message.sig = message?.data?.sig
         message.messageId = message?.meta?.messageId;
         message.lastEdited = message?.meta?.editedAt;
-    }
-    else{
-        console.log("message is not a dm")
+
+        // resolve reply. painful
+        if (message?.meta?.reply?.meta?.messageId?.length === 12) {
+            let reply = message.meta.reply;
+            let replyId = message?.meta?.reply?.meta?.messageId;
+            let replyAuthorId = reply?.meta?.author?.id;
+            let replyIsMine = replyAuthorId === UserManager.getID();
+
+            message.reply = {
+                messageId: replyId,
+                message: await getMessageText(reply, replyIsMine),
+                author: reply.meta.author,
+                timestamp: reply.meta.timestamp,
+            };
+        }
     }
 
     return message;

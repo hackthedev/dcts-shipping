@@ -59,7 +59,6 @@ export async function processMessageObject(message, issuer){
     message = await checkMessageObjAuthor(message);
     message.author = await autoAnonymizeMember(issuer, message.author);
     message = await autoAnonymizeMessage(issuer, message);
-
     return message;
 }
 

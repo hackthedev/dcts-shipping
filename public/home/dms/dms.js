@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     registerDmIconTooltips();
 })
 
-
 document.addEventListener("set-e2ee", e => {
     let enabled = e?.detail?.enabled;
     if(enabled === undefined) throw new Error("E2EE Update event Error: Couldnt get value")
@@ -461,7 +460,7 @@ async function sendDmMessage(text, currentDmObj){
                 id: UserManager.getID(),
             },
             reply: {
-                id: replyMessageId ?? null
+                messageId: replyMessageId ?? null
             },
             timestamp: new Date().getTime()
         },

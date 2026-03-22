@@ -89,7 +89,7 @@ function isValidTimestamp(ts) {
     return !isNaN(new Date(ts).getTime());
 }
 
-export async function fetchDmMessageById(id, issuerId) {
+export async function fetchDmMessageById(id, issuerId, noLoop = false) {
     if (!id || id?.length !== 12) throw new Error("Missing ID or invalid");
     if (!issuerId || issuerId?.length !== 12) throw new Error("Missing issuerId or invalid");
 
@@ -104,10 +104,13 @@ export async function fetchDmMessageById(id, issuerId) {
     if (!parsed) return null;
 
     let resolvedMessageObj = await processMessageObject(parsed.data, issuerId);
-
     parsed.meta = parsed.meta || {};
     parsed.meta.author = resolvedMessageObj?.author ?? {id: 0};
-    parsed.meta.reply = resolvedMessageObj?.reply ?? {id: null};
+
+    if(parsed?.meta?.reply?.id?.length === 12 && !noLoop){
+        parsed.meta.reply = await fetchDmMessageById(id, parsed.meta, true);
+    }
+
     parsed.meta.editedAt = messageRow[0].editedAt ?? null;
 
     return parsed;
@@ -218,8 +221,14 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
         // only store specific stuff in the meta obj
         let resolvedMessageObj = await processMessageObject(message.data, requesterMemberId);
         message.meta.author = resolvedMessageObj?.author ?? {id: 0};
-        message.meta.reply = resolvedMessageObj?.reply ?? {id: null};
         message.meta.editedAt = message.meta.editedAt = messageRow.editedAt ?? null;
+
+        // resolve replies
+        if(message?.data?.reply?.messageId?.length === 12){
+            let replyId = message?.data?.reply?.messageId
+            let resolvedReply = await fetchDmMessageById(replyId, requesterMemberId);
+            if(resolvedReply) message.meta.reply = resolvedReply ?? {messageId: replyId}
+        }
 
         messages[messageRow.messageId] = message;
     }

@@ -180,11 +180,11 @@ function saveSettings() {
     try {
 
         let newSettings = {
-            icon: settings_icon.value != null && settings_icon.value.length > 0 ? sanitizeHtmlForRender(settings_icon.value, false) : null, // Icon
-            banner: settings_banner.value != null && settings_banner.value.length > 0 ? sanitizeHtmlForRender(settings_banner.value, false) : null, // Banner
-            aboutme: settings_aboutme.value != null && settings_aboutme.value.length > 0 ? sanitizeHtmlForRender(settings_aboutme.value, false) : null,  // About me
-            username: settings_username.value != null && settings_username.value.length >= 3 ? sanitizeHtmlForRender(settings_username.value, false) : null, // Username
-            status: sanitizeHtmlForRender(settings_status.value, false), // Status
+            icon: settings_icon?.value != null && settings_icon?.value.length > 0 ? sanitizeHtmlForRender(settings_icon?.value, false) : null, // Icon
+            banner: settings_banner?.value != null && settings_banner?.value.length > 0 ? sanitizeHtmlForRender(settings_banner?.value, false) : null, // Banner
+            aboutme: settings_aboutme?.value != null && settings_aboutme?.value.length > 0 ? sanitizeHtmlForRender(settings_aboutme?.value, false) : null,  // About me
+            username: settings_username?.value != null && settings_username?.value.length >= 3 ? sanitizeHtmlForRender(settings_username?.value, false) : null, // Username
+            status: sanitizeHtmlForRender(settings_status?.value, false), // Status
         }
 
         socket.emit("updateMember", {id: UserManager.getID(), newSettings: newSettings,}, async function (response) {

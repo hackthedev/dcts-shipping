@@ -324,7 +324,7 @@ export async function getMessageLogsFromDb(msgId) {
     return await queryDatabase(query, [msgId]);
 }
 
-export async function deleteChatMessagesFromDb(messageId) {
+export async function deleteChatMessagesFromDb(messageId, type = null) {
     if (!messageId) {
         Logger.warn("Tried to delete a message from the db but the message id was null");
         Logger.warn(messageId)
@@ -332,9 +332,9 @@ export async function deleteChatMessagesFromDb(messageId) {
     }
 
     // dm message
-    if (messageId?.startsWith("m_")) {
+    if (type === "dm") {
         const query = `DELETE
-                       FROM dms_messages
+                       FROM dms
                        WHERE messageId = ?`;
         return await queryDatabase(query, [messageId]);
     }

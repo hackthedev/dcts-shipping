@@ -80,36 +80,17 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
     }
 });
 
+
+
 export function sanitizeHTML(html, onTag = null) {
     if (html == null) return '';
 
     _activeOnTag = typeof onTag === 'function' ? onTag : null;
 
-    let raw = String(html || '').trim();
+    const clean = DOMPurify.sanitize(String(html), SANITIZE_OPTIONS);
 
-    const hasTags = /<\/?[a-z][\s\S]*?>/i.test(raw);
-    if (!hasTags) {
-        const paras = raw.replace(/\r/g, '').split(/\n{2,}/)
-            .map(s => s.trim())
-            .filter(Boolean);
-
-        let out = paras.map(p => {
-            const withBreaks = encodePlainText(p).replace(/\n/g, '<br>');
-            return `${withBreaks}`;
-        }).join('<br><br>');
-
-        const clean = DOMPurify.sanitize(out, SANITIZE_OPTIONS);
-        _activeOnTag = null;
-        return `${clean}`;
-    }
-
-    let clean = DOMPurify.sanitize(raw, SANITIZE_OPTIONS);
     _activeOnTag = null;
-
-    clean = clean.replace(/<\/?p[^>]*>/gi, '');
-    clean = clean.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');
-
-    return `${clean.trim()}`;
+    return clean;
 }
 
 export function stripHTML(html) {

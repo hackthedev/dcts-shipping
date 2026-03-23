@@ -46,7 +46,7 @@ export async function getMemberLatestMessage(memberId, issuerMemberId){
     if(!memberId) throw new Error("Member id not specified");
 
     let messageRow = await queryDatabase(`SELECT * FROM messages WHERE authorId = ? ORDER BY createdAt DESC LIMIT 1`, [memberId])
-    if(messageRow?.length == null) return null;
+    if(messageRow?.length === 0) return null;
 
     // some simple processing
     let messageObj = messageRow[0]?.message;

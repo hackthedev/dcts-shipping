@@ -6,6 +6,8 @@
     /* cyan: #012724;*/
     /* purple: #1d1635;*/
     --main: #131415;
+    --border-color: hsl(from var(--main) h s calc(l * 8) / 20%);
+    --border-color-bright: hsl(from var(--main) h s calc(l * 8) / 60%);
 }
 
 html,
@@ -34,13 +36,14 @@ a {
     font-style: italic;
 }
 .message-container .content{
+    background-color: transparent !important;
     font-size: 14px;
 }
 .message-container .meta .username{
     font-size: 16px;
 }
 .message-container .content:hover{
-    background-color: hsl(from var(--main) h s calc(l * 2.25))
+    background-color: hsl(from var(--main) h s calc(l * 2.25)) !important;
 }
 
 /* Main Server Chat */
@@ -131,22 +134,6 @@ a {
 }
 
 /* Server Home Page */
-#ticketIdentity option,
-.panel,
-.homeCard,
-.modalCard,
-.searchCard {
-    background-color: hsl(from var(--main) h s calc(l * 1.7));
-}
-
-.statusDot{
-    border: 2px solid hsl(from var(--main) h s calc(l * 1.7));
-}
-
-#ticketIdentity option {
-    border: 2px solid  hsl(from var(--main) h s calc(l * 1.7));
-}
-
 body{
     background: linear-gradient(180deg, hsl(from var(--main) h s calc(l * 0.8)), hsl(from var(--main) h s calc(l * 1.4)));
 }
@@ -155,17 +142,13 @@ body{
     background-color: hsl(from var(--main) h s calc(l * 1.7));
 }
 
-.hero{
-    background: hsl(from var(--main) h s calc(l * 1.7)) center/cover no-repeat;
-}
-
 blockquote {
     border-left: 3px solid hsl(from var(--main) h s calc(l * 9));
     color: hsl(from var(--main) h s calc(l * 9));
     background-color: hsla(from var(--main) h s calc(l * 6) / 10%);
 }
 
-.video-embed {
+.video-embed, video {
     /*
         Man i love css sometimes. the following two lines are just
         so amazing to me. works perfectly
@@ -358,6 +341,42 @@ img {
 }
  */
 
+.svg-icon,
+.edit-icon .svg-icon{
+    display: flex;
+    background-color: hsl(from var(--main) h s calc(l * 1) / 40%);
+    color: hsl(from var(--main) h s calc(l * 10) / 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+
+    padding: 4px;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.edit-icon .svg-icon:hover,
+.svg-icon:hover{
+    background-color: hsl(from var(--main) h s calc(l * 1) / 80%);
+    border: 2px solid var(--border-color-bright);
+}
+
+.edit-icon.dark .svg-icon{
+    background-color: hsl(from var(--main) h s calc(l * 1) / 20%);
+    color: hsl(from var(--main) h s calc(l * 10) / 40%);
+}
+.edit-icon.dark .svg-icon:hover{
+    background-color: hsl(from var(--main) h s calc(l * 1) / 100%);
+    color: hsl(from var(--main) h s calc(l * 10) / 80%);
+}
+
+
+
+.edit-icon .svg-icon path,
+.svg-icon path{
+    fill: currentColor !important;
+}
+
 .content-hidden{
     color: indianred;
 }
@@ -366,4 +385,76 @@ img {
     background-color: hsl(from var(--main) h s calc(l * 2) / 100%);
     color: hsl(from var(--main) h s calc(l * 10) / 100%);
     border: 1px solid hsl(from var(--main) h s calc(l * 8) / 30%);
+}
+
+/* home */
+#navigation.home {
+    border-right: 1px solid var(--border-color);
+}
+
+.layout .content .about{
+    border: 1px solid var(--border-color);
+    background-color: hsl(from var(--main) h s calc(l * 1.75));
+}
+.hint-label{
+    color: hsl(from var(--main) h s calc(l * 6) / 100%);
+}
+.layout.home #navigation{
+    background-color: hsl(from var(--main) h s calc(l * 1));
+}
+.layout.home > .content{
+    background-color: hsl(from var(--main) h s calc(l * 1.25));
+    color: hsl(from var(--main) h s calc(l * 10) / 100%);
+}
+#navigation.home .entry.selected {
+    background-color: hsl(from var(--main) h s calc(l * 6) / 10%);
+}
+#navigation.home .entry:hover{
+    background-color: hsl(from var(--main) h s calc(l * 8) / 10%);
+}
+.layout.home .content .site-banner .content{
+    color: hsl(from var(--main) h s calc(l * 12) / 100%);
+}
+
+.layout.home .content .public-key,
+.layout.home .content .contact {
+    background-color: hsl(from var(--main) h s calc(l * 1.75));
+    border: 1px solid var(--border-color);
+}
+
+.layout.home .content .dm-container .header{
+    border-bottom: 1px solid var(--border-color);
+}
+.layout.home .content .dm-container .editor,
+.layout.home .content .dm-container .editor .ql-toolbar{
+    border: 1px solid var(--border-color);
+}
+.layout.home .content .dm-container .editor .ql-toolbar button svg,
+.layout.home .content .dm-container .editor .ql-stroke,
+.layout.home .content .dm-container .editor .ql-fill{
+    stroke: hsl(from var(--main) h s calc(l * 10));
+}
+.layout.home .content .dm-container .footer{
+    border-top: 1px solid var(--border-color);
+}
+/* some markdown */
+.iframe-container iframe{
+    border: 1px solid var(--border-color);
+    margin: 8px 0;
+}
+.encryption-notice{
+    color: indianred;
+    text-shadow: -1px 0 0 var(--main), 1px 0 0 var(--main),
+    0 -1px 0 var(--main), 0 1px 0 var(--main),
+    0 0 8px var(--main);
+}
+
+details.encryption-notice.chat-notice{
+    background-color: rgba(209, 117, 117, 0.2);
+    border: 1.5px solid rgba(209, 117, 117, 0.2);
+}
+
+.layout.home .content .dm-container .header .right-side .menu ul{
+    border: 1px solid var(--border-color);
+    background-color: hsl(from var(--main) h s calc(l * 1.75));
 }

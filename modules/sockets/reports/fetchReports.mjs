@@ -5,6 +5,7 @@ import Logger from "../../functions/logger.mjs";
 import {getCastingMemberObject, validateMemberId} from "../../functions/main.mjs";
 import {decodeFromBase64, getChatMessagesFromDb, getReports, saveReport} from "../../functions/mysql/helper.mjs";
 import {decodeAndParseJSON, decodeString} from "../resolveMessage.mjs";
+import JSONTools from "@hackthedev/json-tools";
 
 export default (io) => (socket) => {
 
@@ -16,13 +17,16 @@ export default (io) => (socket) => {
             if (await hasPermission(member.id, "manageReports")) {
                 try {
                     let reports = await getReports();
-                    Object.keys(reports).forEach(async function (report) {
+
+                    for(let report of Object.keys(reports)) {
                         reports[report].reportCreator = await getCastingMemberObject(decodeAndParseJSON(reports[report].reportCreator))
                         reports[report].reportedUser = await getCastingMemberObject(decodeAndParseJSON(reports[report].reportedUser))
-                        reports[report].reportData = decodeAndParseJSON(reports[report].reportData)
+                        reports[report].reportData = JSONTools.tryParse(reports[report].reportData)
 
-                        if(reports[report].reportData?.message) reports[report].reportData.message = decodeString(reports[report].reportData.message)
-                    });
+                        if(reports[report]?.reportData?.payload) {
+                            reports[report].reportData.payload = JSONTools.tryParse(reports[report].reportData.payload)
+                        }
+                    }
 
                     response({ type: "success", msg: "Reports fetched", reports:  reports});
                 }

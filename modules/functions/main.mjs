@@ -558,6 +558,10 @@ export function checkBool(value, type) {
 }
 
 export function checkConfigAdditions() {
+
+
+    checkObjectKeys(serverconfig, "serverinfo.dms.maxParticipants", 10)
+
     // recreating the config example minimum base so that copying isnt needed anymore
     checkObjectKeys(serverconfig, "serverinfo.name", "Default Server")
     checkObjectKeys(serverconfig, "serverinfo.description", "")
@@ -696,7 +700,6 @@ export function checkConfigAdditions() {
             "/^\/emojis(\/.*)?$/"
         ]
     )
-
 
     checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.user_slowmode", 0)
     checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.user_slowmode_duration", "2 minutes")

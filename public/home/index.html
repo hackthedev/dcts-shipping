@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+
+    <link href="/css/themes/default/default.css" rel="stylesheet">
+    <link href="/css/home/general.css" rel="stylesheet">
+    <link href="/css/home/dms.css" rel="stylesheet">
+    <link href="/css/home/home.css" rel="stylesheet">
+    <link href="/css/messages.css" rel="stylesheet">
+    <link href="/css/contextmenu.css" rel="stylesheet">
+    <link href="/css/markdown.css" rel="stylesheet">
+    <link href="/css/markdown-parser.css" rel="stylesheet">
+    <link href="/css/message_actions.css" rel="stylesheet">
+    <link href="/css/settings.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
+    <link href="/css/emojis.css" rel="stylesheet">
+    <link href="/css/emoji-autocomplete.css" rel="stylesheet">
+    <link href="/highlight.css?v={{random}}" rel="stylesheet">
+
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/ruby.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/css.min.js"></script>
+
+    <script src="/js/core/Autocomplete.js"></script>
+    <script src="/js/effects/splashscreen.js"></script>
+    <script src="/js/core/socket.io.js"></script>
+    <script src="/js/core/PoW.js"></script>
+    <script src="/js/docs.js"></script>
+    <script src="/js/core/scroll-helper.js"></script>
+    <script src="/js/core/MobileUI.js"></script>
+    <script src="/js/elementloader.js"></script>
+    <script src="/js/inbox.js"></script>
+    <script src="/js/quill.js"></script>
+    <script src="/js/core/RichEditor.js"></script>
+    <script src="/js/core/qrcode.js"></script>
+    <script src="/js/effects/glitch.js"></script>
+    <script src="/js/core/ContextMenu.js"></script>
+    <script src="/js/core/CookieManager.js"></script>
+    <script src="/js/core/ChatManager.js"></script>
+    <script src="/js/core/UserManager.js"></script>
+    <script src="/js/core/UserReports.js"></script>
+    <script src="/js/emojis.js"></script>
+    <script src="/js/markdown.js"></script>
+    <script src="/js/core/markdown-parser.js"></script>
+    <script src="/js/escape.js"></script>
+    <script src="/js/mentions.js"></script>
+
+    <script src="/js/tooltips.js"></script>
+    <script src="/js/hover.js"></script>
+    <script src="/js/prompts.js"></script>
+    <script src="/js/sysmsg.js"></script>
+    <script src="/js/upload.js"></script>
+    <script src="/js/messages/server/messages.js"></script>
+
+
+    <script src="/js/tooltips/dialogs/introduceServerHome.js"></script>
+    <script src="/js/core/purify.js"></script>
+    <script src="/js/core/Crypto.js"></script>
+    <script src="/js/core/Client.js"></script>
+
+    <script src="/home/main.js"></script>
+    <script src="/home/home.js"></script>
+    <script src="/home/dms/dms.js"></script>
+    <script src="/home/dms/crypto.js"></script>
+
+    <meta content="{{meta.page.description}}" name="description">
+    <title>{{server.name}} – Server Home & DMs</title>
+
+    <script>
+        ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
+    </script>
+</head>
+
+<body>
+
+<div class="layout home">
+    <div id="navigation" class="home">
+
+        <label class="hint-label">Navigation</label>
+        <a class="entry nav selected" data-name="home" onclick="renderHome();">
+            <img class="icon nav" src="/img/discover.png">
+            <div class="info">
+                <p>Home</p>
+            </div>
+        </a>
+
+        <!--
+        <a class="entry nav">
+            <img class="icon nav" src="/img/mail.png">
+            <div class="info">
+                <p>Posts</p>
+            </div>
+        </a>
+
+        <a class="entry nav">
+            <img class="icon nav" src="/img/eye.png">
+            <div class="info">
+                <p>Rules</p>
+            </div>
+        </a>
+        -->
+        <hr>
+
+        <label class="hint-label">Direct Messages</label>
+        <div class="dms"></div>
+    </div>
+
+    <div class="content">
+
+    </div>
+</div>
+
+</body>
+
+</html>

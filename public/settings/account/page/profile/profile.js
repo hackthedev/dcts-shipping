@@ -112,7 +112,6 @@ async function exportAccount() {
                 if (selectedOption === "yes") {
                     let qrcodeElement = document.getElementById("export-account-qrcode");
 
-                    console.log(UserManager.getShortenedAccountData(response.account))
                     new QRCode(qrcodeElement, {
                         text: JSON.stringify(UserManager.getShortenedAccountData(response.account)),
                         correctLevel: QRCode.CorrectLevel.L,

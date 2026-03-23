@@ -1,5 +1,167 @@
+var editorContainer;
+var editorToolbar;
+var editorHints;
 
 document.addEventListener("DOMContentLoaded", function () {
+    editorContainer = document.querySelector('.editor-container');
+    editorToolbar = document.getElementById("editor-toolbar");
+    editorHints = document.getElementById("editor-hints");
+
+    ContextMenu.registerContextMenu(
+        "memberprofile",
+        [
+            ".memberlist-container",
+            ".memberlist-container .name",
+            ".memberlist-container .status",
+            ".memberlist-img",
+            ".mention.member",
+            // vc container
+            ".vc-container .participant",
+            ".vc-container .participant img",
+            ".user-container .user-icon",
+            ".message-container .icon",
+            ".message-container .username",
+            // vc user from channels
+            "#channeltree .category .participants .participant",
+            "#channeltree .category .participants .participant .avatar",
+        ],
+        [
+            {
+                icon: "&#9878;",
+                text: "Ban Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt ban member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.banUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt ban member because memberid wasnt found");
+                        return;
+                    }
+                    return await UserManager.checkPermission("banMember") === true && (memberId !== UserManager.getID())
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9873;",
+                text: "Kick Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt kick member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.kickUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if(!memberId) return false;
+                    return await UserManager.checkPermission("kickUsers") === true && (memberId !== UserManager.getID())
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9873;",
+                text: "Mute Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt mute member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.muteUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if(!memberId) return false;
+                    return await UserManager.checkPermission("muteUsers") === true &&
+                        (memberId !== UserManager.getID()) &&
+                        data.element.querySelectorAll(".mutedMember").length === 0
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9873;",
+                text: "Unmute Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt mute member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.unmuteUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if(!memberId) return false;
+                    return await UserManager.checkPermission("muteUsers") === true &&
+                        (memberId !== UserManager.getID()) &&
+                        data.element.querySelectorAll(".mutedMember").length !== 0
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9741;",
+                text: "Disconnect Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt disconnect member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.disconnectUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if(!memberId) return false;
+                    return  await UserManager.checkPermission("disconnectUsers") === true && (memberId !== UserManager.getID())
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9741;",
+                text: "Remove from Group",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt disconnect member because memberid wasnt found");
+                        return;
+                    }
+
+                    if(typeof promptRemoveDmParticipant === "function"){
+                        promptRemoveDmParticipant(memberId);
+                    }
+                },
+                condition: async (data) => {
+                    return typeof promptRemoveDmParticipant === "function"
+                },
+                type: "error"
+            },
+            {
+                icon: "&#10070;",
+                text: "Copy ID",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt copy member because memberid wasnt found");
+                        return;
+                    }
+
+                    navigator.clipboard.writeText(memberId)
+                }
+            }
+        ])
+
     ContextMenu.registerContextMenu(
         "servermessage",
         [
@@ -19,20 +181,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 callback: async (data) => {
                     let element = data.element;
                     let messageId = getMessageIdFromElement(element);
-                    let isDM = !!document.querySelector(".threadArea")
-
-                    if(isDM){
-                        let msgElement = element.closest(".msg");
-                        let threadId = msgElement.getAttribute("data-thread-id")
-                        let targetId = msgElement.getAttribute("data-target-id")
-                        if(onEditMsg){
-                            onEditMsg(threadId, messageId, targetId)
-                            return;
-                        }
-
-                        throw new Error("Editing messages in DMs is not supported yet")
-                    }
-
                     editMessage(messageId);
                 },
                 condition: async (data) => {
@@ -50,8 +198,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     let element = data.element;
                     let messageId = getMessageIdFromElement(element) || data.element?.getAttribute("data-message-id");
                     let isDM = !!document.querySelector(".threadArea")
+                    let messageType = findAttributeUp(element, "data-message-type");
 
-                    deleteMessageFromChat(messageId, isDM ? "dm" : "message");
+                    deleteMessageFromChat(messageId, messageType);
                 },
                 condition: async (data) => {
                     console.log(data)
@@ -67,8 +216,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 callback: async (data) => {
                     let element = data.element;
                     let messageId = getMessageIdFromElement(element);
-                    
-                    let isDM = !!document.querySelector(".threadArea")
+
+                    let isDM = !!document.querySelector(".dms")
                     let plainText = decodeURIComponent(element?.closest(".content")?.getAttribute("data-plain-text"))
                     UserReports.reportMessage(messageId, isDM ? "dm" : "message", plainText)
                 },
@@ -85,26 +234,24 @@ document.addEventListener("DOMContentLoaded", function () {
         "openProfileDbl",
         [".content"],
         async (data) => {
-            if(data?.element){
+            if (data?.element) {
                 let contentDiv = data.element.closest(".content:not(.reply)");
-                if(!contentDiv) return;
+                if (!contentDiv) return;
 
                 let messageId = contentDiv.getAttribute("data-message-id");
                 let memberId = contentDiv.getAttribute("data-member-id");
-                if(!messageId) return;
+                if (!messageId) return;
 
                 // if we double click our message, lets edit it,
                 // otherwise reply to it
-                if(memberId === UserManager.getID()) {
+                if (memberId === UserManager.getID()) {
                     editMessage(messageId)
-                }
-                else{
+                } else {
                     replyToMessage(messageId)
                 }
             }
         }
     );
-
 
 
     ContextMenu.registerClickEvent(
@@ -121,7 +268,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             // no img viewer on reactions
-            if(data.element.parentNode?.classList?.contains("message-reaction-entry")) return;
+            if (data.element.parentNode?.classList?.contains("message-reaction-entry")) return;
 
 
             showImagePopup(src)
@@ -136,10 +283,9 @@ document.addEventListener("DOMContentLoaded", function () {
         ],
         async (data) => {
             let messageId = data.element.getAttribute("data-message-id");
-            if(messageId) {
+            if (messageId) {
                 navigateToMessage(messageId)
-            }
-            else{
+            } else {
                 console.warn("Couldnt navigate to message from reply because messageid wasnt found")
             }
         }
@@ -165,11 +311,10 @@ document.addEventListener("DOMContentLoaded", function () {
             let emojiHash = findAttributeUp(data.element, "data-emoji-hash")
 
             let messageObj = await ChatManager.resolveMessage(messageId);
-            if(messageObj?.reactions.hasOwnProperty(emojiHash)){
-                if(messageObj.reactions[emojiHash]?.includes(UserManager.getID() )){
+            if (messageObj?.reactions.hasOwnProperty(emojiHash)) {
+                if (messageObj.reactions[emojiHash]?.includes(UserManager.getID())) {
                     removeMessageReaction(messageId, emojiHash)
-                }
-                else{
+                } else {
                     addMessageReaction(messageId, emojiHash)
                 }
             }
@@ -217,17 +362,17 @@ document.addEventListener("DOMContentLoaded", function () {
         ]
     );
 
-    socket.on('receiveDeleteMessage', async function(id) {
+    socket.on('receiveDeleteMessage', async function (data) {
         try {
-            var message = getMessageElementFromId(id)
+            var message = getMessageElementFromId(data.messageId ?? data)
             if (!message) {
-                console.warn("Couldnt get message object in delete event");
+                console.warn("Couldnt get message object in delete event", data);
                 return;
             }
 
             let container = getMessageContainerFromMessage(message);
             if (!container) {
-                console.warn("Couldnt get message cotnainer from message in delete event");
+                console.warn("Couldnt get message container from message in delete event");
                 return;
             }
 
@@ -235,12 +380,12 @@ document.addEventListener("DOMContentLoaded", function () {
             message.remove();
 
             // also remove message actions
-            if(container.querySelector(".row.reply")){
+            if (container.querySelector(".row.reply")) {
                 container.querySelector(".row.reply").remove();
             }
 
             // if no message left, delete entire container too
-            if(container.querySelectorAll(".content").length === 0){
+            if (container.querySelectorAll(".content").length === 0) {
                 container.remove();
             }
 
@@ -251,93 +396,145 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
-
     socket.on('messageEdited', async function (message) {
-        let markdownResult = await markdown(message.message, message.messageId);
-        if (!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
-        if (markdownResult.isMarkdown) message.message = markdownResult.message;
-
-        let editElement = getMessageElementFromId(message.messageId);
-        try{ message.message = await text2Emoji(message.message) } catch {}
-        //editElement.innerHTML = message.message;
-
-        let convertedMentions = await convertMention(message);
-
-
-        let lastMsg = getLastMessage(document.getElementById("content"))
-        await withScrollLock(null, lastMsg?.element, async () => {
-            editElement.innerHTML = convertedMentions.text
-            editElement.innerHTML = sanitizeHtmlForRender(convertedMentions.text)
-
-            editElement.innerHTML += getMessageEditedHTML(message);
-            editElement.innerHTML += createMsgActions(message.messageId);
-
-            if(isScrolledToBottom(document.getElementById("content"))) scrollDown("messageEdited")
-        })
+        updateEditedMessage(message)
     });
 })
 
-function registerMessageCreateEvent(){
-    socket.on('updateReactions', async function(messageObj) {
-        updateMessageReactionsElementById(messageObj?.messageId);
+async function updateEditedMessage(message){
+    // handling for dms
+    if(message?.data){
+        message = await transformDmMessage(message, "dm")
+    }
+
+    let markdownResult = await markdown(message.message, message.messageId);
+    if (!markdownResult.isMarkdown) message.message = message.message.replaceAll("\n", "<br>")
+    if (markdownResult.isMarkdown) message.message = markdownResult.message;
+
+    let editElement = getMessageElementFromId(message.messageId);
+    try {
+        message.message = await text2Emoji(message.message)
+    } catch {
+    }
+
+    let convertedMentions = await convertMention(message);
+
+
+    let lastMsg = getLastMessage(getContentMainContainer())
+    await withScrollLock(null, lastMsg?.element, async () => {
+        editElement.innerHTML = convertedMentions.text
+        editElement.innerHTML = sanitizeHtmlForRender(convertedMentions.text)
+
+        editElement.innerHTML += getMessageEditedHTML(message);
+        editElement.innerHTML += createMsgActions(message.messageId);
+
+        if (isScrolledToBottom(getContentMainContainer())) scrollDown("messageEdited")
+    })
+}
+
+function focusEditor() {
+    if (!quill) return;
+    if (MobilePanel.isMobile()) return;
+
+    quill.focus();
+
+    requestAnimationFrame(() => {
+        const len = quill.getLength();
+        quill.setSelection(len - 1, 0, Quill.sources.SILENT);
     });
+}
 
-    
-    socket.on('messageCreate', async function (message) {
-        let container = document.getElementById("content");
-        let isScrolledDown = isScrolledToBottom(container, 20);
+function focusElementInput(element) {
+    element?.focus();
 
+    const length =
+        element?.getLength?.() ??
+        element?.value?.length ??
+        0;
 
+    element?.setSelection?.(length, 0);
+    element?.setSelectionRange?.(length, length);
+}
 
-        // lets increase the channel count first
+function toggleEditor(value) {
+    messageInputBox.parentNode.parentNode.style.visibility = value === true ? "visible" : "hidden";
+}
+
+async function addNewMessageToChatLog(message, type = null) {
+    let container = getContentMainContainer();
+    let isScrolledDown = isScrolledToBottom(container, 20);
+
+    if (!message) throw new Error("No message found to display");
+    message.type = type;
+
+    // lets increase the channel count first
+    // then mark it for ourselves
+    if (message?.channel) {
         ChatManager.increaseChannelMarkerCount(message.channel)
-        // then mark it for ourselves
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())
+    }
 
-        // the message was not created in the room we're currently in, but thats fine.
-        // we will instead show the notification icon and return;
-        if(message.room !== UserManager.getRoom()){
-            ChatManager.setChannelMarker(message.channel, true);
-            await updateUIIndicators(message)
-            return;
-        }
-
-        if (await shouldAppendMessage(container, message) === true) {
-            await showMessageInChat({
-                container,
-                message,
-                append: true,
-                mentions: true,
-                pingMentions: true
-            });
-        } else {
-            await showMessageInChat({
-                container,
-                message,
-                append: false,
-                mentions: true,
-                pingMentions: true
-            });
-        }
-
-
-        if(isScrolledDown) {
-            scrollDown("messageCreated");
-        }
-
+    // the message was not created in the room we're currently in, but thats fine.
+    // we will instead show the notification icon and return;
+    if (message?.room !== UserManager.getRoom() && type === null) {
+        ChatManager.setChannelMarker(message.channel, true);
         await updateUIIndicators(message)
-    });
+        return console.warn("Not showing message");
+    }
 
-    async function updateUIIndicators(message){
-        if(message.channel === UserManager.getChannel()) await Inbox.markAsRead(`${UserManager.getID()}-${message.messageId}`)
+    if(type === "dm"){
+        await displayMessagesInElement({
+            data: [message],
+            channelId: ChatManager.getUrlParams("dm"),
+            container: getContentMainContainer(),
+            appendTop: false,
+            index: null,
+            refElement: null,
+            messageType: "dm",
+            getChannel: () => {
+                return ChatManager.getUrlParams("dm")
+            }
+        })
+    }
+    else{
+        await displayMessagesInElement({
+            data: [message],
+            channelId: UserManager.getChannel(),
+            container: getContentMainContainer(),
+            appendTop: false,
+            index: null,
+            refElement: null,
+        })
+    }
 
-        setTimeout(() => {
-            Inbox.updateInboxMessageEntries()
-        }, 500)
+    displayAwaitedMessages(getContentMainContainer())
+    await updateUIIndicators(message)
+
+    if (isScrolledDown) {
+        scrollDown("messageCreated");
     }
 }
 
-function registerMessageInfiniteLoad(element){
+function registerMessageCreateEvent() {
+    socket.on('updateReactions', async function (messageObj) {
+        updateMessageReactionsElementById(messageObj?.messageId);
+    });
+
+
+    socket.on('messageCreate', async function (message) {
+        addNewMessageToChatLog(message)
+    });
+}
+
+async function updateUIIndicators(message) {
+    if (message.channel === UserManager.getChannel()) await Inbox.markAsRead(`${UserManager.getID()}-${message.messageId}`)
+
+    setTimeout(() => {
+        Inbox.updateInboxMessageEntries()
+    }, 500)
+}
+
+function registerMessageInfiniteLoad(element) {
     element.addEventListener("scroll", async function () {
         if (element.scrollTop === 0) {
             const topElement = getFirstMessage(element);
@@ -349,65 +546,187 @@ function registerMessageInfiniteLoad(element){
     });
 }
 
+function initQuillShit(customQuill = null){
+
+    const Delta = Quill.import('delta');
+    const Embed = Quill.import("blots/embed");
+
+    class EmojiBlot extends Embed {
+        static create(value) {
+            const node = super.create();
+            for (const k in value) node.setAttribute(k, value[k]);
+            return node;
+        }
+
+        static value(node) {
+            const out = {};
+            for (const a of node.attributes) out[a.name] = a.value;
+            return out;
+        }
+    }
+
+    EmojiBlot.blotName = "emoji";
+    EmojiBlot.tagName = "img";
+
+    Quill.DEFAULTS.placeholder = "Write a message...";
+    Quill.register(EmojiBlot);
+
+
+    hljs.configure({
+        languages: ['javascript', 'python', 'ruby', 'xml', 'json', 'css', "bash"]
+    });
+
+
+    window.quill = customQuill ?? new Quill('#editor', {
+        modules: {
+            syntax: true,
+            toolbar: {
+                container: '#editor-toolbar', handlers: {
+                    'link': function (value) {
+                        if (value) {
+                            var href = prompt('Enter the URL');
+                            if (href) {
+                                quill.format('link', href);
+                            }
+                        } else {
+                            quill.format('link', false);
+                        }
+                    }
+                }
+            },
+            keyboard: {
+                bindings: {
+                    enter: {
+                        key: 13,
+                        handler: function (range, context) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }, theme: 'snow'
+    });
+
+    // Add a matcher specifically for image elements
+    quill.clipboard.addMatcher('img', function (node, delta) {
+        // Insert a newline before the image content
+        return new Delta().insert('\n').concat(delta);
+    });
+
+
+    quill.clipboard.addMatcher('PRE', function (node, delta) {
+        return delta.compose(new Delta().retain(delta.length(), {'code-block': true}));
+    });
+
+    quill.clipboard.addMatcher(Node.TEXT_NODE, function (node, delta) {
+        if (node.parentNode && node.parentNode.tagName === 'PRE') {
+            return delta.compose(new Delta().retain(delta.length(), {'code-block': true}));
+        }
+        return delta;
+    });
+
+
+    if(!customQuill){
+        /* Quill Size begin */
+
+        editorContainer = document.querySelector('.editor-container');
+        editorToolbar = document.getElementById("editor-toolbar");
+        editorHints = document.getElementById("editor-hints");
+        quillContainer = document.querySelector('.ql-container');
+        editor = document.querySelector('.ql-editor');
+
+        initialToolbarHeight = editorToolbar.offsetHeight;
+        initialHeight = 40; // Initial height of the editor
+        maxHeight = 400; // Maximum height of the editor
+        initialMargin = parseFloat(getComputedStyle(editorContainer).marginTop);
+        allowEditorBlur = true;
+
+        editor.addEventListener('input', function (event) {
+            setTyping();
+        });
+
+        // save message draft
+        editor.addEventListener('keyup', function (event) {
+            saveChannelMessageDraft(UserManager.getChannel());
+        });
+
+        // editor resize fix where chat wont scroll down
+        const editorResizeObserver = new ResizeObserver(() => {
+            let isScrolledDown =  isScrolledToBottom(document.getElementById("content"));
+            if(isScrolledDown) scrollDown();
+        });
+        editorResizeObserver.observe(editor);
+
+        console.log(editor)
+        editor.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), quill.root.innerHTML);
+            }
+        });
+    }
+}
+/* Quill Emoji resize End */
 
 let editMessageId = null;
 let replyMessageId = null;
 
 function cancelMessageReply() {
     replyMessageId = null;
-    if(editorHints) editorHints.innerHTML = ""
+    if (editorHints) editorHints.innerHTML = ""
 }
 
 function cancelMessageEdit() {
     editMessageId = null;
     editor.innerHTML = "";
-    if(editorHints) editorHints.innerHTML = ""
+    if (editorHints) editorHints.innerHTML = ""
 }
 
-function showRateLimitNotice(){
-    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
-    if (replyMessageId == null && editorHints ) {
-        if(editorHints?.querySelector("#ratelimitHint") != null) editorHints?.querySelector("#ratelimitHint").remove();
+function showRateLimitNotice() {
+    let isScrolledDown = isScrolledToBottom(getContentMainContainer());
+    if (replyMessageId == null && editorHints) {
+        if (editorHints?.querySelector("#ratelimitHint") != null) editorHints?.querySelector("#ratelimitHint").remove();
 
         editorHints.insertAdjacentHTML("afterbegin", `<p id="ratelimitHint" >You have been rate limited</p>`)
     }
 
-    if(isScrolledDown) scrollDown("showRateLimitNotice")
+    if (isScrolledDown) scrollDown("showRateLimitNotice")
 }
 
-function showSlowmodeNotice(timestamp){
-    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
-    if (replyMessageId == null && editorHints ) {
-        if(editorHints?.querySelector("#slowmodeHint") != null) editorHints?.querySelector("#slowmodeHint").remove();
+function showSlowmodeNotice(timestamp) {
+    let isScrolledDown = isScrolledToBottom(getContentMainContainer());
+    if (replyMessageId == null && editorHints) {
+        if (editorHints?.querySelector("#slowmodeHint") != null) editorHints?.querySelector("#slowmodeHint").remove();
 
         editorHints.insertAdjacentHTML("afterbegin", `<p id="slowmodeHint" >Slowmode is active! You need to wait for ${getReadableDuration(new Date(timestamp))}</p>`)
     }
 
-    if(isScrolledDown) scrollDown("showSlowmodeNotice")
+    if (isScrolledDown) scrollDown("showSlowmodeNotice")
 }
 
 function replyToMessage(messageId) {
+    console.log(messageId)
     if (editMessageId) cancelMessageEdit();
     if (replyMessageId == null && editorHints && editorHints?.querySelector("pre#editMsgHint") == null) {
         editorHints.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageReply()'>You are replying to a message &#128942;</p>`)
     }
     replyMessageId = messageId;
 
-    if(focusEditor) focusEditor()
+    if (focusEditor) focusEditor()
 }
 
-function replaceUrlEmbeds(element){
+function replaceUrlEmbeds(element) {
     let embeds = element.querySelectorAll(".markdown-urlEmbed-container");
 
-    if(embeds?.length > 0){
-        for(let embed of embeds) {
+    if (embeds?.length > 0) {
+        for (let embed of embeds) {
             let embedLink = embed.querySelector(".markdown-urlEmbed");
-            if(!embedLink) continue;
+            if (!embedLink) continue;
 
             let url = embedLink.getAttribute("href");
             let wrapper = embed.closest("[data-markdown-done]");
 
-            if(wrapper && wrapper !== element) {
+            if (wrapper && wrapper !== element) {
                 wrapper.outerHTML = url;
             } else {
                 embed.outerHTML = url;
@@ -419,9 +738,9 @@ function replaceUrlEmbeds(element){
         emptyDivs.forEach(d => d.remove());
 
         // wrap shit if needed
-        if(!element.querySelector("p")) {
+        if (!element.querySelector("p")) {
             let text = element.textContent.trim();
-            if(text) element.innerHTML = `<p>${text}</p>`;
+            if (text) element.innerHTML = `<p>${text}</p>`;
         }
 
         element.innerHTML = element.innerHTML.replace(/\s+/g, " ").trim();
@@ -429,10 +748,13 @@ function replaceUrlEmbeds(element){
 }
 
 function editMessage(id) {
+    if (!id) throw new Error("No messag editing id found!")
     if (replyMessageId) cancelMessageReply();
+
     if (editMessageId == null && editorHints && editorHints?.querySelector("pre.editMsgHint") == null) {
         editorHints.insertAdjacentHTML("afterbegin", `<p id="editMsgHint" onclick='cancelMessageEdit()'>You are editing a message &#128942;</p>`)
     }
+    editMessageId = id
 
     let msgContent = document.querySelector(`.message-container .content[data-message-id="${id}"]`).cloneNode(true);
     if (msgContent.querySelector(".messageActions")) {
@@ -491,7 +813,8 @@ function editMessage(id) {
 
     setTimeout(() => {
         const regex = /<p>\s*<\/p>/gm;
-        if(quill) quill.pasteUnconverted(msgContent.innerHTML.replace(regex, ''));
+        console.log(quill)
+        if (quill) quill.pasteUnconverted(msgContent.innerHTML.replace(regex, ''));
 
         focusEditor()
     }, 1);
@@ -511,7 +834,6 @@ function findAttributeUp(element, attr, maxDepth = 10) {
 }
 
 
-
 function getMessageIdFromElement(element) {
     return findAttributeUp(element, "data-message-id");
 }
@@ -529,7 +851,7 @@ function getMessageCountFromContainer(element) {
 }
 
 async function shouldAppendMessage(container, message, appendTop = false) {
-    if(!container) throw new Error("Container wasnt supplied for shouldAppendMessage");
+    if (!container) throw new Error("Container wasnt supplied for shouldAppendMessage");
     let messageElement = appendTop === true ? getFirstMessage(container) : getLastMessage(container)
     let timestamp = 0
 
@@ -570,8 +892,8 @@ async function showMessageInChat({
                                      mentions = false,
                                      pingMentions = false,
                                      waitWithDisplay = false,
+                                     messageType = null,
                                  } = {}) {
-
     let markdownResult = await markdown(message.message, message.messageId);
     if (markdownResult.isMarkdown) message.message = markdownResult.message;
 
@@ -581,11 +903,17 @@ async function showMessageInChat({
     message.message = sanitizeHtmlForRender(convertedMentions.text, false)
 
     // convert emojis
-    try{ message.message = sanitizeHtmlForRender(await text2Emoji(message.message), false) } catch {}
+    try {
+        message.message = sanitizeHtmlForRender(await text2Emoji(message.message), false)
+    } catch {
+    }
 
     // convert emojis and mentions for replies too
-    if(message?.reply?.message) {
-        try{ message.reply.message = sanitizeHtmlForRender(await text2Emoji(message.reply.message), false); } catch {}
+    if (message?.reply?.message) {
+        try {
+            message.reply.message = sanitizeHtmlForRender(await text2Emoji(message.reply.message), false);
+        } catch {
+        }
 
         let convertedReplyMentions = await convertMention(message.reply);
         message.reply.message = sanitizeHtmlForRender(convertedReplyMentions.text, false)
@@ -601,7 +929,8 @@ async function showMessageInChat({
             append: append,
             isSystem: true,
             isMention,
-            waitWithDisplay
+            waitWithDisplay,
+            messageType
         });
     } else {
         // dont append if the previous message was a system message
@@ -611,7 +940,8 @@ async function showMessageInChat({
             append,
             isSystem: false,
             isMention,
-            waitWithDisplay
+            waitWithDisplay,
+            messageType
         });
     }
 
@@ -678,9 +1008,6 @@ async function fixScrollAfterMediaLoad(container, scrollPosition, manualScroll =
 }
 
 
-
-
-
 function truncateText(text, length) {
     let actualLength = 0;
     if (text?.length <= length) {
@@ -689,7 +1016,7 @@ function truncateText(text, length) {
         actualLength = length;
     }
 
-    if(text?.length > length){
+    if (text?.length > length) {
         return text?.substring(0, actualLength) + "..."
     }
 
@@ -742,57 +1069,47 @@ function showImagePopup(src) {
     }
 }
 
-function navigateToMessage(messageId){
+function navigateToMessage(messageId) {
     let message = document.querySelector(`.message-container .content:not(.reply)[data-message-id="${messageId}"]`);
-    if(message){
+    if (message) {
         message.scrollIntoView({behavior: "smooth"});
 
-        if(!message.classList.contains("highlight")){
+        if (!message.classList.contains("highlight")) {
             message.classList.add("highlight");
             setTimeout(() => {
                 message.classList.remove("highlight");
             }, 2000)
         }
-    }
-    else{
+    } else {
         console.log("Couldnt find message for navigation")
     }
 }
 
 function deleteMessageFromChat(id, type = "message") {
-    if(type === "dm"){
-        socket.emit("deleteDMMessage", {messageId: id, token: UserManager.getToken(), id: UserManager.getID()}, (ack) => {
-            if (ack?.type !== "success"){
-                console.log(ack)
-            }
-        });
-
-        return;
-    }
-
     socket.emit("deleteMessage", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
         messageId: id,
         group: UserManager.getGroup(),
         category: UserManager.getCategory(),
-        channel: UserManager.getChannel()
+        channel: UserManager.getChannel(),
+        type
     });
 }
 
-async function updateMessageReactionsElementById(messageId, container = document.getElementById("content")){
+async function updateMessageReactionsElementById(messageId, container = getContentMainContainer()) {
     let wasScrolledDown = isScrolledToBottom(container);
 
     let contentContainer = document.querySelector(`.message-container .content:not(.reply)[data-message-id="${messageId}"]`);
     let reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
 
     let messageObj = await ChatManager.resolveMessage(messageId);
-    if(!messageObj) return console.error(`Couldnt find message object for message reaction update ${messageId}`);
+    if (!messageObj) return console.error(`Couldnt find message object for message reaction update ${messageId}`);
 
     let lastMsg = getLastMessage(container)
     await withScrollLock(container, lastMsg?.element, async () => {
         // no reactions were present so add the container
-        if(!reactionRow) {
+        if (!reactionRow) {
             contentContainer.innerHTML += await getMessageReactionsHTML(messageObj);
             reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
         }
@@ -800,11 +1117,11 @@ async function updateMessageReactionsElementById(messageId, container = document
         reactionRow.outerHTML = await getMessageReactionsHTML(messageObj);
     })
 
-    if(wasScrolledDown) scrollDown()
+    if (wasScrolledDown) scrollDown()
 }
 
-async function getMessageReactionsHTML(messageObj){
-    if(!messageObj?.reactions || Object.keys(messageObj?.reactions)?.length === 0) return "";
+async function getMessageReactionsHTML(messageObj) {
+    if (!messageObj?.reactions || Object.keys(messageObj?.reactions)?.length === 0) return "";
 
     let row = document.createElement("div");
     row.innerHTML =
@@ -814,9 +1131,9 @@ async function getMessageReactionsHTML(messageObj){
 
     let reactionRowContainer = row.querySelector(".message-reaction-row");
 
-    for(let emojiHash in messageObj.reactions){
+    for (let emojiHash in messageObj.reactions) {
         let emojiObj = findEmojiByID(emojiHash);
-        if(!emojiObj) {
+        if (!emojiObj) {
             console.error("Emoji Obj not found")
             continue
         }
@@ -826,12 +1143,12 @@ async function getMessageReactionsHTML(messageObj){
 
     return row.innerHTML;
 
-    function getEmojiReactionRowEntryHTML(messageObj, emojiObj){
+    function getEmojiReactionRowEntryHTML(messageObj, emojiObj) {
         let emojiPath = emojiObj?.code ? `/img/default_emojis/${sanitizeHtmlForRender(emojiObj.code, false)}.svg` : `/emojis/${sanitizeHtmlForRender(emojiObj.filename, false)}`;
         let emojiDetails = extractEmojiDetails(emojiObj);
         let emojiHash = emojiDetails[0]
 
-        if(!emojiHash){
+        if (!emojiHash) {
             console.error(`Emoji hash not found for emoji in reactions for message ${messageObj.messageId}: ${emojiObj?.filename} { ${emojiDetails}`)
             return "";
         }
@@ -853,8 +1170,10 @@ async function createMsgHTML({
                                  isSystem = false,
                                  isMention = false,
                                  waitWithDisplay = false,
-                                 createActions = true
-} = {}) {
+                                 createActions = true,
+                                 messageType = null
+                             } = {}) {
+
     let isSigned = message?.sig?.length > 10;
     let reply = message?.reply;
 
@@ -863,14 +1182,14 @@ async function createMsgHTML({
     }
 
     // dm compatibility
-    if(!message?.timestamp && message?.ts){
+    if (!message?.timestamp && message?.ts) {
         message.timestamp = message.ts;
     }
 
     // consider this a fallback. should be avoided as it makes the
     // chat slower. if this would happen a lot consider something wrong with
     // the server as the server should supply it already.
-    if(!message?.author?.name && message?.author?.id !== 0){
+    if (!message?.author?.name && message?.author?.id !== 0) {
         message.author = await ChatManager.resolveMember(message?.author?.id) || message.author;
     }
 
@@ -885,7 +1204,8 @@ async function createMsgHTML({
             ${message?.plainText ? `data-plain-text="${unescapeHtmlEntities(sanitizeHtmlForRender(encodeURIComponent(message.plainText), false), true)}"` : ""}
             data-message-id="${message.messageId}" 
             data-member-id="${unescapeHtmlEntities(sanitizeHtmlForRender(message?.author?.id, false), true)}" 
-            data-timestamp="${message.timestamp}">
+            data-timestamp="${message.timestamp}"
+            ${messageType ? `data-message-type="${messageType}"` : ""}>
             
             ${createActions === true ? createMsgActions(message?.author?.id, isSystem) : ""}
             ${sanitizeHtmlForRender(message.message)}  ${message?.editCode ? message?.editCode : ""}    
@@ -898,14 +1218,14 @@ async function createMsgHTML({
         return messageRow;
     }
 
-    if(!message?.author?.name) message.author.name = "Unkown Member?";
-    if(reply?.messageId && !reply?.author?.name) message.author.name = "Unkown Member?";
+    if (!message?.author?.name) message.author.name = "Unkown Member?";
+    if (reply?.messageId && !reply?.author?.name) message.author.name = "Unkown Member?";
 
     // if message was a reply
     let replyCode = "";
-    if(reply?.messageId){
+    if (reply?.messageId) {
         replyCode = `
-            <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}">            
+            <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${stripHTML(reply?.author?.id, false)} ${messageType ? `data-message-type="${messageType}"` : ""}">            
                 <!-- very creative name indeed -->
                 <div class="box"></div>
             
@@ -925,12 +1245,14 @@ async function createMsgHTML({
     }
 
     return `
-        <div class="message-container ${isSystem ? "system" : ""} ${isBanned && isAdmin ? "banned" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}" data-member-id="${message?.author?.id}">
+        <div class="message-container ${isSystem ? "system" : ""} ${isBanned && isAdmin ? "banned" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}" 
+            data-member-id="${message?.author?.id}"
+            ${messageType ? `data-message-type="${messageType}"` : ""}>
             
             ${replyCode}
-            <div class="row ${isSystem === true ? `system` : ""}" data-message-id="${message?.messageId}" data-member-id="${message?.id}">
+            <div class="row ${isSystem === true ? `system` : ""}" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}">
                 ${isSystem !== true ?
-                `<div class="icon-container">
+        `<div class="icon-container">
                     <img class="icon" draggable="false" src="${sanitizeHtmlForRender(message?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>` : ""}
                 
@@ -938,13 +1260,13 @@ async function createMsgHTML({
                  <div class="meta">
                  
                     ${isSystem !== true ?
-                    `<label class="username" 
+        `<label class="username" 
                         data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" 
                         style="color: ${message?.author?.color}; background: ${message?.author?.background}; 
                         background-clip: ${message?.author?.backgroundClip};"
                         >
                             ${unescapeHtmlEntities(sanitizeHtmlForRender(truncateText(message?.author?.name, 30), true))
-                    }</label>` : ""}
+        }</label>` : ""}
                     
                     
                     <label class="timestamp" data-timestamp="${message.timestamp}">
@@ -998,14 +1320,14 @@ function actionReply(element) {
     replyToMessage(messageId);
 }
 
-function reactToMessageFromAction(element){
-    if(!element){
+function reactToMessageFromAction(element) {
+    if (!element) {
         console.error("couldnt react to message from action as element wasnt found");
         return;
     }
 
     let contentContainer = element.closest(".content");
-    if(!contentContainer){
+    if (!contentContainer) {
         console.error("couldnt react to message from action as content container wasnt found");
         return;
     }
@@ -1014,7 +1336,7 @@ function reactToMessageFromAction(element){
     let memberId = contentContainer.getAttribute("data-member-id");
 
     let clientRec = element.getBoundingClientRect();
-    if(!messageId){
+    if (!messageId) {
         console.error("couldnt react to message from action as message id wasnt found");
         return;
     }
@@ -1027,7 +1349,7 @@ function reactToMessageFromAction(element){
     }, true);
 }
 
-async function addMessageReaction(messageId, emojiHash, isDefault = false){
+async function addMessageReaction(messageId, emojiHash, isDefault = false) {
     socket.emit("addMessageReaction", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
@@ -1035,7 +1357,7 @@ async function addMessageReaction(messageId, emojiHash, isDefault = false){
         emojiHash,
         default: isDefault
     }, async (response) => {
-        if(response?.error){
+        if (response?.error) {
             console.log(response.error);
             showSystemMessage({
                 title: "Error while reacting",
@@ -1046,14 +1368,14 @@ async function addMessageReaction(messageId, emojiHash, isDefault = false){
     })
 }
 
-async function removeMessageReaction(messageId, emojiHash){
+async function removeMessageReaction(messageId, emojiHash) {
     socket.emit("removeMessageReaction", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
         messageId,
         emojiHash
     }, async (response) => {
-        if(response?.error){
+        if (response?.error) {
             console.log(response.error);
             showSystemMessage({
                 title: "Error while reacting",
@@ -1067,8 +1389,8 @@ async function removeMessageReaction(messageId, emojiHash){
 function createMsgActions(messageId, isSystem = false) {
 
     return `<div class="messageActions">
-                ${isSystem === false ? `<button style="" title="React" class="react" onclick="reactToMessageFromAction(this)">&#x1f412;</button>`: ""}
-                ${isSystem === false ? `<button style="" title="Reply" onclick="actionReply(this)">&#10149;</button>`: ""}
+                ${isSystem === false ? `<button style="" title="React" class="react" onclick="reactToMessageFromAction(this)">&#x1f412;</button>` : ""}
+                ${isSystem === false ? `<button style="" title="Reply" onclick="actionReply(this)">&#10149;</button>` : ""}
                 
                 <!--
                 <button class="approve">&#10004;</button>
@@ -1078,6 +1400,43 @@ function createMsgActions(messageId, isSystem = false) {
             </div>`
 }
 
+function getUrlFromText(text) {
+    var geturl = new RegExp("(^|[ \t\r\n])((ftp|http|https|mailto|file):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))", "g");
+    return text.match(geturl)
+}
+
+async function transformDmMessage(message, messageType){
+    if(messageType === "dm" && message?.message === undefined){
+        let messageAuthorId = message?.data?.author?.id;
+        let isMine = messageAuthorId === UserManager.getID();
+
+        // verification will be handled above so we just make the dms compatible now
+        message.message = await getMessageText(message, isMine, messageAuthorId);
+        message.author = message?.meta?.author;
+        message.timestamp = message?.meta?.timestamp;
+        message.sig = message?.data?.sig
+        message.messageId = message?.meta?.messageId;
+        message.lastEdited = message?.meta?.editedAt;
+
+        // resolve reply. painful
+        if (message?.meta?.reply?.meta?.messageId?.length === 12) {
+            let reply = message.meta.reply;
+            let replyId = message?.meta?.reply?.meta?.messageId;
+            let replyAuthorId = reply?.meta?.author?.id;
+            let replyIsMine = replyAuthorId === UserManager.getID();
+
+            message.reply = {
+                messageId: replyId,
+                message: await getMessageText(reply, replyIsMine),
+                author: reply.meta.author,
+                timestamp: reply.meta.timestamp,
+            };
+        }
+    }
+
+    return message;
+}
+
 async function displayMessagesInElement({
                                             data,
                                             channelId,
@@ -1085,7 +1444,9 @@ async function displayMessagesInElement({
                                             appendTop = false,
                                             index = -1,
                                             scrollPosition = null,
-                                        } = {}){
+                                            getChannel = null,
+                                            messageType = null
+                                        } = {}) {
 
     let firstMessage = getFirstMessage(container);
 
@@ -1094,7 +1455,13 @@ async function displayMessagesInElement({
 
     for (let message of appendTop ? data.reverse() : data) {
         // if user switches channel we cancel this shit
-        if(channelId !== UserManager.getChannel()) return;
+        message = await transformDmMessage(message, messageType)
+
+        if (!getChannel) {
+            if (channelId !== UserManager.getChannel()) return;
+        } else {
+            if (channelId !== await getChannel()) return;
+        }
 
         try {
             // stop trying to fetch new messages on last message
@@ -1127,7 +1494,8 @@ async function displayMessagesInElement({
                     append: true,
                     location,
                     appendTop,
-                    waitWithDisplay: true
+                    waitWithDisplay: true,
+                    messageType
                 });
             } else {
                 await showMessageInChat({
@@ -1137,12 +1505,13 @@ async function displayMessagesInElement({
                     append: false,
                     location,
                     appendTop,
-                    waitWithDisplay: true
+                    waitWithDisplay: true,
+                    messageType
                 });
             }
 
             // this will help with the mentions etc
-            if(Inbox.isUnread(message?.messageId) && message?.messageId){
+            if (Inbox.isUnread(message?.messageId) && message?.messageId) {
                 console.log("is unread")
                 await Inbox.markAsRead(Inbox.getInboxIdFromMessageId(message.messageId))
             }
@@ -1157,10 +1526,10 @@ async function displayMessagesInElement({
 }
 
 function getChatlog(container, index = -1, appendTop = false, scrollPosition = null) {
-    if(UserManager.getChannel() === null) return
-    if(UserManager.getCategory() === null) return
-    if(UserManager.getGroup() === null) return
-    if(!container) throw new Error("Container wasnt supplied for chatlog");
+    if (UserManager.getChannel() === null) return
+    if (UserManager.getCategory() === null) return
+    if (UserManager.getGroup() === null) return
+    if (!container) throw new Error("Container wasnt supplied for chatlog");
 
     let channelId = UserManager.getChannel();
     let refElement = getFirstMessage(container)?.element
@@ -1212,7 +1581,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
             refElement,
         })
 
-        if(channelId !== UserManager.getChannel()){
+        if (channelId !== UserManager.getChannel()) {
             ElementLoader.stop(channelbar);
             Clock.stop("load_messages_processing")
             renderer.remove();
@@ -1233,8 +1602,8 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
 
         Clock.stop("load_messages_processing")
 
-        if (response.data.length === 0 && UserManager.getChannel() && document.getElementById("content").innerText.trim().length === 0) {
-            document.getElementById("content").insertAdjacentHTML("beforeend", `<div style="width: 100%;text-align: center; color: gray; font-style: italic;display: block !important; float: left !important;" id="msg-0">No messages yet... be the first one!</div>`);
+        if (response.data.length === 0 && UserManager.getChannel() && container.innerText.trim().length === 0) {
+            container.insertAdjacentHTML("beforeend", `<div style="width: 100%;text-align: center; color: gray; font-style: italic;display: block !important; float: left !important;" id="msg-0">No messages yet... be the first one!</div>`);
         }
 
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())
@@ -1251,8 +1620,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
 
             watchMediaLoads(container, lastMsg?.element)
             updateMarkdownLinks(2000)
-        }
-        else{
+        } else {
             if (appendTop && scrollPosition !== null) {
 
                 await withScrollLock(container, lastMsg?.element, async () => {
@@ -1286,7 +1654,7 @@ function waitForStableValue(getValueFn, stableMs, callback) {
     requestAnimationFrame(check);
 }
 
-function displayAwaitedMessages(container){
+function displayAwaitedMessages(container) {
     let messages = container.querySelectorAll(".waitForDisplay");
     messages.forEach(message => {
         message.classList.remove("waitForDisplay");
@@ -1299,7 +1667,7 @@ function addToChatLog(element, text, appendTop = false, force = true) {
 
 
 function getFirstMessage(container) {
-    if(!container) throw new Error("Container wasnt supplied");
+    if (!container) throw new Error("Container wasnt supplied");
     let message = container.querySelectorAll(".message-container .content:not(.reply)")[0];
     if (!message) {
         return null;
@@ -1318,7 +1686,7 @@ function getFirstMessage(container) {
 }
 
 function getLastMessage(container) {
-    if(!container) throw new Error("Container wasnt supplied");
+    if (!container) throw new Error("Container wasnt supplied");
     let elements = container.querySelectorAll(".message-container .content:not(.reply)");
     let lastMessageInChat = elements[elements.length - 1];
 
@@ -1348,29 +1716,28 @@ function getLastMessage(container) {
     }
 }
 
-function handleChannelMessageDrafting(channelId){
-    if(!channelId) throw new Error("Channel id is missing");
+function handleChannelMessageDrafting(channelId) {
+    if (!channelId) throw new Error("Channel id is missing");
     let channelDraft = getChannelMessageDraft(channelId);
 
-    if(channelDraft){
+    if (channelDraft) {
         const regex = /<p>\s*<\/p>/gm;
-        if(quill) quill.pasteUnconverted(channelDraft.replace(regex, ''));
-    }
-    else{
+        if (quill) quill.pasteUnconverted(channelDraft.replace(regex, ''));
+    } else {
         editor.innerHTML = "";
     }
 }
 
-function saveChannelMessageDraft(channelId, overwrite){
-    if(!channelId) throw new Error("Channel id is missing");
+function saveChannelMessageDraft(channelId, overwrite) {
+    if (!channelId) throw new Error("Channel id is missing");
     localStorage.setItem(`message_draft_${channelId}`, overwrite !== undefined ? overwrite : editor?.innerHTML || null)
 }
 
-function getChannelMessageDraft(channelId){
-    if(!channelId) throw new Error("Channel id is missing");
+function getChannelMessageDraft(channelId) {
+    if (!channelId) throw new Error("Channel id is missing");
 
     let data = localStorage.getItem(`message_draft_${channelId}`);
-    if(data === "null") return null;
+    if (data === "null") return null;
 
     return data
 }

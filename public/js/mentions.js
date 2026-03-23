@@ -166,8 +166,10 @@ function Mention(type, data) {
 
 async function convertMention(message, isString = false) {
     if(!message) throw new Error("Message cannot be converted");
-
-    let text = isString ? message.toString() : message.message.toString();
+    let text = isString ? message?.toString() : message?.message?.toString();
+    if(!text) {
+        return console.error("No text found from convertion", message);
+    }
 
     const u = await getUserMentions(text);
     text = u.text;

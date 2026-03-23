@@ -177,49 +177,25 @@ function importAccount() {
 }
 
 function saveSettings() {
-
-
-    //const iconStyles = window.getComputedStyle(settings_icon);
-    //const BannerStyles = window.getComputedStyle(settings_banner);
-
-    // Icon
     try {
-        if (settings_icon.value != null && settings_icon.value.length > 0) {
-            UserManager.setPFP(settings_icon.value);
-            console.log("Saved Icon");
-            console.log(settings_icon.value);
+
+        let newSettings = {
+            icon: settings_icon?.value != null && settings_icon?.value.length > 0 ? stripHTML(settings_icon?.value) : null, // Icon
+            banner: settings_banner?.value != null && settings_banner?.value.length > 0 ? stripHTML(settings_banner?.value) : null, // Banner
+            aboutme: settings_aboutme?.value != null && settings_aboutme?.value.length > 0 ? sanitizeHtmlForRender(settings_aboutme?.value, false) : null,  // About me
+            username: settings_username?.value != null && settings_username?.value.length >= 3 ? stripHTML(settings_username?.value) : null, // Username
+            status: sanitizeHtmlForRender(settings_status?.value, false), // Status
         }
 
-        // Banner
-        if (settings_banner.value != null && settings_banner.value.length > 0) {
-            UserManager.setBanner(settings_banner.value);
-            console.log("Saved Banner");
-            console.log(settings_banner.value);
-        }
-
-        // About me
-        // no check so we can allow it to be null
-        UserManager.setAboutme(settings_aboutme.value);
-        console.log("Saved about me");
-
-
-        // Username
-        if (settings_username.value != null && settings_username.value.length >= 3) {
-            UserManager.setUser(settings_username.value);
-            console.log("Saved user");
-        }
-
-        // Status
-        UserManager.setStatus(settings_status.value);
-        console.log("Saved status");
-
-        // About me
-        if (settings_aboutme.value != null && settings_aboutme.value.length > 0) {
-            UserManager.setAboutme(settings_aboutme.value);
-            console.log("Saved about me");
-        }
-
-        saveButton.style.display = "none";
+        socket.emit("updateMember", {id: UserManager.getID(), token: UserManager.getToken(), newSettings: newSettings,}, async function (response) {
+            if(response?.error) throw response?.error.msg;
+            UserManager.setPFP(response.updatedMember.icon);
+            UserManager.setBanner(response.updatedMember.banner);
+            UserManager.setAboutme(response.updatedMember.aboutme);
+            UserManager.setUser(response.updatedMember.username);
+            UserManager.setStatus(response.updatedMember.status);
+            saveButton.style.display = "none";
+        })
     } catch (error) {
         alert("Error while trying to save settings: " + error);
         return;

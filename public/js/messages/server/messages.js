@@ -8,6 +8,161 @@ document.addEventListener("DOMContentLoaded", function () {
     editorHints = document.getElementById("editor-hints");
 
     ContextMenu.registerContextMenu(
+        "memberprofile",
+        [
+            ".memberlist-container",
+            ".memberlist-container .name",
+            ".memberlist-container .status",
+            ".memberlist-img",
+            ".mention.member",
+            // vc container
+            ".vc-container .participant",
+            ".vc-container .participant img",
+            ".user-container .user-icon",
+            ".message-container .icon",
+            ".message-container .username",
+            // vc user from channels
+            "#channeltree .category .participants .participant",
+            "#channeltree .category .participants .participant .avatar",
+        ],
+        [
+            {
+                icon: "&#9878;",
+                text: "Ban Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt ban member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.banUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt ban member because memberid wasnt found");
+                        return;
+                    }
+                    return await UserManager.checkPermission("banMember") === true && (memberId !== UserManager.getID())
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9873;",
+                text: "Kick Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt kick member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.kickUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if(!memberId) return false;
+                    return await UserManager.checkPermission("kickUsers") === true && (memberId !== UserManager.getID())
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9873;",
+                text: "Mute Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt mute member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.muteUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if(!memberId) return false;
+                    return await UserManager.checkPermission("muteUsers") === true &&
+                        (memberId !== UserManager.getID()) &&
+                        data.element.querySelectorAll(".mutedMember").length === 0
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9873;",
+                text: "Unmute Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt mute member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.unmuteUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if(!memberId) return false;
+                    return await UserManager.checkPermission("muteUsers") === true &&
+                        (memberId !== UserManager.getID()) &&
+                        data.element.querySelectorAll(".mutedMember").length !== 0
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9741;",
+                text: "Disconnect Member",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt disconnect member because memberid wasnt found");
+                        return;
+                    }
+
+                    ModActions.disconnectUser(memberId)
+                },
+                condition: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if(!memberId) return false;
+                    return  await UserManager.checkPermission("disconnectUsers") === true && (memberId !== UserManager.getID())
+                },
+                type: "error"
+            },
+            {
+                icon: "&#9741;",
+                text: "Remove from Group",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt disconnect member because memberid wasnt found");
+                        return;
+                    }
+
+                    if(typeof promptRemoveDmParticipant === "function"){
+                        promptRemoveDmParticipant(memberId);
+                    }
+                },
+                condition: async (data) => {
+                    return typeof promptRemoveDmParticipant === "function"
+                },
+                type: "error"
+            },
+            {
+                icon: "&#10070;",
+                text: "Copy ID",
+                callback: async (data) => {
+                    let memberId = data.element.getAttribute("data-member-id");
+                    if (!memberId) {
+                        console.warn("Couldnt copy member because memberid wasnt found");
+                        return;
+                    }
+
+                    navigator.clipboard.writeText(memberId)
+                }
+            }
+        ])
+
+    ContextMenu.registerContextMenu(
         "servermessage",
         [
             ".contentRows .content",
@@ -391,6 +546,127 @@ function registerMessageInfiniteLoad(element) {
     });
 }
 
+function initQuillShit(customQuill = null){
+
+    const Delta = Quill.import('delta');
+    const Embed = Quill.import("blots/embed");
+
+    class EmojiBlot extends Embed {
+        static create(value) {
+            const node = super.create();
+            for (const k in value) node.setAttribute(k, value[k]);
+            return node;
+        }
+
+        static value(node) {
+            const out = {};
+            for (const a of node.attributes) out[a.name] = a.value;
+            return out;
+        }
+    }
+
+    EmojiBlot.blotName = "emoji";
+    EmojiBlot.tagName = "img";
+
+    Quill.DEFAULTS.placeholder = "Write a message...";
+    Quill.register(EmojiBlot);
+
+
+    hljs.configure({
+        languages: ['javascript', 'python', 'ruby', 'xml', 'json', 'css', "bash"]
+    });
+
+
+    window.quill = customQuill ?? new Quill('#editor', {
+        modules: {
+            syntax: true,
+            toolbar: {
+                container: '#editor-toolbar', handlers: {
+                    'link': function (value) {
+                        if (value) {
+                            var href = prompt('Enter the URL');
+                            if (href) {
+                                quill.format('link', href);
+                            }
+                        } else {
+                            quill.format('link', false);
+                        }
+                    }
+                }
+            },
+            keyboard: {
+                bindings: {
+                    enter: {
+                        key: 13,
+                        handler: function (range, context) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }, theme: 'snow'
+    });
+
+    // Add a matcher specifically for image elements
+    quill.clipboard.addMatcher('img', function (node, delta) {
+        // Insert a newline before the image content
+        return new Delta().insert('\n').concat(delta);
+    });
+
+
+    quill.clipboard.addMatcher('PRE', function (node, delta) {
+        return delta.compose(new Delta().retain(delta.length(), {'code-block': true}));
+    });
+
+    quill.clipboard.addMatcher(Node.TEXT_NODE, function (node, delta) {
+        if (node.parentNode && node.parentNode.tagName === 'PRE') {
+            return delta.compose(new Delta().retain(delta.length(), {'code-block': true}));
+        }
+        return delta;
+    });
+
+
+    if(!customQuill){
+        /* Quill Size begin */
+
+        editorContainer = document.querySelector('.editor-container');
+        editorToolbar = document.getElementById("editor-toolbar");
+        editorHints = document.getElementById("editor-hints");
+        quillContainer = document.querySelector('.ql-container');
+        editor = document.querySelector('.ql-editor');
+
+        initialToolbarHeight = editorToolbar.offsetHeight;
+        initialHeight = 40; // Initial height of the editor
+        maxHeight = 400; // Maximum height of the editor
+        initialMargin = parseFloat(getComputedStyle(editorContainer).marginTop);
+        allowEditorBlur = true;
+
+        editor.addEventListener('input', function (event) {
+            setTyping();
+        });
+
+        // save message draft
+        editor.addEventListener('keyup', function (event) {
+            saveChannelMessageDraft(UserManager.getChannel());
+        });
+
+        // editor resize fix where chat wont scroll down
+        const editorResizeObserver = new ResizeObserver(() => {
+            let isScrolledDown =  isScrolledToBottom(document.getElementById("content"));
+            if(isScrolledDown) scrollDown();
+        });
+        editorResizeObserver.observe(editor);
+
+        console.log(editor)
+        editor.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), quill.root.innerHTML);
+            }
+        });
+    }
+}
+/* Quill Emoji resize End */
 
 let editMessageId = null;
 let replyMessageId = null;

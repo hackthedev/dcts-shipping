@@ -32,7 +32,7 @@ class Prompt {
                 font-size: 14px;       
             }
             
-            input.prompt-input {
+            input.prompt-input, textarea {
                 width: 100% !important;
                 padding: 10px;
                 font-size: 14px;

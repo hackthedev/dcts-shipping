@@ -12,6 +12,7 @@ import Logger from "@hackthedev/terminal-logger";
 import JSONTools from "@hackthedev/json-tools";
 import {checkMessageObjAuthor, processMessageObject} from "../../resolveMessage.mjs";
 import {io} from "../../../../index.mjs";
+import {hasPermission} from "../../../functions/chat/main.mjs";
 
 export async function getMemberDmRooms(memberId) {
     if (!memberId) throw new Error("Member Id is required");
@@ -181,6 +182,42 @@ export async function fetchDmMessageById(id, issuerId, noLoop = false) {
     return parsed;
 }
 
+export async function deleteDmRoom(roomId, issuerId) {
+    if (!roomId || roomId?.length !== 12) throw new Error("Missing ID or invalid");
+    if (!issuerId || issuerId?.length !== 12) throw new Error("Missing issuerId or invalid");
+
+    let roomRow = await queryDatabase(
+        `SELECT roomId, creatorId FROM dm_rooms WHERE creatorId = ?`,
+        [issuerId]
+    )
+
+    if(roomRow?.length === 0) {
+        return {
+            error: "Room not found"
+        }
+    }
+
+    let deleteResult = null;
+    if(roomRow[0]?.creatorId === issuerId && roomRow[0]?.roomId){
+        deleteResult = await queryDatabase(
+            `DELETE FROM dm_rooms WHERE roomId = ?`,
+            [roomRow[0]?.roomId]
+        )
+    }
+    else{
+        return {
+            error: "Unauthorized",
+            result: deleteResult
+        }
+    }
+
+    return {
+        error: null,
+        result: deleteResult
+    };
+}
+
+
 export async function saveRoomDmMessage(payload) {
     if (!payload) throw new Error("missing message")
     if (!payload?.data?.roomId) throw new Error("missing roomid")
@@ -299,6 +336,66 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
     }
 
     return messages;
+}
+
+export async function addDmRoomParticipant(roomId, memberId, issuerId) {
+    if (!roomId || roomId.length !== 12) throw new Error("invalid roomId");
+    if (!memberId || memberId.length !== 12) throw new Error("invalid memberId");
+    if (!issuerId || issuerId.length !== 12) throw new Error("invalid issuerId");
+
+    let issuerCheck = await queryDatabase(
+        `SELECT id FROM dm_room_participants WHERE roomId = ? AND memberId = ?`,
+        [roomId, issuerId]
+    );
+    if (!issuerCheck?.length) return { error: "unauthorized" };
+
+    let existing = await queryDatabase(
+        `SELECT id FROM dm_room_participants WHERE roomId = ? AND memberId = ?`,
+        [roomId, memberId]
+    );
+    if (existing?.length) return { error: "already in room" };
+
+    let result = await queryDatabase(
+        `INSERT INTO dm_room_participants (roomId, memberId) VALUES (?, ?)`,
+        [roomId, memberId]
+    );
+
+    return { error: result?.affectedRows > 0 ? null : "failed to add participant" };
+}
+
+export async function removeDmRoomParticipant(roomId, memberId, issuerId) {
+    if (!roomId || roomId.length !== 12) throw new Error("invalid roomId");
+    if (!memberId || memberId.length !== 12) throw new Error("invalid memberId");
+    if (!issuerId || issuerId.length !== 12) throw new Error("invalid issuerId");
+
+    let room = await queryDatabase(
+        `SELECT creatorId FROM dm_rooms WHERE roomId = ?`,
+        [roomId]
+    );
+    if (!room?.length) return { error: "room not found" };
+
+    if (memberId !== issuerId && room[0].creatorId !== issuerId) {
+        return { error: "unauthorized" };
+    }
+
+    let result = await queryDatabase(
+        `DELETE FROM dm_room_participants WHERE roomId = ? AND memberId = ?`,
+        [roomId, memberId]
+    );
+
+    if (!result?.affectedRows) return { error: "not in room" };
+
+    let remaining = await queryDatabase(
+        `SELECT id FROM dm_room_participants WHERE roomId = ? LIMIT 1`,
+        [roomId]
+    );
+
+    if (!remaining?.length) {
+        await queryDatabase(`DELETE FROM dm_rooms WHERE roomId = ?`, [roomId]);
+        return { error: null, roomDeleted: true };
+    }
+
+    return { error: null, roomDeleted: false };
 }
 
 export async function createMemberDmRoom(memberId, participants) {
@@ -449,6 +546,62 @@ export default (io) => (socket) => {
         }
 
         response({error: null})
+    });
+
+    socket.on('addDmRoomParticipant', async function (member, response) {
+        if (await validateMemberId(member.id, socket, member?.token) !== true) {
+            return response?.({type: 'error', msg: 'unauthorized'});
+        }
+
+        if (!member?.roomId || member.roomId.length !== 12) return response({error: "invalid roomId"});
+        if (!member?.memberId || member.memberId.length !== 12) return response({error: "invalid memberId"});
+
+        let {error} = await addDmRoomParticipant(member.roomId, member.memberId, member.id);
+        if (error) return response({error});
+
+        io.in(member.roomId).emit("dmParticipantAdded", {roomId: member.roomId, memberId: member.memberId});
+        io.in(member.memberId).emit("roomInvitation", {roomId: member.roomId});
+
+        response({error: null});
+    });
+
+    socket.on('removeDmRoomParticipant', async function (member, response) {
+        if (await validateMemberId(member.id, socket, member?.token) !== true) {
+            return response?.({type: 'error', msg: 'unauthorized'});
+        }
+
+        if (!member?.roomId || member.roomId.length !== 12) return response({error: "invalid roomId"});
+        if (!member?.memberId || member.memberId.length !== 12) return response({error: "invalid memberId"});
+
+        let {error, roomDeleted} = await removeDmRoomParticipant(member.roomId, member.memberId, member.id);
+        if (error) return response({error});
+
+        if (roomDeleted) {
+            io.in(member.roomId).emit("roomDeleted", {roomId: member.roomId});
+        } else {
+            io.in(member.roomId).emit("dmParticipantRemoved", {roomId: member.roomId, memberId: member.memberId});
+        }
+
+        response({error: null});
+    });
+
+    socket.on('deleteDmRoom', async function (member, response) {
+        if (await validateMemberId(member.id, socket, member?.token) !== true) {
+            return response?.({type: 'error', msg: 'unauthorized'});
+        }
+
+        if (member?.roomId === undefined) return response({error: "roomId missing"});
+        let {result, error} = await deleteDmRoom(member.roomId, member.id);
+
+        if(result?.affectedRows > 0){
+            if(result?.affectedRows > 0){
+                io.in(member.roomId).emit("roomDeleted", {roomId: member.roomId});
+                response({error: null});
+            }
+        }
+        else{
+            response({error: `Unable to delete DM: ${error}`})
+        }
     });
 
     socket.on('sendDmMessage', async function (member, response) {

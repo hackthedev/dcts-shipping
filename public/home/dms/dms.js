@@ -1,10 +1,6 @@
 let tooltipSystem;
 let customPrompts;
 
-document.addEventListener("DOMContentLoaded", async () => {
-    registerDmIconTooltips();
-})
-
 document.addEventListener("set-e2ee", e => {
     let enabled = e?.detail?.enabled;
     if(enabled === undefined) throw new Error("E2EE Update event Error: Couldnt get value")
@@ -40,6 +36,8 @@ function rewriteImg(img) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    registerDmIconTooltips();
+
     tooltipSystem = new TooltipSystem();
     customPrompts = new Prompt();
 
@@ -87,6 +85,30 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 
     socket.on('roomInvitation', async function (response) {
+        renderDMs();
+    })
+
+    socket.on('roomDeletion', async function (response) {
+        renderDMs();
+    })
+
+    socket.on('dmParticipantAdded', async function (response) {
+        let currentRoom = ChatManager.getUrlParams("dm");
+        if (response?.roomId === currentRoom) renderDmRoom(currentRoom);
+        renderDMs();
+    })
+
+    socket.on('dmParticipantRemoved', async function (response) {
+        let currentRoom = ChatManager.getUrlParams("dm");
+
+        // wenn wir selbst removed wurden
+        if (response?.memberId === UserManager.getID()) {
+            if (response?.roomId === currentRoom) renderHome();
+            renderDMs();
+            return;
+        }
+
+        if (response?.roomId === currentRoom) renderDmRoom(currentRoom);
         renderDMs();
     })
 });
@@ -344,6 +366,31 @@ async function updateHeaderStatusIcons(data){
 
 }
 
+async function promptAddDmParticipant() {
+    let roomId = getDMsNavContainer()?.querySelector(`.entry.selected`)?.getAttribute("data-room-id");
+    if (!roomId) return;
+
+    customPrompts.showInput("Enter Member ID to add:", async (memberId) => {
+        if (!memberId || memberId.length !== 12) return;
+        let res = await addDmRoomParticipant(roomId, memberId);
+        if (res?.error) console.error("add participant failed:", res.error);
+    })
+}
+
+async function promptRemoveDmParticipant(memberId) {
+    let roomId = getDMsNavContainer()?.querySelector(`.entry.selected`)?.getAttribute("data-room-id");
+    if (!roomId || !memberId || memberId.length !== 12) return;
+
+    customPrompts.showConfirm("Remove this member from the chat?",
+        [["Yes", "success"], ["No", "error"]],
+        async (selected) => {
+            if (selected !== "yes") return;
+            let res = await removeDmRoomParticipant(roomId, memberId);
+            if (res?.error) console.error("remove participant failed:", res.error);
+        }
+    )
+}
+
 function renderDmMenu() {
     let menu = getContentElement()?.querySelector(".dm-container .header .right-side .menu");
     if (!menu) return;
@@ -352,7 +399,7 @@ function renderDmMenu() {
     if (!ul) return;
 
     ul.innerHTML = `
-        <li>
+        <li onclick="promptAddDmParticipant()">
             ${statusIcons["user-plus"]} Add Member
         </li>
         ${
@@ -369,7 +416,7 @@ function renderDmMenu() {
                 </li>`
             : ""
     }
-        <li class="caution">
+        <li class="caution" onclick="deleteDmRoom()">
             ${statusIcons["trash"]} Delete Chat
         </li>
     `;
@@ -432,17 +479,20 @@ async function renderDmRoom(roomId){
         }
 
         // menu handler
-        getContentElement().addEventListener("click", e => {
-            const menu = e.target.closest(".menu");
+        if(!getContentElement().dataset.menuInit){
+            getContentElement().addEventListener("click", e => {
+                const menu = e.target.closest(".menu");
 
-            getContentElement().querySelectorAll(".menu.open").forEach(m => {
-                if (m !== menu) m.classList.remove("open");
+                getContentElement().querySelectorAll(".menu.open").forEach(m => {
+                    if (m !== menu) m.classList.remove("open");
+                });
+
+                if (menu) {
+                    menu.classList.toggle("open");
+                }
             });
-
-            if (menu) {
-                menu.classList.toggle("open");
-            }
-        });
+            getContentElement().dataset.menuInit = "1";
+        }
 
         observeContainer();
         let dmMessages = await getDmRoomMessages(roomId);
@@ -503,6 +553,15 @@ async function renderDmRoom(roomId){
         editorHints = document.getElementById("editor-hints");
         window.editor = dmEditor.editorEl.querySelector(".ql-editor");
         markDmInNav(roomId);
+
+        // init needed for emojis etc
+        if(!window?.initQuillShitDone){
+            initQuillShit(dmEditor.quill);
+            window.initQuillShitDone = true;
+        }
+
+        initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
+        initializeMentionAutocomplete(document.querySelector('.ql-editor'));
     }
     else{
         startDmWith(ChatManager.getUrlParams("dm"))
@@ -515,6 +574,59 @@ function markDmInNav(roomId){
     })
     let entry = getDMsNavContainer()?.querySelector(`.entry[data-room-id='${roomId}']`);
     if(entry) entry.classList.add("selected");
+}
+
+async function addDmRoomParticipant(roomId, memberId) {
+    return new Promise(resolve => {
+        socket.emit("addDmRoomParticipant", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            roomId,
+            memberId
+        }, resolve);
+    })
+}
+
+async function removeDmRoomParticipant(roomId, memberId) {
+    return new Promise(resolve => {
+        socket.emit("removeDmRoomParticipant", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            roomId,
+            memberId
+        }, resolve);
+    })
+}
+
+async function deleteDmRoom(){
+    let roomId = getDMsNavContainer()?.querySelector(`.entry.selected`)?.getAttribute("data-room-id");
+    if(!roomId) throw new Error("Room id not found for deleting dm")
+
+    customPrompts.showConfirm("Do you really wanna delete this chat?",
+        [["Yes", "success"], ["No", "error"]],
+        (selectedOption) => {
+            if (selectedOption === "yes") {
+                deleteChat();
+                renderHome()
+            }
+        })
+
+    async function deleteChat(){
+        return new Promise(resolve => {
+            socket.emit("deleteDmRoom", {
+                id: UserManager.getID(),
+                token: UserManager.getToken(),
+                roomId,
+            }, function (response) {
+                if(response?.error){
+                    console.error("Couldnt delete chat:", response)
+                }
+                else{
+                    renderDMs()
+                }
+            });
+        })
+    }
 }
 
 async function sendDmMessage(text, currentDmObj){

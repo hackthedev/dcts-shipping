@@ -23,14 +23,15 @@ async function renderHome() {
             
             <div class="home-container">
                 <div class="about">
-                    <div class="edit-icon dark" onclick="editHero()">${ICONS.edit}</div>
-                    ${server?.serverinfo?.home?.about}
+                    <div class="edit-icon dark" onclick="editHeroAbout()">${ICONS.edit}</div>
+                    <div class="about-content">
+                        ${server?.serverinfo?.home?.about}
+                    </div>
                 </div>
                 
                 <div class="info">
                     <div class="contact">                
-                       <label class="hint-label" style="margin: 0;">Contact Information</label>       
-                       <div class="edit-icon dark" onclick="editHero()">${ICONS.edit}</div>
+                       <label class="hint-label" style="margin: 0;">Contact Information</label>     
                        <ul style="padding-left: 20px;line-height: 1.5;">
                             ${contactData.email ? `<li>Email: <a href=mailto:"${contactData.email}" target="_blank">${contactData.email}</a></li>` : ""}
                             ${contactData.website ? `<li>Website: <a href="${contactData.website}" target="_blank">${contactData.website}</a></li>` : ""}
@@ -197,12 +198,15 @@ function editHero() {
 }
 
 function editHeroAbout() {
+    let currentServerAbout = getContentElement().querySelector(".home-container .about .about-content").innerHTML;
+    if(!currentServerAbout) throw new Error("No home element found")
+
     customPrompts.showPrompt(
         "Edit Home",
         `
           <div style="margin: 20px 0;">
             <label class="prompt-label">About</label>
-            <textarea rows=10 type="text" class="prompt-input" name="homeAbout" >${CONFIG.aboutHtml}</textarea
+            <textarea rows=10 type="text" class="prompt-input" name="homeAbout" >${currentServerAbout}</textarea
           </div>         
         `,
 
@@ -212,14 +216,17 @@ function editHeroAbout() {
             // would be hard to edit if already rendered as html am i right
             let homeAbout = values.homeAbout;
 
-            socket.emit("updateHeroAbout", {
+            socket.emit("saveServerInfo", {
                 token: UserManager.getToken(), id: UserManager.getID(),
-                about: homeAbout
+                serverinfo: {
+                    home: {
+                        about: homeAbout
+                    }
+                }
             }, (response) => {
-
-                if (response?.type !== "success") {
+                if (response?.error) {
                     showSystemMessage({
-                        title: response.title || "",
+                        title: response.title || response.error || "",
                         text: response.msg || response.error || "",
                         icon: response.type,
                         img: null,
@@ -230,12 +237,7 @@ function editHeroAbout() {
                     return;
                 }
 
-                // about
-                if (homeAbout) {
-                    CONFIG.aboutHtml = homeAbout;
-                }
-
-                showServerHome();
+                renderHome();
 
             });
         },

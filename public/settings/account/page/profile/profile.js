@@ -187,8 +187,8 @@ function saveSettings() {
             status: sanitizeHtmlForRender(settings_status?.value, false), // Status
         }
 
-        socket.emit("updateMember", {id: UserManager.getID(), newSettings: newSettings,}, async function (response) {
-            if(response?.error) throw `Error response from the server when updating member information: ${response?.error}`;
+        socket.emit("updateMember", {id: UserManager.getID(), token: UserManager.getToken(), newSettings: newSettings,}, async function (response) {
+            if(response?.error) throw response?.error.msg;
             UserManager.setPFP(response.updatedMember.icon);
             UserManager.setBanner(response.updatedMember.banner);
             UserManager.setAboutme(response.updatedMember.aboutme);

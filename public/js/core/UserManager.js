@@ -1,5 +1,3 @@
-import { stripHTML } from "../../../modules/functions/sanitizing/functions.mjs";
-
 class UserManager {
 
     static isLoadingDonators = false;

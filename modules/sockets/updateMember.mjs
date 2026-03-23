@@ -6,9 +6,11 @@ export default (io) => (socket) => {
 
     socket.on('updateMember', async function (member, response) {
         try{
-            for (const [key, value] of Object.entries(member?.newSettings)) {
-                if(value !== null) serverconfig.servermembers[member?.id][key] = value
-            }
+            serverconfig.servermembers[member?.id].icon = member.newSettings.icon;
+            serverconfig.servermembers[member?.id].banner = member.newSettings.banner;
+            serverconfig.servermembers[member?.id].aboutme = member.newSettings.aboutme;
+            serverconfig.servermembers[member?.id].username = member.newSettings.username;
+            serverconfig.servermembers[member?.id].status = member.newSettings.status;
             response({updatedMember: serverconfig.servermembers[member?.id]});
         }
         catch (exception){

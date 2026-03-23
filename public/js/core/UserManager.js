@@ -1,3 +1,5 @@
+import { stripHTML } from "../../../modules/functions/sanitizing/functions.mjs";
+
 class UserManager {
 
     static isLoadingDonators = false;
@@ -590,13 +592,13 @@ class UserManager {
     }
 
     static setUsername(username) {
-        username = sanitizeHtmlForRender(username, false);
+        username = stripHTML(username);
         CookieManager.setCookie("username", username, 360);
         UserManager.updateUsernameOnUI(username);
     }
 
     static setBanner(banner) {
-        banner = sanitizeHtmlForRender(banner, false)
+        banner = stripHTML(banner)
         CookieManager.setCookie("banner", banner, 360);
         localStorage.setItem("banner", banner);
     }
@@ -608,7 +610,7 @@ class UserManager {
     }
 
     static setPFP(pfp) {
-        pfp = sanitizeHtmlForRender(pfp, false)
+        pfp = stripHTML(pfp)
         localStorage.setItem("pfp", pfp);
         UserManager.updateUsernameOnUI(pfp);
     }

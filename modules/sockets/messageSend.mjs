@@ -34,10 +34,10 @@ export default (io) => (socket) => {
     socket.on('messageSend', async function (member, response) {
         if (await validateMemberId(member?.author?.id, socket, member?.token) === true) {
             // some new handling
-            if (!member?.message) return response({error: "No message provided"})
-            if (!member?.group) return response({error: "No group provided"})
-            if (!member?.category) return response({error: "No category provided"})
-            if (!member?.channel) return response({error: "No channel provided"})
+            if (!String(member?.message)) return response({error: "No message provided"})
+            if (!String(member?.group)) return response({error: "No group provided"})
+            if (!String(member?.category)) return response({error: "No category provided"})
+            if (!String(member?.channel)) return response({error: "No channel provided"})
 
             // anti spam check
             let rateLimitResult = await getChannelRateLimit({
@@ -89,22 +89,8 @@ export default (io) => (socket) => {
                 muteText += `<br><br>Reason:<br>${muteResult.reason}`
             }
 
-            if (muteResult.result === true) {
-                sendMessageToUser(socket.id, JSON.parse(
-                    `{
-                                        "title": "You have been ${muteText}",
-                                        "message": "",
-                                        "buttons": {
-                                            "0": {
-                                                "text": "Ok",
-                                                "events": ""
-                                            }
-                                        },
-                                        "type": "error",
-                                        "popup_type": "confirm"
-                                    }`));
-
-                response({error: `You cant chat here! You have been ${muteText}`})
+            if (muteResult?.result === true) {
+                response({error: `You cant chat here! You have been ${muteText}`, muted: true})
                 return;
             }
 
@@ -163,7 +149,7 @@ export default (io) => (socket) => {
                         "popup_type": "confirm"
                    }`));
 
-                return response({error: "You cant chat here!"})
+                return response({error: "You cant chat here! Missing permissions"})
             }
 
             // Check if room exists

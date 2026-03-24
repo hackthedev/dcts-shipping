@@ -491,6 +491,7 @@ async function addNewMessageToChatLog(message, type = null) {
             index: null,
             refElement: null,
             messageType: "dm",
+            pingMentions: true,
             getChannel: () => {
                 return ChatManager.getUrlParams("dm")
             }
@@ -504,6 +505,7 @@ async function addNewMessageToChatLog(message, type = null) {
             appendTop: false,
             index: null,
             refElement: null,
+            pingMentions: true
         })
     }
 
@@ -1445,7 +1447,8 @@ async function displayMessagesInElement({
                                             index = -1,
                                             scrollPosition = null,
                                             getChannel = null,
-                                            messageType = null
+                                            messageType = null,
+                                            pingMentions = false
                                         } = {}) {
 
     let firstMessage = getFirstMessage(container);
@@ -1495,7 +1498,8 @@ async function displayMessagesInElement({
                     location,
                     appendTop,
                     waitWithDisplay: true,
-                    messageType
+                    messageType,
+                    pingMentions
                 });
             } else {
                 await showMessageInChat({
@@ -1506,7 +1510,8 @@ async function displayMessagesInElement({
                     location,
                     appendTop,
                     waitWithDisplay: true,
-                    messageType
+                    messageType,
+                    pingMentions
                 });
             }
 

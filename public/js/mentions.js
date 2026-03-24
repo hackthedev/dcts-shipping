@@ -1,37 +1,37 @@
 let mentionAc = null;
 let mentionList = [];
 
-async function updateUIMentions(){
+async function updateUIMentions() {
     let channelTree = document.querySelector("#channeltree");
     let groupList = document.querySelector("#serverlist");
 
-    if(!channelTree) throw new Error("Channel tree not found!!")
-    if(!groupList) throw new Error("Group list not found!!")
+    if (!channelTree) throw new Error("Channel tree not found!!")
+    if (!groupList) throw new Error("Group list not found!!")
 
     let mentions = await Inbox.fetchMessages();
 
     let channelMentions = [];
     let groupMentions = [];
 
-    if(mentions?.items?.length >= 0){
-        for(let mentionKey of Object.keys(mentions.items)){
+    if (mentions?.items?.length >= 0) {
+        for (let mentionKey of Object.keys(mentions.items)) {
 
             // lets set some vars
             let mention = mentions.items[mentionKey]
             let mentionType = mention?.type;
 
-            if(mentionType === "message"){
+            if (mentionType === "message") {
                 await handleMessageMentionType(mention)
             }
         }
     }
 
-    async function handleMessageMentionType(mention){
+    async function handleMessageMentionType(mention) {
         let messageId = mention?.data?.messageId;
-        if(!messageId) return console.warn("No message id found in mention?");
+        if (!messageId) return console.warn("No message id found in mention?");
 
         let message = await ChatManager.resolveMessage(messageId);
-        if(!message) return console.warn("Message not found from mention? Maybe it was deleted?")
+        if (!message) return console.warn("Message not found from mention? Maybe it was deleted?")
 
         // our nice lil counters
         channelMentions.push(message.channel)
@@ -41,14 +41,14 @@ async function updateUIMentions(){
         updateGroupMentionUI(message.group)
     }
 
-    function updateChannelMentionUI(channelId){
+    function updateChannelMentionUI(channelId) {
         let channelMentionBadgeElement = channelTree.querySelector(`li .channel-mention-marker[data-channel-id='${channelId}']`)
-        if(!channelMentionBadgeElement) return;
+        if (!channelMentionBadgeElement) return;
 
         let count = channelMentions.filter(id => id === channelId).length;
         channelMentionBadgeElement.innerText = count > 0 ? count : "";
 
-        if(count > 0){
+        if (count > 0) {
             channelMentionBadgeElement.style.display = "inline-flex";
         }
         else {
@@ -56,23 +56,23 @@ async function updateUIMentions(){
         }
     }
 
-    function updateGroupMentionUI(groupId){
+    function updateGroupMentionUI(groupId) {
         let groupMentionBadgeElement = groupList.querySelector(`.server-entry .group-mention-indicator[data-group-id='${groupId}']`)
-        if(!groupMentionBadgeElement) return console.warn("Group element not found :/");
+        if (!groupMentionBadgeElement) return console.warn("Group element not found :/");
 
         let count = groupMentions.filter(id => id === groupId).length;
         groupMentionBadgeElement.innerText = count > 0 ? count : "";
 
-        if(count > 0){
+        if (count > 0) {
             groupMentionBadgeElement.style.display = "inline-flex";
         }
-        else{
+        else {
             groupMentionBadgeElement.style.display = "none";
         }
     }
 }
 
-function registerMentionClickEvent(){
+function registerMentionClickEvent() {
     ContextMenu.registerClickEvent(
         "mention_channel_click",
         [
@@ -95,17 +95,17 @@ function registerMentionClickEvent(){
 
 async function resolveMentions(message = null, pingUser = false) {
     if (!message?.messageId && !message?.reply) return;
-    if(!message?.messageId && message?.reply) message.messageId = message.reply;
+    if (!message?.messageId && message?.reply) message.messageId = message.reply;
 
     const container = document.querySelector(`.message-container .content:not(.reply)[data-message-id="${message.messageId}"]`);
-    if(!container) throw new Error("Message container not found for converting mentions");
+    if (!container) throw new Error("Message container not found for converting mentions");
     let messageContainer = container.closest(".message-container");
     if (!messageContainer) return;
 
     let replyRow = messageContainer.querySelector(".row.reply");
-    if(replyRow){
+    if (replyRow) {
         let repliedMessageAuthor = replyRow.getAttribute("data-member-id")
-        if(repliedMessageAuthor === UserManager.getID()){
+        if (repliedMessageAuthor === UserManager.getID()) {
             // only mark the first message
             markElementAsMention(container?.parentNode?.firstElementChild, pingUser, message);
         }
@@ -132,17 +132,19 @@ async function resolveMentions(message = null, pingUser = false) {
     }
 }
 
-function markElementAsMention(element, pingUser = false, message){
-    if(!element) return;
+function markElementAsMention(element, pingUser = false, message) {
+    if (!element) return;
+
+    console.log(element)
     element.style.backgroundColor = "rgba(255, 174, 0, 0.12)";
     element.style.borderLeft = "3px solid rgba(255, 174, 0, 0.52)";
     element.style.marginTop = "0px";
     element.style.width = "calc(100% - 8px)";
 
-    if(pingUser){
+    if (pingUser) {
         playSound("message", 0.5);
 
-        if(message){
+        if (message) {
             showSystemMessage({
                 title: message?.author?.name,
                 text: message.message,
@@ -165,9 +167,9 @@ function Mention(type, data) {
 }
 
 async function convertMention(message, isString = false) {
-    if(!message) throw new Error("Message cannot be converted");
+    if (!message) throw new Error("Message cannot be converted");
     let text = isString ? message?.toString() : message?.message?.toString();
-    if(!text) {
+    if (!text) {
         return console.error("No text found from convertion", message);
     }
 

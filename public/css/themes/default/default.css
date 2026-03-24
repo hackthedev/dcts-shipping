@@ -36,7 +36,7 @@ a {
     font-style: italic;
 }
 .message-container .content{
-    background-color: transparent !important;
+    background-color: transparent;
     font-size: 14px;
 }
 .message-container .meta .username{

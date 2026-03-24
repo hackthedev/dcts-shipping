@@ -54,6 +54,7 @@
     "zip": "^1.2.0"
   },
   "devDependencies": {
+    "socket.io-client": "^4.8.3",
     "typescript": "^5.9.3",
     "vitepress": "^2.0.0-alpha.16",
     "vitepress-sidebar": "^1.33.1"

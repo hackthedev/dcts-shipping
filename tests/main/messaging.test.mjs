@@ -15,6 +15,18 @@ mock.module("../../modules/functions/mysql/mysql.mjs", () => ({
     })
 }));
 
+mock.module("../../modules/functions/mysql/helper.mjs", () => ({
+    getChatMessagesFromDb: mock(async (roomId, index, msgId = null) => {
+        return [{
+            messageId: "123456789012",
+            authorId: "123456789012"
+        }]
+    }),
+    deleteChatMessagesFromDb: mock(async (messageId, type) => {
+        return null
+    })
+}));
+
 let slowmodeResult = false
 let rateLimitResult = false
 mock.module("../../modules/functions/anti-spam/messages.mjs", () => ({
@@ -42,6 +54,7 @@ mock.module("../../modules/functions/chat/main.mjs", () => ({
     hasPermission: mock(async (id, permission) => {
         if(!isAdmin && permission === "bypassSlowmode") return false
         if(!isAdmin && permission === "bypassRatelimit") return false
+        if(!isAdmin && permission === "manageMessages") return false
 
         return mockPermissionResult;
     }),
@@ -96,12 +109,13 @@ mock.module("../../modules/functions/ban-system/helpers.mjs", () => ({
 
 // Import the handler AFTER mocks
 import messageSendHandler from "../../modules/sockets/messageSend.mjs";
+import deleteMessageHandler from "../../modules/sockets/deleteMessage.mjs";
+
 import DateTools from "@hackthedev/datetools";
-import {getMemberLatestMessage} from "../../modules/functions/chat/helper.mjs";
 import {serverconfig} from "../../index.mjs";
 
 describe("Server Chat", () => {
-    const env = setupSocketMock(messageSendHandler);
+    const env = setupSocketMock(messageSendHandler, deleteMessageHandler);
 
     test("Server connection", () => {
         expect(env.clientSocket.connected).toBeTrue();
@@ -212,6 +226,31 @@ describe("Server Chat", () => {
         expect(res.slowmode).toBe(expectedTimestamp);
     });
 
+    test("Send Message (slow mode + admin)", async () => {
+        const payload = {
+            author: {
+                id: "123456789012"
+            },
+            token: "test",
+            message: "Test message",
+            group: 0,
+            category: 0,
+            channel: 0,
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = true
+        rateLimitResult = false
+        isAdmin = true;
+        getMemberLatestMessageTimestamp = new Date().getTime()
+
+        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        expect(res.error).toBeNull();
+    });
+
     test("Send Message (rate limited)", async () => {
         const payload = {
             author: {
@@ -235,5 +274,86 @@ describe("Server Chat", () => {
         const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).not.toBeNull();
         expect(res.rateLimited).toBe(true);
+    });
+
+    test("Send Message (rate limited + admin)", async () => {
+        const payload = {
+            author: {
+                id: "123456789012"
+            },
+            token: "test",
+            message: "Test message",
+            group: 0,
+            category: 0,
+            channel: 0,
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = true
+        isAdmin = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        expect(res.error).toBeNull();
+    });
+
+    test("Delete Message", async () => {
+        const payload = {
+            id: "123456789012",
+            token: "test",
+            messageId: "123456789012",
+            type: null
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        rateLimitResult = false
+        isAdmin = false;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("deleteMessage", payload, resolve));
+        expect(res.error).toBeNull();
+    });
+
+    test("Delete Message (not the author)", async () => {
+        const payload = {
+            id: "123456789013",
+            token: "test",
+            messageId: "123456789012",
+            type: null
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = false
+        isAdmin = false;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("deleteMessage", payload, resolve));
+        expect(res.error).toBe("Unauthorized or not message author");
+    });
+
+    test("Delete Message (not the author + admin)", async () => {
+        const payload = {
+            id: "123456789013",
+            token: "test",
+            messageId: "123456789012",
+            type: null
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = false
+        isAdmin = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("deleteMessage", payload, resolve));
+        expect(res.error).toBeNull();
     });
 });

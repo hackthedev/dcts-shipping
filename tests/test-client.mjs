@@ -62,6 +62,12 @@ mock.module("../index.mjs", () => ({
                 token: "test",
                 name: "Test",
                 onboarding: true
+            },
+            "123456789013": {
+                id: "123456789013",
+                token: "test",
+                name: "Test",
+                onboarding: true
             }
         },
         mutelist: {},
@@ -139,7 +145,7 @@ export function connectClient(socket) {
     });
 }
 
-export function setupSocketMock(socketHandlerFactory) {
+export function setupSocketMock(...socketHandlerFactories) {
     let env = {
         ioServer: null,
         server: null,
@@ -150,11 +156,12 @@ export function setupSocketMock(socketHandlerFactory) {
         env.server = createServer();
         env.ioServer = new Server(env.server, { cors: { origin: "*" } });
 
-        const handler = socketHandlerFactory(env.ioServer);
+        const handlers = socketHandlerFactories.map(factory => factory(env.ioServer));
         env.ioServer.on("connection", (socket) => {
             if (!socket.rooms) socket.rooms = new Set();
             socket.join = mock((room) => socket.rooms.add(room));
-            handler(socket);
+
+            handlers.forEach(handler => handler(socket));
         });
 
         await new Promise(res => env.server.listen(0, res));

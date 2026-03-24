@@ -518,7 +518,7 @@ async function findExactDmRoom(participants) {
 export default (io) => (socket) => {
     socket.on('getDmRooms', async function (member, response) {
         if (await validateMemberId(member.id, socket, member?.token) !== true) {
-            return response?.({type: 'error', msg: 'unauthorized'});
+            return response?.({error: 'unauthorized'});
         }
 
         response({error: null, rooms: await getMemberDmRooms(member.id)});
@@ -526,7 +526,7 @@ export default (io) => (socket) => {
 
     socket.on('getDmRoomMessages', async function (member, response) {
         if (await validateMemberId(member.id, socket, member?.token) !== true) {
-            return response?.({type: 'error', msg: 'unauthorized'});
+            return response?.({error: 'unauthorized'});
         }
 
         if (member?.roomId === undefined) return response({error: "roomId missing"})
@@ -537,7 +537,7 @@ export default (io) => (socket) => {
 
     socket.on('joinDmRoom', async function (member, response) {
         if (await validateMemberId(member.id, socket, member?.token) !== true) {
-            return response?.({type: 'error', msg: 'unauthorized'});
+            return response?.({error: 'unauthorized'});
         }
 
         if (member?.roomId === undefined) return response({error: "roomId missing"});
@@ -549,8 +549,8 @@ export default (io) => (socket) => {
     });
 
     socket.on('addDmRoomParticipant', async function (member, response) {
-        if (await validateMemberId(member.id, socket, member?.token) !== true) {
-            return response?.({type: 'error', msg: 'unauthorized'});
+        if (await validateMemberId(member?.id, socket, member?.token) !== true) {
+            return response?.({error: 'unauthorized'});
         }
 
         if (!member?.roomId || member.roomId.length !== 12) return response({error: "invalid roomId"});
@@ -566,8 +566,8 @@ export default (io) => (socket) => {
     });
 
     socket.on('removeDmRoomParticipant', async function (member, response) {
-        if (await validateMemberId(member.id, socket, member?.token) !== true) {
-            return response?.({type: 'error', msg: 'unauthorized'});
+        if (await validateMemberId(member?.id, socket, member?.token) !== true) {
+            return response?.({error: 'unauthorized'});
         }
 
         if (!member?.roomId || member.roomId.length !== 12) return response({error: "invalid roomId"});
@@ -586,8 +586,8 @@ export default (io) => (socket) => {
     });
 
     socket.on('deleteDmRoom', async function (member, response) {
-        if (await validateMemberId(member.id, socket, member?.token) !== true) {
-            return response?.({type: 'error', msg: 'unauthorized'});
+        if (await validateMemberId(member?.id, socket, member?.token) !== true) {
+            return response?.({error: 'unauthorized'});
         }
 
         if (member?.roomId === undefined) return response({error: "roomId missing"});
@@ -595,7 +595,7 @@ export default (io) => (socket) => {
 
         if(result?.affectedRows > 0){
             if(result?.affectedRows > 0){
-                io.in(member.roomId).emit("roomDeleted", {roomId: member.roomId});
+                io.in(member.roomId).emit("roomDeleted", {roomId: member.roomId, error: null});
                 response({error: null});
             }
         }
@@ -606,7 +606,7 @@ export default (io) => (socket) => {
 
     socket.on('sendDmMessage', async function (member, response) {
         if (await validateMemberId(member.id, socket, member?.token) !== true) {
-            return response?.({type: 'error', msg: 'unauthorized'});
+            return response?.({error: 'unauthorized'});
         }
 
         let payload = member?.payload
@@ -640,7 +640,7 @@ export default (io) => (socket) => {
 
     socket.on('createDmRoom', async function (member, response) {
         if (await validateMemberId(member.id, socket, member?.token) !== true) {
-            return response?.({type: 'error', msg: 'unauthorized'});
+            return response?.({error: 'unauthorized'});
         }
 
         if (member?.participants === undefined) return response({error: "participants array missing"})
@@ -663,7 +663,7 @@ export default (io) => (socket) => {
 
     socket.on('markDmAsRead', async function (member, response) {
         if (await validateMemberId(member.id, socket, member?.token) !== true) {
-            return response?.({type: 'error', msg: 'unauthorized'});
+            return response?.({error: 'unauthorized'});
         }
 
         let mid = member?.messageId;

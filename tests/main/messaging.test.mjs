@@ -310,6 +310,9 @@ describe("Server Chat", () => {
 
         mockPermissionResult = true
         checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
         rateLimitResult = false
         isAdmin = false;
 

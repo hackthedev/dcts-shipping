@@ -296,7 +296,6 @@ export default (io) => (socket) => {
                 return response({error: "Channel not found!"});
             }
         } else {
-            Logger.warn("Cant send message because member id wasnt valid");
             response({error: "Member validation failed!"})
         }
     });

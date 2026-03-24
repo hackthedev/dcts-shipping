@@ -15,14 +15,16 @@ mock.module("../../modules/functions/mysql/mysql.mjs", () => ({
     })
 }));
 
+let slowmodeResult = false
+let rateLimitResult = false
 mock.module("../../modules/functions/anti-spam/messages.mjs", () => ({
     getChannelRateLimit: mock(async (query, args) => {
         return {
             currentHourly: 0,
             currentDaily: 0,
             baseline: 0,
-            slowmode: false,
-            rateLimited: false
+            slowmode: slowmodeResult,
+            rateLimited: rateLimitResult
         }
     })
 }));
@@ -35,9 +37,22 @@ mock.module("../../modules/functions/io.mjs", () => ({
 // different scenarios lol. there may be a better way for this
 // but as of right now it works at least
 let mockPermissionResult = true;
+let isAdmin = false
 mock.module("../../modules/functions/chat/main.mjs", () => ({
     hasPermission: mock(async (id, permission) => {
+        if(!isAdmin && permission === "bypassSlowmode") return false
+        if(!isAdmin && permission === "bypassRatelimit") return false
+
         return mockPermissionResult;
+    }),
+}));
+
+let getMemberLatestMessageTimestamp = null;
+mock.module("../../modules/functions/chat/helper.mjs", () => ({
+    getMemberLatestMessage: mock(async (memberId, issuerId) => {
+        return {
+            timestamp: getMemberLatestMessageTimestamp ?? DateTools.getDateFromOffset("-5 minutes").getTime()
+        }
     }),
 }));
 
@@ -82,6 +97,8 @@ mock.module("../../modules/functions/ban-system/helpers.mjs", () => ({
 // Import the handler AFTER mocks
 import messageSendHandler from "../../modules/sockets/messageSend.mjs";
 import DateTools from "@hackthedev/datetools";
+import {getMemberLatestMessage} from "../../modules/functions/chat/helper.mjs";
+import {serverconfig} from "../../index.mjs";
 
 describe("Server Chat", () => {
     const env = setupSocketMock(messageSendHandler);
@@ -160,9 +177,63 @@ describe("Server Chat", () => {
         mockPermissionResult = true
         checkMemberMuteResult = false;
         checkMemberBanResult = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        expect(res.error).not.toBeNull();
+    });
+
+    test("Send Message (slow mode)", async () => {
+        const payload = {
+            author: {
+                id: "123456789012"
+            },
+            token: "test",
+            message: "Test message",
+            group: 0,
+            category: 0,
+            channel: 0,
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = true
+        rateLimitResult = false
+        getMemberLatestMessageTimestamp = new Date().getTime()
+
         const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
 
-        console.log(res)
+        // here we need to do some calc shit like the server does so the expectedTimestamp etc will match
+        let diff = DateTools.getDateFromOffset(serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration, new Date(getMemberLatestMessageTimestamp)).getTime() - getMemberLatestMessageTimestamp;
+        let expectedTimestamp = getMemberLatestMessageTimestamp + diff;
+
         expect(res.error).not.toBeNull();
+        expect(res.slowmode).toBe(expectedTimestamp);
+    });
+
+    test("Send Message (rate limited)", async () => {
+        const payload = {
+            author: {
+                id: "123456789012"
+            },
+            token: "test",
+            message: "Test message",
+            group: 0,
+            category: 0,
+            channel: 0,
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = true
+        isAdmin = false;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        expect(res.error).not.toBeNull();
+        expect(res.rateLimited).toBe(true);
     });
 });

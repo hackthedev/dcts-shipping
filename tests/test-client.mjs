@@ -12,7 +12,7 @@ export let defaultTestOverwrites = {
                 const { checkMemberBan } = await import("../modules/functions/ban-system/helpers.mjs");
                 const banResult = await checkMemberBan(socket, serverconfig.servermembers[id]);
                 if (banResult?.result) return false;
-                
+
                 return true
             }
         }
@@ -44,7 +44,18 @@ mock.module("../modules/functions/main.mjs", () => ({
 
 mock.module("../index.mjs", () => ({
     serverconfig: {
-        serverinfo: { dms: { maxParticipants: 10 } },
+        serverinfo: {
+            dms: {
+                maxParticipants: 10
+            },
+            moderation: {
+                ratelimit: {
+                    actions: {
+                        user_slowmode_duration: "1 minute"
+                    }
+                }
+            }
+        },
         servermembers: {
             "123456789012": {
                 id: "123456789012",

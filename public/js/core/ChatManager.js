@@ -4,6 +4,10 @@ class ChatManager {
     static connectionLost = false;
     static wasConnected = false;
 
+    static chance(percent) {
+        return Math.random() < percent / 100;
+    }
+
     static waitForSocket(socket) {
         return new Promise((resolve, reject) => {
             if (socket.connected) {

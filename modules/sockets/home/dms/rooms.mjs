@@ -515,6 +515,20 @@ async function findExactDmRoom(participants) {
     return null;
 }
 
+export async function getDmRoomParticipantIds(roomId) {
+    if (!roomId || roomId.length !== 12) throw new Error("invalid roomId");
+
+    let rows = await queryDatabase(
+        `SELECT memberId
+         FROM dm_room_participants
+         WHERE roomId = ?`,
+        [roomId]
+    );
+
+    if (!rows?.length) return [];
+    return rows.map(row => String(row.memberId));
+}
+
 export default (io) => (socket) => {
     socket.on('getDmRooms', async function (member, response) {
         if (await validateMemberId(member.id, socket, member?.token) !== true) {
@@ -609,29 +623,40 @@ export default (io) => (socket) => {
             return response?.({ error: 'unauthorized' });
         }
 
-        let payload = member?.payload
-        if (typeof payload !== "object") return response({ error: "Missing message payload" })
+        let payload = member?.payload;
+        if (typeof payload !== "object") return response({ error: "Missing message payload" });
 
-        if (payload?.data?.roomId === undefined) return response({ error: "roomId missing" })
-        if (payload?.data?.roomId?.length !== 12) return response({ error: "Invalid roomId format" })
-        if (!payload?.data) return response({ error: "Missing data object" })
-        if (typeof payload?.data !== "object") return response({ error: "Message is not an object" })
-        if (!payload?.data?.author?.id) return response({ error: "Message doesnt contain author information" })
+        if (payload?.data?.roomId === undefined) return response({ error: "roomId missing" });
+        if (payload?.data?.roomId?.length !== 12) return response({ error: "Invalid roomId format" });
+        if (!payload?.data) return response({ error: "Missing data object" });
+        if (typeof payload?.data !== "object") return response({ error: "Message is not an object" });
+        if (!payload?.data?.author?.id) return response({ error: "Message doesnt contain author information" });
 
         let saved = await saveRoomDmMessage(payload);
         let hasError = saved ? null : "Error while sending DM";
 
         if (!hasError) {
+            let messageId = saved?.meta?.messageEditId || saved?.meta?.messageId;
+
             let fullMessage = await fetchDmMessageById(
-                saved.meta.messageId,
+                messageId,
                 member.id
             );
 
-            if (saved.meta.messageEditId) {
+            if (!fullMessage) {
+                return response({ error: "Unable to resolve saved DM", payload: null });
+            }
+
+            if (saved?.meta?.messageEditId) {
                 fullMessage.messageEditId = saved.meta.messageEditId;
             }
 
-            io.in(fullMessage.data.roomId).emit("newDmMessage", { payload: fullMessage });
+            let participantIds = await getDmRoomParticipantIds(fullMessage.data.roomId);
+
+            for (let i = 0; i < participantIds.length; i++) {
+                io.in(participantIds[i]).emit("newDmMessage", { payload: fullMessage });
+            }
+
             response({ error: null, payload: fullMessage });
         } else {
             response({ error: hasError, payload: null });

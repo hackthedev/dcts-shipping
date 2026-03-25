@@ -268,9 +268,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             // no img viewer on reactions
-            if (data.element.parentNode?.classList?.contains("message-reaction-entry")) return;
-
-
+            if (data.element.parentNode?.classList?.contains("message-reaction-entry")) return console.warn("Reaction entry");
             showImagePopup(src)
         }
     )

@@ -469,18 +469,12 @@ ensureDomPurify()
 
 voip = new VoIP(`${window.location.origin.includes("https") ? "wss" : "ws"}://{{livekit.url}}/`);
 
-
-
-socket.on('receiveThreadNew', async ({ }) => {
-    console.log("receiveThreadNew")
-    displayHomeUnread()
-});
-
 socket.on('updateUnread', async () => {
     displayHomeUnread()
 });
 
-socket.on('receiveMessage', async ({ }) => {
+socket.on('newDmMessage', async (data) => {
+    console.log(data)
     displayHomeUnread()
 });
 

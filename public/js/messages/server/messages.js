@@ -643,6 +643,8 @@ function initQuillShit(customQuill = null){
         initialMargin = parseFloat(getComputedStyle(editorContainer).marginTop);
         allowEditorBlur = true;
 
+        if(!editor) throw new Error("No editor element found for quill init!")
+
         editor.addEventListener('input', function (event) {
             setTyping();
         });
@@ -659,7 +661,6 @@ function initQuillShit(customQuill = null){
         });
         editorResizeObserver.observe(editor);
 
-        console.log(editor)
         editor.addEventListener('keydown', function (event) {
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();

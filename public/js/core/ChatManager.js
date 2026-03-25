@@ -906,7 +906,6 @@ class ChatManager {
             return;
         }
 
-        console.log(channelId)
         return document.querySelector(`#channeltree a.channelTrigger[data-channel-id='${channelId}']`);
     }
 }

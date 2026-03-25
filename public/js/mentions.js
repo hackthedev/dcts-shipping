@@ -135,7 +135,6 @@ async function resolveMentions(message = null, pingUser = false) {
 function markElementAsMention(element, pingUser = false, message) {
     if (!element) return;
 
-    console.log(element)
     element.style.backgroundColor = "rgba(255, 174, 0, 0.12)";
     element.style.borderLeft = "3px solid rgba(255, 174, 0, 0.52)";
     element.style.marginTop = "0px";

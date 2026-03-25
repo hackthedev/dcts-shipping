@@ -195,7 +195,7 @@ function saveSettings() {
             UserManager.setUser(response.updatedMember.username);
             UserManager.setStatus(response.updatedMember.status);
             saveButton.style.display = "none";
-        })
+        });
     } catch (error) {
         alert("Error while trying to save settings: " + error);
         return;

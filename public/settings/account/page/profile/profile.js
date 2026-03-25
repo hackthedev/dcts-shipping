@@ -195,7 +195,7 @@ function saveSettings() {
             UserManager.setUser(response.updatedMember.username);
             UserManager.setStatus(response.updatedMember.status);
             saveButton.style.display = "none";
-        })
+        });
     } catch (error) {
         alert("Error while trying to save settings: " + error);
         return;
@@ -231,7 +231,7 @@ function updatePreview(id) {
 
         // Icon
         if (id == "settings_profile_icon") {
-            preview_icon.style.backgroundImage = `url("${newSetting}")`;
+            preview_icon.style.backgroundImage = newSetting.length <= 0 ? '/img/default_pfp.png' : `url("${newSetting}")`;
         }
 
         // Banner
@@ -247,10 +247,8 @@ function updatePreview(id) {
             settings_banner.value != UserManager.getBanner()
 
         ) {
-            console.log("NOt same");
             saveButton.style.display = "block";
         } else {
-            console.log("same");
             saveButton.style.display = "none";
         }
     } catch (e) {

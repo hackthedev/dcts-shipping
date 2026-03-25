@@ -196,7 +196,7 @@ async function getDmRoomInfo(dm){
     }
 
     return {
-        icon: dmRoomIcon?.trim?.length > 0 ? dmRoomIcon : "/img/default_pfp.png",
+        icon: dmRoomIcon?.trim()?.length > 0 ? dmRoomIcon : "/img/default_pfp.png",
         title: dmRoomName
     }
 }

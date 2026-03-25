@@ -1089,6 +1089,8 @@ function navigateToMessage(messageId) {
 }
 
 function deleteMessageFromChat(id, type = "message") {
+    let isScrolledDown = isScrolledToBottom(getContentMainContainer())
+
     socket.emit("deleteMessage", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
@@ -1097,6 +1099,8 @@ function deleteMessageFromChat(id, type = "message") {
         category: UserManager.getCategory(),
         channel: UserManager.getChannel(),
         type
+    }, function (response) {
+        if(isScrolledDown) scrollDown("");
     });
 }
 

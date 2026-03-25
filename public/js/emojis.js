@@ -518,8 +518,6 @@ function listenForGifSearch() {
 
 
 function selectEmojiTab(element) {
-    console.log(element)
-    console.log(element?.parentNode)
     var parentnode = element.parentNode.children;
 
     for (let i = 0; i < parentnode.length; i++) {

@@ -168,3 +168,5 @@ function scrollDown(functionCaller, opts = {}) {
 
     if (functionCaller) console.log(`ScrollDown called by ${functionCaller}`);
 }
+
+document.addEventListener("DOMContentLoaded", observeContainer);

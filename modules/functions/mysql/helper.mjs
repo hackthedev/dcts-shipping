@@ -53,9 +53,6 @@ export async function saveMemberToDB(id, data) {
     }
 }
 
-
-
-
 export async function loadMembersFromDB() {
     if (!serverconfig || typeof serverconfig !== "object") return;
 

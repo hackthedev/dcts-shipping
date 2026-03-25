@@ -935,10 +935,6 @@ app.use(
     ),
 );
 
-app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
-});
-
 // Process plugins at server start
 processPlugins().catch((err) => console.error(err));
 
@@ -1112,6 +1108,11 @@ async function listenToIO(){
             }
         }
     });
+
+    app.use((req, res) => {
+        res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
+    });
+
 }
 
 function initConfig(filePath) {

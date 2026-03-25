@@ -46,9 +46,6 @@ class UserManager {
             var roleBackgroundClip = role.backgroundClip;
             var roleName = role.name;
 
-            console.log(roleColor)
-            console.log(roleBackground)
-
             roleCode += `<code class="role" id="profile-role-entry-${role.id}"><div class="role_color" style="background: ${roleColor === "transparent" ? roleBackground : roleColor};"></div><span style="color: ${roleColor};background: ${roleBackground};background-clip: ${roleBackgroundClip};">${roleName}</span></code>`;
         }
 

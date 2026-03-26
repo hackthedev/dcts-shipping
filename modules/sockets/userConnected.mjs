@@ -228,25 +228,8 @@ export default (io) => (socket) => {
 
         // handle invites
         let inviteResult = handleInviteCode(member, socket, response);
-        let tempMember = null;
         if (!inviteResult) {
             return;
-        } else {
-            // prematurely create a servermembers object since the code was correct and the
-            // servermembers object is used to display invite code prompts or not.
-            tempMember = {
-                id: member.id,
-                token: member.token,
-                onboarding: false,
-            };
-            // if (!serverconfig.servermembers[member.id]) {
-            //     serverconfig.servermembers[member.id] = {
-            //         id: member.id,
-            //         token: member.token,
-            //         onboarding: false,
-            //     };
-            //     await saveMemberToDB(member?.id, serverconfig.servermembers[member.id]);
-            // }
         }
 
         // skip pow challenge for faster connection
@@ -314,8 +297,8 @@ export default (io) => (socket) => {
 
             // if new member
             if (
-                !tempMember ||
-                tempMember.onboarding === false
+                !serverconfig.servermembers[member.id] ||
+                serverconfig.servermembers[member.id]?.onboarding === false
             ) {
 
                 // New Member joined the server
@@ -376,43 +359,6 @@ export default (io) => (socket) => {
                     false,
                     true
                 )
-                // member = {
-                //     id: member.id,
-                //     token: member.token,
-                //     loginName: member.loginName,
-                //     name: "",
-                //     nickname: null,
-                //     status: "",
-                //     aboutme: "",
-                //     icon: "",
-                //     banner: "",
-                //     joined: now,
-                //     isOnline: 1,
-                //     lastOnline: now,
-                //     isBanned: 0,
-                //     isMuted: 0,
-                //     password: hashedPassword,
-                //     publicKey: "",
-                //     isVerifiedKey: false,
-                //     onboarding: true
-                // };
-
-
-
-                // set some values this way because it may cauz errors
-                // and i dont wanna manually encode shit etc...
-                // if (member?.icon) serverconfig.servermembers[member.id].icon = stripHTML(member.icon);
-                // if (member?.banner) serverconfig.servermembers[member.id].banner = stripHTML(member.banner);
-                // if (member?.aboutme) serverconfig.servermembers[member.id].aboutme = sanitizeHTML(member.aboutme);
-                // if (member?.status) serverconfig.servermembers[member.id].status = stripHTML(member.status);
-                // if (member?.name) serverconfig.servermembers[member.id].name = stripHTML(member.aboutme || "Member");
-                // if (member?.country_code) serverconfig.servermembers[member.id].country_code = stripHTML(member.country_code);
-                // if (member?.publicKey) serverconfig.servermembers[member.id].publicKey = stripHTML(member?.publicKey);
-
-                // serverconfig.servermembers[member.id].onboarding = true;
-
-                // saveMemberToDB(member?.id, serverconfig.servermembers[member.id]);
-                // member.onboarding = true
 
                 try {
                     sendMessageToUser(
@@ -508,7 +454,7 @@ export default (io) => (socket) => {
                     status: serverconfig.servermembers[member.id].status,
                     aboutme: serverconfig.servermembers[member.id].aboutme,
                 });
-            } else {
+            } else { // if existing member
                 if (
                     member.token == null ||
                     member.token.length !== 48 ||
@@ -561,39 +507,11 @@ export default (io) => (socket) => {
                     }
                 }
 
-                // let updatedMember = {
-                //     icon: settings_icon?.value != null && settings_icon?.value.length > 0 ? stripHTML(settings_icon?.value) : null, // Icon
-                //     banner: settings_banner?.value != null && settings_banner?.value.length > 0 ? stripHTML(settings_banner?.value) : null, // Banner
-                //     aboutme: settings_aboutme?.value != null && settings_aboutme?.value.length > 0 ? sanitizeHtmlForRender(settings_aboutme?.value, false) : null,  // About me
-                //     username: settings_username?.value != null && settings_username?.value.length >= 3 ? stripHTML(settings_username?.value) : null, // Username
-                //     status: sanitizeHtmlForRender(settings_status?.value, false), // Status
-                //     publicKey: member.publicKey?.value != null && member.publicKey?.value.length >= 3 ? stripHTML(settings_username?.value) : null, // Username
-                //     isVerifiedKey: true,
-                //     lastOnline: new Date().getTime()
-                // }
+                updateMember({
+                    id: member.id,
+                    lastOnline: new Date().getTime()
+                })
 
-                member.lastOnline = new Date().getTime()
-                await updateMember(member)
-
-                // if(member?.name) serverconfig.servermembers[member.id].name = sanitizeHTML(
-                //     member.name
-                // );
-                // if(member?.status) serverconfig.servermembers[member.id].status = sanitizeHTML(
-                //     member.status
-                // );
-                // if(member?.aboutme) serverconfig.servermembers[member.id].aboutme = sanitizeHTML(
-                //     member.aboutme
-                // );
-                // if (member.icon) serverconfig.servermembers[member.id].icon = sanitizeHTML(
-                //     member.icon
-                // );
-                // if (member.banner) serverconfig.servermembers[member.id].banner = sanitizeHTML(
-                //     member.banner
-                // );
-
-                // if (member.country_code) serverconfig.servermembers[member.id].country_code = member.country_code;
-
-                // serverconfig.servermembers[member.id].lastOnline = new Date().getTime();
                 socket.memberId = member.id;
 
                 usersocket[member.id] = socket.id;

@@ -1,5 +1,5 @@
 class Autocomplete {
-    constructor(anchorElement, options = {}) {
+    constructor(anchorElement, options = {}, updateUI = true) {
         this.anchor = anchorElement;
         this.entries = [];
         this.filtered = [];
@@ -15,7 +15,7 @@ class Autocomplete {
         this.highlightBg = options.highlightBg || "#3a3f45";
         this.highlightColor = options.highlightColor || this.color;
         this.entryPadding = options.entryPadding || "8px";
-
+        
         this.container = document.createElement("div");
         this.container.style.position = "absolute";
         this.container.style.zIndex = "1000";
@@ -26,9 +26,11 @@ class Autocomplete {
         this.container.style.maxHeight = this.maxHeight + "px";
         this.container.style.display = "none";
         this.container.style.pointerEvents = "auto";
-        document.body.appendChild(this.container);
+        if (updateUI) {
+            document.body.appendChild(this.container);
 
-        window.addEventListener("resize", () => this.updatePosition());
+            window.addEventListener("resize", () => this.updatePosition());
+        }
     }
 
     addEntry(label, data = {}, html = null) {

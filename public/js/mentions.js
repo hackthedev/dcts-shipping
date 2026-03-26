@@ -1,4 +1,4 @@
-let mentionAc = null;
+let mentionAc = new Autocomplete(null, {}, false);
 let mentionList = [];
 
 async function updateUIMentions() {

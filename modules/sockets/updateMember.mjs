@@ -8,9 +8,9 @@ export default (io) => (socket) => {
 
     socket.on('updateMember', async function (member, response) {
         try {
-            if (await validateMemberId(member?.id, socket, member?.token) === true) {
-                updateMember(member);
-                response({updatedMember: serverconfig.servermembers[member?.id]});
+            if (await validateMemberId(member?.updatedMember?.id, socket, member?.token) === true) {
+                updateMember(member?.updatedMember);
+                response({ updatedMember: serverconfig.servermembers[member?.updatedMember?.id] });
             }
             else {
                 response({ type: 'error', msg: 'Invalid member or token', error: "Member ID or Token invalid" });

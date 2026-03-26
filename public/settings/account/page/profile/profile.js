@@ -180,6 +180,7 @@ function saveSettings() {
     try {
 
         let updatedMember = {
+            id: UserManager.getID(), // Reference ID
             icon: settings_icon?.value != null && settings_icon?.value.length > 0 ? settings_icon?.value : null, // Icon
             banner: settings_banner?.value != null && settings_banner?.value.length > 0 ? settings_banner?.value : null, // Banner
             aboutme: settings_aboutme?.value != null && settings_aboutme?.value.length > 0 ? sanitizeHtmlForRender(settings_aboutme?.value) : null,  // About me
@@ -187,7 +188,7 @@ function saveSettings() {
             status: settings_status != null && settings_status?.value.length >= 3 ? sanitizeHtmlForRender(settings_status?.value, false) : null // Status
         }
 
-        socket.emit("updateMember", {id: UserManager.getID(), token: UserManager.getToken(), updatedMember: updatedMember,}, async function (response) {
+        socket.emit("updateMember", {token: UserManager.getToken(), updatedMember: updatedMember,}, async function (response) {
             if(response?.error) throw response?.error.msg;
             UserManager.setPFP(response.updatedMember.icon);
             UserManager.setBanner(response.updatedMember.banner);

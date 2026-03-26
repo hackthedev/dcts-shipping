@@ -42,8 +42,9 @@ export function updateMember(member) {
     if(member?.banner !== undefined) serverconfig.servermembers[member?.id].banner = stripHTML(member?.banner);
     if(member?.aboutme !== undefined) serverconfig.servermembers[member?.id].aboutme = sanitizeHTML(member?.aboutme, false);
     if(member?.nickname !== undefined) serverconfig.servermembers[member?.id].nickname = stripHTML(member?.nickname);
+    if(member?.status !== undefined) serverconfig.servermembers[member?.id].status = member?.status;
     if(member?.country_code !== undefined) serverconfig.servermembers[member?.id].country_code = sanitizeHTML(member?.country_code, false);
-    if(member?.publicKey !== undefined) serverconfig.servermembers[member?.id].status = member?.publicKey;
+    if(member?.publicKey !== undefined) serverconfig.servermembers[member?.id].publicKey = member?.publicKey;
     if(member?.isVerifiedKey !== undefined) serverconfig.servermembers[member?.id].isVerifiedKey = member?.isVerifiedKey
     if(member?.lastOnline !== undefined) serverconfig.servermembers[member?.id].lastOnline = member?.lastOnline
     if(member?.onboarding !== undefined) serverconfig.servermembers[member?.id].onboarding = member?.onboarding

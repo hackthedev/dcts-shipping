@@ -47,7 +47,7 @@ export function updateMember(member) {
     if(member?.country_code !== undefined) serverconfig.servermembers[member?.id].country_code = sanitizeHTML(member?.country_code, false);
     if(member?.publicKey !== undefined) serverconfig.servermembers[member?.id].publicKey = stripHTML(member?.publicKey);
     if(member?.isVerifiedKey !== undefined) serverconfig.servermembers[member?.id].isVerifiedKey = member?.isVerifiedKey
-    if(member?.lastOnline !== undefined) serverconfig.servermembers[member?.id].lastOnline = member?.lastOnline
-    if(member?.onboarding !== undefined) serverconfig.servermembers[member?.id].onboarding = member?.onboarding
+    if(member?.lastOnline !== undefined) serverconfig.servermembers[member?.id].lastOnline = Number(stripHTML(member?.lastOnline))
+    if(member?.onboarding !== undefined) serverconfig.servermembers[member?.id].onboarding = Boolean(stripHTML(member?.onboarding))
     saveMemberToDB(member?.id, serverconfig.servermembers[member?.id]);
 }

@@ -2,27 +2,28 @@ import {serverconfig} from "../../index.mjs";
 import {saveMemberToDB} from "./mysql/helper.mjs";
 import {sanitizeHTML, stripHTML} from "./sanitizing/functions.mjs";
 
-export function createMember(id, token, name, loginName, icon, banner, aboutme, status, country_code, publicKey, joined, lastOnline, hashedPassword, isVerifiedKey, onboarding) {
+export function createMember(id, token, name, loginName, icon, banner, aboutme, status, country_code, publicKey, joined, lastOnline, password, isVerifiedKey, onboarding) {
+    if(!id) throw "Member id is missing when creating member."
     serverconfig.servermembers[id] = {
         id: id,
-        token: token,
-        name: name,
-        loginName: loginName,
+        token: (token !== undefined && token !== null) ? token: null,
+        name: (name !== undefined && name !== null) ? name: null,
+        loginName: (loginName !== undefined && loginName !== null) ? loginName: null,
         nickname: null,
-        icon: icon,
-        banner: banner,
-        aboutme: aboutme,
-        status: status,
-        country_code: country_code,
-        publicKey: publicKey,
-        joined: joined,
+        icon: (icon !== undefined && icon !== null) ? icon: null,
+        banner: (banner !== undefined && banner !== null) ? banner: null,
+        aboutme: (aboutme !== undefined && aboutme !== null) ? aboutme: null,
+        status: (status !== undefined && status !== null) ? status: null,
+        country_code: (country_code !== undefined && country_code !== null) ? country_code: null,
+        publicKey: (publicKey !== undefined && publicKey !== null) ? publicKey: null,
+        joined: (joined !== undefined && joined !== null) ? joined: null,
         isOnline: 1,
-        lastOnline: lastOnline,
+        lastOnline: (lastOnline !== undefined && lastOnline !== null) ? lastOnline: null,
         isBanned: 0,
         isMuted: 0,
-        password: hashedPassword,
-        isVerifiedKey: isVerifiedKey,
-        onboarding: onboarding
+        password: (password !== undefined && password !== null) ? password: null,
+        isVerifiedKey: (isVerifiedKey !== undefined && isVerifiedKey !== null) ? isVerifiedKey: null,
+        onboarding: (onboarding !== undefined && onboarding !== null) ? onboarding: null,
     }
     saveMemberToDB(id, serverconfig.servermembers[id]);
 }
@@ -44,7 +45,7 @@ export function updateMember(member) {
     if(member?.nickname !== undefined) serverconfig.servermembers[member?.id].nickname = stripHTML(member?.nickname);
     if(member?.status !== undefined) serverconfig.servermembers[member?.id].status = stripHTML(member?.status);
     if(member?.country_code !== undefined) serverconfig.servermembers[member?.id].country_code = sanitizeHTML(member?.country_code, false);
-    if(member?.publicKey !== undefined) serverconfig.servermembers[member?.id].publicKey = tripHTML(member?.publicKey);
+    if(member?.publicKey !== undefined) serverconfig.servermembers[member?.id].publicKey = stripHTML(member?.publicKey);
     if(member?.isVerifiedKey !== undefined) serverconfig.servermembers[member?.id].isVerifiedKey = member?.isVerifiedKey
     if(member?.lastOnline !== undefined) serverconfig.servermembers[member?.id].lastOnline = member?.lastOnline
     if(member?.onboarding !== undefined) serverconfig.servermembers[member?.id].onboarding = member?.onboarding

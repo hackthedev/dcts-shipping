@@ -35,16 +35,16 @@ export function updateMember(member) {
     if (!member?.id in serverconfig.servermembers) {
         throw "Member does not exist and therefore it cannot be updates."
     }
-    if(member?.token !== undefined) serverconfig.servermembers[member?.id].token = member?.token;
+    if(member?.token !== undefined) serverconfig.servermembers[member?.id].token = stripHTML(member?.token);
     if(member?.name !== undefined) serverconfig.servermembers[member?.id].name = stripHTML(member?.name);
     if(member?.loginName !== undefined) serverconfig.servermembers[member?.id].loginName = stripHTML(member?.loginName);
     if(member?.icon !== undefined) serverconfig.servermembers[member?.id].icon = stripHTML(member?.icon);
     if(member?.banner !== undefined) serverconfig.servermembers[member?.id].banner = stripHTML(member?.banner);
     if(member?.aboutme !== undefined) serverconfig.servermembers[member?.id].aboutme = sanitizeHTML(member?.aboutme, false);
     if(member?.nickname !== undefined) serverconfig.servermembers[member?.id].nickname = stripHTML(member?.nickname);
-    if(member?.status !== undefined) serverconfig.servermembers[member?.id].status = member?.status;
+    if(member?.status !== undefined) serverconfig.servermembers[member?.id].status = stripHTML(member?.status);
     if(member?.country_code !== undefined) serverconfig.servermembers[member?.id].country_code = sanitizeHTML(member?.country_code, false);
-    if(member?.publicKey !== undefined) serverconfig.servermembers[member?.id].publicKey = member?.publicKey;
+    if(member?.publicKey !== undefined) serverconfig.servermembers[member?.id].publicKey = tripHTML(member?.publicKey);
     if(member?.isVerifiedKey !== undefined) serverconfig.servermembers[member?.id].isVerifiedKey = member?.isVerifiedKey
     if(member?.lastOnline !== undefined) serverconfig.servermembers[member?.id].lastOnline = member?.lastOnline
     if(member?.onboarding !== undefined) serverconfig.servermembers[member?.id].onboarding = member?.onboarding

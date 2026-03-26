@@ -34,8 +34,7 @@ import {isValidProof, powVerifiedUsers} from "./pow.mjs";
 import {checkMemberBan} from "../functions/ban-system/helpers.mjs";
 import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
 import {autobanXSS} from "../functions/sanitizing/actions.mjs";
-import {createMember} from "../functions/member.mjs";
-import {updateMember} from "../functions/member.mjs";
+import { createMember, updateMember } from "../functions/member.mjs";
 
 function normaliseString(v) {
     if (v === null || v === undefined) return "";

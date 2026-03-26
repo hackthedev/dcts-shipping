@@ -179,15 +179,16 @@ function importAccount() {
 function saveSettings() {
     try {
 
-        let newSettings = {
-            icon: settings_icon?.value != null && settings_icon?.value.length > 0 ? stripHTML(settings_icon?.value) : null, // Icon
-            banner: settings_banner?.value != null && settings_banner?.value.length > 0 ? stripHTML(settings_banner?.value) : null, // Banner
-            aboutme: settings_aboutme?.value != null && settings_aboutme?.value.length > 0 ? sanitizeHtmlForRender(settings_aboutme?.value, false) : null,  // About me
-            username: settings_username?.value != null && settings_username?.value.length >= 3 ? stripHTML(settings_username?.value) : null, // Username
-            status: sanitizeHtmlForRender(settings_status?.value, false), // Status
+        let updatedMember = {
+            id: UserManager.getID(), // Reference ID
+            icon: settings_icon?.value != null && settings_icon?.value.length > 0 ? settings_icon?.value : null, // Icon
+            banner: settings_banner?.value != null && settings_banner?.value.length > 0 ? settings_banner?.value : null, // Banner
+            aboutme: settings_aboutme?.value != null && settings_aboutme?.value.length > 0 ? sanitizeHtmlForRender(settings_aboutme?.value) : null,  // About me
+            username: settings_username?.value != null && settings_username?.value.length >= 3 ? settings_username?.value : null, // Username
+            status: settings_status != null && settings_status?.value.length >= 3 ? sanitizeHtmlForRender(settings_status?.value, false) : null // Status
         }
 
-        socket.emit("updateMember", {id: UserManager.getID(), token: UserManager.getToken(), newSettings: newSettings,}, async function (response) {
+        socket.emit("updateMember", {token: UserManager.getToken(), updatedMember: updatedMember,}, async function (response) {
             if(response?.error) throw response?.error.msg;
             UserManager.setPFP(response.updatedMember.icon);
             UserManager.setBanner(response.updatedMember.banner);

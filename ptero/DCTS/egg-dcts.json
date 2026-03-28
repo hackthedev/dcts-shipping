@@ -109,36 +109,6 @@
             "field_type": "text"
         },
         {
-            "name": "LiveKit URL",
-            "description": "URL of the shared LiveKit server. Leave empty to disable voice/video.",
-            "env_variable": "LIVEKIT_URL",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "nullable|string",
-            "field_type": "text"
-        },
-        {
-            "name": "LiveKit API Key",
-            "description": "API key for LiveKit authentication.",
-            "env_variable": "LIVEKIT_API_KEY",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "nullable|string",
-            "field_type": "text"
-        },
-        {
-            "name": "LiveKit API Secret",
-            "description": "API secret for LiveKit authentication.",
-            "env_variable": "LIVEKIT_API_SECRET",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "nullable|string",
-            "field_type": "text"
-        },
-        {
             "name": "Debug Mode",
             "description": "Enable debug logging.",
             "env_variable": "DEBUG",

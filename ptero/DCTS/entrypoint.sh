@@ -13,7 +13,6 @@ if [ ! -d ".git" ]; then
 else
   git fetch origin "${GIT_BRANCH:-beta}"
   git reset --hard "origin/${GIT_BRANCH:-beta}"
-  git clean -fd -e livekit/livekit-server
 fi
 
 bun --version
@@ -27,10 +26,34 @@ fi
 # ==========================================
 export LIVEKIT_YAML_PATH="livekit/livekit.yaml"
 
+# auto-download livekit binary if missing (e.g. first start after clone wiped it)
+if [ ! -f "livekit/livekit-server" ]; then
+    echo "LiveKit binary not found. Downloading..."
+    mkdir -p livekit
+
+    LIVEKIT_VERSION=$(curl -s https://api.github.com/repos/livekit/livekit/releases/latest | grep '"tag_name":' | head -n 1 | sed -E 's/.*"v([^"]+)".*/\1/')
+    if [ -z "$LIVEKIT_VERSION" ]; then
+        LIVEKIT_VERSION="1.10.0"
+        echo "Could not fetch latest version (API rate limit?), falling back to v${LIVEKIT_VERSION}"
+    fi
+
+    DOWNLOAD_URL="https://github.com/livekit/livekit/releases/latest/download/livekit_${LIVEKIT_VERSION}_linux_amd64.tar.gz"
+    echo "Downloading LiveKit v${LIVEKIT_VERSION}..."
+
+    if curl -sfL "${DOWNLOAD_URL}" -o /tmp/livekit.tar.gz && tar -xzf /tmp/livekit.tar.gz -C livekit livekit-server; then
+        chmod +x livekit/livekit-server
+        rm -f /tmp/livekit.tar.gz
+        echo "LiveKit v${LIVEKIT_VERSION} installed."
+    else
+        rm -f /tmp/livekit.tar.gz
+        echo "Warning: Failed to download LiveKit from ${DOWNLOAD_URL}"
+    fi
+fi
+
 if [ -f "livekit/livekit-server" ]; then
     echo "LiveKit binary found. Setting up embedded LiveKit Server..."
-    
-    # Generate keys if they don't exist in our environment yet
+
+    # generate keys if they don't exist in our environment yet
     if ! grep -q "^LIVEKIT_API_KEY=" .env 2>/dev/null; then
         echo "Generating new LiveKit keys (overriding github template)..."
         OUTPUT=$(./livekit/livekit-server generate-keys)
@@ -62,17 +85,17 @@ if [ -f "livekit/livekit-server" ]; then
     API_SECRET=$(/usr/local/bin/yq '.keys | .["'"$API_KEY"'"]' "${LIVEKIT_YAML_PATH}")
 
     touch .env
-    # Remove old keys if present
+    # remove old keys if present
     sed -i '/^LIVEKIT_API_KEY=/d' .env
     sed -i '/^LIVEKIT_API_SECRET=/d' .env
-    
-    # Inject keys into .env and export them so they override Pterodactyl's native variables
+
+    # inject keys into .env and export them so they override pterodactyl's native variables
     echo "LIVEKIT_API_KEY=${API_KEY}" >> .env
     echo "LIVEKIT_API_SECRET=${API_SECRET}" >> .env
     export LIVEKIT_API_KEY="${API_KEY}"
     export LIVEKIT_API_SECRET="${API_SECRET}"
-    
-    # Fully Automate LIVEKIT_URL using your Wildcard Domain
+
+    # fully automate LIVEKIT_URL using wildcard domain
     if [ -n "$LIVEKIT_PORT" ]; then
         sed -i '/^LIVEKIT_URL=/d' .env
         echo "LIVEKIT_URL=${LIVEKIT_PORT}.instance.dcts.community" >> .env
@@ -83,7 +106,7 @@ if [ -f "livekit/livekit-server" ]; then
     echo "Starting LiveKit server silently in the background..."
     env -u REDIS_HOST ./livekit/livekit-server --config "${LIVEKIT_YAML_PATH}" >/dev/null 2>&1 &
 else
-    echo "Notice: LiveKit binary not found. Running purely as chat server."
+    echo "Warning: LiveKit binary not available. Running purely as chat server."
 fi
 # ==========================================
 

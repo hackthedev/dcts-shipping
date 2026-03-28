@@ -16,13 +16,13 @@
     "startup": "./livekit-server --config {{LIVEKIT_YAML_PATH}}",
     "config": {
         "files": "{}",
-        "startup": "{\r\n    \"done\": \"Welcome to DCTS\"\r\n}",
+        "startup": "{\r\n    \"done\": \"starting LiveKit server\"\r\n}",
         "logs": "{}",
         "stop": "^C"
     },
     "scripts": {
         "installation": {
-            "script": "#!/bin/bash\nexport HOME=/mnt/server\nmkdir -p /mnt/server\ncd /mnt/server\n\necho \"Fetching latest LiveKit release...\"\nLATEST_VERSION=$(curl -s https://api.github.com/repos/livekit/livekit/releases/latest | grep '\"tag_name\":' | head -n 1 | sed -E 's/.*\"v([^\"]+)\".*/\\1/')\necho \"Installing LiveKit v${LATEST_VERSION}...\"\nwget \"https://github.com/livekit/livekit/releases/latest/download/livekit-server_${LATEST_VERSION}_linux_amd64.tar.gz\"\ntar -xzf livekit-server_${LATEST_VERSION}_linux_amd64.tar.gz livekit-server\nrm livekit-server_${LATEST_VERSION}_linux_amd64.tar.gz\nchmod +x livekit-server\necho \"LiveKit installation complete.\"\n",
+            "script": "#!/bin/bash\nexport HOME=/mnt/server\nmkdir -p /mnt/server\ncd /mnt/server\n\necho \"Fetching latest LiveKit release...\"\nLATEST_VERSION=$(curl -s https://api.github.com/repos/livekit/livekit/releases/latest | grep '\"tag_name\":' | head -n 1 | sed -E 's/.*\"v([^\"]+)\".*/\\1/')\necho \"Installing LiveKit v${LATEST_VERSION}...\"\nwget \"https://github.com/livekit/livekit/releases/latest/download/livekit_${LATEST_VERSION}_linux_amd64.tar.gz\"\ntar -xzf livekit_${LATEST_VERSION}_linux_amd64.tar.gz livekit-server\nrm livekit_${LATEST_VERSION}_linux_amd64.tar.gz\nchmod +x livekit-server\necho \"LiveKit installation complete.\"\n",
             "container": "ghcr.io/pterodactyl/installers:debian",
             "entrypoint": "bash"
         }
@@ -31,7 +31,7 @@
         {
             "name": "Server Port",
             "description": "Main HTTP port for the LiveKit API (Default 7880).",
-            "env_variable": "SERVER_PORT",
+            "env_variable": "PORT",
             "default_value": "7880",
             "user_viewable": true,
             "user_editable": false,
@@ -46,6 +46,26 @@
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "RTC TCP Port",
+            "description": "Secondary port used for LiveKit TCP WebRTC signaling.",
+            "env_variable": "RTC_TCP_PORT",
+            "default_value": "7881",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+        },
+        {
+            "name": "RTC UDP Port",
+            "description": "Port used for direct LiveKit UDP WebRTC media streaming.",
+            "env_variable": "RTC_UDP_PORT",
+            "default_value": "7882",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
             "field_type": "text"
         }
     ]

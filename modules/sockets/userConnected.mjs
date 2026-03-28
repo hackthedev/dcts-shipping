@@ -31,10 +31,10 @@ import {
 import {sendSystemMessage} from "./home/general.mjs";
 import {discoverHosts} from "../functions/discovery.mjs";
 import {isValidProof, powVerifiedUsers} from "./pow.mjs";
-import {saveMemberToDB} from "../functions/mysql/helper.mjs";
 import {checkMemberBan} from "../functions/ban-system/helpers.mjs";
 import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
 import {autobanXSS} from "../functions/sanitizing/actions.mjs";
+import { createMember, updateMember } from "../functions/member.mjs";
 
 function normaliseString(v) {
     if (v === null || v === undefined) return "";
@@ -229,17 +229,6 @@ export default (io) => (socket) => {
         let inviteResult = handleInviteCode(member, socket, response);
         if (!inviteResult) {
             return;
-        } else {
-            // prematurely create a servermembers object since the code was correct and the
-            // servermembers object is used to display invite code prompts or not.
-            if (!serverconfig.servermembers[member.id]) {
-                serverconfig.servermembers[member.id] = {
-                    id: member.id,
-                    token: member.token,
-                    onboarding: false,
-                };
-                await saveMemberToDB(member?.id, serverconfig.servermembers[member.id]);
-            }
         }
 
         // skip pow challenge for faster connection
@@ -352,39 +341,23 @@ export default (io) => (socket) => {
                 // setup member
                 const now = new Date().getTime();
                 const hashedPassword = await hashPassword(member.password);
-                serverconfig.servermembers[member.id] = {
-                    id: member.id,
-                    token: member.token,
-                    loginName: member.loginName,
-                    name: "",
-                    nickname: null,
-                    status: "",
-                    aboutme: "",
-                    icon: "",
-                    banner: "",
-                    joined: now,
-                    isOnline: 1,
-                    lastOnline: now,
-                    isBanned: 0,
-                    isMuted: 0,
-                    password: hashedPassword,
-                    publicKey: "",
-                    isVerifiedKey: false
-                };
-
-                // set some values this way because it may cauz errors
-                // and i dont wanna manually encode shit etc...
-                if (member?.icon) serverconfig.servermembers[member.id].icon = stripHTML(member.icon);
-                if (member?.banner) serverconfig.servermembers[member.id].banner = stripHTML(member.banner);
-                if (member?.aboutme) serverconfig.servermembers[member.id].aboutme = sanitizeHTML(member.aboutme);
-                if (member?.status) serverconfig.servermembers[member.id].status = stripHTML(member.status);
-                if (member?.name) serverconfig.servermembers[member.id].name = stripHTML(member.name || "Member");
-                if (member?.country_code) serverconfig.servermembers[member.id].country_code = stripHTML(member.country_code);
-                if (member?.publicKey) serverconfig.servermembers[member.id].publicKey = stripHTML(member?.publicKey);
-
-                serverconfig.servermembers[member.id].onboarding = true;
-
-                saveMemberToDB(member?.id, serverconfig.servermembers[member.id]);
+                await createMember(
+                    member.id,
+                    member.token,
+                    member?.name ? stripHTML(member.name || "Member") : "",
+                    member.loginName,
+                    member?.icon ? stripHTML(member.icon) : "",
+                    member?.banner ? stripHTML(member.banner) : "",
+                    member?.aboutme ? sanitizeHTML(member.aboutme) : "",
+                    member?.status ? stripHTML(member.status) : "",
+                    member?.country_code ? stripHTML(member.country_code) : "",
+                    member?.publicKey ? stripHTML(member.publicKey) : "",
+                    now,
+                    now,
+                    hashedPassword,
+                    false,
+                    true
+                )
 
                 try {
                     sendMessageToUser(
@@ -480,7 +453,7 @@ export default (io) => (socket) => {
                     status: serverconfig.servermembers[member.id].status,
                     aboutme: serverconfig.servermembers[member.id].aboutme,
                 });
-            } else {
+            } else { // if existing member
                 if (
                     member.token == null ||
                     member.token.length !== 48 ||
@@ -523,34 +496,21 @@ export default (io) => (socket) => {
                         sanitizeHTML(member.publicKey);
 
                     // check if its valid and change the flag
-                    if ((await hasVerifiedKey(member.id)) === true) {
-                        serverconfig.servermembers[member.id].isVerifiedKey = true;
-                    } else {
+                    if ((await hasVerifiedKey(member.id)) === false) {
                         // otherwise make the client verify their ownership of the key.
                         // key wont be used until its verified
                         emitBasedOnMemberId(member.id, "verifyPublicKey");
                     }
+                    else {
+                        member.isVerifiedKey = true
+                    }
                 }
 
-                if(member?.name) serverconfig.servermembers[member.id].name = sanitizeHTML(
-                    member.name
-                );
-                if(member?.status) serverconfig.servermembers[member.id].status = sanitizeHTML(
-                    member.status
-                );
-                if(member?.aboutme) serverconfig.servermembers[member.id].aboutme = sanitizeHTML(
-                    member.aboutme
-                );
-                if (member.icon) serverconfig.servermembers[member.id].icon = sanitizeHTML(
-                    member.icon
-                );
-                if (member.banner) serverconfig.servermembers[member.id].banner = sanitizeHTML(
-                    member.banner
-                );
+                updateMember({
+                    id: member.id,
+                    lastOnline: new Date().getTime()
+                })
 
-                if (member.country_code) serverconfig.servermembers[member.id].country_code = member.country_code;
-
-                serverconfig.servermembers[member.id].lastOnline = new Date().getTime();
                 socket.memberId = member.id;
 
                 usersocket[member.id] = socket.id;

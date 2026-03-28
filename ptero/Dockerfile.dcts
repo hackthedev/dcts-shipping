@@ -1,0 +1,23 @@
+# ---------------------------
+# Pterodactyl Dockerfile
+# Environment: Bun (DCTS Shipping)
+# ---------------------------
+FROM oven/bun:1-alpine
+
+# Install dependencies and create container user
+RUN apk add --no-cache --update curl ca-certificates openssl git tar bash sqlite fontconfig tzdata iproute2 \
+    && adduser -D -h /home/container container
+
+RUN mkdir -p /home/container/.bun && chown -R container:container /home/container
+
+# Set environment
+USER container
+ENV USER=container HOME=/home/container
+WORKDIR /home/container
+
+# Copy entrypoint
+COPY --chown=container:container ./ptero/DCTS/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+CMD ["/bin/bash", "/entrypoint.sh"]
+

@@ -487,6 +487,20 @@ code.markdown{
     max-height: 100px;
 }
 
+.ql-toolbar button svg {
+    margin: auto !important;
+    width: 18px !important;
+    height: 18px !important;
+    border: none !important;
+}
+.ql-toolbar button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+    border: none !important;
+}
+
 .image-embed,
 .message-container .content img {
     max-width: 300px;
@@ -1001,6 +1015,8 @@ li.info:hover {
 }
 
 .qr-code img{
+    width: 200px;
+    height: 200px;
     margin: 8px;
     padding: 8px;
     border-radius: 10px;

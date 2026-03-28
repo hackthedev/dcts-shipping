@@ -31,9 +31,9 @@ class Prompt {
                 margin-bottom: 8px;
                 font-size: 14px;       
             }
-
-            .prompt-input {
-                width: 100%;
+            
+            input.prompt-input, textarea {
+                width: 100% !important;
                 padding: 10px;
                 font-size: 14px;
                 border: 1px solid rgb(98, 98, 98) !important;
@@ -59,7 +59,7 @@ class Prompt {
                 color: white;
                 border: none;
                 border-radius: 2px;
-                width: calc(100% - 20px);
+                width: calc(100%) !important;
                 cursor: pointer;
                 font-size: 14px;
                 border: 1px solid rgb(98, 98, 98);
@@ -70,7 +70,7 @@ class Prompt {
 
             .prompt-button.submit{
                 background-color: #2492c9; 
-                width: 100%;
+                width: 100% !important;
             }
 
             .prompt-button.submit:hover{

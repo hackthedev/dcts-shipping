@@ -436,6 +436,56 @@ const processPlugins = async () => {
 // +1 convenience
 const tables = [
     {
+        name: "dm_rooms",
+        columns: [
+
+            {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "roomId", type: "varchar(20) NOT NULL UNIQUE KEY"},
+            {name: "title", type: "varchar(204) NOT NULL DEFAULT 'New Chat'"},
+            {name: "creatorId", type: "varchar(20) NOT NULL"},
+            {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+        ]
+    },
+    {
+        name: "dm_reads",
+        columns: [
+            {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "memberId", type: "varchar(204) NOT NULL"},
+            {name: "targetId", type: "varchar(100) NOT NULL"}, // roomId oder channelId
+            {name: "lastReadAt", type: "bigint NOT NULL DEFAULT 0"},
+        ],
+        keys: [
+            {name: "UNIQUE KEY", type: "unique_member_target (memberId, targetId)"},
+            {name: "KEY", type: "idx_memberId (memberId)"},
+        ]
+    },
+    {
+        name: "dm_room_participants",
+        columns: [
+            {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "roomId", type: "varchar(20) NOT NULL"},
+            {name: "memberId", type: "varchar(204) NOT NULL"},
+            {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+        ],
+        keys: [
+            {name: "UNIQUE KEY", type: "unique_room_member (roomId, memberId)"},
+            {name: "KEY", type: "idx_memberId (memberId)"},
+            {name: "KEY", type: "idx_roomId (roomId)"},
+        ]
+    },
+    {
+        name: "dms",
+        columns: [
+            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "authorId", type: "varchar(100) NOT NULL"},
+            {name: "roomId", type: "varchar(100) NOT NULL"},
+            {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
+            {name: "message", type: "longtext NOT NULL"},
+            {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+            {name: "editedAt", type: "bigint NULL"},
+        ]
+    },
+    {
         name: "messages",
         columns: [
             {name: "authorId", type: "varchar(100) NOT NULL"},
@@ -529,141 +579,6 @@ const tables = [
             {name: "reportData", type: "longtext NULL"},
             {name: "reportNotes", type: "longtext NULL"},
             {name: "reportStatus", type: "varchar(100) NOT NULL DEFAULT 'pending'"},
-        ],
-    }, // home section stuff
-    {
-        name: "dms_threads",
-        columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "type", type: "varchar(50) NOT NULL"},
-            {name: "title", type: "text NULL"},
-        ],
-    },
-    {
-        name: "dms_participants",
-        columns: [
-            { name: "threadId", type: "varchar(100) NOT NULL" },
-            { name: "memberId", type: "varchar(100) NOT NULL" },
-        ],
-        keys: [
-            { name: "PRIMARY KEY", type: "(threadId, memberId)" },
-            { name: "KEY", type: "memberId (memberId)" }
-        ]
-    },
-    {
-        name: "dms_message_logs",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT"},
-            {name: "messageId", type: "varchar(100) NOT NULL"},
-            {name: "threadId", type: "varchar(100) NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "message", type: "longtext NOT NULL"},
-            {name: "loggedAt", type: "datetime NOT NULL"},
-        ]
-    },
-    {
-        name: "dms_messages",
-        columns: [
-            {name: "messageId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "threadId", type: "varchar(100) NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "message", type: "longtext NOT NULL"},
-            {name: "createdAt", type: "datetime NOT NULL"},
-
-            {name: "supportIdentity", type: "varchar(20) NOT NULL DEFAULT 'self'"}, // 'self' | 'support_tagged' | 'support_anon'
-            {name: "displayName", type: "text NULL"},
-        ],
-        keys: [
-            {name: "KEY", type: "threadId (threadId)"},
-        ],
-    },
-    {
-        name: "tickets",
-        columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "creatorId", type: "varchar(100) NOT NULL"},
-            {name: "status", type: "varchar(20) NOT NULL DEFAULT 'open'"},
-            {
-                name: "createdAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
-            },
-            {
-                name: "updatedAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
-            },
-        ],
-        keys: [
-            {name: "KEY", type: "status (status)"},
-            {name: "KEY", type: "creatorId (creatorId)"},
-        ],
-    },
-
-    {
-        name: "posts",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "title", type: "text NOT NULL"},
-            {name: "body", type: "longtext NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "tag", type: "varchar(100) NULL"},
-            {name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0"},
-            {
-                name: "createdAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
-            },
-        ]
-    },
-    {
-        name: "news",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "title", type: "text NOT NULL"},
-            {name: "body", type: "longtext NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0"},
-            {
-                name: "createdAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
-            },
-        ]
-    },
-    {
-        name: "help",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "slug", type: "varchar(120) NOT NULL UNIQUE KEY"},
-            {name: "title", type: "text NOT NULL"},
-            {name: "body", type: "longtext NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0"},
-            {
-                name: "createdAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
-            },
-        ]
-    },
-    {
-        name: "dms_reads",
-        columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "memberId", type: "varchar(100) NOT NULL"},
-            {name: "last_read_at", type: "text NOT NULL"},
-        ]
-    },
-    {
-        name: "content_reads",
-        columns: [
-            {name: "id", type: "bigint NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "contentType", type: "varchar(32) NOT NULL"},
-            {name: "contentId", type: "bigint NOT NULL"},
-            {name: "userId", type: "varchar(128) NOT NULL"},
-            {name: "readAt", type: "datetime NULL"},
-            {name: "createdAt",type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP" },
-        ],
-        keys: [
-            {name: "UNIQUE KEY uq_content_user",type: "(contentType, contentId, userId)"},
-            {name: "INDEX idx_user_unread", type: "(userId, readAt)"},
-            {name: "INDEX idx_content", type: "(contentType, contentId)"},
         ],
     },
     {
@@ -1155,7 +1070,7 @@ async function listenToIO(){
         if (serverconfig.ipblacklist.hasOwnProperty(ip)) {
             if (Date.now() <= serverconfig.ipblacklist[ip]) {
                 let detailText = "";
-                let banListResult = findInJson(serverconfig.banlist, "ip", ip);
+                let banListResult = findInJson(serverconfig?.banlist, "ip", ip);
                 if (banListResult != null) {
                     let bannedUntilDate = new Date(banListResult.until);
                     bannedUntilDate.getFullYear() === "9999"
@@ -1193,6 +1108,12 @@ async function listenToIO(){
             }
         }
     });
+
+    /*
+    app.use((req, res) => {
+        res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
+    });
+     */
 }
 
 function initConfig(filePath) {

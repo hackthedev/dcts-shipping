@@ -4,6 +4,36 @@ class ChatManager {
     static connectionLost = false;
     static wasConnected = false;
 
+    static chance(percent) {
+        return Math.random() < percent / 100;
+    }
+
+    static waitForSocket(socket) {
+        return new Promise((resolve, reject) => {
+            if (socket.connected) {
+                return resolve(socket);
+            }
+
+            const onConnect = () => {
+                cleanup();
+                resolve(socket);
+            };
+
+            const onError = (err) => {
+                cleanup();
+                reject(err);
+            };
+
+            function cleanup() {
+                socket.off("connect", onConnect);
+                socket.off("connect_error", onError);
+            }
+
+            socket.on("connect", onConnect);
+            socket.on("connect_error", onError);
+        });
+    }
+
     static countryCodeToEmoji(code) {
         if (!code || code.length !== 2) {
             return `<img src="/img/default_emojis/1f30d.svg" class="inline-text-emoji">`;
@@ -231,6 +261,178 @@ class ChatManager {
         console.log("Applied theme: ", theme)
     }
 
+    static async userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false, callback = null) {
+        if (UserManager.getUsername() != null) {
+            var username = UserManager.getUsername();
+
+            let knownServers = "";
+            if (isLauncher() && initial) {
+                await syncHostData()
+                knownServers = await Client().GetServers();
+            }
+
+            socket.emit("userConnected", {
+                id: UserManager.getID(),
+                name: username,
+                icon: UserManager.getPFP(),
+                status: UserManager.getStatus(),
+                token: UserManager.getToken(),
+                password: passwordFlag,
+                onboarding: onboardingFlag,
+                aboutme: UserManager.getAboutme(),
+                banner: UserManager.getBanner(),
+                loginName: loginNameFlag,
+                publicKey: await UserManager.getPublicKey(),
+                knownServers,
+                code: accessCode,
+                pow: {
+                    challenge: localStorage.getItem("pow_challenge"),
+                    solution: localStorage.getItem("pow_solution")
+                }
+            }, async function (response) {
+
+                // sync data
+                if (response?.token) CookieManager.setCookie("token", response.token);
+                if (response?.icon) CookieManager.setCookie("pfp", response.icon);
+                if (response?.banner) CookieManager.setCookie("banner", response.banner);
+                if (response?.aboutme) CookieManager.setCookie("aboutme", response.aboutme);
+                if (response?.status) CookieManager.setCookie("status", response.status);
+                if (response?.loginName) CookieManager.setCookie("loginName", response.loginName);
+                if (response?.name) CookieManager.setCookie("username", response.name);
+                if (response?.id) CookieManager.setCookie("id", response.id);
+
+                // account manager soon?
+                if (await isLauncher()) {
+                    if (await Client().setAccountCredentials) {
+                        await Client().setAccountCredentials(
+                            extractHost(window.location.origin),
+                            UserManager.getID(),
+                            UserManager.getToken()
+                        );
+                    }
+
+                    UserManager.saveAccount()
+                }
+
+                if(callback) await callback(response);
+
+                // if we finished onboarding
+                if (!response?.error && response.finishedOnboarding === true && initial) {
+                    socket.emit("setRoom", {
+                        id: UserManager.getID(),
+                        room: UserManager.getRoom(),
+                        token: UserManager.getToken()
+                    });
+                    getGroupBanner();
+                    socket.emit("getGroupList", {
+                        id: UserManager.getID(),
+                        group: UserManager.getGroup(),
+                        token: UserManager.getToken(),
+                        username: UserManager.getUsername(),
+                        icon: UserManager.getPFP()
+                    });
+
+                    socket.emit("getCurrentChannel", {
+                        id: UserManager.getID(),
+                        token: UserManager.getToken(),
+                        username: UserManager.getUsername(),
+                        icon: UserManager.getPFP(),
+                        group: UserManager.getGroup(),
+                        category: UserManager.getCategory(),
+                        channel: UserManager.getChannel()
+                    });
+                    socket.emit("setRoom", {
+                        id: UserManager.getID(),
+                        room: UserManager.getRoom(),
+                        token: UserManager.getToken()
+                    });
+
+                    if (initial) {
+                        /* Quill Emoji Autocomplete */
+                        initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
+                        initializeMentionAutocomplete(document.querySelector('.ql-editor'));
+
+                        await ChatManager.getServerInfo();
+                        getChatlog(document.getElementById("content"));
+
+                        getMemberList()
+                        getChannelTree()
+                        showGroupStats();
+                        focusEditor()
+                    }
+
+                    socket.emit("checkPermission", {
+                        id: UserManager.getID(),
+                        token: UserManager.getToken(),
+                        permission: "manageReports"
+                    }, function (response) {
+                        if (response.permission === "granted" && initial) {
+                            ModView.init();
+                            UserReports.getReports();
+                        }
+                    });
+
+                } else {
+                    if (response.error) {
+                        splash.hide()
+                        if(response.error.includes("banned")){
+                            ChatManager.showInstanceInfo(response.error, "indianred");
+                            return;
+                        }
+
+
+                        showSystemMessage({
+                            title: response.title || "",
+                            text: response.msg || response.error || "",
+                            icon: "error",
+                            img: null,
+                            type: "error",
+                            duration: response.displayTime || 3000
+                        });
+
+                        if (response?.registration === false) {
+                            // show registration prompt
+                            customPrompts.showPrompt(
+                                `Invite Code`,
+                                `
+                             <div class="prompt-form-group">
+                                 <p>
+                                    This server is an invite-only server. <br>
+                                    Please enter an invite code to join the server.
+                                 </p>
+                                 <p>
+                                 Already have an account? <a href="#" onclick="UserManager.doAccountLogin()">Log in instead</a>
+                                </p>
+                             </div>
+
+                             <div class="prompt-form-group">
+                                <input class="prompt-input" autocomplete="off" type="text" name="inviteCode" id="inviteCode" placeholder="Enter an invite code" value="">
+                                <label style="color: indianred;" class="prompt-label error-text"></label>
+                             </div>
+                            `,
+                                async function (values) {
+                                    let inviteCode = values?.inviteCode;
+
+                                    if (inviteCode && inviteCode.length > 0) {
+                                        requestAnimationFrame(function () {
+                                            UserManager.doAccountOnboarding(null, inviteCode)
+                                        })
+                                        //userJoined(false, null, null, inviteCode);
+                                    }
+
+                                    if (!inviteCode) {
+                                        ChatManager.userJoined();
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+
     static async checkConnection(delay) {
         setInterval(() => {
             if (socket.connected === false && ChatManager.showedGlitch === false && ChatManager.wasConnected === true) {
@@ -280,22 +482,88 @@ class ChatManager {
         }
     }
 
-    static getDMFromUrl() {
+    static setUrl(param) {
+        window.history.replaceState(null, null, param); // or pushState
+        let page = param.replace("?page=", "");
+        if(typeof loadPageContent === "function") loadPageContent(page)
+    }
+
+    static setUrlParam(key, value, { replace = true } = {}) {
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
+
+        if (params.has(key)) {
+            params.set(key, value);
+        } else {
+            params.append(key, value);
+        }
+
+        if (replace) {
+            window.history.replaceState({}, '', url);
+        } else {
+            window.history.pushState({}, '', url);
+        }
+    }
+
+    static getUrlParams(param) {
         var url = window.location.search;
         var urlParams = new URLSearchParams(url);
-        var urlChannel = urlParams.get("dm");
+        var value = urlParams.get(param);
+        return value;
+    }
 
-        if (urlChannel == null) {
-            return null;
-        } else {
-            return urlChannel;
-        }
+
+    static getDMFromUrl() {
+        return this.getUrlParams("dm") || null;
+    }
+
+    static async getServerInfo(returnData = false) {
+        return new Promise((resolve, reject) => {
+
+            // reject if we get disconnected or something
+            setTimeout(() => {
+                if(!socket.connected){
+                    resolve(null);
+                }
+            }, 1000)
+
+            //Official <span style="font-weight: bold; color: skyblue;">DCTS <span style="font-weight: bold; color: cadetblue;">Community</span></span>
+            socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken()}, async function (response) {
+                if(returnData) return resolve(response);
+                var headline = document.getElementById("header");
+
+                let servername = response.serverinfo.name;
+                let serverdesc = response.serverinfo.description;
+                let countryCode = response.serverinfo.countryCode;
+
+                headline.innerHTML = `
+                    <div id="main_header">
+                        ${countryCode ? `${ChatManager.countryCodeToEmoji(countryCode)} ` : ""}${sanitizeHtmlForRender(servername, false)} ${serverdesc ? ` - ${sanitizeHtmlForRender(serverdesc, false)}` : ""}
+                    </div>
+        
+                    <div id="badges"></div>          
+                    <div id="headerRight">
+                        <div class="headerIcon help" onclick="ChatManager.showInstanceInfo()"></div>
+                        <div class="headerIcon donators" onclick="UserManager.showDonatorList('https://shy-devil.me/app/dcts/');"></div>
+                        <div class="headerIcon inbox">
+                            <span id="inbox-indicator"></span>
+        
+                            ${await Inbox.getContentHTML()}
+                        </div>
+                    </div>
+                    `;
+
+                UserManager.displayServerBadges();
+                displayDiscoveredHosts()
+                resolve(null)
+            });
+        })
     }
 
     static async showInstanceInfo(notice = null, noticeColor = "transparent"){
         let infoData;
         if(socket.connected){
-            infoData = await getServerInfo(true);
+            infoData = await this.getServerInfo(true);
             if(infoData) infoData = infoData.serverinfo
         }
 
@@ -375,11 +643,11 @@ class ChatManager {
                 let inviteCode = values?.inviteCode;
 
                 if (inviteCode && inviteCode.length > 0) {
-                    userJoined(false, null, null, inviteCode);
+                    ChatManager.userJoined(false, null, null, inviteCode);
                 }
 
                 if (!inviteCode) {
-                    userJoined();
+                    ChatManager.userJoined();
                 }
             },
             ["Ok", null],
@@ -603,14 +871,12 @@ class ChatManager {
     static increaseChannelMarkerCount(channelId) {
         let channelElement = ChatManager.getChannelElementById(channelId);
         if (!channelElement) {
-            console.error("couldnt increase channel marker count as the channel element wasnt found");
-            return
+            return console.error("couldnt increase channel marker count as the channel element wasnt found");
         }
 
         let msgCount = Number(channelElement.getAttribute("data-message-count"));
         if (!msgCount) {
-            console.error("Couldnt increase channel marker counter as counter attribute wasnt found")
-            return;
+            return console.error("Couldnt increase channel marker counter as counter attribute wasnt found")
         }
 
         // increase counter and update
@@ -621,12 +887,10 @@ class ChatManager {
     static setChannelMarker(channelId, mark = false) {
         let channelElement = ChatManager.getChannelElementById(channelId);
         if (!channelElement) {
-            console.error("couldnt set channel marker as the channel element wasnt found", channelId);
-            return
+            return console.error("couldnt set channel marker as the channel element wasnt found", channelId);
         }
 
         let indicator = channelElement.querySelector(".message-marker-icon");
-
         if (!channelElement || !indicator) {
             console.error("Couldnt set channel marker because channelelement wasnt found");
         }

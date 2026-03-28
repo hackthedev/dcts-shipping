@@ -1,4 +1,4 @@
-import { serverconfig, xssFilters } from "../../index.mjs";
+import { usersocket, serverconfig, xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../functions/main.mjs";

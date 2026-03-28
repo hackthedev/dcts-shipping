@@ -46,9 +46,6 @@ class UserManager {
             var roleBackgroundClip = role.backgroundClip;
             var roleName = role.name;
 
-            console.log(roleColor)
-            console.log(roleBackground)
-
             roleCode += `<code class="role" id="profile-role-entry-${role.id}"><div class="role_color" style="background: ${roleColor === "transparent" ? roleBackground : roleColor};"></div><span style="color: ${roleColor};background: ${roleBackground};background-clip: ${roleBackgroundClip};">${roleName}</span></code>`;
         }
 
@@ -106,7 +103,7 @@ class UserManager {
                ` : ""}
             <hr>
                        
-            <a id="dm_action" href="/home.html?dm=${sanitizeHtmlForRender(memberObj?.id, false)}">&#10149; Send Message</a>
+            <a id="dm_action" href="/home/?dm=${sanitizeHtmlForRender(memberObj?.id, false)}">&#10149; Send Message</a>
 
             <div class="profile_meta">
                 <div class="info">
@@ -300,7 +297,7 @@ class UserManager {
     }
 
     static getRoom() {
-        return getUrlParams("group") + "-" + getUrlParams("category") + "-" + getUrlParams("channel");
+        return ChatManager.getUrlParams("group") + "-" + ChatManager.getUrlParams("category") + "-" + ChatManager.getUrlParams("channel");
     }
 
     static getCategory() {
@@ -486,9 +483,8 @@ class UserManager {
             jsonData = await this.getAccountExportData();
         }
 
-        if (isLauncher()) {
-            let client = Client()
-            let result = client.saveAccount(JSON.stringify(jsonData))
+        if (isLauncher() && Client().saveAccount) {
+            Client().saveAccount(JSON.stringify(jsonData))
         }
     }
 
@@ -591,13 +587,13 @@ class UserManager {
     }
 
     static setUsername(username) {
-        username = sanitizeHtmlForRender(username, false);
+        username = stripHTML(username);
         CookieManager.setCookie("username", username, 360);
         UserManager.updateUsernameOnUI(username);
     }
 
     static setBanner(banner) {
-        banner = sanitizeHtmlForRender(banner, false)
+        banner = stripHTML(banner)
         CookieManager.setCookie("banner", banner, 360);
         localStorage.setItem("banner", banner);
     }
@@ -609,7 +605,7 @@ class UserManager {
     }
 
     static setPFP(pfp) {
-        pfp = sanitizeHtmlForRender(pfp, false)
+        pfp = stripHTML(pfp)
         localStorage.setItem("pfp", pfp);
         UserManager.updateUsernameOnUI(pfp);
     }
@@ -1136,7 +1132,7 @@ class UserManager {
 
 
                 // resubmit userjoin but with onboarding done
-                await userJoined(true, values.password, values.loginName, code)
+                await ChatManager.userJoined(true, values.password, values.loginName, code)
             },
             null,
             null,

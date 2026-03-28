@@ -61,30 +61,58 @@ jobs:
           push: true
           tags: ${{ steps.meta-branch.outputs.tags || steps.meta-release.outputs.tags }}
 
-      - name: Set image tags ptero (branch)
+      - name: Set image tags ptero-dcts (branch)
         if: github.event_name == 'push'
-        id: ptero-branch
+        id: ptero-dcts-branch
         run: |
-          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-ptero"
+          TAGS="${{ env.REGISTRY }}/${{ github.repository_owner }}/ptero-dcts:${{ github.ref_name }}"
           if [ "${{ github.ref_name }}" = "main" ]; then
-            TAGS="$TAGS,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-ptero"
+            TAGS="$TAGS,${{ env.REGISTRY }}/${{ github.repository_owner }}/ptero-dcts:latest"
           fi
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
-      - name: Set image tags ptero (release)
+      - name: Set image tags ptero-dcts (release)
         if: github.event_name == 'release'
-        id: ptero-release
+        id: ptero-dcts-release
         run: |
           VERSION="${GITHUB_REF_NAME}"
           VERSION="${VERSION#v}"
-          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-ptero,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-ptero"
+          TAGS="${{ env.REGISTRY }}/${{ github.repository_owner }}/ptero-dcts:${VERSION},${{ env.REGISTRY }}/${{ github.repository_owner }}/ptero-dcts:latest"
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
-      - name: Build and push ptero image
+      - name: Build and push ptero-dcts image
         uses: docker/build-push-action@v5
         with:
           platforms: linux/amd64,linux/arm64
           context: .
-          file: ./Dockerfile.ptero
+          file: ./ptero/Dockerfile.dcts
           push: true
-          tags: ${{ steps.ptero-branch.outputs.tags || steps.ptero-release.outputs.tags }}
+          tags: ${{ steps.ptero-dcts-branch.outputs.tags || steps.ptero-dcts-release.outputs.tags }}
+
+      - name: Set image tags ptero-livekit (branch)
+        if: github.event_name == 'push'
+        id: ptero-livekit-branch
+        run: |
+          TAGS="${{ env.REGISTRY }}/${{ github.repository_owner }}/ptero-livekit:${{ github.ref_name }}"
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            TAGS="$TAGS,${{ env.REGISTRY }}/${{ github.repository_owner }}/ptero-livekit:latest"
+          fi
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: Set image tags ptero-livekit (release)
+        if: github.event_name == 'release'
+        id: ptero-livekit-release
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          VERSION="${VERSION#v}"
+          TAGS="${{ env.REGISTRY }}/${{ github.repository_owner }}/ptero-livekit:${VERSION},${{ env.REGISTRY }}/${{ github.repository_owner }}/ptero-livekit:latest"
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: Build and push ptero-livekit image
+        uses: docker/build-push-action@v5
+        with:
+          platforms: linux/amd64,linux/arm64
+          context: .
+          file: ./ptero/Dockerfile.livekit
+          push: true
+          tags: ${{ steps.ptero-livekit-branch.outputs.tags || steps.ptero-livekit-release.outputs.tags }}

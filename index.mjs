@@ -1,6 +1,14 @@
 import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
+// handle startup args
+let nodeArgs = process.argv;
 
-console.clear();
+// remove the first few arguments because fuck that lol
+nodeArgs.shift();
+nodeArgs.shift();
+
+if(!isPtero()){
+    console.clear();
+}
 console.log("Starting...");
 
 let versionPath = path.join(path.resolve(), "version");
@@ -110,13 +118,6 @@ let fileHandle = null; // File handle for the config file
 let savedState = null; // In-memory config state
 let writeQueue = Promise.resolve(); // Queue for write operations
 let isClosing = false; // Flag to prevent multiple close attempts
-
-// handle startup args
-let nodeArgs = process.argv;
-
-// remove the first few arguments because fuck that lol
-nodeArgs.shift();
-nodeArgs.shift();
 
 if (nodeArgs.includes("--debug") || debugmode === true) {
     // enable debug logging

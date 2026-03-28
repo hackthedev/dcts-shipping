@@ -13,7 +13,7 @@ if [ ! -d ".git" ]; then
 else
   git fetch origin "${GIT_BRANCH:-beta}"
   git reset --hard "origin/${GIT_BRANCH:-beta}"
-  git clean -fd
+  git clean -fd -e livekit/livekit-server
 fi
 
 bun --version

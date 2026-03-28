@@ -46,6 +46,24 @@ if [ -f "livekit/livekit-server" ]; then
     fi
 
     echo "Syncing LiveKit Ports..."
+
+    # Auto-detect Pterodactyl Allocations if variables are missing or default
+    if [ -z "$LIVEKIT_PORT" ] || [ "$LIVEKIT_PORT" == "7880" ]; then
+        if [ -n "$P_SERVER_ALLOCATION_1" ]; then
+            export LIVEKIT_PORT="$P_SERVER_ALLOCATION_1"
+        fi
+    fi
+    if [ -z "$RTC_TCP_PORT" ] || [ "$RTC_TCP_PORT" == "7881" ]; then
+        if [ -n "$P_SERVER_ALLOCATION_2" ]; then
+            export RTC_TCP_PORT="$P_SERVER_ALLOCATION_2"
+        fi
+    fi
+    if [ -z "$RTC_UDP_PORT" ] || [ "$RTC_UDP_PORT" == "7882" ]; then
+        if [ -n "$P_SERVER_ALLOCATION_3" ]; then
+            export RTC_UDP_PORT="$P_SERVER_ALLOCATION_3"
+        fi
+    fi
+
     if [ -n "$LIVEKIT_PORT" ]; then
         /usr/local/bin/yq -i '.port = '"$LIVEKIT_PORT" "${LIVEKIT_YAML_PATH}"
     fi
@@ -68,9 +86,16 @@ if [ -f "livekit/livekit-server" ]; then
     # Inject keys into .env
     echo "LIVEKIT_API_KEY=${API_KEY}" >> .env
     echo "LIVEKIT_API_SECRET=${API_SECRET}" >> .env
+    
+    # Fully Automate LIVEKIT_URL using your Wildcard Domain
+    if [ -n "$LIVEKIT_PORT" ]; then
+        sed -i '/^LIVEKIT_URL=/d' .env
+        echo "LIVEKIT_URL=wss://${LIVEKIT_PORT}.instance.dcts.community" >> .env
+        echo "Injected LIVEKIT_URL into .env: wss://${LIVEKIT_PORT}.instance.dcts.community"
+    fi
 
-    echo "Starting LiveKit server in the background..."
-    env -u REDIS_HOST ./livekit/livekit-server --config "${LIVEKIT_YAML_PATH}" &
+    echo "Starting LiveKit server silently in the background..."
+    env -u REDIS_HOST ./livekit/livekit-server --config "${LIVEKIT_YAML_PATH}" >/dev/null 2>&1 &
 else
     echo "Notice: LiveKit binary not found. Running purely as chat server."
 fi

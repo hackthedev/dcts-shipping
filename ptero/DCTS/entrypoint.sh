@@ -47,23 +47,6 @@ if [ -f "livekit/livekit-server" ]; then
 
     echo "Syncing LiveKit Ports..."
 
-    # Auto-detect Pterodactyl Allocations if variables are missing or default
-    if [ -z "$LIVEKIT_PORT" ] || [ "$LIVEKIT_PORT" == "7880" ]; then
-        if [ -n "$P_SERVER_ALLOCATION_1" ]; then
-            export LIVEKIT_PORT="$P_SERVER_ALLOCATION_1"
-        fi
-    fi
-    if [ -z "$RTC_TCP_PORT" ] || [ "$RTC_TCP_PORT" == "7881" ]; then
-        if [ -n "$P_SERVER_ALLOCATION_2" ]; then
-            export RTC_TCP_PORT="$P_SERVER_ALLOCATION_2"
-        fi
-    fi
-    if [ -z "$RTC_UDP_PORT" ] || [ "$RTC_UDP_PORT" == "7882" ]; then
-        if [ -n "$P_SERVER_ALLOCATION_3" ]; then
-            export RTC_UDP_PORT="$P_SERVER_ALLOCATION_3"
-        fi
-    fi
-
     if [ -n "$LIVEKIT_PORT" ]; then
         /usr/local/bin/yq -i '.port = '"$LIVEKIT_PORT" "${LIVEKIT_YAML_PATH}"
     fi
@@ -83,15 +66,18 @@ if [ -f "livekit/livekit-server" ]; then
     sed -i '/^LIVEKIT_API_KEY=/d' .env
     sed -i '/^LIVEKIT_API_SECRET=/d' .env
     
-    # Inject keys into .env
+    # Inject keys into .env and export them so they override Pterodactyl's native variables
     echo "LIVEKIT_API_KEY=${API_KEY}" >> .env
     echo "LIVEKIT_API_SECRET=${API_SECRET}" >> .env
+    export LIVEKIT_API_KEY="${API_KEY}"
+    export LIVEKIT_API_SECRET="${API_SECRET}"
     
     # Fully Automate LIVEKIT_URL using your Wildcard Domain
     if [ -n "$LIVEKIT_PORT" ]; then
         sed -i '/^LIVEKIT_URL=/d' .env
         echo "LIVEKIT_URL=${LIVEKIT_PORT}.instance.dcts.community" >> .env
-        echo "Injected LIVEKIT_URL into .env: ${LIVEKIT_PORT}.instance.dcts.community"
+        export LIVEKIT_URL="${LIVEKIT_PORT}.instance.dcts.community"
+        echo "Injected LIVEKIT_URL into .env and environment: ${LIVEKIT_PORT}.instance.dcts.community"
     fi
 
     echo "Starting LiveKit server silently in the background..."

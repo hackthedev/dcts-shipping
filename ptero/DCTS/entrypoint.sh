@@ -70,7 +70,7 @@ if [ -f "livekit/livekit-server" ]; then
     echo "LIVEKIT_API_SECRET=${API_SECRET}" >> .env
 
     echo "Starting LiveKit server in the background..."
-    ./livekit/livekit-server --config "${LIVEKIT_YAML_PATH}" &
+    env -u REDIS_HOST ./livekit/livekit-server --config "${LIVEKIT_YAML_PATH}" &
 else
     echo "Notice: LiveKit binary not found. Running purely as chat server."
 fi

@@ -90,8 +90,8 @@ if [ -f "livekit/livekit-server" ]; then
     # Fully Automate LIVEKIT_URL using your Wildcard Domain
     if [ -n "$LIVEKIT_PORT" ]; then
         sed -i '/^LIVEKIT_URL=/d' .env
-        echo "LIVEKIT_URL=wss://${LIVEKIT_PORT}.instance.dcts.community" >> .env
-        echo "Injected LIVEKIT_URL into .env: wss://${LIVEKIT_PORT}.instance.dcts.community"
+        echo "LIVEKIT_URL=${LIVEKIT_PORT}.instance.dcts.community" >> .env
+        echo "Injected LIVEKIT_URL into .env: ${LIVEKIT_PORT}.instance.dcts.community"
     fi
 
     echo "Starting LiveKit server silently in the background..."

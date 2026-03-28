@@ -92,7 +92,7 @@ class AdminActions {
     }
 
     static editServer() {
-        ChatManager.openPagePopup("serverSettings", "settings/server/");
+        ChatManager.openPagePopup("serverSettings", "/settings/server/");
     }
 
     static sortChannels() {

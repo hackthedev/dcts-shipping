@@ -291,7 +291,6 @@ async function checkMediaTypeAsync(url) {
                         throw new Error(`HTTP error! status: ${xhr.status}`);
                     }
                 } catch (error) {
-                    console.error('Error checking media type:', error);
                     resolve('error');
                 }
             }

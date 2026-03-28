@@ -13,11 +13,11 @@ class ChatManager {
         if(pagePopup) {
             pagePopup.remove()
         }
-        else {
-            throw new Error("No page popup to be closed is present!");
-        }
     }
 
+    static isPopupShown(id){
+        return !!document.querySelector(`.popupPageContainer#${id}`);
+    }
 
     static openPagePopup(elementId, url){
         if(!url) throw new Error("No url supplied bitch", url); // lol
@@ -33,8 +33,8 @@ class ChatManager {
             pagePopup.id = elementId;
 
             // some styling for it to seam "real
-            pagePopup.style.width = "80%";
-            pagePopup.style.height = "80%"
+            pagePopup.style.width = "92%";
+            pagePopup.style.height = "92%"
 
             // this is how you center shit easily with css
             pagePopup.style.position = "fixed";
@@ -53,9 +53,14 @@ class ChatManager {
             pagePopup.style.border = "1.25px solid var(--border-color-bright)";
             pagePopup.style.boxShadow = "0 0 60px rgba(0,0,0,1)";
             pagePopup.style.backdropFilter = "blur(10px)";
+            pagePopup.style.display = "flex";
 
             // then add it to the document
             document.body.appendChild(pagePopup);
+        }
+        else{
+            pagePopup.id = elementId;
+            pagePopup.style.display = "flex";
         }
 
         if(!iframe){

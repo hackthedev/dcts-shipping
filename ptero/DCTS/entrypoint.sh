@@ -25,15 +25,15 @@ fi
 # ==========================================
 # LIVEKIT INTEGRATION
 # ==========================================
-export LIVEKIT_YAML_PATH="Livekit/livekit.yaml"
+export LIVEKIT_YAML_PATH="livekit/livekit.yaml"
 
-if [ -f "Livekit/livekit-server" ]; then
+if [ -f "livekit/livekit-server" ]; then
     echo "LiveKit binary found. Setting up embedded LiveKit Server..."
     
-    # Generate keys if they don't exist
-    if ! grep -q "^keys:" "${LIVEKIT_YAML_PATH}" 2>/dev/null; then
-        echo "Generating new LiveKit keys..."
-        OUTPUT=$(./Livekit/livekit-server generate-keys)
+    # Generate keys if they don't exist in our environment yet
+    if ! grep -q "^LIVEKIT_API_KEY=" .env 2>/dev/null; then
+        echo "Generating new LiveKit keys (overriding github template)..."
+        OUTPUT=$(./livekit/livekit-server generate-keys)
         API_KEY=$(echo "$OUTPUT" | awk '/API Key:/ {print $3}')
         API_SECRET=$(echo "$OUTPUT" | awk '/API Secret:/ {print $3}')
 
@@ -42,7 +42,7 @@ if [ -f "Livekit/livekit-server" ]; then
           .keys = {} |
           .keys["'"$API_KEY"'"] = "'"$API_SECRET"'"
         ' "${LIVEKIT_YAML_PATH}"
-        echo "LiveKit Keys generated."
+        echo "LiveKit Keys generated and template overridden."
     fi
 
     echo "Syncing LiveKit Ports..."
@@ -57,8 +57,8 @@ if [ -f "Livekit/livekit-server" ]; then
     fi
 
     echo "Reading LiveKit Keys to sync with DCTS .env..."
-    API_KEY=$(/usr/local/bin/yq e '.keys | keys | .[0]' "${LIVEKIT_YAML_PATH}")
-    API_SECRET=$(/usr/local/bin/yq e '.keys | .["'"$API_KEY"'"]' "${LIVEKIT_YAML_PATH}")
+    API_KEY=$(/usr/local/bin/yq '.keys | keys | .[0]' "${LIVEKIT_YAML_PATH}")
+    API_SECRET=$(/usr/local/bin/yq '.keys | .["'"$API_KEY"'"]' "${LIVEKIT_YAML_PATH}")
 
     touch .env
     # Remove old keys if present
@@ -70,7 +70,7 @@ if [ -f "Livekit/livekit-server" ]; then
     echo "LIVEKIT_API_SECRET=${API_SECRET}" >> .env
 
     echo "Starting LiveKit server in the background..."
-    ./Livekit/livekit-server --config "${LIVEKIT_YAML_PATH}" &
+    ./livekit/livekit-server --config "${LIVEKIT_YAML_PATH}" &
 else
     echo "Notice: LiveKit binary not found. Running purely as chat server."
 fi

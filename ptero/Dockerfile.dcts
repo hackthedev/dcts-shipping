@@ -16,7 +16,7 @@ ENV USER=container HOME=/home/container
 WORKDIR /home/container
 
 # Copy entrypoint
-COPY --chown=container:container ./ptero/entrypoint.sh /entrypoint.sh
+COPY --chown=container:container ./ptero/DCTS/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 CMD ["/bin/bash", "/entrypoint.sh"]

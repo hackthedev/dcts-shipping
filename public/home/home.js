@@ -1,5 +1,6 @@
 async function renderHome() {
     ChatManager.setUrl("/home")
+    MobilePanel.close()
 
     // get server info and clear the html in case its being re-rendered
     let server = await getServerInfo();

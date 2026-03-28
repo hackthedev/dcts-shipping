@@ -92,7 +92,7 @@ class AdminActions {
     }
 
     static editServer() {
-        window.location.href = "settings/server/";
+        ChatManager.openPagePopup("serverSettings", "/settings/server/");
     }
 
     static sortChannels() {
@@ -100,11 +100,11 @@ class AdminActions {
     }
 
     static editGroup(id) {
-        window.location.href = "/settings/group?id=" + id;
+        ChatManager.openPagePopup("groupSettings", "/settings/group?id=" + id)
     }
 
     static editChannel(channelId) {
-        window.location.href = `/settings/channel?id=${channelId}`;
+        ChatManager.openPagePopup("channelSettings", `/settings/channel?id=${channelId}`);
     }
 
     static createCategory() {

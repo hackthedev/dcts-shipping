@@ -417,6 +417,7 @@ function renderDmMenu() {
 
 async function renderDmRoom(roomId){
     if(!roomId) throw new Error("Room ID is required");
+    MobilePanel.close()
 
     ChatManager.setUrlParam("dm", roomId)
 

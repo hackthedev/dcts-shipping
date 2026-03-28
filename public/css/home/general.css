@@ -4,8 +4,8 @@
 
 #navigation.home {
     display: flex;
-    width: 300px !important;
-    min-width: 300px !important;
+    width: 300px;
+    min-width: 300px;
     gap: 2px;
     padding: 10px;
     max-height: 100%;

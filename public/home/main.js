@@ -33,6 +33,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     splash = new SplashScreen(document.body);
     splash.show()
 
+    MobilePanel.setLeftMenu([
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#navigation")
+            ]
+        }
+    ], "left");
+
     ChatManager.checkConnection(2000)
     await ChatManager.waitForSocket(socket);
     ChatManager.wasConnected = true;

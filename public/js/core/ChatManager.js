@@ -8,6 +8,69 @@ class ChatManager {
         return Math.random() < percent / 100;
     }
 
+    static closePagePopup(id){
+        let pagePopup = window.parent.document.querySelector(`#${id}`);
+        if(pagePopup) {
+            pagePopup.remove()
+        }
+        else {
+            throw new Error("No page popup to be closed is present!");
+        }
+    }
+
+
+    static openPagePopup(elementId, url){
+        if(!url) throw new Error("No url supplied bitch", url); // lol
+        MobilePanel.close()
+
+        let pagePopup = document.querySelector('#' + elementId);
+        let iframe = pagePopup?.querySelector('iframe');
+
+        // if no shit found make it
+        if(!pagePopup) {
+            pagePopup = document.createElement('div');
+            pagePopup.classList.add('popupPageContainer');
+            pagePopup.id = elementId;
+
+            // some styling for it to seam "real
+            pagePopup.style.width = "80%";
+            pagePopup.style.height = "80%"
+
+            // this is how you center shit easily with css
+            pagePopup.style.position = "fixed";
+            pagePopup.style.top = "50%";
+            pagePopup.style.left = "50%";
+            pagePopup.style.transform = "translate(-50%, -50%)";
+
+            // if not visible it may be transparent or behind other shit
+            // i have some other css where i used it too in case
+            pagePopup.style.backgroundColor = "black";
+            pagePopup.style.zIndex = "2";
+
+            pagePopup.style.borderRadius = "8px";
+            pagePopup.style.overflow = "hidden";
+
+            pagePopup.style.border = "1.25px solid var(--border-color-bright)";
+            pagePopup.style.boxShadow = "0 0 60px rgba(0,0,0,1)";
+            pagePopup.style.backdropFilter = "blur(10px)";
+
+            // then add it to the document
+            document.body.appendChild(pagePopup);
+        }
+
+        if(!iframe){
+            iframe = document.createElement('iframe');
+            iframe.src = url;
+            iframe.style.width = "100%";
+            iframe.style.height = "100%";
+            iframe.style.border = "none";
+            pagePopup.appendChild(iframe);
+        }
+        else{
+            iframe.src = url
+        }
+    }
+
     static waitForSocket(socket) {
         return new Promise((resolve, reject) => {
             if (socket.connected) {

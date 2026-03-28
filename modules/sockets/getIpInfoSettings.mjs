@@ -11,10 +11,10 @@ import {
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on("getIpInfoSettings", function (member, response) {
-        if (validateMemberId(member?.id, socket,  member?.token) === true
+    socket.on("getIpInfoSettings", async function (member, response) {
+        if (await validateMemberId(member?.id, socket,  member?.token) === true
         ) {
-            if (hasPermission(member.id, "manageIpSettings")) {
+            if (await hasPermission(member.id, "manageIpSettings")) {
                 return response({ip: serverconfig.serverinfo.moderation.ip})
             }
 
@@ -28,9 +28,9 @@ export default (io) => (socket) => {
     });
 
     socket.on("saveIpInfoSettings", async function (member, response) {
-        if (validateMemberId(member?.id, socket,  member?.token) === true
+        if (await validateMemberId(member?.id, socket,  member?.token) === true
         ) {
-            if (hasPermission(member.id, "manageIpSettings")) {
+            if (await hasPermission(member.id, "manageIpSettings")) {
                 if(member?.ip?.blockedCountryCodes != null) serverconfig.serverinfo.moderation.ip.blockedCountryCodes = member.ip.blockedCountryCodes;
                 if(member?.ip?.blockDataCenter != null) serverconfig.serverinfo.moderation.ip.blockDataCenter = member.ip.blockDataCenter;
                 if(member?.ip?.blockSatelite != null) serverconfig.serverinfo.moderation.ip.blockSatelite = member.ip.blockSatelite;

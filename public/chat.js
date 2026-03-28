@@ -5,17 +5,27 @@ document.addEventListener("error", (e) => {
     const el = e.target;
     if (el.tagName === "IMG") {
         el.setAttribute("data-src", el.src)
-        el.src = "/img/error.png";
+
+        if (ChatManager.chance(20)) {
+            el.src = "/img/worker.png";
+        }
+        else {
+            el.src = "/img/error.png";
+        }
+
+        // lets see if this will break something
+        el.style.maxHeight = "50px"
+        el.style.maxWidth = "50px"
     }
 }, true);
 
-function rewriteImg(img){
-    if(!img || !img.src) return;
+function rewriteImg(img) {
+    if (!img || !img.src) return;
 
-    if(img.dataset.proxied === "1") return;
+    if (img.dataset.proxied === "1") return;
 
     const proxied = ChatManager.proxyUrl(img.src);
-    if(proxied !== img.src){
+    if (proxied !== img.src) {
         img.src = proxied;
     }
 
@@ -23,17 +33,46 @@ function rewriteImg(img){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    MobilePanel.setLeftMenu([
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#mainLayout #header")
+            ]
+        },
+        {
+            direction: "row",
+            flex: "1 1 0",
+            flexGrow: 1,
+            flexShrink: 1,
+            height: "100%",
+            children: [
+                document.querySelector("#mainLayout #serverlist"),
+                document.querySelector("#mainLayout #channellist")
+            ]
+        }
+    ], "left");
+
+    MobilePanel.setRightMenu([
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#mainLayout #infolist")
+            ]
+        }
+    ], "right");
+
+
     document.querySelectorAll("img").forEach(rewriteImg);
-
     new MutationObserver(mutations => {
-        for(const m of mutations){
-            for(const n of m.addedNodes){
-                if(n.nodeType !== 1) continue;
+        for (const m of mutations) {
+            for (const n of m.addedNodes) {
+                if (n.nodeType !== 1) continue;
 
-                if(n.tagName === "IMG"){
+                if (n.tagName === "IMG") {
                     rewriteImg(n);
                 }
-                else{
+                else {
                     n.querySelectorAll?.("img").forEach(rewriteImg);
                 }
             }
@@ -63,9 +102,6 @@ let tooltipSystem
 let customAlerts
 let splash
 
-var editorContainer = document.querySelector('.editor-container');
-var editorToolbar = document.getElementById("editor-toolbar");
-var editorHints = document.getElementById("editor-hints");
 var quillContainer = document.querySelector('.ql-container');
 var editor = document.querySelector('.ql-editor');
 
@@ -117,9 +153,11 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     initQuillShit();
 
+    if (UserManager.getChannel()) handleChannelMessageDrafting(UserManager.getChannel());
+
     // manual click event listener because its too general
     document.body.addEventListener("click", (event) => {
-        const {clientX: mouseX, clientY: mouseY} = event;
+        const { clientX: mouseX, clientY: mouseY } = event;
         var clickedElement = event.target
 
         var profileContent = document.getElementById("profile_container");
@@ -142,40 +180,19 @@ document.addEventListener("DOMContentLoaded", async function () {
         ModActions.hideRoleMenu()
     });
 
-    // mobile swiping
-    const contentLayout = document.getElementById("contentLayout");
-    contentLayout.addEventListener("touchstart", e => {
-        const t = e.touches[0];
-        startX = t.clientX;
-        startY = t.clientY;
-    });
-
-    contentLayout.addEventListener("touchend", e => {
-        const t = e.changedTouches[0];
-        const dx = t.clientX - startX;
-        const dy = t.clientY - startY;
-
-        if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
-
-        if (Math.abs(dx) > Math.abs(dy)) {
-            onSwipe(dx > 0 ? "right" : "left");
-        }
-    });
-
-
     document.getElementById("message-actions-image").onclick = function (e) {
         var x = e.clientX;
         var y = e.clientY;
 
         var clickedElement = document.elementFromPoint(x, y)
 
-        if (clickedElement.id != "message-actions-image") {
+        if (clickedElement.id !== "message-actions-image") {
             return;
         }
 
-        showEmojiPicker(x,y, (emojiObj) => {
+        showEmojiPicker(x, y, (emojiObj) => {
             insertEmoji(emojiObj, true);
-            focusEditor();
+            if (!MobilePanel.isMobile()) focusEditor();
         })
     }
 
@@ -183,16 +200,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     window.addEventListener('resize', function (event) {
         // do stuff here
 
+        let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+
         var emojiContainer = document.getElementById("emoji-box-container");
         var profileContainer = document.getElementById("profile_container");
 
-        if (emojiContainer.style.display == "flex") {
+        if (emojiContainer.style.display == "flex" && !MobilePanel.isMobile()) {
             //emojiContainer.style.display = "none";
             closeEmojiBox()
         }
         if (profileContainer.style.display == "flex") {
             profileContainer.style.display = "none";
         }
+
+        if (isScrolledDown) scrollDown("window resizer");
     });
 
     document.addEventListener("keydown", (event) => {
@@ -218,7 +239,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         await initPow()
 
         // join first
-        await userJoined(null, null, null, null, true);
+        await ChatManager.userJoined(null, null, null, null, true);
 
         setTimeout(() => {
             splash.hide()
@@ -302,8 +323,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             ".addRoleMenuTrigger"
         ],
         async (data) => {
-            console.log(data)
-
             let memberId = data.element.getAttribute("data-member-id");
             if (!memberId) {
                 console.warn("Couldnt get member profile from click event because memberid wasnt found");
@@ -328,7 +347,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         },
         async (data) => {
             const inbox = document.querySelector(".inbox-container");
-            if(!inbox) return true;
+            if (!inbox) return true;
 
             return !inbox.contains(data.event.target);
         }
@@ -359,7 +378,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             )
 
             let entry = PageRenderer.Element().querySelector(".entry");
-            if(!entry) return console.error("Couldnt find inbox reply")
+            if (!entry) return console.error("Couldnt find inbox reply")
 
             let messageId = findAttributeUp(entry, "data-message-id")
             let inboxId = findAttributeUp(entry, "data-inbox-id")
@@ -375,14 +394,13 @@ document.addEventListener("DOMContentLoaded", async function () {
                     let upload = await ChatManager.srcToFile(src);
                     editor.insertImage(upload.path)
                 },
-                onSend: async(html) => {
+                onSend: async (html) => {
                     console.log(html, messageId);
-                    if(!messageId) throw new Error("Couldnt find inbox reply message id")
+                    if (!messageId) throw new Error("Couldnt find inbox reply message id")
 
                     replyMessageId = messageId;
-                    let wasSent = sendMessageToServer(null, null, null, html, true);
-
-                    if(wasSent){
+                    let wasSent = await sendMessageToServer(null, null, null, html, true);
+                    if (wasSent) {
                         Inbox.markAsRead(inboxId)
                         editor.clear()
                     }
@@ -394,7 +412,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     )
 
-// close emoji box when we click outside of the emoji container
+    // close emoji box when we click outside of the emoji container
     ContextMenu.registerClickEvent(
         "body_emojicontainer",
         [
@@ -406,170 +424,33 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (emojiContainer?.style?.display === "flex" && !emojiContainer?.contains(data.element)) {
                 if (!data?.element?.id?.includes("message-actions-image") &&
                     !data?.element?.classList?.contains("react")
-                ){
+                ) {
                     closeEmojiBox();
                 }
             }
 
             // inbox
             let inboxContainer = document.querySelector(".inbox-container");
-            if(inboxContainer && inboxContainer?.style?.display === "flex" &&
+            if (inboxContainer && inboxContainer?.style?.display === "flex" &&
                 (!inboxContainer?.contains(data.element) && !data?.element?.classList?.contains("inbox")) &&
                 (!PageRenderer?.Element()?.contains(data.element))
-            )
-            {
+            ) {
                 //inboxContainer.style.display = "none";
             }
 
             // refocus editor
             let editorContainer = document.querySelector(".editor-container");
-            if(editorContainer &&
+            if (editorContainer &&
                 !editorContainer?.contains(data.element) &&
                 //!docsContainer?.contains(data.element) &&
                 !emojiContainer.contains(data.element)
-            ){
+            ) {
                 //focusEditor(); // causes too many dumb bugs as of rn
             }
 
 
         }
     )
-
-    ContextMenu.registerContextMenu(
-        "memberprofile",
-        [
-            ".memberlist-container",
-            ".memberlist-container .name",
-            ".memberlist-container .status",
-            ".memberlist-img",
-            ".mention.member",
-            // vc container
-            ".vc-container .participant",
-            ".vc-container .participant img",
-            ".user-container .user-icon",
-            ".message-container .icon",
-            ".message-container .username",
-            // vc user from channels
-            "#channeltree .category .participants .participant",
-            "#channeltree .category .participants .participant .avatar",
-        ],
-        [
-            {
-                icon: "&#9878;",
-                text: "Ban Member",
-                callback: async (data) => {
-                    let memberId = data.element.getAttribute("data-member-id");
-                    if (!memberId) {
-                        console.warn("Couldnt ban member because memberid wasnt found");
-                        return;
-                    }
-
-                    ModActions.banUser(memberId)
-                },
-                condition: async (data) => {
-                    let memberId = data.element.getAttribute("data-member-id");
-                    if (!memberId) {
-                        console.warn("Couldnt ban member because memberid wasnt found");
-                        return;
-                    }
-                    return (await (await checkPermission("banMember")).permission === "granted") && (memberId !== UserManager.getID())
-                },
-                type: "error"
-            },
-            {
-                icon: "&#9873;",
-                text: "Kick Member",
-                callback: async (data) => {
-                    let memberId = data.element.getAttribute("data-member-id");
-                    if (!memberId) {
-                        console.warn("Couldnt kick member because memberid wasnt found");
-                        return;
-                    }
-
-                    ModActions.kickUser(memberId)
-                },
-                condition: async (data) => {
-                    let memberId = data.element.getAttribute("data-member-id");
-                    if(!memberId) return false;
-                    return (await (await checkPermission("kickUsers")).permission === "granted") && (memberId !== UserManager.getID())
-                },
-                type: "error"
-            },
-            {
-                icon: "&#9873;",
-                text: "Mute Member",
-                callback: async (data) => {
-                    let memberId = data.element.getAttribute("data-member-id");
-                    if (!memberId) {
-                        console.warn("Couldnt mute member because memberid wasnt found");
-                        return;
-                    }
-
-                    ModActions.muteUser(memberId)
-                },
-                condition: async (data) => {
-                    let memberId = data.element.getAttribute("data-member-id");
-                    if(!memberId) return false;
-                    return (await (await checkPermission("muteUsers")).permission === "granted") &&
-                        (memberId !== UserManager.getID()) &&
-                        data.element.querySelectorAll(".mutedMember").length === 0
-                },
-                type: "error"
-            },
-            {
-                icon: "&#9873;",
-                text: "Unmute Member",
-                callback: async (data) => {
-                    let memberId = data.element.getAttribute("data-member-id");
-                    if (!memberId) {
-                        console.warn("Couldnt mute member because memberid wasnt found");
-                        return;
-                    }
-
-                    ModActions.unmuteUser(memberId)
-                },
-                condition: async (data) => {
-                    let memberId = data.element.getAttribute("data-member-id");
-                    if(!memberId) return false;
-                    return (await (await checkPermission("muteUsers")).permission === "granted") &&
-                        (memberId !== UserManager.getID()) &&
-                        data.element.querySelectorAll(".mutedMember").length !== 0
-                },
-                type: "error"
-            },
-            {
-                icon: "&#9741;",
-                text: "Disconnect Member",
-                callback: async (data) => {
-                    let memberId = data.element.getAttribute("data-member-id");
-                    if (!memberId) {
-                        console.warn("Couldnt disconnect member because memberid wasnt found");
-                        return;
-                    }
-
-                    ModActions.disconnectUser(memberId)
-                },
-                condition: async (data) => {
-                    let memberId = data.element.getAttribute("data-member-id");
-                    if(!memberId) return false;
-                    return (await (await checkPermission("disconnectUsers")).permission === "granted") && (memberId !== UserManager.getID())
-                },
-                type: "error"
-            },
-            {
-                icon: "&#10070;",
-                text: "Copy ID",
-                callback: async (data) => {
-                    let memberId = data.element.getAttribute("data-member-id");
-                    if (!memberId) {
-                        console.warn("Couldnt copy member because memberid wasnt found");
-                        return;
-                    }
-
-                    navigator.clipboard.writeText(memberId)
-                }
-            }
-        ])
 })
 
 // IMPORTANT! By default, socket.io() connects to the host that
@@ -578,7 +459,7 @@ var socket = io.connect()
 
 registerMentionClickEvent()
 
-socket.on("updatedEmojis", function () {
+socket.on("updatedEmojis", async function () {
     fetchEmojis();
 })
 
@@ -588,32 +469,26 @@ ensureDomPurify()
 
 voip = new VoIP(`${window.location.origin.includes("https") ? "wss" : "ws"}://{{livekit.url}}/`);
 
-
-
-socket.on('receiveThreadNew', ({}) => {
-    console.log("receiveThreadNew")
+socket.on('updateUnread', async () => {
     displayHomeUnread()
 });
 
-socket.on('updateUnread', () => {
+socket.on('newDmMessage', async (data) => {
+    console.log(data)
     displayHomeUnread()
 });
 
-socket.on('receiveMessage', ({}) => {
-    displayHomeUnread()
-});
-
-socket.on('receiveContentNew', ({type, item}) => {
+socket.on('receiveContentNew', async ({ type, item }) => {
     if (item?.notifyAll && String(item.authorId) !== String(UserManager.getID())) {
         displayHomeUnread()
     }
 });
 
-socket.on('newReport', () => {
+socket.on('newReport', async () => {
     UserReports.getReports();
 });
 
-socket.on('verifyPublicKey', () => {
+socket.on('verifyPublicKey', async () => {
     Crypto.dSyncTest();
 });
 
@@ -645,104 +520,6 @@ var blockedData = [];
 var blockedDataCounter = [];
 var bypassElement = [];
 var bypassCounter = [];
-
-function isElementVisible(element) {
-    const rect = element.getBoundingClientRect();
-    return rect.top < window.innerHeight &&
-        rect.bottom > 0 &&
-        rect.left < window.innerWidth &&
-        rect.right > 0;
-}
-
-
-function escapeHtml(text) {
-
-    if (text == null || text.length <= 0) {
-        return text;
-    }
-
-    var map = {
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-    };
-
-    return text.replace(/[&<>"']/g, function (m) {
-        return map[m];
-    });
-}
-
-async function checkMediaTypeAsync(url) {
-    return new Promise((resolve, reject) => {
-
-        if (!isURL(url)) {
-            resolve("unkown");
-            return;
-        }
-
-        socket.emit("checkMediaUrlCache", {
-            id: UserManager.getID(),
-            token: UserManager.getToken(),
-            url: url
-        }, function (response) {
-
-            if (response.isCached === true) {
-                // return cached media type
-                resolve(response.mediaType);
-            } else {
-                // url wasnt cached
-                let xhr = new XMLHttpRequest();
-                xhr.open('HEAD', `${ChatManager.proxyUrl(url)}`, false); // false makes the request synchronous
-                try {
-                    xhr.send();
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        let contentType = xhr.getResponseHeader('Content-Type');
-
-                        if (contentType) {
-                            if (contentType.startsWith('audio/')) {
-                                resolve('audio');
-                            } else if (contentType.startsWith('video/')) {
-                                resolve('video');
-                            } else if (contentType.startsWith('image/')) {
-                                resolve('image');
-                            } else {
-                                resolve('unknown');
-                            }
-                        } else {
-                            console.log("Content-Type missing")
-                            throw new Error('Content-Type header is missing');
-                        }
-                    } else {
-                        if (xhr.status === 404) resolve ("404");
-
-                        throw new Error(`HTTP error! status: ${xhr.status}`);
-                    }
-                } catch (error) {
-                    console.error('Error checking media type:', error);
-                    resolve('error');
-                }
-            }
-
-        });
-
-    });
-}
-
-function handleVideoClick(event, videoElement) {
-    event.preventDefault();
-    event.stopPropagation();
-    const shouldPlay = videoElement.paused;
-    document.querySelectorAll(".video-embed").forEach(player => {
-        if (player !== videoElement && !player.paused) {
-            player.pause();
-        }
-    });
-
-    if (shouldPlay) {
-        videoElement.play().catch(err => console.warn(err));
-    } else {
-        videoElement.pause();
-    }
-}
-
 
 /* Debug Stuff
    Should be deprecated
@@ -780,18 +557,6 @@ async function checkPermission(perms, any = false) {
             resolve(response)
         });
     })
-}
-
-
-function stopRecording() {
-    socket.emit("leftVC", {
-        id: UserManager.getID(),
-        username: UserManager.getUsername(),
-        icon: UserManager.getPFP(),
-        room: UserManager.getRoom(),
-        token: UserManager.getToken()
-    });
-    //leaveRoom(UserManager.getRoom());
 }
 
 function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
@@ -863,7 +628,7 @@ function redeemKey() {
     if (key == null || key.length <= 0) {
 
     } else {
-        socket.emit("redeemKey", {id: UserManager.getID(), key: key, token: UserManager.getToken()});
+        socket.emit("redeemKey", { id: UserManager.getID(), key: key, token: UserManager.getToken() });
     }
 }
 
@@ -875,7 +640,7 @@ function dataURLtoBlob(dataUrl) {
     for (let i = 0; i < binary.length; i++) {
         array[i] = binary.charCodeAt(i);
     }
-    return new Blob([array], {type: mime});
+    return new Blob([array], { type: mime });
 }
 
 function getMessageId(element) {
@@ -888,157 +653,29 @@ function getMessageId(element) {
     }
 }
 
-async function userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false) {
-    if (UserManager.getUsername() != null) {
-        var username = UserManager.getUsername();
+function extractHost(url) {
+    if (!url) return null;
+    const s = String(url).trim();
 
-        let knownServers = "";
-        if (isLauncher() && initial) {
-            await syncHostData()
-            knownServers = await Client().GetServers();
+    const looksLikeBareIPv6 = !s.includes('://') && !s.includes('/') && s.includes(':') && /^[0-9A-Fa-f:.]+$/.test(s);
+    const withProto = looksLikeBareIPv6 ? `https://[${s}]` : (s.includes('://') ? s : `https://${s}`);
+
+    try {
+        const u = new URL(withProto);
+        const host = u.hostname; // IPv6 returned without brackets
+        const port = u.port;
+        if (host.includes(':')) {
+            return port ? `[${host}]:${port}` : host;
         }
-
-        socket.emit("userConnected", {
-            id: UserManager.getID(),
-            name: username,
-            icon: UserManager.getPFP(),
-            status: UserManager.getStatus(),
-            token: UserManager.getToken(),
-            password: passwordFlag,
-            onboarding: onboardingFlag,
-            aboutme: UserManager.getAboutme(),
-            banner: UserManager.getBanner(),
-            loginName: loginNameFlag,
-            publicKey: await UserManager.getPublicKey(),
-            knownServers,
-            code: accessCode,
-            pow: {
-                challenge: localStorage.getItem("pow_challenge"),
-                solution: localStorage.getItem("pow_solution")
-            }
-        }, function (response) {
-
-            // sync data
-            if (response?.token) CookieManager.setCookie("token", response.token);
-            if (response?.icon) CookieManager.setCookie("pfp", response.icon);
-            if (response?.banner) CookieManager.setCookie("banner", response.banner);
-            if (response?.aboutme) CookieManager.setCookie("aboutme", response.aboutme);
-            if (response?.status) CookieManager.setCookie("status", response.status);
-            if (response?.loginName) CookieManager.setCookie("loginName", response.loginName);
-            if (response?.id) CookieManager.setCookie("id", response.id);
-
-            // if we finished onboarding
-            if (!response?.error && response.finishedOnboarding === true && initial) {
-                socket.emit("setRoom", {
-                    id: UserManager.getID(),
-                    room: UserManager.getRoom(),
-                    token: UserManager.getToken()
-                });
-                getGroupBanner();
-                socket.emit("getGroupList", {
-                    id: UserManager.getID(),
-                    group: UserManager.getGroup(),
-                    token: UserManager.getToken(),
-                    username: UserManager.getUsername(),
-                    icon: UserManager.getPFP()
-                });
-
-                socket.emit("getCurrentChannel", {
-                    id: UserManager.getID(),
-                    token: UserManager.getToken(),
-                    username: UserManager.getUsername(),
-                    icon: UserManager.getPFP(),
-                    group: UserManager.getGroup(),
-                    category: UserManager.getCategory(),
-                    channel: UserManager.getChannel()
-                });
-                socket.emit("setRoom", {
-                    id: UserManager.getID(),
-                    room: UserManager.getRoom(),
-                    token: UserManager.getToken()
-                });
-
-                if (initial) {
-                    getMemberList()
-                    getChannelTree()
-                    getServerInfo();
-                    showGroupStats();
-                    focusEditor()
-                    getChatlog(document.getElementById("content"));
-
-                    /* Quill Emoji Autocomplete */
-                    initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
-                    initializeMentionAutocomplete(document.querySelector('.ql-editor'));
-                }
-
-                socket.emit("checkPermission", {
-                    id: UserManager.getID(),
-                    token: UserManager.getToken(),
-                    permission: "manageReports"
-                }, function (response) {
-                    if (response.permission === "granted" && initial) {
-                        ModView.init();
-                        UserReports.getReports();
-                    }
-                });
-
-            } else {
-                if (response.error) {
-                    splash.hide()
-                    if(response.error.includes("banned")){
-                        ChatManager.showInstanceInfo(response.error, "indianred");
-                        return;
-                    }
-
-
-                    showSystemMessage({
-                        title: response.title || "",
-                        text: response.msg || response.error || "",
-                        icon: "error",
-                        img: null,
-                        type: "error",
-                        duration: response.displayTime || 3000
-                    });
-
-                    if (response?.registration === false) {
-                        // show registration prompt
-                        customPrompts.showPrompt(
-                            `Invite Code`,
-                            `
-                             <div class="prompt-form-group">
-                                 <p>
-                                    This server is an invite-only server. <br>
-                                    Please enter an invite code to join the server.
-                                 </p>
-                                 <p>
-                                 Already have an account? <a href="#" onclick="UserManager.doAccountLogin()">Log in instead</a>
-                                </p>
-                             </div>
-
-                             <div class="prompt-form-group">
-                                <input class="prompt-input" autocomplete="off" type="text" name="inviteCode" id="inviteCode" placeholder="Enter an invite code" value="">
-                                <label style="color: indianred;" class="prompt-label error-text"></label>
-                             </div>
-                            `,
-                            async function (values) {
-                                let inviteCode = values?.inviteCode;
-
-                                if (inviteCode && inviteCode.length > 0) {
-                                    requestAnimationFrame(function () {
-                                        UserManager.doAccountOnboarding(null, inviteCode)
-                                    })
-                                    //userJoined(false, null, null, inviteCode);
-                                }
-
-                                if (!inviteCode) {
-                                    userJoined();
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-        });
+        return port ? `${host}:${port}` : host;
+    } catch (e) {
+        const re = /^(?:https?:\/\/)?(?:[^@\/\n]+@)?([^:\/?#]+)(?::(\d+))?(?:[\/?#]|$)/i;
+        const m = s.match(re);
+        if (!m) return null;
+        const hostname = m[1].replace(/^\[(.*)\]$/, '$1');
+        const port = m[2];
+        if (hostname.includes(':')) return port ? `[${hostname}]:${port}` : hostname;
+        return port ? `${hostname}:${port}` : hostname;
     }
 }
 
@@ -1046,7 +683,7 @@ let lastTypingEmitted = 0;
 
 function setTyping() {
     if (new Date().getTime() > lastTypingEmitted) {
-        socket.emit("isTyping", {id: UserManager.getID(), token: UserManager.getToken(), room: UserManager.getRoom()});
+        socket.emit("isTyping", { id: UserManager.getID(), token: UserManager.getToken(), room: UserManager.getRoom() });
         lastTypingEmitted = new Date().getTime() + (2000)
     }
 
@@ -1072,131 +709,6 @@ function getUrlParams(param) {
 function getChannelTree() {
     ChannelTree.getTree();
     getGroupBanner()
-}
-
-
-function createYouTubeEmbed(url, messageId) {
-    let u = new URL(url.trim());
-    let host = u.hostname.replace("www.", "").toLowerCase();
-
-    let code = "";
-    let t = "";
-
-    if (u.searchParams.has("t")) t = u.searchParams.get("t");
-    if (u.hash.startsWith("#t=")) t = u.hash.replace("#t=", "");
-    if (u.hash.startsWith("#")) t = u.hash.replace("#", "");
-
-    if (host === "youtube.com" || host === "m.youtube.com") {
-        // watch?v=...
-        if (u.searchParams.has("v")) {
-            code = u.searchParams.get("v");
-        }
-        // /embed/...
-        else if (u.pathname.startsWith("/embed/")) {
-            code = u.pathname.replace("/embed/", "");
-        }
-        // /shorts/...
-        else if (u.pathname.startsWith("/shorts/")) {
-            code = u.pathname.replace("/shorts/", "").split("?")[0];
-        }
-    } else if (host === "youtu.be") {
-        code = u.pathname.replace("/", "");
-    }
-
-    if (!code) {
-        console.warn("No youtube code found in url")
-        return;
-    }
-
-    let embed = "https://www.youtube.com/embed/" + code;
-    if (t) embed += "?start=" + parseInt(t);
-
-    return `
-        <div data-message-id="${messageId.replace("msg-", "")}" class="iframe-container" id="msg-${messageId}">
-            <a href="${url}" target="_blank">${url}</a><br>
-            <iframe
-                data-original-url="${url}"
-                data-message-id="${messageId.replace("msg-", "")}"
-                data-media-type="youtube"
-                style="border:none"
-                src="${embed}"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowfullscreen
-                referrerpolicy="strict-origin-when-cross-origin">
-            </iframe>
-
-        </div>
-    `;
-}
-
-
-var notAImage = []
-var notAImageCount = []
-var validImage = []
-
-function isImage(url) {
-
-    const img = new Image();
-
-    img.src = url;
-
-
-    if (img.height > 0 && img.width > 0) {
-        if (validImage.includes(url) == false) {
-            validImage.push(url);
-        }
-
-
-        return true;
-    } else {
-
-        // Try to load a image 6 times
-        if (notAImage.includes(url) == false && notAImageCount[url] > 6) {
-            notAImage.push(url);
-        }
-
-        notAImageCount[url]++;
-        return false;
-    }
-}
-
-function isAudio(url) {
-    return /\.(mp3|wav|ogg)$/.test(url.toLowerCase());
-}
-
-function isVideo(url) {
-    return new Promise((resolve) => {
-        const vid = document.createElement("video");
-
-        vid.onloadedmetadata = function () {
-            resolve(vid.videoWidth > 0 && vid.videoHeight > 0);
-        };
-
-        vid.onerror = function () {
-            resolve(false);
-        };
-
-        vid.src = url;
-    });
-}
-
-
-function getUrlFromText(text) {
-    var geturl = new RegExp("(^|[ \t\r\n])((ftp|http|https|mailto|file):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))", "g");
-    return text.match(geturl)
-}
-
-var isValidUrl = []
-
-function isURL(text) {
-    try {
-        const url = new URL(text);
-        return url.protocol === 'http:' || url.protocol === 'https:' || url.protocol === "data:";
-
-    } catch (err) {
-        return false;
-    }
 }
 
 var lastKey = "";
@@ -1385,12 +897,12 @@ function replaceInlineEmojis() {
 
 
 async function sendMessageToServer(authorId = UserManager.getID(),
-                                   authorUsername = UserManager.getUsername(),
-                                   pfp = UserManager.getPFP(),
-                                   message,
-                                   bypassQuill = false) {
+    authorUsername = UserManager.getUsername(),
+    pfp = UserManager.getPFP(),
+    message,
+    bypassQuill = false) {
     Clock.start("send_message");
-    let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+    let isScrolledDown = isScrolledToBottom(getContentMainContainer());
 
     if (UserManager.getGroup() == null || UserManager.getGroup().length <= 0 || UserManager.getCategory() == null || UserManager.getCategory().length <= 0 || UserManager.getChannel() == null || UserManager.getChannel().length <= 0) {
         showSystemMessage({
@@ -1404,7 +916,8 @@ async function sendMessageToServer(authorId = UserManager.getID(),
 
         Clock.stop("send_message");
         //alert("Please select any channel first");
-        return;
+        console.warn("Not sending as no channel found");
+        return
     }
 
     replaceInlineEmojis();
@@ -1428,35 +941,80 @@ async function sendMessageToServer(authorId = UserManager.getID(),
     };
 
     // if we're using the client, sign the message
-    if (await Client()) {
+    if (isLauncher()) {
         msgPayload = await Client().SignJson(msgPayload);
     }
 
-    socket.emit("messageSend", msgPayload, async function (response) {
-        if (response.error) {
-            // do smth in the future with this
-            console.error(response.error);
-        } else {
-            // mark channel as read
-            ChatManager.increaseChannelMarkerCount(UserManager.getChannel())
-            // mark channel as read
-            ChatManager.setChannelMarkerCounter(UserManager.getChannel())
-        }
-    });
+    return new Promise((resolve, reject) => {
+        socket.emit("messageSend", msgPayload, async function (response) {
+            Clock.stop("send_message");
 
-    // reset all flags
-    editMessageId = null;
-    replyMessageId = null;
-    cancelMessageEdit();
-    cancelMessageReply();
+            if (response?.error) {
+                // do smth in the future with this
+                console.error(response);
 
-    scrollDown("sendMessageToServer"); // forgot that
-    setTimeout(() => focusEditor(), 1)
-    Clock.stop("send_message");
+                // check for slowmode
+                if (response?.slowmode) {
+                    showSlowmodeNotice(response.slowmode)
+                }
+                // check for ratelimit
+                if (response?.rateLimited) {
+                    showRateLimitNotice()
+                }
 
-    return true;
+                resolve(false)
+            } else {
+                // mark channel as read
+                ChatManager.increaseChannelMarkerCount(UserManager.getChannel())
+                // mark channel as read
+                ChatManager.setChannelMarkerCounter(UserManager.getChannel())
+
+                // reset all flags
+                editMessageId = null;
+                replyMessageId = null;
+                cancelMessageEdit();
+                cancelMessageReply();
+
+                scrollDown("sendMessageToServer"); // forgot that
+                setTimeout(() => focusEditor(), 1)
+                editor.innerHTML = "<p><br></p>"
+
+                saveChannelMessageDraft(UserManager.getChannel(), null)
+
+                resolve(true);
+            }
+        });
+    })
 }
 
+function getReadableDuration(date) {
+    let untilTimestamp = date.getTime();
+
+    const remainingTime = untilTimestamp - Date.now();
+    if (remainingTime <= 0) return "Expired";
+
+    let secondsTotal = Math.floor(remainingTime / 1000);
+
+    const years = Math.floor(secondsTotal / (60 * 60 * 24 * 365));
+    secondsTotal %= 60 * 60 * 24 * 365;
+
+    const days = Math.floor(secondsTotal / (60 * 60 * 24));
+    secondsTotal %= 60 * 60 * 24;
+
+    const hours = Math.floor(secondsTotal / (60 * 60));
+    secondsTotal %= 60 * 60;
+
+    const minutes = Math.floor(secondsTotal / 60);
+    const seconds = secondsTotal % 60;
+
+    return [
+        years ? `${years}y` : null,
+        days ? `${days}d` : null,
+        hours ? `${hours}h` : null,
+        minutes ? `${minutes}m` : null,
+        seconds ? `${seconds}s` : null
+    ].filter(Boolean).join(" ");
+}
 
 var audio = new Audio();
 
@@ -1471,7 +1029,7 @@ socket.on('doAccountOnboarding', async function (message) {
 });
 
 
-socket.on('showUserJoinMessage', function (author) {
+socket.on('showUserJoinMessage', async function (author) {
 
     // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
     var message = '<div class="systemAnnouncementChat">' + '            <p>User <label class="systemAnnouncementChatUsername" id="">' + author.username + '</label> joined the chat!</p>' + '        </div>';
@@ -1480,157 +1038,11 @@ socket.on('showUserJoinMessage', function (author) {
     scrollDown("userJoinMessage");
 });
 
-socket.on('updateGroupList', function (author) {
+socket.on('updateGroupList', async function (author) {
 
     getGroupList();
 })
 
-
-
-function focusEditor() {
-    if (!quill) return;
-
-    quill.focus();
-
-    requestAnimationFrame(() => {
-        const len = quill.getLength();
-        quill.setSelection(len - 1, 0, Quill.sources.SILENT);
-    });
-}
-
-function focusElementInput(element) {
-    element?.focus();
-
-    const length =
-        element?.getLength?.() ??
-        element?.value?.length ??
-        0;
-
-    element?.setSelection?.(length, 0);
-    element?.setSelectionRange?.(length, length);
-}
-
-
-
-function toggleEditor(value) {
-    messageInputBox.parentNode.parentNode.style.visibility = value === true ? "visible" : "hidden";
-}
-
-
-function initQuillShit(){
-
-    const Delta = Quill.import('delta');
-    const Embed = Quill.import("blots/embed");
-
-    class EmojiBlot extends Embed {
-        static create(value) {
-            const node = super.create();
-            for (const k in value) node.setAttribute(k, value[k]);
-            return node;
-        }
-
-        static value(node) {
-            const out = {};
-            for (const a of node.attributes) out[a.name] = a.value;
-            return out;
-        }
-    }
-
-    EmojiBlot.blotName = "emoji";
-    EmojiBlot.tagName = "img";
-
-    Quill.DEFAULTS.placeholder = "Write a message...";
-    Quill.register(EmojiBlot);
-
-
-    hljs.configure({
-        languages: ['javascript', 'python', 'ruby', 'xml', 'json', 'css', "bash"]
-    });
-
-
-    window.quill = new Quill('#editor', {
-        modules: {
-            syntax: true,
-            toolbar: {
-                container: '#editor-toolbar', handlers: {
-                    'link': function (value) {
-                        if (value) {
-                            var href = prompt('Enter the URL');
-                            if (href) {
-                                quill.format('link', href);
-                            }
-                        } else {
-                            quill.format('link', false);
-                        }
-                    }
-                }
-            },
-            keyboard: {
-                bindings: {
-                    enter: {
-                        key: 13,
-                        handler: function (range, context) {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }, theme: 'snow'
-    });
-
-    // Add a matcher specifically for image elements
-    quill.clipboard.addMatcher('img', function (node, delta) {
-        // Insert a newline before the image content
-        return new Delta().insert('\n').concat(delta);
-    });
-
-
-    quill.clipboard.addMatcher('PRE', function (node, delta) {
-        return delta.compose(new Delta().retain(delta.length(), {'code-block': true}));
-    });
-
-    quill.clipboard.addMatcher(Node.TEXT_NODE, function (node, delta) {
-        if (node.parentNode && node.parentNode.tagName === 'PRE') {
-            return delta.compose(new Delta().retain(delta.length(), {'code-block': true}));
-        }
-        return delta;
-    });
-
-
-    /* Quill Size begin */
-
-    editorContainer = document.querySelector('.editor-container');
-    editorToolbar = document.getElementById("editor-toolbar");
-    editorHints = document.getElementById("editor-hints");
-    quillContainer = document.querySelector('.ql-container');
-    editor = document.querySelector('.ql-editor');
-
-    initialToolbarHeight = editorToolbar.offsetHeight;
-    initialHeight = 40; // Initial height of the editor
-    maxHeight = 400; // Maximum height of the editor
-    initialMargin = parseFloat(getComputedStyle(editorContainer).marginTop);
-    allowEditorBlur = true;
-
-    editor.addEventListener('input', function (event) {
-        setTyping();
-    });
-
-    editor.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-
-            /*
-            let msgContent = quill.root.innerHTML
-                //    .replace(/<p><br><\/p>/g, "")
-                .replace(/<p>\s*<br\s*\/?>\s*<\/p>/g, ""); // Clean up empty lines
-
-             */
-
-            sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), quill.root.innerHTML);
-        }
-    });
-}
-/* Quill Emoji resize End */
 
 
 function getAllChildren(element) {
@@ -1676,7 +1088,7 @@ socket.on('memberTyping', members => {
 });
 
 
-socket.on('receiveChannelTree', function (data) {
+socket.on('receiveChannelTree', async function (data) {
     getChannelTree()
     markCurrentChannelStyle(UserManager.getChannel())
 });
@@ -1726,21 +1138,21 @@ function reapplyUnreadFromCookies() {
 */
 
 
-socket.on('markChannel', function (data) {
+socket.on('markChannel', async function (data) {
     markChannel(data.channelId, false, data?.count);
 });
 
-socket.on('createMessageEmbed', function (data) {
+socket.on('createMessageEmbed', async function (data) {
     document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
     scrollDown("createMessageEmbed");
 });
 
-socket.on('createMessageLink', function (data) {
+socket.on('createMessageLink', async function (data) {
     document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
     scrollDown("createMessageLink");
 });
 
-socket.on('receiveCurrentChannel', function (channel) {
+socket.on('receiveCurrentChannel', async function (channel) {
     try {
         if (channel.name == null) {
             channel.name = "";
@@ -1758,11 +1170,11 @@ socket.on('updateMemberList', async function (data) {
     await updateMentionAutocompleteData();
 });
 
-socket.on('updateGroupList', function (data) {
+socket.on('updateGroupList', async function (data) {
     getGroupList();
 });
 
-socket.on('receiveGroupList', function (data) {
+socket.on('receiveGroupList', async function (data) {
     if (serverlist.innerHTML !== data) {
         serverlist.innerHTML = "";
         serverlist.innerHTML = data;
@@ -1775,7 +1187,7 @@ socket.on('receiveGroupList', function (data) {
 });
 
 
-socket.on('newMemberJoined', function (author) {
+socket.on('newMemberJoined', async function (author) {
 
     // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
     var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + author.name + '</label> joined the server! <label class="timestamp" id="' + author.timestamp + '">' + author.timestamp.toLocaleString("narrow") + '</p>' + '        </div>';
@@ -1785,7 +1197,7 @@ socket.on('newMemberJoined', function (author) {
 
 });
 
-socket.on('memberOnline', function (member) {
+socket.on('memberOnline', async function (member) {
 
     // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
     var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + member.username + '</label> is now online!</p>' + '        </div>';
@@ -1794,10 +1206,10 @@ socket.on('memberOnline', function (member) {
     scrollDown("memberOnline");
 });
 
-socket.on('memberPresent', function (member) {
+socket.on('memberPresent', async function (member) {
 });
 
-socket.on('receiveGifImage', function (response) {
+socket.on('receiveGifImage', async function (response) {
     clearGifContainer()
 
     if (response?.gifs) {
@@ -1816,11 +1228,11 @@ socket.on('receiveGifImage', function (response) {
 });
 
 
-socket.on('receiveToken', function (data) {
+socket.on('receiveToken', async function (data) {
     CookieManager.setCookie("dcts_token", data, 365);
 });
 
-socket.on('modalMessage', function (data) {
+socket.on('modalMessage', async function (data) {
     var buttonArray = [];
     if (data.buttons) {
         Object.keys(data.buttons).forEach(function (button) {
@@ -1878,9 +1290,8 @@ function setActiveGroup(group) {
 }
 
 function displayHomeUnread() {
-
-    socket.emit("getAllUnread", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
-        let unread = Number(response?.unread ?? 0);
+    socket.emit("getAllUnread", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
+        let unread = Number(response?.total ?? 0);
 
         let indicators = document.querySelectorAll('.home-indicator');
         if (!indicators) return console.warn('.home-indicator not found');
@@ -1901,358 +1312,10 @@ function displayHomeUnread() {
     });
 }
 
-
-function queryTenorSearch(search) {
-    Clock.start("gifSearch")
-    socket.emit("searchTenorGif", {
-        id: UserManager.getID(),
-        token: UserManager.getToken(),
-        search
-    }, function (response) {
-        if (response.type === "success") {
-            console.log("Tenor Response", response);
-        } else {
-            showSystemMessage({
-                title: response.msg || "",
-                text: "",
-                icon: response.type,
-                img: null,
-                type: response.type,
-                duration: 1000
-            });
-        }
-    });
-}
-
-function listenForGifSearch() {
-    const gifContainer = document.getElementById("gif-entry-container");
-    const emojiEntryContainer = document.getElementById("emoji-entry-container");
-
-    var gifSearchbarInput = document.getElementById("gif-searchbar-input");
-    // Execute a function when the user presses a key on the keyboard
-    let gifSearchTimeout;
-    gifSearchbarInput.addEventListener("input", function () {
-        clearTimeout(gifSearchTimeout);
-
-        gifSearchTimeout = setTimeout(() => {
-            const query = gifSearchbarInput.value
-            if (!query) return;
-
-            queryTenorSearch(query);
-        }, 500);
-    });
-}
-
-
-function selectEmojiTab(element) {
-    var parentnode = element.parentNode.children;
-
-    for (let i = 0; i < parentnode.length; i++) {
-        if (parentnode[i].classList.contains("SelectedTab")) {
-            parentnode[i].classList.remove("SelectedTab");
-        }
-    }
-
-    element.classList.add("SelectedTab");
-}
-
-function sendGif(url) {
-
-    if (document.querySelector('.ql-editor').innerHTML.replaceAll(" ", "").length >= 1) {
-        sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), document.querySelector('.ql-editor').innerHTML);
-    }
-    sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), url, true);
-    closeEmojiBox();
-    focusEditor()
-}
-
-
-
-function changeGIFSrc(url, element) {
-    element.src = url;
-}
-
-function clearGifContainer() {
-    let search = document.getElementById("gif-searchbar-input");
-    document.getElementById("gif-entry-container").innerHTML = `<div id="gif-searchbar"><input autocomplete="off" id="gif-searchbar-input"
-                                                       placeholder="Search anything, then press enter" type="text" value="${search?.value ? search?.value : ""}"></div>`;
-    listenForGifSearch();
-}
-
-function getGifs() {
-    var gifEntryContainer = document.getElementById("gif-entry-container");
-    var emojiEntryContainer = document.getElementById("emoji-entry-container");
-
-    emojiEntryContainer.style.display = "none"
-    gifEntryContainer.style.display = "flex"
-    clearGifContainer()
-    queryTenorSearch("trending")
-
-}
-
-async function getEmojis(callback = null) {
-    var emojiContainer = getEmojiContainerElement()
-    var emojiEntryContainer = document.getElementById("emoji-entry-container");
-    var gifEntryContainer = document.getElementById("gif-entry-container");
-    gifEntryContainer.innerHTML = "";
-    gifEntryContainer.style.display = "none"
-
-    let emojiEntries = emojiContainer.querySelectorAll(".emoji-entry")
-    emojiEntries.forEach(emoji => {
-        let clone = emoji.cloneNode(true);
-        emoji.replaceWith(clone);
-    })
-
-    socket.emit("getEmojis", { id: UserManager.getID(), token: UserManager.getToken() }, async function (response) {
-        if (response.type === "success") {
-            emojiEntryContainer.style.display = "flex";
-
-            let groupBar = emojiEntryContainer.querySelector(".emoji-group-bar");
-            if (!groupBar) {
-                groupBar = document.createElement("div");
-                groupBar.className = "emoji-group-bar";
-                emojiEntryContainer.prepend(groupBar);
-            }
-            groupBar.innerHTML = "";
-
-            let searchWrap = emojiEntryContainer.querySelector(".emoji-search-wrap");
-            if (!searchWrap) {
-                searchWrap = document.createElement("div");
-                searchWrap.className = "emoji-search-wrap";
-                const searchInput = document.createElement("input");
-                searchInput.className = "emoji-search-input";
-                searchInput.type = "text";
-                searchInput.placeholder = "search emojis...";
-                searchWrap.appendChild(searchInput);
-                groupBar.parentNode ? emojiEntryContainer.insertBefore(searchWrap, groupBar.nextSibling) : emojiEntryContainer.prepend(searchWrap);
-            }
-            const searchInput = searchWrap.querySelector(".emoji-search-input");
-            searchInput.value = "";
-            setTimeout(() => searchInput.focus(), 50);
-
-            const customTab = document.createElement("div");
-            customTab.className = "emoji-group-tab active";
-            customTab.setAttribute("data-group", "custom");
-            customTab.title = "custom";
-
-            const customIcon = document.createElement("img");
-            customIcon.src = "/img/default_pfp.png";
-            customIcon.className = "emoji-group-icon";
-            customTab.appendChild(customIcon);
-            groupBar.appendChild(customTab);
-
-            for (const group of twemojiIndex) {
-                const tab = document.createElement("div");
-                tab.className = "emoji-group-tab";
-                tab.setAttribute("data-group", group.group);
-                tab.title = group.group;
-
-                const icon = document.createElement("img");
-                icon.src = `/img/default_emojis/${group.icon}.svg`;
-                icon.className = "emoji-group-icon";
-                tab.appendChild(icon);
-                groupBar.appendChild(tab);
-            }
-
-            let contentContainer = emojiEntryContainer.querySelector(".emoji-group-content");
-            if (!contentContainer) {
-                contentContainer = document.createElement("div");
-                contentContainer.className = "emoji-group-content";
-                emojiEntryContainer.appendChild(contentContainer);
-            }
-            contentContainer.innerHTML = "";
-
-            const customSection = document.createElement("div");
-            customSection.className = "emoji-section";
-            customSection.setAttribute("data-group", "custom");
-
-            for (let emoji of response.data.reverse()) {
-                const base = emoji.filename.replace(/\.[^/.]+$/, "");
-                const parts = base.split("_");
-
-                let parsed = parseEmojiFilename(emoji.filename)
-                const emojiId = parsed.hash;
-                const emojiName = parsed.name;
-
-                if (hasEmojiInContainer(emojiId)) {
-                    let existingEmojiElement = contentContainer.querySelector(`.emoji-entry[data-hash="${emojiId}"]`);
-                    if (existingEmojiElement) registerEmojiCallback(existingEmojiElement, emoji);
-                    continue;
-                }
-
-                const entry = document.createElement("div");
-                entry.className = "emoji-entry";
-                entry.setAttribute("data-hash", emojiId);
-                entry.title = emojiName;
-
-                const imgWrap = document.createElement("div");
-                imgWrap.className = "emoji-img";
-
-                const img = document.createElement("img");
-                img.className = "emoji";
-                img.src = `/emojis/${emoji.filename}`;
-
-                imgWrap.appendChild(img);
-                entry.appendChild(imgWrap);
-                registerEmojiCallback(entry, emoji);
-                customSection.appendChild(entry);
-            }
-            contentContainer.appendChild(customSection);
-
-            for (const group of twemojiIndex) {
-                const section = document.createElement("div");
-                section.className = "emoji-section";
-                section.setAttribute("data-group", group.group);
-                section.style.display = "none";
-
-                for (const e of group.emojis) {
-                    const entry = document.createElement("div");
-                    entry.className = "emoji-entry";
-                    entry.setAttribute("data-default", "1");
-                    entry.setAttribute("data-name", e.name);
-                    entry.title = e.name;
-
-                    const imgWrap = document.createElement("div");
-                    imgWrap.className = "emoji-img";
-
-                    const img = document.createElement("img");
-                    img.className = "emoji";
-                    img.src = `/img/default_emojis/${e.code}.svg`;
-                    imgWrap.appendChild(img);
-                    entry.appendChild(imgWrap);
-
-                    entry.addEventListener("click", () => {
-                        if (typeof callback === "function") {
-                            callback({ code: e.code, name: e.name, default: true });
-                            closeEmojiBox();
-                        } else {
-                            const sel = quill.getSelection(true);
-                            quill.insertEmbed(sel.index, "emoji", {
-                                src: `/img/default_emojis/${e.code}.svg`,
-                                class: "inline-text-emoji default",
-                                ["data-code"]: e.code
-                            });
-                            quill.setSelection(sel.index + 1);
-                            focusEditor();
-                            getEmojiContainerElement().style.display = "none";
-                        }
-                    });
-
-                    section.appendChild(entry);
-                }
-                contentContainer.appendChild(section);
-            }
-
-            searchInput.addEventListener("input", () => {
-                const query = searchInput.value.toLowerCase().trim();
-
-                if (!query) {
-                    groupBar.style.display = "";
-                    const activeGroup = groupBar.querySelector(".emoji-group-tab.active")?.getAttribute("data-group") || "custom";
-                    contentContainer.querySelectorAll(".emoji-section").forEach(s => {
-                        s.style.display = s.getAttribute("data-group") === activeGroup ? "flex" : "none";
-                        s.classList.remove("emoji-section-search");
-                    });
-                    contentContainer.querySelectorAll(".emoji-entry").forEach(e => e.style.display = "");
-                    return;
-                }
-
-                groupBar.style.display = "none";
-                contentContainer.querySelectorAll(".emoji-section").forEach(s => {
-                    s.style.display = "";
-                    s.classList.add("emoji-section-search");
-                });
-
-                contentContainer.querySelectorAll(".emoji-entry").forEach(entry => {
-                    const name = (entry.title || entry.getAttribute("data-name") || "").toLowerCase();
-                    entry.style.display = name.includes(query) ? "" : "none";
-                });
-            });
-
-            groupBar.addEventListener("click", (ev) => {
-                const tab = ev.target.closest(".emoji-group-tab");
-                if (!tab) return;
-
-                const groupName = tab.getAttribute("data-group");
-
-                groupBar.querySelectorAll(".emoji-group-tab").forEach(t => t.classList.remove("active"));
-                tab.classList.add("active");
-
-                searchInput.value = "";
-                contentContainer.querySelectorAll(".emoji-entry").forEach(e => e.style.display = "");
-                contentContainer.querySelectorAll(".emoji-section").forEach(s => {
-                    s.style.display = s.getAttribute("data-group") === groupName ? "flex" : "none";
-                });
-            });
-
-            removeUnusedEmojisFromContainer(response);
-
-        } else {
-            showSystemMessage({
-                title: response.msg || "",
-                text: "",
-                icon: response.type,
-                img: null,
-                type: response.type,
-                duration: 1000
-            });
-        }
-    });
-
-
-    function registerEmojiCallback(element, emojiObj){
-        element.addEventListener("click", async () => {
-            if(!callback){
-                insertEmoji(emojiObj, true);
-                focusEditor();
-            }
-            else{
-                await callback(emojiObj);
-            }
-
-            if(getEmojiContainerElement()) getEmojiContainerElement().style.display = "none";
-        }, {once: true});
-    }
-}
-
-socket.on('receiveGroupBanner', function (data) {
+socket.on('receiveGroupBanner', async function (data) {
     groupbanner.src = ChatManager.proxyUrl(data);
     document.getElementById("mobile_groupBannerDisplay").src = ChatManager.proxyUrl(data);
 });
-
-function getChannelObjectFromTree(channelId) {
-    const id = String(channelId);
-    return (document.querySelector(`#channellist a#channel-${id}`) || document.querySelector(`#channellist li#channel-${id}`));
-}
-
-
-function refreshValues() {
-    /* Deprecated? */
-    var username = UserManager.getUsername();
-    getRoles();
-    userJoined();
-    getServerInfo();
-
-    socket.emit("setRoom", {
-        id: UserManager.getID(),
-        username: UserManager.getUsername(),
-        icon: UserManager.getPFP(),
-        room: UserManager.getRoom(),
-        token: UserManager.getToken()
-    });
-    getGroupList();
-    getMemberList();
-    getChannelTree();
-    socket.emit("getCurrentChannel", {
-        id: UserManager.getID(),
-        username: username,
-        icon: UserManager.getPFP(),
-        group: UserManager.getGroup(),
-        category: UserManager.getCategory(),
-        channel: UserManager.getChannel(),
-        token: UserManager.getToken()
-    });
-}
 
 function getGroupList() {
     socket.emit("getGroupList", {
@@ -2275,54 +1338,6 @@ function getGroupBanner() {
     });
 }
 
-var serverName;
-var serverDesc;
-
-async function getServerInfo(returnData = false) {
-    return new Promise((resolve, reject) => {
-
-        // reject if we get disconnected or something
-        setTimeout(() => {
-            if(!socket.connected){
-                resolve(null);
-            }
-        }, 1000)
-
-        //Official <span style="font-weight: bold; color: skyblue;">DCTS <span style="font-weight: bold; color: cadetblue;">Community</span></span>
-        socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken()}, async function (response) {
-            if(returnData) return resolve(response);
-            var headline = document.getElementById("header");
-
-            servername = response.serverinfo.name;
-            serverdesc = response.serverinfo.description;
-            let countryCode = response.serverinfo.countryCode;
-
-            headline.innerHTML = `
-
-            <div id="main_header">
-                ${countryCode ? `${ChatManager.countryCodeToEmoji(countryCode)} ` : ""}${sanitizeHtmlForRender(servername, false)} ${serverdesc ? ` - ${sanitizeHtmlForRender(serverdesc, false)}` : ""}
-            </div>
-
-            <div id="badges"></div>          
-            <div id="headerRight">
-                <div class="headerIcon help" onclick="ChatManager.showInstanceInfo()"></div>
-                <div class="headerIcon donators" onclick="UserManager.showDonatorList('https://shy-devil.me/app/dcts/');"></div>
-                <div class="headerIcon inbox">
-                    <span id="inbox-indicator"></span>
-
-                    ${await Inbox.getContentHTML()}
-                </div>
-            </div>
-            `;
-
-
-            UserManager.displayServerBadges();
-        });
-
-        displayDiscoveredHosts();
-    })
-}
-
 async function waitFor(callback, timeout = 0) {
     return new Promise(resolve => {
         let result = callback();
@@ -2333,13 +1348,17 @@ async function waitFor(callback, timeout = 0) {
 }
 
 async function setUrl(param, isVC = false) {
+    if (!isVC) {
+        showHome(true)
+        saveChannelMessageDraft(UserManager.getID());
+    }
+
+
     let urlData = param.split("&")
     let groupId = urlData[0]?.replace("?group=", "")
     let categoryId = urlData[1]?.replace("category=", "")
     let channelId = urlData[2]?.replace("channel=", "")
     focusEditor()
-
-    if (!isVC) showHome(true)
 
     // channel already open, dont reload it
     if (UserManager.getChannel() === channelId && channelId && UserManager.getChannel() && isVC === false) return;
@@ -2371,7 +1390,14 @@ async function setUrl(param, isVC = false) {
             token: UserManager.getToken(),
             permission: "sendMessages"
         }, function (response) {
-            switchLeftSideMenu(true)
+
+            MobilePanel.close()
+
+            // lets prioritize loading the chat lol
+            changedChannel()
+            chatlog.innerHTML = "";
+            document.getElementById("messagebox").style.display = "flex";
+            getChatlog(document.getElementById("content"));
 
             // update grouplist and channel tree if we only
             // click on a group
@@ -2379,19 +1405,21 @@ async function setUrl(param, isVC = false) {
                 getChannelTree();
             }
 
-            changedChannel()
-            ChatManager.setChannelMarker(channelId, false)
-
-            chatlog.innerHTML = "";
-            document.getElementById("messagebox").style.display = "flex";
-            focusEditor();
-            getChatlog(document.getElementById("content"));
+            if (channelId) ChatManager.setChannelMarker(channelId, false)
             showGroupStats();
 
             if (response.permission !== "granted") {
                 toggleEditor(false);
             } else {
-                toggleEditor(true);
+                // to avoid confusion
+                if (!channelId) {
+                    toggleEditor(false);
+                }
+                else {
+                    toggleEditor(true);
+                    focusEditor();
+                    if (channelId) handleChannelMessageDrafting(channelId);
+                }
             }
         });
     }
@@ -2470,96 +1498,6 @@ function getRoles() {
     });
 }
 
-function isScrolledToBottom(element, tolerancePx = 2) {
-    const maxTop = Math.max(0, element.scrollHeight - element.clientHeight);
-    return (maxTop - element.scrollTop) <= tolerancePx;
-}
-
-function scrollDown(functionCaller, opts = {}) {
-    const el = document.getElementById("content");
-    if (!el) return;
-
-    const tolerancePx = Number.isFinite(opts.tolerancePx) ? opts.tolerancePx : 2;
-    const maxMs = Number.isFinite(opts.maxMs) ? opts.maxMs : 5000;
-    const stableMs = Number.isFinite(opts.stableMs) ? opts.stableMs : 250;
-
-    if (!el._scrollDownState) el._scrollDownState = {};
-    const state = el._scrollDownState;
-
-    state.seq = (state.seq || 0) + 1;
-    const seq = state.seq;
-
-    if (state.raf) cancelAnimationFrame(state.raf);
-    if (state.mo) state.mo.disconnect();
-    if (state.ro) state.ro.disconnect();
-
-    const start = performance.now();
-    let lastChange = performance.now();
-
-    const jumpBottom = () => {
-        const top = Math.max(0, el.scrollHeight - el.clientHeight);
-        if (el.scrollTop !== top) el.scrollTop = top;
-    };
-
-    const onAnyChange = () => { lastChange = performance.now(); };
-
-    state.mo = new MutationObserver(onAnyChange);
-    state.mo.observe(el, { childList: true, subtree: true, characterData: true, attributes: true });
-
-    state.ro = new ResizeObserver(onAnyChange);
-    state.ro.observe(el);
-
-    const bindMedia = () => {
-        const nodes = el.querySelectorAll("img,video");
-        nodes.forEach(n => {
-            if (n._sdBound) return;
-            n._sdBound = true;
-
-            if (n.tagName === "IMG") {
-                if (!n.complete) {
-                    n.addEventListener("load", onAnyChange, { once: true });
-                    n.addEventListener("error", onAnyChange, { once: true });
-                }
-            } else {
-                if (n.readyState < 2) {
-                    n.addEventListener("loadeddata", onAnyChange, { once: true });
-                    n.addEventListener("loadedmetadata", onAnyChange, { once: true });
-                    n.addEventListener("error", onAnyChange, { once: true });
-                }
-            }
-        });
-    };
-
-    const tick = () => {
-        if (el._scrollDownState.seq !== seq) return;
-
-        bindMedia();
-        jumpBottom();
-
-        const now = performance.now();
-        const bottomOk = isScrolledToBottom(el, tolerancePx);
-        const stableEnough = bottomOk && (now - lastChange) >= stableMs;
-
-        if (stableEnough || (now - start) >= maxMs) {
-            if (state.mo) state.mo.disconnect();
-            if (state.ro) state.ro.disconnect();
-            state.mo = null;
-            state.ro = null;
-            state.raf = null;
-            return;
-        }
-
-        state.raf = requestAnimationFrame(tick);
-    };
-
-    lastChange = performance.now();
-    tick();
-
-    if (functionCaller) console.log(`ScrollDown called by ${functionCaller}`);
-}
-
-
-
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -2571,7 +1509,7 @@ async function testDb(length) {
     }
 }
 
-socket.on("uploadProgress", ({filename, bytes, total}) => {
+socket.on("uploadProgress", async ({ filename, bytes, total }) => {
     const percent = total ? Math.min(100, (bytes / total) * 100) : 0;
     showSystemMessage({
         title: `File ${percent}% uploaded`,
@@ -2582,7 +1520,7 @@ socket.on("uploadProgress", ({filename, bytes, total}) => {
     });
 });
 
-function initUploadFileDialog(){
+function initUploadFileDialog() {
     //Setting up to trigger once Input-Dialog element receives a new file
     const fileInput = document.getElementById('uploadCaller');
     fileInput.addEventListener('change', async function () {
@@ -2615,7 +1553,7 @@ function initUploadFileDialog(){
     })
 }
 
-function initUploadDragAndDrop(){
+function initUploadDragAndDrop() {
 
     var uploadObject = document.getElementById('content');
 

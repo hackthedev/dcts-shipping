@@ -5,20 +5,20 @@ import { copyObject, getCastingMemberObject, sendMessageToUser, validateMemberId
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('checkChannelPermission', function (member, response) {
-        if (validateMemberId(member.id, socket) == true) {
+    socket.on('checkChannelPermission', async function (member, response) {
+        if (await validateMemberId(member.id, socket) == true) {
 
             member.id = xssFilters.inHTMLData(member.id);
             member.token = xssFilters.inHTMLData(member.token);
             member.permission = xssFilters.inHTMLData(member.permission);
             member.channel = xssFilters.inHTMLData(member.channel);
 
-            var userObj = getCastingMemberObject(serverconfig.servermembers[member.id]);
+            var userObj = await getCastingMemberObject(serverconfig.servermembers[member.id]);
 
             if (Array.isArray(member.permission)) {
 
                 for (var i = 0; i < member.permission.length; i++) {
-                    if (hasPermission(member.id, member.permission[i], member.channel)) {
+                    if (await hasPermission(member.id, member.permission[i], member.channel)) {
                         response({ type: "success", permission: "granted", user: userObj });
                         return;
                     }
@@ -28,7 +28,7 @@ export default (io) => (socket) => {
             }
             else { // Single permission check
 
-                if (hasPermission(member.id, member.permission, member.channel)) {
+                if (await hasPermission(member.id, member.permission, member.channel)) {
                     response({ type: "success", permission: "granted", user: userObj });
                 } else {
                     response({ type: "success", permission: "denied", user: userObj });

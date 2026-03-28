@@ -5,12 +5,11 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('deleteChannel', function (member, response) {
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+    socket.on('deleteChannel', async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
-            if (!hasPermission(member.id, "manageChannels")) {
+            if (!await hasPermission(member.id, "manageChannels")) {
                 response({ msg: "You arent allowed to deleteChannels", type: "error", error: "Missing Permissions: manageChannels" })
                 return;
             }

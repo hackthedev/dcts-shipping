@@ -157,8 +157,10 @@ async function getSavedServers(container){
     if(!container) return;
 
     try{
-        let servers = Client() ? JSON.parse(await Client().GetServers()) : [];
+        let servers = Client() ? [await Client().GetServers()] : null ?? [];
+        console.log(servers)
         let serverSideServers = await getDiscoveredHosts();
+        console.log(serverSideServers)
 
         const merged = [...servers, ...serverSideServers.servers];
         renderServersList(merged);

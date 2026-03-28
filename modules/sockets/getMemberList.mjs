@@ -5,19 +5,25 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('getMemberList', function (member, response) {
-        if (validateMemberId(member?.id, socket, member?.token) === true) {
+    socket.on('getMemberList', async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
-            if (!hasPermission(member.id, "viewGroup", member.group)) {
+            if (!await hasPermission(member.id, "viewGroup", member.group)) {
                 response({ error: true, msg: "You arent allowed to view this group", type: "error" })
                 return;
             }
 
-            if(!member?.channel) return response({ members: {}, index: 0, error: "No channel id provided" });
-
-            let {members, index} = getMemberList(member, member?.channel, member?.lastIndex);
-            
-            response({ members, index })
+            if(!member?.channel) {
+                if(member?.group) {
+                    let {members, index} = await getMemberList(member, member?.group, member?.lastIndex);
+                    response({ members, index })
+                } else {
+                    return response({ members: {}, index: 0, error: "No channel id provided" });
+                }
+            } else {
+                let {members, index} = await getMemberList(member, member?.channel, member?.lastIndex);
+                response({ members, index })
+            }   
         }
     });
 }

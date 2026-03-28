@@ -29,7 +29,7 @@ class UserReports {
                 }, function (response) {
 
                     showSystemMessage({
-                        title: response?.msg || response?.error,
+                        title: response?.error || response?.msg,
                         text: "",
                         icon: response.type,
                         img: null,
@@ -71,11 +71,9 @@ class UserReports {
             id: UserManager.getID(),
             token: UserManager.getToken()
         }, function (response) {
-
             try {
-                if (response.type == "success") {
-                    let reports = response.reports;
-                    ModView.showReports(reports)
+                if (response.type === "success") {
+                    ModView.showReports(response.reports)
                 }
             }
             catch (error) {

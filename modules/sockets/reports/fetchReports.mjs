@@ -5,24 +5,28 @@ import Logger from "../../functions/logger.mjs";
 import {getCastingMemberObject, validateMemberId} from "../../functions/main.mjs";
 import {decodeFromBase64, getChatMessagesFromDb, getReports, saveReport} from "../../functions/mysql/helper.mjs";
 import {decodeAndParseJSON, decodeString} from "../resolveMessage.mjs";
+import JSONTools from "@hackthedev/json-tools";
 
 export default (io) => (socket) => {
 
     // socket.on code here
     socket.on('fetchReports', async function (member, response) {
-        if (validateMemberId(member.id, socket, member.token) === true
+        if (await validateMemberId(member.id, socket, member.token) === true
         ) {
 
-            if (hasPermission(member.id, "manageReports")) {
+            if (await hasPermission(member.id, "manageReports")) {
                 try {
                     let reports = await getReports();
-                    Object.keys(reports).forEach(function (report) {
-                        reports[report].reportCreator = getCastingMemberObject(decodeAndParseJSON(reports[report].reportCreator))
-                        reports[report].reportedUser = getCastingMemberObject(decodeAndParseJSON(reports[report].reportedUser))
-                        reports[report].reportData = decodeAndParseJSON(reports[report].reportData)
 
-                        if(reports[report].reportData?.message) reports[report].reportData.message = decodeString(reports[report].reportData.message)
-                    });
+                    for(let report of Object.keys(reports)) {
+                        reports[report].reportCreator = await getCastingMemberObject(decodeAndParseJSON(reports[report].reportCreator))
+                        reports[report].reportedUser = await getCastingMemberObject(decodeAndParseJSON(reports[report].reportedUser))
+                        reports[report].reportData = JSONTools.tryParse(reports[report].reportData)
+
+                        if(reports[report]?.reportData?.payload) {
+                            reports[report].reportData.payload = JSONTools.tryParse(reports[report].reportData.payload)
+                        }
+                    }
 
                     response({ type: "success", msg: "Reports fetched", reports:  reports});
                 }

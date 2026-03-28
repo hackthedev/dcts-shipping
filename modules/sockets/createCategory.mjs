@@ -6,9 +6,8 @@ import { copyObject, escapeHtml, generateId, sendMessageToUser, validateMemberId
 export default (io) => (socket) => {
     // socket.on code here
 
-    socket.on('createCategory', function (member, response) {
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+    socket.on('createCategory', async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
             member.id = xssFilters.inHTMLData(member.id)
@@ -16,7 +15,7 @@ export default (io) => (socket) => {
             member.group = xssFilters.inHTMLData(member.group)
             member.value = xssFilters.inHTMLData(member.value)
 
-            if (!hasPermission(member.id, "manageChannels")) {
+            if (!await hasPermission(member.id, "manageChannels")) {
                 response({ error: "Missing permissions: manageChannels", msg: "Cant create category because you dont have the permissions to manage channels", type: "error" })
                 return;
             }

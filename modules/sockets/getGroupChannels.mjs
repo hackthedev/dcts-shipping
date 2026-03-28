@@ -5,12 +5,11 @@ import { copyObject, sendMessageToUser, validateMemberId } from "../functions/ma
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on("getGroupChannels", function (member, response) {
-        if (validateMemberId(member.id, socket) == true &&
-            serverconfig.servermembers[member.id].token == member.token
+    socket.on("getGroupChannels", async function (member, response) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            if (hasPermission(member.id, "manageChannels") ||
-                hasPermission(member.id, "manageGroups")) {
+            if (await hasPermission(member.id, "manageChannels") ||
+                await hasPermission(member.id, "manageGroups")) {
 
                 response(serverconfig.groups);
             }

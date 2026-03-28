@@ -6,7 +6,7 @@ import { checkRateLimit, copyObject, sendMessageToUser, validateMemberId } from 
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('getMemberProfile', async function (member, response) {
-        if (validateMemberId(member.id, socket) === true &&
+        if (await validateMemberId(member.id, socket) === true &&
             serverconfig.servermembers[member.id].token === member.token
         ) {
 

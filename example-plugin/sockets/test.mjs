@@ -1,8 +1,8 @@
 import { validateMemberId } from "../../../modules/functions/main.mjs";
 
 export default (socket) => {
-    socket.on('test', (member, response) => {
-        if (validateMemberId(member?.id, socket, member?.token) === true) {
+    socket.on('test', async (member, response) => {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
             // some cool code here ;)
             response({ type: 'success', msg: "Worked!", error: null });

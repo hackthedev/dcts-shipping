@@ -65,33 +65,85 @@ class Crypto {
         return await Client().VerifyJson(json, key);
     }
 
+
+    static async getPublicKey() {
+        if (isLauncher()) return await Client().GetPublicKey();
+        return null;
+    }
+
     static CreateEnvelopeStructure(obj) {
+        if (typeof obj === "string") {
+            try {
+                obj = JSON.parse(obj);
+            } catch (e) {
+                return "|||||";
+            }
+        }
+
         return [
-            obj.method || "",
-            obj.encKey || "",
-            obj.salt || "",
-            obj.ciphertext || obj.cipher || "",
-            obj.iv || "",
-            obj.tag || ""
+            obj?.method || "",
+            obj?.encKey || "",
+            obj?.salt || "",
+            obj?.ciphertext || obj?.cipher || "",
+            obj?.iv || "",
+            obj?.tag || ""
         ].join("|");
     }
 
     static GetEnvelopeStructure(envelope) {
-        const p = envelope.split("|");
+        if (envelope && typeof envelope === "object") {
+            return {
+                method: envelope.method || "",
+                encKey: envelope.encKey || "",
+                salt: envelope.salt || "",
+                ciphertext: envelope.ciphertext || envelope.cipher || "",
+                iv: envelope.iv || "",
+                tag: envelope.tag || ""
+            };
+        }
+
+        const p = String(envelope || "").split("|");
         return {
-            method: p[0],
-            encKey: p[1],
-            salt: p[2],
-            ciphertext: p[3],
-            iv: p[4],
-            tag: p[5]
+            method: p[0] || "",
+            encKey: p[1] || "",
+            salt: p[2] || "",
+            ciphertext: p[3] || "",
+            iv: p[4] || "",
+            tag: p[5] || ""
         };
     }
 
-    static async DecryptEnvelope(envelopeString, keyOrPass = null) {
+    static setE2EE(value){
+        if(typeof value !== "boolean") throw new Error("Boolean required");
+        localStorage.setItem("enable-e2ee", value);
+
+        // absolutely required HERE so its impossible to forget!!
+        showSystemMessage({
+            text: `E2EE was ${value === true ? "enabled" : "disabled"}`,
+            type: value === true ? "success" : "warning",
+            duration: 1000
+        })
+
+        // for the sake of it and updating ui stuff.
+        // could be cool, lets see how it goes
+        document.dispatchEvent(
+            new CustomEvent("set-e2ee", { detail: { enabled: value } })
+        );
+    }
+
+    static getE2EE(){
+        return localStorage.getItem("enable-e2ee") === "true" ?? false;
+    }
+
+    static async DecryptEnvelope(envelopeInput) {
         if (!isLauncher()) return;
 
-        const env = this.GetEnvelopeStructure(envelopeString);
+        if (!envelopeInput) {
+            console.error("Cant decrypt envelope because of missing data");
+            return;
+        }
+
+        const env = this.GetEnvelopeStructure(envelopeInput);
 
         if (!env.method || !env.ciphertext) {
             console.error("Cant decrypt envelope because of missing data");
@@ -101,17 +153,23 @@ class Crypto {
         return await Client().DecryptData(env.method, env.encKey, env.iv, env.tag, env.ciphertext);
     }
 
-    static async getPublicKey() {
-        if (isLauncher()) return await Client().GetPublicKey();
-        return null;
-    }
-
     static async EncryptEnvelope(content, keyOrPass = null) {
         if (!isLauncher()) return;
-        if(!keyOrPass){
+        if (!keyOrPass) {
             keyOrPass = await this.getPublicKey();
         }
-        return this.CreateEnvelopeStructure(await Client().EncryptData(content, keyOrPass));
-    }
 
+        let encrypted = await Client().EncryptData(content, keyOrPass);
+
+        if (typeof encrypted === "string") {
+            try {
+                encrypted = JSON.parse(encrypted);
+            } catch (e) {
+                console.error("EncryptData returned invalid JSON:", encrypted);
+                return null;
+            }
+        }
+
+        return this.CreateEnvelopeStructure(encrypted);
+    }
 }

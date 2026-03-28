@@ -1,4 +1,4 @@
-import { serverconfig, xssFilters } from "../../index.mjs";
+import { usersocket, serverconfig, xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
@@ -6,9 +6,8 @@ import { leaveAllRooms } from "../functions/mysql/helper.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('setRoom', function (member) {
-        if (validateMemberId(member.id, socket, member?.token) === true
-
+    socket.on('setRoom', async function (member) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
             leaveAllRooms(socket, member.id);
 
@@ -20,7 +19,7 @@ export default (io) => (socket) => {
             // annoying
             if (channel === "null" || category === "null" || group === "null") return;
 
-            if (!hasPermission(member.id, "viewChannel", channel)) {
+            if (!await hasPermission(member.id, "viewChannel", channel)) {
                 sendMessageToUser(socket.id, JSON.parse(
                     `{
                         "title": "Access denied",
@@ -51,7 +50,7 @@ export default (io) => (socket) => {
                     else if (serverconfig.groups[group].channels.categories[category].channel[channel].type === "voice") {
 
                         // If user can use VC
-                        if (!hasPermission(member.id, "useVOIP", channel)) {
+                        if (!await hasPermission(member.id, "useVOIP", channel)) {
                             sendMessageToUser(socket.id, JSON.parse(
                                 `{
                                     "title": "Access denied",

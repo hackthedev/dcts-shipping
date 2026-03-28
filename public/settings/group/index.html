@@ -15,6 +15,9 @@
     <link rel="stylesheet" href="/css/themes/default/default.css">
     <script src="/js/core/PermUI.js"></script>
 
+    <script src="/js/core/MobileUI.js"></script>
+    <script src="/js/core/purify.js"></script>
+    <script src="/js/escape.js"></script>
     <script src="/js/core/JsonEditor.js"></script>
     <script src="/js/core/ChatManager.js"></script>
     <script src="/js/core/UserManager.js"></script>
@@ -25,6 +28,14 @@
     <script src="../utility.js"></script>
     <script src="../../notify.js"></script>
     <script src="settings.js"></script>
+    <script src="/plugins/loader.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof loadPlugins === "function") {
+                loadPlugins();
+            }
+        });
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
@@ -56,7 +67,7 @@
     }
 
     #navigation{
-        background-color: hsl(from var(--main) h s calc(l * 2));
+        background-color: hsl(from var(--main) h s calc(l * 1));
 
         padding: 32px;
 

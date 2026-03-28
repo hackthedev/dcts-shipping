@@ -31,7 +31,7 @@ export function decodeAndParseJSON(data){
 }
 
 export async function checkMessageObjReactions(message){
-    if(!message.messageId) throw new Error("Message id was not provided");
+    if(!message?.messageId) throw new Error("Message id was not provided");
 
     if (!message.reactions || Object.keys(message.reactions).length === 0) {
         const rows = await getMessageReactionsById(message.messageId);
@@ -51,9 +51,22 @@ export async function checkMessageObjReactions(message){
     return message
 }
 
-export function checkMessageObjAuthor(message){
+export async function processMessageObject(message, issuer){
+    message = copyObject(message)
+    if(!message) throw new Error("Message id was not provided");
+    if(!issuer) throw new Error("Issuer id was not provided");
+
+    message = await checkMessageObjAuthor(message);
+    message.author = await autoAnonymizeMember(issuer, message.author);
+    message = await autoAnonymizeMessage(issuer, message);
+    return message;
+}
+
+export async function checkMessageObjAuthor(message){
+    if(!message?.author) throw new Error("No message author object found");
+
     if(!message?.author?.name){
-        message.author = getCastingMemberObject(serverconfig.servermembers[message.author.id]);
+        message.author = await getCastingMemberObject(serverconfig.servermembers[message.author.id]);
     }
     return message;
 }
@@ -75,8 +88,13 @@ export async function getMessageObjectById(messageId){
     if(message?.id) delete message.id;
     if(message?.color) delete message.color;
 
-    message = checkMessageObjAuthor(message);
+    message = await checkMessageObjAuthor(message);
     message = await checkMessageObjReactions(message);
+
+    if(message?.group && message?.category && message?.channel){
+        message.channelName = serverconfig.groups[message.group].channels.categories[message.category].channel[message.channel].name
+    }
+
     return { error: null, message };
 }
 
@@ -86,7 +104,7 @@ export default (io) => (socket) => {
 
     socket.on('resolveMessage', async function (member, response) {
         // some code
-        if(validateMemberId(member?.id, socket, member?.token) === true){
+        if(await validateMemberId(member?.id, socket, member?.token) === true){
 
             if(!member?.messageId || (typeof member?.messageId !== "string" && typeof member?.messageId !== "number")) {
                 response({ error: "Message ID is required and needs to be a string or number", message: null})
@@ -105,12 +123,12 @@ export default (io) => (socket) => {
                 messageObj.reply = replyResult.message;
             }
 
-            if (!hasPermission(member.id, "viewChannel", messageObj?.channel)) {
+            if (!await hasPermission(member.id, "viewChannel", messageObj?.channel)) {
                 response({ error: "You dont have permission to resolve the message", message: null})
                 return;
             }
 
-            if(messageObj?.message) messageObj = autoAnonymizeMessage(member.id, messageObj);
+            if(messageObj?.message) messageObj = await autoAnonymizeMessage(member.id, messageObj);
             response(messageObj)
         }
     });

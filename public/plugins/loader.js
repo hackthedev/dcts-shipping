@@ -1,15 +1,17 @@
 function loadPlugins(){
-    socket.emit("getPluginList", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
-        Object.keys(response.plugins).forEach(function(plugin) {
-            let pluginObj = response.plugins[plugin];
-    
-            for(let i = 0; i < pluginObj.filePaths.length; i++){
-                let file = pluginObj.filePaths[i];
-    
-                if(file.includes(`${plugin}\\main.js`) || file.includes(`${plugin}/main.js`)){
-                    loadScript(file);
+    document.addEventListener("DOMContentLoaded", () => {
+        socket.emit("getPluginList", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
+            Object.keys(response.plugins).forEach(function(plugin) {
+                let pluginObj = response.plugins[plugin];
+
+                for(let i = 0; i < pluginObj.filePaths.length; i++){
+                    let file = pluginObj.filePaths[i];
+
+                    if(file.includes(`${plugin}\\main.js`) || file.includes(`${plugin}/main.js`)){
+                        loadScript(file);
+                    }
                 }
-            }
+            });
         });
     });
 }
@@ -17,6 +19,9 @@ function loadPlugins(){
 function loadScript(url, callback) {
     const script = document.createElement('script');
     script.type = 'text/javascript';
+    if (!url.startsWith('/') && !url.startsWith('http')) {
+        url = '/' + url.replace(/\\/g, '/');
+    }
     script.src = url;
 
     script.onload = function() {

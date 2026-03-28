@@ -7,13 +7,13 @@ function showHome(override = null) {
 
 
     if (!isShown) {
-        window.location.href = "/home.html";
+        window.location.href = "/home/";
         return;
 
         let iframe = home.querySelector("iframe");
         if (!iframe) {
             iframe = document.createElement("iframe");
-            iframe.src = "/home.html?popup=1";
+            iframe.src = "/home/?popup=1";
             iframe.style.width = "100%";
             iframe.style.height = "100%";
             iframe.style.border = "0";

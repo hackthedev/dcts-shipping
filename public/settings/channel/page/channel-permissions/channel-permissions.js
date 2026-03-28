@@ -9,64 +9,84 @@ var currentChannelId = "";
 var currentRoleId = "";
 let permListPage = null;
 
-currentChannelId = getUrlParams("id");
+document.addEventListener("pagechange", e => {
+    console.log(e.detail.page);
+    if (e.detail.page !== "channel-permissions") return;
 
-socket.emit("getChannelInfo", { id: UserManager.getID(), token: UserManager.getToken(), channel: currentChannelId }, function (response) {
-    try {
-
-        editChannel = response.data;
-
-        console.log("EditChannel")
-        console.log(editChannel);
-
-        //loadRolePerms(getUrlParams("id"));
-
-
-    }
-    catch (err) {
-        console.log("Unable to get Channel Information");
-        console.log(err);
-    }
-
+    initChannelRoles();
 });
 
-socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
+let channelRolesRightPanel = null;
 
-    //console.log(response);
-    serverRoleResponse = response;
+async function initChannelRoles(){
+    currentChannelId = getUrlParams("id");
 
-    console.log("Role Response:")
-    console.log(response);
+    channelRolesRightPanel = [
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#permissionlist")
+            ]
+        }
+    ];
+    MobilePanel.setRightMenu(channelRolesRightPanel, "right");
 
-    var roleArraySorted = [];
-    var code = "";
-    var role = "";
+    socket.emit("getChannelInfo", { id: UserManager.getID(), token: UserManager.getToken(), channel: currentChannelId }, function (response) {
+        try {
 
-    console.log(editChannel)
+            editChannel = response.data;
 
-    // Foreach role in the channel permissions
-    Object.keys(editChannel.permissions).forEach(function (perm) {
+            console.log("EditChannel")
+            console.log(editChannel);
 
-        //console.log("Role " + perm + " has the following permissions");
-
-        /*
-        console.log("Perm)")
-        console.log(perm)
-        console.log(serverRoleResponse[perm]);
-
-         */
-
-        role = serverRoleResponse[perm];
-
-        /*
-        console.log(role);
-        console.log(serverRoleResponse[perm]);
-
-         */
+            //loadRolePerms(getUrlParams("id"));
 
 
+        }
+        catch (err) {
+            console.log("Unable to get Channel Information");
+            console.log(err);
+        }
 
-        code += `
+    });
+
+    socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
+
+        //console.log(response);
+        serverRoleResponse = response;
+
+        console.log("Role Response:")
+        console.log(response);
+
+        var roleArraySorted = [];
+        var code = "";
+        var role = "";
+
+        console.log(editChannel)
+
+        // Foreach role in the channel permissions
+        Object.keys(editChannel.permissions).forEach(function (perm) {
+
+            //console.log("Role " + perm + " has the following permissions");
+
+            /*
+            console.log("Perm)")
+            console.log(perm)
+            console.log(serverRoleResponse[perm]);
+
+             */
+
+            role = serverRoleResponse[perm];
+
+            /*
+            console.log(role);
+            console.log(serverRoleResponse[perm]);
+
+             */
+
+
+
+            code += `
                    <div class="role-entry-container" id="${role.info.id}">
                        <div onclick="moveRoleUp(${role.info.id})" style="background-image: url('/img/up.png');background-size: cover;object-fit: cover;background-position: center center;
                        width: 10px; height: 10px;display: inline-block;"></div>
@@ -80,21 +100,22 @@ socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getT
                    </div>`;
 
 
-        //children = document.querySelectorAll(`#${perm} input`);
+            //children = document.querySelectorAll(`#${perm} input`);
 
-        /*
-        if (editChannel[perm] == 1){
-            children[0].checked = true;
-        }
-        else{
-            children[0].checked = false;
-        }
+            /*
+            if (editChannel[perm] == 1){
+                children[0].checked = true;
+            }
+            else{
+                children[0].checked = false;
+            }
 
-         */
+             */
+        });
+
+        rolelist.insertAdjacentHTML("beforeend", code);
     });
-
-    rolelist.insertAdjacentHTML("beforeend", code);
-});
+}
 
 function removeRole() {
 
@@ -254,6 +275,10 @@ function loadRolePerms(roleId) {
                     callback
                 );
             });
+
+            if (MobilePanel.isMobile()) {
+                MobilePanel.renderPanel(channelRolesRightPanel, "right")
+            }
         }
     });
 

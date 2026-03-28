@@ -46,9 +46,6 @@ class UserManager {
             var roleBackgroundClip = role.backgroundClip;
             var roleName = role.name;
 
-            console.log(roleColor)
-            console.log(roleBackground)
-
             roleCode += `<code class="role" id="profile-role-entry-${role.id}"><div class="role_color" style="background: ${roleColor === "transparent" ? roleBackground : roleColor};"></div><span style="color: ${roleColor};background: ${roleBackground};background-clip: ${roleBackgroundClip};">${roleName}</span></code>`;
         }
 
@@ -78,13 +75,13 @@ class UserManager {
         
             <div id="profile_pfp_container">
                 <div id="profile_icon" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.icon)}');"></div>                
-                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(memberObj?.publicKey) : ""}"></div>                
+                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(sanitizeHtmlForRender(memberObj?.publicKey)) : ""}"></div>                
             </div>
             
         
             <div id="profile_content">       
-                <div id="profile_username"><h2 style="margin: 0 !important;">${unescapeHtmlEntities(memberObj?.name)}</h2></div>                
-                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? memberObj?.status : ""}</i></div>  
+                <div id="profile_username"><h2 style="margin: 0 !important;">${unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.name))}</h2></div>                
+                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.status), false) : ""}</i></div>  
                 
                 ${memberObj?.aboutme?.trim()?.length > 0 ?                
                `
@@ -106,7 +103,7 @@ class UserManager {
                ` : ""}
             <hr>
                        
-            <a id="dm_action" href="/home.html?dm=${memberObj?.id}">&#10149; Send Message</a>
+            <a id="dm_action" href="/home/?dm=${sanitizeHtmlForRender(memberObj?.id, false)}">&#10149; Send Message</a>
 
             <div class="profile_meta">
                 <div class="info">
@@ -137,7 +134,7 @@ class UserManager {
             <div id="profile_roles">
                 <h2 class="profile_headline">Roles</h2>
                 ${roleCode}
-                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${memberObj.id}');" class="role addRoleMenuTrigger" data-member-id="${memberObj.id}" id="addRole-${memberObj.id}">+</code>
+                <code style="cursor: pointer;" onclick="ModActions.addRoleFromProfile('${sanitizeHtmlForRender(memberObj.id, false)}');" class="role addRoleMenuTrigger" data-member-id="${memberObj.id}" id="addRole-${memberObj.id}">+</code>
             </div>`;
     }
 
@@ -300,7 +297,7 @@ class UserManager {
     }
 
     static getRoom() {
-        return getUrlParams("group") + "-" + getUrlParams("category") + "-" + getUrlParams("channel");
+        return ChatManager.getUrlParams("group") + "-" + ChatManager.getUrlParams("category") + "-" + ChatManager.getUrlParams("channel");
     }
 
     static getCategory() {
@@ -454,9 +451,46 @@ class UserManager {
         return UserManager.pickRandomFromArray(randomUsernames);
     }
 
+    static getShortenedAccountData(jsonData) {
+        function clean(str) {
+            if (typeof str !== 'string') return str
+            return str.replace(/[^\x20-\x7E]/g, '')
+        }
+
+        return {
+            id: jsonData.id,
+            token: jsonData.token,
+            name: clean(jsonData.name),
+            icon: clean(jsonData.icon),
+            pow: jsonData.pow,
+        }
+    }
+
+    static async getAccountExportData(){
+        return new Promise((resolve, reject) => {
+            socket.emit("exportAccount", {id: UserManager.getID(), token: UserManager.getToken(),}, async function (response) {
+                resolve(UserManager.getShortenedAccountData(response?.account) ?? response);
+            });
+        })
+    }
+
+    static setAccount(jsonData){
+
+    }
+
+    static async saveAccount(jsonData){
+        if(!jsonData){
+            jsonData = await this.getAccountExportData();
+        }
+
+        if (isLauncher() && Client().saveAccount) {
+            Client().saveAccount(JSON.stringify(jsonData))
+        }
+    }
+
     static getUsername() {
 
-        var username = CookieManager.getCookie("username");
+        var username = sanitizeHtmlForRender(CookieManager.getCookie("username"), false);
 
         if (username == null || username.length <= 0) {
             return UserManager.getRandomUsername();
@@ -470,7 +504,7 @@ class UserManager {
     }
 
     static getAboutme() {
-        var aboutme = CookieManager.getCookie("aboutme");
+        var aboutme = sanitizeHtmlForRender(CookieManager.getCookie("aboutme"), false);
 
         if (aboutme == null || aboutme.length <= 0) {
             return "";
@@ -484,7 +518,7 @@ class UserManager {
     }
 
     static getBanner() {
-        var banner = localStorage.getItem("banner");
+        var banner = sanitizeHtmlForRender(localStorage.getItem("banner"), false);
 
         if (banner == null || banner.length <= 0) {
             return "";
@@ -549,30 +583,35 @@ class UserManager {
 
     static setUser(username) {
         // renamed setUser. May be used. legacy function lol
-        UserManager.setUsername(username)
+        UserManager.setUsername(sanitizeHtmlForRender(username, false))
     }
 
     static setUsername(username) {
+        username = stripHTML(username);
         CookieManager.setCookie("username", username, 360);
         UserManager.updateUsernameOnUI(username);
     }
 
     static setBanner(banner) {
+        banner = stripHTML(banner)
         CookieManager.setCookie("banner", banner, 360);
         localStorage.setItem("banner", banner);
     }
 
     static setStatus(status) {
+        status = sanitizeHtmlForRender(status, false);
         CookieManager.setCookie("status", status, 360);
         UserManager.updateUsernameOnUI(status);
     }
 
     static setPFP(pfp) {
+        pfp = stripHTML(pfp)
         localStorage.setItem("pfp", pfp);
         UserManager.updateUsernameOnUI(pfp);
     }
 
     static setAboutme(aboutme) {
+        aboutme = sanitizeHtmlForRender(aboutme, false);
         CookieManager.setCookie("aboutme", aboutme, 360);
         UserManager.updateUsernameOnUI(aboutme);
     }
@@ -1093,7 +1132,7 @@ class UserManager {
 
 
                 // resubmit userjoin but with onboarding done
-                await userJoined(true, values.password, values.loginName, code)
+                await ChatManager.userJoined(true, values.password, values.loginName, code)
             },
             null,
             null,

@@ -9,39 +9,32 @@ import {
 } from "../../index.mjs";
 import {
     formatDateTime,
-    generateGid,
     getJson,
-    getMemberFromKey, getMemberIpInfo,
+    getMemberIpInfo,
     getMemberLastOnline,
     hasVerifiedKey,
     resolveCategoryByChannelId,
-    resolveChannelById,
     resolveGroupByChannelId,
 } from "../functions/chat/main.mjs";
 import {saveChatMessage} from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
 import {
-    checkMemberBan,
     checkMemberMute,
     checkRateLimit,
-    copyObject,
     emitBasedOnMemberId,
-    escapeHtml,
     generateId,
     getCastingMemberObject,
     hashPassword,
     removeFromArray,
     sendMessageToUser,
-    validateMemberId,
 } from "../functions/main.mjs";
 import {sendSystemMessage} from "./home/general.mjs";
 import {discoverHosts} from "../functions/discovery.mjs";
 import {isValidProof, powVerifiedUsers} from "./pow.mjs";
-import logger from "../functions/logger.mjs";
-import {channel} from "node:diagnostics_channel";
-import {saveMemberToDB} from "../functions/mysql/helper.mjs";
-import {runInWorker} from "../functions/offload.mjs";
-import {listThemes, loadThemeCache} from "./routes/themes.mjs";
+import {checkMemberBan} from "../functions/ban-system/helpers.mjs";
+import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
+import {autobanXSS} from "../functions/sanitizing/actions.mjs";
+import { createMember, updateMember } from "../functions/member.mjs";
 
 function normaliseString(v) {
     if (v === null || v === undefined) return "";
@@ -140,8 +133,8 @@ export default (io) => (socket) => {
         const memberId = socket.data?.memberId || socket?.memberId;
         if (!memberId) return;
 
-        setTimeout(() => {
-            const info = getMemberLastOnline(memberId);
+        setTimeout(async () => {
+            const info = await getMemberLastOnline(memberId);
             if (info && !info.isOnline && info.minutesPassed >= 1) {
                 io.emit("updateMemberList");
             }
@@ -150,6 +143,9 @@ export default (io) => (socket) => {
 
     // socket.on code here
     socket.on("userConnected", async function (member, response) {
+        if(!member?.id) return response({error: "No Account id provided"})
+        if(member?.id?.length !== 12) return response({error: "Account id length not 12"})
+
         if (member?.id) member.id = String(member.id);
         if (member?.token) member.token = String(member.token);
         if (member?.pow?.challenge) member.pow.challenge = String(member?.pow?.challenge);
@@ -166,24 +162,31 @@ export default (io) => (socket) => {
         if(member?.status === "null" || member?.status === "undefined") member.status = null
         if(member?.aboutme === "null" || member?.aboutme === "undefined") member.aboutme = null
 
-        member.id = xssFilters.inHTMLData(normaliseString(member.id));
-        member.loginName = xssFilters.inHTMLData(normaliseString(member.loginName));
+        member.id = stripHTML(normaliseString(member.id));
+        member.loginName = stripHTML(sanitizeHTML(normaliseString(member.loginName)));
 
-        if (member?.name) member.name = xssFilters.inHTMLData(normaliseString(member.name));
-        if (member?.status) member.status = truncateText(xssFilters.inHTMLData(normaliseString(member.status)), 25);
+        if (member?.name) member.name = stripHTML(sanitizeHTML(normaliseString(member.name), async (tag, node, data) => {
+            if(tag === "script") await autobanXSS(member.id);
+        }));
+        if (member?.status) member.status = stripHTML(truncateText(sanitizeHTML(normaliseString(member.status), async (tag, node, data) => {
+            if(tag === "script") await autobanXSS(member.id);
+        }), 25));
 
-        if (member?.aboutme) member.aboutme = truncateText(xssFilters.inHTMLData(normaliseString(member.aboutme)), 500);
-        if (member?.icon) member.icon = xssFilters.inHTMLData(normaliseString(member.icon));
-        if (member?.banner) member.banner = xssFilters.inHTMLData(normaliseString(member.banner));
+        if (member?.aboutme) member.aboutme = truncateText(sanitizeHTML(normaliseString(member.aboutme), async (tag, node, data) => {
+            if(tag === "script") await autobanXSS(member.id);
+        }), 500);
 
-        member.token = xssFilters.inHTMLData(normaliseString(member.token));
-        member.onboarding = xssFilters.inHTMLData(normaliseString(member.onboarding)) === "true";
-        member.password = xssFilters.inHTMLData(normaliseString(member.password)) || null;
+        if (member?.icon) member.icon = stripHTML(normaliseString(member.icon));
+        if (member?.banner) member.banner = stripHTML(normaliseString(member.banner));
 
-        member.group = xssFilters.inHTMLData(normaliseString(member.group));
-        member.category = xssFilters.inHTMLData(normaliseString(member.category));
-        member.channel = xssFilters.inHTMLData(normaliseString(member.channel));
-        member.room = xssFilters.inHTMLData(normaliseString(member.room));
+        member.token = sanitizeHTML(normaliseString(member.token));
+        member.onboarding = sanitizeHTML(normaliseString(member.onboarding)) === "true";
+        member.password = sanitizeHTML(normaliseString(member.password)) || null;
+
+        member.group = sanitizeHTML(normaliseString(member.group));
+        member.category = sanitizeHTML(normaliseString(member.category));
+        member.channel = sanitizeHTML(normaliseString(member.channel));
+        member.room = sanitizeHTML(normaliseString(member.room));
 
         // get ip info
         let ipInfo = await getMemberIpInfo(socket);
@@ -196,47 +199,36 @@ export default (io) => (socket) => {
 
         // if pow has been passed. used for quicker initial connection to skip pow challenge
         if (member?.pow?.challenge)
-            member.pow.challenge = xssFilters.inHTMLData(
+            member.pow.challenge = sanitizeHTML(
                 normaliseString(member?.pow?.challenge),
             );
         if (member?.pow?.solution)
-            member.pow.solution = xssFilters.inHTMLData(
+            member.pow.solution = sanitizeHTML(
                 normaliseString(member?.pow?.solution),
             );
 
         // check if public key was supplied
         if (member?.publicKey && member?.publicKey?.length > 10) {
-            member.publicKey = xssFilters.inHTMLData(
+            member.publicKey = stripHTML(
                 normaliseString(member?.publicKey),
             );
         }
 
         // check if knownServers was supplied
         if (member?.knownServers && member?.knownServers?.length > 2) {
-            member.knownServers = xssFilters.inHTMLData(member?.knownServers);
+            member.knownServers = stripHTML(member?.knownServers);
             discoverHosts(member.knownServers);
         }
 
         // check registration code and filter
         if (member?.code && member?.code > 0) {
-            member.code = xssFilters.inHTMLData(member?.code);
+            member.code = sanitizeHTML(member?.code);
         }
 
         // handle invites
         let inviteResult = handleInviteCode(member, socket, response);
         if (!inviteResult) {
             return;
-        } else {
-            // prematurely create a servermembers object since the code was correct and the
-            // servermembers object is used to display invite code prompts or not.
-            if (!serverconfig.servermembers[member.id]) {
-                serverconfig.servermembers[member.id] = {
-                    id: member.id,
-                    token: member.token,
-                    onboarding: false,
-                };
-                await saveMemberToDB(member?.id, serverconfig.servermembers[member.id]);
-            }
         }
 
         // skip pow challenge for faster connection
@@ -296,6 +288,9 @@ export default (io) => (socket) => {
             await saveConfig(serverconfig);
         }
 
+        // default fallback
+        if(!member?.name) member.name = "Arnold"
+
         if (member.id.length === 12) {
             usersocket[member.id] = socket.id; // deprecated, left for legacy
 
@@ -304,7 +299,6 @@ export default (io) => (socket) => {
                 !serverconfig.servermembers[member.id] ||
                 serverconfig.servermembers[member.id]?.onboarding === false
             ) {
-                if(!member?.name) member.name = "Arnold"
 
                 // New Member joined the server
                 Logger.debug("New member connected");
@@ -347,39 +341,23 @@ export default (io) => (socket) => {
                 // setup member
                 const now = new Date().getTime();
                 const hashedPassword = await hashPassword(member.password);
-                serverconfig.servermembers[member.id] = {
-                    id: member.id,
-                    token: member.token,
-                    loginName: member.loginName,
-                    name: "",
-                    nickname: null,
-                    status: "",
-                    aboutme: "",
-                    icon: "",
-                    banner: "",
-                    joined: now,
-                    isOnline: 1,
-                    lastOnline: now,
-                    isBanned: 0,
-                    isMuted: 0,
-                    password: hashedPassword,
-                    publicKey: "",
-                    isVerifiedKey: false
-                };
-
-                // set some values this way because it may cauz errors
-                // and i dont wanna manually encode shit etc...
-                if (member?.icon) serverconfig.servermembers[member.id].icon = member.icon;
-                if (member?.banner) serverconfig.servermembers[member.id].banner = member.banner;
-                if (member?.aboutme) serverconfig.servermembers[member.id].aboutme = member.aboutme;
-                if (member?.status) serverconfig.servermembers[member.id].status = member.status;
-                if (member?.name) serverconfig.servermembers[member.id].name = member.name || "Member";
-                if (member?.country_code) serverconfig.servermembers[member.id].country_code = member.country_code;
-                if (member?.publicKey) serverconfig.servermembers[member.id].publicKey = member?.publicKey;
-
-                serverconfig.servermembers[member.id].onboarding = true;
-
-                saveMemberToDB(member?.id, serverconfig.servermembers[member.id]);
+                await createMember(
+                    member.id,
+                    member.token,
+                    member?.name ? stripHTML(member.name || "Member") : "",
+                    member.loginName,
+                    member?.icon ? stripHTML(member.icon) : "",
+                    member?.banner ? stripHTML(member.banner) : "",
+                    member?.aboutme ? sanitizeHTML(member.aboutme) : "",
+                    member?.status ? stripHTML(member.status) : "",
+                    member?.country_code ? stripHTML(member.country_code) : "",
+                    member?.publicKey ? stripHTML(member.publicKey) : "",
+                    now,
+                    now,
+                    hashedPassword,
+                    false,
+                    true
+                )
 
                 try {
                     sendMessageToUser(
@@ -424,7 +402,7 @@ export default (io) => (socket) => {
                 }
 
                 // create copy of server member without token etc
-                var castingMember = getCastingMemberObject(
+                var castingMember = await getCastingMemberObject(
                     serverconfig.servermembers[member.id],
                 );
                 delete castingMember.token;
@@ -475,7 +453,7 @@ export default (io) => (socket) => {
                     status: serverconfig.servermembers[member.id].status,
                     aboutme: serverconfig.servermembers[member.id].aboutme,
                 });
-            } else {
+            } else { // if existing member
                 if (
                     member.token == null ||
                     member.token.length !== 48 ||
@@ -515,42 +493,40 @@ export default (io) => (socket) => {
                 if (member?.publicKey) {
                     // set pubic key
                     serverconfig.servermembers[member.id].publicKey =
-                        xssFilters.inHTMLData(member.publicKey);
+                        sanitizeHTML(member.publicKey);
 
                     // check if its valid and change the flag
-                    if ((await hasVerifiedKey(member.id)) === true) {
-                        serverconfig.servermembers[member.id].isVerifiedKey = true;
-                    } else {
+                    if ((await hasVerifiedKey(member.id)) === false) {
                         // otherwise make the client verify their ownership of the key.
                         // key wont be used until its verified
                         emitBasedOnMemberId(member.id, "verifyPublicKey");
                     }
+                    else {
+                        member.isVerifiedKey = true
+                    }
                 }
 
-                if(member?.name) serverconfig.servermembers[member.id].name = xssFilters.inHTMLData(
-                    member.name
-                );
-                if(member?.status) serverconfig.servermembers[member.id].status = xssFilters.inHTMLData(
-                    member.status
-                );
-                if(member?.aboutme) serverconfig.servermembers[member.id].aboutme = xssFilters.inHTMLData(
-                    member.aboutme
-                );
-                if (member.icon) serverconfig.servermembers[member.id].icon = xssFilters.inHTMLData(
-                    member.icon
-                );
-                if (member.banner) serverconfig.servermembers[member.id].banner = xssFilters.inHTMLData(
-                    member.banner
-                );
+                updateMember({
+                    id: member.id,
+                    lastOnline: new Date().getTime()
+                })
 
-                if (member.country_code) serverconfig.servermembers[member.id].country_code = member.country_code;
-
-                serverconfig.servermembers[member.id].lastOnline = new Date().getTime();
                 socket.memberId = member.id;
 
                 usersocket[member.id] = socket.id;
                 socket.data.memberId = member.id;
-                response({finishedOnboarding: true});
+
+                response({
+                    finishedOnboarding: true,
+                    token: member.token,
+                    id: member.id,
+                    icon: serverconfig.servermembers[member.id].icon,
+                    banner: serverconfig.servermembers[member.id].banner,
+                    name: serverconfig.servermembers[member.id].name,
+                    loginName: serverconfig.servermembers[member.id].loginName,
+                    status: serverconfig.servermembers[member.id].status,
+                    aboutme: serverconfig.servermembers[member.id].aboutme,
+                });
 
                 io.emit("updateMemberList");
             }

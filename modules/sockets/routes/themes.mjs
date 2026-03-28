@@ -23,10 +23,17 @@ export async function saveThemeCache(data){
 
 export async function listThemes() {
     let cachedGithub = await loadThemeCache();
-    let githubThemes = cachedGithub;
+    let githubThemes = cachedGithub?.data;
 
-    // no cache so we fetch new themes lol
-    if (!githubThemes) {
+    if (typeof githubThemes === "string") {
+        try {
+            githubThemes = JSON.parse(githubThemes);
+        } catch {
+            githubThemes = [];
+        }
+    }
+
+    if (!Array.isArray(githubThemes) || !githubThemes.length) {
         githubThemes = await getThemes();
         await saveThemeCache(githubThemes);
     }
@@ -38,7 +45,10 @@ export async function listThemes() {
             .map(d => d.name)
         : [];
 
-    return Array.from(new Set([...localThemes, ...githubThemes]));
+    const a = Array.isArray(localThemes) ? localThemes : [];
+    const b = Array.isArray(githubThemes) ? githubThemes : [];
+
+    return Array.from(new Set([...a, ...b]));
 }
 
 export async function downloadTheme(themeName){

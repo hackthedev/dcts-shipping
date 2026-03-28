@@ -11,64 +11,63 @@ import { sendSystemMessage } from "../home/general.mjs";
 
 export default (io) => (socket) => {
 
-    async function emitToThread(threadId, event, payload) {
+    async function emitToThread(roomId, event, payload) {
         const rows = await queryDatabase(
-            `SELECT memberId FROM dms_participants WHERE threadId = ?`,
-            [threadId]
+            `SELECT participants FROM dm_rooms WHERE roomId = ?`,
+            [roomId]
         );
-        for (const r of rows) {
-            io.to(r.memberId).emit(event, payload);
+
+        if(rows?.length === 0) return;
+
+        console.log(rows)
+        let participants = rows[0]?.participants
+        let participantsArray = participants.split(",")
+
+        if(participantsArray.length > 0) {
+            for (const r of participantsArray) {
+                console.log(r, event, payload)
+                io.in(r).emit(event, payload);
+            }
         }
     }
 
     // socket.on code here
     socket.on('deleteMessageInReport', async function (member, response) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
 
-            if (hasPermission(member.id, "manageMessages")) {
+            if (await hasPermission(member.id, "manageMessages")) {
                 try {
                     let messageId = member.messageId
+                    let messageType = member.messageType
 
                     // dm message
-                    if (messageId.startsWith("m_")) {
-                        let threadIdResult = await queryDatabase("SELECT * from dms_messages WHERE messageId = ?", [messageId])
-                        let threadId = threadIdResult[0].threadId;
-                        let messageAuthorId = threadIdResult[0].authorId;
+                    if (messageType === "dm") {
+                        let dmMessageRow = await queryDatabase("SELECT * from dms WHERE messageId = ?", [messageId])
+                        let dmMessageObj = dmMessageRow[0];
 
-                        if (!threadId) {
-                            response({ type: "error", error: "No thread found to delete the message from" });
-                            return;
+                        if (!dmMessageObj) {
+                            return response({ type: "error", error: "No dm found to delete the message from" });
                         }
 
-                        let participantsResult = await queryDatabase("SELECT * from dms_participants WHERE threadId = ?", [threadId])
-
-                        const otherIds = participantsResult
-                            .filter(p => String(p.memberId) !== String(messageAuthorId))
-                            .map(p => p.memberId);
-
-                        let offenderAuthorId = otherIds[0];
-
+                        let roomId = dmMessageObj?.roomId;
+                        let messageAuthorId = dmMessageObj?.authorId;
 
                         // works for server messages and dms
-                        let deleteResult = await deleteChatMessagesFromDb(member.messageId);
+                        let deleteResult = await deleteChatMessagesFromDb(member.messageId, messageType);
 
                         if (deleteResult.affectedRows >= 1) {
-                            await emitToThread(threadId, "receiveMessageDelete", { threadId, messageId });
+                            await emitToThread(roomId, "receiveDeleteMessage", { messageId });
 
                             // notify reporter
-                            if (offenderAuthorId) {
-                                await sendSystemMessage(otherIds[0],
-                                    `The message you've reported sent by <i>${serverconfig.servermembers[messageAuthorId].name} (${messageAuthorId})</i> has been deleted.<br><br>
-                                    Thank you for helping keep the server safe.`);
+                            if (member.id) {
+                                await sendSystemMessage(member.id,
+                                    `<p>The message you've reported sent by <i>${serverconfig.servermembers[messageAuthorId].name} (${messageAuthorId})</i> has been deleted.<br><br>
+                                    Thank you for helping keep the server safe.</p>`);
                             }
 
-                            response({ type: "success", msg: "DM Message was deleted" });
-                            return;
+                            return response({ type: "success", msg: "DM Message was deleted", error: null })
                         }
-
-                        return;
                     }
                     else {
                         let deleteResult = await deleteChatMessagesFromDb(member.messageId);

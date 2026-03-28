@@ -13,7 +13,7 @@ async function syncHostData(){
 
         if(isLauncher() && json){
             let server = await Client().GetServer(window.location.host);
-            await Client().SaveServer(window.location.host, JSON.stringify(json), server?.IsFavourite);
+            await Client().SaveServer(window.location.host, server?.isFav ?? false);
         }
     }
 }
@@ -128,7 +128,7 @@ async function displayDiscoveredHosts(){
             }
 
             if(isLauncher()){
-                Client().SaveServer(host, server?.favourite);
+                Client().SaveServer(host, server?.favourite ?? false);
             }
 
             discoveredHostList.insertAdjacentHTML("beforeend",
@@ -168,6 +168,6 @@ async function changeFavouriteNetworkServer(address){
         return;
     }
 
-    server.IsFavourite = !server.IsFavourite;
-    await Client().SaveServer(address, server.IsFavourite);
+    server.isFav = !server.isFav;
+    await Client().SaveServer(address, server?.isFav ?? false);
 }

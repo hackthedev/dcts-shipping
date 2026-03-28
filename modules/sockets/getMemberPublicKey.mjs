@@ -6,20 +6,20 @@ import {copyObject, emitBasedOnMemberId, sendMessageToUser, validateMemberId} fr
 export default (io) => (socket) => {
     // socket.on code here
 
-    socket.on('getMemberPublicKey', function (member, response) {
-        if(validateMemberId(member?.id, socket, member?.token) === true){
+    socket.on('getMemberPublicKey', async function (member, response) {
+        if(await validateMemberId(member?.id, socket, member?.token) === true){
 
             if(!member?.target){
-                response({ error: "No target member specified"})
+                response({ error: "No target member specified", publicKey: null})
                 return;
             }
 
             if(serverconfig.servermembers[member?.target] === null){
-                response({ error: "Target member not found"})
+                response({ error: "Target member not found", publicKey: null})
                 return;
             }
 
-            response( { error: null, publicKey: serverconfig.servermembers[member.target]?.publicKey } )
+            response( { error: null, publicKey: serverconfig.servermembers[member.target]?.publicKey ?? null } )
         }
     });
 }

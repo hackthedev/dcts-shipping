@@ -4,6 +4,15 @@ let customPrompts;
 document.addEventListener("DOMContentLoaded", () => {
     socket = io.connect();
     customPrompts = new Prompt();
+
+    MobilePanel.setLeftMenu([
+        {
+            direction: "column",
+            children: [
+                document.querySelector("#navigation")
+            ]
+        }
+    ], "left");
 })
 
 function findAttributeUp(element, attr, maxDepth = 10) {
@@ -108,6 +117,12 @@ async function loadPageContent(page = "server-info") {
 
 
     console.log("emitting pagechange", page);
+
+    // close nav
+    if(MobilePanel.isMobile()){
+        MobilePanel.close();
+    }
+
     document.dispatchEvent(
         new CustomEvent("pagechange", { detail: { page } })
     );
@@ -117,6 +132,103 @@ async function loadPageContent(page = "server-info") {
     });
 
     setUrl(`?page=${page}`)
+}
+
+function rgbToHex(rgbString) {
+    if (typeof rgbString !== "string") return rgbString;
+
+    const matches = rgbString.match(/\d+/g);
+    if (!matches || matches.length < 3) return rgbString;
+
+    const [r, g, b] = matches.map(Number);
+
+    if (r === undefined) return rgbString;
+    if (g === undefined) return rgbString;
+    if (b === undefined) return rgbString;
+
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+}
+
+function displayGraph(type, path, element = null){
+    if(type === "daily"){
+        let dailyElement = element ?? document.querySelector("#chart_daily");
+        if(dailyElement){
+            dailyElement.src = path;
+        }
+    }
+    if(type === "hourly"){
+        let hourlyElement = element ?? document.querySelector("#chart_hourly");
+        if(hourlyElement){
+            hourlyElement.src = path;
+        }
+    }
+}
+
+async function getRoomCharts(room){
+    if(!room) throw new Error("No room argument passed.");
+
+    return new Promise((resolve, reject) => {
+        socket.emit("getRoomCharts", {id: UserManager.getID(), token: UserManager.getToken(), room }, function (response) {
+            resolve(response?.paths || response);
+        })
+    })
+}
+async function getServerInfo(){
+    return new Promise((resolve, reject) => {
+        socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken() }, function (response) {
+            resolve(response);
+        })
+    })
+}
+async function saveServerInfoSettings(jsonData){
+    return new Promise(resolve => {
+        socket.emit("saveServerInfo", {id: UserManager.getID(), token: UserManager.getToken(), serverinfo: jsonData.serverinfo }, function (response) {
+            if(response.error){
+                showSystemMessage({
+                    title: "Error while saving settings",
+                    text: response.error,
+                    type: "error",
+                    icon: "error"
+                })
+            }
+            else{
+                originalnfo = jsonData;
+                resolve(jsonData);
+            }
+        });
+    })
+}
+async function getChannelTree(){
+    return new Promise((resolve, reject) => {
+        socket.emit("getChannelTree", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageChannels" }, function (response) {
+            resolve(response?.data || response);
+        });
+    })
+}
+
+function getChannelPathFromGroupConfig(data, channelId) {
+    const groups = data?.groups;
+    if (!groups) return null;
+
+    for (const gId in groups) {
+        const cats = groups[gId]?.categories;
+        if (!cats) continue;
+
+        for (const cId in cats) {
+            const channels = cats[cId]?.channel;
+            if (!channels) continue;
+
+            if (channels[channelId]) {
+                return {
+                    path: `groups.${gId}.categories.${cId}.channel.${channelId}`,
+                    groupId: gId,
+                    categoryId: cId,
+                    channelId
+                };
+            }
+        }
+    }
+    return null;
 }
 
 function setUrl(param) {
@@ -227,7 +339,7 @@ function chooseRole(arg = {}) {
                   <div class="role-menu-entry" style="display:flex;align-items:center;gap:8px;margin:6px 0;padding:6px 8px;border-radius:6px;">
                     <input type="checkbox" id="role_${r.id}" name="role_${r.id}" ${preset}
                            class="role-menu-entry-checkbox" style="margin:0;">
-                    <label for="role_${r.id}" style="cursor:pointer;color:${r.color};user-select:none;">${r.name}</label>
+                    <label for="role_${r.id}" style="cursor:pointer;color:${r.color};background:${r.background};backgroundClip:${r.backgroundClip};user-select:none;">${r.name}</label>
                   </div>`;
             }).join("");
 

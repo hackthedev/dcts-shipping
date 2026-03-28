@@ -73,7 +73,7 @@ class Inbox {
             updateUIMentions()
 
             for (let item of data.items) {
-                let itemData = JSON.parse(item.data);
+                let itemData = item.data;
                 let itemType = item.type;
 
                 if (itemType === "message") {
@@ -126,6 +126,7 @@ class Inbox {
     }
 
     static async updateInboxMessageEntries() {
+        if(!this.getInboxElement()?.querySelector(".inbox-content")) return console.warn("Inbox Element wasnt found")
         this.getInboxElement().querySelector(".inbox-content").innerHTML = await this.getContentHTML(true);
     }
 

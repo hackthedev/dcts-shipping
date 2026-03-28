@@ -231,10 +231,20 @@ class ModActions {
                     displayChecked = "";
                 }
 
+                console.log(roleObj)
+
                 if(roleId !== 0 && roleId !== 1){
                     roleList.insertAdjacentHTML("beforeend",
                         `<div class="role-menu-entry" onclick="ModActions.checkCheckedRoleMenu(this.querySelector('input'))">
-                            <input type="checkbox" ${displayChecked} class="role-menu-entry-checkbox" id="role-menu-entry_${roleId}_${userId}" onclick="ModActions.checkCheckedRoleMenu(this)">
+                            <input type="checkbox" 
+                                ${displayChecked} 
+                                class="role-menu-entry-checkbox" 
+                                id="role-menu-entry_${roleId}_${userId}" 
+                                data-member-id="${userId}"
+                                data-role-id="${roleId}"
+                                onclick="ModActions.checkCheckedRoleMenu(this)">
+                                
+                                
                             <label style="color: ${roleColor};background: ${roleBackground};background-clip: ${roleBackgroundClip};" class="role-menu-entry-roleName">${roleName}</label>
                         </div>`)
                 }
@@ -249,13 +259,14 @@ class ModActions {
         socket.emit("checkPermission", { id: UserManager.getID(), token: UserManager.getToken(), permission: "manageMembers" }, function (response) {
             if (response.permission === "granted") {
                 element.checked = !element.checked;
-                var roleId = element.id.split("_")[1];
-                var userId = element.id.split("_")[2];
+                var roleId = element.getAttribute("data-role-id")
+                var userId = element.getAttribute("data-member-id");
 
                 if (element.checked === true) {
                     // Assign role
                     socket.emit("addUserToRole", { id: UserManager.getID(), token: UserManager.getToken(), role: roleId, target: userId }, function (response) {
 
+                        console.log(response)
                         if (response.type !== "success") {
                             showSystemMessage({
                                 title: response.msg,

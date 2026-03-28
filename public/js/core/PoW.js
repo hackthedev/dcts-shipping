@@ -30,9 +30,7 @@ async function measureHashRate(durationSeconds = 3) {
 }
 
 async function sha256(message) {
-    console.log(message);
     const msgBuffer = new TextEncoder().encode(message);
-    console.log(msgBuffer)
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -77,6 +75,10 @@ function setupAccountFromData(data) {
 }
 
 async function setupAccount(challenge, difficulty) {
+    if(await isLauncher()){
+        if(await Client().pickAccount) await Client().pickAccount();
+    }
+
     customPrompts.showPrompt(
         "Welcome!",
         `
@@ -311,7 +313,7 @@ async function updatePowProgress(currentBits, targetLevel, challenge = null) {
 
 
 function initPow(onAcceptedCallback) {
-    socket.on('powChallenge', (pow) => {
+    socket.on('powChallenge', async (pow) => {
         console.log('Received PoW challenge:', pow.challenge, 'Difficulty:', pow.difficulty);
 
         // Check if the solution is already stored
@@ -326,7 +328,7 @@ function initPow(onAcceptedCallback) {
         }
     });
 
-    socket.on('powAccepted', (data) => {
+    socket.on('powAccepted', async (data) => {
         console.log('PoW accepted:', data);
         if (typeof onAcceptedCallback === "function") {
             onAcceptedCallback(data);

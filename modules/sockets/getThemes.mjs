@@ -2,16 +2,17 @@ import { validateMemberId } from "../functions/main.mjs";
 import { fs } from "../../index.mjs";
 import https from "https";
 import ArrayTools from "@hackthedev/arraytools";
+import {listThemes} from "./routes/themes.mjs";
 
 function getLocalThemes() {
     const dirs = fs.readdirSync("./public/css/themes/", { withFileTypes: true });
     return dirs.filter(d => d.isDirectory()).map(d => d.name);
 }
 
-function fetchGithubThemes() {
+async function fetchGithubThemes() {
     return new Promise(resolve => {
         https.get(
-            "https://api.github.com/repos/DCTS-Project/themes/contents/theme\n",
+            "https://api.github.com/repos/DCTS-Project/themes/contents/theme",
             { headers: { "User-Agent": "DCTS" } },
             res => {
                 let raw = "";
@@ -36,22 +37,17 @@ function getThemeFiles(theme) {
 }
 
 export async function getThemes(){
-    const local = getLocalThemes();
-    const remote = await fetchGithubThemes();
-    const merged = ArrayTools.merge(...new Set([...local, ...remote]));
-    return merged
+    return await listThemes();
 }
 
 export default (io) => (socket) => {
     socket.on("getThemes", async (member, response) => {
-        if (validateMemberId(member?.id, socket, member?.token) !== true) return;
-        const local = getLocalThemes();
-        const remote = await fetchGithubThemes();
-        const merged = Array.from(new Set([...local, ...remote]));
-        response({ error: null, themes: merged });
+        if (await validateMemberId(member?.id, socket, member?.token) !== true) return;
+        const themes = await getThemes();
+        response({ error: null, themes: themes });
     });
 
-    socket.on("getThemeFiles", (theme, response) => {
+    socket.on("getThemeFiles", async (theme, response) => {
         const files = getThemeFiles(theme);
         response({ error: null, files });
     });

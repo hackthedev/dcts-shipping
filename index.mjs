@@ -1,6 +1,15 @@
 import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
+// handle startup args
+let nodeArgs = process.argv;
 
-console.clear();
+// remove the first few arguments because fuck that lol
+nodeArgs.shift();
+nodeArgs.shift();
+
+if(!isPtero()){
+    console.clear();
+}
+console.log("Starting...");
 
 let versionPath = path.join(path.resolve(), "version");
 if(!fs.existsSync(versionPath)) {
@@ -110,13 +119,6 @@ let savedState = null; // In-memory config state
 let writeQueue = Promise.resolve(); // Queue for write operations
 let isClosing = false; // Flag to prevent multiple close attempts
 
-// handle startup args
-let nodeArgs = process.argv;
-
-// remove the first few arguments because fuck that lol
-nodeArgs.shift();
-nodeArgs.shift();
-
 if (nodeArgs.includes("--debug") || debugmode === true) {
     // enable debug logging
     Logger.logDebug = true;
@@ -163,16 +165,17 @@ if (fs.existsSync("./configs/sql.txt")) {
     serverconfig.serverinfo.sql.enabled = true; // enabled it because the file doesnt exist for fun
 }
 
-// overwrites for docker
-if (process.env.DB_HOST) serverconfig.serverinfo.sql.host = process.env.DB_HOST;
-if (process.env.DB_USER)
-    serverconfig.serverinfo.sql.username = process.env.DB_USER;
-if (process.env.DB_PASS)
-    serverconfig.serverinfo.sql.password = process.env.DB_PASS;
-if (process.env.DB_NAME)
-    serverconfig.serverinfo.sql.database = process.env.DB_NAME;
-if (process.env.DB_HOST || process.env.DB_USER || process.env.DB_PASS || process.env.DB_NAME) {
-    serverconfig.serverinfo.sql.enabled = true;
+let dbHost = process.env.DATABASE_HOST || process.env.DB_HOST;
+let dbUser = process.env.DATABASE_USER || process.env.DB_USER;
+let dbPass = process.env.DATABASE_PASSWORD || process.env.DB_PASS;
+let dbName = process.env.DATABASE_NAME || process.env.DB_NAME;
+
+if (dbHost) serverconfig.serverinfo.sql.host = dbHost;
+if (dbUser) serverconfig.serverinfo.sql.username = dbUser;
+if (dbPass) serverconfig.serverinfo.sql.password = dbPass;
+if (dbName) serverconfig.serverinfo.sql.database = dbName;
+
+if (dbHost || dbUser || dbPass || dbName) {
 }
 saveConfig(serverconfig);
 
@@ -185,16 +188,49 @@ if(!serverconfig?.serverinfo?.sql?.username){
 
 
 // create sql pool
-export let db = new dSyncSql({
-    host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
-    port: process.env.DB_PORT || serverconfig.serverinfo.sql.port,
-    user: process.env.DB_USER || serverconfig.serverinfo.sql.username,
-    password: process.env.DB_PASS || serverconfig.serverinfo.sql.password,
-    database: process.env.DB_NAME || serverconfig.serverinfo.sql.database,
-    waitForConnections: true,
-    connectionLimit: serverconfig.serverinfo.sql.connectionLimit,
-    queueLimit: 0,
-});
+export let db
+try {
+    db = new dSyncSql({
+        host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
+        port: process.env.DB_PORT || serverconfig.serverinfo.sql.port,
+        user: process.env.DB_USER || serverconfig.serverinfo.sql.username,
+        password: process.env.DB_PASS || serverconfig.serverinfo.sql.password,
+        database: process.env.DB_NAME || serverconfig.serverinfo.sql.database,
+        waitForConnections: true,
+        connectionLimit: serverconfig.serverinfo.sql.connectionLimit,
+        queueLimit: 0,
+    });
+
+    await db.ready;
+} catch (e) {
+    if(isPtero()){
+        if(debugmode === false) console.clear();
+        Logger.space();
+        Logger.success("===================================")
+        Logger.success("Setup successful!")
+        Logger.success("===================================")
+        Logger.space()
+        Logger.info("Important steps now!")
+        Logger.info("1) On the top, click on 'Databases'")
+        Logger.info("2) Click on 'New Database'")
+        Logger.info("3) Enter any name, ignore host setting, then click 'Create Database'")
+        Logger.info("4) Once successful, click the eye symbol and copy the username, database name and password.")
+        Logger.info("5) Go to 'Startup on the top'")
+        Logger.info("6) Edit the database related settings");
+        Logger.space();
+        Logger.info("Once you've done that try starting the server again in the 'Console' tab.")
+
+        if(debugmode === true){
+            Logger.warn(e)
+        }
+
+        process.exit(0);
+    }
+    else{
+        Logger.error(e)
+    }
+}
+
 // Import functions etc from files (= better organisation)
 // Special thanks to Kannustin <3
 
@@ -216,7 +252,6 @@ import {
     sanitizeInput,
     copyObject,
     sanitizeFilename,
-    checkMemberBan,
     hashPassword,
     getCastingMemberObject,
     findAndVerifyUser,
@@ -241,16 +276,13 @@ import {checkSSL} from "./modules/functions/http.mjs";
 
 // Chat functions
 import {
-    unbanIp,
     formatDateTime,
     findInJson,
     changeKeyVerification,
     getSocketIp,
-    hasPermission,
 } from "./modules/functions/chat/main.mjs";
 
 import {
-    checkAndCreateTable,
     queryDatabase,
 } from "./modules/functions/mysql/mysql.mjs";
 
@@ -286,6 +318,7 @@ import {
     getChannelMessageFrequency, getChannelRateLimit,
 } from "./modules/functions/anti-spam/messages.mjs";
 import {renderChart} from "./modules/functions/anti-spam/charts.mjs";
+import {unbanIp} from "./modules/functions/ban-system/helpers.mjs";
 
 /*
     Files for the plugin system
@@ -404,6 +437,56 @@ const processPlugins = async () => {
 // +1 convenience
 const tables = [
     {
+        name: "dm_rooms",
+        columns: [
+
+            {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "roomId", type: "varchar(20) NOT NULL UNIQUE KEY"},
+            {name: "title", type: "varchar(204) NOT NULL DEFAULT 'New Chat'"},
+            {name: "creatorId", type: "varchar(20) NOT NULL"},
+            {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+        ]
+    },
+    {
+        name: "dm_reads",
+        columns: [
+            {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "memberId", type: "varchar(204) NOT NULL"},
+            {name: "targetId", type: "varchar(100) NOT NULL"}, // roomId oder channelId
+            {name: "lastReadAt", type: "bigint NOT NULL DEFAULT 0"},
+        ],
+        keys: [
+            {name: "UNIQUE KEY", type: "unique_member_target (memberId, targetId)"},
+            {name: "KEY", type: "idx_memberId (memberId)"},
+        ]
+    },
+    {
+        name: "dm_room_participants",
+        columns: [
+            {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "roomId", type: "varchar(20) NOT NULL"},
+            {name: "memberId", type: "varchar(204) NOT NULL"},
+            {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+        ],
+        keys: [
+            {name: "UNIQUE KEY", type: "unique_room_member (roomId, memberId)"},
+            {name: "KEY", type: "idx_memberId (memberId)"},
+            {name: "KEY", type: "idx_roomId (roomId)"},
+        ]
+    },
+    {
+        name: "dms",
+        columns: [
+            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "authorId", type: "varchar(100) NOT NULL"},
+            {name: "roomId", type: "varchar(100) NOT NULL"},
+            {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
+            {name: "message", type: "longtext NOT NULL"},
+            {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+            {name: "editedAt", type: "bigint NULL"},
+        ]
+    },
+    {
         name: "messages",
         columns: [
             {name: "authorId", type: "varchar(100) NOT NULL"},
@@ -498,141 +581,6 @@ const tables = [
             {name: "reportNotes", type: "longtext NULL"},
             {name: "reportStatus", type: "varchar(100) NOT NULL DEFAULT 'pending'"},
         ],
-    }, // home section stuff
-    {
-        name: "dms_threads",
-        columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "type", type: "varchar(50) NOT NULL"},
-            {name: "title", type: "text NULL"},
-        ],
-    },
-    {
-        name: "dms_participants",
-        columns: [
-            { name: "threadId", type: "varchar(100) NOT NULL" },
-            { name: "memberId", type: "varchar(100) NOT NULL" },
-        ],
-        keys: [
-            { name: "PRIMARY KEY", type: "(threadId, memberId)" },
-            { name: "KEY", type: "memberId (memberId)" }
-        ]
-    },
-    {
-        name: "dms_message_logs",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT"},
-            {name: "messageId", type: "varchar(100) NOT NULL"},
-            {name: "threadId", type: "varchar(100) NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "message", type: "longtext NOT NULL"},
-            {name: "loggedAt", type: "datetime NOT NULL"},
-        ]
-    },
-    {
-        name: "dms_messages",
-        columns: [
-            {name: "messageId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "threadId", type: "varchar(100) NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "message", type: "longtext NOT NULL"},
-            {name: "createdAt", type: "datetime NOT NULL"},
-
-            {name: "supportIdentity", type: "varchar(20) NOT NULL DEFAULT 'self'"}, // 'self' | 'support_tagged' | 'support_anon'
-            {name: "displayName", type: "text NULL"},
-        ],
-        keys: [
-            {name: "KEY", type: "threadId (threadId)"},
-        ],
-    },
-    {
-        name: "tickets",
-        columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "creatorId", type: "varchar(100) NOT NULL"},
-            {name: "status", type: "varchar(20) NOT NULL DEFAULT 'open'"},
-            {
-                name: "createdAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
-            },
-            {
-                name: "updatedAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
-            },
-        ],
-        keys: [
-            {name: "KEY", type: "status (status)"},
-            {name: "KEY", type: "creatorId (creatorId)"},
-        ],
-    },
-
-    {
-        name: "posts",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "title", type: "text NOT NULL"},
-            {name: "body", type: "longtext NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "tag", type: "varchar(100) NULL"},
-            {name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0"},
-            {
-                name: "createdAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
-            },
-        ]
-    },
-    {
-        name: "news",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "title", type: "text NOT NULL"},
-            {name: "body", type: "longtext NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0"},
-            {
-                name: "createdAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
-            },
-        ]
-    },
-    {
-        name: "help",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "slug", type: "varchar(120) NOT NULL UNIQUE KEY"},
-            {name: "title", type: "text NOT NULL"},
-            {name: "body", type: "longtext NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0"},
-            {
-                name: "createdAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
-            },
-        ]
-    },
-    {
-        name: "dms_reads",
-        columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "memberId", type: "varchar(100) NOT NULL"},
-            {name: "last_read_at", type: "text NOT NULL"},
-        ]
-    },
-    {
-        name: "content_reads",
-        columns: [
-            {name: "id", type: "bigint NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "contentType", type: "varchar(32) NOT NULL"},
-            {name: "contentId", type: "bigint NOT NULL"},
-            {name: "userId", type: "varchar(128) NOT NULL"},
-            {name: "readAt", type: "datetime NULL"},
-            {name: "createdAt",type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP" },
-        ],
-        keys: [
-            {name: "UNIQUE KEY uq_content_user",type: "(contentType, contentId, userId)"},
-            {name: "INDEX idx_user_unread", type: "(userId, readAt)"},
-            {name: "INDEX idx_content", type: "(contentType, contentId)"},
-        ],
     },
     {
         name: "network_servers",
@@ -675,6 +623,18 @@ const tables = [
             {name: "publicKey", type: "text DEFAULT ''"},
             {name: "isVerifiedKey", type: "BOOLEAN DEFAULT FALSE"},
             {name: "pow", type: "text DEFAULT ''"},
+        ]
+    },
+    {
+        name: "bans",
+        columns: [
+            {name: "rowId", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+            {name: "memberId", type: "varchar(100) NOT NULL UNIQUE"},
+            {name: "issuerId", type: "varchar(100) NOT NULL"},
+            {name: "ip", type: "varchar(100) DEFAULT NULL"},
+            {name: "reason", type: "varchar(500) DEFAULT NULL"},
+            {name: "created", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+            {name: "until", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
         ]
     },
 ];
@@ -860,24 +820,30 @@ async function waitForTable(table, interval = 1000) {
     // after the tables exist etc we will fire up our awesome new job(s)
     scheduleDbTasks(dbTasks);
 
-    let libDir = path.join(path.resolve(), "public", "js", "libs");
-    const results = await FrontendLibs.installMultiple([
-        { package: '@hackthedev/file-manager@1.0.0', path: libDir },
-        { package: '@hackthedev/element-loader@1.0.0', path: libDir },
-    ]);
-
-    results.forEach((r) => {
-        if(r?.success || r?.skipped){
-            Logger.debug(r?.message)
-        }
-        else{
-            Logger.error(r?.message)
-        }
-    });
 
     initPaymentSystem(app)
     startServer();
     listenToIO();
+
+    try{
+        let libDir = path.join(path.resolve(), "public", "js", "libs");
+        const results = await FrontendLibs.installMultiple([
+            { package: '@hackthedev/file-manager@1.0.0', path: libDir },
+            { package: '@hackthedev/element-loader@1.0.0', path: libDir },
+        ]);
+
+        results.forEach((r) => {
+            if(r?.success || r?.skipped){
+                Logger.debug(r?.message)
+            }
+            else{
+                Logger.error(r?.message)
+            }
+        });
+    }
+    catch(exc){
+        Logger.error(exc);
+    }
 })();
 
 async function initIPSec(){
@@ -913,58 +879,12 @@ async function initIPSec(){
 export async function startServer() {
     initIPSec();
 
-
-    const { rows, hourlyBaseline, dailyAverage, hourlyAverage, currentHourlyAverage } = await getChannelMessageFrequency({ room: "0-0-1254" });
-    const status = await getChannelRateLimit("0-0-0");
-
-    // QUE PUTAS!
-    // THIS IS HERE FOR TESTING OKAY
-    // IM A LAZY SHIT SO THIS WILL BE MOVED ELSEWHERE
-    // AND YES THIS IS HOW I LIKE TO TEST AND FORGET
-    // IF YOU SEE THIS CRY FOR HELP
-
-    // daily shit
-    await renderChart({
-        xLabels: rows.map(r => r.day),
-        yValues: rows.map(r => r.messages),
-        xLabel: "Day",
-        yLabel: "Messages",
-        label: "messages / day",
-        lines: [
-            { value: dailyAverage, label: "Baseline", color: "rgba(255,234,0,0.9)" },
-            { value: dailyAverage * 2, label: "User Specific Slowmode", color: "rgba(255,98,0,0.9)" },
-            { value: dailyAverage * 2.5, label: "Rate Limit", color: "rgba(255, 0, 0, 0.9)" },
-            { value: status.currentDaily, label: "Current", color: "rgba(0,255,255,0.9)" }
-        ]
-    }, path.join(process.cwd(), "plot-daily.png"));
-
-    // hourly shit
-    const hours = [...hourlyBaseline.keys()];
-    const avgValues = [...hourlyBaseline.values()];
-
-    console.log(status); // <-- super fucking professional
-    await renderChart({
-        xLabels: hours.map(h => `${h}:00`),
-        yValues: avgValues,
-        xLabel: "Time",
-        yLabel: "avg messages",
-        label: "avg messages / hour",
-        lines: [
-            { value: hourlyAverage, label: "Baseline", color: "rgba(255,234,0,0.9)" },
-            { value: hourlyAverage * 2, label: "User Specific Slowmode", color: "rgba(255,98,0,0.9)" },
-            { value: hourlyAverage * 2.5, label: "Rate Limit", color: "rgba(255, 0, 0, 0.9)" },
-            { value: status.currentHourly, label: "Current", color: "rgba(0,255,255,0.9)" }
-        ]
-    }, path.join(process.cwd(), "plot-hourly.png"));
-
-
-
     // Start the app server
     var port = process.env.PORT || serverconfig.serverinfo.port;
     server.listen(port, function () {
         Logger.info("Server is running on port " + port);
 
-        if (serverconfig.serverinfo.setup == 0) {
+        if (serverconfig.serverinfo.setup === 0) {
             var adminToken = generateId(64);
             serverconfig.serverinfo.setup = 1;
             serverconfig.serverroles["1111"].token.push(adminToken);
@@ -1131,7 +1051,7 @@ async function listenToIO(){
 
         registerSocketEvents(socket);
 
-        socket.on("disconnect", () => {
+        socket.on("disconnect", async () => {
             //Logger.info(`Socket ${socket.id} disconnected, cleaning up handlers...`);
             if (activeSockets.has(socket.id)) {
                 activeSockets.get(socket.id).forEach((cleanup) => cleanup());
@@ -1151,7 +1071,7 @@ async function listenToIO(){
         if (serverconfig.ipblacklist.hasOwnProperty(ip)) {
             if (Date.now() <= serverconfig.ipblacklist[ip]) {
                 let detailText = "";
-                let banListResult = findInJson(serverconfig.banlist, "ip", ip);
+                let banListResult = findInJson(serverconfig?.banlist, "ip", ip);
                 if (banListResult != null) {
                     let bannedUntilDate = new Date(banListResult.until);
                     bannedUntilDate.getFullYear() === "9999"
@@ -1189,6 +1109,12 @@ async function listenToIO(){
             }
         }
     });
+
+    /*
+    app.use((req, res) => {
+        res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
+    });
+     */
 }
 
 function initConfig(filePath) {
@@ -1287,4 +1213,8 @@ export function setRatelimit(ip, value) {
 
 export function flipDebug() {
     debugmode = !debugmode;
+}
+
+export function isPtero(){
+    return nodeArgs?.includes("--ptero")
 }

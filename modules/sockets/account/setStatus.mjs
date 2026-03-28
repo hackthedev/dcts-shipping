@@ -5,9 +5,8 @@ import { copyObject, escapeHtml, limitString, sendMessageToUser, validateMemberI
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('setStatus', function (member) {
-        if (validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token) {
+    socket.on('setStatus', async function (member) {
+        if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
             serverconfig.servermembers[member.id].status = escapeHtml(limitString(member.status, 100));
             saveConfig(serverconfig);

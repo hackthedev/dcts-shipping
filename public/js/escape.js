@@ -1,4 +1,3 @@
-
 const SANITIZE_OPTIONS = {
     ALLOWED_TAGS: [
         'div',
@@ -24,6 +23,8 @@ const SANITIZE_OPTIONS = {
         "label",
         'blockquote',
         'strong',
+        "details",
+        "summary",
         'em',
         'img',
         'mark',
@@ -45,40 +46,55 @@ const SANITIZE_OPTIONS = {
         'title',
         'data-member-id',
         'data-message-id'
-    ]
+    ],
+
+    //ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    //ALLOW_DATA_ATTR: false,
+    //FORBID_ATTR: ['style', 'onerror', 'onclick', 'onload', 'onmouseover', 'onfocus', 'onblur'],
 };
 
-function sanitizeHtmlForRender(html, wrapParagraphs = true) {
+let _hooksInstalled = false;
+
+function installDomPurifyHooks() {
+    if (_hooksInstalled || !window.DOMPurify) return;
+    _hooksInstalled = true;
+
+    DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+        if (node.tagName === 'A') {
+            node.setAttribute('target', '_blank');
+            node.setAttribute('rel', 'noopener noreferrer nofollow');
+
+            const href = (node.getAttribute('href') || '').toLowerCase().trim();
+            if (href.startsWith('javascript:') || href.startsWith('data:') || href.startsWith('vbscript:')) {
+                node.removeAttribute('href');
+            }
+        }
+
+        if (node.tagName === 'IMG') {
+            const src = (node.getAttribute('src') || '').toLowerCase().trim();
+            if (src.startsWith('javascript:') || src.startsWith('data:') || src.startsWith('vbscript:')) {
+                node.remove();
+            }
+        }
+    });
+}
+
+function stripHTML(html) {
+    if (html == null) return '';
+    return DOMPurify.sanitize(String(html), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+}
+
+function sanitizeHtmlForRender(html, wrapParagraphs = false) {
     if (html == null) return '';
 
-    let raw = unescapeHtmlEntities(String(html || ''), true).trim();
-
-    const hasTags = /<\/?[a-z][\s\S]*?>/i.test(raw);
-    if (!hasTags) {
-        const paras = raw.replace(/\r/g, '').split(/\n{2,}/)
-            .map(s => s.trim())
-            .filter(Boolean);
-
-        let out = paras.map(p => {
-            const withBreaks = encodePlainText(p).replace(/\n/g, '<br>');
-            return wrapParagraphs ? `<p>${withBreaks}</p>` : withBreaks;
-        }).join(wrapParagraphs ? '' : '<br><br>');
-
-        const clean = DOMPurify.sanitize(out, SANITIZE_OPTIONS);
-        return `${clean}`;
-    }
-
-    let clean = DOMPurify.sanitize(raw, SANITIZE_OPTIONS);
+    installDomPurifyHooks();
+    let clean = DOMPurify.sanitize(String(html), SANITIZE_OPTIONS);
 
     if (wrapParagraphs) {
-        clean = clean.replace(/<p[^>]*>\s*(?:&nbsp;|\s|\u00A0)*<\/p>/gi, '');
-    } else {
-        clean = clean.replace(/<\/?p[^>]*>/gi, '');
+        clean = `<p>${clean}</p>`;
     }
 
-    clean = clean.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');
-
-    return `${clean.trim()}`;
+    return clean.trim();
 }
 
 function encodePlainText(s) {
@@ -95,16 +111,16 @@ function unescapeHtmlEntities(str, raw = false) {
 
     if(raw === true){
         const txt = document.createElement('textarea');
-        txt.innerHTML = String(str);
+        txt.innerHTML = DOMPurify.sanitize(String(str), SANITIZE_OPTIONS);
         return txt.value;
     }
 
     const txt = document.createElement('label');
-    txt.innerHTML = String(str);
+    txt.innerHTML = DOMPurify.sanitize(String(str), SANITIZE_OPTIONS);
     let unescaped = txt.textContent;
 
     const div = document.createElement('div');
-    div.innerHTML = unescaped;
+    div.innerHTML = DOMPurify.sanitize(unescaped, SANITIZE_OPTIONS);
     return div.textContent || "";
 }
 
@@ -129,7 +145,10 @@ function ensureDomPurify(src = "https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dis
     });
 
     return new Promise((resolve, reject) => {
-        const finish = () => resolve(window.DOMPurify);
+        const finish = () => {
+            installDomPurifyHooks();
+            resolve(window.DOMPurify);
+        };
         const waitForGlobal = () => {
             if (window.DOMPurify) return finish();
             setTimeout(waitForGlobal, 25);

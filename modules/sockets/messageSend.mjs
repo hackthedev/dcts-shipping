@@ -16,8 +16,12 @@ import {
 import {decodeFromBase64, getChatMessagesFromDb} from "../functions/mysql/helper.mjs";
 import {signer} from "../../index.mjs"
 import {decodeAndParseJSON, getMessageObjectById} from "./resolveMessage.mjs";
+import {getChannelRateLimit} from "../functions/anti-spam/messages.mjs";
+import {getMemberLatestMessage} from "../functions/chat/helper.mjs";
+import DateTools from "@hackthedev/datetools";
+import dSyncRateLimit from "@hackthedev/dsync-ratelimit";
 
-export function getMentionIdsFromText(text){
+export function getMentionIdsFromText(text) {
     return {
         userIds: [...text.matchAll(/&lt;@(\d+)&gt;/g)].map(m => m[1]),
         roleIds: [...text.matchAll(/&lt;!@(\d+)&gt;/g)].map(m => m[1]),
@@ -25,24 +29,56 @@ export function getMentionIdsFromText(text){
     }
 }
 
-
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('messageSend', async function (member, response) {
-        if (validateMemberId(member?.author?.id, socket, member?.token) === true) {
-
+        if (await validateMemberId(member?.author?.id, socket, member?.token) === true) {
             // some new handling
-            if(!member?.message) return response({error: "No message provided"})
-            if(!member?.group) return response({error: "No group provided"})
-            if(!member?.category) return response({error: "No category provided"})
-            if(!member?.channel) return response({error: "No channel provided"})
+            if (!String(member?.message)) return response({error: "No message provided"})
+            if (!String(member?.group)) return response({error: "No group provided"})
+            if (!String(member?.category)) return response({error: "No category provided"})
+            if (!String(member?.channel)) return response({error: "No channel provided"})
+
+            // anti spam check
+            let rateLimitResult = await getChannelRateLimit({
+                room: `${member.group}-${member.category}-${member.channel}`,
+                memberId: member.author.id,
+            })
+
+            // check results
+            if (rateLimitResult?.slowmode === true && !await hasPermission(member.author.id, "bypassSlowmode", member.channel)) {
+
+                // get last message sent from member here so we can check the timestamp
+                let lastMemberMessageObj = await getMemberLatestMessage(member.author.id, member.author.id);
+                if (lastMemberMessageObj){
+
+                    // get future date where slowmode will be expired
+                    let slowmodeDate = DateTools.getDateFromOffset(
+                        `+${serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration}`,
+                        new Date(lastMemberMessageObj.timestamp)
+                    ).getTime();
+
+                    if (lastMemberMessageObj?.timestamp &&
+                        new Date().getTime() >= slowmodeDate) {
+                        // member is allowed to send a message
+                    } else {
+                        // we can use that in the client to check for it like if xx?.slowMode and if
+                        // it exists we can straight up use it to get a display date. this way we
+                        // save some data to transmit ig as that works too.
+                        return response({error: "Slow mode active!", slowmode: slowmodeDate})
+                    }
+                }
+            }
+            else if(rateLimitResult?.rateLimited === true && !await hasPermission(member.author.id, "bypassRatelimit", member.channel)){
+                return response({error: "The server has been rate limited!", rateLimited: true})
+            }
 
             // check member mute
             let muteResult = checkMemberMute(socket, member);
             let muteText = "";
 
             if (muteResult?.timestamp) {
-                if (new Date(muteResult.timestamp).getFullYear() == "9999") {
+                if (new Date(muteResult.timestamp).getFullYear() === 9999) {
                     muteText = "muted permanently";
                 } else {
                     muteText = `muted until <br>${formatDateTime(new Date(muteResult.timestamp))}`
@@ -53,47 +89,33 @@ export default (io) => (socket) => {
                 muteText += `<br><br>Reason:<br>${muteResult.reason}`
             }
 
-            if (muteResult.result === true) {
-                sendMessageToUser(socket.id, JSON.parse(
-                    `{
-                                        "title": "You have been ${muteText}",
-                                        "message": "",
-                                        "buttons": {
-                                            "0": {
-                                                "text": "Ok",
-                                                "events": ""
-                                            }
-                                        },
-                                        "type": "error",
-                                        "popup_type": "confirm"
-                                    }`));
-
-                response({error: `You cant chat here! You have been ${muteText}`})
+            if (muteResult?.result === true) {
+                response({error: `You cant chat here! You have been ${muteText}`, muted: true})
                 return;
             }
 
             if (isNaN(member.group) === true) {
                 Logger.debug("Group was not a number");
-                return;
+                return response({error: "Group was not a number"});
             }
             if (isNaN(member.channel) === true) {
                 Logger.debug("Channel was not a number");
-                return;
+                return response({error: "Channel was not a number"});
             }
             if (isNaN(member.category) === true) {
                 Logger.debug("Category was not a number");
-                return;
+                return response({error: "Category was not a number"});
             }
             if (member.message.replaceAll(" ").length <= 0) {
                 Logger.debug("Message is shorter than 1 charachter");
-                return;
+                return response({error: "Message is shorter than 1 charachter"});
             }
 
             // if message is signed, verify the signature
-            if(member?.sig !== null && member?.sig?.length > 10 && serverconfig.servermembers[member?.id]?.isVerifiedKey === true){
+            if (member?.sig !== null && member?.sig?.length > 10 && serverconfig.servermembers[member?.id]?.isVerifiedKey === true) {
                 let signCheckResult = await signer.verifyJson(member, serverconfig.servermembers[member?.id]?.publicKey);
 
-                if(signCheckResult !== true){
+                if (signCheckResult !== true) {
                     sendMessageToUser(socket.id, JSON.parse(
                         `{
                                 "title": "Message rejected!",
@@ -108,12 +130,11 @@ export default (io) => (socket) => {
                                 "popup_type": "confirm"
                             }`));
 
-                    response({error: "Message rejected! Signature wasnt valid!"})
-                    return;
+                    return response({error: "Message rejected! Signature wasnt valid!"})
                 }
             }
 
-            if (!hasPermission(member.author?.id, ["sendMessages", "viewChannel"], member.channel, "all")) {
+            if (!await hasPermission(member.author?.id, ["sendMessages", "viewChannel"], member.channel, "all")) {
                 sendMessageToUser(socket.id, JSON.parse(
                     `{
                         "title": "You cant chat here",
@@ -128,9 +149,7 @@ export default (io) => (socket) => {
                         "popup_type": "confirm"
                    }`));
 
-                response({error: "You cant chat here!"})
-
-                return;
+                return response({error: "You cant chat here! Missing permissions"})
             }
 
             // Check if room exists
@@ -140,6 +159,7 @@ export default (io) => (socket) => {
                     member.timestamp = new Date().getTime();
                     member.messageId = messageid;
                     member.message = sanitizeInput(member.message);
+
                     member.reply = {
                         messageId: null,
                     }
@@ -154,7 +174,7 @@ export default (io) => (socket) => {
 
                     if (member.message.trim() === "" || member.message.trim().length === 0) {
                         console.log("Message was empty")
-                        return;
+                        return response({error: "Message was empty"});
                     }
 
                     // If the message was edited
@@ -167,7 +187,7 @@ export default (io) => (socket) => {
                         // Check if the user who wants to edit the msg is even the original author lol
                         if (originalMsgObj.author.id !== member.author?.id) {
                             Logger.warn(`Unauthorized user (${member.name} - ${member.author?.id}) tried to edit another users message`);
-                            return;
+                            return response({error: "You cant edit others messages!"});
                         }
 
                         // Update the data for editing
@@ -181,10 +201,10 @@ export default (io) => (socket) => {
                     }
 
                     // if the message is a reply
-                    if(member?.replyMsgId != null) {
+                    if (member?.replyMsgId != null) {
                         // Get Original message
                         let originalMsg = await getMessageObjectById(member.replyMsgId);
-                        if(originalMsg?.message == null) return response({error: "Original message wasnt found!"});
+                        if (originalMsg?.message == null) return response({error: "Original message wasnt found!"});
 
                         // client will later fetch the original message.
                         // this way it'll always show the up-to-date
@@ -194,8 +214,8 @@ export default (io) => (socket) => {
                     }
 
                     // update some stuff for the message event
-                    member = getCastingMemberObject(member);
-                    member.author = getCastingMemberObject(serverconfig.servermembers[member.author?.id]);
+                    member = await getCastingMemberObject(member);
+                    member.author = await getCastingMemberObject(serverconfig.servermembers[member.author?.id]);
 
                     // msgCount is incremented in saveChatMessage()
 
@@ -224,6 +244,8 @@ export default (io) => (socket) => {
                         io.in(member.room).emit("messageEdited", member);
                     }
 
+                    response({error: null})
+
                 } else {
                     Logger.debug("Couldnt find message channel");
 
@@ -243,6 +265,8 @@ export default (io) => (socket) => {
                             "type": "success",
                             "popup_type": "confirm"
                         }`));
+
+                    response({error: "Unable to find channel"})
                 }
             } catch (err) {
                 Logger.warn("Couldnt send message because room didnt exist");
@@ -269,10 +293,10 @@ export default (io) => (socket) => {
                             "type": "error",
                             "popup_type": "confirm"
                         }`));
-                return;
+                return response({error: "Channel not found!"});
             }
         } else {
-            Logger.warn("Cant send message because member id wasnt valid");
+            response({error: "Member validation failed!"})
         }
     });
 

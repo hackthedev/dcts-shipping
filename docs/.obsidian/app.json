@@ -1,0 +1,9 @@
+{
+  "newLinkFormat": "relative",
+  "alwaysUpdateLinks": true,
+  "showUnsupportedFiles": true,
+  "showInlineTitle": false,
+  "promptDelete": false,
+  "attachmentFolderPath": "assets",
+  "useMarkdownLinks": true
+}

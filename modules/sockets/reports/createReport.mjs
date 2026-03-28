@@ -5,14 +5,15 @@ import Logger from "../../functions/logger.mjs";
 import {emitBasedOnPermission, getCastingMemberObject, sanitizeInput, validateMemberId} from "../../functions/main.mjs";
 import { getChatMessagesFromDb, saveReport, decodeFromBase64 } from "../../functions/mysql/helper.mjs";
 import {queryDatabase} from "../../functions/mysql/mysql.mjs";
+import {stripHTML} from "../../functions/sanitizing/functions.mjs";
 
 export default (io) => (socket) => {
 
     function notifyReportAdmins() {
 
         // for each user, check if they are allowed to manage reports to notify them
-        Object.keys(usersocket).forEach(function (user) {
-            if (hasPermission(user, "manageReports")) {
+        Object.keys(usersocket).forEach(async function (user) {
+            if (await hasPermission(user, "manageReports")) {
                 io.to(usersocket[user]).emit("newReport");
             }
         });
@@ -21,28 +22,29 @@ export default (io) => (socket) => {
 
     // socket.on code here
     socket.on('createReport', async function (member, response) {
-        if (validateMemberId(member.id, socket, member.token) === true
+        if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            // waiting until permissions overhaul
-            //if (hasPermission(member.id, "createReports")) {
             try {
-                let reportCreatorId = xssFilters.inHTMLData(member.id);
-                let reportTargetId = xssFilters.inHTMLData(member.targetId);
-                let reportType = xssFilters.inHTMLData(member.type);
-                let reportDescription = xssFilters.inHTMLData(member.description);
+                if(!member?.targetId) return response({ error: "Missing report target member id" })
+
+                let reportCreatorId = stripHTML(member.id);
+                let reportTargetId = stripHTML(member.targetId);
+                let reportType = stripHTML(member.type);
+                let reportDescription = stripHTML(member.description);
 
                 switch (reportType) {
                     case "message":
                         let message = await getChatMessagesFromDb(null, null, reportTargetId);
                         let messageObj = message[0].message;
 
+                        // you shall not be confused like i was,
+                        // as this authorId is a database column
                         let messageAuthorId = message[0]?.authorId;
 
                         // if data is available
                         if (messageAuthorId) {
                             let room = message[0]?.room; // 1-2-3
                             let channelId = room.split("-")[2]; // 3
-                            let channelObj = resolveChannelById(channelId) // json obj of channel
 
                             if (!serverconfig.servermembers[messageAuthorId]) {
                                 return response({ type: "error", msg: "User is not in the server anymore" });
@@ -59,11 +61,13 @@ export default (io) => (socket) => {
 
                             emitBasedOnPermission("manageReports", "newReport")
                         }
+                        else{
+                            return response?.({ type: "error", error: "Message author not found" });
+                        }
+
+                        break;
                     case "dm":
                         try {
-                            const me = socket.data.memberId;
-                            if (!me) return response?.({ type: "error", msg: "unauthorized" });
-
                             let messageId = reportTargetId;
                             let reason = reportDescription;
                             let plainText = member?.plainText;
@@ -75,15 +79,16 @@ export default (io) => (socket) => {
                             if (!messageId) return response?.({ type: "error", msg: "missing messageId" });
 
                             const [msg] = await queryDatabase(
-                                `SELECT messageId, threadId, authorId, message, createdAt
-                                         FROM dms_messages
+                                `SELECT messageId, roomId, authorId, message, createdAt
+                                         FROM dms
                                          WHERE messageId = ? LIMIT 1`,
-                                [messageId.startsWith("m_") ? messageId : `m_${messageId}`]
+                                [messageId]
                             );
-                            if (!msg) return response?.({ type: "error", msg: "not found" });
 
-                            const reporterObj = getCastingMemberObject(serverconfig.servermembers[me]);
-                            const reportedObj = getCastingMemberObject(serverconfig.servermembers[msg.authorId]);
+                            if (!msg) return response?.({ type: "error", msg: "Message not found" });
+
+                            const reporterObj = await getCastingMemberObject(serverconfig.servermembers[member.id]);
+                            const reportedObj = await getCastingMemberObject(serverconfig.servermembers[msg.authorId]);
 
                             const reportData = {
                                 author: {
@@ -92,7 +97,7 @@ export default (io) => (socket) => {
                                     icon: reportedObj?.icon ?? "/img/default_pfp.png",
                                     color: reportedObj?.color ?? null
                                 },
-                                message: msg.message,
+                                payload: msg.message,
                                 plainText: sanitizeInput(plainText),
                                 group: "0",
                                 category: "0",
@@ -105,7 +110,7 @@ export default (io) => (socket) => {
 
                             await queryDatabase(
                                 `INSERT INTO reports (reportCreator, reportedUser, reportType, reportData, reportNotes, reportStatus)
-                                        VALUES (?, ?, 'dm_message', ?, ?, 'pending')`,
+                                        VALUES (?, ?, 'dm', ?, ?, 'pending')`,
                                 [
                                     JSON.stringify(reporterObj),
                                     JSON.stringify(reportedObj),

@@ -20,7 +20,8 @@ html, body {
 
     color: hsl(from var(--main) h s calc(l * 12));
     background: linear-gradient(180deg, hsl(from var(--main) h s calc(l * 1.5)), hsl(from var(--main) h s calc(l * 2)), hsl(from var(--main) h s calc(l * 2)));
-    overflow: auto;
+
+    overflow-y: auto !important;
 }
 
 #navigation{
@@ -44,9 +45,8 @@ html, body {
     justify-content: center;
     align-items: center;
 
-    width: 80vw;
-    flex: 1;
-    margin: 0 auto 0 auto;
+    margin: auto;
+    margin-bottom: 2rem;
 }
 
 h1 {
@@ -60,7 +60,7 @@ h1 {
     flex-wrap: wrap;
 
     justify-content: center;
-    align-content: center;
+    align-content: start;
     text-align: center;
 
     width: 80vw;

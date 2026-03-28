@@ -5,13 +5,16 @@
   "main": "index.mjs",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "author": "",
   "license": "",
   "dependencies": {
     "@hackthedev/arraytools": "^1.0.2",
-    "@hackthedev/datetools": "^1.0.1",
+    "@hackthedev/datetools": "^1.0.3",
     "@hackthedev/dsync": "^1.0.8",
     "@hackthedev/dsync-auth": "^1.0.9",
     "@hackthedev/dsync-files": "^1.0.9",
@@ -34,12 +37,13 @@
     "fs-extra": "^11.3.3",
     "get-folder-size": "^2.0.1",
     "htmlparser2": "^10.1.0",
+    "isomorphic-dompurify": "^3.0.0",
     "js-yaml": "^4.1.1",
     "jsonwebtoken": "^9.0.3",
     "livekit-server-sdk": "^2.15.0",
     "multer": "^2.0.2",
     "node-fetch": "^3.3.2",
-    "sanitize-html": "^2.17.0",
+    "sanitize-html": "^2.17.1",
     "socket.io": "^4.8.3",
     "sqlstring": "^2.3.3",
     "tough-cookie": "^6.0.0",
@@ -50,6 +54,9 @@
     "zip": "^1.2.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "socket.io-client": "^4.8.3",
+    "typescript": "^5.9.3",
+    "vitepress": "^2.0.0-alpha.16",
+    "vitepress-sidebar": "^1.33.1"
   }
 }

@@ -155,7 +155,7 @@ sortable-chosen.sortable-ghost {
     width: 100%;
     flex-direction: row;
 
-    padding: 16px;
+    padding: 12px 16px;
 
     font-weight: bold;
     font-size: 20px;
@@ -487,6 +487,20 @@ code.markdown{
     max-height: 100px;
 }
 
+.ql-toolbar button svg {
+    margin: auto !important;
+    width: 18px !important;
+    height: 18px !important;
+    border: none !important;
+}
+.ql-toolbar button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+    border: none !important;
+}
+
 .image-embed,
 .message-container .content img {
     max-width: 300px;
@@ -757,11 +771,10 @@ label.mention .inline-text-emoji{
 }
 
 label.mention {
-    display: inline;
-    all: unset;
+    display: inline-flex;
     background: rgba(135, 206, 235, 0.2);
-    padding: 0 4px;
-    margin: 0 4px;
+    padding: 0 2px;
+    margin: 0 2px;
     border-radius: 4px;
     cursor: pointer;
 }
@@ -816,9 +829,10 @@ label.mention.channel {
 
 #profile-role-menu {
     position: fixed;
-    z-index: 100000;
+    z-index: 3;
     width: calc(208px - 16px + 8px);
-    height: 150px;
+    max-height: 50vh;
+    min-height: 150px;
 
     padding: 8px;
 
@@ -836,8 +850,7 @@ label.mention.channel {
 
 #role-menu-header,
 #role-menu-search-input {
-    display: inline-block;
-    float: left;
+    width: 100%;
 }
 
 #role-menu-header {
@@ -848,6 +861,8 @@ label.mention.channel {
 
 #role-menu-search-input {
     outline: none !important;
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
 #role-menu-search-icon {
@@ -864,13 +879,12 @@ label.mention.channel {
 }
 
 #role-menu-list {
-    height: 120px;
+    display: flex;
+    flex-direction: column;
     width: 100%;
 
     margin-top: 8px;
 
-    display: block;
-    float: left;
 
     overflow-y: auto;
 }
@@ -998,4 +1012,13 @@ li.info span.bullet::before {
 
 li.info:hover {
     background-color: transparent !important;
+}
+
+.qr-code img{
+    width: 200px;
+    height: 200px;
+    margin: 8px;
+    padding: 8px;
+    border-radius: 10px;
+    background-color: white;
 }

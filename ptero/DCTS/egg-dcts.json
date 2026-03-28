@@ -22,7 +22,7 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!/bin/bash\r\n# DCTS\r\n#\r\n# Server Files: /mnt/server\r\n# All required packages are installed in the used install image \r\n\r\nexport HOME=/mnt/server\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ngit config --global --add safe.directory /mnt/server\r\n\r\nif [ ! -d \".git\" ]; then\r\n  echo \"Cloning from github...\"\r\n  git clone -b beta https://github.com/hackthedev/dcts-shipping.git .\r\nelse\r\n  echo \"Updating existing installation...\"\r\n  git fetch origin beta\r\n  git reset --hard origin/beta\r\nfi\r\n\r\necho -e \"Preparing directories and fixing permissions...\"\r\n\r\nmkdir -p sv configs public/uploads public/emojis plugins themes\r\n\r\necho -e \"Installation completed.\\nDependencies will be installed on first start.\"",
+            "script": "#!/bin/bash\nexport HOME=/mnt/server\nmkdir -p /mnt/server\ncd /mnt/server\n\ngit config --global --add safe.directory /mnt/server\n\nif [ ! -d \".git\" ]; then\n  echo \"Cloning from github...\"\n  git clone -b beta https://github.com/hackthedev/dcts-shipping.git .\nelse\n  echo \"Updating existing installation...\"\n  git fetch origin beta\n  git reset --hard origin/beta\nfi\n\necho -e \"Preparing directories and fixing permissions...\"\nmkdir -p sv configs public/uploads public/emojis plugins themes Livekit\n\necho \"Fetching latest LiveKit release...\"\nLATEST_VERSION=$(curl -s https://api.github.com/repos/livekit/livekit/releases/latest | grep '\"tag_name\":' | head -n 1 | sed -E 's/.*\"v([^\"]+)\".*/\\1/')\necho \"Installing LiveKit v${LATEST_VERSION}...\"\ncurl -sL \"https://github.com/livekit/livekit/releases/latest/download/livekit_${LATEST_VERSION}_linux_amd64.tar.gz\" -o livekit_linux_amd64.tar.gz\ntar -xzf livekit_linux_amd64.tar.gz livekit-server\nmv livekit-server Livekit/livekit-server\nrm livekit_linux_amd64.tar.gz\nchmod +x Livekit/livekit-server\n\necho -e \"Installation completed.\\nDependencies will be installed on first start.\"",
             "container": "ghcr.io/pterodactyl/installers:debian",
             "entrypoint": "bash"
         }
@@ -146,6 +146,36 @@
             "user_viewable": false,
             "user_editable": true,
             "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "LiveKit API Port (HTTP)",
+            "description": "Port used for internal LiveKit signaling.",
+            "env_variable": "LIVEKIT_PORT",
+            "default_value": "7880",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+        },
+        {
+            "name": "LiveKit RTC TCP Port",
+            "description": "Secondary port used for LiveKit TCP WebRTC signaling.",
+            "env_variable": "RTC_TCP_PORT",
+            "default_value": "7881",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+        },
+        {
+            "name": "LiveKit RTC UDP Port",
+            "description": "Port used for direct LiveKit UDP WebRTC media streaming.",
+            "env_variable": "RTC_UDP_PORT",
+            "default_value": "7882",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
             "field_type": "text"
         }
     ]

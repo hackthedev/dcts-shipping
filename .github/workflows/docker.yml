@@ -88,31 +88,4 @@ jobs:
           file: ./ptero/Dockerfile.dcts
           push: true
           tags: ${{ steps.ptero-dcts-branch.outputs.tags || steps.ptero-dcts-release.outputs.tags }}
-
-      - name: Set image tags ptero-livekit (branch)
-        if: github.event_name == 'push'
-        id: ptero-livekit-branch
-        run: |
-          TAGS="${{ env.REGISTRY }}/${{ github.repository_owner }}/ptero-livekit:${{ github.ref_name }}"
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            TAGS="$TAGS,${{ env.REGISTRY }}/${{ github.repository_owner }}/ptero-livekit:latest"
-          fi
-          echo "tags=$TAGS" >> $GITHUB_OUTPUT
-
-      - name: Set image tags ptero-livekit (release)
-        if: github.event_name == 'release'
-        id: ptero-livekit-release
-        run: |
-          VERSION="${GITHUB_REF_NAME}"
-          VERSION="${VERSION#v}"
-          TAGS="${{ env.REGISTRY }}/${{ github.repository_owner }}/ptero-livekit:${VERSION},${{ env.REGISTRY }}/${{ github.repository_owner }}/ptero-livekit:latest"
-          echo "tags=$TAGS" >> $GITHUB_OUTPUT
-
-      - name: Build and push ptero-livekit image
-        uses: docker/build-push-action@v5
-        with:
-          platforms: linux/amd64,linux/arm64
-          context: .
-          file: ./ptero/Dockerfile.livekit
-          push: true
-          tags: ${{ steps.ptero-livekit-branch.outputs.tags || steps.ptero-livekit-release.outputs.tags }}
+

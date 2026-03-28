@@ -40,5 +40,13 @@ if [ -n "$SERVER_PORT" ]; then
     /usr/local/bin/yq -i '.port = '"$SERVER_PORT" "${LIVEKIT_YAML_PATH}"
 fi
 
+if [ -n "$RTC_TCP_PORT" ]; then
+    /usr/local/bin/yq -i '.rtc.tcp_port = '"$RTC_TCP_PORT" "${LIVEKIT_YAML_PATH}"
+fi
+
+if [ -n "$RTC_UDP_PORT" ]; then
+    /usr/local/bin/yq -i '.rtc.udp_port = '"$RTC_UDP_PORT" "${LIVEKIT_YAML_PATH}"
+fi
+
 # Start livekit
 exec ./livekit-server --config "${LIVEKIT_YAML_PATH}"

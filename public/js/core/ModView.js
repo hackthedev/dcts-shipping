@@ -511,14 +511,11 @@ class ModView {
         let reportedUser = report.reportedUser;
         let reportData = report.reportData
         let reportType = report.reportType;
-        console.log(reportType)
 
         reportData.author = await ChatManager.resolveMember(reportData?.author?.id);
         if(!reportData?.author?.name){
             console.error("Unable to resolve reported message member")
         }
-
-        console.log(reportData)
 
         let reportMessage = "";
         if(reportType === "dm") {
@@ -566,10 +563,10 @@ class ModView {
             </div>
 
             <div class="user-section reported">
-                <img src="${reportedUser.icon || '/img/default_pfp.png'}" class="user-icon" onclick='getMemberProfile("${reportedUser.id}", null, null, event)'>
+                <img src="${stripHTML(reportedUser?.icon) || '/img/default_pfp.png'}" class="user-icon" onclick='getMemberProfile("${reportedUser.id}", null, null, event)'>
                 <div>
                     <h3>Reported</h3>
-                    <p><strong>Name:</strong> ${reportedUser.name} (${reportedUser.id})</p>
+                    <p><strong>Name:</strong> ${stripHTML(reportedUser.name)} (${stripHTML(reportedUser.id)})</p>
                     <!--<p><strong>Status:</strong> 
                         <select class="status-select">
                             <option value="active" ${reportedUser.isMuted === 0 && reportCreator.isBanned === 0 ? "selected" : ""}>Normal</option>
@@ -607,7 +604,7 @@ class ModView {
         <div class="modview_message-container">
             <h3>Reported Message</h3>
             <div class="modview_message-box">
-                <p><strong>User:</strong> ${reportData?.author?.name} (${reportData?.author?.id})</p>
+                <p><strong>User:</strong> ${stripHTML(reportData?.author?.name)} (${stripHTML(reportData?.author?.id)})</p>
                 <p><strong>Message:</strong></p> <div class="reported-message"><span>${reportMessage}</span></div>
                 <p><strong>Time:</strong> ${new Date(reportData.timestamp).toLocaleString()}</p>
             </div>
@@ -625,7 +622,7 @@ class ModView {
 
                             // check if the reported message isnt there anymore but logged
                             let messageColorhint = "";
-                            if (reportData.message == msg.message) {
+                            if (reportData.message === msg.message) {
                                 messageColorhint = "background:rgba(236, 105, 105, 0.6);"
                             }
                             else {
@@ -637,7 +634,7 @@ class ModView {
                                         <span class="history-time" style="font-style: italic;">${new Date(msg.editedTimestamp).toLocaleString()}:</span>
 
                                         <div class="history-msg" style="margin: 10px 0 0px 0; padding:10px; width:calc(100% - 20px);${messageColorhint}">
-                                            ${clean}
+                                            ${sanitizeHtmlForRender(clean)}
                                         </div>
                                     </div>`;
                         })

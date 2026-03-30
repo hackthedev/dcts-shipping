@@ -392,9 +392,9 @@ function renderDmMenu() {
     if (!ul) return;
 
     ul.innerHTML = `
-        <li onclick="promptAddDmParticipant()">
+        <!--<li onclick="promptAddDmParticipant()">
             ${statusIcons["user-plus"]} Add Member
-        </li>
+        </li>-->
         ${
         isLauncher() && Crypto.getE2EE() === true ?
             `<li class="warning" onclick="Crypto.setE2EE(false)">

@@ -156,6 +156,10 @@ function markElementAsMention(element, pingUser = false, message) {
                     closeSystemMessage();
                 }
             });
+
+            ChatManager.ShowNotification({
+                title, text, icon
+            })
         }
     }
 }

@@ -115,7 +115,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
     Docs.registerContextMenu()
 
-    registerMessageInfiniteLoad(document.getElementById("content"))
+    ChatManager.registerMessageInfiniteLoad(
+        document.getElementById("content"),
+        async (element) => {
+            const topElement = getFirstMessage(element);
+            if (!topElement) return;
+
+            const timeStamp = Number(topElement?.element?.getAttribute("data-timestamp"));
+            await getChatlog(element, timeStamp, true, getScrollPosition(element, topElement?.element));
+    })
+
     registerMessageCreateEvent();
     initAudioPlayerEvents();
 

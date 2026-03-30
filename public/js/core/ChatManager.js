@@ -99,6 +99,20 @@ class ChatManager {
         }
     }
 
+    static async registerMessageInfiniteLoad(element, callback = null) {
+        if(!element) throw new Error("Element for infinite scroll not found");
+
+        if(!element.getAttribute("data-scroll-init")){
+            element.addEventListener("scroll", async function () {
+                if (element.scrollTop === 0) {
+                    if(callback && typeof callback === "function") await callback(element);
+                }
+            });
+
+            element.setAttribute("data-scroll-init", true)
+        }
+    }
+
     static goBackToChatWindowFromPopup(popupId){
         if(!popupId) throw new Error("No popup id specified")
 

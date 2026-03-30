@@ -307,7 +307,7 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
                       INNER JOIN dm_room_participants ON dm_room_participants.roomId = dms.roomId
              WHERE dms.roomId = ?
                AND dm_room_participants.memberId = ?
-               AND dms.createdAt <= ?
+               AND dms.createdAt < ?
              ORDER BY dms.createdAt DESC LIMIT 50`,
             [roomId, requesterMemberId, timestamp]
         );
@@ -545,8 +545,9 @@ export default (io) => (socket) => {
 
         if (member?.roomId === undefined) return response({ error: "roomId missing" })
         if (member?.roomId?.length !== 12) return response({ error: "Invalid roomId format" })
+        if(!member?.timestamp) member.timestamp = null; // default
 
-        response({ error: null, messages: await getDmRoomMessages(member.roomId, member.id) });
+        response({ error: null, messages: await getDmRoomMessages(member.roomId, member.id, member.timestamp) });
     });
 
     socket.on('joinDmRoom', async function (member, response) {

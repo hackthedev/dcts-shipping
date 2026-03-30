@@ -61,6 +61,7 @@ class ChannelTree {
                         let channelHTML = `
                             <li draggable="true"
                                 channelType="${channel.type}" 
+                                data-channel-type="${channel.type}" 
                                 id="channel-${channel.id}" 
                                 style="color: #ABB8BE; cursor: pointer;user-select: none;" data-category-id="${category.info.id}" 
                                 data-channel-id="${channel.id}"
@@ -68,6 +69,7 @@ class ChannelTree {
                                 >                                
                                 <a 
                                     channelType="${channel.type}" 
+                                    data-channel-type="${channel.type}" 
                                     class="channelTrigger msgCount_${channel.msgCount}" 
                                     data-channel-id="${channel.id}" 
                                     data-category-id="${category.info.id}"

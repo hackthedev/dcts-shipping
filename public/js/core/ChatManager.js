@@ -384,7 +384,6 @@ class ChatManager {
                     solution: localStorage.getItem("pow_solution")
                 }
             }, async function (response) {
-
                 // sync data
                 if (response?.token) CookieManager.setCookie("token", response.token);
                 if (response?.icon) CookieManager.setCookie("pfp", response.icon);
@@ -447,11 +446,9 @@ class ChatManager {
                         initializeMentionAutocomplete(document.querySelector('.ql-editor'));
 
                         await ChatManager.getServerInfo();
-                        getChatlog(document.getElementById("content"));
-
-                        getMemberList()
                         getChannelTree()
-                        showGroupStats();
+                        getChatlog(document.getElementById("content"));
+                        getMemberList()
                         focusEditor()
                     }
 
@@ -983,6 +980,11 @@ class ChatManager {
         if (!channelElement) {
             return console.error("couldnt set channel marker as the channel element wasnt found", channelId);
         }
+
+        // important because its dumb to show a new message indicator on a voice channel
+        let channelType = channelElement?.getAttribute("data-channel-type");
+        if(!channelType) return console.warn("No channel type found for marker!!")
+        if(channelType === "voice") return;
 
         let indicator = channelElement.querySelector(".message-marker-icon");
         if (!channelElement || !indicator) {

@@ -492,7 +492,6 @@ socket.on('verifyPublicKey', async () => {
     Crypto.dSyncTest();
 });
 
-
 var chatlog = document.getElementById("content");
 var channeltree = document.getElementById("channeltree");
 var serverlist = document.getElementById("serverlist");

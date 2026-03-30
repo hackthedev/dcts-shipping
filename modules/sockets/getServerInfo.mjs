@@ -9,6 +9,7 @@ import {
     validateMemberId
 } from "../functions/main.mjs";
 import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
+import {normalizeVar} from "./userConnected.mjs";
 
 export async function getPublicServerInfoObject(){
     let groupId = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);
@@ -90,8 +91,8 @@ export default (io) => (socket) => {
 
                 if(member?.serverinfo?.uploadFileTypes !== undefined) serverconfig.serverinfo.uploadFileTypes = stripHTML(member.serverinfo.uploadFileTypes);
                 if(member?.serverinfo?.defaultChannel !== undefined) serverconfig.serverinfo.defaultChannel = stripHTML(member.serverinfo.defaultChannel);
-                if(member?.serverinfo?.registration?.enabled !== undefined) serverconfig.serverinfo.registration.enabled = stripHTML(member.serverinfo.registration.enabled);
-                if(member?.serverinfo?.discovery?.enabled !== undefined) serverconfig.serverinfo.discovery.enabled = stripHTML(member.serverinfo.discovery.enabled);
+                if(member?.serverinfo?.registration?.enabled !== undefined) serverconfig.serverinfo.registration.enabled = normalizeVar(stripHTML(member.serverinfo.registration.enabled));
+                if(member?.serverinfo?.discovery?.enabled !== undefined) serverconfig.serverinfo.discovery.enabled = normalizeVar(stripHTML(member.serverinfo.discovery.enabled));
                 if(member?.serverinfo?.discovery?.defaultStatus !== undefined) serverconfig.serverinfo.discovery.defaultStatus = stripHTML(member.serverinfo.discovery.defaultStatus);
 
                 if(member?.serverinfo?.instance?.contact?.email !== undefined) serverconfig.serverinfo.instance.contact.email = stripHTML(member.serverinfo.instance.contact.email);
@@ -113,7 +114,7 @@ export default (io) => (socket) => {
                 if(member?.serverinfo?.moderation?.ratelimit?.record_history !== undefined) serverconfig.serverinfo.moderation.ratelimit.record_history = stripHTML(member.serverinfo.moderation.ratelimit.record_history);
 
                 // some other mod settings
-                if(member?.serverinfo?.moderation?.bans?.memberListHideBanned !== undefined) serverconfig.serverinfo.moderation.bans.memberListHideBanned = stripHTML(member.serverinfo.moderation.bans.memberListHideBanned);
+                if(member?.serverinfo?.moderation?.bans?.memberListHideBanned !== undefined) serverconfig.serverinfo.moderation.bans.memberListHideBanned = normalizeVar(stripHTML(member.serverinfo.moderation.bans.memberListHideBanned));
                 if(member?.serverinfo?.moderation?.bans?.ipBanDuration !== undefined) serverconfig.serverinfo.moderation.bans.ipBanDuration = stripHTML(member.serverinfo.moderation.bans.ipBanDuration);
 
                 // server home
@@ -123,7 +124,7 @@ export default (io) => (socket) => {
                 if (member?.serverinfo?.home?.about) serverconfig.serverinfo.home.about = sanitizeHTML(member.serverinfo.home.about);
 
 
-                await saveConfig(serverconfig);
+                saveConfig(serverconfig);
                 return response({error: null})
             }
 

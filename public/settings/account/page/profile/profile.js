@@ -184,7 +184,7 @@ function saveSettings() {
             icon: settings_icon?.value != null && settings_icon?.value.length > 0 ? settings_icon?.value : null, // Icon
             banner: settings_banner?.value != null && settings_banner?.value.length > 0 ? settings_banner?.value : null, // Banner
             aboutme: settings_aboutme?.value != null && settings_aboutme?.value.length > 0 ? sanitizeHtmlForRender(settings_aboutme?.value) : null,  // About me
-            username: settings_username?.value != null && settings_username?.value.length >= 3 ? settings_username?.value : null, // Username
+            name: settings_username?.value != null && settings_username?.value.length >= 3 ? settings_username?.value : null, // Username
             status: settings_status != null && settings_status?.value.length >= 3 ? sanitizeHtmlForRender(settings_status?.value, false) : null // Status
         }
 
@@ -193,7 +193,7 @@ function saveSettings() {
             UserManager.setPFP(response.updatedMember.icon);
             UserManager.setBanner(response.updatedMember.banner);
             UserManager.setAboutme(response.updatedMember.aboutme);
-            UserManager.setUser(response.updatedMember.username);
+            UserManager.setUsername(response.updatedMember.name);
             UserManager.setStatus(response.updatedMember.status);
             saveButton.style.display = "none";
         });

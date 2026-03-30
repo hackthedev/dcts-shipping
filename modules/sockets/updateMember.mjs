@@ -9,7 +9,7 @@ export default (io) => (socket) => {
     socket.on('updateMember', async function (member, response) {
         try {
             if (await validateMemberId(member?.updatedMember?.id, socket, member?.token) === true) {
-                updateMember(member?.updatedMember);
+                await updateMember(member?.updatedMember);
                 response({ updatedMember: serverconfig.servermembers[member?.updatedMember?.id] });
             }
             else {

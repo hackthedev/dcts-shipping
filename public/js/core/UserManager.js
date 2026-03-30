@@ -489,7 +489,6 @@ class UserManager {
     }
 
     static getUsername() {
-
         var username = sanitizeHtmlForRender(CookieManager.getCookie("username"), false);
 
         if (username == null || username.length <= 0) {
@@ -579,11 +578,6 @@ class UserManager {
 
             window.location.href = window.location.origin;
         }
-    }
-
-    static setUser(username) {
-        // renamed setUser. May be used. legacy function lol
-        UserManager.setUsername(sanitizeHtmlForRender(username, false))
     }
 
     static setUsername(username) {
@@ -1077,33 +1071,6 @@ class UserManager {
                     UserManager.doAccountOnboarding();
                     return;
                 }
-
-                /*
-                // check profile picture
-                if (values.profileImage) {
-                    const profileUrl = await upload(values.profileImage);
-
-                    if (!profileUrl.error) {
-                        console.log('Profile Image :', profileUrl.urls);
-                        UserManager.setPFP(profileUrl.urls)
-                    }
-                } else {
-                    console.log('No profile image selected.');
-                }
-
-                // check banner
-                if (values.bannerImage) {
-                    const bannerUrl = await upload(values.bannerImage);
-
-                    if (!bannerUrl.error) {
-                        console.log('Banner Image :', bannerUrl.urls);
-                        UserManager.setBanner(bannerUrl.urls)
-                    }
-                } else {
-                    console.log('No banner image selected.');
-                }
-
-                 */
 
                 // check username
                 if (values.username) {

@@ -1000,3 +1000,7 @@ li.info:hover {
     border-radius: 10px;
     background-color: white;
 }
+
+.popupPageContainer{
+    z-index: 25 !important;
+}

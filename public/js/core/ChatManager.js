@@ -71,7 +71,6 @@ class ChatManager {
             // if not visible it may be transparent or behind other shit
             // i have some other css where i used it too in case
             pagePopup.style.backgroundColor = "black";
-            pagePopup.style.zIndex = "2";
 
             pagePopup.style.borderRadius = "8px";
             pagePopup.style.overflow = "hidden";

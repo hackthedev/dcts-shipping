@@ -158,7 +158,9 @@ function markElementAsMention(element, pingUser = false, message) {
             });
 
             ChatManager.ShowNotification({
-                title, text, icon
+                title: `${message?.author?.name} mentioned you`,
+                text: stripHTML(message.message),
+                icon: message.author.icon ?? "icon.ico"
             })
         }
     }

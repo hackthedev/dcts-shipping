@@ -64,8 +64,8 @@ export async function cleanMemberData(member) {
     if (member?.name) member.name = normalizeVar(member.name);
 
     // set public key and verify it
-    if (member?.publicKey != null) {
-        let memberServerPublicKey = serverconfig.servermembers[member.id].publicKey
+    if (member?.publicKey != null && serverconfig.servermembers[member.id]) {
+        let memberServerPublicKey = serverconfig.servermembers[member.id]?.publicKey
 
         // check if its valid and change the flag
         if ((await hasVerifiedKey(member.id)) === false && !memberServerPublicKey) {

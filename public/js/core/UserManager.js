@@ -103,7 +103,7 @@ class UserManager {
                ` : ""}
             <hr>
                        
-            <a id="dm_action" href="/home/?dm=${sanitizeHtmlForRender(memberObj?.id, false)}">&#10149; Send Message</a>
+            <a id="dm_action" onclick="ChatManager.openPagePopup('homeScreen', '/home/?dm=${sanitizeHtmlForRender(memberObj?.id, false)}')">&#10149; Send Message</a>
 
             <div class="profile_meta">
                 <div class="info">

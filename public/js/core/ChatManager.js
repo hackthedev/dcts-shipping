@@ -99,6 +99,26 @@ class ChatManager {
         }
     }
 
+    static playSound(sound, volume = 0.1) {
+        let audio = document.querySelector(`audio[data-sound="${sound}"]`);
+
+        if (!audio) {
+            audio = document.createElement("audio");
+            audio.src = `/sounds/${sound}.mp3`;
+            audio.dataset.sound = sound;
+            audio.preload = "auto";
+            document.body.appendChild(audio);
+        }
+
+        audio.volume = Math.min(1, Math.max(0, volume));
+        audio.currentTime = 0;
+
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {});
+        }
+    }
+
     static isIframe() {
         try {
             return window.self !== window.top;

@@ -141,7 +141,7 @@ function markElementAsMention(element, pingUser = false, message) {
     element.style.width = "calc(100% - 8px)";
 
     if (pingUser) {
-        playSound("message", 0.5);
+        ChatManager.playSound("message", 0.5);
 
         if (message) {
             showSystemMessage({

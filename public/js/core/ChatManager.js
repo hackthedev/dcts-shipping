@@ -99,6 +99,14 @@ class ChatManager {
         }
     }
 
+    static isIframe() {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
+    }
+
     static waitForSocket(socket) {
         return new Promise((resolve, reject) => {
             if (socket.connected) {

@@ -61,9 +61,6 @@ function handleInviteCode(member, socket, response) {
     // if a member was on the server already he wont be prompted for codes.
     if(member?.code)  member.code = stripHTML(member?.code)
 
-    console.log(serverconfig.serverinfo.registration)
-    console.log(serverconfig.servermembers[member?.id]?.onboarding)
-
     if (
         serverconfig.serverinfo.registration.enabled === false
         && (serverconfig.servermembers[member?.id]?.onboarding === false || !serverconfig.servermembers[member?.id])
@@ -200,7 +197,6 @@ export default (io) => (socket) => {
 
         // handle invites
         let inviteResult = handleInviteCode(member, socket, response);
-        console.log(inviteResult)
         if (!inviteResult) return;
 
         // check member ban and disconnect if needed.

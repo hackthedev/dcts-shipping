@@ -157,10 +157,15 @@ function markElementAsMention(element, pingUser = false, message) {
                 }
             });
 
+
+            let displayIcon = message?.author?.icon ?
+                                            message.author.icon.startsWith("https://") ?
+                                                    message?.author?.icon : `https://${ChatManager.extractHost(window.location.origin)}${message?.author?.icon}`
+                                            : "";
             ChatManager.ShowNotification({
                 title: `${message?.author?.name} mentioned you`,
                 text: stripHTML(message.message),
-                icon: message.author.icon ?? "icon.ico"
+                icon: displayIcon
             })
         }
     }

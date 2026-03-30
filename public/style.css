@@ -608,7 +608,7 @@ code.markdown{
     border-radius: 50%;
     border: 2px solid black;
 
-    z-index: 2;
+    z-index: 2 !important;
     text-align: center;
     font-style: normal;
 
@@ -617,11 +617,6 @@ code.markdown{
 
     margin: 0;
     padding: 2px 6px;
-}
-
-#mobile_GroupList .home-indicator {
-    top: 2px !important;
-    left: 38px !important;
 }
 
 .home-indicator.visible {

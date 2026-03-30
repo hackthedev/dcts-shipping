@@ -219,8 +219,6 @@ async function renderDMs(){
     let dmRooms = dms?.rooms;
     let unreads = await getAllUnread();
 
-    let firstDm = true
-
     if(dmRooms?.length > 0){
         getDMsNavContainer().innerHTML = "";
         for(let dm of dmRooms){
@@ -233,12 +231,13 @@ async function renderDMs(){
                 : "";
 
             getDMsNavContainer().insertAdjacentHTML('beforeend',
-                `<a class="entry ${!firstDm ? "selected" : ""}" data-room-id="${dm.roomId}" onclick="renderDmRoom('${dm.roomId}')">
+                `<a class="entry" data-room-id="${dm.roomId}" onclick="renderDmRoom('${dm.roomId}')">
                             <img class="icon" src="${stripHTML(icon)}">
                             <div class="info">
                                 <p>${stripHTML(title)}</p>
                                 <p class="status">${stripHTML(dm.status) ?? ""}</p>
                             </div>
+                            ${badge}
                         </a>`
             )
             setDmCount(dm.roomId, unreads?.[dm.roomId] || 0);

@@ -1301,7 +1301,7 @@ function displayHomeUnread() {
 
                 indicator.innerHTML = `${unread > 1000 ? "Too many :o" : unread}`;
                 indicator.classList.add('visible');
-                indicator.setAttribute('aria-label', `${unread} ungelesene Nachrichten`);
+                indicator.setAttribute('aria-label', `${unread} unread messages`);
             } else {
                 indicator.innerHTML = '';
                 indicator.classList.remove('visible');

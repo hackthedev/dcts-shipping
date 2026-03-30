@@ -99,6 +99,17 @@ class ChatManager {
         }
     }
 
+    static goBackToChatWindowFromPopup(popupId){
+        if(!popupId) throw new Error("No popup id specified")
+
+        if(ChatManager.isIframe()){
+            ChatManager.closePagePopup(popupId);
+        }
+        else{
+            window.location.href = "/"
+        }
+    }
+
     static playSound(sound, volume = 0.1) {
         let audio = document.querySelector(`audio[data-sound="${sound}"]`);
 

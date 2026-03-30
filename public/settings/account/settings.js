@@ -21,5 +21,5 @@ function getUrlParams(param) {
 }
 
 function closeSettings(){
-    ChatManager.closePagePopup("settingsPopup")
+    ChatManager.goBackToChatWindowFromPopup('settingsPopup')
 }

@@ -104,7 +104,7 @@ export default (io) => (socket) => {
                 if(member?.serverinfo?.instance?.contact?.signal !== undefined) serverconfig.serverinfo.instance.contact.signal = normalizeVar(stripHTML(member.serverinfo.instance.contact.signal));
 
                 if(member?.serverinfo?.maxUploadStorage !== undefined) serverconfig.serverinfo.maxUploadStorage = normalizeVar(stripHTML(member.serverinfo.maxUploadStorage));
-                if(member?.serverinfo?.rateLimit !== undefined) serverconfig.serverinfo.rateLimit = member.serverinfo.rateLimit;
+                if(member?.serverinfo?.rateLimit !== undefined) serverconfig.serverinfo.rateLimit = normalizeVar(member.serverinfo.rateLimit);
                 if(member?.serverinfo?.dropInterval !== undefined) serverconfig.serverinfo.dropInterval = normalizeVar(stripHTML(member.serverinfo.dropInterval));
 
                 // new rate limit settings

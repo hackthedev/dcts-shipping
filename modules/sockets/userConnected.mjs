@@ -45,6 +45,12 @@ export function normalizeVar(v) {
         if (val === "true") return true;
         if (val === "false") return false;
         if (val === "null" || val === "undefined" || val === "") return null;
+
+        if (/^-?\d+(\.\d+)?$/.test(val)) {
+            if (val.length < 10) {
+                return Number(val);
+            }
+        }
     }
 
     return String(v);
@@ -353,6 +359,9 @@ export default (io) => (socket) => {
                 serverconfig.servermembers[member.id]?.name == null ||
                 serverconfig.servermembers[member.id]?.token !== member.token
             ) {
+
+
+                console.log(member,  serverconfig.servermembers[member.id])
                 return response({
                     error: "Invalid login",
                     title: "Invalid Login",

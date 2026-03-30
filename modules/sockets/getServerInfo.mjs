@@ -85,9 +85,9 @@ export default (io) => (socket) => {
         if (await validateMemberId(member?.id, socket,  member?.token) === true
         ) {
             if (await hasPermission(member.id, "manageServer")) {
-                if(member?.serverinfo?.name !== undefined) serverconfig.serverinfo.name = sanitizeHTML(member.serverinfo.name);
-                if(member?.serverinfo?.description !== undefined) serverconfig.serverinfo.description = sanitizeHTML(member.serverinfo.description);
-                if(member?.serverinfo?.countryCode !== undefined) serverconfig.serverinfo.countryCode = stripHTML(member.serverinfo.countryCode);
+                if(member?.serverinfo?.name !== undefined) serverconfig.serverinfo.name = normalizeVar(sanitizeHTML(member.serverinfo.name));
+                if(member?.serverinfo?.description !== undefined) serverconfig.serverinfo.description = normalizeVar(sanitizeHTML(member.serverinfo.description));
+                if(member?.serverinfo?.countryCode !== undefined) serverconfig.serverinfo.countryCode = normalizeVar(stripHTML(member.serverinfo.countryCode));
 
                 if(member?.serverinfo?.uploadFileTypes !== undefined) serverconfig.serverinfo.uploadFileTypes = stripHTML(member.serverinfo.uploadFileTypes);
                 if(member?.serverinfo?.defaultChannel !== undefined) serverconfig.serverinfo.defaultChannel = stripHTML(member.serverinfo.defaultChannel);
@@ -95,22 +95,22 @@ export default (io) => (socket) => {
                 if(member?.serverinfo?.discovery?.enabled !== undefined) serverconfig.serverinfo.discovery.enabled = normalizeVar(stripHTML(member.serverinfo.discovery.enabled));
                 if(member?.serverinfo?.discovery?.defaultStatus !== undefined) serverconfig.serverinfo.discovery.defaultStatus = stripHTML(member.serverinfo.discovery.defaultStatus);
 
-                if(member?.serverinfo?.instance?.contact?.email !== undefined) serverconfig.serverinfo.instance.contact.email = stripHTML(member.serverinfo.instance.contact.email);
-                if(member?.serverinfo?.instance?.contact?.website !== undefined) serverconfig.serverinfo.instance.contact.website = stripHTML(member.serverinfo.instance.contact.website);
-                if(member?.serverinfo?.instance?.contact?.reddit !== undefined) serverconfig.serverinfo.instance.contact.reddit = stripHTML(member.serverinfo.instance.contact.reddit);
-                if(member?.serverinfo?.instance?.contact?.discord !== undefined) serverconfig.serverinfo.instance.contact.discord = stripHTML(member.serverinfo.instance.contact.discord);
-                if(member?.serverinfo?.instance?.contact?.github !== undefined) serverconfig.serverinfo.instance.contact.github = stripHTML(member.serverinfo.instance.contact.github);
-                if(member?.serverinfo?.instance?.contact?.owner?.name !== undefined) serverconfig.serverinfo.instance.contact.owner.name = stripHTML(member.serverinfo.instance.contact.owner.name);
-                if(member?.serverinfo?.instance?.contact?.signal !== undefined) serverconfig.serverinfo.instance.contact.signal = stripHTML(member.serverinfo.instance.contact.signal);
+                if(member?.serverinfo?.instance?.contact?.email !== undefined) serverconfig.serverinfo.instance.contact.email = normalizeVar(stripHTML(member.serverinfo.instance.contact.email));
+                if(member?.serverinfo?.instance?.contact?.website !== undefined) serverconfig.serverinfo.instance.contact.website = normalizeVar(stripHTML(member.serverinfo.instance.contact.website));
+                if(member?.serverinfo?.instance?.contact?.reddit !== undefined) serverconfig.serverinfo.instance.contact.reddit = normalizeVar(stripHTML(member.serverinfo.instance.contact.reddit));
+                if(member?.serverinfo?.instance?.contact?.discord !== undefined) serverconfig.serverinfo.instance.contact.discord = normalizeVar(stripHTML(member.serverinfo.instance.contact.discord));
+                if(member?.serverinfo?.instance?.contact?.github !== undefined) serverconfig.serverinfo.instance.contact.github = normalizeVar(stripHTML(member.serverinfo.instance.contact.github));
+                if(member?.serverinfo?.instance?.contact?.owner?.name !== undefined) serverconfig.serverinfo.instance.contact.owner.name = normalizeVar(stripHTML(member.serverinfo.instance.contact.owner.name));
+                if(member?.serverinfo?.instance?.contact?.signal !== undefined) serverconfig.serverinfo.instance.contact.signal = normalizeVar(stripHTML(member.serverinfo.instance.contact.signal));
 
-                if(member?.serverinfo?.maxUploadStorage !== undefined) serverconfig.serverinfo.maxUploadStorage = stripHTML(member.serverinfo.maxUploadStorage);
-                if(member?.serverinfo?.rateLimit !== undefined) serverconfig.serverinfo.rateLimit = stripHTML(member.serverinfo.rateLimit);
-                if(member?.serverinfo?.dropInterval !== undefined) serverconfig.serverinfo.dropInterval = stripHTML(member.serverinfo.dropInterval);
+                if(member?.serverinfo?.maxUploadStorage !== undefined) serverconfig.serverinfo.maxUploadStorage = normalizeVar(stripHTML(member.serverinfo.maxUploadStorage));
+                if(member?.serverinfo?.rateLimit !== undefined) serverconfig.serverinfo.rateLimit = member.serverinfo.rateLimit;
+                if(member?.serverinfo?.dropInterval !== undefined) serverconfig.serverinfo.dropInterval = normalizeVar(stripHTML(member.serverinfo.dropInterval));
 
                 // new rate limit settings
-                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode = stripHTML(member.serverinfo.moderation.ratelimit.actions.user_slowmode);
-                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode_duration !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration = stripHTML(member.serverinfo.moderation.ratelimit.actions.user_slowmode_duration);
-                if(member?.serverinfo?.moderation?.ratelimit?.actions?.ratelimit !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.ratelimit = stripHTML(member.serverinfo.moderation.ratelimit.actions.ratelimit);
+                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode = normalizeVar(stripHTML(member.serverinfo.moderation.ratelimit.actions.user_slowmode));
+                if(member?.serverinfo?.moderation?.ratelimit?.actions?.user_slowmode_duration !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration = normalizeVar(stripHTML(member.serverinfo.moderation.ratelimit.actions.user_slowmode_duration));
+                if(member?.serverinfo?.moderation?.ratelimit?.actions?.ratelimit !== undefined) serverconfig.serverinfo.moderation.ratelimit.actions.ratelimit = normalizeVar(stripHTML(member.serverinfo.moderation.ratelimit.actions.ratelimit));
                 if(member?.serverinfo?.moderation?.ratelimit?.record_history !== undefined) serverconfig.serverinfo.moderation.ratelimit.record_history = stripHTML(member.serverinfo.moderation.ratelimit.record_history);
 
                 // some other mod settings

@@ -1,5 +1,3 @@
-import DOMPurify from "isomorphic-dompurify";
-
 const SANITIZE_OPTIONS = {
     ALLOWED_TAGS: [
         'div',
@@ -81,7 +79,7 @@ function installDomPurifyHooks() {
     });
 }
 
-export function stripHTML(html) {
+function stripHTML(html) {
     if(typeof html === "object") return;
     if(Array.isArray(html)) return;
     if (html == null) return '';

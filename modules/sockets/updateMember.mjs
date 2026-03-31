@@ -11,6 +11,7 @@ export default (io) => (socket) => {
             if (await validateMemberId(member?.id, socket, member?.token) === true) {
                 await updateMember(member);
                 response({ ...serverconfig.servermembers[member.id] });
+                io.emit("memberUpdated");
             }
             else {
                 response({ error: "Member ID or Token invalid" });

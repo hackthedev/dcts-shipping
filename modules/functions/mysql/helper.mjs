@@ -34,8 +34,12 @@ export async function exportDatabaseFromPool(pool, outFile) {
 export async function saveMemberToDB(id, data) {
     if (!data || typeof data !== "object" || !id) return console.log("[saveMemberToDB] invalid data", data);
 
-    const cols = Object.keys(data);
-    const vals = Object.values(data);
+    const cleaned = Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [key, value === undefined ? null : value])
+    );
+
+    const cols = Object.keys(cleaned);
+    const vals = Object.values(cleaned);
     const placeholders = cols.map(() => "?").join(",");
 
     const sql = `
@@ -44,7 +48,6 @@ export async function saveMemberToDB(id, data) {
             ON DUPLICATE KEY UPDATE
                                  ${cols.map(c => `${c}=VALUES(${c})`).join(",")}
     `;
-
 
     try {
         await queryDatabase(sql, vals);

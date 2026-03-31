@@ -472,6 +472,11 @@ socket.on("updatedEmojis", async function () {
     fetchEmojis();
 })
 
+
+socket.on("memberUpdated", async function () {
+    getMemberList();
+})
+
 // very important
 ensureDomPurify()
 

@@ -818,7 +818,7 @@ class ChatManager {
     }
 
     static async uploadFile(files, type = "upload") {
-        const file = files[0];
+        const file = files[0] ?? files;
         const chunkSize = 1024 * 256; // 256kb
         const totalChunks = Math.ceil(file.size / chunkSize);
         const fileId = crypto.randomUUID();

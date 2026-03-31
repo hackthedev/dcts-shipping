@@ -160,11 +160,11 @@ function editHero() {
 
             // check banner and upload new one
             if (values.bannerImage) {
-                const bannerUrl = await upload(values.bannerImage);
-
+                const bannerUrl = await ChatManager.uploadFile(values.bannerImage);
+                console.log(bannerUrl)
                 if (!bannerUrl.error) {
-                    console.log('Banner Image :', bannerUrl.urls);
-                    homeBannerUrl = bannerUrl.urls;
+                    console.log('Banner Image :', bannerUrl.path);
+                    homeBannerUrl = bannerUrl.path;
                 }
             }
 

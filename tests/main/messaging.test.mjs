@@ -19,7 +19,8 @@ mock.module("../../modules/functions/mysql/helper.mjs", () => ({
     getChatMessagesFromDb: mock(async (roomId, index, msgId = null) => {
         return [{
             messageId: "123456789012",
-            authorId: "123456789012"
+            authorId: "123456789012",
+            message: '{ "author": { "id": "123456789012"}, "timestamp": null, "reply": {"messageId": null}}'
         }]
     }),
     deleteChatMessagesFromDb: mock(async (messageId, type) => {
@@ -91,7 +92,7 @@ mock.module("../../modules/functions/main.mjs", () => ({
 
 mock.module("../../modules/sockets/resolveMessage.mjs", () => ({
     processMessageObject: mock(async (msg) => ({ author: { id: "user12345678" } })),
-    checkMessageObjAuthor: mock()
+    checkMessageObjAuthor: mock(),
 }));
 
 let checkMemberBanResult = false;
@@ -299,6 +300,85 @@ describe("Server Chat", () => {
         const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).toBeNull();
     });
+
+    test("Edit Message", async () => {
+        const payload = {
+            author: {
+                id: "123456789012"
+            },
+            name: "Test User",
+            token: "test",
+            message: "Test message",
+            group: 0,
+            category: 0,
+            channel: 0,
+            editedMsgId: "123456789012"
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = true
+        isAdmin = true;
+        console.log(serverconfig?.groups[0]?.channels?.categories[1]?.channel[0])
+        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        expect(res.error).toBeNull();
+    });
+
+    test("Edit Message (slow mode)", async () => {
+        const payload = {
+            author: {
+                id: "123456789012"
+            },
+            name: "Test User",
+            token: "test",
+            message: "Test message",
+            group: 0,
+            category: 0,
+            channel: 0,
+            editedMsgId: "123456789012"
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = true
+        rateLimitResult = true
+        isAdmin = true;
+        console.log(serverconfig?.groups[0]?.channels?.categories[1]?.channel[0])
+        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        expect(res.error).toBeNull();
+    });
+
+    test("Edit Message (editor != author)", async () => {
+        const payload = {
+            author: {
+                id: "123456789013"
+            },
+            name: "Test User",
+            token: "test",
+            message: "Test message",
+            group: 0,
+            category: 0,
+            channel: 0,
+            editedMsgId: "123456789012"
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = true
+        isAdmin = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        expect(res.error).toBe("You cant edit others messages!");
+    });
+
 
     test("Delete Message", async () => {
         const payload = {

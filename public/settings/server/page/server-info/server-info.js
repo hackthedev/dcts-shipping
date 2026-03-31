@@ -59,7 +59,7 @@ function displayServerInfoSettings(response){
 
     mainSettings.insertAdjacentElement("beforeend",
         JsonEditor.getSettingElement(
-            response.serverinfo.description,
+            response.serverinfo.description ?? "",
             "Server Description",
             "",
             v => {

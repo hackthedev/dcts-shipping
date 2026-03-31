@@ -34,8 +34,13 @@ import crypto from "crypto";
 
 // dSync Libs
 import dSyncAuth from "@hackthedev/dsync-auth";
+//import dSyncAuth from "E:\\network-z-dev\\dSyncAuth\\index.mjs";
+
 import {dSyncSign} from "@hackthedev/dsync-sign";
+import dSyncWeb from "E:\\network-z-dev\\dsync-web\\index.mjs";
+
 import dSync from "@hackthedev/dsync";
+//import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
 
 import Logger from "@hackthedev/terminal-logger"
 import dSyncSql from "@hackthedev/dsync-sql"
@@ -101,14 +106,6 @@ export let socketToIP = [];
 export let allowLogging = false;
 export let debugmode = process.env.DEBUG || false;
 export let configPath = "./configs/config.json";
-
-export let syncer = new dSync("dcts", app);
-export const signer = new dSyncSign("./configs/privatekey.json");
-export const auther = new dSyncAuth(app, signer, async function (data) {
-    if (data.valid === true) {
-        changeKeyVerification(data.publicKey, data.valid);
-    }
-});
 
 export let ipsec;
 export let io;
@@ -188,7 +185,13 @@ if(!serverconfig?.serverinfo?.sql?.username){
 
 
 // create sql pool
-export let db
+export let db = null;
+export let dsw = null;
+
+export let syncer = null;
+export let signer = null;
+export let auther = null;
+
 try {
     db = new dSyncSql({
         host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
@@ -202,6 +205,34 @@ try {
     });
 
     await db.ready;
+
+    signer = new dSyncSign("./configs/privatekey.json");
+    auther = new dSyncAuth(app, signer, async function (data) {
+        if (data.valid === true) {
+            changeKeyVerification(data.publicKey, data.valid);
+        }
+    });
+
+    dsw = new dSyncWeb({
+        express,
+        app,
+        db,
+        dsa: dSyncAuth,
+        canAccess: async (req) => {
+            return true;
+        }
+    });
+
+    await dsw.setup();
+
+    syncer = new dSync({
+        prefix: "dcts",
+        app,
+        dSyncWeb: dsw,
+        host: serverconfig.serverinfo.app.url?.length >= 7 ? serverconfig.serverinfo.app.url : null
+    });
+
+    syncer.addPeer("http://localhost:2052", true)
 } catch (e) {
     if(isPtero()){
         if(debugmode === false) console.clear();
@@ -583,16 +614,6 @@ const tables = [
         ],
     },
     {
-        name: "network_servers",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "address", type: "varchar(255) NOT NULL UNIQUE KEY"},
-            {name: "status", type: "varchar(255) NOT NULL"},
-            {name: "data", type: "longtext"},
-            {name: "last_sync", type: "datetime NULL"},
-        ]
-    },
-    {
         name: "auditlog",
         columns: [
             {name: "text", type: "longtext NOT NULL"},
@@ -916,6 +937,20 @@ export async function startServer() {
         }
 
         syncDiscoveredHosts(true);
+
+        /*
+        syncer.on("ping", { ipRequestLimit: 1, requestLimit: 10 }, (payload, response) => {
+            response({ pong: true, from: "B" })
+        })
+
+        syncer.emit("ping", {
+            hello: "A and C",
+            title: "Connection Test Ping",
+            desc: "Just a simple test ping"
+        }, (res) => {
+            console.log(res)
+        })
+         */
     });
 }
 

@@ -81,13 +81,13 @@ export async function cleanMemberData(member) {
     if (member?.name) member.name = stripHTML(truncateText(normalizeVar(member.name), 25), async (tag, node, data) => {
         if (tag === "script") await autobanXSS(member.id);
     });
-    if (member?.status) member.status = stripHTML(truncateText(normalizeVar(member.status), async (tag, node, data) => {
+    if (member?.status) member.status = stripHTML(truncateText(normalizeVar(member.status), 50), async (tag, node, data) => {
         if (tag === "script") await autobanXSS(member.id);
-    }), 50);
+    });
 
-    if (member?.aboutme) member.aboutme = truncateText(sanitizeHTML(normalizeVar(member.aboutme), async (tag, node, data) => {
+    if (member?.aboutme) member.aboutme = sanitizeHTML(truncateText(normalizeVar(member.aboutme), 1000), async (tag, node, data) => {
         if (tag === "script") await autobanXSS(member.id);
-    }), 500);
+    });
 
     member.onboarding = stripHTML(normalizeVar(member.onboarding)) === "true";
     member.password = stripHTML(normalizeVar(member.password)) || null;

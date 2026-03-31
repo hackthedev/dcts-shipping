@@ -303,6 +303,31 @@ describe("Server Chat", () => {
         expect(res.error).toBeNull();
     });
 
+    test("Send Message (reply)", async () => {
+        const payload = {
+            author: {
+                id: "123456789012"
+            },
+            token: "test",
+            message: "Test message",
+            group: 0,
+            category: 0,
+            channel: 0,
+            replyMsgId: "123456789012"
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = true
+        isAdmin = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        expect(res.error).toBeNull();
+    });
+
     test("Edit Message", async () => {
         const payload = {
             author: {

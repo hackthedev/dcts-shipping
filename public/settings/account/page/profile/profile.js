@@ -21,34 +21,26 @@ document.addEventListener("pagechange", e => {
 
 async function handleUpload(files, id) {
     try {
-        // Ensure `files` is an array of `File` objects
-        const fileArray = Array.isArray(files) ? files : Array.from(files);
+        let uploadResult = await ChatManager.uploadFile(files);
+        console.log(uploadResult);
 
-        // Wait for the upload to complete
-        const result = await upload(fileArray);
+        if(uploadResult.ok !== true){
+            return showSystemMessage({
+                title: `Error uploading file`,
+                text: uploadResult?.error,
+                icon: "error",
+                type: "error",
+                duration: 4000
+            });
+        }
+
+        let url = `${uploadResult.path}`
 
         if (id === "settings_profile_icon") {
-            if (Array.isArray(result)) {
-                result.urls.forEach((url, index) => {
-                    console.log(`File ${index + 1} uploaded to: ${url}`);
-                    settings_icon.value = url;
-                });
-            } else {
-                console.log(`File uploaded to: ${result.urls}`);
-                settings_icon.value = result.urls;
-            }
+            settings_icon.value = url;
             updatePreview("settings_profile_icon");
         } else if (id === "settings_profile_banner") {
-            if (Array.isArray(result)) {
-                result.urls.forEach((url, index) => {
-                    console.log(`File ${index + 1} uploaded to: ${url}`);
-                    settings_banner.value = url;
-                });
-            } else {
-                console.log(`File uploaded to: ${result}`);
-                console.log(result);
-                settings_banner.value = result.urls;
-            }
+            settings_banner.value = url;
             updatePreview("settings_profile_banner");
         }
     } catch (error) {

@@ -36,6 +36,19 @@ export async function checkMigrations(){
         didBackup = false; // intentionally make a new backup after updates and migration
     }
 
+    // uploadfiletype array fix
+    migrationTask = await getMigrationTask(`uploadTypesFix`, true);
+    if(migrationTask && migrationTask?.done === 0){
+        await doBackup()
+
+        let uploadFileTypes = serverconfig.serverinfo.uploadFileTypes;
+        if(!Array.isArray(uploadFileTypes)){
+            serverconfig.serverinfo.uploadFileTypes =  uploadFileTypes.split(",");
+            await saveConfig(serverconfig);
+        }
+        await completeMigrationTask(`uploadTypesFix`)
+    }
+
     async function doBackup(){
         if(didBackup) return;
         didBackup = true;

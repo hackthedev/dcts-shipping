@@ -93,6 +93,7 @@ mock.module("../../modules/functions/main.mjs", () => ({
 mock.module("../../modules/sockets/resolveMessage.mjs", () => ({
     processMessageObject: mock(async (msg) => ({ author: { id: "user12345678" } })),
     checkMessageObjAuthor: mock(),
+    getMessageObjectById: mock(async (msgId) => ({message: { author: { id: "123456789012"}, timestamp: null, reply: { messageId: null}}, error: null}))
 }));
 
 let checkMemberBanResult = false;
@@ -111,12 +112,13 @@ mock.module("../../modules/functions/ban-system/helpers.mjs", () => ({
 // Import the handler AFTER mocks
 import messageSendHandler from "../../modules/sockets/messageSend.mjs";
 import deleteMessageHandler from "../../modules/sockets/deleteMessage.mjs";
+import messageReactionsHandler from "../../modules/sockets/messageReactions.mjs";
 
 import DateTools from "@hackthedev/datetools";
 import {serverconfig} from "../../index.mjs";
 
 describe("Server Chat", () => {
-    const env = setupSocketMock(messageSendHandler, deleteMessageHandler);
+    const env = setupSocketMock(messageSendHandler, deleteMessageHandler, messageReactionsHandler);
 
     test("Server connection", () => {
         expect(env.clientSocket.connected).toBeTrue();
@@ -320,7 +322,7 @@ describe("Server Chat", () => {
         checkMemberBanResult = false;
 
         slowmodeResult = false
-        rateLimitResult = true
+        rateLimitResult = false
         isAdmin = true;
         console.log(serverconfig?.groups[0]?.channels?.categories[1]?.channel[0])
         const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
@@ -346,7 +348,7 @@ describe("Server Chat", () => {
         checkMemberBanResult = false;
 
         slowmodeResult = true
-        rateLimitResult = true
+        rateLimitResult = false
         isAdmin = true;
         console.log(serverconfig?.groups[0]?.channels?.categories[1]?.channel[0])
         const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
@@ -379,6 +381,166 @@ describe("Server Chat", () => {
         expect(res.error).toBe("You cant edit others messages!");
     });
 
+    test("Add reaction", async () => {
+        const payload = {
+            id: "123456789012",
+            token: "test",
+            messageId: "123456789012",
+            emojiHash: "c4de1f0c46e01576810740c9242097cbab1f8bd0137a63d94f2362e7bdf682bd"
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = false
+        isAdmin = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("addMessageReaction", payload, resolve));
+        expect(res.error).toBeNull();
+    });
+
+    test("Add reaction (No message id)", async () => {
+        const payload = {
+            id: "123456789012",
+            token: "test",
+            emojiHash: "c4de1f0c46e01576810740c9242097cbab1f8bd0137a63d94f2362e7bdf682bd"
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = false
+        isAdmin = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("addMessageReaction", payload, resolve));
+        expect(res.error).toBe("Missing message id");
+    });
+
+    test("Add reaction (No emoji Hash)", async () => {
+        const payload = {
+            id: "123456789012",
+            token: "test",
+            messageId: "123456789012",
+            messageId: "123456789012",
+        };
+
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = false
+        isAdmin = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("addMessageReaction", payload, resolve));
+        expect(res.error).toBe("Missing emoji id");
+    });
+
+    test("Add reaction (Wrong emoji Hash length)", async () => {
+        const payload = {
+            id: "123456789012",
+            token: "test",
+            messageId: "123456789012",
+            emojiHash: "c4de1f0c4c9242f8bd0137a63d94f2362e7bdf682bd"
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = false
+        isAdmin = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("addMessageReaction", payload, resolve));
+        expect(res.error).toBe("Invalid emoji hash");
+    });
+
+    test("Add reaction (Default)", async () => {
+        const payload = {
+            id: "123456789012",
+            token: "test",
+            messageId: "123456789012",
+            emojiHash: "c4de1f0",
+            default: "xxx"
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = false
+        isAdmin = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("addMessageReaction", payload, resolve));
+        expect(res.error).toBeNull();
+    });
+
+    test("Remove reaction", async () => {
+        const payload = {
+            id: "123456789012",
+            token: "test",
+            messageId: "123456789012",
+            emojiHash: "c4de1f0c46e01576810740c9242097cbab1f8bd0137a63d94f2362e7bdf682bd"
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = false
+        isAdmin = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("removeMessageReaction", payload, resolve));
+        expect(res.error).toBeNull();
+    });
+
+    test("Remove reaction (No message id)", async () => {
+        const payload = {
+            id: "123456789012",
+            token: "test",
+            emojiHash: "c4de1f0c46e01576810740c9242097cbab1f8bd0137a63d94f2362e7bdf682bd"
+        };
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = false
+        isAdmin = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("removeMessageReaction", payload, resolve));
+        expect(res.error).toBe("Missing message id");
+    });
+
+    test("Remove reaction (No emoji Hash)", async () => {
+        const payload = {
+            id: "123456789012",
+            token: "test",
+            messageId: "123456789012",
+            messageId: "123456789012",
+        };
+
+
+        mockPermissionResult = true
+        checkMemberMuteResult = false;
+        checkMemberBanResult = false;
+
+        slowmodeResult = false
+        rateLimitResult = false
+        isAdmin = true;
+
+        const res = await new Promise(resolve => env.clientSocket.emit("removeMessageReaction", payload, resolve));
+        expect(res.error).toBe("Missing emoji id");
+    });
 
     test("Delete Message", async () => {
         const payload = {

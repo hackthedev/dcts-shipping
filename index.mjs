@@ -37,7 +37,8 @@ import dSyncAuth from "@hackthedev/dsync-auth";
 //import dSyncAuth from "E:\\network-z-dev\\dSyncAuth\\index.mjs";
 
 import {dSyncSign} from "@hackthedev/dsync-sign";
-import dSyncWeb from "E:\\network-z-dev\\dsync-web\\index.mjs";
+//import dSyncWeb from "E:\\network-z-dev\\dsync-web\\index.mjs";
+import dSyncWeb from "@hackthedev/dsync-web";
 
 import dSync from "@hackthedev/dsync";
 //import dSync from "E:\\network-z-dev\\dSync\\index.mjs";

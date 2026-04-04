@@ -349,7 +349,7 @@ describe("Server Chat", () => {
         slowmodeResult = false
         rateLimitResult = false
         isAdmin = true;
-        console.log(serverconfig?.groups[0]?.channels?.categories[1]?.channel[0])
+
         const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).toBeNull();
     });
@@ -375,7 +375,7 @@ describe("Server Chat", () => {
         slowmodeResult = true
         rateLimitResult = false
         isAdmin = true;
-        console.log(serverconfig?.groups[0]?.channels?.categories[1]?.channel[0])
+
         const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).toBeNull();
     });

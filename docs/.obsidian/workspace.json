@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Managed Hosting/Ptero Host Server Setup Notes.md",
+                "file": "Data privacy.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Ptero Host Server Setup Notes"
+              "title": "Data privacy"
             }
           }
         ]
@@ -185,8 +185,9 @@
   },
   "active": "3a0469dcedf99830",
   "lastOpenFiles": [
-    "install NodeJS.md",
     "Managed Hosting/Ptero Host Server Setup Notes.md",
+    "Data privacy.md",
+    "install NodeJS.md",
     "Lore/Terminology.md",
     "Lore/Technical overview.md",
     "Managed Hosting",
@@ -215,7 +216,6 @@
     "Unbenannt.base",
     "Socket Events/1. Heads up.md",
     "assets/Pasted image 20260228193820.png",
-    "Pasted image 20260228193713.png",
-    "Performance.md"
+    "Pasted image 20260228193713.png"
   ]
 }

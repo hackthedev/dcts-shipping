@@ -8,7 +8,7 @@
         "@hackthedev/arraytools": "^1.0.2",
         "@hackthedev/datetools": "^1.0.3",
         "@hackthedev/dsync": "^1.0.10",
-        "@hackthedev/dsync-auth": "^1.0.10",
+        "@hackthedev/dsync-auth": "^1.0.11",
         "@hackthedev/dsync-files": "^1.0.9",
         "@hackthedev/dsync-ipsec": "^1.0.12",
         "@hackthedev/dsync-pay": "^1.0.8",
@@ -16,7 +16,7 @@
         "@hackthedev/dsync-shop": "^1.0.1",
         "@hackthedev/dsync-sign": "^1.0.15",
         "@hackthedev/dsync-sql": "^1.0.10",
-        "@hackthedev/dsync-web": "^1.0.1",
+        "@hackthedev/dsync-web": "^1.0.3",
         "@hackthedev/frontend-libs": "^1.0.5",
         "@hackthedev/json-tools": "^1.0.8",
         "@hackthedev/terminal-logger": "^1.0.1",
@@ -167,7 +167,7 @@
 
     "@hackthedev/dsync-sql": ["@hackthedev/dsync-sql@1.0.10", "", { "dependencies": { "@hackthedev/terminal-logger": "^1.0.0", "mysql2": "^3.16.0", "mysql2-promise": "^0.1.4" } }, "sha512-P5y/290U/P5jFy1cigsRwMn95VIySIc3HnxN8t0AeiUy2p85EHW095bKYLgoMQSv15NFHMHA0ubmIxF9CuySaQ=="],
 
-    "@hackthedev/dsync-web": ["@hackthedev/dsync-web@1.0.1", "", {}, "sha512-Lb4IfVaRPiQ2jOwl1+a7GP0PQ1nN4cuNHp2uP42+hnslx7HirMN5G3WQ/demZzOMP14phaXjbm6kOvibitaddw=="],
+    "@hackthedev/dsync-web": ["@hackthedev/dsync-web@1.0.4", "", {}, "sha512-S43uSCAA1lCVD2a6dONBApxqNqO4fnOHeCxGNjqGApN9HYgamWYepoNUdpymWyd2vPmaKOgVj/3ocM4nnCjF3A=="],
 
     "@hackthedev/frontend-libs": ["@hackthedev/frontend-libs@1.0.5", "", {}, "sha512-fhNoNffBAaHfxb3ckxxPG/2gjfrklEoQrox5h1shLFeMlT2gdzlELy7hHXrLOtQcvHrjsJx2Qxg3mppG74agtg=="],
 

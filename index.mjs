@@ -220,7 +220,11 @@ try {
         db,
         dsa: dSyncAuth,
         canAccess: async (req) => {
-            return true;
+            const { id, token } = req.body || {};
+            if (!id || !token) return false;
+
+            if(!await validateMemberId(id, null, token)) return false;
+            return await hasPermission(id, "administrator");
         }
     });
 
@@ -232,8 +236,6 @@ try {
         dSyncWeb: dsw,
         host: serverconfig.serverinfo.app.url?.length >= 7 ? serverconfig.serverinfo.app.url : null
     });
-
-    syncer.addPeer("http://localhost:2052", true)
 } catch (e) {
     if(isPtero()){
         if(debugmode === false) console.clear();
@@ -311,7 +313,7 @@ import {
     formatDateTime,
     findInJson,
     changeKeyVerification,
-    getSocketIp,
+    getSocketIp, hasPermission,
 } from "./modules/functions/chat/main.mjs";
 
 import {
@@ -1041,41 +1043,45 @@ const registerSocketEvents = (socket) => {
 
 export async function checkPow(socket) {
     if (powVerifiedUsers.includes(socket.id)) {
-        socket.powValidated = true;
-        return;
+        socket.powValidated = true
+        return
     }
 
-    listenToPow(socket);
-    sendPow(socket);
+    let difficulty = serverconfig.serverinfo.pow.difficulty
+    let { challenge } = auther.createPowChallenge(difficulty)
+    let { estimatedSeconds } = dSyncAuth.estimatePoWDuration(difficulty)
+    let timeout = (estimatedSeconds * 2) + 600
 
-    let powResult = await waitForPowSolution(socket);
-    if (!powResult) {
-        // send error to user?
-        sendMessageToUser(
-            socket.id,
-            JSON.parse(
-                `{
-                        "title": "PoW Timeout",
-                        "message": "It took you too long to upgrade your identity...",
-                        "buttons": {
-                            "0": {
-                                "text": "Ok",
-                                "events": "onclick='closeModal()'"
-                            }
-                        },
-                        "type": "error",
-                        "displayTime": 600000
-                    }`,
-            ),
-        );
+    socket.emit("powChallenge", { challenge, difficulty })
 
-        socket.disconnect(true);
-    } else {
-        // let client know pow was successful.
-        socket.emit("powAccepted");
+    let pow = auther.waitForPow(challenge, difficulty, timeout)
+
+    socket.on("verifyPow", (data, response) => {
+        checkRateLimit(socket)
+        let result = pow.verify(data.solution)
+        response(result)
+    })
+
+    try {
+        await pow
+        powVerifiedUsers.push(socket.id)
+        socket.emit("powAccepted")
+    } catch (err) {
+        sendMessageToUser(socket.id, {
+            title: "PoW Timeout",
+            message: "It took you too long to upgrade your identity...",
+            buttons: {
+                "0": {
+                    text: "Ok",
+                    events: "onclick='closeModal()'"
+                }
+            },
+            type: "error",
+            displayTime: 600000
+        })
+        socket.disconnect(true)
     }
 }
-
 
 async function listenToIO(){
     io.on("connection", async function (socket) {

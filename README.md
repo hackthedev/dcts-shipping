@@ -1,5 +1,5 @@
 # DCTS - Direct Communication Through Sockets
-[Visit our subreddit](https://www.reddit.com/r/dcts/) • [Feature list](https://github.com/hackthedev/dcts-shipping/blob/beta/docs/Feature%20List.md) • [Discord for convenience](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [To-Do list](https://github.com/users/hackthedev/projects/6/views/1?filterQuery=-changelog-status%3AAdded+-status%3ACanceled) • [Tutorial Playlist](https://www.youtube.com/watch?v=b1RXJ-ykdgc&list=PL2xF-BCo1FWav36ktSvBG4nDsbhfLkFR-&index=1) • [Forum](https://dcts.community/)
+[Reddit](https://www.reddit.com/r/dcts/) • [Feature list](https://github.com/hackthedev/dcts-shipping/blob/beta/docs/Feature%20List.md) • [Discord](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [Tutorial Playlist](https://www.youtube.com/watch?v=b1RXJ-ykdgc&list=PL2xF-BCo1FWav36ktSvBG4nDsbhfLkFR-&index=1) • [Forum](https://dcts.community/) • [Documentation](https://docs.dcts.community/)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
 
@@ -148,7 +148,11 @@ You may get an error or warning telling you to edit the `configs/config.json` fi
 
 ### Bun:
 
+- ✔️ 1.3.11
+
 - ✔️ 1.3.5
+
+  
 
 ### Node:
 

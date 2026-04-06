@@ -186,34 +186,34 @@ export async function deleteDmRoom(roomId, issuerId) {
     if (!roomId || roomId?.length !== 12) throw new Error("Missing ID or invalid");
     if (!issuerId || issuerId?.length !== 12) throw new Error("Missing issuerId or invalid");
 
-    let roomRow = await queryDatabase(
-        `SELECT roomId, creatorId FROM dm_rooms WHERE creatorId = ?`,
-        [issuerId]
-    )
+    const roomRow = await queryDatabase(
+        `SELECT roomId, creatorId FROM dm_rooms WHERE roomId = ?`,
+        [roomId]
+    );
 
     if (roomRow?.length === 0) {
         return {
             error: "Room not found"
-        }
+        };
     }
 
-    let deleteResult = null;
-    if (roomRow[0]?.creatorId === issuerId && roomRow[0]?.roomId) {
-        deleteResult = await queryDatabase(
+    let result = null;
+
+    if (roomRow[0].creatorId === issuerId) {
+        result = await queryDatabase(
             `DELETE FROM dm_rooms WHERE roomId = ?`,
-            [roomRow[0]?.roomId]
-        )
-    }
-    else {
-        return {
-            error: "Unauthorized",
-            result: deleteResult
-        }
+            [roomId]
+        );
+    } else {
+        result = await queryDatabase(
+            `DELETE FROM dm_room_participants WHERE roomId = ? AND memberId = ?`,
+            [roomId, issuerId]
+        );
     }
 
     return {
         error: null,
-        result: deleteResult
+        result
     };
 }
 

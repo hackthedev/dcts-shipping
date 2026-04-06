@@ -222,7 +222,6 @@ async function renderServersList(servers) {
           <div class="features">
             <label>Features</label>
             ${externalServerData?.serverinfo?.ssl ? `<div id="ssl" class="feature">TLS Encryption</div>` : ""}
-            ${externalServerData?.serverinfo?.tenor ? `<div id="tenor" class="feature">Tenor GIFs</div>` : ""}
             ${externalServerData?.serverinfo?.voip ? `<div id="turn-vc" class="feature">VC</div>` : ""}
             ${externalServerData?.serverinfo?.voip ? `<div id="turn-ss" class="feature">Screensharing</div>` : ""}
             <div class="feature">Version ${versionText}</div>

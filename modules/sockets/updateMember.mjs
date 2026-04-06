@@ -8,16 +8,17 @@ export default (io) => (socket) => {
 
     socket.on('updateMember', async function (member, response) {
         try {
-            if (await validateMemberId(member?.updatedMember?.id, socket, member?.token) === true) {
-                updateMember(member?.updatedMember);
-                response({ updatedMember: serverconfig.servermembers[member?.updatedMember?.id] });
+            if (await validateMemberId(member?.id, socket, member?.token) === true) {
+                await updateMember(member);
+                response({ ...serverconfig.servermembers[member.id] });
+                io.emit("memberUpdated");
             }
             else {
-                response({ type: 'error', msg: 'Invalid member or token', error: "Member ID or Token invalid" });
+                response({ error: "Member ID or Token invalid" });
             }
         }
         catch (exception){
-            response({ type: 'error', msg: 'Error while updating the member information.', error: "Error while updating the member information from the server." });
+            response({ error: "Error while updating the member information from the server." });
         }
     });
 };

@@ -534,18 +534,6 @@ async function updateUIIndicators(message) {
     }, 500)
 }
 
-function registerMessageInfiniteLoad(element) {
-    element.addEventListener("scroll", async function () {
-        if (element.scrollTop === 0) {
-            const topElement = getFirstMessage(element);
-            if (!topElement) return;
-
-            const timeStamp = Number(topElement?.element?.getAttribute("data-timestamp"));
-            await getChatlog(element, timeStamp, true, getScrollPosition(element, topElement?.element));
-        }
-    });
-}
-
 function initQuillShit(customQuill = null){
 
     const Delta = Quill.import('delta');
@@ -1450,6 +1438,7 @@ async function displayMessagesInElement({
                                             index = -1,
                                             scrollPosition = null,
                                             getChannel = null,
+                                            getLoadingElement = null,
                                             messageType = null,
                                             pingMentions = false
                                         } = {}) {
@@ -1457,7 +1446,7 @@ async function displayMessagesInElement({
     let firstMessage = getFirstMessage(container);
 
     let loaded = 0;
-    let channelbar = document.querySelector("#channelname-bar");
+    let channelbar = typeof getLoadingElement === "function" ? getLoadingElement() : document.querySelector("#channelname-bar");
 
     for (let message of appendTop ? data.reverse() : data) {
         // if user switches channel we cancel this shit
@@ -1601,12 +1590,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
             frag.appendChild(renderer.firstElementChild);
         }
         renderer.remove();
-
-
-        let lastMsg = getLastMessage(container)
-        await withScrollLock(container, lastMsg?.element, async () => {
-            container.insertBefore(frag, container.firstElementChild);
-        });
+        container.insertBefore(frag, container.firstElementChild);
 
         Clock.stop("load_messages_processing")
 
@@ -1626,15 +1610,10 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
             scrollDown();
             toggleSmoothScroll(container, true)
 
-            watchMediaLoads(container, lastMsg?.element)
             updateMarkdownLinks(2000)
         } else {
             if (appendTop && scrollPosition !== null) {
-
-                await withScrollLock(container, lastMsg?.element, async () => {
-                    displayAwaitedMessages(container)
-                })
-                watchMediaLoads(container, lastMsg?.element)
+                displayAwaitedMessages(container)
             }
         }
 

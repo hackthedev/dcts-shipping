@@ -186,34 +186,34 @@ export async function deleteDmRoom(roomId, issuerId) {
     if (!roomId || roomId?.length !== 12) throw new Error("Missing ID or invalid");
     if (!issuerId || issuerId?.length !== 12) throw new Error("Missing issuerId or invalid");
 
-    let roomRow = await queryDatabase(
-        `SELECT roomId, creatorId FROM dm_rooms WHERE creatorId = ?`,
-        [issuerId]
-    )
+    const roomRow = await queryDatabase(
+        `SELECT roomId, creatorId FROM dm_rooms WHERE roomId = ?`,
+        [roomId]
+    );
 
     if (roomRow?.length === 0) {
         return {
             error: "Room not found"
-        }
+        };
     }
 
-    let deleteResult = null;
-    if (roomRow[0]?.creatorId === issuerId && roomRow[0]?.roomId) {
-        deleteResult = await queryDatabase(
+    let result = null;
+
+    if (roomRow[0].creatorId === issuerId) {
+        result = await queryDatabase(
             `DELETE FROM dm_rooms WHERE roomId = ?`,
-            [roomRow[0]?.roomId]
-        )
-    }
-    else {
-        return {
-            error: "Unauthorized",
-            result: deleteResult
-        }
+            [roomId]
+        );
+    } else {
+        result = await queryDatabase(
+            `DELETE FROM dm_room_participants WHERE roomId = ? AND memberId = ?`,
+            [roomId, issuerId]
+        );
     }
 
     return {
         error: null,
-        result: deleteResult
+        result
     };
 }
 
@@ -307,7 +307,7 @@ export async function getDmRoomMessages(roomId, requesterMemberId, timestamp = n
                       INNER JOIN dm_room_participants ON dm_room_participants.roomId = dms.roomId
              WHERE dms.roomId = ?
                AND dm_room_participants.memberId = ?
-               AND dms.createdAt <= ?
+               AND dms.createdAt < ?
              ORDER BY dms.createdAt DESC LIMIT 50`,
             [roomId, requesterMemberId, timestamp]
         );
@@ -545,8 +545,9 @@ export default (io) => (socket) => {
 
         if (member?.roomId === undefined) return response({ error: "roomId missing" })
         if (member?.roomId?.length !== 12) return response({ error: "Invalid roomId format" })
+        if(!member?.timestamp) member.timestamp = null; // default
 
-        response({ error: null, messages: await getDmRoomMessages(member.roomId, member.id) });
+        response({ error: null, messages: await getDmRoomMessages(member.roomId, member.id, member.timestamp) });
     });
 
     socket.on('joinDmRoom', async function (member, response) {

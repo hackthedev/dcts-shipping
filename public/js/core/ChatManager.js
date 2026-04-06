@@ -8,6 +8,150 @@ class ChatManager {
         return Math.random() < percent / 100;
     }
 
+    static closePagePopup(id) {
+        let pagePopup = window.parent.document.querySelector(`#${id}`);
+        if (pagePopup) {
+            pagePopup.remove()
+        }
+    }
+
+    static isPopupShown(id) {
+        return !!document.querySelector(`.popupPageContainer#${id}`);
+    }
+
+    static extractHost(url) {
+        if (!url) return null;
+        const s = String(url).trim();
+
+        const looksLikeBareIPv6 = !s.includes('://') && !s.includes('/') && s.includes(':') && /^[0-9A-Fa-f:.]+$/.test(s);
+        const withProto = looksLikeBareIPv6 ? `https://[${s}]` : (s.includes('://') ? s : `https://${s}`);
+
+        try {
+            const u = new URL(withProto);
+            const host = u.hostname; // IPv6 returned without brackets
+            const port = u.port;
+            if (host.includes(':')) {
+                return port ? `[${host}]:${port}` : host;
+            }
+            return port ? `${host}:${port}` : host;
+        } catch (e) {
+            const re = /^(?:https?:\/\/)?(?:[^@\/\n]+@)?([^:\/?#]+)(?::(\d+))?(?:[\/?#]|$)/i;
+            const m = s.match(re);
+            if (!m) return null;
+            const hostname = m[1].replace(/^\[(.*)\]$/, '$1');
+            const port = m[2];
+            if (hostname.includes(':')) return port ? `[${hostname}]:${port}` : hostname;
+            return port ? `${hostname}:${port}` : hostname;
+        }
+    }
+
+    static openPagePopup(elementId, url) {
+        if (!url) throw new Error("No url supplied bitch", url); // lol
+        MobilePanel.close()
+
+        let pagePopup = document.querySelector('#' + elementId);
+        let iframe = pagePopup?.querySelector('iframe');
+
+        // if no shit found make it
+        if (!pagePopup) {
+            pagePopup = document.createElement('div');
+            pagePopup.classList.add('popupPageContainer');
+            pagePopup.id = elementId;
+
+            // some styling for it to seam "real
+            pagePopup.style.width = "92%";
+            pagePopup.style.height = "92%"
+
+            // this is how you center shit easily with css
+            pagePopup.style.position = "fixed";
+            pagePopup.style.top = "50%";
+            pagePopup.style.left = "50%";
+            pagePopup.style.transform = "translate(-50%, -50%)";
+
+            // if not visible it may be transparent or behind other shit
+            // i have some other css where i used it too in case
+            pagePopup.style.backgroundColor = "black";
+
+            pagePopup.style.borderRadius = "8px";
+            pagePopup.style.overflow = "hidden";
+
+            pagePopup.style.border = "1.25px solid var(--border-color-bright)";
+            pagePopup.style.boxShadow = "0 0 60px rgba(0,0,0,1)";
+            pagePopup.style.backdropFilter = "blur(10px)";
+            pagePopup.style.display = "flex";
+
+            // then add it to the document
+            document.body.appendChild(pagePopup);
+        } else {
+            pagePopup.id = elementId;
+            pagePopup.style.display = "flex";
+        }
+
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.src = url;
+            iframe.style.width = "100%";
+            iframe.style.height = "100%";
+            iframe.style.border = "none";
+            pagePopup.appendChild(iframe);
+        } else {
+            iframe.src = url
+        }
+    }
+
+    static async registerMessageInfiniteLoad(element, callback = null) {
+        if(!element) throw new Error("Element for infinite scroll not found");
+
+        if(!element.getAttribute("data-scroll-init")){
+            element.addEventListener("scroll", async function () {
+                if (element.scrollTop === 0) {
+                    if(callback && typeof callback === "function") await callback(element);
+                }
+            });
+
+            element.setAttribute("data-scroll-init", true)
+        }
+    }
+
+    static goBackToChatWindowFromPopup(popupId){
+        if(!popupId) throw new Error("No popup id specified")
+
+        if(ChatManager.isIframe()){
+            ChatManager.closePagePopup(popupId);
+        }
+        else{
+            window.location.href = "/"
+        }
+    }
+
+    static playSound(sound, volume = 0.1) {
+        let audio = document.querySelector(`audio[data-sound="${sound}"]`);
+
+        if (!audio) {
+            audio = document.createElement("audio");
+            audio.src = `/sounds/${sound}.mp3`;
+            audio.dataset.sound = sound;
+            audio.preload = "auto";
+            document.body.appendChild(audio);
+        }
+
+        audio.volume = Math.min(1, Math.max(0, volume));
+        audio.currentTime = 0;
+
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {});
+        }
+    }
+
+    static isIframe() {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
+    }
+
     static waitForSocket(socket) {
         return new Promise((resolve, reject) => {
             if (socket.connected) {
@@ -48,17 +192,17 @@ class ChatManager {
         return `<img src="/img/default_emojis/${codepoints.toLowerCase()}.svg" title="${code?.toUpperCase()}" class="inline-text-emoji">`;
     }
 
-    static async showThemePage(){
+    static async showThemePage() {
         initThemePageContext();
 
         let themesRes = await fetch("/themes/list");
         let themes;
-        if(themesRes.status === 200){
+        if (themesRes.status === 200) {
             let responseJson = await themesRes.json();
             themes = responseJson?.themes
         }
 
-        if(!themes) return console.warn("No themes found")
+        if (!themes) return console.warn("No themes found")
 
         await PageRenderer.renderHTML(document.body,
             `
@@ -148,19 +292,19 @@ class ChatManager {
         let themeList = PageRenderer.Element().querySelector(".theme-entries");
         await buildThemeEntryBodyHTML(themes, themeList)
 
-        async function buildThemeEntryBodyHTML(themes, element){
-            if(themes.length > 0){
-                for(let theme of themes){
+        async function buildThemeEntryBodyHTML(themes, element) {
+            if (themes.length > 0) {
+                for (let theme of themes) {
                     element.insertAdjacentHTML("beforeend", await getThemeEntryHTML(theme));
                 }
             }
         }
 
-        async function getThemeEntryHTML(theme){
+        async function getThemeEntryHTML(theme) {
             let themeResponse = await fetch(`https://raw.githubusercontent.com/DCTS-Project/themes/refs/heads/main/theme/${theme}/config.json`);
             let themeMeta = null;
-            if(themeResponse.status === 200) themeMeta = await themeResponse.json();
-            if(!themeMeta){
+            if (themeResponse.status === 200) themeMeta = await themeResponse.json();
+            if (!themeMeta) {
                 console.error(`No theme meta found for theme ${theme}`)
                 return "";
             }
@@ -176,8 +320,8 @@ class ChatManager {
             `
         }
 
-        function initThemePageContext(){
-            if(window.didInitthemePageContext) return;
+        function initThemePageContext() {
+            if (window.didInitthemePageContext) return;
 
             ContextMenu.registerClickEvent(
                 "theme page selector",
@@ -191,7 +335,7 @@ class ChatManager {
                         return;
                     }
 
-                    if(!await downloadTheme(theme)){
+                    if (!await downloadTheme(theme)) {
                         return showSystemMessage({
                             title: `Error setting theme`,
                             text: "It seems to be currently unavailable",
@@ -211,11 +355,11 @@ class ChatManager {
             window.didInitthemePageContext = true;
         }
 
-        async function downloadTheme(theme){
-            if(!theme) throw new Error("Missing theme name for download");
+        async function downloadTheme(theme) {
+            if (!theme) throw new Error("Missing theme name for download");
 
             let localThemeRes = await fetch(`/css/themes/${theme}/${theme}.css`)
-            if(localThemeRes.status === 200) return true;
+            if (localThemeRes.status === 200) return true;
 
             showSystemMessage({
                 title: `Downloading theme...`,
@@ -223,9 +367,9 @@ class ChatManager {
                 type: "info"
             })
 
-            if(localThemeRes.status === 404){
+            if (localThemeRes.status === 404) {
                 let downloadRes = await fetch(`/themes/download/${theme}`);
-                if(downloadRes.status === 200) return true;
+                if (downloadRes.status === 200) return true;
                 console.error(downloadRes)
                 return false;
             }
@@ -239,15 +383,15 @@ class ChatManager {
         // and the user has not set his own theme
         // then we apply the server default theme
         let serverDefaultTheme = "{{default_theme}}";
-        if(serverDefaultTheme !== "default.css" && theme === "default.css"){
+        if (serverDefaultTheme !== "default.css" && theme === "default.css") {
             theme = serverDefaultTheme.split(".css")[0];
         }
 
         // apply accent before theme
-        if(accent) document.documentElement.style.setProperty('--main', accent);
+        if (accent) document.documentElement.style.setProperty('--main', accent);
 
         // dont need to reimport it
-        if(theme === "default.css") return;
+        if (theme === "default.css") return;
 
         let link = document.querySelector('link[data-theme]');
         if (!link) {
@@ -259,6 +403,25 @@ class ChatManager {
 
         link.href = `/css/themes/${theme}/${theme}.css`;
         console.log("Applied theme: ", theme)
+    }
+
+    static ShowNotification({
+                                title,
+                                text,
+                                icon
+                            }) {
+        if(isLauncher()){
+            if(typeof Client().ShowNotification === "function"){
+                Client().ShowNotification({
+                    title,
+                    text,
+                    icon
+                })
+            }
+            else{
+                console.warn("ShowNotification is not supported yet")
+            }
+        }
     }
 
     static async userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false, callback = null) {
@@ -290,7 +453,6 @@ class ChatManager {
                     solution: localStorage.getItem("pow_solution")
                 }
             }, async function (response) {
-
                 // sync data
                 if (response?.token) CookieManager.setCookie("token", response.token);
                 if (response?.icon) CookieManager.setCookie("pfp", response.icon);
@@ -305,7 +467,7 @@ class ChatManager {
                 if (await isLauncher()) {
                     if (await Client().setAccountCredentials) {
                         await Client().setAccountCredentials(
-                            extractHost(window.location.origin),
+                            ChatManager.extractHost(window.location.origin),
                             UserManager.getID(),
                             UserManager.getToken()
                         );
@@ -314,7 +476,7 @@ class ChatManager {
                     UserManager.saveAccount()
                 }
 
-                if(callback) await callback(response);
+                if (callback) await callback(response);
 
                 // if we finished onboarding
                 if (!response?.error && response.finishedOnboarding === true && initial) {
@@ -353,11 +515,9 @@ class ChatManager {
                         initializeMentionAutocomplete(document.querySelector('.ql-editor'));
 
                         await ChatManager.getServerInfo();
-                        getChatlog(document.getElementById("content"));
-
-                        getMemberList()
                         getChannelTree()
-                        showGroupStats();
+                        getChatlog(document.getElementById("content"));
+                        getMemberList()
                         focusEditor()
                     }
 
@@ -375,7 +535,7 @@ class ChatManager {
                 } else {
                     if (response.error) {
                         splash.hide()
-                        if(response.error.includes("banned")){
+                        if (response.error.includes("banned")) {
                             ChatManager.showInstanceInfo(response.error, "indianred");
                             return;
                         }
@@ -462,33 +622,33 @@ class ChatManager {
 
     static async srcToFile(src) {
         if (!src || typeof src !== "string")
-            return { ok: false, error: "invalid_src" };
+            return {ok: false, error: "invalid_src"};
 
         try {
             const r = await fetch(src);
             if (!r.ok)
-                return { ok: false, error: "fetch_failed", status: r.status };
+                return {ok: false, error: "fetch_failed", status: r.status};
 
             const blob = await r.blob();
             const ext = blob.type.split("/")[1] || "bin";
             const filename = `${UserManager.generateId(12)}.${ext}`;
-            const file = new File([blob], filename, { type: blob.type });
+            const file = new File([blob], filename, {type: blob.type});
 
             const res = await ChatManager.uploadFile([file]);
             return res;
         } catch (err) {
             console.error("srcToFile error:", err);
-            return { ok: false, error: "srcToFile_failed" };
+            return {ok: false, error: "srcToFile_failed"};
         }
     }
 
     static setUrl(param) {
         window.history.replaceState(null, null, param); // or pushState
         let page = param.replace("?page=", "");
-        if(typeof loadPageContent === "function") loadPageContent(page)
+        if (typeof loadPageContent === "function") loadPageContent(page)
     }
 
-    static setUrlParam(key, value, { replace = true } = {}) {
+    static setUrlParam(key, value, {replace = true} = {}) {
         const url = new URL(window.location.href);
         const params = url.searchParams;
 
@@ -522,14 +682,17 @@ class ChatManager {
 
             // reject if we get disconnected or something
             setTimeout(() => {
-                if(!socket.connected){
+                if (!socket.connected) {
                     resolve(null);
                 }
             }, 1000)
 
             //Official <span style="font-weight: bold; color: skyblue;">DCTS <span style="font-weight: bold; color: cadetblue;">Community</span></span>
-            socket.emit("getServerInfo", {id: UserManager.getID(), token: UserManager.getToken()}, async function (response) {
-                if(returnData) return resolve(response);
+            socket.emit("getServerInfo", {
+                id: UserManager.getID(),
+                token: UserManager.getToken()
+            }, async function (response) {
+                if (returnData) return resolve(response);
                 var headline = document.getElementById("header");
 
                 let servername = response.serverinfo.name;
@@ -560,32 +723,31 @@ class ChatManager {
         })
     }
 
-    static async showInstanceInfo(notice = null, noticeColor = "transparent"){
+    static async showInstanceInfo(notice = null, noticeColor = "transparent") {
         let infoData;
-        if(socket.connected){
+        if (socket.connected) {
             infoData = await this.getServerInfo(true);
-            if(infoData) infoData = infoData.serverinfo
+            if (infoData) infoData = infoData.serverinfo
         }
 
         // fallback to /discover
-        if(!infoData){
-            try{
+        if (!infoData) {
+            try {
                 let request = await fetch("/discover");
-                if(request.status === 200){
+                if (request.status === 200) {
                     let serverInfoData = await request.json();
                     infoData = serverInfoData.serverinfo
-                }
-                else{
+                } else {
                     console.error(request);
                     return;
                 }
-            }catch(err){
+            } catch (err) {
                 console.error(err)
             }
         }
 
         // everything failed
-        if(!infoData) {
+        if (!infoData) {
             console.error("Couldnt get server info");
             return
         }
@@ -612,12 +774,12 @@ class ChatManager {
                         ">
                             ${notice}
                         </div>`
-            : ""}
+                : ""}
 
              <div style="display: flex; gap: 80px;">
                 <div style="display: flex; flex-direction: column; justify-content: start;">
                     <h3 style="margin-bottom: 0;">Contact Information</h3>
-                    ${contactData.owner.name ? `<p style="margin-top: 8px;">This instance is run by:<br> ${contactData.owner.name}</p>`: ""}
+                    ${contactData.owner.name ? `<p style="margin-top: 8px;">This instance is run by:<br> ${contactData.owner.name}</p>` : ""}
                     
                     <ul style="padding-left: 20px;line-height: 1.5;">
                         ${contactData.email ? `<li>Email: <a href=mailto:"${contactData.email}" target="_blank">${contactData.email}</a></li>` : ""}
@@ -656,8 +818,8 @@ class ChatManager {
     }
 
     static async uploadFile(files, type = "upload") {
-        const file = files[0];
-        const chunkSize =  1024 * 256; // 256kb
+        const file = files[0] ?? files;
+        const chunkSize = 1024 * 256; // 256kb
         const totalChunks = Math.ceil(file.size / chunkSize);
         const fileId = crypto.randomUUID();
 
@@ -695,7 +857,7 @@ class ChatManager {
             if (percent !== lastPercent) {
                 lastPercent = percent;
 
-                if(window?.showSystemMessage){
+                if (window?.showSystemMessage) {
                     showSystemMessage({
                         title: `Uploading file... ${percent}%`,
                         text: ``,
@@ -707,7 +869,7 @@ class ChatManager {
             }
 
             if (json.ok && json.path) {
-                if(window?.showSystemMessage){
+                if (window?.showSystemMessage) {
                     showSystemMessage({
                         title: "File uploaded",
                         text: "",
@@ -720,7 +882,7 @@ class ChatManager {
             }
         }
 
-        return { ok: false, error: "unknown_upload_error" };
+        return {ok: false, error: "unknown_upload_error"};
     }
 
     static async resolveMemberRoles(memberId) {
@@ -735,14 +897,14 @@ class ChatManager {
         })
     }
 
-    static proxyUrl(url){
-        if(!url) return null;
-        if(url.startsWith(window.location.origin)) return url;
-        if(url.startsWith(encodeURIComponent(window.location.origin))) return decodeURIComponent(url);
-        if(url.startsWith("data:")) return url;
-        if(url.startsWith("/uploads")) return url;
-        if(url.startsWith("/img")) return url;
-        if(url.startsWith("/emojis")) return url;
+    static proxyUrl(url) {
+        if (!url) return null;
+        if (url.startsWith(window.location.origin)) return url;
+        if (url.startsWith(encodeURIComponent(window.location.origin))) return decodeURIComponent(url);
+        if (url.startsWith("data:")) return url;
+        if (url.startsWith("/uploads")) return url;
+        if (url.startsWith("/img")) return url;
+        if (url.startsWith("/emojis")) return url;
         return `/proxy?url=${encodeURIComponent(url)}`
     }
 
@@ -889,6 +1051,11 @@ class ChatManager {
         if (!channelElement) {
             return console.error("couldnt set channel marker as the channel element wasnt found", channelId);
         }
+
+        // important because its dumb to show a new message indicator on a voice channel
+        let channelType = channelElement?.getAttribute("data-channel-type");
+        if (!channelType) return console.warn("No channel type found for marker!!")
+        if (channelType === "voice") return;
 
         let indicator = channelElement.querySelector(".message-marker-icon");
         if (!channelElement || !indicator) {

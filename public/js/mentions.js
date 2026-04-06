@@ -1,4 +1,4 @@
-let mentionAc = new Autocomplete(null, {}, false);
+let mentionAc = null
 let mentionList = [];
 
 async function updateUIMentions() {
@@ -141,7 +141,7 @@ function markElementAsMention(element, pingUser = false, message) {
     element.style.width = "calc(100% - 8px)";
 
     if (pingUser) {
-        playSound("message", 0.5);
+        ChatManager.playSound("message", 0.5);
 
         if (message) {
             showSystemMessage({
@@ -156,6 +156,17 @@ function markElementAsMention(element, pingUser = false, message) {
                     closeSystemMessage();
                 }
             });
+
+
+            let displayIcon = message?.author?.icon ?
+                                            message.author.icon.startsWith("https://") ?
+                                                    message?.author?.icon : `https://${ChatManager.extractHost(window.location.origin)}${message?.author?.icon}`
+                                            : "";
+            ChatManager.ShowNotification({
+                title: `${message?.author?.name} mentioned you`,
+                text: stripHTML(message.message),
+                icon: displayIcon
+            })
         }
     }
 }
@@ -278,6 +289,8 @@ async function updateMentionAutocompleteData() {
     let channels = {};
 
     mentionList = [];
+    if(!mentionAc) return console.warn("mentionAc was not there yet");
+
     mentionAc.clear();
 
     // handle channels

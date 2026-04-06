@@ -80,10 +80,11 @@ function installDomPurifyHooks() {
 }
 
 function stripHTML(html) {
+    if(typeof html === "object") return;
+    if(Array.isArray(html)) return;
     if (html == null) return '';
     return DOMPurify.sanitize(String(html), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 }
-
 function sanitizeHtmlForRender(html, wrapParagraphs = false) {
     if (html == null) return '';
 

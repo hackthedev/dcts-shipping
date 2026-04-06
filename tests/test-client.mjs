@@ -3,6 +3,7 @@ import { serverconfig } from "../index.mjs";
 import { mock, beforeAll, afterAll } from "bun:test";
 import { Server } from "socket.io";
 import { createServer } from "http";
+import xssFilters from "xss-filters";
 
 export let defaultTestOverwrites = {
     validateMemberId: mock(async (id, socket, token) => {
@@ -124,7 +125,7 @@ mock.module("../index.mjs", () => ({
     io: defaultTestOverwrites.io,
     signer: {},
     usersocket: {},
-    xssFilters: {}
+    xssFilters: xssFilters
 }));
 
 export function createTestClient(target = 2052) {

@@ -186,7 +186,6 @@ export default (io) => (socket) => {
 
                         // Check if the user who wants to edit the msg is even the original author lol
                         if (originalMsgObj.author.id !== member.author?.id) {
-                            Logger.warn(`Unauthorized user (${member.name} - ${member.author?.id}) tried to edit another users message`);
                             return response({error: "You cant edit others messages!"});
                         }
 

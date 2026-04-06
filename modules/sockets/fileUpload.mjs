@@ -18,7 +18,7 @@ function computeMD5(filePath) {
 export default (io) => (socket) => {
     // socket.on code here
     socket.on("fileUpload", async ({ chunk, metadata }, response) => {
-
+        return response({ error: "DEPRECATED FUNCTION! IF YOU SEE THIS HIT ANGEL" });
 
         let { id, token, filename, type, totalChunks, chunkIndex, fileId } = metadata; // Expect fileId in metadata
         

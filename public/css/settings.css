@@ -21,6 +21,7 @@
 
     flex-shrink: 0;
     padding: 32px;
+    padding-right: 0;
 
     width: fit-content;
     min-width: 300px;

@@ -19,28 +19,6 @@
     --input-border: 1px solid rgb(98, 98, 98);
 }
 
-#homeScreen {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 100px;
-
-    background: #24292e;
-    z-index: 99990;
-    display: none;
-    transition:
-        left 180ms ease,
-        right 180ms ease;
-}
-
-#homeScreen.visible {
-    display: block;
-    transition:
-        left 180ms ease,
-        right 180ms ease;
-}
-
 .homeDivider {
     width: 80%;
     margin: 10px !important;
@@ -630,7 +608,7 @@ code.markdown{
     border-radius: 50%;
     border: 2px solid black;
 
-    z-index: 2;
+    z-index: 2 !important;
     text-align: center;
     font-style: normal;
 
@@ -639,11 +617,6 @@ code.markdown{
 
     margin: 0;
     padding: 2px 6px;
-}
-
-#mobile_GroupList .home-indicator {
-    top: 2px !important;
-    left: 38px !important;
 }
 
 .home-indicator.visible {
@@ -1021,4 +994,8 @@ li.info:hover {
     padding: 8px;
     border-radius: 10px;
     background-color: white;
+}
+
+.popupPageContainer{
+    z-index: 25 !important;
 }

@@ -1,7 +1,7 @@
 import {checkRateLimit, isLocalhostIp} from "../main.mjs";
 import Logger from "@hackthedev/terminal-logger";
 import {saveConfig, serverconfig} from "../../../index.mjs";
-import {getJson, getNewDate, getSocketIp} from "../chat/main.mjs";
+import {formatDateTime, getJson, getNewDate, getSocketIp} from "../chat/main.mjs";
 import {queryDatabase} from "../mysql/mysql.mjs";
 import DateTools from "@hackthedev/datetools";
 
@@ -138,7 +138,7 @@ export async function checkMemberBan(socket, member) {
             removeBan(member?.id);
             return checkAndUnbanIp(ip);
         } else {
-            return {result: true, timestamp: durationStamp, reason: banReason};
+            return {result: true, timestamp: durationStamp, reason: banReason, text: getBannedText(userBan)};
         }
     }
 
@@ -149,12 +149,30 @@ export async function checkMemberBan(socket, member) {
         if (ipBan) {
             if (Date.now() >= ipBan?.until) {
                 removeBan(ip);
-                return {result: false, timestamp: null}
+                return {result: false, timestamp: null, text: null}
             } else {
-                return {result: true, timestamp: ipBan?.until}
+                return {result: true, timestamp: ipBan?.until, text: getBannedText(userBan)}
             }
         }
 
-        return {result: false, timestamp: null}
+        return {result: false, timestamp: null, text: null}
+    }
+
+    function getBannedText(banInfo){
+        let banText = "You've been ";
+
+        if (banInfo?.timestamp) {
+            if (new Date(banInfo.timestamp).getFullYear() === 9999) {
+                banText += "permanently banned";
+            } else {
+                banText = `banned until <br>${formatDateTime(new Date(banInfo.timestamp))}`;
+            }
+        }
+
+        if (banInfo?.reason) {
+            banText += `<br><br>Reason:<br>${banInfo.reason}`;
+        }
+
+        return banText;
     }
 }

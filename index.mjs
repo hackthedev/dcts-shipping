@@ -34,8 +34,14 @@ import crypto from "crypto";
 
 // dSync Libs
 import dSyncAuth from "@hackthedev/dsync-auth";
+//import dSyncAuth from "E:\\network-z-dev\\dSyncAuth\\index.mjs";
+
 import {dSyncSign} from "@hackthedev/dsync-sign";
+//import dSyncWeb from "E:\\network-z-dev\\dsync-web\\index.mjs";
+import dSyncWeb from "@hackthedev/dsync-web";
+
 import dSync from "@hackthedev/dsync";
+//import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
 
 import Logger from "@hackthedev/terminal-logger"
 import dSyncSql from "@hackthedev/dsync-sql"
@@ -101,14 +107,6 @@ export let socketToIP = [];
 export let allowLogging = false;
 export let debugmode = process.env.DEBUG || false;
 export let configPath = "./configs/config.json";
-
-export let syncer = new dSync("dcts", app);
-export const signer = new dSyncSign("./configs/privatekey.json");
-export const auther = new dSyncAuth(app, signer, async function (data) {
-    if (data.valid === true) {
-        changeKeyVerification(data.publicKey, data.valid);
-    }
-});
 
 export let ipsec;
 export let io;
@@ -188,7 +186,13 @@ if(!serverconfig?.serverinfo?.sql?.username){
 
 
 // create sql pool
-export let db
+export let db = null;
+export let dsw = null;
+
+export let syncer = null;
+export let signer = null;
+export let auther = null;
+
 try {
     db = new dSyncSql({
         host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
@@ -202,6 +206,36 @@ try {
     });
 
     await db.ready;
+
+    signer = new dSyncSign("./configs/privatekey.json");
+    auther = new dSyncAuth(app, signer, async function (data) {
+        if (data.valid === true) {
+            changeKeyVerification(data.publicKey, data.valid);
+        }
+    });
+
+    dsw = new dSyncWeb({
+        express,
+        app,
+        db,
+        dsa: dSyncAuth,
+        canAccess: async (req) => {
+            const { id, token } = req.body || {};
+            if (!id || !token) return false;
+
+            if(!await validateMemberId(id, null, token)) return false;
+            return await hasPermission(id, "administrator");
+        }
+    });
+
+    await dsw.setup();
+
+    syncer = new dSync({
+        prefix: "dcts",
+        app,
+        dSyncWeb: dsw,
+        host: serverconfig.serverinfo.app.url?.length >= 7 ? serverconfig.serverinfo.app.url : null
+    });
 } catch (e) {
     if(isPtero()){
         if(debugmode === false) console.clear();
@@ -279,7 +313,7 @@ import {
     formatDateTime,
     findInJson,
     changeKeyVerification,
-    getSocketIp,
+    getSocketIp, hasPermission,
 } from "./modules/functions/chat/main.mjs";
 
 import {
@@ -581,16 +615,6 @@ const tables = [
             {name: "reportNotes", type: "longtext NULL"},
             {name: "reportStatus", type: "varchar(100) NOT NULL DEFAULT 'pending'"},
         ],
-    },
-    {
-        name: "network_servers",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "address", type: "varchar(255) NOT NULL UNIQUE KEY"},
-            {name: "status", type: "varchar(255) NOT NULL"},
-            {name: "data", type: "longtext"},
-            {name: "last_sync", type: "datetime NULL"},
-        ]
     },
     {
         name: "auditlog",
@@ -916,6 +940,20 @@ export async function startServer() {
         }
 
         syncDiscoveredHosts(true);
+
+        /*
+        syncer.on("ping", { ipRequestLimit: 1, requestLimit: 10 }, (payload, response) => {
+            response({ pong: true, from: "B" })
+        })
+
+        syncer.emit("ping", {
+            hello: "A and C",
+            title: "Connection Test Ping",
+            desc: "Just a simple test ping"
+        }, (res) => {
+            console.log(res)
+        })
+         */
     });
 }
 
@@ -1005,41 +1043,45 @@ const registerSocketEvents = (socket) => {
 
 export async function checkPow(socket) {
     if (powVerifiedUsers.includes(socket.id)) {
-        socket.powValidated = true;
-        return;
+        socket.powValidated = true
+        return
     }
 
-    listenToPow(socket);
-    sendPow(socket);
+    let difficulty = serverconfig.serverinfo.pow.difficulty
+    let { challenge } = auther.createPowChallenge(difficulty)
+    let { estimatedSeconds } = dSyncAuth.estimatePoWDuration(difficulty)
+    let timeout = (estimatedSeconds * 2) + 600
 
-    let powResult = await waitForPowSolution(socket);
-    if (!powResult) {
-        // send error to user?
-        sendMessageToUser(
-            socket.id,
-            JSON.parse(
-                `{
-                        "title": "PoW Timeout",
-                        "message": "It took you too long to upgrade your identity...",
-                        "buttons": {
-                            "0": {
-                                "text": "Ok",
-                                "events": "onclick='closeModal()'"
-                            }
-                        },
-                        "type": "error",
-                        "displayTime": 600000
-                    }`,
-            ),
-        );
+    socket.emit("powChallenge", { challenge, difficulty })
 
-        socket.disconnect(true);
-    } else {
-        // let client know pow was successful.
-        socket.emit("powAccepted");
+    let pow = auther.waitForPow(challenge, difficulty, timeout)
+
+    socket.on("verifyPow", (data, response) => {
+        checkRateLimit(socket)
+        let result = pow.verify(data.solution)
+        response(result)
+    })
+
+    try {
+        await pow
+        powVerifiedUsers.push(socket.id)
+        socket.emit("powAccepted")
+    } catch (err) {
+        sendMessageToUser(socket.id, {
+            title: "PoW Timeout",
+            message: "It took you too long to upgrade your identity...",
+            buttons: {
+                "0": {
+                    text: "Ok",
+                    events: "onclick='closeModal()'"
+                }
+            },
+            type: "error",
+            displayTime: 600000
+        })
+        socket.disconnect(true)
     }
 }
-
 
 async function listenToIO(){
     io.on("connection", async function (socket) {

@@ -24,11 +24,11 @@ class AdminActions {
 
                 // check banner and upload new one
                 if (values.profileImage) {
-                    const bannerUrl = await upload(values.profileImage);
+                    const bannerUrl = await ChatManager.uploadFile(values.profileImage);
 
                     if (!bannerUrl.error) {
-                        console.log('Banner Image :', bannerUrl.urls);
-                        homeBannerUrl = bannerUrl.urls;
+                        console.log('Banner Image :', bannerUrl.path);
+                        homeBannerUrl = bannerUrl.path;
 
                         socket.emit("updateGroupIcon", { id: UserManager.getID(), value: homeBannerUrl, token: UserManager.getToken(), group: id });
                     }
@@ -66,11 +66,11 @@ class AdminActions {
 
                 // check banner and upload new one
                 if (values.bannerImage) {
-                    const bannerUrl = await upload(values.bannerImage);
+                    const bannerUrl = await ChatManager.uploadFile(values.bannerImage);
 
                     if (!bannerUrl.error) {
-                        console.log('Banner Image :', bannerUrl.urls);
-                        homeBannerUrl = bannerUrl.urls;
+                        console.log('Banner Image :', bannerUrl.path);
+                        homeBannerUrl = bannerUrl.path;
 
                         socket.emit("updateGroupBanner", { id: UserManager.getID(), value: homeBannerUrl, token: UserManager.getToken(), group: UserManager.getGroup() });
                     }
@@ -92,7 +92,7 @@ class AdminActions {
     }
 
     static editServer() {
-        window.location.href = "settings/server/";
+        ChatManager.openPagePopup("serverSettings", "/settings/server/");
     }
 
     static sortChannels() {
@@ -100,11 +100,11 @@ class AdminActions {
     }
 
     static editGroup(id) {
-        window.location.href = "/settings/group?id=" + id;
+        ChatManager.openPagePopup("groupSettings", "/settings/group?id=" + id)
     }
 
     static editChannel(channelId) {
-        window.location.href = `/settings/channel?id=${channelId}`;
+        ChatManager.openPagePopup("channelSettings", `/settings/channel?id=${channelId}`);
     }
 
     static createCategory() {

@@ -115,7 +115,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
     Docs.registerContextMenu()
 
-    registerMessageInfiniteLoad(document.getElementById("content"))
+    ChatManager.registerMessageInfiniteLoad(
+        document.getElementById("content"),
+        async (element) => {
+            const topElement = getFirstMessage(element);
+            if (!topElement) return;
+
+            const timeStamp = Number(topElement?.element?.getAttribute("data-timestamp"));
+            await getChatlog(element, timeStamp, true, getScrollPosition(element, topElement?.element));
+    })
+
     registerMessageCreateEvent();
     initAudioPlayerEvents();
 
@@ -240,6 +249,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         // join first
         await ChatManager.userJoined(null, null, null, null, true);
+        showGroupStats();
 
         setTimeout(() => {
             splash.hide()
@@ -463,6 +473,11 @@ socket.on("updatedEmojis", async function () {
     fetchEmojis();
 })
 
+
+socket.on("memberUpdated", async function () {
+    getMemberList();
+})
+
 // very important
 ensureDomPurify()
 
@@ -491,7 +506,6 @@ socket.on('newReport', async () => {
 socket.on('verifyPublicKey', async () => {
     Crypto.dSyncTest();
 });
-
 
 var chatlog = document.getElementById("content");
 var channeltree = document.getElementById("channeltree");
@@ -1302,7 +1316,7 @@ function displayHomeUnread() {
 
                 indicator.innerHTML = `${unread > 1000 ? "Too many :o" : unread}`;
                 indicator.classList.add('visible');
-                indicator.setAttribute('aria-label', `${unread} ungelesene Nachrichten`);
+                indicator.setAttribute('aria-label', `${unread} unread messages`);
             } else {
                 indicator.innerHTML = '';
                 indicator.classList.remove('visible');
@@ -1463,10 +1477,13 @@ function showGroupStats() {
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
+                text-align: center;
                 height: 100%;
                 ">
                 <h1 style="margin-bottom: 0;">Welcome to the server!</h1>
-                <p>Select a channel to begin chatting</p>
+                <p>
+                    ${MobilePanel.isMobile() ? `Swipe right to select a channel and begin chatting!` : `Select a channel to begin chatting`}
+                </p>
             </div>
             `;
     }

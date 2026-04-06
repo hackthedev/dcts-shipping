@@ -3,19 +3,19 @@ let customPrompts;
 
 document.addEventListener("set-e2ee", e => {
     let enabled = e?.detail?.enabled;
-    if(enabled === undefined) throw new Error("E2EE Update event Error: Couldnt get value")
+    if (enabled === undefined) throw new Error("E2EE Update event Error: Couldnt get value")
 
     updateHeaderStatusIcons();
 });
 
-function registerDmIconTooltips(){
+function registerDmIconTooltips() {
     ContextMenu.registerTooltip(
         "dm chat indicators",
         [".dm-container .header .indicators .indicator"],
         (data) => {
             let status = data?.element?.dataset?.status;
             let text = data?.element?.dataset?.text;
-            if(!status) return "BUG! NO ELEMENT FOUND!";
+            if (!status) return "BUG! NO ELEMENT FOUND!";
 
             return text || status;
         }
@@ -64,20 +64,20 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.on('newDmMessage', async function (response) {
         let roomId = response?.payload?.data?.roomId;
         let currentRoom = ChatManager.getUrlParams("dm");
+        console.log(roomId, currentRoom);
 
-        if(roomId === currentRoom){
-            if(response?.payload?.messageEditId){
+        if (roomId === currentRoom) {
+            if (response?.payload?.messageEditId) {
                 updateEditedMessage(response.payload);
-            }
-            else{
+            } else {
                 addNewMessageToChatLog(response.payload, "dm")
-                await markAsRead(null, roomId);
+                //await markAsRead(null, roomId);
             }
         }
         // when its not the same room BUT a room id is present lets update the indicator
-        else if(roomId){
+        else if (roomId) {
             let entry = getDMsNavContainer()?.querySelector(`.entry[data-room-id='${roomId}']`);
-            if(!entry) return;
+            if (!entry) return;
             let badge = entry.querySelector(".unread-badge");
             let current = badge ? (parseInt(badge.textContent) || 0) : 0;
             setDmCount(roomId, current + 1);
@@ -114,82 +114,77 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function setDmCount(roomId, count) {
-    if(!roomId) return;
+    if (!roomId) return;
     let entry = getDMsNavContainer()?.querySelector(`.entry[data-room-id='${roomId}']`);
-    if(!entry) return;
+    if (!entry) return;
 
     let badge = entry.querySelector(".unread-badge");
 
-    if(!count || count <= 0){
-        if(badge) badge.remove();
+    if (!count || count <= 0) {
+        if (badge) badge.remove();
         return;
     }
 
     let text = count > 99 ? "99+" : count;
 
-    if(badge){
+    if (badge) {
         badge.textContent = text;
-    }
-    else{
+    } else {
         entry.insertAdjacentHTML("beforeend", `<span class="unread-badge">${text}</span>`);
     }
 }
 
 async function startDmWith(id) {
-    if(!id || id?.length !== 12) throw new Error("id must be provided or was invalid");
+    if (!id || id?.length !== 12) throw new Error("id must be provided or was invalid");
     let createdRoom = await createDmRoom([id])
-    if(!createdRoom?.error && createdRoom?.roomId){
+    if (!createdRoom?.error && createdRoom?.roomId) {
         ChatManager.setUrlParam("dm", createdRoom.roomId)
         renderDmRoom(createdRoom?.roomId)
         renderDMs();
         markDmInNav(createdRoom?.roomId)
-    }
-    else{
+    } else {
         console.error(createdRoom.error)
     }
     // check if exists etc
 }
 
 
-function getDMsNavContainer(){
+function getDMsNavContainer() {
     return getNavContainer().querySelector(".dms");
 }
 
-function getNavContainer(){
+function getNavContainer() {
     return document.querySelector("#navigation.home");
 }
 
 
-function getDmRoomCount(dm){
+function getDmRoomCount(dm) {
     return Object.keys(dm?.participants).length;
 }
 
-async function getDmRoomInfo(dm){
+async function getDmRoomInfo(dm) {
     let participantCount = getDmRoomCount(dm);
 
     let dmRoomIcon = null;
     let dmRoomName = null;
 
-    if(participantCount > 2){
+    if (participantCount > 2) {
         dmRoomIcon = "/img/default_pfp.png";
         dmRoomName = dm.title.replaceAll(",", ", ");
-    }
-    else if(participantCount === 2){
+    } else if (participantCount === 2) {
         let oppositeParticipant = Object.values(dm.participants).find(x => x.id !== UserManager.getID());
 
-        if(oppositeParticipant?.id === "system"){
+        if (oppositeParticipant?.id === "system") {
             dmRoomIcon = "/img/default_icon.png";
             dmRoomName = "System"
-        }
-        else{
+        } else {
             dmRoomIcon = oppositeParticipant?.icon ?? "/img/default_icon.png";
             dmRoomName = oppositeParticipant?.name;
         }
-    }
-    else if(participantCount === 1){
+    } else if (participantCount === 1) {
         let participant = Object.values(dm.participants)[0];
 
-        if(participant?.id === UserManager.getID()){
+        if (participant?.id === UserManager.getID()) {
             dmRoomIcon = UserManager.getPFP()
             dmRoomName = UserManager.getUsername() + " (You)"
         }
@@ -214,16 +209,15 @@ async function checkDmParticipantPublicKey(participants) {
     }
 }
 
-async function renderDMs(){
+async function renderDMs() {
     let dms = await getDmRooms();
     let dmRooms = dms?.rooms;
     let unreads = await getAllUnread();
 
-    let firstDm = true
-
-    if(dmRooms?.length > 0){
+    if (dmRooms?.length > 0) {
         getDMsNavContainer().innerHTML = "";
-        for(let dm of dmRooms){
+
+        for (let dm of dmRooms) {
             let {icon, title} = await getDmRoomInfo(dm);
             joinDmRoom(dm.roomId)
 
@@ -233,12 +227,13 @@ async function renderDMs(){
                 : "";
 
             getDMsNavContainer().insertAdjacentHTML('beforeend',
-                `<a class="entry ${!firstDm ? "selected" : ""}" data-room-id="${dm.roomId}" onclick="renderDmRoom('${dm.roomId}')">
+                `<a class="entry" data-room-id="${dm.roomId}" onclick="renderDmRoom('${dm.roomId}')">
                             <img class="icon" src="${stripHTML(icon)}">
                             <div class="info">
                                 <p>${stripHTML(title)}</p>
                                 <p class="status">${stripHTML(dm.status) ?? ""}</p>
                             </div>
+                            ${badge}
                         </a>`
             )
             setDmCount(dm.roomId, unreads?.[dm.roomId] || 0);
@@ -248,7 +243,7 @@ async function renderDMs(){
     getDMsNavContainer().fadeIn(200, "flex")
 }
 
-async function getAllUnread(){
+async function getAllUnread() {
     return new Promise(resolve => {
         socket.emit('getAllUnread', {
             id: UserManager.getID(),
@@ -259,8 +254,8 @@ async function getAllUnread(){
     })
 }
 
-async function markAsRead(messageId = null, roomId = null){
-    if(!messageId && !roomId) return;
+async function markAsRead(messageId = null, roomId = null) {
+    if (!messageId && !roomId) return;
 
     return new Promise(resolve => {
         socket.emit('markDmAsRead', {
@@ -269,7 +264,7 @@ async function markAsRead(messageId = null, roomId = null){
             messageId,
             roomId
         }, response => {
-            if(!response?.error) if(!response?.error) setDmCount(roomId, 0);
+            if (!response?.error) if (!response?.error) setDmCount(roomId, 0);
             resolve(response)
         });
     })
@@ -285,6 +280,10 @@ const statusIcons = {
     "user-plus": `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus-icon lucide-user-plus"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>`,
     "arrow-left-back": `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-big-left-dash-icon lucide-arrow-big-left-dash"><path d="M13 9a1 1 0 0 1-1-1V4.707a.707.707 0 0 0-1.207-.5l-6.94 6.94a1.207 1.207 0 0 0 0 1.707l6.94 6.94a.707.707 0 0 0 1.207-.5V16a1 1 0 0 1 1-1h2a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1z"/><path d="M20 9v6"/></svg>`,
 };
+
+function getDmHeaderElement(){
+    return getContentElement()?.querySelector(".dm-container .header")
+}
 
 function setDmStatus(key, value, color, text) {
     let dmContainer = getContentElement()?.querySelector(".dm-container");
@@ -323,10 +322,10 @@ function setDmStatus(key, value, color, text) {
     else delete el.dataset.text;
 }
 
-async function updateHeaderStatusIcons(data){
+async function updateHeaderStatusIcons(data) {
     renderDmMenu();
 
-    if(data?.currentDmObj){
+    if (data?.currentDmObj) {
         // status icons etc
         let keyCheck = await checkDmParticipantPublicKey(data.currentDmObj.participants);
         if (keyCheck.allCanDecrypt === true) {
@@ -340,15 +339,14 @@ async function updateHeaderStatusIcons(data){
         }
     }
 
-    if(isLauncher() && await Crypto.getPublicKey() && Crypto.getE2EE() === true){
+    if (isLauncher() && await Crypto.getPublicKey() && Crypto.getE2EE() === true) {
         setDmStatus(
             "use-encryption",
             "key",
             "mediumseagreen",
             "Your sent messages will be encrypted."
         )
-    }
-    else{
+    } else {
         setDmStatus(
             "use-encryption",
             "key",
@@ -392,9 +390,9 @@ function renderDmMenu() {
     if (!ul) return;
 
     ul.innerHTML = `
-        <li onclick="promptAddDmParticipant()">
+        <!--<li onclick="promptAddDmParticipant()">
             ${statusIcons["user-plus"]} Add Member
-        </li>
+        </li>-->
         ${
         isLauncher() && Crypto.getE2EE() === true ?
             `<li class="warning" onclick="Crypto.setE2EE(false)">
@@ -415,8 +413,9 @@ function renderDmMenu() {
     `;
 }
 
-async function renderDmRoom(roomId){
-    if(!roomId) throw new Error("Room ID is required");
+async function renderDmRoom(roomId) {
+    if (!roomId) throw new Error("Room ID is required");
+    MobilePanel.close()
 
     ChatManager.setUrlParam("dm", roomId)
 
@@ -425,21 +424,20 @@ async function renderDmRoom(roomId){
 
     let currentDmObj = Object.values(dmRooms ?? {}).find(x => x.roomId === roomId);
 
-    if(currentDmObj){
+    if (currentDmObj) {
         let {icon, title} = await getDmRoomInfo(currentDmObj);
         let dmContainer = getContentElement().querySelector(".dm-container");
 
-        if(dmContainer){
+        if (dmContainer) {
             let iconEl = dmContainer?.querySelector(".header .icon img");
-            if(iconEl) iconEl.src = stripHTML(icon);
+            if (iconEl) iconEl.src = stripHTML(icon);
 
             let titleEl = dmContainer.querySelector(".header .title");
-            if(titleEl) titleEl.innerHTML = sanitizeHtmlForRender(title, false)
+            if (titleEl) titleEl.innerHTML = sanitizeHtmlForRender(title, false)
 
             let contentEl = dmContainer.querySelector(".content");
-            if(contentEl) contentEl.innerHTML = "";
-        }
-        else{
+            if (contentEl) contentEl.innerHTML = "";
+        } else {
             getContentElement().innerHTML = "";
             getContentElement().insertAdjacentHTML("beforeend",
                 `
@@ -471,8 +469,20 @@ async function renderDmRoom(roomId){
             )
         }
 
+        // init infinite load. it will automatically check it already etc.
+        ChatManager.registerMessageInfiniteLoad(
+            getContentMainContainer(),
+            async (element) => {
+                const topElement = getFirstMessage(element);
+                if (!topElement) return;
+
+                const timeStamp = Number(topElement?.element?.getAttribute("data-timestamp"));
+                await displayDmMessages(roomId, timeStamp, true)
+            }
+        )
+
         // menu handler
-        if(!getContentElement().dataset.menuInit){
+        if (!getContentElement().dataset.menuInit) {
             getContentElement().addEventListener("click", e => {
                 const menu = e.target.closest(".menu");
 
@@ -488,33 +498,7 @@ async function renderDmRoom(roomId){
         }
 
         observeContainer();
-        let dmMessages = await getDmRoomMessages(roomId);
-
-        // display messages if no messages are found.
-        // that if could be used to show when there are no messages.
-        if(Object.keys(dmMessages?.messages || {})?.length > 0){
-            await displayMessagesInElement({
-                data: Object.values(dmMessages.messages).reverse(),
-                channelId: roomId,
-                container: getContentMainContainer(),
-                appendTop: false,
-                index: null,
-                refElement: null,
-                messageType: "dm",
-                getChannel: () => {
-                    return roomId
-                }
-            })
-
-            displayAwaitedMessages(getContentMainContainer())
-            await markAsRead(null, roomId);
-
-            requestAnimationFrame(() => {
-                scrollDown("dm", {
-                    tolerancePx: 10
-                });
-            })
-        }
+        await displayDmMessages(roomId)
 
         await updateMarkdownLinks(2000)
         await updateHeaderStatusIcons({
@@ -534,7 +518,7 @@ async function renderDmRoom(roomId){
                 let upload = await ChatManager.srcToFile(src);
                 dmEditor.insertImage(upload.path)
             },
-            onSend: async(html) => {
+            onSend: async (html) => {
                 let wasSent = await sendDmMessage(html, currentDmObj)
                 cancelMessageReply()
                 cancelMessageReply()
@@ -548,25 +532,98 @@ async function renderDmRoom(roomId){
         markDmInNav(roomId);
 
         // init needed for emojis etc
-        if(!window?.initQuillShitDone){
+        if (!window?.initQuillShitDone) {
             initQuillShit(dmEditor.quill);
             window.initQuillShitDone = true;
         }
 
         initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
         initializeMentionAutocomplete(document.querySelector('.ql-editor'));
-    }
-    else{
+    } else {
         startDmWith(ChatManager.getUrlParams("dm"))
+    }
+
+    async function displayDmMessages(roomId, timestamp = null, appendTop = false){
+        let dmMessages = await getDmRoomMessages(roomId, timestamp);
+
+        // display messages if no messages are found.
+        // that if could be used to show when there are no messages.
+        if (Object.keys(dmMessages?.messages || {})?.length > 0) {
+
+            // we will use this temp shit to not update the actual dom too many times
+            const renderer = document.createElement("div");
+            document.body.appendChild(renderer);
+
+            ElementLoader.start(getDmHeaderElement(), {
+                style: "linear",
+                color: "hsl(from var(--main) h s calc(l * 8))",
+                value: 0
+            });
+
+            // then display the messages inside that temp element
+            if(!appendTop){
+                await displayMessagesInElement({
+                    data: Object.values(dmMessages.messages).reverse(),
+                    channelId: roomId,
+                    container: renderer,
+                    appendTop: false,
+                    index: null,
+                    refElement: null,
+                    messageType: "dm",
+                    getChannel: () => {
+                        return ChatManager.getUrlParams("dm");
+                    },
+                    getLoadingElement: () => {
+                        return getDmHeaderElement()
+                    }
+                })
+            }
+            else if(appendTop && timestamp){
+                await displayMessagesInElement({
+                    data: Object.values(dmMessages.messages).reverse(),
+                    channelId: roomId,
+                    container: renderer,
+                    appendTop: true,
+                    index: timestamp,
+                    refElement: null,
+                    messageType: "dm",
+                    getChannel: () => {
+                        return ChatManager.getUrlParams("dm");
+                    },
+                    getLoadingElement: () => {
+                        return getDmHeaderElement()
+                    }
+                })
+            }
+
+            // then show it in the main element
+            const frag = document.createDocumentFragment();
+            while (renderer.firstElementChild) {
+                frag.appendChild(renderer.firstElementChild);
+            }
+            renderer.remove();
+            getContentMainContainer().insertBefore(frag, getContentMainContainer().firstElementChild);
+            displayAwaitedMessages(getContentMainContainer())
+
+            ElementLoader.stop(getDmHeaderElement());
+
+
+            await markAsRead(null, roomId);
+            if(!appendTop){
+                scrollDown("dm", {
+                    tolerancePx: 10
+                });
+            }
+        }
     }
 }
 
-function markDmInNav(roomId){
+function markDmInNav(roomId) {
     getNavContainer()?.querySelectorAll(`.entry`).forEach(x => {
         x.classList.remove("selected");
     })
     let entry = getDMsNavContainer()?.querySelector(`.entry[data-room-id='${roomId}']`);
-    if(entry) entry.classList.add("selected");
+    if (entry) entry.classList.add("selected");
 }
 
 async function addDmRoomParticipant(roomId, memberId) {
@@ -591,9 +648,9 @@ async function removeDmRoomParticipant(roomId, memberId) {
     })
 }
 
-async function deleteDmRoom(){
+async function deleteDmRoom() {
     let roomId = getDMsNavContainer()?.querySelector(`.entry.selected`)?.getAttribute("data-room-id");
-    if(!roomId) throw new Error("Room id not found for deleting dm")
+    if (!roomId) throw new Error("Room id not found for deleting dm")
 
     customPrompts.showConfirm("Do you really wanna delete this chat?",
         [["Yes", "success"], ["No", "error"]],
@@ -604,17 +661,16 @@ async function deleteDmRoom(){
             }
         })
 
-    async function deleteChat(){
+    async function deleteChat() {
         return new Promise(resolve => {
             socket.emit("deleteDmRoom", {
                 id: UserManager.getID(),
                 token: UserManager.getToken(),
                 roomId,
             }, function (response) {
-                if(response?.error){
+                if (response?.error) {
                     console.error("Couldnt delete chat:", response)
-                }
-                else{
+                } else {
                     renderDMs()
                 }
             });
@@ -622,8 +678,8 @@ async function deleteDmRoom(){
     }
 }
 
-async function sendDmMessage(text, currentDmObj){
-    if(!text) throw new Error("text is required");
+async function sendDmMessage(text, currentDmObj) {
+    if (!text) throw new Error("text is required");
 
     let payload = {
         data: {
@@ -647,24 +703,23 @@ async function sendDmMessage(text, currentDmObj){
         token: UserManager.getToken(),
         payload
     }, function (response) {
-        if(response?.error){
+        if (response?.error) {
             console.error("Couldnt send message:", response.error)
         }
     });
 
-    async function setPayloadText(text, payload, currentDmObj){
+    async function setPayloadText(text, payload, currentDmObj) {
         if (await Client() && Crypto.getE2EE() === true) {
             let plainText = text;
 
             try {
-                for(let participant of Object.values(currentDmObj.participants)){
-                    if (!participant?.publicKey || participant?.publicKey?.length === 0){
+                for (let participant of Object.values(currentDmObj.participants)) {
+                    if (!participant?.publicKey || participant?.publicKey?.length === 0) {
                         // if the participant has NO public key, we will encrypt the message with our public key
                         // so that the participant will see its encrypted etc and the entire logic for showing the error etc
                         // will still work
                         payload.data.message[participant.id] = await Crypto.EncryptEnvelope(plainText, await Crypto.getPublicKey());
-                    }
-                    else{
+                    } else {
                         payload.data.message[participant.id] = await Crypto.EncryptEnvelope(plainText, participant.publicKey); // encrypt for receiver
                     }
                 }
@@ -682,8 +737,8 @@ async function sendDmMessage(text, currentDmObj){
             }
         }
         // and for the web client we do the same but in plain text
-        else{
-            for(let participant of Object.values(currentDmObj.participants)){
+        else {
+            for (let participant of Object.values(currentDmObj.participants)) {
                 payload.data.message[participant.id] = text;
             }
         }
@@ -691,9 +746,9 @@ async function sendDmMessage(text, currentDmObj){
 }
 
 
-async function createDmRoom(participants){
-    if(!participants) throw new Error("participants is required");
-    if(!Array.isArray(participants)) throw new Error("participants is not an array");
+async function createDmRoom(participants) {
+    if (!participants) throw new Error("participants is required");
+    if (!Array.isArray(participants)) throw new Error("participants is not an array");
 
     return new Promise(resolve => {
         socket.emit("createDmRoom", {
@@ -706,13 +761,14 @@ async function createDmRoom(participants){
     })
 }
 
-async function getDmRoomMessages(roomId, timestamp = null){
-    if(!roomId) throw new Error("Room ID is required");
+async function getDmRoomMessages(roomId, timestamp = null) {
+    if (!roomId) throw new Error("Room ID is required");
 
     return new Promise((resolve, reject) => {
         socket.emit('getDmRoomMessages', {
             id: UserManager.getID(),
             token: UserManager.getToken(),
+            timestamp,
             roomId,
         }, (response) => {
             resolve(response)
@@ -720,8 +776,8 @@ async function getDmRoomMessages(roomId, timestamp = null){
     })
 }
 
-async function joinDmRoom(roomId){
-    if(!roomId) throw new Error("Room ID is required");
+async function joinDmRoom(roomId) {
+    if (!roomId) throw new Error("Room ID is required");
 
     return new Promise((resolve, reject) => {
         socket.emit('joinDmRoom', {
@@ -734,7 +790,7 @@ async function joinDmRoom(roomId){
     })
 }
 
-async function getDmRooms(){
+async function getDmRooms() {
     return new Promise((resolve, reject) => {
         socket.emit('getDmRooms', {
             id: UserManager.getID(),

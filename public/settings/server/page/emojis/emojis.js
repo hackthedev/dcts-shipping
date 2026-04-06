@@ -11,7 +11,7 @@ function initEmojis(){
     // handle upload
     document.getElementById("settings_profile_save")
         .addEventListener("change", function (e) {
-                upload(e.target.files)
+                ChatManager.uploadFile(e.target.files)
             }
         );
 
@@ -256,7 +256,7 @@ dropzone.addEventListener("drop", e => {
     const imageFiles = files.filter(file => file.type.startsWith("image/"));
 
     if (imageFiles.length > 0) {
-        upload(imageFiles);
+        ChatManager.uploadFile(imageFiles);
     }
 });
 

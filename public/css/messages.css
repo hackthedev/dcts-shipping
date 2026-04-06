@@ -116,6 +116,7 @@
     justify-content: flex-start;
     align-content: center;
     align-items: center;
+    margin-bottom: 4px;
 }
 
 .message-container .contentRows {
@@ -186,6 +187,7 @@
 
     font-style: italic;
     margin: 6px 0;
+    padding: 8px;
 }
 
 .message-container .edit-notice {
@@ -217,15 +219,17 @@
 .message-container .row.reply {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-content: center;
-    align-items: center;
-    align-self: start;
+    justify-content: center !important;
+    align-content: center !important;
+    align-items: center !important;
+    align-self: start !important;
+    margin: auto auto auto 0 !important;
 
-    margin-bottom: 2px;
+    gap: 6px;
+}
+
+.message-container .row.reply * {
     font-size: 12px;
-
-    gap: 4px;
 }
 
 .message-container .row.reply .content.reply {
@@ -235,7 +239,7 @@
     align-content: center;
     align-items: center;
     align-self: start;
-    margin: auto;
+
     flex-grow: 1;
 
     padding: 0 2px;
@@ -244,9 +248,8 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     word-break: keep-all;
-
-    font-size: 12px;
     font-style: italic;
+    margin: auto auto 4px auto;
 }
 
 .message-container .row.reply .box {
@@ -280,8 +283,9 @@
 }
 
 .message-container .row.reply .username {
+    margin-top: 2px;
+    font-size: 12px;
     white-space: nowrap;
-    padding-left: 2px;
 }
 
 details.chat-notice{

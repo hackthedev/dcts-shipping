@@ -36,108 +36,17 @@ export async function checkMigrations(){
         didBackup = false; // intentionally make a new backup after updates and migration
     }
 
-    // new message system migration
-    migrationTask = await getMigrationTask("migrateNewMessages", true);
-    if(migrationTask && migrationTask?.done === 0){
-        await doBackup()
-        await migrateOldMessagesToNewMessageSystemWithoutEncoding()
-        await completeMigrationTask("migrateNewMessages")
-    }
-
-    migrationTask = await getMigrationTask("clearMemberBase64FromDb", true);
-    if(migrationTask && migrationTask?.done === 0){
-        await doBackup()
-        await clearMemberBase64FromDb()
-        await completeMigrationTask("clearMemberBase64FromDb")
-    }
-
-    // inox id error
-    migrationTask = await getMigrationTask("fixAutoIncrementInMessageLogs", true);
-    if(migrationTask && migrationTask?.done === 0){
-        await doBackup()
-        await queryDatabase(
-            "ALTER TABLE `message_logs` MODIFY COLUMN `id` INT(100) NOT NULL AUTO_INCREMENT",
-            []
-        );
-        await completeMigrationTask("fixAutoIncrementInMessageLogs")
-    }
-
-    // messages room change
-    migrationTask = await getMigrationTask("messagesRoomTypeChange", true);
-    if(migrationTask && migrationTask?.done === 0){
-        await doBackup()
-        await queryDatabase(
-            "ALTER TABLE messages MODIFY COLUMN room VARCHAR(25) NOT NULL"
-        );
-        await completeMigrationTask("messagesRoomTypeChange")
-    }
-
-    // beta to main update
-    migrationTask = await getMigrationTask("mainMerge", true);
+    // uploadfiletype array fix
+    migrationTask = await getMigrationTask(`uploadTypesFix`, true);
     if(migrationTask && migrationTask?.done === 0){
         await doBackup()
 
-        try{
-            await queryDatabase("ALTER TABLE `messages` ADD UNIQUE KEY `messageId` (`messageId`)", []);
-            await queryDatabase("ALTER TABLE `members` ADD COLUMN `country_code` VARCHAR(50) DEFAULT NULL", []);
-            await queryDatabase("ALTER TABLE `members` MODIFY `token` VARCHAR(255)", []);
-            await queryDatabase("ALTER TABLE `members` MODIFY `name` VARCHAR(100) NOT NULL DEFAULT 'User'", []);
-            await queryDatabase("ALTER TABLE `members` MODIFY `password` TEXT DEFAULT NULL", []);
-            await queryDatabase("ALTER TABLE `dms_participants` ADD KEY `memberId` (`memberId`)", []);
-            await queryDatabase("ALTER TABLE `url_cache` ADD UNIQUE KEY `url` (`url`)", []);
-            await queryDatabase("ALTER TABLE `content_reads` MODIFY `id` BIGINT NOT NULL AUTO_INCREMENT", []);
-            await queryDatabase("ALTER TABLE `message_logs` MODIFY `id` INT(100) NOT NULL AUTO_INCREMENT", []);
-        }catch(err){
-            Logger.error("DB Migration failed and wont be retried!")
-            Logger.error(err);
-            await completeMigrationTask("mainMerge")
+        let uploadFileTypes = serverconfig.serverinfo.uploadFileTypes;
+        if(!Array.isArray(uploadFileTypes)){
+            serverconfig.serverinfo.uploadFileTypes =  uploadFileTypes.split(",");
+            await saveConfig(serverconfig);
         }
-
-        await completeMigrationTask("mainMerge")
-    }
-
-    // dm participant stuff
-    migrationTask = await getMigrationTask("dmParticipants", true);
-    if(migrationTask && migrationTask?.done === 0){
-        await doBackup()
-
-        try{
-            await queryDatabase(`ALTER TABLE dms_participants DROP PRIMARY KEY`, []);
-            await queryDatabase(`ALTER TABLE dms_participants ADD PRIMARY KEY (threadId, memberId)`, []);
-            await queryDatabase(`ALTER TABLE dms_participants ADD KEY memberId (memberId)`, []);
-        }catch(err){
-            Logger.error("DB Migration failed and wont be retried!")
-            Logger.error(err);
-            await completeMigrationTask("dmParticipants")
-        }
-
-        await completeMigrationTask("dmParticipants")
-    }
-
-    // fix 1erb45 ids to 123254345
-    migrationTask = await getMigrationTask("fixPRIds", true);
-    if(migrationTask && migrationTask?.done === 0){
-        await doBackup()
-
-        for (const [groupKey, group] of Object.entries(serverconfig.groups)) {
-            group.info.id = String(groupKey);
-
-            const categories = group.channels?.categories;
-            if (!categories) continue;
-
-            for (const [catKey, cat] of Object.entries(categories)) {
-                cat.info.id = String(catKey);
-
-                if (!cat.channel) continue;
-
-                for (const [chKey, ch] of Object.entries(cat.channel)) {
-                    ch.id = String(chKey);
-                }
-            }
-        }
-
-        await saveConfig(serverconfig);
-        await completeMigrationTask("fixPRIds")
+        await completeMigrationTask(`uploadTypesFix`)
     }
 
     async function doBackup(){

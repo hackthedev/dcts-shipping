@@ -21,34 +21,26 @@ document.addEventListener("pagechange", e => {
 
 async function handleUpload(files, id) {
     try {
-        // Ensure `files` is an array of `File` objects
-        const fileArray = Array.isArray(files) ? files : Array.from(files);
+        let uploadResult = await ChatManager.uploadFile(files);
+        console.log(uploadResult);
 
-        // Wait for the upload to complete
-        const result = await upload(fileArray);
+        if(uploadResult.ok !== true){
+            return showSystemMessage({
+                title: `Error uploading file`,
+                text: uploadResult?.error,
+                icon: "error",
+                type: "error",
+                duration: 4000
+            });
+        }
+
+        let url = `${uploadResult.path}`
 
         if (id === "settings_profile_icon") {
-            if (Array.isArray(result)) {
-                result.urls.forEach((url, index) => {
-                    console.log(`File ${index + 1} uploaded to: ${url}`);
-                    settings_icon.value = url;
-                });
-            } else {
-                console.log(`File uploaded to: ${result.urls}`);
-                settings_icon.value = result.urls;
-            }
+            settings_icon.value = url;
             updatePreview("settings_profile_icon");
         } else if (id === "settings_profile_banner") {
-            if (Array.isArray(result)) {
-                result.urls.forEach((url, index) => {
-                    console.log(`File ${index + 1} uploaded to: ${url}`);
-                    settings_banner.value = url;
-                });
-            } else {
-                console.log(`File uploaded to: ${result}`);
-                console.log(result);
-                settings_banner.value = result.urls;
-            }
+            settings_banner.value = url;
             updatePreview("settings_profile_banner");
         }
     } catch (error) {
@@ -183,18 +175,18 @@ function saveSettings() {
             id: UserManager.getID(), // Reference ID
             icon: settings_icon?.value != null && settings_icon?.value.length > 0 ? settings_icon?.value : null, // Icon
             banner: settings_banner?.value != null && settings_banner?.value.length > 0 ? settings_banner?.value : null, // Banner
-            aboutme: settings_aboutme?.value != null && settings_aboutme?.value.length > 0 ? sanitizeHtmlForRender(settings_aboutme?.value) : null,  // About me
-            username: settings_username?.value != null && settings_username?.value.length >= 3 ? settings_username?.value : null, // Username
-            status: settings_status != null && settings_status?.value.length >= 3 ? sanitizeHtmlForRender(settings_status?.value, false) : null // Status
+            aboutme: settings_aboutme != null ? sanitizeHtmlForRender(settings_aboutme?.value) : null,  // About me
+            name: settings_username?.value != null && settings_username?.value.length >= 3 ? settings_username?.value : null, // Username
+            status: settings_status != null ? sanitizeHtmlForRender(settings_status?.value, false) : null // Status
         }
 
-        socket.emit("updateMember", {token: UserManager.getToken(), updatedMember: updatedMember,}, async function (response) {
-            if(response?.error) throw response?.error.msg;
-            UserManager.setPFP(response.updatedMember.icon);
-            UserManager.setBanner(response.updatedMember.banner);
-            UserManager.setAboutme(response.updatedMember.aboutme);
-            UserManager.setUser(response.updatedMember.username);
-            UserManager.setStatus(response.updatedMember.status);
+        socket.emit("updateMember", {token: UserManager.getToken(), ...updatedMember,}, async function (response) {
+            if(response?.error) throw response?.error;
+            UserManager.setPFP(response.icon);
+            UserManager.setBanner(response.banner);
+            UserManager.setAboutme(response.aboutme);
+            UserManager.setUsername(response.name);
+            UserManager.setStatus(response.status);
             saveButton.style.display = "none";
         });
     } catch (error) {

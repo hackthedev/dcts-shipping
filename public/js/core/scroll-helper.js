@@ -17,21 +17,26 @@ function observeContainer() {
     });
 
     const observeNode = (node) => {
-        if (node.nodeType !== 1) return;
+        if (node?.nodeType !== 1) return;
         resizeObserver.observe(node);
         for (const child of node.querySelectorAll("*")) {
             resizeObserver.observe(child);
         }
     };
 
-    observeNode(container);
+    if(container){
+        observeNode(container);
 
-    // for other fucking elements
-    new MutationObserver((mutations) => {
-        for (const m of mutations) {
-            for (const node of m.addedNodes) observeNode(node);
-        }
-    }).observe(container, { childList: true, subtree: true });
+        // for other fucking elements
+        new MutationObserver((mutations) => {
+            for (const m of mutations) {
+                for (const node of m.addedNodes) observeNode(node);
+            }
+        }).observe(container, { childList: true, subtree: true });
+    }
+    else{
+        console.warn("Container not found for resize observing")
+    }
 }
 
 function getContentMainContainer(){

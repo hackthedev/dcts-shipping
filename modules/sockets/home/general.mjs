@@ -11,13 +11,15 @@ export async function sendSystemMessage(targetUserId, text) {
 
     let payload = {
         data: {
-            message: text,
+            message: {},
             roomId,
             author: { id: "system" },
             reply: { id: null },
             timestamp: new Date().getTime()
         }
     }
+
+    payload.data.message[targetUserId] = text;
 
     await saveRoomDmMessage(payload);
 

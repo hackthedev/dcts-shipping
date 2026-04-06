@@ -216,6 +216,7 @@ async function renderDMs() {
 
     if (dmRooms?.length > 0) {
         getDMsNavContainer().innerHTML = "";
+
         for (let dm of dmRooms) {
             let {icon, title} = await getDmRoomInfo(dm);
             joinDmRoom(dm.roomId)

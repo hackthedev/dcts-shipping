@@ -1,4 +1,4 @@
-let mentionAc = null;
+let mentionAc = null
 let mentionList = [];
 
 async function updateUIMentions() {
@@ -289,6 +289,8 @@ async function updateMentionAutocompleteData() {
     let channels = {};
 
     mentionList = [];
+    if(!mentionAc) return console.warn("mentionAc was not there yet");
+
     mentionAc.clear();
 
     // handle channels

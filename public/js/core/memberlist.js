@@ -172,7 +172,6 @@ function getMemberList() {
 
     function insertRoleIntoList(roleInfo, roleHTML){
         let elements = getRenderElements();
-
         elements.forEach(element => {
             let roleHeaderElement = element.querySelectorAll(`.infolist-role[data-role-id="${roleInfo.id}"]`);
 

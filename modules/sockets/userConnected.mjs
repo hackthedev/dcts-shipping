@@ -35,6 +35,7 @@ import {checkMemberBan} from "../functions/ban-system/helpers.mjs";
 import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
 import {autobanXSS} from "../functions/sanitizing/actions.mjs";
 import {cleanMemberData, createMember, updateMember} from "../functions/member.mjs";
+import dSyncAuth from "@hackthedev/dsync-auth";
 
 export function normalizeVar(v) {
     if (v === null || v === undefined) return "";
@@ -137,23 +138,22 @@ function handleInviteCode(member, socket, response) {
     return true;
 }
 
-export async function handlePowOnConnection(member, socket){
-    // skip pow challenge for faster connection
+export async function handlePowOnConnection(member, socket) {
     if (member?.pow?.challenge && member?.pow?.solution) {
-        let powResult = await isValidProof(
-            stripHTML(normalizeVar(member?.pow?.challenge)),
-            stripHTML(normalizeVar(member?.pow?.solution)),
-        );
+        let result = dSyncAuth.isValidProof(
+            stripHTML(normalizeVar(member.pow.challenge)),
+            stripHTML(normalizeVar(member.pow.solution)),
+            serverconfig.serverinfo.pow.difficulty
+        )
 
-        if (powResult.valid) {
+        if (result.valid) {
             if (!powVerifiedUsers.includes(socket.id))
-                powVerifiedUsers.push(socket.id);
-        } else {
-            await checkPow(socket, member);
+                powVerifiedUsers.push(socket.id)
+            return
         }
-    } else {
-        await checkPow(socket, member);
     }
+
+    await checkPow(socket)
 }
 
 export default (io) => (socket) => {

@@ -1,6 +1,4 @@
 class MobilePanel {
-
-    static active = [];
     static leftMenu = null;
     static rightMenu = null;
     static swipeInitialized = false;
@@ -12,6 +10,24 @@ class MobilePanel {
 
     static renderPanel(elements, side = "left"){
         MobilePanel.swipeLocked = true;
+
+        const existing = side === "left" ? MobilePanel.leftPanel : MobilePanel.rightPanel;
+        if(existing){
+            existing.open = true;
+            existing.overlay.style.visibility = "visible";
+            existing.panel.style.visibility = "visible";
+            existing.overlay.style.opacity = "0";
+            existing.panel.style.transform = side === "left" ? "translate3d(-100%,0,0)" : "translate3d(100%,0,0)";
+            existing.panel.offsetHeight;
+
+            requestAnimationFrame(()=>{
+                existing.overlay.style.opacity = "1";
+                existing.panel.style.transform = "translate3d(0,0,0)";
+            });
+
+            setTimeout(()=> MobilePanel.swipeLocked = false, 300);
+            return;
+        }
 
         const overlay = document.createElement("div");
         overlay.classList.add("mobile-ui");
@@ -54,25 +70,7 @@ class MobilePanel {
 
         const appendItem = (item, parent) => {
             if(item instanceof Element){
-                const wrapper = document.createElement("div");
-                wrapper.style.display = "contents";
-                parent.appendChild(wrapper);
-
-                const render = ()=>{
-                    wrapper.replaceChildren(item);
-                };
-
-                render();
-
-                const observer = new MutationObserver(render);
-                observer.observe(item, {
-                    childList: true,
-                    subtree: true,
-                    characterData: true,
-                    attributes: true
-                });
-
-                observers.push(observer);
+                parent.appendChild(item);
                 return;
             }
 
@@ -100,7 +98,9 @@ class MobilePanel {
         document.body.appendChild(overlay);
         document.body.appendChild(panel);
 
-        MobilePanel.active.push({panel, overlay, observers, side});
+        const entry = {panel, overlay, side, open: true};
+        if(side === "left") MobilePanel.leftPanel = entry;
+        else MobilePanel.rightPanel = entry;
 
         panel.offsetHeight;
         overlay.offsetHeight;
@@ -142,7 +142,7 @@ class MobilePanel {
     static close(){
         MobilePanel.swipeLocked = true;
 
-        MobilePanel.active.forEach(({panel, overlay, observers, side})=>{
+        [MobilePanel.leftPanel, MobilePanel.rightPanel].filter(e => e && e.open).forEach(({panel, overlay, side})=>{
             overlay.style.opacity = "0";
 
             if(side === "left"){
@@ -152,13 +152,13 @@ class MobilePanel {
             }
 
             setTimeout(()=>{
-                observers.forEach(o => o.disconnect());
-                panel.remove();
-                overlay.remove();
+                panel.style.visibility = "hidden";
+                overlay.style.visibility = "hidden";
             },250);
         });
 
-        MobilePanel.active = [];
+        if(MobilePanel.leftPanel) MobilePanel.leftPanel.open = false;
+        if(MobilePanel.rightPanel) MobilePanel.rightPanel.open = false;
 
         setTimeout(()=>{
             MobilePanel.swipeLocked = false;
@@ -185,7 +185,7 @@ class MobilePanel {
         let currentY = 0;
 
         document.addEventListener("touchstart", (e)=>{
-            if(MobilePanel.active.length) return;
+            if((MobilePanel.leftPanel && MobilePanel.leftPanel.open) || (MobilePanel.rightPanel && MobilePanel.rightPanel.open)) return;
             if(MobilePanel.swipeLocked) return;
 
             const touch = e.touches[0];
@@ -196,7 +196,7 @@ class MobilePanel {
         }, { passive: true });
 
         document.addEventListener("touchmove", (e)=>{
-            if(MobilePanel.active.length) return;
+            if((MobilePanel.leftPanel && MobilePanel.leftPanel.open) || (MobilePanel.rightPanel && MobilePanel.rightPanel.open)) return;
             if(MobilePanel.swipeLocked) return;
 
             const touch = e.touches[0];
@@ -205,7 +205,7 @@ class MobilePanel {
         }, { passive: true });
 
         document.addEventListener("touchend", ()=>{
-            if(MobilePanel.active.length) return;
+            if((MobilePanel.leftPanel && MobilePanel.leftPanel.open) || (MobilePanel.rightPanel && MobilePanel.rightPanel.open)) return;
             if(MobilePanel.swipeLocked) return;
 
             const diffX = currentX - startX;

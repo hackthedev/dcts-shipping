@@ -249,6 +249,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         // join first
         await ChatManager.userJoined(null, null, null, null, true);
+        showGroupStats();
 
         setTimeout(() => {
             splash.hide()
@@ -1476,10 +1477,13 @@ function showGroupStats() {
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
+                text-align: center;
                 height: 100%;
                 ">
                 <h1 style="margin-bottom: 0;">Welcome to the server!</h1>
-                <p>Select a channel to begin chatting</p>
+                <p>
+                    ${MobilePanel.isMobile() ? `Swipe right to select a channel and begin chatting!` : `Select a channel to begin chatting`}
+                </p>
             </div>
             `;
     }

@@ -192,7 +192,8 @@ table td, table th {
 }
 
 .feature {
-    background: hsl(from var(--accent) h s calc(l * 2));
+    background: hsl(from var(--accent) h s calc(l * 3));
+    border: 1.5px solid hsl(from var(--accent) h s calc(l * 8) / 20%);
     color: hsl(from var(--accent) h s calc(l * 10));
 
     width: fit-content;

@@ -359,7 +359,8 @@ export async function getStringSizeInMegabytes(str) {
 // Same as in chat.js
 export async function checkMediaTypeAsync(url) {
     try {
-        const response = await fetch(url, {method: 'HEAD'});
+        const timeout_ms = serverconfig.serverinfo.fetch?.timeout_ms || 1000;
+        const response = await fetch(url, {method: 'HEAD', signal: AbortSignal.timeout(timeout_ms)});
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

@@ -264,10 +264,12 @@ async function checkMediaTypeAsync(url) {
                 resolve(response.mediaType);
             } else {
                 // url wasnt cached
+                let serverinfo = getServerInfo();
                 let xhr = new XMLHttpRequest();
-                xhr.open('HEAD', `${ChatManager.proxyUrl(url)}`, false); // false makes the request synchronous
-                try {
-                    xhr.send();
+
+                xhr.timeout = serverinfo?.fetch?.timeout_ms || 1000;
+                xhr.open('HEAD', `${ChatManager.proxyUrl(url)}`, true);
+                xhr.onload = function(e) {
                     if (xhr.status >= 200 && xhr.status < 300) {
                         let contentType = xhr.getResponseHeader('Content-Type');
 
@@ -282,14 +284,28 @@ async function checkMediaTypeAsync(url) {
                                 resolve('unknown');
                             }
                         } else {
-                            console.log("Content-Type missing")
-                            throw new Error('Content-Type header is missing');
+                            console.error('Content-Type missing');
+                            resolve('error');
                         }
                     } else {
                         if (xhr.status === 404) resolve ("404");
 
-                        throw new Error(`HTTP error! status: ${xhr.status}`);
+                        console.error(`HTTP error status: ${xhr.status}`);
+                        resolve('error');
                     }
+                }
+
+                xhr.onerror = function(e) {
+                    console.error('XMLHttpRequest error');
+                    resolve('error');
+                }
+
+                xhr.ontimeout = function(e) {
+                    console.error('Request timed out');
+                    resolve('error');
+                }
+                try {
+                    xhr.send();
                 } catch (error) {
                     resolve('error');
                 }

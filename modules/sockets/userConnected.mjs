@@ -419,6 +419,8 @@ export default (io) => (socket) => {
                     // if the user successfully authenticated let them know it all worked
                     if(socket.keyAuthSolution === member.keySolution){
                         let serverMemberObj = await getMemberFromKey(member?.publicKey)
+                        if(!serverMemberObj) return { keepExecution: true } // no member found, continue logic
+
                         await successfulAuthResponse(serverMemberObj)
 
                         return {

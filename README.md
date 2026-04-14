@@ -1,5 +1,5 @@
 # DCTS - Direct Communication Through Sockets
-[Reddit](https://www.reddit.com/r/dcts/) • [Feature list](https://github.com/hackthedev/dcts-shipping/blob/beta/docs/Feature%20List.md) • [Discord](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [Tutorial Playlist](https://www.youtube.com/watch?v=b1RXJ-ykdgc&list=PL2xF-BCo1FWav36ktSvBG4nDsbhfLkFR-&index=1) • [Forum](https://dcts.community/) • [Documentation](https://docs.dcts.community/)
+[Reddit](https://www.reddit.com/r/dcts/) • [Feature list](https://github.com/hackthedev/dcts-shipping/blob/beta/docs/Feature%20List.md) • [Discord](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [Tutorial Playlist](https://www.youtube.com/watch?v=b1RXJ-ykdgc&list=PL2xF-BCo1FWav36ktSvBG4nDsbhfLkFR-&index=1) • [Forum](https://dcts.community/) • [Documentation](https://docs.dcts.community/) • [Desktop Client](https://github.com/hackthedev/dcts-client-shipping) • [Android app](https://github.com/DCTS-Project/android-app)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
 

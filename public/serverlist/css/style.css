@@ -1,0 +1,40 @@
+:root {
+    --main: #131415;
+}
+
+
+* {
+    font-family: "Roboto", sans-serif;
+    font-optical-sizing: auto;
+
+    scrollbar-color: hsl(from var(--main) h s calc(l * 6)) var(--main);
+    scrollbar-width: thin;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+
+    color: hsl(from var(--main) h s calc(l * 12));
+    background: linear-gradient(180deg, hsl(from var(--main) h s calc(l * 1.5)), hsl(from var(--main) h s calc(l * 2)), hsl(from var(--main) h s calc(l * 2)));
+    overflow: auto;
+}
+
+.layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.layout > .content-container{
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}

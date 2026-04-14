@@ -1,0 +1,14 @@
+{
+  "name": "@hackthedev/icons",
+  "version": "1.0.5",
+  "description": "",
+  "keywords": [
+    "frontend"
+  ],
+  "license": "ISC",
+  "author": "",
+  "main": "Icons.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

@@ -1,0 +1,37 @@
+@media (max-width: 1050px) {
+    .layout > .header{
+        flex-direction: row;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .layout > .header .connection-bar{
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        justify-content: center !important;
+        flex-wrap: wrap;
+    }
+    .layout > .header .connection-bar input{
+        width: fit-content;
+    }
+
+    .layout > .content-container {
+        flex-direction: column;
+    }
+    .layout > .content-container > .navigation{
+        width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        border-bottom: 1.5px solid var(--border-color);
+        padding: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .layout > .content-container > .navigation .entry{
+        padding: 12px;
+    }
+
+    .layout > .content-container > .content > .serverList > .server-card {
+        width: 100% !important;
+    }
+}

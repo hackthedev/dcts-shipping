@@ -18,6 +18,8 @@ async function getSavedServers(container) {
     container.innerHTML = `<div class="serverList"></div>`;
 
     let servers = isLauncher() ? await Client().GetServers() : {};
+    if(typeof servers === "string" && servers === "{}") servers = {}; // android bridge fix
+
     let remoteServers = [];
 
     // if not connected to an instance. using file:// url...
@@ -37,6 +39,8 @@ async function getSavedServers(container) {
             };
         }
     }
+
+    console.log(JSON.stringify(mergedServers, null, 4))
 
     renderServersList(container.querySelector(".serverList"), mergedServers);
 }

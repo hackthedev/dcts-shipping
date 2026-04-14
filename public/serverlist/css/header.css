@@ -1,0 +1,32 @@
+.layout > .header {
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+    gap: 2rem;
+
+    padding: 1rem 1rem;
+}
+.layout > .header h1{
+    margin: 0;
+    font-size: 22px;
+}
+
+.layout > .header .connection-bar{
+    justify-content: center;
+    margin: auto;
+}
+.layout > .header .connection-bar input{
+    padding: 4px 8px;
+    width: 300px;
+}
+.layout > .header .connection-bar button{
+    padding: 4px 8px;
+}
+
+.layout > .header .end-bar {
+    display: none;
+}
+.layout > .header .end-bar button {
+    padding: 4px 8px;
+}

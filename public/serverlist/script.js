@@ -1,32 +1,46 @@
 let customPrompts = null;
-document.addEventListener('DOMContentLoaded', async () => {
-    customPrompts = new Prompt();
-})
 
-function extractHost(url){
-    if(!url) return null;
-    const s = String(url).trim();
+function isLocal(){
+    return window.location.origin.startsWith("file://");
+}
 
-    const looksLikeBareIPv6 = !s.includes('://') && !s.includes('/') && s.includes(':') && /^[0-9A-Fa-f:.]+$/.test(s);
-    const withProto = looksLikeBareIPv6 ? `https://[${s}]` : (s.includes('://') ? s : `https://${s}`);
+async function getDiscoveredHosts(){
+    return new Promise(async (resolve, reject) => {
+        let servers = await fetch("/servers");
+        resolve(servers.json())
+    })
+}
 
-    try {
-        const u = new URL(withProto);
-        const host = u.hostname; // IPv6 returned without brackets
-        const port = u.port;
-        if (host.includes(':')) {
-            return port ? `[${host}]:${port}` : host;
-        }
-        return port ? `${host}:${port}` : host;
-    } catch (e) {
-        const re = /^(?:https?:\/\/)?(?:[^@\/\n]+@)?([^:\/?#]+)(?::(\d+))?(?:[\/?#]|$)/i;
-        const m = s.match(re);
-        if (!m) return null;
-        const hostname = m[1].replace(/^\[(.*)\]$/, '$1');
-        const port = m[2];
-        if (hostname.includes(':')) return port ? `[${hostname}]:${port}` : hostname;
-        return port ? `${hostname}:${port}` : hostname;
+
+async function getSavedServers(container) {
+    if (!container) return console.warn("No container supplied!");
+
+    container.innerHTML = `<div class="serverList"></div>`;
+
+    let servers = isLauncher() ? await Client().GetServers() : {};
+    if(typeof servers === "string" && servers === "{}") servers = {}; // android bridge fix
+
+    let remoteServers = [];
+
+    // if not connected to an instance. using file:// url...
+    if (!isLocal()) {
+        const discovered = await getDiscoveredHosts();
+        remoteServers = Array.isArray(discovered?.servers) ? discovered.servers : [];
     }
+
+    const mergedServers = { ...(servers || {}) };
+
+    for (const server of remoteServers) {
+        if (!server?.address) continue;
+
+        if (!mergedServers[server.address]) {
+            mergedServers[server.address] = {
+                address: server.address
+            };
+        }
+    }
+
+    renderServersList(container.querySelector(".serverList"), mergedServers);
 }
 
 function submitServerUI(){
@@ -58,7 +72,7 @@ function submitServerUI(){
 }
 
 async function submitServer(host){
-    if(!host) return;
+    if(!host || isLocal()) return;
     let extractedHost = extractHost(host);
 
     // lets give the user some feedback
@@ -114,133 +128,84 @@ async function submitServer(host){
     }
 }
 
-async function connectToServer(address){
-    if(!isLauncher()) return;
-
-    let host = extractHost(address);
-    let urlInput = document.getElementById('connectUrl');
-    let status = document.getElementById('connectionStatus');
-
-    if(!urlInput){
-        console.warn("Couldnt find connect url field")
-        return;
-    }
-
-    if(!status){
-        console.warn("Couldnt find status element")
-        return;
-    }
-
-    // apply status etc
-    status.style.marginTop = "20px";
-    status.innerText = "connecting...";
-
-    try{
-        // test host
-        let testHost = await fetch(`http://${host}/discover`);
-
-        // is a valid host so we conenct
-        if(testHost.status === 200){
-            await Client().NavigateToUrl(extractHost(address));
-            urlInput.value = "";
-        }
-        else{
-            status.innerText = "Host doesnt seem to be a DCTS server";
-        }
-    }catch(e){
-        console.warn(e)
-        status.innerText = "Cant connect to host...";
-    }
-}
-
-async function getSavedServers(container){
-    if(!container) return;
-
-    try{
-        let servers = Client() ? [await Client().GetServers()] : null ?? [];
-        console.log(servers)
-        let serverSideServers = await getDiscoveredHosts();
-        console.log(serverSideServers)
-
-        const merged = [...servers, ...serverSideServers.servers];
-        renderServersList(merged);
-    }
-    catch(error){
-        console.error(error)
-    }
-}
-
-
-async function renderServersList(servers) {
-    const list = document.querySelector(".serverlistingContainer");
-    if (!list) return;
+async function renderServersList(container, servers) {
+    const list = container;
+    if (!list) throw new Error("No list found to display items in");
     list.innerHTML = "";
 
-    if (servers?.length <= 0) {
-        list.innerHTML = "<p>No servers found :(</p>"
-        return;
-    }
+    for (let server in servers) {
+        let serverObj = servers[server];
+        serverObj.serverinfo = null;
 
-    for(let server of servers){
-        let externalServerInfo;
-        let externalServerData;
+        let address = server;
+        let isFav = serverObj?.fav;
 
-        try{
-            externalServerInfo = await fetch(`https://${server.address}/discover`);
-            externalServerData = await externalServerInfo.json();
-        }
-        catch(error){
-            console.warn(error);
+        let serverInfoRequest = null;
+        let serverInfoJson = null;
+
+        if (!serverObj || serverObj.length <= 0) {
+            list.innerHTML = "<p>No servers found :(</p>"
             continue;
         }
 
         const idx = list.children.length;
-        if(externalServerData?.serverinfo?.error) continue;
-        if(!externalServerData?.serverinfo) continue;
+        if (serverObj?.serverinfo?.error && !showOwnerActions) continue;
 
-        const versionText = encodePlainText(String(String(externalServerData?.serverinfo?.version).split("")).replaceAll(",", "."));
+        const versionText = encodePlainText(String(String(serverObj?.serverinfo?.version || "?").split("")).replaceAll(",", "."));
         const card = document.createElement("div");
 
-        console.log(externalServerData)
-
-        // cache or some shit
-        if(!externalServerData?.serverinfo?.voip && externalServerData?.serverinfo?.turn) {
-            externalServerData.serverinfo.voip = externalServerData.serverinfo.turn
-        }
-
-
         card.className = "server-card";
+        card.setAttribute("address", address)
         card.style.setProperty("--reveal-delay", `${idx * 200}ms`);
+
         card.innerHTML = `
-         <div class="banner" style="${externalServerData?.serverinfo?.banner ? `background-image:url('https://${extractHost(server.address)}/${externalServerData?.serverinfo?.banner}')` : ""}">
-            <p class="name">${encodePlainText(unescapeHtmlEntities(truncateString(externalServerData?.serverinfo?.name, 25)))}</p>
-          </div>
-
-
-          <div class="about">${sanitizeHtmlForRender(externalServerData?.serverinfo?.about)}</div>
-    
-          <div class="features">
-            <label>Features</label>
-            ${externalServerData?.serverinfo?.ssl ? `<div id="ssl" class="feature">TLS Encryption</div>` : ""}
-            ${externalServerData?.serverinfo?.voip ? `<div id="turn-vc" class="feature">VC</div>` : ""}
-            ${externalServerData?.serverinfo?.voip ? `<div id="turn-ss" class="feature">Screensharing</div>` : ""}
-            <div class="feature">Version ${versionText}</div>
-          </div>
-    
-          <div class="footer">
-            ${externalServerData?.serverinfo?.slots?.online ? encodePlainText(externalServerData?.serverinfo?.slots?.online) : "0"} / ${encodePlainText(externalServerData?.serverinfo?.slots?.limit)} Online • ${encodePlainText(externalServerData?.serverinfo?.slots?.reserved)} reserved
-            <a class="joinButton" href="https://${server?.address}">Join</a>
-          </div>
-        `;
+             <div class="banner" style="background-image:url('${serverObj?.serverinfo?.banner?.includes("://") ? serverObj.serverinfo.banner : `https://${address}${serverObj?.serverinfo?.banner}`}')">
+                <p class="name">${encodePlainText(truncateString(serverObj?.serverinfo?.name || address, 25))}</p>
+                
+                 <div class="features">
+                    ${serverObj?.serverinfo?.voip === true ? `<div id="turn-vc" class="feature" title="Voice chat suported">${Icon.display("mic")}</div>` : ""}
+                    ${serverObj?.serverinfo?.voip === true ? `<div id="turn-ss" class="feature" title="Screensharing supported">${Icon.display("screenshare")}</div>` : ""}
+                    <div class="feature" title="Version ${versionText}">${Icon.display("tag")}</div>
+                  </div>
+              </div>        
+        
+              <div class="about">${sanitizeHtmlForRender(serverObj?.serverinfo?.about ?? "No info found.")}</div>
+        
+              <div class="footer">
+                <label class="online">
+                    ${serverObj?.serverinfo?.slots?.online ? encodePlainText(serverObj?.serverinfo?.slots?.online) : "0"} / ${encodePlainText(serverObj?.serverinfo?.slots?.limit)} Online • ${encodePlainText(serverObj?.serverinfo?.slots?.reserved)} reserved
+                </label>
+                                
+                <div class="buttons">
+                    <a class="joinButton" href="http://${address}">Join</a>
+                    <a class="joinButton delete" onclick="deleteServer('${extractHost(address)}')"">&#128465;</a>
+                </div>
+                
+              </div>
+            `;
 
         list.appendChild(card);
+
+        // if no data found fetch it async but DONT wait for it
+        if(Object.keys(serverObj?.serverinfo ?? {})?.length === 0){
+            lazyFetchAndUpdateServerCard(address)
+        }
+
         setTimeout(() => card.classList.add("reveal"), idx * 200);
     }
 }
 
+async function deleteServer(ip) {
+    await Client().DeleteServer(ip)
+    getSavedServers(document.querySelector('.serverlistingContainer'))
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    customPrompts = new Prompt();
+
     ensureDomPurify();
-    getSavedServers(document.querySelector('.serverlistingContainer'));
+    buildNavHTML(true);
+    getSavedServers(getContentElement())
 });
 
 function truncateString(value, length) {

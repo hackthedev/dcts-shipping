@@ -40,8 +40,6 @@ async function getSavedServers(container) {
         }
     }
 
-    console.log(JSON.stringify(mergedServers, null, 4))
-
     renderServersList(container.querySelector(".serverList"), mergedServers);
 }
 

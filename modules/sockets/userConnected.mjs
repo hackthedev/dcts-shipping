@@ -2,14 +2,14 @@ import {
     checkPow,
     saveConfig,
     server,
-    serverconfig,
+    serverconfig, signer,
     socketToIP,
     usersocket,
     xssFilters,
 } from "../../index.mjs";
 import {
     formatDateTime,
-    getJson,
+    getJson, getMemberFromKey,
     getMemberIpInfo,
     getMemberLastOnline,
     hasVerifiedKey,
@@ -26,7 +26,7 @@ import {
     getCastingMemberObject,
     hashPassword,
     removeFromArray,
-    sendMessageToUser,
+    sendMessageToUser, validateMemberId,
 } from "../functions/main.mjs";
 import {sendSystemMessage} from "./home/general.mjs";
 import {discoverHosts} from "../functions/discovery.mjs";
@@ -139,7 +139,10 @@ function handleInviteCode(member, socket, response) {
 }
 
 export async function handlePowOnConnection(member, socket) {
-    if (member?.pow?.challenge && member?.pow?.solution) {
+    let challenge = stripHTML(normalizeVar(member.pow.challenge));
+    let solution = stripHTML(normalizeVar(member.pow.solution));
+
+    if (challenge && solution) {
         let result = dSyncAuth.isValidProof(
             stripHTML(normalizeVar(member.pow.challenge)),
             stripHTML(normalizeVar(member.pow.solution)),
@@ -194,6 +197,8 @@ export default (io) => (socket) => {
         // if pow has been passed. used for quicker
         // initial connection to skip pow challenge
         await handlePowOnConnection(member, socket)
+        let authResult = await handlePublicKeyAuthOnConnection(member);
+        if(authResult?.keepExecution === false) return;
 
         // check if knownServers was supplied for discovery
         if (member?.knownServers && member?.knownServers?.length > 1) {
@@ -359,9 +364,6 @@ export default (io) => (socket) => {
                 serverconfig.servermembers[member.id]?.name == null ||
                 serverconfig.servermembers[member.id]?.token !== member.token
             ) {
-
-
-                console.log(member,  serverconfig.servermembers[member.id])
                 return response({
                     error: "Invalid login",
                     title: "Invalid Login",
@@ -370,11 +372,15 @@ export default (io) => (socket) => {
                     displayTime: 1000 * 60 * 60,
                 });
             }
+        }
 
+        successfulAuthResponse(member);
+
+        async function successfulAuthResponse(member){
             // login was successful
             socket.join(member.id);
 
-            await updateMember({
+            updateMember({
                 id: member.id,
                 lastOnline: new Date().getTime()
             })
@@ -390,6 +396,41 @@ export default (io) => (socket) => {
             });
 
             io.emit("updateMemberList");
+        }
+
+        async function handlePublicKeyAuthOnConnection(member){
+            if(member?.publicKey && !await validateMemberId(member?.id, socket, member?.token)){
+                // if didnt supply a solution, create a challenge
+                if(!member?.keySolution){
+                    const keyChallengeResult = await dSyncAuth.createChallenge(signer, member.publicKey);
+
+                    // prepair the socket a bit for easier handling n shit
+                    socket.keyAuthIdentifier = keyChallengeResult.identifier;
+                    socket.keyAuthSolution = keyChallengeResult.challengeString;
+
+                    // then send response to client to solve
+                    response({ keyAuth: true, challenge: keyChallengeResult.challenge });
+                    return {
+                        keepExecution: false,
+                    }
+                }
+                // if there is a solution supplied and the socket still has the identifier set
+                else if(member?.keySolution && socket?.keyAuthIdentifier && socket.keyAuthSolution){
+                    // if the user successfully authenticated let them know it all worked
+                    if(socket.keyAuthSolution === member.keySolution){
+                        let serverMemberObj = await getMemberFromKey(member?.publicKey)
+                        await successfulAuthResponse(serverMemberObj)
+
+                        return {
+                            keepExecution: false,
+                        }
+                    }
+                }
+            }
+
+            return {
+                keepExecution: true,
+            }
         }
     });
 };

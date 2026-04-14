@@ -424,7 +424,7 @@ class ChatManager {
         }
     }
 
-    static async userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false, callback = null) {
+    static async userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false, callback = null, keySolution = null) {
         if (UserManager.getUsername() != null) {
             var username = UserManager.getUsername();
 
@@ -447,13 +447,36 @@ class ChatManager {
                 loginName: loginNameFlag,
                 publicKey: await UserManager.getPublicKey(),
                 knownServers,
+                keySolution,
                 code: accessCode,
                 pow: {
                     challenge: localStorage.getItem("pow_challenge"),
                     solution: localStorage.getItem("pow_solution")
                 }
             }, async function (response) {
-                // sync data
+
+                // automatic client auth using public key challenge
+                try{
+                    if(response?.keyAuth === true && response?.challenge && isLauncher() && await Crypto.getPublicKey() && !keySolution){
+                        if(typeof Client().DecryptData !== "function") throw new Error("Public Key Auth is not supported")
+                        let decrypted = await Client().DecryptData(
+                            response?.challenge.method,
+                            response?.challenge.encKey,
+                            response?.challenge.iv,
+                            response?.challenge.tag,
+                            response?.challenge.ciphertext
+                        );
+
+                        if(decrypted){
+                            return ChatManager.userJoined(true, null, null, null, true, null, decrypted);
+                        }
+                    }
+                }
+                catch(publicKeyAuthError){
+                    console.error(publicKeyAuthError)
+                }
+
+                // sync data if available
                 if (response?.token) CookieManager.setCookie("token", response.token);
                 if (response?.icon) CookieManager.setCookie("pfp", response.icon);
                 if (response?.banner) CookieManager.setCookie("banner", response.banner);

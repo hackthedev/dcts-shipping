@@ -177,7 +177,7 @@ async function renderServersList(container, servers) {
                 </label>
                                 
                 <div class="buttons">
-                    <a class="joinButton" href="http://${address}">Join</a>
+                    <a class="joinButton" href="https://${address}">Join</a>
                     <a class="joinButton delete" onclick="deleteServer('${extractHost(address)}')"">&#128465;</a>
                 </div>
                 

@@ -81,14 +81,27 @@ class AdminActions {
     }
 
     static createGroup() {
-        var catname = prompt("Group Name:");
+        customPrompts.showPrompt(
+            "Create Group",
+            `
+        <div class="prompt-form-group">
+            <label class="prompt-label" for="groupName">Group Name</label>
+            <input class="prompt-input" type="text" id="groupName" name="groupName" placeholder="Enter a group name">
+        </div>
+        `,
+            (values) => {
+                const groupName = values.groupName?.trim();
 
-        if (catname == null || catname.length <= 0) {
-            return;
-        }
-        else {
-            socket.emit("createGroup", { id: UserManager.getID(), value: catname, token: UserManager.getToken() });
-        }
+                if (!groupName) {
+                    return;
+                }
+
+                socket.emit("createGroup", { id: UserManager.getID(), value: groupName, token: UserManager.getToken() });
+            },
+            ["Create", "success"],
+            false,
+            250
+        );
     }
 
     static editServer() {

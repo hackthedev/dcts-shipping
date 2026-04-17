@@ -20,7 +20,7 @@ function initGroupSettings(){
             console.log("Unable to get Group Information");
             console.log(err);
 
-            alert("Unable to get channel info. Please try to reload slowly until it works. Known bug!");
+            DialogManager.alert("Unable to get channel info. Please try to reload slowly until it works. Known bug!", {title: "Group Info Error"});
         }
 
     });
@@ -46,5 +46,4 @@ function showChannelSettings(response) {
         )
     );
 }
-
 

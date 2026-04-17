@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 callback: async (data) => {
                     let categoryId = getCategoryIdFromElement(data.element);
                     if(!categoryId){
-                        alert("not found")
+                        DialogManager.alert("Category not found", {title: "Create Channel"});
                         console.error("Cant create channel in category because couldnt find category id from element");
                         return;
                     }

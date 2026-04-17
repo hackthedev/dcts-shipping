@@ -41,25 +41,28 @@ function unbanUser(id) {
     var container = document.querySelector(`tr[data-member-id="${id}"]`);
     var username = container.querySelector(`#username[data-member-id="${id}"]`)?.innerText?.split(" ")[0];
 
-    if (!confirm("Do you want to unban the user " + username + "?")){
-        notify("Canceled unban", "info")
-        return;
-    }
-
-
-    socket.emit("unbanUser", {id: UserManager.getID(), token: UserManager.getToken(), target: id}, function (response) {
-        //notify("User was banned by " + response.data.name, "info", null, "normal");
-        if(response.type === "success"){
-            notify(response.msg, "success");
-            container.remove();
+    DialogManager.confirm("Do you want to unban the user " + username + "?", {
+        title: "Unban User",
+        confirmText: "Unban",
+        confirmColor: "error",
+    }).then((confirmed) => {
+        if (!confirmed){
+            notify("Canceled unban", "info")
+            return;
         }
-        else{
-            notify(response.msg, "error");
-            console.log(response.data)
-        }
+
+        socket.emit("unbanUser", {id: UserManager.getID(), token: UserManager.getToken(), target: id}, function (response) {
+            //notify("User was banned by " + response.data.name, "info", null, "normal");
+            if(response.type === "success"){
+                notify(response.msg, "success");
+                container.remove();
+            }
+            else{
+                notify(response.msg, "error");
+                console.log(response.data)
+            }
+        });
     });
-
-
 }
 
 function getBans() {
@@ -134,7 +137,7 @@ function getBans() {
                 // Add it to the html
                 emojiContainer.insertAdjacentHTML("beforeend", table);
             } else {
-                alert(response1?.error || response1?.msg);
+                DialogManager.alert(response1?.error || response1?.msg, {title: "Ban List"});
             }
         } catch (ex) {
             console.log(ex);

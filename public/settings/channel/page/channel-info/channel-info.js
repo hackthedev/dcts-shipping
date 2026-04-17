@@ -57,7 +57,7 @@ function initChannelSettings(){
             console.log("Unable to get Channel Information");
             console.log(err);
 
-            alert("Unable to get channel info. Please try to reload slowly until it works. Known bug!");
+            DialogManager.alert("Unable to get channel info. Please try to reload slowly until it works. Known bug!", {title: "Channel Info Error"});
         }
 
     });

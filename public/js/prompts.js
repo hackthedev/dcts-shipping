@@ -3,9 +3,12 @@ class Prompt {
         this.addStyles();  // Add the custom styles
         this.createModal();
         this.currentCallback = null;
+        this.afterSubmitAction = null;
         this.selectedValues = []; // Store selected values for select feature
         this.multiSelect = false; // Single or multi-select mode
         this.closePrompt();
+        window.__promptInstance = this;
+        window.__prompt = this;
     }
 
     addStyles() {
@@ -280,7 +283,7 @@ class Prompt {
         this.selectedValues = multiSelect ? [] : null;
         this.promptContent.innerHTML = htmlContent;
         this.modal.style.display = 'flex';
-        this.promptContent.style.minWidth = `${customMinWidth}px` || "";
+        this.promptContent.style.minWidth = customMinWidth ? `${customMinWidth}px` : "";
 
         // reset colors just in case
         this.modalContent.style.backgroundColor = '#24292E';
@@ -327,7 +330,7 @@ class Prompt {
         }
     }
 
-    showConfirm(titleText, options, callback, afterSubmitAction = null) {
+    showConfirm(titleText, options, callback, afterSubmitAction = null, bodyHtml = '') {
         this.currentCallback = callback;
         this.afterSubmitAction = afterSubmitAction;
 
@@ -336,7 +339,7 @@ class Prompt {
             titleElement.innerText = titleText;
         }
 
-        this.promptContent.innerHTML = '';
+        this.promptContent.innerHTML = bodyHtml || '';
         this.submitButton.style.display = 'none';
         this.helpButton.style.display = 'none';
         this.closeButton.style.display = 'none';
@@ -404,13 +407,15 @@ class Prompt {
     }
 
     closePrompt(canceled = true) {
+        const afterSubmitAction = this.afterSubmitAction;
+
         this.modal.style.display = 'none';
-
-        if (this.afterSubmitAction) {
-            this.afterSubmitAction({ canceled, values: null });
-        }
-
         this.currentCallback = null;
+        this.afterSubmitAction = null;
+
+        if (canceled && afterSubmitAction) {
+            afterSubmitAction({ canceled, values: null });
+        }
     }
 
     previewImage(event) {
@@ -446,21 +451,164 @@ class Prompt {
             }
         });
 
-        const callbackResult = this.currentCallback ? this.currentCallback(values) : undefined;
-
-        if (this.currentCallback) {
-            this.currentCallback = null;
-        }
+        const currentCallback = this.currentCallback;
+        const afterSubmitAction = this.afterSubmitAction;
+        const callbackResult = currentCallback ? currentCallback(values) : undefined;
 
         if (callbackResult === false) return;
 
-        if (this.afterSubmitAction) {
-            this.afterSubmitAction({ canceled: false, values });
+        this.currentCallback = null;
+        this.afterSubmitAction = null;
+
+        if (afterSubmitAction) {
+            afterSubmitAction({ canceled: false, values });
         }
 
-        this.closePrompt(false);
+        this.modal.style.display = 'none';
     }
 
 
 
 }
+Prompt.escapeHtml = function (value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+};
+
+Prompt.textToHtml = function (value) {
+    return `<p style="margin:0 0 10px 0;line-height:1.5;">${Prompt.escapeHtml(value).replaceAll("\n", "<br>")}</p>`;
+};
+
+Prompt.prototype.showInput = function (titleOrOptions = {}, callback = null, extraOptions = {}) {
+    const options = typeof titleOrOptions === "object" && titleOrOptions !== null
+        ? titleOrOptions
+        : { title: titleOrOptions, callback, ...extraOptions };
+    const inputId = `prompt-input-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const {
+        title = "Prompt",
+        label = "",
+        message = "",
+        name = "value",
+        value = "",
+        placeholder = "",
+        type = "text",
+        submitText = "Submit",
+        submitColor = null,
+        minWidth = 280,
+        multiline = false,
+        rows = 6,
+        callback: inputCallback = typeof callback === "function" ? callback : null,
+    } = options;
+    const escapedValue = Prompt.escapeHtml(value);
+    const escapedPlaceholder = Prompt.escapeHtml(placeholder);
+    const escapedLabel = Prompt.escapeHtml(label);
+    const bodyHtml = `
+        ${message ? Prompt.textToHtml(message) : ""}
+        <div class="prompt-form-group">
+            ${label ? `<label class="prompt-label" for="${inputId}">${escapedLabel}</label>` : ""}
+            ${multiline
+                ? `<textarea class="prompt-input" id="${inputId}" name="${name}" rows="${rows}" placeholder="${escapedPlaceholder}">${escapedValue}</textarea>`
+                : `<input class="prompt-input" type="${type}" id="${inputId}" name="${name}" value="${escapedValue}" placeholder="${escapedPlaceholder}">`
+            }
+        </div>
+    `;
+
+    return new Promise((resolve) => {
+        let settled = false;
+        const finish = (result) => {
+            if (settled) return;
+            settled = true;
+            resolve(result);
+        };
+
+        this.showPrompt(
+            title,
+            bodyHtml,
+            (values) => {
+                const result = values?.[name] ?? null;
+                const callbackResult = inputCallback ? inputCallback(result, values) : undefined;
+
+                if (callbackResult === false) {
+                    return false;
+                }
+
+                finish(result);
+            },
+            [submitText, submitColor],
+            false,
+            minWidth,
+            null,
+            (state) => {
+                if (state?.canceled) {
+                    finish(null);
+                }
+            }
+        );
+
+        requestAnimationFrame(() => {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+
+            input.focus();
+            if (!multiline && typeof input.select === "function") {
+                input.select();
+            }
+        });
+    });
+};
+
+Prompt.prototype.showAlert = function (message, {
+    title = "Notice",
+    buttonText = "OK",
+    buttonColor = null,
+    minWidth = 320,
+} = {}) {
+    return new Promise((resolve) => {
+        let settled = false;
+        const finish = () => {
+            if (settled) return;
+            settled = true;
+            resolve(true);
+        };
+
+        this.showPrompt(
+            title,
+            Prompt.textToHtml(message),
+            () => finish(),
+            [buttonText, buttonColor],
+            false,
+            minWidth,
+            null,
+            () => finish()
+        );
+    });
+};
+
+Prompt.prototype.showConfirmPrompt = function (message, {
+    title = "Confirm",
+    confirmText = "Yes",
+    cancelText = "No",
+    confirmColor = "success",
+    cancelColor = "error",
+} = {}) {
+    return new Promise((resolve) => {
+        let settled = false;
+        const finish = (result) => {
+            if (settled) return;
+            settled = true;
+            resolve(result);
+        };
+
+        this.showConfirm(
+            title,
+            [[confirmText, confirmColor], [cancelText, cancelColor]],
+            (selectedOption) => finish(selectedOption === confirmText.toLowerCase()),
+            null,
+            Prompt.textToHtml(message)
+        );
+    });
+};

@@ -55,8 +55,17 @@ class RichEditor {
                     handlers: {
                         link: value => {
                             if (!value) return this.quill.format("link", false);
-                            const href = prompt("Enter the URL");
-                            if (href) this.quill.format("link", href);
+                            DialogManager.prompt({
+                                title: "Insert Link",
+                                label: "URL",
+                                placeholder: "Enter the URL",
+                                submitText: "Insert",
+                                submitColor: "success",
+                                minWidth: 360,
+                            }).then((href) => {
+                                const trimmedHref = href?.trim();
+                                if (trimmedHref) this.quill.format("link", trimmedHref);
+                            });
                         }
                     }
                 },

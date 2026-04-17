@@ -110,12 +110,12 @@ function addRole() {
 
             if (roleId != 0) {
                 if (String(roleId).length != 4) {
-                    alert("The role id (4 character long number) you've entered is incorrect.");
+                    DialogManager.alert("The role id (4 character long number) you've entered is incorrect.", {title: "Invalid Role ID"});
                     return;
                 }
             }
             if (isNaN(roleId) == true) {
-                alert("The role id has to be a number");
+                DialogManager.alert("The role id has to be a number", {title: "Invalid Role ID"});
                 return;
             }
 

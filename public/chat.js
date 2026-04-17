@@ -637,13 +637,19 @@ function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
 
 
 function redeemKey() {
-    var key = prompt("Enter the key you want to redeem");
+    DialogManager.prompt({
+        title: "Redeem Key",
+        label: "Key",
+        placeholder: "Enter the key you want to redeem",
+        submitText: "Redeem",
+        submitColor: "success",
+        minWidth: 360,
+    }).then((key) => {
+        const trimmedKey = key?.trim();
+        if (!trimmedKey) return;
 
-    if (key == null || key.length <= 0) {
-
-    } else {
-        socket.emit("redeemKey", { id: UserManager.getID(), key: key, token: UserManager.getToken() });
-    }
+        socket.emit("redeemKey", { id: UserManager.getID(), key: trimmedKey, token: UserManager.getToken() });
+    });
 }
 
 function dataURLtoBlob(dataUrl) {

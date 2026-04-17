@@ -122,8 +122,9 @@ function removeRole() {
     console.log(currentRoleId);
 
     socket.emit("removeRoleFromChannel", { id: UserManager.getID(), token: UserManager.getToken(), role: currentRoleId, channel: currentChannelId }, function (response) {
-        alert(response.msg);
-        window.location.reload();
+        DialogManager.alert(response.msg, {title: "Remove Role From Channel"}).then(() => {
+            window.location.reload();
+        });
     });
 }
 
@@ -137,19 +138,20 @@ function addRole() {
 
             if (roleId != 0) {
                 if (String(roleId).length != 4) {
-                    alert("The role id (4 character long number) you've entered is incorrect.");
+                    DialogManager.alert("The role id (4 character long number) you've entered is incorrect.", {title: "Invalid Role ID"});
                     return;
                 }
             }
             if (isNaN(roleId) == true) {
-                alert("The role id has to be a number");
+                DialogManager.alert("The role id has to be a number", {title: "Invalid Role ID"});
                 return;
             }
 
 
             socket.emit("addRoleToChannel", { id: UserManager.getID(), token: UserManager.getToken(), role: roleId, channel: currentChannelId }, function (response) {
-                alert(response.msg);
-                window.location.reload();
+                DialogManager.alert(response.msg, {title: "Add Role To Channel"}).then(() => {
+                    window.location.reload();
+                });
             });
         });
     });
@@ -188,7 +190,7 @@ function savePermissions() {
     console.log(editChannel.permissions);
 
     socket.emit("saveChannelPermissions", { id: UserManager.getID(), token: UserManager.getToken(), channel: currentChannelId, role: currentRoleId, permission: editChannel.permissions[currentRoleId] }, function (response) {
-        alert(response.msg);
+        DialogManager.alert(response.msg, {title: "Save Channel Permissions"});
         console.log(response)
         //window.location.reload();
     });

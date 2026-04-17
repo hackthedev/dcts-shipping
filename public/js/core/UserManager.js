@@ -256,40 +256,64 @@ class UserManager {
     }
 
     static changeStatus() {
-        var status = prompt("What should your new status be?", getStatus());
+        DialogManager.prompt({
+            title: "Change Status",
+            label: "Status",
+            value: UserManager.getStatus() || "",
+            placeholder: "What should your new status be?",
+            submitText: "Save",
+            submitColor: "success",
+            minWidth: 360,
+        }).then((status) => {
+            if (status == null) return;
 
-        if (status.length > 0) {
-            CookieManager.setCookie("status", status, 360);
-            UserManager.updateStatusOnUI(status, true);
-        } else {
-            alert("Your status was too short");
-        }
+            const trimmedStatus = status.trim();
+            if (trimmedStatus.length > 0) {
+                CookieManager.setCookie("status", trimmedStatus, 360);
+                UserManager.updateStatusOnUI(trimmedStatus, true);
+            } else {
+                DialogManager.alert("Your status was too short", {title: "Invalid Status"});
+            }
+        });
     }
 
     static changePFP() {
-        var pfp = prompt("Enter the url of your new pfp", getPFP());
+        DialogManager.prompt({
+            title: "Change Profile Picture",
+            label: "Profile Image URL",
+            value: UserManager.getPFP() || "",
+            placeholder: "Enter the url of your new pfp",
+            submitText: "Save",
+            submitColor: "success",
+            minWidth: 420,
+        }).then((pfp) => {
+            if (pfp == null) return;
 
-        if (pfp.length > 0) {
-            CookieManager.setCookie("pfp", pfp, 360);
-            UserManager.updatePFPOnUI(pfp, true);
-        } else {
+            const trimmedPfp = pfp.trim();
+            if (trimmedPfp.length > 0) {
+                let resolvedPfp = trimmedPfp;
+                if (isImage(resolvedPfp) == false) {
+                    resolvedPfp = "/img/default_pfp.png";
+                }
 
-            var reset = confirm("Your pfp url was too short. Want to reset your pfp?");
-
-            if (reset) {
-                pfp = "/img/default_pfp.png";
-                setPFP(pfp);
-            } else {
+                CookieManager.setCookie("pfp", resolvedPfp, 360);
+                UserManager.updatePFPOnUI(resolvedPfp, true);
                 return;
             }
-        }
 
-        if (pfp == null || isImage(pfp) == false) {
-            pfp = "/img/default_pfp.png";
-        }
+            DialogManager.confirm("Your pfp url was too short. Want to reset your pfp?", {
+                title: "Reset Profile Picture",
+                confirmText: "Reset",
+                confirmColor: "error",
+            }).then((reset) => {
+                if (!reset) return;
 
-        CookieManager.setCookie("pfp", pfp, 360);
-        UserManager.updatePFPOnUI(pfp, true);
+                const defaultPfp = "/img/default_pfp.png";
+                UserManager.setPFP(defaultPfp);
+                CookieManager.setCookie("pfp", defaultPfp, 360);
+                UserManager.updatePFPOnUI(defaultPfp, true);
+            });
+        });
     }
 
     static changeUsername() {
@@ -327,8 +351,15 @@ class UserManager {
     }
 
     static getPassword() {
-        let passprompt = prompt("Please enter your account password:");
-        if (passprompt) return passprompt;
+        return DialogManager.prompt({
+            title: "Password Required",
+            label: "Password",
+            placeholder: "Please enter your account password",
+            type: "password",
+            submitText: "Continue",
+            submitColor: "success",
+            minWidth: 360,
+        });
     }
 
     static getTheme() {
@@ -542,31 +573,44 @@ class UserManager {
 
     static importToken() {
         /* DEPRECATED */
-        var combinedInput = prompt("Please paste your exported token here.")
+        DialogManager.prompt({
+            title: "Import Token",
+            label: "Exported Token",
+            placeholder: "Please paste your exported token here",
+            submitText: "Import",
+            submitColor: "success",
+            minWidth: 460,
+        }).then((combinedInput) => {
+            if (!combinedInput) return;
 
-        var token = combinedInput.split(":")[0];
-        var id = combinedInput.split(":")[1];
+            const token = combinedInput.split(":")[0] || "";
+            const id = combinedInput.split(":")[1] || "";
 
-        console.log(token)
+            console.log(token)
 
-        if (token.length != 48) {
-            alert("This token was invalid. If you forgot your token please contact the server admin");
-            return;
-        }
-        if (id.length != 12) {
-            alert("The ID in your token string was invalid. Format: token:id (48, 12)");
-            return;
-        }
+            if (token.length != 48) {
+                DialogManager.alert("This token was invalid. If you forgot your token please contact the server admin", {title: "Invalid Token"});
+                return;
+            }
+            if (id.length != 12) {
+                DialogManager.alert("The ID in your token string was invalid. Format: token:id (48, 12)", {title: "Invalid Token ID"});
+                return;
+            }
 
-        alert("Token successfully set!\nPlease save it if you havent already");
-        CookieManager.setCookie("dcts_token", token, 365);
-        CookieManager.setCookie("id", id, 365);
+            DialogManager.alert("Token successfully set!\nPlease save it if you havent already", {title: "Token Imported"});
+            CookieManager.setCookie("dcts_token", token, 365);
+            CookieManager.setCookie("id", id, 365);
+        });
     }
 
     static resetAccount() {
-        var reset = confirm("Do you really wanna logout?")
+        DialogManager.confirm("Do you really wanna logout?", {
+            title: "Logout",
+            confirmText: "Logout",
+            confirmColor: "error",
+        }).then((reset) => {
+            if (!reset) return;
 
-        if (reset) {
             CookieManager.setCookie("id", null, 365);
             CookieManager.setCookie("username", null, 365);
             CookieManager.setCookie("status", null, 365);
@@ -577,7 +621,7 @@ class UserManager {
             CookieManager.setCookie("pow_solution", null, 365);
 
             window.location.href = window.location.origin;
-        }
+        });
     }
 
     static setUsername(username) {

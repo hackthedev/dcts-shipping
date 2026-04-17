@@ -1,3 +1,66 @@
+const MEDIA_VOLUME_STORAGE_KEY = "media_embed_volume";
+
+function isPersistedMediaElement(element) {
+    return !!element?.matches?.(".audio-player audio, .video-embed");
+}
+
+function clampMediaVolume(value) {
+    return Math.max(0, Math.min(1, Number(value) || 0));
+}
+
+function getSavedMediaVolume() {
+    try {
+        const rawValue = localStorage.getItem(MEDIA_VOLUME_STORAGE_KEY);
+        if (!rawValue) return null;
+
+        const parsedValue = JSON.parse(rawValue);
+        if (!parsedValue || typeof parsedValue !== "object") return null;
+
+        return {
+            volume: clampMediaVolume(parsedValue.volume),
+            muted: parsedValue.muted === true
+        };
+    } catch (error) {
+        console.warn("Unable to read saved media volume", error);
+        return null;
+    }
+}
+
+function applySavedMediaVolume(mediaElement) {
+    if (!isPersistedMediaElement(mediaElement)) return;
+
+    const savedSettings = getSavedMediaVolume();
+    if (!savedSettings) return;
+
+    mediaElement.volume = savedSettings.volume;
+    mediaElement.muted = savedSettings.muted;
+}
+
+function persistMediaVolume(mediaElement) {
+    if (!isPersistedMediaElement(mediaElement)) return;
+
+    try {
+        localStorage.setItem(MEDIA_VOLUME_STORAGE_KEY, JSON.stringify({
+            volume: clampMediaVolume(mediaElement.volume),
+            muted: mediaElement.muted === true
+        }));
+    } catch (error) {
+        console.warn("Unable to save media volume", error);
+    }
+}
+
+document.addEventListener("loadedmetadata", event => {
+    applySavedMediaVolume(event.target);
+}, true);
+
+document.addEventListener("play", event => {
+    applySavedMediaVolume(event.target);
+}, true);
+
+document.addEventListener("volumechange", event => {
+    persistMediaVolume(event.target);
+}, true);
+
 function initAudioPlayerEvents(){
     ContextMenu.registerClickEvent(
         "audioplayer",
@@ -54,6 +117,7 @@ function togglePlayPause(button) {
     // then we continue with enabling the current player or pausing it
     const audio = button.parentElement.parentElement.querySelector('audio');
     if (audio.paused) {
+        applySavedMediaVolume(audio);
         audio.play();
         button.textContent = 'Pause';
         button.classList.add('playing');

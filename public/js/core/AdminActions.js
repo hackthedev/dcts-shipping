@@ -298,12 +298,13 @@ class AdminActions {
                     group: UserManager.getGroup().replace("group-", ""),
                     category: normalizedCategory
                 }, function (response) {
+                    const isError = Boolean(response?.error);
                     showSystemMessage({
-                        title: response.msg,
+                        title: isError ? response.error : "Channel created successfully",
                         text: "",
-                        icon: response.type,
+                        icon: isError ? "error" : "success",
                         img: null,
-                        type: response.type,
+                        type: isError ? "error" : "success",
                         duration: 1000
                     });
                 });

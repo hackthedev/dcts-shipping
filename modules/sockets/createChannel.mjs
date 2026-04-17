@@ -1,47 +1,33 @@
-import { saveConfig, serverconfig, xssFilters } from "../../index.mjs";
+import { saveConfig, serverconfig } from "../../index.mjs";
 import { getChannelTree, hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
-import { copyObject, escapeHtml, generateId, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { generateId, validateMemberId } from "../functions/main.mjs";
+import { stripHTML } from "../functions/sanitizing/functions.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('createChannel', async function (member, response) {
         if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            member.id = xssFilters.inHTMLData(member.id)
-            member.token = xssFilters.inHTMLData(member.token)
-            member.group = xssFilters.inHTMLData(member.group)
-            member.category = xssFilters.inHTMLData(member.category)
-            member.value = xssFilters.inHTMLData(member.value)
-            member.type = xssFilters.inHTMLData(member.type)
+            member.id = stripHTML(member?.id)?.trim()
+            member.token = stripHTML(member?.token)?.trim()
+            member.group = stripHTML(member?.group)?.trim()
+            member.category = stripHTML(member?.category)?.trim()
+            member.value = stripHTML(member?.value)?.trim()
+            member.type = stripHTML(member?.type)?.trim()
 
-            if (!await hasPermission(member.id, "manageChannels")) {
-                response({ msg: "You are not allowed to create a channel", type: "error", error: "Missing permissions to create channel" })
-                return;
-            }
+            if (!await hasPermission(member.id, "manageChannels")) return response({ error: "Missing permissions to create channel" })
 
             const group = serverconfig.groups?.[member.group];
-            if (!group) {
-                response({ msg: "Couldnt create channel", type: "error", error: "Invalid group" })
-                return;
-            }
+            if (!group) return response({ error: "Couldnt create channel: invalid group" })
 
             const category = group.channels?.categories?.[member.category];
-            if (!category) {
-                response({ msg: "Couldnt create channel", type: "error", error: "Invalid category" })
-                return;
-            }
+            if (!category) return response({ error: "Couldnt create channel: missing category" })
 
-            const channelName = escapeHtml(String(member.value || "").trim());
-            if (!channelName) {
-                response({ msg: "Channel name is required", type: "error", error: "Missing channel name" })
-                return;
-            }
+            const channelName = stripHTML(member.value);
+            if (!channelName) return response({ error: "Couldnt create channel: missing channel name" })
 
-            if (!["text", "voice"].includes(member.type)) {
-                response({ msg: "Invalid channel type", type: "error", error: "Invalid channel type" })
-                return;
-            }
+            if (!["text", "voice"].includes(member.type)) return response({ error: "Couldnt create channel: invalid channel type" })
 
             try {
                 var channelId = generateId(4);
@@ -64,12 +50,12 @@ export default (io) => (socket) => {
 
                 saveConfig(serverconfig);
                 io.emit("receiveChannelTree", getChannelTree(member));
-                response({ msg: "Channel created successfully", type: "success" })
+                response({ error: null })
             }
             catch (e) {
                 Logger.error("Couldnt create channel");
                 Logger.error(e);
-                response({ msg: "Couldnt create channel", type: "error", error: "Unexpected error creating channel" })
+                response({ error: "Couldnt create channel: unexpected error" })
             }
         }
     });

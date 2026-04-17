@@ -172,9 +172,16 @@ class AdminActions {
             (selectedOption) => {
 
                 if (selectedOption == "yes") {
-
-                    // TODO: Improve using response
-                    socket.emit("deleteGroup", { id: UserManager.getID(), token: UserManager.getToken(), group: groupid });
+                    socket.emit("deleteGroup", { id: UserManager.getID(), token: UserManager.getToken(), group: groupid }, function (response) {
+                        showSystemMessage({
+                            title: response?.msg || "Unable to delete group",
+                            text: "",
+                            icon: response?.type || "error",
+                            img: null,
+                            type: response?.type || "error",
+                            duration: 1000
+                        });
+                    });
                 }
             }
         )

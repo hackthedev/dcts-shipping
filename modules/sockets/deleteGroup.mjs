@@ -1,43 +1,27 @@
-import { saveConfig, serverconfig, xssFilters } from "../../index.mjs";
-import { hasPermission } from "../functions/chat/main.mjs";
+import { saveConfig, serverconfig } from "../../index.mjs";
+import { getChannelTree, hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
-import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { validateMemberId } from "../functions/main.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
-    socket.on('deleteGroup', async function (member) {
+    socket.on('deleteGroup', async function (member, response) {
         if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            if (serverconfig.groups[member.group].info.isDeletable === 0) {
-                return sendMessageToUser(socket.id, JSON.parse(
-                    `{
-                        "title": "Error!",
-                        "message": "This group cant be deleted.",
-                        "buttons": {
-                            "0": {
-                                "text": "Ok",
-                                "events": ""
-                            }
-                        },
-                        "type": "error",
-                        "popup_type": "confirm"
-                    }`));
+            const group = serverconfig.groups[member?.group];
+            if (!group) {
+                response?.({ msg: "This group does not exist", type: "error", error: "Invalid group" });
+                return;
+            }
+
+            if (group.info.isDeletable === 0) {
+                response?.({ msg: "This group cant be deleted.", type: "error", error: "Group is not deletable" });
+                return;
             }
 
             if (!await hasPermission(member.id, "manageGroups")) {
-                return sendMessageToUser(socket.id, JSON.parse(
-                    `{
-                        "title": "Missing permissions!",
-                        "message": "You arent allowed to delete groups",
-                        "buttons": {
-                            "0": {
-                                "text": "Ok",
-                                "events": ""
-                            }
-                        },
-                        "type": "error",
-                        "popup_type": "confirm"
-                    }`));
+                response?.({ msg: "You arent allowed to delete groups", type: "error", error: "Missing permissions: manageGroups" });
+                return;
             }
 
 
@@ -45,11 +29,14 @@ export default (io) => (socket) => {
                 delete serverconfig.groups[member.group];
                 saveConfig(serverconfig);
 
+                response?.({ msg: "Group deleted", type: "success", error: null });
                 io.emit("updateGroupList");
+                io.emit("receiveChannelTree", getChannelTree(member));
             }
             catch (e) {
                 Logger.error("Couldnt delete group");
                 Logger.error(e);
+                response?.({ msg: "Couldnt delete group", type: "error", error: "Unexpected error while deleting group" });
             }
         }
     });

@@ -3,27 +3,21 @@ window.addRole  = addRole;
 
 
 var serverconfigName;
-var editGroup = {};
-
-var serverRoleResponse = {};
-var editGroup = "";
+var serverRoleResponse = null;
+var editGroup = null;
 var currentRoleId = "";
 let permListPage = null;
+let invalidRoleWarningShown = false;
 
 setupNotify();
 
 let currentGroupId = getUrlParams("id");
+invalidRoleWarningShown = false;
 
 socket.emit("getGroupInfo", { id: UserManager.getID(), token: UserManager.getToken(), group: currentGroupId }, function (response) {
     try {
-
         editGroup = response.data;
-
-        console.log("Edit Group")
-        console.log(editGroup);
-
-        //loadRolePerms(getUrlParams("id"));
-
+        renderGroupRoleList();
 
     }
     catch (err) {
@@ -37,61 +31,44 @@ socket.emit("getServerRoles", { id: UserManager.getID(), token: UserManager.getT
 
     //console.log(response);
     serverRoleResponse = response;
+    renderGroupRoleList();
+});
 
-    console.log("Role Response:")
-    console.log(response);
+function renderGroupRoleList() {
+    if (!editGroup?.permissions || !serverRoleResponse) return;
 
-    var roleArraySorted = [];
-    var code = "";
-    var role = "";
+    const invalidRoleIds = [];
+    let code = "";
 
-    console.log(editGroup)
-
-    // Foreach role in the channel permissions
     Object.keys(editGroup.permissions).forEach(function (perm) {
-
-        //console.log("Role " + perm + " has the following permissions");
-
-        /*
-        console.log("Perm)")
-        console.log(perm)
-        console.log(serverRoleResponse[perm]);
-
-         */
-
-        role = serverRoleResponse[perm];
-
-        /*
-        console.log(role);
-        console.log(serverRoleResponse[perm]);
-
-         */
-
-
+        const role = serverRoleResponse[perm];
+        if (!role?.info) {
+            invalidRoleIds.push(perm);
+            return;
+        }
 
         code += `
-                   <div class="role-entry-container" id="${role.info.id}">                       
-                        <p class="role-entry" onclick="loadRolePerms('${role.info.id}')" id="${role.info.id}">
-                            <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${role.info.name}</style>
-                        </p>
-                   </div>`;
-
-
-        //children = document.querySelectorAll(`#${perm} input`);
-
-        /*
-        if (editChannel[perm] == 1){
-            children[0].checked = true;
-        }
-        else{
-            children[0].checked = false;
-        }
-
-         */
+               <div class="role-entry-container" id="${role.info.id}">                       
+                    <p class="role-entry" onclick="loadRolePerms('${role.info.id}')" id="${role.info.id}">
+                        <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${role.info.name}</style>
+                    </p>
+               </div>`;
     });
 
-    rolelist.insertAdjacentHTML("beforeend", code);
-});
+    rolelist.innerHTML = code;
+
+    if (invalidRoleIds.length && !invalidRoleWarningShown) {
+        invalidRoleWarningShown = true;
+        showSystemMessage({
+            title: "Skipped invalid role permissions",
+            text: `Ignored missing role IDs: ${invalidRoleIds.join(", ")}`,
+            icon: "warning",
+            img: null,
+            type: "warning",
+            duration: 4000
+        });
+    }
+}
 
 function removeRole(id) {
 
@@ -178,7 +155,17 @@ function loadRolePerms(roleId) {
     console.log(editGroup);
 
     // Get Permissions
-    var groupperms = editGroup.permissions[currentRoleId];
+    if (!editGroup?.permissions?.[currentRoleId]) {
+        showSystemMessage({
+            title: "Role permissions not found",
+            text: "This role no longer exists in the server role list.",
+            icon: "warning",
+            img: null,
+            type: "warning",
+            duration: 3000
+        });
+        return;
+    }
 
     //console.log("Channel Permissions for role " + roleId)
     //console.log(channelperms);
@@ -209,11 +196,15 @@ function loadRolePerms(roleId) {
             });
         }
         else {
+            const currentRolePermissions = editGroup.permissions[currentRoleId] || {};
             Object.entries(response.permissions).forEach(([permName, permission]) => {
-                const currentValue = editGroup.permissions[currentRoleId][permName] ?? 0;
+                const currentValue = currentRolePermissions[permName] ?? 0;
 
                 const callback = (value) => {
                     // Always show save/cancel buttons
+                    if (!editGroup.permissions[currentRoleId]) {
+                        editGroup.permissions[currentRoleId] = {};
+                    }
                     editGroup.permissions[currentRoleId][permName] = value
 
                     document.getElementById("saveButton").style.display = "inline-block";

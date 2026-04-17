@@ -2,12 +2,13 @@ window.loadRolePerms = loadRolePerms;
 window.savePermissions = savePermissions;
 
 var serverconfigName;
-var editChannel = {};
+var editChannel = null;
 
-var serverRoleResponse = {};
+var serverRoleResponse = null;
 var currentChannelId = "";
 var currentRoleId = "";
 let permListPage = null;
+let invalidRoleWarningShown = false;
 
 document.addEventListener("pagechange", e => {
     console.log(e.detail.page);
@@ -20,6 +21,7 @@ let channelRolesRightPanel = null;
 
 async function initChannelRoles(){
     currentChannelId = getUrlParams("id");
+    invalidRoleWarningShown = false;
 
     channelRolesRightPanel = [
         {
@@ -33,14 +35,8 @@ async function initChannelRoles(){
 
     socket.emit("getChannelInfo", { id: UserManager.getID(), token: UserManager.getToken(), channel: currentChannelId }, function (response) {
         try {
-
             editChannel = response.data;
-
-            console.log("EditChannel")
-            console.log(editChannel);
-
-            //loadRolePerms(getUrlParams("id"));
-
+            renderChannelRoleList();
 
         }
         catch (err) {
@@ -54,67 +50,50 @@ async function initChannelRoles(){
 
         //console.log(response);
         serverRoleResponse = response;
-
-        console.log("Role Response:")
-        console.log(response);
-
-        var roleArraySorted = [];
-        var code = "";
-        var role = "";
-
-        console.log(editChannel)
-
-        // Foreach role in the channel permissions
-        Object.keys(editChannel.permissions).forEach(function (perm) {
-
-            //console.log("Role " + perm + " has the following permissions");
-
-            /*
-            console.log("Perm)")
-            console.log(perm)
-            console.log(serverRoleResponse[perm]);
-
-             */
-
-            role = serverRoleResponse[perm];
-
-            /*
-            console.log(role);
-            console.log(serverRoleResponse[perm]);
-
-             */
-
-
-
-            code += `
-                   <div class="role-entry-container" id="${role.info.id}">
-                       <div onclick="moveRoleUp(${role.info.id})" style="background-image: url('/img/up.png');background-size: cover;object-fit: cover;background-position: center center;
-                       width: 10px; height: 10px;display: inline-block;"></div>
-                       
-                       <div onclick="moveRoleDown(${role.info.id})" style="background-image: url('/img/down.png');background-size: cover;object-fit: cover;background-position: center center;
-                       width: 10px; height: 10px;display: inline-block;"></div>
-                       
-                        <p class="role-entry" onclick="loadRolePerms('${role.info.id}')" id="${role.info.id}" style="display: inline-block;color: ${role.info.color};">
-                            <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${role.info.name}</span>
-                        </p>
-                   </div>`;
-
-
-            //children = document.querySelectorAll(`#${perm} input`);
-
-            /*
-            if (editChannel[perm] == 1){
-                children[0].checked = true;
-            }
-            else{
-                children[0].checked = false;
-            }
-
-             */
-        });
-
-        rolelist.insertAdjacentHTML("beforeend", code);
+        renderChannelRoleList();
     });
+}
+
+function renderChannelRoleList() {
+    if (!editChannel?.permissions || !serverRoleResponse) return;
+
+    const invalidRoleIds = [];
+    let code = "";
+
+    Object.keys(editChannel.permissions).forEach(function (perm) {
+        const role = serverRoleResponse[perm];
+        if (!role?.info) {
+            invalidRoleIds.push(perm);
+            return;
+        }
+
+        code += `
+               <div class="role-entry-container" id="${role.info.id}">
+                   <div onclick="moveRoleUp(${role.info.id})" style="background-image: url('/img/up.png');background-size: cover;object-fit: cover;background-position: center center;
+                   width: 10px; height: 10px;display: inline-block;"></div>
+                   
+                   <div onclick="moveRoleDown(${role.info.id})" style="background-image: url('/img/down.png');background-size: cover;object-fit: cover;background-position: center center;
+                   width: 10px; height: 10px;display: inline-block;"></div>
+                   
+                    <p class="role-entry" onclick="loadRolePerms('${role.info.id}')" id="${role.info.id}" style="display: inline-block;color: ${role.info.color};">
+                        <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${role.info.name}</span>
+                    </p>
+               </div>`;
+    });
+
+    rolelist.innerHTML = code;
+
+    if (invalidRoleIds.length && !invalidRoleWarningShown) {
+        invalidRoleWarningShown = true;
+        showSystemMessage({
+            title: "Skipped invalid role permissions",
+            text: `Ignored missing role IDs: ${invalidRoleIds.join(", ")}`,
+            icon: "warning",
+            img: null,
+            type: "warning",
+            duration: 4000
+        });
+    }
 }
 
 function removeRole() {
@@ -222,7 +201,17 @@ function loadRolePerms(roleId) {
     console.log("Role id: " + currentRoleId);
 
     // Get Permissions
-    var channelperms = editChannel.permissions[roleId];
+    if (!editChannel?.permissions?.[roleId]) {
+        showSystemMessage({
+            title: "Role permissions not found",
+            text: "This role no longer exists in the server role list.",
+            icon: "warning",
+            img: null,
+            type: "warning",
+            duration: 3000
+        });
+        return;
+    }
 
     //console.log("Channel Permissions for role " + roleId)
     //console.log(channelperms);
@@ -254,11 +243,15 @@ function loadRolePerms(roleId) {
             });
         }
         else {
+            const currentRolePermissions = editChannel.permissions[currentRoleId] || {};
             Object.entries(response.permissions).forEach(([permName, permission]) => {
-                const currentValue = editChannel.permissions[currentRoleId][permName] ?? 0;
+                const currentValue = currentRolePermissions[permName] ?? 0;
 
                 const callback = (value) => {
                     // Always show save/cancel buttons
+                    if (!editChannel.permissions[currentRoleId]) {
+                        editChannel.permissions[currentRoleId] = {};
+                    }
                     editChannel.permissions[currentRoleId][permName] = value;
 
                     document.getElementById("saveButton").style.display = "inline-block";

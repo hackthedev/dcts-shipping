@@ -676,34 +676,36 @@ async function toggleScreenshare() {
         return;
     }
 
+    const currentStreamSettings = voip.getStreamSettings();
+
     customPrompts.showPrompt("Stream Settings", `
        <div style="margin:20px 0;">
             <div class="prompt-form-group">
                 <label class="prompt-label">Resolution</label>
                 <select id="res" class="prompt-select">
-                    <option value="1280x720">720p</option>
-                    <option value="1920x1080" selected>1080p</option>
-                    <option value="2560x1440">2K (1440p)</option>
-                    <option value="3840x2160">4K (2160p)</option>
+                    <option value="1280x720" ${currentStreamSettings.resolution === "1280x720" ? "selected" : ""}>720p</option>
+                    <option value="1920x1080" ${currentStreamSettings.resolution === "1920x1080" ? "selected" : ""}>1080p</option>
+                    <option value="2560x1440" ${currentStreamSettings.resolution === "2560x1440" ? "selected" : ""}>2K (1440p)</option>
+                    <option value="3840x2160" ${currentStreamSettings.resolution === "3840x2160" ? "selected" : ""}>4K (2160p)</option>
                 </select>
             </div>
             <div class="prompt-form-group">
                 <label class="prompt-label">FPS</label>
                 <select id="fps" class="prompt-select">
-                    <option value="30">30</option>
-                    <option value="60" selected>60</option>
-                    <option value="120">120</option>
+                    <option value="30" ${currentStreamSettings.frameRate === 30 ? "selected" : ""}>30</option>
+                    <option value="60" ${currentStreamSettings.frameRate === 60 ? "selected" : ""}>60</option>
+                    <option value="120" ${currentStreamSettings.frameRate === 120 ? "selected" : ""}>120</option>
                 </select>
             </div>
             <div class="prompt-form-group">
                 <label class="prompt-label">Bitrate</label>
                 <select id="bit" class="prompt-select">
-                    <option value="3000000">3 Mbit</option>
-                    <option value="8000000" selected>8 Mbit</option>
-                    <option value="12000000">12 Mbit</option>
-                    <option value="20000000">20 Mbit</option>
-                    <option value="35000000">35 Mbit</option>
-                    <option value="50000000">50 Mbit</option>
+                    <option value="3000000" ${currentStreamSettings.maxBitrate === 3000000 ? "selected" : ""}>3 Mbit</option>
+                    <option value="8000000" ${currentStreamSettings.maxBitrate === 8000000 ? "selected" : ""}>8 Mbit</option>
+                    <option value="12000000" ${currentStreamSettings.maxBitrate === 12000000 ? "selected" : ""}>12 Mbit</option>
+                    <option value="20000000" ${currentStreamSettings.maxBitrate === 20000000 ? "selected" : ""}>20 Mbit</option>
+                    <option value="35000000" ${currentStreamSettings.maxBitrate === 35000000 ? "selected" : ""}>35 Mbit</option>
+                    <option value="50000000" ${currentStreamSettings.maxBitrate === 50000000 ? "selected" : ""}>50 Mbit</option>
                 </select>
             </div>
         </div>

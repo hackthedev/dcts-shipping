@@ -1,5 +1,6 @@
 class VoIP {
     constructor(livekitUrl = "", applicationServerUrl = "") {
+        this.SCREENSHARE_SETTINGS_KEY = "vc_screenshare_settings";
         this.APPLICATION_SERVER_URL = applicationServerUrl;
         this.LIVEKIT_URL = livekitUrl;
         this.room = null;
@@ -9,6 +10,7 @@ class VoIP {
             frameRate: 60,
             maxBitrate: 50_000_000,
         };
+        this.loadStreamSettings();
 
         this.onJoin = null;
         this.onLeave = null;
@@ -33,6 +35,38 @@ class VoIP {
         this._audioNodes = new Map();
         this._mediaElSources = new WeakMap();
         this._volumes = new Map();
+    }
+
+    loadStreamSettings() {
+        try {
+            const rawSettings = localStorage.getItem(this.SCREENSHARE_SETTINGS_KEY);
+            if (!rawSettings) return;
+
+            const savedSettings = JSON.parse(rawSettings);
+            if (!savedSettings || typeof savedSettings !== "object") return;
+
+            if (typeof savedSettings.resolution === "string" && savedSettings.resolution.length > 0) {
+                this.streamSettings.resolution = savedSettings.resolution;
+            }
+
+            if (Number.isFinite(Number(savedSettings.frameRate))) {
+                this.streamSettings.frameRate = Number(savedSettings.frameRate);
+            }
+
+            if (Number.isFinite(Number(savedSettings.maxBitrate))) {
+                this.streamSettings.maxBitrate = Number(savedSettings.maxBitrate);
+            }
+        } catch (error) {
+            console.warn("Unable to load saved screenshare settings", error);
+        }
+    }
+
+    saveStreamSettings() {
+        try {
+            localStorage.setItem(this.SCREENSHARE_SETTINGS_KEY, JSON.stringify(this.streamSettings));
+        } catch (error) {
+            console.warn("Unable to save screenshare settings", error);
+        }
     }
 
     cleanupAudioElById(audioId, memberId, isScreen) {
@@ -419,6 +453,11 @@ class VoIP {
         if (resolution) this.streamSettings.resolution = resolution;
         if (frameRate) this.streamSettings.frameRate = frameRate;
         if (maxBitrate) this.streamSettings.maxBitrate = maxBitrate;
+        this.saveStreamSettings();
+    }
+
+    getStreamSettings() {
+        return {...this.streamSettings};
     }
 
     _cleanupDetachedEls(detachedEls){

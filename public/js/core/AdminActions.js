@@ -229,6 +229,20 @@ class AdminActions {
 
 
     static createChannel(category) {
+        const normalizedCategory = String(category || "").replace("category-", "").trim();
+
+        if (!normalizedCategory) {
+            showSystemMessage({
+                title: "Couldnt create channel",
+                text: "No category was selected.",
+                icon: "error",
+                img: null,
+                type: "error",
+                duration: 2000
+            });
+            return;
+        }
+
         customPrompts.showPrompt(
             "Create a channel",
             `
@@ -249,13 +263,40 @@ class AdminActions {
         </div>
         `,
             (values) => {
+                const channelName = String(values.channelName || "").trim();
+                const channelType = values.selected;
+
+                if (!channelName) {
+                    showSystemMessage({
+                        title: "Channel name required",
+                        text: "",
+                        icon: "error",
+                        img: null,
+                        type: "error",
+                        duration: 1500
+                    });
+                    return false;
+                }
+
+                if (!["text", "voice"].includes(channelType)) {
+                    showSystemMessage({
+                        title: "Channel type required",
+                        text: "",
+                        icon: "error",
+                        img: null,
+                        type: "error",
+                        duration: 1500
+                    });
+                    return false;
+                }
+
                 socket.emit("createChannel", {
                     id: UserManager.getID(),
-                    value: values.channelName,
-                    type: values.selected,
+                    value: channelName,
+                    type: channelType,
                     token: UserManager.getToken(),
                     group: UserManager.getGroup().replace("group-", ""),
-                    category: category.replace("category-", "")
+                    category: normalizedCategory
                 }, function (response) {
                     showSystemMessage({
                         title: response.msg,

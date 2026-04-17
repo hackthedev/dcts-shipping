@@ -1,4 +1,57 @@
 class Crypto {
+    static arrayBufferToBase64(buffer) {
+        return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    }
+
+    static base64ToUint8Array(value) {
+        const binaryString = atob(value);
+        return Uint8Array.from(binaryString, char => char.charCodeAt(0));
+    }
+
+    static async derivePassphraseKey(passphrase, saltBase64, iterations = 250000) {
+        const encoder = new TextEncoder();
+        const passphraseKey = await window.crypto.subtle.importKey(
+            "raw",
+            encoder.encode(passphrase),
+            "PBKDF2",
+            false,
+            ["deriveKey"]
+        );
+
+        return await window.crypto.subtle.deriveKey(
+            {
+                name: "PBKDF2",
+                salt: this.base64ToUint8Array(saltBase64),
+                iterations,
+                hash: "SHA-256"
+            },
+            passphraseKey,
+            {
+                name: "AES-GCM",
+                length: 256
+            },
+            false,
+            ["decrypt"]
+        );
+    }
+
+    static async decryptProtectedExport(payload, passphrase) {
+        if (!payload?.encrypted) return payload;
+        if (!passphrase) throw new Error("Missing password");
+
+        const key = await this.derivePassphraseKey(passphrase, payload.salt, payload.iterations);
+        const decryptedBuffer = await window.crypto.subtle.decrypt(
+            {
+                name: "AES-GCM",
+                iv: this.base64ToUint8Array(payload.iv)
+            },
+            key,
+            this.base64ToUint8Array(payload.ciphertext)
+        );
+
+        return JSON.parse(new TextDecoder().decode(decryptedBuffer));
+    }
+
     static async dSyncTest() {
         const result = await fetch("/dSyncAuth/login", {
             method: "POST",

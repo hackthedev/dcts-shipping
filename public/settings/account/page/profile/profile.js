@@ -86,40 +86,97 @@ function setPreview() {
 }
 
 async function exportAccount() {
+    const runExport = (passphrase = "") => {
+        socket.emit("exportAccount", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            origin: window.location.origin,
+            passphrase
+        }, async function (response) {
+            if (response?.error) {
+                showSystemMessage({
+                    title: "Unable to export account",
+                    text: response.error,
+                    icon: "error",
+                    img: null,
+                    type: "error",
+                    duration: 4000
+                });
+                return;
+            }
 
-    socket.emit("exportAccount", {id: UserManager.getID(), token: UserManager.getToken(),}, async function (response) {
-        console.log(response)
-
-        if (response.account.icon.substring(0, 1).includes("/")) {
-            response.account.icon = `${window.location.origin}${response.account.icon}`
-        }
-
-        if (response.account.banner.substring(0, 1).includes("/")) {
-            response.account.banner = `${window.location.origin}${response.account.banner}`
-        }
-
-        customPrompts.showConfirm("Generate a QR code?",
-            [["Yes", "success"], ["No", "error"]],
-            (selectedOption) => {
-                if (selectedOption === "yes") {
-                    let qrcodeElement = document.getElementById("export-account-qrcode");
-
-                    new QRCode(qrcodeElement, {
-                        text: JSON.stringify(UserManager.getShortenedAccountData(response.account)),
-                        correctLevel: QRCode.CorrectLevel.L,
-                        typeNumber: 40,
-                    })
-                }
-
-                customPrompts.showConfirm("Export as file?",
+            if (response?.encrypted === true) {
+                customPrompts.showConfirm("Export encrypted file?",
                     [["Yes", "success"], ["No", "error"]],
-                    async (selectedOption2) => {
-                        if (selectedOption2 === "yes") {
-                            await FileManager.saveFile(JSON.stringify(response.account), `${window.location.origin}_identity_${UserManager.getUsername()}.json`)
+                    async (selectedOption) => {
+                        if (selectedOption === "yes") {
+                            await FileManager.saveFile(JSON.stringify(response.account, null, 4), `${window.location.origin}_identity_${UserManager.getUsername()}_encrypted.json`)
                         }
-                    })
-            })
-    });
+                    });
+                return;
+            }
+
+            customPrompts.showConfirm("Generate a QR code?",
+                [["Yes", "success"], ["No", "error"]],
+                (selectedOption) => {
+                    if (selectedOption === "yes") {
+                        let qrcodeElement = document.getElementById("export-account-qrcode");
+
+                        new QRCode(qrcodeElement, {
+                            text: JSON.stringify(UserManager.getShortenedAccountData(response.account)),
+                            correctLevel: QRCode.CorrectLevel.L,
+                            typeNumber: 40,
+                        })
+                    }
+
+                    customPrompts.showConfirm("Export as file?",
+                        [["Yes", "success"], ["No", "error"]],
+                        async (selectedOption2) => {
+                            if (selectedOption2 === "yes") {
+                                await FileManager.saveFile(JSON.stringify(response.account, null, 4), `${window.location.origin}_identity_${UserManager.getUsername()}.json`)
+                            }
+                        })
+                })
+        });
+    };
+
+    customPrompts.showConfirm("Protect the export with a password?",
+        [["Yes", "success"], ["No", "error"]],
+        (selectedOption) => {
+            if (selectedOption !== "yes") {
+                runExport();
+                return;
+            }
+
+            customPrompts.showPrompt(
+                "Protect export",
+                `
+                <div class="prompt-form-group">
+                    <label class="prompt-label" for="exportPassword">Password</label>
+                    <input class="prompt-input" type="password" id="exportPassword" placeholder="Enter export password">
+                </div>
+                `,
+                values => {
+                    const exportPassword = values.exportPassword?.trim();
+                    if (!exportPassword) {
+                        showSystemMessage({
+                            title: "Missing password",
+                            text: "Enter a password to encrypt the export.",
+                            icon: "warning",
+                            img: null,
+                            type: "warning",
+                            duration: 3000
+                        });
+                        return;
+                    }
+
+                    runExport(exportPassword);
+                },
+                ["Protect", "success"],
+                false,
+                420
+            );
+        });
 
     /*
     let data = {
@@ -146,14 +203,49 @@ function importAccount() {
         try {
             let data = JSON.parse(content)
 
-            if (data?.icon) UserManager.setPFP(data.icon);
-            if (data?.banner) UserManager.setBanner(data.banner);
-            if (data?.displayName) UserManager.setUsername(data.displayName);
-            if (data?.status) UserManager.setStatus(data.status);
-            if (data?.aboutme) UserManager.setAboutme(data.aboutme);
+            const applyImportedAccount = importedAccount => {
+                if (importedAccount?.icon) UserManager.setPFP(importedAccount.icon);
+                if (importedAccount?.banner) UserManager.setBanner(importedAccount.banner);
+                if (importedAccount?.name) UserManager.setUsername(importedAccount.name);
+                if (importedAccount?.displayName) UserManager.setUsername(importedAccount.displayName);
+                if (importedAccount?.status) UserManager.setStatus(importedAccount.status);
+                if (importedAccount?.aboutme) UserManager.setAboutme(importedAccount.aboutme);
 
-            // refresh ui
-            setPreview()
+                setPreview()
+            };
+
+            if (data?.encrypted === true) {
+                customPrompts.showPrompt(
+                    "Unlock export",
+                    `
+                    <div class="prompt-form-group">
+                        <label class="prompt-label" for="importPassword">Password</label>
+                        <input class="prompt-input" type="password" id="importPassword" placeholder="Enter export password">
+                    </div>
+                    `,
+                    async values => {
+                        try {
+                            const decryptedAccount = await Crypto.decryptProtectedExport(data, values.importPassword?.trim());
+                            applyImportedAccount(decryptedAccount);
+                        } catch (decryptError) {
+                            showSystemMessage({
+                                title: "Unable to decrypt account",
+                                text: decryptError.message,
+                                icon: "error",
+                                img: null,
+                                type: "error",
+                                duration: 4000
+                            });
+                        }
+                    },
+                    ["Unlock", "success"],
+                    false,
+                    420
+                );
+                return;
+            }
+
+            applyImportedAccount(data);
         } catch (err) {
             console.log(err)
             showSystemMessage({

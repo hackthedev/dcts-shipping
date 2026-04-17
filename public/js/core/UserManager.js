@@ -256,7 +256,7 @@ class UserManager {
     }
 
     static changeStatus() {
-        DialogManager.prompt({
+        customPrompts.showInput({
             title: "Change Status",
             label: "Status",
             value: UserManager.getStatus() || "",
@@ -272,13 +272,13 @@ class UserManager {
                 CookieManager.setCookie("status", trimmedStatus, 360);
                 UserManager.updateStatusOnUI(trimmedStatus, true);
             } else {
-                DialogManager.alert("Your status was too short", {title: "Invalid Status"});
+                customPrompts.showAlert("Your status was too short", {title: "Invalid Status"});
             }
         });
     }
 
     static changePFP() {
-        DialogManager.prompt({
+        customPrompts.showInput({
             title: "Change Profile Picture",
             label: "Profile Image URL",
             value: UserManager.getPFP() || "",
@@ -301,7 +301,7 @@ class UserManager {
                 return;
             }
 
-            DialogManager.confirm("Your pfp url was too short. Want to reset your pfp?", {
+            customPrompts.showConfirmPrompt("Your pfp url was too short. Want to reset your pfp?", {
                 title: "Reset Profile Picture",
                 confirmText: "Reset",
                 confirmColor: "error",
@@ -351,7 +351,7 @@ class UserManager {
     }
 
     static getPassword() {
-        return DialogManager.prompt({
+        return customPrompts.showInput({
             title: "Password Required",
             label: "Password",
             placeholder: "Please enter your account password",
@@ -573,7 +573,7 @@ class UserManager {
 
     static importToken() {
         /* DEPRECATED */
-        DialogManager.prompt({
+        customPrompts.showInput({
             title: "Import Token",
             label: "Exported Token",
             placeholder: "Please paste your exported token here",
@@ -589,22 +589,22 @@ class UserManager {
             console.log(token)
 
             if (token.length != 48) {
-                DialogManager.alert("This token was invalid. If you forgot your token please contact the server admin", {title: "Invalid Token"});
+                customPrompts.showAlert("This token was invalid. If you forgot your token please contact the server admin", {title: "Invalid Token"});
                 return;
             }
             if (id.length != 12) {
-                DialogManager.alert("The ID in your token string was invalid. Format: token:id (48, 12)", {title: "Invalid Token ID"});
+                customPrompts.showAlert("The ID in your token string was invalid. Format: token:id (48, 12)", {title: "Invalid Token ID"});
                 return;
             }
 
-            DialogManager.alert("Token successfully set!\nPlease save it if you havent already", {title: "Token Imported"});
+            customPrompts.showAlert("Token successfully set!\nPlease save it if you havent already", {title: "Token Imported"});
             CookieManager.setCookie("dcts_token", token, 365);
             CookieManager.setCookie("id", id, 365);
         });
     }
 
     static resetAccount() {
-        DialogManager.confirm("Do you really wanna logout?", {
+        customPrompts.showConfirmPrompt("Do you really wanna logout?", {
             title: "Logout",
             confirmText: "Logout",
             confirmColor: "error",

@@ -55,7 +55,7 @@ class RichEditor {
                     handlers: {
                         link: value => {
                             if (!value) return this.quill.format("link", false);
-                            DialogManager.prompt({
+                            customPrompts.showInput({
                                 title: "Insert Link",
                                 label: "URL",
                                 placeholder: "Enter the URL",

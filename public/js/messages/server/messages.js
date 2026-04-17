@@ -572,10 +572,18 @@ function initQuillShit(customQuill = null){
                 container: '#editor-toolbar', handlers: {
                     'link': function (value) {
                         if (value) {
-                            var href = prompt('Enter the URL');
-                            if (href) {
-                                quill.format('link', href);
-                            }
+                            customPrompts.showInput({
+                                title: "Insert Link",
+                                label: "URL",
+                                placeholder: "https://example.com",
+                                defaultValue: quill.getFormat()?.link || "",
+                                submitText: "Insert"
+                            }, href => {
+                                href = href?.trim();
+                                if (href) {
+                                    quill.format('link', href);
+                                }
+                            });
                         } else {
                             quill.format('link', false);
                         }

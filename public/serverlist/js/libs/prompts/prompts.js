@@ -3,8 +3,11 @@ class Prompt {
         this.addStyles();  // Add the custom styles
         this.createModal();
         this.currentCallback = null;
+        this.afterSubmitAction = null;
         this.selectedValues = []; // Store selected values for select feature
         this.multiSelect = false; // Single or multi-select mode
+        window.__promptInstance = this;
+        window.__prompt = this;
         this.closePrompt();
     }
 
@@ -280,7 +283,7 @@ class Prompt {
         this.selectedValues = multiSelect ? [] : null;
         this.promptContent.innerHTML = htmlContent;
         this.modal.style.display = 'flex';
-        this.promptContent.style.minWidth = `${customMinWidth}px` || "";
+        this.promptContent.style.minWidth = customMinWidth ? `${customMinWidth}px` : "";
 
         // reset colors just in case
         this.modalContent.style.backgroundColor = '#24292E';
@@ -327,7 +330,7 @@ class Prompt {
         }
     }
 
-    showConfirm(titleText, options, callback, afterSubmitAction = null) {
+    showConfirm(titleText, options, callback, afterSubmitAction = null, bodyHtml = '') {
         this.currentCallback = callback;
         this.afterSubmitAction = afterSubmitAction;
 
@@ -336,7 +339,7 @@ class Prompt {
             titleElement.innerText = titleText;
         }
 
-        this.promptContent.innerHTML = '';
+        this.promptContent.innerHTML = bodyHtml || '';
         this.submitButton.style.display = 'none';
         this.helpButton.style.display = 'none';
         this.closeButton.style.display = 'none';
@@ -404,13 +407,14 @@ class Prompt {
     }
 
     closePrompt(canceled = true) {
+        const afterSubmitAction = this.afterSubmitAction;
         this.modal.style.display = 'none';
-
-        if (this.afterSubmitAction) {
-            this.afterSubmitAction({ canceled, values: null });
-        }
-
         this.currentCallback = null;
+        this.afterSubmitAction = null;
+
+        if (canceled && afterSubmitAction) {
+            afterSubmitAction({ canceled, values: null });
+        }
     }
 
     previewImage(event) {
@@ -446,21 +450,23 @@ class Prompt {
             }
         });
 
-        const callbackResult = this.currentCallback ? this.currentCallback(values) : undefined;
+        const currentCallback = this.currentCallback;
+        const afterSubmitAction = this.afterSubmitAction;
+        const callbackResult = currentCallback ? currentCallback(values) : undefined;
 
-        if (this.currentCallback) {
-            this.currentCallback = null;
+        if (callbackResult === false) {
+            return;
         }
 
-        if (callbackResult === false) return;
+        this.currentCallback = null;
+        this.afterSubmitAction = null;
 
-        if (this.afterSubmitAction) {
-            this.afterSubmitAction({ canceled: false, values });
+        if (afterSubmitAction) {
+            afterSubmitAction({ canceled: false, values });
         }
 
-        this.closePrompt(false);
+        this.modal.style.display = 'none';
     }
-
 
 
 }

@@ -41,7 +41,7 @@ function unbanUser(id) {
     var container = document.querySelector(`tr[data-member-id="${id}"]`);
     var username = container.querySelector(`#username[data-member-id="${id}"]`)?.innerText?.split(" ")[0];
 
-    DialogManager.confirm("Do you want to unban the user " + username + "?", {
+    customPrompts.showConfirmPrompt("Do you want to unban the user " + username + "?", {
         title: "Unban User",
         confirmText: "Unban",
         confirmColor: "error",
@@ -137,7 +137,7 @@ function getBans() {
                 // Add it to the html
                 emojiContainer.insertAdjacentHTML("beforeend", table);
             } else {
-                DialogManager.alert(response1?.error || response1?.msg, {title: "Ban List"});
+                customPrompts.showAlert(response1?.error || response1?.msg, {title: "Ban List"});
             }
         } catch (ex) {
             console.log(ex);

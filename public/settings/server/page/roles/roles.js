@@ -113,7 +113,7 @@ function saveAppearance() {
         roleId: currentRoleId,
         data: serverRoleResponse[currentRoleId]
     }, function (response) {
-        DialogManager.alert(response.msg, {title: "Role Appearance"}).then(() => {
+        customPrompts.showAlert(response.msg, {title: "Role Appearance"}).then(() => {
             window.location.reload();
         });
     });
@@ -164,7 +164,7 @@ function saveSorting() {
         token: UserManager.getToken(),
         sorted: sortArray
     }, function (response) {
-        DialogManager.alert(response.msg, {title: "Role Hierarchy"}).then(() => {
+        customPrompts.showAlert(response.msg, {title: "Role Hierarchy"}).then(() => {
             window.location.reload();
         });
     });
@@ -178,7 +178,7 @@ function removeFromRole(roleId, userId) {
         role: roleId,
         target: userId
     }, function (response) {
-        DialogManager.alert(response.msg, {title: "Remove User From Role"}).then(() => {
+        customPrompts.showAlert(response.msg, {title: "Remove User From Role"}).then(() => {
             window.location.reload();
         });
     });
@@ -196,14 +196,14 @@ function savePermissions() {
         role: currentRoleId,
         permissions: editedServerRoleResponse[currentRoleId].permissions
     }, function (response) {
-        DialogManager.alert(response.msg, {title: "Save Role Permissions"}).then(() => {
+        customPrompts.showAlert(response.msg, {title: "Save Role Permissions"}).then(() => {
             window.location.reload();
         });
     });
 }
 
 function addToRole() {
-    DialogManager.prompt({
+    customPrompts.showInput({
         title: "Add User to Role",
         label: "User ID",
         placeholder: "Enter the 12-digit user id",
@@ -215,7 +215,7 @@ function addToRole() {
         if (!trimmedUserId) return;
 
         if (trimmedUserId.length != 12 || isNaN(trimmedUserId) == true) {
-            DialogManager.alert("The user id (12 character long number) you've entered is incorrect.", {title: "Invalid User ID"});
+            customPrompts.showAlert("The user id (12 character long number) you've entered is incorrect.", {title: "Invalid User ID"});
             return;
         }
 
@@ -225,7 +225,7 @@ function addToRole() {
             role: currentRoleId,
             target: trimmedUserId
         }, function (response) {
-            DialogManager.alert(response.msg, {title: "Add User to Role"}).then(() => {
+            customPrompts.showAlert(response.msg, {title: "Add User to Role"}).then(() => {
                 window.location.reload();
             });
         });
@@ -235,7 +235,7 @@ function addToRole() {
 function createRole() {
     console.log(socket.connected)
     socket.emit("createRole", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
-        DialogManager.alert(response.msg, {title: "Create Role"}).then(() => {
+        customPrompts.showAlert(response.msg, {title: "Create Role"}).then(() => {
             window.location.reload();
         });
     });
@@ -275,7 +275,7 @@ function deleteRole() {
         token: UserManager.getToken(),
         roleId: currentRoleId
     }, function (response) {
-        DialogManager.alert(response.msg, {title: "Delete Role"}).then(() => {
+        customPrompts.showAlert(response.msg, {title: "Delete Role"}).then(() => {
             window.location.reload();
         });
     });

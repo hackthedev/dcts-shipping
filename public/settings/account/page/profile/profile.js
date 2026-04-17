@@ -190,7 +190,7 @@ function saveSettings() {
             saveButton.style.display = "none";
         });
     } catch (error) {
-        DialogManager.alert("Error while trying to save settings: " + error, {title: "Profile Save Error"});
+        customPrompts.showAlert("Error while trying to save settings: " + error, {title: "Profile Save Error"});
         return;
     }
 }

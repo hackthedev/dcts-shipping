@@ -637,7 +637,7 @@ function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
 
 
 function redeemKey() {
-    DialogManager.prompt({
+    customPrompts.showInput({
         title: "Redeem Key",
         label: "Key",
         placeholder: "Enter the key you want to redeem",

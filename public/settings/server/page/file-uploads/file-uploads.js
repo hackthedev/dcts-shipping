@@ -108,12 +108,12 @@ function saveSettings(){
                                         cloudflareHash: setting_cfAccountHash.value,
                                         maxLocalUpload: setting_localFsLimit.value
         }, function (response) {
-            DialogManager.alert(response.msg, {title: "Media Settings"});
+            customPrompts.showAlert(response.msg, {title: "Media Settings"});
             console.log(response);
         });
     }
     catch(error){
-        DialogManager.alert("Error while trying to save settings: " + error, {title: "Media Settings Error"});
+        customPrompts.showAlert("Error while trying to save settings: " + error, {title: "Media Settings Error"});
         return;
     }
 }

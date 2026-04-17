@@ -31,13 +31,13 @@
         <div class="profile_input_container">
             <label>Cloudflare Image API Token</label><br>
             <input type="password" id="cfAccountToken" style="background-color: #36393F;" oninput="updatePreview('cfAccountToken');">
-            <label style="font-style: italic; margin-left: 4px;" onclick="DialogManager.alert(document.getElementById('cfAccountToken').value, { title: 'Cloudflare Image API Token' });">(Show)</label>
+            <label style="font-style: italic; margin-left: 4px;" onclick="customPrompts.showAlert(document.getElementById('cfAccountToken').value, { title: 'Cloudflare Image API Token' });">(Show)</label>
         </div>
 
         <div class="profile_input_container">
             <label>Cloudflare Image Account Hash</label><br>
             <input type="password" id="cfAccountHash" style="background-color: #36393F;" oninput="updatePreview('cfAccountHash');">
-            <label style="font-style: italic; margin-left: 4px;" onclick="DialogManager.alert(document.getElementById('cfAccountHash').value, { title: 'Cloudflare Image Account Hash' });">(Show)</label>
+            <label style="font-style: italic; margin-left: 4px;" onclick="customPrompts.showAlert(document.getElementById('cfAccountHash').value, { title: 'Cloudflare Image Account Hash' });">(Show)</label>
         </div>
 
         Please never share the API Token and Account Hash. They are hidden for a reason!

@@ -1,25 +1,40 @@
-import { saveConfig, serverconfig, xssFilters } from "../../index.mjs";
+import { saveConfig, serverconfig } from "../../index.mjs";
 import { getChannelTree, hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
-import { copyObject, escapeHtml, generateId, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { generateId, validateMemberId } from "../functions/main.mjs";
+import { stripHTML } from "../functions/sanitizing/functions.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('createChannel', async function (member, response) {
         if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
+            member.id = stripHTML(member?.id)?.trim()
+            member.token = stripHTML(member?.token)?.trim()
+            member.group = stripHTML(member?.group)?.trim()
+            member.category = stripHTML(member?.category)?.trim()
+            member.value = stripHTML(member?.value)?.trim()
+            member.type = stripHTML(member?.type)?.trim()
 
-            if (!await hasPermission(member.id, "manageChannels")) {
-                response({ msg: "You are not allowed to create a channel", type: "error", error: "Missing permissions to create channel" })
-                return;
-            }
+            if (!await hasPermission(member.id, "manageChannels")) return response({ error: "Missing permissions to create channel" })
+
+            const group = serverconfig.groups?.[member.group];
+            if (!group) return response({ error: "Couldnt create channel: invalid group" })
+
+            const category = group.channels?.categories?.[member.category];
+            if (!category) return response({ error: "Couldnt create channel: missing category" })
+
+            const channelName = stripHTML(member.value);
+            if (!channelName) return response({ error: "Couldnt create channel: missing channel name" })
+
+            if (!["text", "voice"].includes(member.type)) return response({ error: "Couldnt create channel: invalid channel type" })
 
             try {
                 var channelId = generateId(4);
 
-                serverconfig.groups[member.group].channels.categories[member.category].channel[channelId] = {
+                category.channel[channelId] = {
                     id: channelId,
-                    name: xssFilters.inHTMLData(escapeHtml(member.value)),
+                    name: channelName,
                     type: member.type,
                     description: "Default Channel Description",
                     sortId: 0,
@@ -35,11 +50,12 @@ export default (io) => (socket) => {
 
                 saveConfig(serverconfig);
                 io.emit("receiveChannelTree", getChannelTree(member));
-                response({ msg: "Channel created successfully", type: "success" })
+                response({ error: null })
             }
             catch (e) {
                 Logger.error("Couldnt create channel");
                 Logger.error(e);
+                response({ error: "Couldnt create channel: unexpected error" })
             }
         }
     });

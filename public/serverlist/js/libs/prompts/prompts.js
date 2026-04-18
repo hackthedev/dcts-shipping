@@ -446,10 +446,13 @@ class Prompt {
             }
         });
 
+        const callbackResult = this.currentCallback ? this.currentCallback(values) : undefined;
+
         if (this.currentCallback) {
-            this.currentCallback(values);
             this.currentCallback = null;
         }
+
+        if (callbackResult === false) return;
 
         if (this.afterSubmitAction) {
             this.afterSubmitAction({ canceled: false, values });

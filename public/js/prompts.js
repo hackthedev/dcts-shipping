@@ -6,9 +6,9 @@ class Prompt {
         this.afterSubmitAction = null;
         this.selectedValues = []; // Store selected values for select feature
         this.multiSelect = false; // Single or multi-select mode
-        this.closePrompt();
         window.__promptInstance = this;
         window.__prompt = this;
+        this.closePrompt();
     }
 
     addStyles() {
@@ -408,11 +408,9 @@ class Prompt {
 
     closePrompt(canceled = true) {
         const afterSubmitAction = this.afterSubmitAction;
-
         this.modal.style.display = 'none';
         this.currentCallback = null;
         this.afterSubmitAction = null;
-
         if (canceled && afterSubmitAction) {
             afterSubmitAction({ canceled, values: null });
         }

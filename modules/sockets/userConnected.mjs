@@ -1,4 +1,5 @@
 import {
+    auther,
     checkPow,
     saveConfig,
     server,
@@ -399,6 +400,18 @@ export default (io) => (socket) => {
         }
 
         async function handlePublicKeyAuthOnConnection(member){
+            if (member?.sessionId && member?.publicKey) {
+                let session = await dSyncAuth.verifySession(auther.authSessions, member.sessionId, member.publicKey);
+
+                if (session.valid) {
+                    let serverMemberObj = await getMemberFromKey(session.publicKey);
+                    if (serverMemberObj) {
+                        await successfulAuthResponse(serverMemberObj);
+                        return { keepExecution: false };
+                    }
+                }
+            }
+
             if(member?.publicKey && !await validateMemberId(member?.id, socket, member?.token)){
                 // if didnt supply a solution, create a challenge
                 if(!member?.keySolution){

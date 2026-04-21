@@ -20,8 +20,21 @@
               "icon": "lucide-file",
               "title": "Privacy Policy"
             }
+          },
+          {
+            "id": "be0c79daeda9cc5b",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "Graphs/Images/dSync Explaination.png"
+              },
+              "icon": "lucide-image",
+              "title": "dSync Explaination"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -180,13 +193,19 @@
       "daily-notes:Heutige Notiz öffnen": false,
       "templates:Vorlage einfügen": false,
       "command-palette:Befehlspalette öffnen": false,
-      "bases:Neue Base erstellen": false
+      "bases:Neue Base erstellen": false,
+      "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "3a0469dcedf99830",
+  "active": "be0c79daeda9cc5b",
   "lastOpenFiles": [
-    "Managed Hosting/Ptero Host Server Setup Notes.md",
+    "Graphs/dSync Explaination.md",
+    "Graphs/Images/dSync Explaination (1).png",
+    "Graphs/Images/dSync Explaination.png",
+    "Graphs/Images",
     "Privacy Policy.md",
+    "Graphs",
+    "Managed Hosting/Ptero Host Server Setup Notes.md",
     "install NodeJS.md",
     "Lore/Terminology.md",
     "Lore/Technical overview.md",
@@ -212,9 +231,7 @@
     "markdown-examples.md",
     "api-examples.md",
     "DCTS Docs Base.base",
-    "ssl/errors/Cant access cert files.md",
     "Unbenannt.base",
-    "Socket Events/1. Heads up.md",
     "assets/Pasted image 20260228193820.png",
     "Pasted image 20260228193713.png"
   ]

@@ -171,7 +171,6 @@ class UserManager {
         return await this.getServerBadges(gid, beta).then(result => {
             if (result != null) {
                 let badgeData = JSON.parse(result?.data || "{}")
-                console.log(badgeData)
 
                 for(let badgeKey of Object.keys(badgeData)){
                     let badge = badgeData[badgeKey];

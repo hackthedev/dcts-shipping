@@ -1,5 +1,6 @@
 class Inbox {
     static async fetchMessages() {
+        return null;
         return await new Promise((resolve, reject) => {
             socket.emit("fetchInboxMessages", {
                 id: UserManager.getID(),
@@ -131,6 +132,7 @@ class Inbox {
     }
 
     static async getContentHTML(contentOnly = false) {
+        return "";
         if(contentOnly) return await this.getInboxMessageEntryHTML();
 
         return ` <div class="inbox-container">

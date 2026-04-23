@@ -43,6 +43,8 @@ import dSyncWeb from "@hackthedev/dsync-web";
 import dSync from "@hackthedev/dsync";
 //import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
 
+import dSyncInbox from "E:\\network-z-dev\\dSyncInbox\\index.mjs"
+
 import Logger from "@hackthedev/terminal-logger"
 import dSyncSql from "@hackthedev/dsync-sql"
 import dSyncIPSec from "@hackthedev/dsync-ipsec"
@@ -192,6 +194,7 @@ export let dsw = null;
 export let syncer = null;
 export let signer = null;
 export let auther = null;
+export let inbox;
 
 try {
     db = new dSyncSql({
@@ -236,6 +239,19 @@ try {
         dSyncWeb: dsw,
         host: serverconfig.serverinfo.app.url?.length >= 7 ? serverconfig.serverinfo.app.url : null
     });
+
+    let inbox = new dSyncInbox({
+        app,
+        express,
+        dSyncSign: signer,
+        dSyncSql: db,
+        isValidated: async (req, res) => {
+            return true;
+        }
+    })
+
+    await inbox.init();
+
 } catch (e) {
     if(isPtero()){
         if(debugmode === false) console.clear();
@@ -570,21 +586,6 @@ const tables = [
             {name: "done", type: "int(10) NOT NULL DEFAULT 0"},
         ],
         keys: [{name: "UNIQUE KEY", type: "migration_name (migration_name)"}],
-    },
-    {
-        name: "inbox",
-        columns: [
-            {name: "inboxId", type: "int(100) NOT NULL AUTO_INCREMENT PRIMARY KEY UNIQUE KEY"},
-            {name: "memberId", type: "varchar(250) NOT NULL"},
-            {name: "customId", type: "varchar(250) DEFAULT NULL"},
-            {name: "data", type: "longtext NOT NULL"},
-            {name: "type", type: "varchar(250) NOT NULL"},
-            {name: "isRead", type: "bigint NOT NULL DEFAULT 0"},
-            {
-                name: "createdAt",
-                type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)",
-            },
-        ]
     },
     {
         name: "message_logs",

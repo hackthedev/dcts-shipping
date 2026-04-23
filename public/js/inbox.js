@@ -1,15 +1,19 @@
 class Inbox {
     static async fetchMessages() {
-        return null;
-        return await new Promise((resolve, reject) => {
-            socket.emit("fetchInboxMessages", {
+        let response = await fetch('/inbox/fetch', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
                 id: UserManager.getID(),
-                token: UserManager.getToken(),
-                onlyUnread: true
-            }, async function (response) {
-                resolve(response)
-            });
+                token: UserManager.getToken()
+            })
         })
+
+        if(response.status === 200){
+            return await response.json()
+        }
     }
 
     static toggleIndicator(toggle) {
@@ -70,10 +74,10 @@ class Inbox {
         let data = await Inbox.fetchMessages();
 
         let html = "";
-        if (data?.items?.length > 0) {
+        if (data?.inbox?.length > 0) {
             updateUIMentions()
 
-            for (let item of data.items) {
+            for (let item of data.inbox) {
                 let itemData = item.data;
                 let itemType = item.type;
 
@@ -132,7 +136,6 @@ class Inbox {
     }
 
     static async getContentHTML(contentOnly = false) {
-        return "";
         if(contentOnly) return await this.getInboxMessageEntryHTML();
 
         return ` <div class="inbox-container">

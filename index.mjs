@@ -194,7 +194,7 @@ export let dsw = null;
 export let syncer = null;
 export let signer = null;
 export let auther = null;
-export let inbox;
+export let inbox = null;
 
 try {
     db = new dSyncSql({
@@ -240,13 +240,39 @@ try {
         host: serverconfig.serverinfo.app.url?.length >= 7 ? serverconfig.serverinfo.app.url : null
     });
 
-    let inbox = new dSyncInbox({
+    inbox = new dSyncInbox({
         app,
         express,
         dSyncSign: signer,
         dSyncSql: db,
         isValidated: async (req, res) => {
-            return true;
+            const {inboxId, timestamp, customId} = req?.params;
+            const { id, token, sessionId, publicKey } = req.body;
+
+
+            if(serverconfig.servermembers[id]?.token === token && !sessionId) return true;
+
+            if(sessionId){
+                let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
+                console.log(sessionResult?.valid)
+                return sessionResult?.valid ?? false;
+            }
+
+            return false;
+        },
+        getIdentifier: async (req, res) => {
+            const {inboxId, timestamp, customId} = req?.params;
+            let { id, token, sessionId, publicKey } = req.body;
+
+            if(!id && !token && publicKey){
+                let member = await getMemberFromKey(publicKey);
+                if (member){
+                    id = member.id;
+                    token = member.token;
+                }
+            }
+
+            return id ?? null;
         }
     })
 
@@ -329,7 +355,7 @@ import {
     formatDateTime,
     findInJson,
     changeKeyVerification,
-    getSocketIp, hasPermission,
+    getSocketIp, hasPermission, getMemberFromKey,
 } from "./modules/functions/chat/main.mjs";
 
 import {

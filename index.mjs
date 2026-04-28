@@ -249,12 +249,10 @@ try {
             const {inboxId, timestamp, customId} = req?.params;
             const { id, token, sessionId, publicKey } = req.body;
 
-
             if(serverconfig.servermembers[id]?.token === token && !sessionId) return true;
 
             if(sessionId){
                 let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
-                console.log(sessionResult?.valid)
                 return sessionResult?.valid ?? false;
             }
 
@@ -273,6 +271,21 @@ try {
             }
 
             return id ?? null;
+        },
+        beforeReturn: async (req, res, inbox) => {
+            if(Array.isArray(inbox) && inbox.length > 0){
+                for(let item of inbox){
+                    let itemType = item?.type;
+
+                    // chat mentions
+                    if(itemType === "mention"){
+                        let messageId = item?.data?.messageId;
+                        if(!messageId || messageId?.length !== 12) continue;
+
+                        item.data = await getMessageObjectById(messageId);
+                    }
+                }
+            }
         }
     })
 
@@ -395,6 +408,7 @@ import {
 } from "./modules/functions/anti-spam/messages.mjs";
 import {renderChart} from "./modules/functions/anti-spam/charts.mjs";
 import {unbanIp} from "./modules/functions/ban-system/helpers.mjs";
+import {getMessageObjectById} from "./modules/sockets/resolveMessage.mjs";
 
 /*
     Files for the plugin system

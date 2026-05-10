@@ -240,57 +240,6 @@ try {
         host: serverconfig.serverinfo.app.url?.length >= 7 ? serverconfig.serverinfo.app.url : null
     });
 
-    inbox = new dSyncInbox({
-        app,
-        express,
-        dSyncSign: signer,
-        dSyncSql: db,
-        isValidated: async (req, res) => {
-            const {inboxId, timestamp, customId} = req?.params;
-            const { id, token, sessionId, publicKey } = req.body;
-
-            if(serverconfig.servermembers[id]?.token === token && !sessionId) return true;
-
-            if(sessionId){
-                let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
-                return sessionResult?.valid ?? false;
-            }
-
-            return false;
-        },
-        getIdentifier: async (req, res) => {
-            const {inboxId, timestamp, customId} = req?.params;
-            let { id, token, sessionId, publicKey } = req.body;
-
-            if(!id && !token && publicKey){
-                let member = await getMemberFromKey(publicKey);
-                if (member){
-                    id = member.id;
-                    token = member.token;
-                }
-            }
-
-            return id ?? null;
-        },
-        beforeReturn: async (req, res, inbox) => {
-            if(Array.isArray(inbox) && inbox.length > 0){
-                for(let item of inbox){
-                    let itemType = item?.type;
-
-                    // chat mentions
-                    if(itemType === "mention"){
-                        let messageId = item?.data?.messageId;
-                        if(!messageId || messageId?.length !== 12) continue;
-
-                        item.data = await getMessageObjectById(messageId);
-                    }
-                }
-            }
-        }
-    })
-
-    await inbox.init();
-
 } catch (e) {
     if(isPtero()){
         if(debugmode === false) console.clear();
@@ -1198,6 +1147,60 @@ async function listenToIO(){
         res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
     });
      */
+
+    // init here cauz we need io
+    inbox = new dSyncInbox({
+        io,
+        app,
+        express,
+        dSyncSign: signer,
+        dSyncSql: db,
+        dSyncAuth: auther,
+        isValidated: async (req, res) => {
+            const {inboxId, timestamp, customId} = req?.params;
+            const { id, token, sessionId, publicKey } = req.body;
+
+            if(serverconfig.servermembers[id]?.token === token && !sessionId) return true;
+
+            if(sessionId){
+                let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
+                return sessionResult?.valid ?? false;
+            }
+
+            return false;
+        },
+        getIdentifier: async (req, res) => {
+            const {inboxId, timestamp, customId} = req?.params;
+            let { id, token, sessionId, publicKey } = req.body;
+
+            if(!id && !token && publicKey){
+                let member = await getMemberFromKey(publicKey);
+                if (member){
+                    id = member.id;
+                    token = member.token;
+                }
+            }
+
+            return id ?? null;
+        },
+        beforeReturn: async (req, res, inbox) => {
+            if(Array.isArray(inbox) && inbox.length > 0){
+                for(let item of inbox){
+                    let itemType = item?.type;
+
+                    // chat mentions
+                    if(itemType === "mention"){
+                        let messageId = item?.data?.messageId;
+                        if(!messageId || messageId?.length !== 12) continue;
+
+                        item.data = await getMessageObjectById(messageId);
+                    }
+                }
+            }
+        }
+    })
+
+    await inbox.init();
 }
 
 function initConfig(filePath) {

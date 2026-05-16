@@ -957,46 +957,6 @@ async function showMessageInChat({
 }
 
 
-async function fixScrollAfterMediaLoad(container, scrollPosition, manualScroll = false) {
-    if (!scrollPosition) return;
-
-    toggleSmoothScroll(container, false);
-
-    if (manualScroll === true) {
-        setScrollPosition(container, scrollPosition);
-    }
-
-    let stableFrames = 0;
-    let lastDiff = 0;
-
-    const tick = () => {
-        const before = container.scrollTop;
-
-        requestAnimationFrame(() => {
-            setScrollPosition(container, scrollPosition);
-
-            const after = container.scrollTop;
-            const diff = after - before;
-
-            if (diff === lastDiff) {
-                stableFrames++;
-            } else {
-                stableFrames = 0;
-                lastDiff = diff;
-            }
-
-            if (stableFrames < 3) {
-                tick();
-            } else {
-                toggleSmoothScroll(container, true);
-            }
-        });
-    };
-
-    tick();
-}
-
-
 function truncateText(text, length) {
     let actualLength = 0;
     if (text?.length <= length) {

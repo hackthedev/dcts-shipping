@@ -8,8 +8,9 @@
         "@hackthedev/arraytools": "^1.0.2",
         "@hackthedev/datetools": "^1.0.3",
         "@hackthedev/dsync": "^1.0.10",
-        "@hackthedev/dsync-auth": "^1.0.25",
+        "@hackthedev/dsync-auth": "^1.0.26",
         "@hackthedev/dsync-files": "^1.0.9",
+        "@hackthedev/dsync-inbox": "^1.0.1",
         "@hackthedev/dsync-ipsec": "^1.0.12",
         "@hackthedev/dsync-pay": "^1.0.8",
         "@hackthedev/dsync-ratelimit": "^1.0.3",
@@ -156,6 +157,8 @@
     "@hackthedev/dsync-auth": ["@hackthedev/dsync-auth@1.0.26", "", { "dependencies": { "@hackthedev/datetools": "^1.0.3", "@hackthedev/dsync-auth": "1.0.17", "@hackthedev/dsync-sign": "^1.0.15", "cors": "^2.8.6", "express": "^5.2.1" } }, "sha512-OiEat+T7Wdfi7ljeWPWOYrPwhpTPkEm7M0g3Y6mq0JYRpRsxpXinN0/+U59pLZZkbTf28OLHKWMCZ2H7C9cEVA=="],
 
     "@hackthedev/dsync-files": ["@hackthedev/dsync-files@1.0.9", "", {}, "sha512-JAgUvJZmmg5a2/6HQpcSaxr2nJc/w8i3T9o15CCs1kgb0O2Z9flZZCwgKScLuRFzjOhW79ikkS9wrPW9TUZUrA=="],
+
+    "@hackthedev/dsync-inbox": ["@hackthedev/dsync-inbox@1.0.1", "", {}, "sha512-pWpwmH6JoBBwbtjn23ZWFez0BOc295ttO8nemMbFzK8h1gDrbCkk9lOde9gXxjdJ6r+PhVf7YNtZmApF72gWQg=="],
 
     "@hackthedev/dsync-ipsec": ["@hackthedev/dsync-ipsec@1.0.12", "", {}, "sha512-aCPQu6Cypqa6kmIpGjmqVPsoRwaYWbtPBvhPkZjOPu/FI054DItr3gtcqCE8+sULJSzNwAo2Ol2NZP2HEWucEg=="],
 

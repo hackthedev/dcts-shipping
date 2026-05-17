@@ -43,7 +43,8 @@ import dSyncWeb from "@hackthedev/dsync-web";
 import dSync from "@hackthedev/dsync";
 //import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
 
-import dSyncInbox from "E:\\network-z-dev\\dSyncInbox\\index.mjs"
+import dSyncInbox from "@hackthedev/dsync-inbox"
+//import dSyncInbox from "E:\\network-z-dev\\dSyncInbox\\index.mjs"
 
 import Logger from "@hackthedev/terminal-logger"
 import dSyncSql from "@hackthedev/dsync-sql"

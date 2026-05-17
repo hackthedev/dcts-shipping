@@ -204,6 +204,7 @@ export async function getInboxMessages({
                                            inboxId = null,
                                            onlyUnread = false
                                        } = {}) {
+    return null;
     index = Number(index ?? -1);
 
     if (inboxId !== null) {

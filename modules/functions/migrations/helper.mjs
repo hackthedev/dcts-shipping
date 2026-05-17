@@ -37,16 +37,12 @@ export async function checkMigrations(){
     }
 
     // uploadfiletype array fix
-    migrationTask = await getMigrationTask(`uploadTypesFix`, true);
+    migrationTask = await getMigrationTask(`dropTable`, true);
     if(migrationTask && migrationTask?.done === 0){
         await doBackup()
 
-        let uploadFileTypes = serverconfig.serverinfo.uploadFileTypes;
-        if(!Array.isArray(uploadFileTypes)){
-            serverconfig.serverinfo.uploadFileTypes =  uploadFileTypes.split(",");
-            await saveConfig(serverconfig);
-        }
-        await completeMigrationTask(`uploadTypesFix`)
+        await queryDatabase(`DROP table inbox`)
+        await completeMigrationTask(`dropTable`)
     }
 
     async function doBackup(){

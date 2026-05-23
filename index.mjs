@@ -629,6 +629,7 @@ const tables = [
             {name: "aboutme", type: "text DEFAULT ''"},
             {name: "icon", type: "longtext DEFAULT ''"},
             {name: "banner", type: "longtext DEFAULT ''"},
+            {name: "card", type: "longtext DEFAULT ''"},
             {name: "joined", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
             {name: "isOnline", type: "BOOLEAN DEFAULT FALSE"},
             {name: "lastOnline", type: "bigint DEFAULT 0"},

@@ -507,10 +507,6 @@ class UserManager {
         if (aboutme == null || aboutme.length <= 0) {
             return "";
         } else {
-            try {
-                updateUsernameOnUI(aboutme);
-            } catch {
-            }
             return aboutme;
         }
     }
@@ -521,10 +517,16 @@ class UserManager {
         if (banner == null || banner.length <= 0) {
             return "";
         } else {
-            try {
-                updateUsernameOnUI(aboutme);
-            } catch {
-            }
+            return banner;
+        }
+    }
+
+    static getCard() {
+        var banner = sanitizeHtmlForRender(localStorage.getItem("card"), false);
+
+        if (banner == null || banner.length <= 0) {
+            return "";
+        } else {
             return banner;
         }
     }
@@ -601,6 +603,11 @@ class UserManager {
         pfp = stripHTML(pfp)
         localStorage.setItem("pfp", pfp);
         UserManager.updateUsernameOnUI(pfp);
+    }
+
+    static setCard(card) {
+        card = stripHTML(card)
+        localStorage.setItem("card", card);
     }
 
     static setAboutme(aboutme) {

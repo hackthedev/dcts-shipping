@@ -235,7 +235,12 @@ function getMemberList() {
     }
 
     function getMemberHTML(member, role){
+        console.log(member.card)
         return `<div class="memberlist-container" data-member-id="${member.id}">
+                        ${member?.card ? `
+                            <div class="card" style="background-image: url('${ChatManager.proxyUrl(member.card)}"></div>` 
+                        : ""}
+
                         <img draggable="false" class="memberlist-img ${member?.isOffline ? "offline_pfp" : ""}" data-member-id="${member.id}" src="${ChatManager.proxyUrl(member.icon)}" onerror="this.src='/img/default_pfp.png'">
                         
                         <div style="display:flex;flex-direction: column;width: calc(100% - 35px);">

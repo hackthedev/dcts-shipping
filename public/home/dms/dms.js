@@ -514,9 +514,21 @@ async function renderDmRoom(roomId) {
                 ["clean", "link", "image", "video"],
                 ["code", "code-block", "blockquote"]
             ],
-            onImg: async (src) => {
-                let upload = await ChatManager.srcToFile(src);
-                dmEditor.insertImage(upload.path)
+            onImg: async (src, { insert }) => {
+                console.log("image handler fired");
+                if(src?.constructor?.name === "File"){
+                    let upload = await ChatManager.uploadFile(src);
+                    console.log("file", upload)
+                    insert(upload.path)
+                }
+                else if(src?.constructor?.name === "String"){
+                    let upload = await ChatManager.srcToFile(src);
+                    console.log("String", upload)
+                    insert(upload.path)
+                }
+                else{
+                    console.log("Unsupported")
+                }
             },
             onSend: async (html) => {
                 let wasSent = await sendDmMessage(html, currentDmObj)

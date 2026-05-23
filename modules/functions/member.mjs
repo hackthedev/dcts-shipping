@@ -102,8 +102,6 @@ export async function updateMember(member) {
     }
 
     await cleanMemberData(member)
-
-    console.log(member)
     if (member?.token !== undefined) serverconfig.servermembers[member?.id].token = stripHTML(member?.token);
     if (member?.name !== undefined && normalizeVar(member?.name)?.length > 0) serverconfig.servermembers[member?.id].name = stripHTML(normalizeVar(member?.name));
     if (member?.loginName !== undefined && normalizeVar(member?.name)?.length > 0) serverconfig.servermembers[member?.id].loginName = stripHTML(member?.loginName);

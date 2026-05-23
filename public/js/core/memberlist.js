@@ -235,7 +235,6 @@ function getMemberList() {
     }
 
     function getMemberHTML(member, role){
-        console.log(member.card)
         return `<div class="memberlist-container" data-member-id="${member.id}">
                         ${member?.card ? `
                             <div class="card" style="background-image: url('${ChatManager.proxyUrl(member.card)}"></div>` 

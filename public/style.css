@@ -383,8 +383,16 @@ sortable-chosen.sortable-ghost {
 }
 .memberlist-container > .card {
     position: absolute;
+    display: flex;
+    align-items: center;
+    align-content: center;
+
+    margin: auto;
+    margin-left: 12px;
+
     inset: 0;
 
+    object-fit: cover;
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -416,7 +424,6 @@ sortable-chosen.sortable-ghost {
     height: 35px;
     min-width: 35px;
     min-height: 35px;
-    margin-left: 10px;
 
     border-radius: 50%;
     background-color: black;
@@ -428,12 +435,16 @@ sortable-chosen.sortable-ghost {
 }
 
 .memberlist-member-info {
+    display: flex;
+    flex-direction: column;
+
+
+    background-color: transparent;
+
     z-index: 1;
     box-sizing: border-box;
-    height: 20px;
     overflow: hidden;
     margin-left: 8px;
-    background-color: transparent;
     user-select: none;
 }
 

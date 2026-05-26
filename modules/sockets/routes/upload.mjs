@@ -30,6 +30,9 @@ app.post("/upload", async (req, res) => {
             fileId
         } = req.query;
 
+        const chunkNum = Number(chunkIndex);
+        const totalNum = Number(totalChunks);
+
         let headerBuf = Buffer.alloc(0);
         let fullBodyChunks = [];
 
@@ -50,6 +53,9 @@ app.post("/upload", async (req, res) => {
                 const clean = sanitizeFilename(filename);
                 const dir = type === "emoji" ? "./public/emojis" : UPLOAD_DIR;
 
+                if (!Number.isInteger(chunkNum) || !Number.isInteger(totalNum))
+                    return res.status(400).json({ ok: false, error: "invalid_chunk_data" });
+
                 if (type === "upload" && !await hasPermission(id, "uploadFiles"))
                     return res.status(403).json({ ok: false, error: "no_permission" });
 
@@ -59,14 +65,15 @@ app.post("/upload", async (req, res) => {
                 const role = getMemberHighestRole(id);
                 const maxBytes = (role?.permissions?.maxUpload || 10) * 1024 * 1024;
 
-                if (chunkIndex === 0 &&
+                if (chunkNum === 0 &&
                     getFolderSize(dir) >= serverconfig.serverinfo.maxUploadStorage * 1024 * 1024)
                     return res.status(507).json({ ok: false, error: "storage_full" });
 
                 const temp = path.join(dir, `${fileId}_${clean}`);
 
-                if (chunkIndex === 0) {
+                if (chunkNum === 0) {
                     const { mime } = (await fileTypeFromBuffer(headerBuf)) || {};
+
                     if (!mime || !serverconfig.serverinfo.uploadFileTypes.includes(mime))
                         return res.status(415).json({ ok: false, error: "mime_not_allowed" });
 
@@ -81,7 +88,15 @@ app.post("/upload", async (req, res) => {
 
                 fs.appendFileSync(temp, fullBody);
 
-                if (Number(chunkIndex) + 1 < Number(totalChunks))
+                const checkBuf = fs.readFileSync(temp);
+                const { mime } = (await fileTypeFromBuffer(checkBuf)) || {};
+
+                if (!mime || !serverconfig.serverinfo.uploadFileTypes.includes(mime)) {
+                    fs.unlinkSync(temp);
+                    return res.status(415).json({ ok: false, error: "mime_not_allowed" });
+                }
+
+                if (chunkNum + 1 < totalNum)
                     return res.json({ ok: true, part: true });
 
                 const hash = getFileHash(temp)
@@ -108,8 +123,6 @@ app.post("/upload", async (req, res) => {
         return res.status(500).json({ ok: false, error: "server_error" });
     }
 });
-
-
 
 
 export default (io) => (socket) => {

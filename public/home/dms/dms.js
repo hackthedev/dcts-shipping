@@ -228,7 +228,7 @@ async function renderDMs() {
 
             getDMsNavContainer().insertAdjacentHTML('beforeend',
                 `<a class="entry" data-room-id="${dm.roomId}" onclick="renderDmRoom('${dm.roomId}')">
-                            <img class="icon" src="${stripHTML(icon)}">
+                            <img class="icon" src="${stripHTML(icon)}" >
                             <div class="info">
                                 <p>${stripHTML(title)}</p>
                                 <p class="status">${stripHTML(dm.status) ?? ""}</p>

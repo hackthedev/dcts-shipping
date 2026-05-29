@@ -3,9 +3,9 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
 
-DCTS was created in 2023 because existing solutions at the time all had fundamental issues and sucked. Fast forward to today and the only thing that has changed are the names and some new players entering the game that also suck in terms of concept, vision and execution. 
+DCTS was created in 2023 because existing solutions at the time all had fundamental issues and sucked. Fast forward to today and the only thing that has changed are the names and some new players entering the game that sadly also suck in terms of concept, vision and execution. 
 
-The general goal is to provide a software thats easy to use for admins, users and devs and to be as independent as possible so that DCTS can still exist without issues for the next 10 years or more. To achieve this we wont accept investors, make as many code libraries ourself and keep a high code quality by refactoring code if needed to also avoid tech debt. It pays off very well, as features are implemented lightning fast and the code base being nice to work with.
+The general goal is to provide a software thats easy to use for admins, users and devs and to be as independent as possible so that DCTS can still exist without issues for the next 10 years or more. To achieve this we wont accept investors, make custom code libraries and keep a high code quality by refactoring it if needed to also avoid tech debt. It pays off very well, as features are implemented lightning fast and the code base being nice to work with.
 
 > [!TIP]
 >

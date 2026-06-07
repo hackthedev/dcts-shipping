@@ -27,7 +27,7 @@ class UserManager {
                 if(response?.error) {
                     resolve({error: response?.error, member: null} )
                 }
-                
+
                 UserManager.setPFP(response.icon);
                 UserManager.setBanner(response.banner);
                 UserManager.setAboutme(response.aboutme);

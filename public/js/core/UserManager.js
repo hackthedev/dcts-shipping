@@ -23,17 +23,27 @@ class UserManager {
         if(typeof member !== "object") throw new Error("passed object is not a member object");
 
         return new Promise((resolve, reject) => {
-            socket.emit("updateMember", {token: UserManager.getToken(), ...member,}, async function (response) {
+            socket.emit("updateMember", {token: UserManager.getToken(), id: UserManager.getID(), ...member,}, async function (response) {
                 if(response?.error) {
                     resolve({error: response?.error, member: null} )
                 }
-
+                
                 UserManager.setPFP(response.icon);
                 UserManager.setBanner(response.banner);
                 UserManager.setAboutme(response.aboutme);
                 UserManager.setUsername(response.name);
                 UserManager.setStatus(response.status);
                 UserManager.setCard(response.card);
+
+                if(await isLauncher()){
+                    if(typeof await Client().SetUserIcon === "function" && typeof await Client().GetUserIcon === "function"){
+                        if(!await Client().GetUserIcon()) await Client().SetUserIcon(response.icon);
+                    }
+
+                    if(typeof await Client().GetNickname === "function" && typeof await Client().SetNickname === "function"){
+                        if(!await Client().GetNickname()) await Client().SetNickname(response.name);
+                    }
+                }
 
                 resolve( {error: null, member: response} );
             });
@@ -420,9 +430,9 @@ class UserManager {
         if (pfp == null || pfp.length <= 0) {
             //pfp = prompt("Please enter the url to your profile picture.");
 
-            //if(pfp.length <= 0){
+
             pfp = "/img/default_pfp.png";
-            //}
+
             CookieManager.setCookie("pfp", pfp, 360);
             UserManager.updatePFPOnUI(pfp);
             return pfp;

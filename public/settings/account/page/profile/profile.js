@@ -127,24 +127,6 @@ async function exportAccount() {
                     })
             })
     });
-
-    /*
-    let data = {
-        icon: await FileManager.fileToBase64(UserManager.getPFP()),
-        banner: await FileManager.fileToBase64(UserManager.getBanner()),
-        loginName: UserManager.getLoginName(),
-        displayName: UserManager.getUsername(),
-        status: UserManager.getStatus(),
-        aboutme: UserManager.getAboutme(),
-        pow: {
-            challenge: CookieManager.getCookie("pow_challenge"),
-            solution: CookieManager.getCookie("pow_solution")
-        }
-    }
-    
-    await FileManager.saveFile(JSON.stringify(data, null, 4), "identity_" + UserManager.getUsername() + ".json")
-
-     */
 }
 
 function importAccount() {
@@ -176,7 +158,7 @@ function importAccount() {
     });
 }
 
-function saveSettings() {
+async function saveSettings() {
     try {
 
         let updatedMember = {
@@ -189,16 +171,9 @@ function saveSettings() {
             card: settings_card?.value != null && settings_card?.value.length > 0 ? settings_card?.value : null, // Banner
         }
 
-        socket.emit("updateMember", {token: UserManager.getToken(), ...updatedMember,}, async function (response) {
-            if(response?.error) throw response?.error;
-            UserManager.setPFP(response.icon);
-            UserManager.setBanner(response.banner);
-            UserManager.setAboutme(response.aboutme);
-            UserManager.setUsername(response.name);
-            UserManager.setStatus(response.status);
-            UserManager.setCard(response.card);
-            saveButton.style.display = "none";
-        });
+        let result = await UserManager.updateMember(updatedMember);
+        if(!result?.error) saveButton.style.display = "none";
+        else throw new Error(result?.error);
     } catch (error) {
         alert("Error while trying to save settings: " + error);
         return;

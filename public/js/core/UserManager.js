@@ -19,6 +19,27 @@ class UserManager {
 
     }
 
+    static async updateMember(member){
+        if(typeof member !== "object") throw new Error("passed object is not a member object");
+
+        return new Promise((resolve, reject) => {
+            socket.emit("updateMember", {token: UserManager.getToken(), ...member,}, async function (response) {
+                if(response?.error) {
+                    resolve({error: response?.error, member: null} )
+                }
+
+                UserManager.setPFP(response.icon);
+                UserManager.setBanner(response.banner);
+                UserManager.setAboutme(response.aboutme);
+                UserManager.setUsername(response.name);
+                UserManager.setStatus(response.status);
+                UserManager.setCard(response.card);
+
+                resolve( {error: null, member: response} );
+            });
+        })
+    }
+
     static async resolveMemberGid(memberId){
         if(!memberId || memberId?.length !== 12) throw new Error("Member ID not set or length invalid!");
 

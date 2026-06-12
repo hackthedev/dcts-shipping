@@ -526,14 +526,14 @@ class ChatManager {
                     }
 
                     // check for client nickname
-                    if(typeof await Client().GetNickname === "function"){
+                    if(typeof await Client().GetNickname === "function" && await Client().GetUserConsistentSettings() === true){
                         let clientName = await Client().GetNickname();
                         if(clientName && clientName !== UserManager.getUsername()) await UserManager.updateMember({name: clientName});
                         if(!clientName && clientName !== UserManager.getUsername()) await Client().SetNickname(UserManager.getUsername())
                     }
 
                     // check for client icon
-                    if(typeof await Client().GetUserIcon === "function"){
+                    if(typeof await Client().GetUserIcon === "function" && await Client().GetUserConsistentSettings() === true){
                         let clientIcon = await Client().GetUserIcon()
 
                         if(clientIcon && clientIcon !== UserManager.getPFP()) await UserManager.updateMember({icon: clientIcon});

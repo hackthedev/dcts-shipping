@@ -5,15 +5,6 @@ class UserManager {
     static updateUsernameOnUI(username, sync = false) {
         try {
             document.getElementById("profile-qa-info-username").innerText = username;
-
-            if (sync == true) {
-                socket.emit("setUsername", {
-                    token: UserManager.getToken(),
-                    id: UserManager.getID(),
-                    username: UserManager.getUsername(),
-                    icon: UserManager.getPFP()
-                });
-            }
         } catch {
         }
 
@@ -35,15 +26,24 @@ class UserManager {
                 UserManager.setStatus(response.status);
                 UserManager.setCard(response.card);
 
-                if(await isLauncher()){
-                    if(typeof await Client().SetUserIcon === "function" && typeof await Client().GetUserIcon === "function"){
-                        if(!await Client().GetUserIcon()) await Client().SetUserIcon(response.icon);
-                    }
+                try{
+                    if(await isLauncher() && await Client().GetUserConsistentSettings() === true){
+                        if(typeof await Client().SetUserIcon === "function" && typeof await Client().GetUserIcon === "function"){
+                            let clientIcon = await Client().GetUserIcon();
+                            if(!clientIcon || clientIcon?.trim()?.length === 0) await Client().SetUserIcon(response.icon);
+                        }
 
-                    if(typeof await Client().GetNickname === "function" && typeof await Client().SetNickname === "function"){
-                        if(!await Client().GetNickname()) await Client().SetNickname(response.name);
+                        if(typeof await Client().GetNickname === "function" && typeof await Client().SetNickname === "function"){
+                            let clientName = await Client().GetNickname();
+                            if(!clientName || clientName?.trim()?.length === 0) await Client().SetNickname(response.name);
+                        }
                     }
                 }
+                catch(syncError){
+                    console.error("Cant Sync with Client")
+                    console.error(syncError)
+                }
+
 
                 resolve( {error: null, member: response} );
             });

@@ -36,6 +36,15 @@ export async function checkMigrations(){
         didBackup = false; // intentionally make a new backup after updates and migration
     }
 
+    // uploadfiletype array fix
+    migrationTask = await getMigrationTask(`dropTable`, true);
+    if(migrationTask && migrationTask?.done === 0){
+        await doBackup()
+
+        await queryDatabase(`DROP table inbox`)
+        await completeMigrationTask(`dropTable`)
+    }
+
     async function doBackup(){
         if(didBackup) return;
         didBackup = true;

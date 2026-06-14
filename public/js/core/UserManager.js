@@ -5,18 +5,49 @@ class UserManager {
     static updateUsernameOnUI(username, sync = false) {
         try {
             document.getElementById("profile-qa-info-username").innerText = username;
-
-            if (sync == true) {
-                socket.emit("setUsername", {
-                    token: UserManager.getToken(),
-                    id: UserManager.getID(),
-                    username: UserManager.getUsername(),
-                    icon: UserManager.getPFP()
-                });
-            }
         } catch {
         }
 
+    }
+
+    static async updateMember(member){
+        if(typeof member !== "object") throw new Error("passed object is not a member object");
+
+        return new Promise((resolve, reject) => {
+            socket.emit("updateMember", {token: UserManager.getToken(), id: UserManager.getID(), ...member,}, async function (response) {
+                if(response?.error) {
+                    resolve({error: response?.error, member: null} )
+                }
+
+                UserManager.setPFP(response.icon);
+                UserManager.setBanner(response.banner);
+                UserManager.setAboutme(response.aboutme);
+                UserManager.setUsername(response.name);
+                UserManager.setStatus(response.status);
+                UserManager.setCard(response.card);
+
+                try{
+                    if(await isLauncher() && await Client().GetUserConsistentSettings() === true){
+                        if(typeof await Client().SetUserIcon === "function" && typeof await Client().GetUserIcon === "function"){
+                            let clientIcon = await Client().GetUserIcon();
+                            if(!clientIcon || clientIcon?.trim()?.length === 0) await Client().SetUserIcon(response.icon);
+                        }
+
+                        if(typeof await Client().GetNickname === "function" && typeof await Client().SetNickname === "function"){
+                            let clientName = await Client().GetNickname();
+                            if(!clientName || clientName?.trim()?.length === 0) await Client().SetNickname(response.name);
+                        }
+                    }
+                }
+                catch(syncError){
+                    console.error("Cant Sync with Client")
+                    console.error(syncError)
+                }
+
+
+                resolve( {error: null, member: response} );
+            });
+        })
     }
 
     static async resolveMemberGid(memberId){
@@ -171,7 +202,6 @@ class UserManager {
         return await this.getServerBadges(gid, beta).then(result => {
             if (result != null) {
                 let badgeData = JSON.parse(result?.data || "{}")
-                console.log(badgeData)
 
                 for(let badgeKey of Object.keys(badgeData)){
                     let badge = badgeData[badgeKey];
@@ -400,9 +430,9 @@ class UserManager {
         if (pfp == null || pfp.length <= 0) {
             //pfp = prompt("Please enter the url to your profile picture.");
 
-            //if(pfp.length <= 0){
+
             pfp = "/img/default_pfp.png";
-            //}
+
             CookieManager.setCookie("pfp", pfp, 360);
             UserManager.updatePFPOnUI(pfp);
             return pfp;
@@ -508,10 +538,6 @@ class UserManager {
         if (aboutme == null || aboutme.length <= 0) {
             return "";
         } else {
-            try {
-                updateUsernameOnUI(aboutme);
-            } catch {
-            }
             return aboutme;
         }
     }
@@ -522,10 +548,16 @@ class UserManager {
         if (banner == null || banner.length <= 0) {
             return "";
         } else {
-            try {
-                updateUsernameOnUI(aboutme);
-            } catch {
-            }
+            return banner;
+        }
+    }
+
+    static getCard() {
+        var banner = sanitizeHtmlForRender(localStorage.getItem("card"), false);
+
+        if (banner == null || banner.length <= 0) {
+            return "";
+        } else {
             return banner;
         }
     }
@@ -602,6 +634,11 @@ class UserManager {
         pfp = stripHTML(pfp)
         localStorage.setItem("pfp", pfp);
         UserManager.updateUsernameOnUI(pfp);
+    }
+
+    static setCard(card) {
+        card = stripHTML(card)
+        localStorage.setItem("card", card);
     }
 
     static setAboutme(aboutme) {

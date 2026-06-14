@@ -50,7 +50,13 @@
 
     padding: 16px;
     overflow-y: auto;
+
+    scrollbar-width: none;
 }
+#channeltree:hover {
+    scrollbar-width: thin;
+}
+
 
 #channeltree details ul {
     list-style-type: none;

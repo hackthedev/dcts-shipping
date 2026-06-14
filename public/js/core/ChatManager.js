@@ -424,6 +424,35 @@ class ChatManager {
         }
     }
 
+    static getProtocol(host) {
+        if (!host) return "https";
+        const h = host.toLowerCase();
+
+        if (
+            h.includes("localhost") ||
+            h.startsWith("127.")
+        ) {
+            return "http";
+        }
+
+        return "https";
+    }
+
+    static getFixedUrl(host, url) {
+        if (!host || !url) return null;
+
+        const base = `${this.getProtocol(host)}://${host}`;
+        const cleanUrl = String(url).trim();
+
+        if (cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://")) {
+            return cleanUrl;
+        }
+
+        return cleanUrl.startsWith("/")
+            ? `${base}${cleanUrl}`
+            : `${base}/${cleanUrl}`;
+    }
+
     static async userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false, callback = null, keySolution = null) {
         if (UserManager.getUsername() != null) {
             var username = UserManager.getUsername();
@@ -488,12 +517,29 @@ class ChatManager {
 
                 // account manager soon?
                 if (await isLauncher()) {
-                    if (await Client().setAccountCredentials) {
+                    if (typeof await Client().setAccountCredentials === "function") {
                         await Client().setAccountCredentials(
                             ChatManager.extractHost(window.location.origin),
                             UserManager.getID(),
                             UserManager.getToken()
                         );
+                    }
+
+                    // check for client nickname
+                    if(typeof await Client().GetNickname === "function" && await Client().GetUserConsistentSettings() === true){
+                        let clientName = await Client().GetNickname();
+                        if(clientName && clientName !== UserManager.getUsername()) await UserManager.updateMember({name: clientName});
+                        if(!clientName && clientName !== UserManager.getUsername()) await Client().SetNickname(UserManager.getUsername())
+                    }
+
+                    // check for client icon
+                    if(typeof await Client().GetUserIcon === "function" && await Client().GetUserConsistentSettings() === true){
+                        let clientIcon = await Client().GetUserIcon()
+
+                        if(clientIcon && clientIcon !== UserManager.getPFP()) await UserManager.updateMember({icon: clientIcon});
+                        if(!clientIcon && clientIcon !== UserManager.getPFP() && UserManager.getPFP()) await Client().SetUserIcon(UserManager.getPFP())
+
+                        console.log("did user icon")
                     }
 
                     UserManager.saveAccount()

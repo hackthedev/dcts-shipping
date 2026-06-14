@@ -366,21 +366,60 @@ sortable-chosen.sortable-ghost {
 }
 
 .memberlist-container {
+    position: relative;
     display: flex;
+    align-items: center;
+
     flex-direction: row;
     flex-shrink: 0;
     gap: 4px;
 
     width: 100%;
-    background-color: transparent;
     margin-bottom: 12px;
     cursor: pointer;
 
     text-overflow: ellipsis;
     overflow: hidden;
 }
+.memberlist-container > .card {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    align-content: center;
 
+    margin: auto;
+    margin-left: 16px;
+
+    inset: 0;
+
+    object-fit: cover;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+
+    border-radius: 4px;
+    z-index: 0;
+}
+
+.memberlist-container > .card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    border-radius: 4px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+
+    background: linear-gradient(
+            to right,
+            rgba(0,0,0,0.75),
+            rgba(0,0,0,0.75),
+            rgba(0,0,0,0.5),
+            rgba(0,0,0,0.25)
+    );
+}
 .memberlist-img {
+    z-index: 1;
     width: 35px;
     height: 35px;
     min-width: 35px;
@@ -396,15 +435,21 @@ sortable-chosen.sortable-ghost {
 }
 
 .memberlist-member-info {
+    display: flex;
+    flex-direction: column;
+
+
+    background-color: transparent;
+
+    z-index: 1;
     box-sizing: border-box;
-    height: 20px;
     overflow: hidden;
     margin-left: 8px;
-    background-color: transparent;
     user-select: none;
 }
 
 .memberlist-member-info.status {
+    z-index: 1;
     font-size: 12px;
     overflow: hidden;
     text-overflow: ellipsis;

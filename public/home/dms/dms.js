@@ -228,7 +228,7 @@ async function renderDMs() {
 
             getDMsNavContainer().insertAdjacentHTML('beforeend',
                 `<a class="entry" data-room-id="${dm.roomId}" onclick="renderDmRoom('${dm.roomId}')">
-                            <img class="icon" src="${stripHTML(icon)}">
+                            <img class="icon" src="${stripHTML(icon)}" >
                             <div class="info">
                                 <p>${stripHTML(title)}</p>
                                 <p class="status">${stripHTML(dm.status) ?? ""}</p>
@@ -514,9 +514,18 @@ async function renderDmRoom(roomId) {
                 ["clean", "link", "image", "video"],
                 ["code", "code-block", "blockquote"]
             ],
-            onImg: async (src) => {
-                let upload = await ChatManager.srcToFile(src);
-                dmEditor.insertImage(upload.path)
+            onImg: async (src, { insert }) => {
+                if(src?.constructor?.name === "File"){
+                    let upload = await ChatManager.uploadFile(src);
+                    insert(upload.path)
+                }
+                else if(src?.constructor?.name === "String"){
+                    let upload = await ChatManager.srcToFile(src);
+                    insert(upload.path)
+                }
+                else{
+                    console.log("Unsupported")
+                }
             },
             onSend: async (html) => {
                 let wasSent = await sendDmMessage(html, currentDmObj)

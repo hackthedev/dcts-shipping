@@ -22,7 +22,7 @@ Without going too much into the technicality, the general concept is to enable s
 
 ------
 
-## Existing Solutions
+## Code Libraries
 
 Its important to make as many libraries and similar ourselves, as this comes with a lot of benefits and is better in the long run for DCTS. This way debugging becomes a lot easier which has been proven many times already, code optimization is easier too since you'll know what your code does and how it works and much more, tho its also important to check if its practical to create something yourself rather than using something existing, as you may lose yourself in something so big that it would be its own dedicated project. Sometimes this could be worth the effort, sometimes not, so its important to weigh your goal given your situation.
 
@@ -32,7 +32,7 @@ Also its important to keep the concept of "technical debt" in mind when choosing
 
 ## Quality degradation
 
-Quality degradation aka "enshittification" has been witnessed many times in the past and is, in my opinion, a natural effect of all central services or companies in general that are not independent. Generally it means that a product is getting worse over time, and a simple example would be Discord locking more features behind their Nitro subscription, decreasing the file upload limit for "free" users and alike. This is not exclusive to discord but many other companies which will hurt or even kill companies in the long run.
+Quality degradation aka "enshittification" has been witnessed many times in the past and is almost always a natural effect of all central services or companies in general that are not independent. Generally it means that a product is getting worse over time, and a simple example would be Discord locking more features behind their Nitro subscription, decreasing the file upload limit for "free" users and alike. This is not exclusive to discord but many other companies which will hurt or even kill companies in the long run.
 
 DCTS is mostly driven by intuition and community feedback with the user first in mind, followed by admins.
 

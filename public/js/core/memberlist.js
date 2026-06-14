@@ -199,6 +199,7 @@ function getMemberList() {
                 roleHeaderElement.insertAdjacentHTML("beforeend", memberHTML);
             }
             else{
+                let memberCard   = alreadyExistsInRole.querySelector(".card");
                 let memberIcon   = alreadyExistsInRole.querySelector(".memberlist-img");
                 let memberName   = alreadyExistsInRole.querySelector(".memberlist-member-info.name span");
                 let memberStatus = alreadyExistsInRole.querySelector(".memberlist-member-info.status span");
@@ -211,6 +212,18 @@ function getMemberList() {
                         memberIcon.src = sanitizeHtmlForRender(newSrc, false);
                     }
                 }
+
+                // cool ass shit
+                if(memberCard){
+                    let cardSource = ChatManager.proxyUrl(stripHTML(memberCard.getAttribute("data-src")))
+
+                    let newSrc = ChatManager.proxyUrl(stripHTML(memberObject?.card));
+                    if(cardSource !== newSrc){
+                        memberCard.style.backgroundImage = `url('${newSrc}')`;
+                    }
+                }
+
+
 
                 if(memberName && memberName.innerText !== memberObject.name){
                     memberName.innerText = unescapeHtmlEntities(sanitizeHtmlForRender(memberObject.name, false));
@@ -235,15 +248,21 @@ function getMemberList() {
     }
 
     function getMemberHTML(member, role){
+        let memberCardInlineHTML = member?.card?.length > 0 ? `style="background-image: url('${ChatManager.proxyUrl(member.card)}"` : "";
+
         return `<div class="memberlist-container" data-member-id="${member.id}">
+                        ${member?.card ? `
+                            <div class="card" ${memberCardInlineHTML} data-src="${ChatManager.proxyUrl(stripHTML(member?.card))}"></div>` 
+                        : ""}
+
                         <img draggable="false" class="memberlist-img ${member?.isOffline ? "offline_pfp" : ""}" data-member-id="${member.id}" src="${ChatManager.proxyUrl(member.icon)}" onerror="this.src='/img/default_pfp.png'">
                         
                         <div style="display:flex;flex-direction: column;width: calc(100% - 35px);">
                             <div class="memberlist-member-info name" 
-                                onclick="getMemberProfile('${sanitizeHtmlForRender(member.id, false)}');" data-member-id="${sanitizeHtmlForRender(member.id, false)}">
+                                onclick="getMemberProfile('${stripHTML(member.id)}');" data-member-id="${stripHTML(member.id)}">
                                 <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${sanitizeHtmlForRender(getDisplayString(member?.name, member, role.info.color), false)}</span>
                             </div>
-                            <div class="memberlist-member-info status" data-member-id="${member.id}">
+                            <div class="memberlist-member-info status" data-member-id="${stripHTML(member.id)}">
                                 <span style="color: ${role.info.color};background: ${role.info.background};background-clip: ${role.info.backgroundClip};">${sanitizeHtmlForRender(getDisplayString(member?.status, member, role.info.color), false)}</span>
                             </div>
                         </div>

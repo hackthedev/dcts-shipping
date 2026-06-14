@@ -1,6 +1,7 @@
 var settings_username = null
 var settings_loginName = null
 var settings_status = null
+var settings_card = null
 var settings_aboutme = null
 var settings_icon = null
 var settings_banner = null
@@ -43,6 +44,10 @@ async function handleUpload(files, id) {
             settings_banner.value = url;
             updatePreview("settings_profile_banner");
         }
+        else if (id === "settings_profile_card") {
+            settings_card.value = url;
+            updatePreview("settings_profile_card");
+        }
     } catch (error) {
         console.error("An error occurred during the upload process:", error);
     }
@@ -57,6 +62,7 @@ function setPreview() {
     settings_username = document.getElementById("settings_profile_username");
     settings_loginName = document.getElementById("settings_profile_loginName");
     settings_status = document.getElementById("settings_profile_status");
+    settings_card = document.getElementById("settings_profile_card");
     settings_aboutme = document.getElementById("settings_profile_aboutme");
     settings_icon = document.getElementById("settings_profile_icon");
     settings_banner = document.getElementById("settings_profile_banner");
@@ -78,6 +84,7 @@ function setPreview() {
 
     settings_icon.value = `${UserManager.getPFP()}`;
     settings_banner.value = `${UserManager.getBanner()}`;
+    settings_card.value = `${UserManager.getCard()}`;
 
     preview_username.innerHTML = `<h2>${limitString(UserManager.getUsername(), 30)}</h2>`;
     preview_status.innerText = `${limitString(UserManager.getStatus(), 100)}`;
@@ -120,24 +127,6 @@ async function exportAccount() {
                     })
             })
     });
-
-    /*
-    let data = {
-        icon: await FileManager.fileToBase64(UserManager.getPFP()),
-        banner: await FileManager.fileToBase64(UserManager.getBanner()),
-        loginName: UserManager.getLoginName(),
-        displayName: UserManager.getUsername(),
-        status: UserManager.getStatus(),
-        aboutme: UserManager.getAboutme(),
-        pow: {
-            challenge: CookieManager.getCookie("pow_challenge"),
-            solution: CookieManager.getCookie("pow_solution")
-        }
-    }
-    
-    await FileManager.saveFile(JSON.stringify(data, null, 4), "identity_" + UserManager.getUsername() + ".json")
-
-     */
 }
 
 function importAccount() {
@@ -147,6 +136,7 @@ function importAccount() {
             let data = JSON.parse(content)
 
             if (data?.icon) UserManager.setPFP(data.icon);
+            if (data?.card) UserManager.setCard(data.card);
             if (data?.banner) UserManager.setBanner(data.banner);
             if (data?.displayName) UserManager.setUsername(data.displayName);
             if (data?.status) UserManager.setStatus(data.status);
@@ -168,7 +158,7 @@ function importAccount() {
     });
 }
 
-function saveSettings() {
+async function saveSettings() {
     try {
 
         let updatedMember = {
@@ -177,18 +167,13 @@ function saveSettings() {
             banner: settings_banner?.value != null && settings_banner?.value.length > 0 ? settings_banner?.value : null, // Banner
             aboutme: settings_aboutme != null ? sanitizeHtmlForRender(settings_aboutme?.value) : null,  // About me
             name: settings_username?.value != null && settings_username?.value.length >= 3 ? settings_username?.value : null, // Username
-            status: settings_status != null ? sanitizeHtmlForRender(settings_status?.value, false) : null // Status
+            status: settings_status != null ? sanitizeHtmlForRender(settings_status?.value, false) : null, // Status
+            card: settings_card?.value != null && settings_card?.value.length > 0 ? settings_card?.value : null, // Banner
         }
 
-        socket.emit("updateMember", {token: UserManager.getToken(), ...updatedMember,}, async function (response) {
-            if(response?.error) throw response?.error;
-            UserManager.setPFP(response.icon);
-            UserManager.setBanner(response.banner);
-            UserManager.setAboutme(response.aboutme);
-            UserManager.setUsername(response.name);
-            UserManager.setStatus(response.status);
-            saveButton.style.display = "none";
-        });
+        let result = await UserManager.updateMember(updatedMember);
+        if(!result?.error) saveButton.style.display = "none";
+        else throw new Error(result?.error);
     } catch (error) {
         alert("Error while trying to save settings: " + error);
         return;
@@ -237,6 +222,7 @@ function updatePreview(id) {
             preview_status.innerText != UserManager.getStatus() ||
             preview_aboutme.innerText != UserManager.getAboutme() ||
             settings_icon.value != UserManager.getPFP() ||
+            settings_card.value != UserManager.getCard() ||
             settings_banner.value != UserManager.getBanner()
 
         ) {

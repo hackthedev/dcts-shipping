@@ -43,6 +43,9 @@ import dSyncWeb from "@hackthedev/dsync-web";
 import dSync from "@hackthedev/dsync";
 //import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
 
+import dSyncInbox from "@hackthedev/dsync-inbox"
+//import dSyncInbox from "E:\\network-z-dev\\dSyncInbox\\index.mjs"
+
 import Logger from "@hackthedev/terminal-logger"
 import dSyncSql from "@hackthedev/dsync-sql"
 import dSyncIPSec from "@hackthedev/dsync-ipsec"
@@ -192,6 +195,7 @@ export let dsw = null;
 export let syncer = null;
 export let signer = null;
 export let auther = null;
+export let inbox = null;
 
 try {
     db = new dSyncSql({
@@ -236,6 +240,7 @@ try {
         dSyncWeb: dsw,
         host: serverconfig.serverinfo.app.url?.length >= 7 ? serverconfig.serverinfo.app.url : null
     });
+
 } catch (e) {
     if(isPtero()){
         if(debugmode === false) console.clear();
@@ -313,7 +318,7 @@ import {
     formatDateTime,
     findInJson,
     changeKeyVerification,
-    getSocketIp, hasPermission,
+    getSocketIp, hasPermission, getMemberFromKey,
 } from "./modules/functions/chat/main.mjs";
 
 import {
@@ -353,6 +358,7 @@ import {
 } from "./modules/functions/anti-spam/messages.mjs";
 import {renderChart} from "./modules/functions/anti-spam/charts.mjs";
 import {unbanIp} from "./modules/functions/ban-system/helpers.mjs";
+import {getMessageObjectById} from "./modules/sockets/resolveMessage.mjs";
 
 /*
     Files for the plugin system
@@ -572,21 +578,6 @@ const tables = [
         keys: [{name: "UNIQUE KEY", type: "migration_name (migration_name)"}],
     },
     {
-        name: "inbox",
-        columns: [
-            {name: "inboxId", type: "int(100) NOT NULL AUTO_INCREMENT PRIMARY KEY UNIQUE KEY"},
-            {name: "memberId", type: "varchar(250) NOT NULL"},
-            {name: "customId", type: "varchar(250) DEFAULT NULL"},
-            {name: "data", type: "longtext NOT NULL"},
-            {name: "type", type: "varchar(250) NOT NULL"},
-            {name: "isRead", type: "bigint NOT NULL DEFAULT 0"},
-            {
-                name: "createdAt",
-                type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)",
-            },
-        ]
-    },
-    {
         name: "message_logs",
         columns: [
             {name: "id", type: "int(100) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT"},
@@ -638,6 +629,7 @@ const tables = [
             {name: "aboutme", type: "text DEFAULT ''"},
             {name: "icon", type: "longtext DEFAULT ''"},
             {name: "banner", type: "longtext DEFAULT ''"},
+            {name: "card", type: "longtext DEFAULT ''"},
             {name: "joined", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
             {name: "isOnline", type: "BOOLEAN DEFAULT FALSE"},
             {name: "lastOnline", type: "bigint DEFAULT 0"},
@@ -854,6 +846,7 @@ async function waitForTable(table, interval = 1000) {
         const results = await FrontendLibs.installMultiple([
             { package: '@hackthedev/file-manager@1.0.0', path: libDir },
             { package: '@hackthedev/element-loader@1.0.0', path: libDir },
+            { package: '@hackthedev/rich-editor@latest', path: libDir },
         ]);
 
         results.forEach((r) => {
@@ -1157,6 +1150,60 @@ async function listenToIO(){
         res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
     });
      */
+
+    // init here cauz we need io
+    inbox = new dSyncInbox({
+        io,
+        app,
+        express,
+        dSyncSign: signer,
+        dSyncSql: db,
+        dSyncAuth: auther,
+        isValidated: async (req, res) => {
+            const {inboxId, timestamp, customId} = req?.params;
+            const { id, token, sessionId, publicKey } = req.body;
+
+            if(serverconfig.servermembers[id]?.token === token && !sessionId) return true;
+
+            if(sessionId){
+                let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
+                return sessionResult?.valid ?? false;
+            }
+
+            return false;
+        },
+        getIdentifier: async (req, res) => {
+            const {inboxId, timestamp, customId} = req?.params;
+            let { id, token, sessionId, publicKey } = req.body;
+
+            if(!id && !token && publicKey){
+                let member = await getMemberFromKey(publicKey);
+                if (member){
+                    id = member.id;
+                    token = member.token;
+                }
+            }
+
+            return id ?? null;
+        },
+        beforeReturn: async (req, res, inbox) => {
+            if(Array.isArray(inbox) && inbox.length > 0){
+                for(let item of inbox){
+                    let itemType = item?.type;
+
+                    // chat mentions
+                    if(itemType === "mention"){
+                        let messageId = item?.data?.messageId;
+                        if(!messageId || messageId?.length !== 12) continue;
+
+                        item.data = await getMessageObjectById(messageId);
+                    }
+                }
+            }
+        }
+    })
+
+    await inbox.init();
 }
 
 function initConfig(filePath) {

@@ -25,12 +25,14 @@
             "id": "be0c79daeda9cc5b",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "Graphs/Images/dSync Explaination.png"
+                "file": "Messenger/Introduction.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "dSync Explaination"
+              "icon": "lucide-file",
+              "title": "Introduction"
             }
           }
         ],
@@ -199,26 +201,28 @@
   },
   "active": "be0c79daeda9cc5b",
   "lastOpenFiles": [
+    "Managed Hosting/Ptero Host Server Setup Notes.md",
+    "Messenger/Introduction.md",
+    "Messenger",
+    "Lore/Principles.md",
+    "Lore/Moderation.md",
+    "Lore/Threat model.md",
+    "Lore/Terminology.md",
+    "Lore/Technical overview.md",
+    "Graphs/Images/dSync Explaination.png",
     "Graphs/dSync Explaination.md",
     "Graphs/Images/dSync Explaination (1).png",
-    "Graphs/Images/dSync Explaination.png",
     "Graphs/Images",
     "Privacy Policy.md",
     "Graphs",
-    "Managed Hosting/Ptero Host Server Setup Notes.md",
     "install NodeJS.md",
-    "Lore/Terminology.md",
-    "Lore/Technical overview.md",
     "Managed Hosting",
-    "Lore/Principles.md",
-    "Lore/Moderation.md",
     "Lore/Architecture.md",
     "sql/Configure SQL.md",
     "network/Port forwarding.md",
     "network/DynDNS.md",
     "network/DNS Setup.md",
     "network/Caddy Setup.md",
-    "Lore/Threat model.md",
     "sql/errors/SQL Tables and Columns not setting up automatically.md",
     "sql/errors",
     "sql/Configurating SQL.md",

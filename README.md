@@ -90,7 +90,7 @@ Please note that if you plan to make it available to the public or want to conne
 > Make sure that you have a reverse proxy setup for your chat instance! Checkout the docs folder or https://docs.dcts.community!
 
 ```bash
-wget https://raw.githubusercontent.com/hackthedev/dcts-shipping/refs/heads/main/docker-compose.yml
+wget https://raw.githubusercontent.com/hackthedev/dcts-shipping/refs/heads/main/Docker/docker-compose.yml
 docker compose up
 ```
 

@@ -888,12 +888,13 @@ class ChatManager {
 
     static async uploadFile(files, type = "upload") {
         const file = files[0] ?? files;
-        const chunkSize = 1024 * 256; // 256kb
+        const chunkSize = 1024 * 256;
         const totalChunks = Math.ceil(file.size / chunkSize);
         const fileId = crypto.randomUUID();
 
         const filename = file.name;
         const id = UserManager.getID();
+        const token = UserManager.getToken();
 
         let lastPercent = -1;
 
@@ -904,16 +905,17 @@ class ChatManager {
 
             const arrayBuf = await chunk.arrayBuffer();
 
-            const url = `/upload?` +
-                `id=${id}` +
-                `&type=${type}` +
-                `&filename=${encodeURIComponent(filename)}` +
-                `&chunkIndex=${i}` +
-                `&totalChunks=${totalChunks}` +
-                `&fileId=${fileId}`;
-
-            const res = await fetch(url, {
+            const res = await fetch("/upload", {
                 method: "POST",
+                headers: {
+                    "x-member-id": id,
+                    "x-member-token": token,
+                    "x-upload-type": type,
+                    "x-file-name": encodeURIComponent(filename),
+                    "x-chunk-index": String(i),
+                    "x-total-chunks": String(totalChunks),
+                    "x-file-id": fileId
+                },
                 body: arrayBuf
             });
 
@@ -923,6 +925,7 @@ class ChatManager {
                 return json;
 
             const percent = Math.round(((i + 1) / totalChunks) * 100);
+
             if (percent !== lastPercent) {
                 lastPercent = percent;
 
@@ -947,6 +950,7 @@ class ChatManager {
                         duration: 2000
                     });
                 }
+
                 return json;
             }
         }
@@ -972,8 +976,15 @@ class ChatManager {
         if (url.startsWith(encodeURIComponent(window.location.origin))) return decodeURIComponent(url);
         if (url.startsWith("data:")) return url;
         if (url.startsWith("/uploads")) return url;
+        if (url.startsWith("/upload")) return url;
         if (url.startsWith("/img")) return url;
         if (url.startsWith("/emojis")) return url;
+        if (url.startsWith(encodeURIComponent("/uploads"))) return url;
+        if (url.startsWith(encodeURIComponent("/upload"))) return url;
+        if (url.startsWith(encodeURIComponent("/img"))) return url;
+        if (url.startsWith(encodeURIComponent("/emojis"))) return url;
+
+        console.log(url)
         return `/proxy?url=${encodeURIComponent(url)}`
     }
 

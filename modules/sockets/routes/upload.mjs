@@ -19,6 +19,7 @@ export function getFileHash(path){
     return sha256(finalBuf);
 }
 
+/*
 app.post("/upload", async (req, res) => {
     try {
         const {
@@ -123,6 +124,8 @@ app.post("/upload", async (req, res) => {
         return res.status(500).json({ ok: false, error: "server_error" });
     }
 });
+
+ */
 
 
 export default (io) => (socket) => {

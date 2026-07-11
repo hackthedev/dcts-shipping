@@ -17,6 +17,12 @@
             <input type="file" accept="image/jpeg, image/png, image/jpg, image/webp, image/gif" onchange="handleUpload(this.files, 'settings_profile_banner')" />
         </div>
 
+        <div class="profile_input_container">
+            <label>Member Card</label><br>
+            <input type="text" id="settings_profile_card" oninput="updatePreview('settings_profile_card');">
+            <input type="file" accept="image/jpeg, image/png, image/jpg, image/webp, image/gif" onchange="handleUpload(this.files, 'settings_profile_card')" />
+        </div>
+
 
 
 

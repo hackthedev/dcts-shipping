@@ -11,42 +11,66 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
 
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="/css/themes/default/default.css">
+    <link rel="stylesheet" href="css/themes/default/default.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/nav.css">
+    <link rel="stylesheet" href="css/mobile.css">
 
-    <script src="/js/prompts.js?v={{random}}"></script>
-    <script src="/js/sysmsg.js?v={{random}}"></script>
-    <script src="/js/discovery.js"></script>
-    <script src="/js/core/Client.js"></script>
-    <script src="/js/core/purify.js"></script>
-    <script src="/js/escape.js"></script>
+    <link rel="stylesheet" href="css/content/serverlist.css">
+    <link rel="stylesheet" href="css/content.css">
+
+    <script src="js/libs/icons/Icons.js"></script>
+    <script src="js/libs/prompts/prompts.js"></script>
+    <script src="js/libs/mobile-ui/MobileUI.js"></script>
+
+    <script src="js/content/serverlist.js"></script>
+    <script src="js/content/messages.js"></script>
+    <script src="js/content/account.js"></script>
+    <script src="js/content/settings.js"></script>
+
+    <script src="js/content.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/header.js"></script>
+    <script src="js/general.js"></script>
+
     <script src="script.js"></script>
+    <script src="purify.js"></script>
+    <script src="escape.js"></script>
 
-    <title>DCTS Discovery</title>
+    <title>DCTS</title>
 </head>
 <body>
 
-<div id="savedServers">
-    <div class="savedServersHeader">
-        <h1>Discovery</h1>
 
-        <div id="navigation">
-            <a href="/">&#8617; Go Back</a>
-            <a href="#" class="last" onclick="submitServerUI()">&#9998; Submit a server</a>
+<div class="layout">
+
+    <div class="header">
+        <h1>DCTS</h1>
+
+        <div class="connection-bar">
+            <input type="text" placeholder="Connect...">
+            <button onclick="connectToServer(this.parentNode.querySelector('input').value)">Connect</button>
         </div>
 
-        <br>
-        <input type="text" id="manualUrl" placeholder="Connect manually via url...">
-        <button onclick="window.location.href = manualUrl.value">Connect</button>
+        <div class="end-bar">
+            <button onclick="submitServerUI()">Submit a server</button>
+        </div>
     </div>
 
-    <div class="serverlistingContainer">
-        <p>
-            If there are any servers they will be displayed here :)<br>
-            You can also submit servers for discovery
-        </p>
+    <div class="content-container">
+        <div class="navigation">
+            <div class="entry">
+
+            </div>
+        </div>
+
+        <div class="content"></div>
     </div>
+
 </div>
+
+
 
 </body>
 </html>

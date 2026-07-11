@@ -8,21 +8,21 @@ document.addEventListener("pagechange", e => {
 async function initNetworkServers() {
     setupNotify();
 
-// check perms. its checked server side anyway but just for ux
+    // check perms. its checked server side anyway but just for ux
     if (await UserManager.checkPermission("manageNetworkServers") === false) {
         window.location.href = window.location.origin + "/settings/server";
     } else {
         document.getElementById("pagebody").style.display = "block";
     }
 
-// handle search
+    // handle search
     let searchTimeout = null;
     getSearchInputElement().addEventListener("input", function (event) {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(renderServers, 500);
     })
 
-// load initially
+    // load initially
     renderServers();
 }
 
@@ -170,7 +170,23 @@ async function createServerTable(container, status, summary) {
     // Add rows for each banned user
     let index = 0;
     for (let server of filteredServers) {
-        let serverData = (JSON.parse(server.data))?.serverinfo;
+        let serverData = (JSON.parse(server.data))?.serverinfo ?? null;
+
+        // if no local data, fetch it
+        if(serverData === null){
+            try{
+                let serverDataRes = await fetch(`https://${ChatManager.extractHost(server.address)}/discover`)
+                if(serverDataRes.status === 200){
+                    let jsonData = await serverDataRes.json();
+                    serverData = jsonData.serverinfo;
+                }
+            }
+            catch(err){
+                console.warn(err)
+            }
+        }
+
+        // no data? ok
         if (!serverData) {
             console.warn("Couldnt find server data for server", server.address)
             continue
@@ -192,7 +208,6 @@ async function createServerTable(container, status, summary) {
 
         index++;
     }
-
 
 
     // Close the table

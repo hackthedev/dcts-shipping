@@ -1,6 +1,6 @@
 class JsonEditor{
     static getSettingElement(jsonKey, displayName, description, onChange = null){
-        if(jsonKey === null || jsonKey === undefined) throw new Error("No json key provided!");
+        if(jsonKey === undefined) throw new Error("No json key provided!");
 
         let element = document.createElement("div")
         element.style.display = "flex";
@@ -87,9 +87,11 @@ class JsonEditor{
 
     static createInputElement(value){
         let type = typeof value;
-        if (type === "string") type = "text";
+        if (type === "string" || value === null) type = "text";
         if (type === "number") type = "number";
         if (type === "boolean") type = "checkbox";
+
+        if(value === null) value = ""
 
         if (type === "checkbox") {
             return `<input type="checkbox"${value ? " checked" : ""}>`;
@@ -103,6 +105,7 @@ class JsonEditor{
         if(typeof(jsonKey) === "string") return this.createInputElement(jsonKey);
         if(typeof(jsonKey) === "number") return this.createInputElement(jsonKey);
         if(typeof(jsonKey) === "boolean") return this.createInputElement(jsonKey);
+        if(jsonKey === null) return this.createInputElement(jsonKey);
 
         if(Array.isArray(jsonKey)){
             let html = `<div style='display: flex; flex-wrap: wrap;flex-direction: column;gap: 4px;'>

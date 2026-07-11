@@ -558,6 +558,10 @@ export function checkBool(value, type) {
 }
 
 export function checkConfigAdditions() {
+
+
+    checkObjectKeys(serverconfig, "serverinfo.dms.maxParticipants", 10)
+
     // recreating the config example minimum base so that copying isnt needed anymore
     checkObjectKeys(serverconfig, "serverinfo.name", "Default Server")
     checkObjectKeys(serverconfig, "serverinfo.description", "")
@@ -696,7 +700,6 @@ export function checkConfigAdditions() {
             "/^\/emojis(\/.*)?$/"
         ]
     )
-
 
     checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.user_slowmode", 0)
     checkObjectKeys(serverconfig, "serverinfo.moderation.ratelimit.actions.user_slowmode_duration", "2 minutes")
@@ -1006,8 +1009,13 @@ export async function validateMemberId(id, socket, token, bypass = false) {
     if(id && token){
         let memberObject = serverconfig.servermembers[id];
 
-        // this needs to be improved
-        if(memberObject && socket) checkMemberBan(socket, memberObject);
+        // checks for member ban too
+        if(memberObject && socket){
+            let banResult =  await checkMemberBan(socket, memberObject);
+            if(banResult?.result === true){
+                return false;
+            }
+        }
 
         if(serverconfig.servermembers[id]?.token !== token){
             return false;
@@ -1128,21 +1136,13 @@ export function checkMemberMute(socket, member) {
     serverconfigEditable = checkEmptyConfigVar(serverconfig);
     let ip = socket.handshake.address;
 
-    if (serverconfigEditable.banlist.hasOwnProperty(member.id)) {
-        console.log("Checking mutelist for member ID:", member.id);
-    }
-    if (serverconfigEditable.banlist.hasOwnProperty(ip)) {
-        console.log("Checking ipblacklist for IP:", ip);
-    }
-
-
     checkRateLimit(socket);
 
     // check mutelist
-    if (serverconfig.mutelist.hasOwnProperty(member.id)) {
-
+    if (serverconfig?.mutelist && serverconfig?.mutelist?.hasOwnProperty(member.id)) {
         var durationStamp = serverconfig.mutelist[member.id].duration;
         var muteReason = serverconfig.mutelist[member.id].reason;
+
 
         if (Date.now() >= durationStamp) {
             // unmute user
@@ -1153,16 +1153,6 @@ export function checkMemberMute(socket, member) {
             consolas(colors.yellow("Automatically unmuted user " + member.name + ` (${member.id})`));
         } else {
             return {result: true, timestamp: durationStamp, reason: muteReason};
-        }
-    }
-
-    // check ip blacklist
-    if (serverconfig.banlist.hasOwnProperty(ip)) {
-        if (Date.now() >= serverconfig.banlist[ip]) {
-            delete serverconfig.banlist[ip];
-            saveConfig(serverconfig);
-        } else {
-            return {result: true, timestamp: serverconfig.banlist[ip]}
         }
     }
 

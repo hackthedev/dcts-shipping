@@ -59,7 +59,6 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
         }
     }
 
-
     function renderTemplate(template, query) {
         const { group, category, channel } = query;
 
@@ -73,7 +72,7 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
 
             // vc
             ["livekit.url", () => `${process.env.LIVEKIT_URL || config.serverinfo.livekit.url}`],
-            
+
             ["version", () => versionCode],
             ["random", () => generateId(20)],
             ["default_theme", () => config.serverinfo.defaultTheme || "default.css"],
@@ -92,22 +91,47 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
         });
     }
 
-    app.use((req, res, next) => {
-        let reqPath = req.path === '/' ? '/index.html' : req.path;
+    function resolveFilePath(reqPath, publicDir, path, fs) {
+        if (reqPath === '/') reqPath = '/index.html';
+
         const ext = path.extname(reqPath).toLowerCase();
 
-        if (!templateExtensions.includes(ext)) return next();
+        if (ext === '') {
+            const htmlPath = path.join(publicDir, reqPath + '.html');
+            if (fs.existsSync(htmlPath)) {
+                return { fullPath: htmlPath, ext: '.html', isDirectoryIndex: false };
+            }
 
-        const fullPath = path.join(publicDir, reqPath);
+            const indexPath = path.join(publicDir, reqPath, 'index.html');
+            if (fs.existsSync(indexPath)) {
+                return { fullPath: indexPath, ext: '.html', isDirectoryIndex: true };
+            }
 
-        fs.readFile(fullPath, 'utf8', (err, content) => {
+            return null;
+        }
+
+        if (!['.html', '.js'].includes(ext)) return null;
+
+        return { fullPath: path.join(publicDir, reqPath), ext, isDirectoryIndex: false };
+    }
+
+    app.use((req, res, next) => {
+        const resolved = resolveFilePath(req.path, publicDir, path, fs);
+        if (!resolved) return next();
+
+        if (resolved.isDirectoryIndex && !req.path.endsWith('/')) {
+            const q = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+            return res.redirect(301, req.path + '/' + q);
+        }
+
+        fs.readFile(resolved.fullPath, 'utf8', (err, content) => {
             if (err) return next();
 
             const rendered = renderTemplate(content, req.query);
             const contentType = {
                 '.html': 'text/html',
                 '.js': 'application/javascript',
-            }[ext] || 'text/plain';
+            }[resolved.ext] || 'text/plain';
 
             res.setHeader('Content-Type', contentType);
             res.send(rendered);

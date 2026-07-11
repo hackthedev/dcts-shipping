@@ -33,6 +33,15 @@ class VoIP {
         this._audioNodes = new Map();
         this._mediaElSources = new WeakMap();
         this._volumes = new Map();
+        this._primedMicKey = null;
+
+        if (typeof window !== "undefined") {
+            window.addEventListener("micsettingschange", () => {
+                this._handleMicSettingsChange().catch((error) => {
+                    console.warn("Failed to apply mic settings:", error);
+                });
+            });
+        }
     }
 
     cleanupAudioElById(audioId, memberId, isScreen) {
@@ -193,17 +202,130 @@ class VoIP {
         return !!lp.isMicrophoneEnabled;
     }
 
+    _readMicBoolSetting(cookieName, fallback = true) {
+        const rawValue = CookieManager.getCookie(cookieName);
+        if (rawValue == null || rawValue === "") return fallback;
+        return CookieManager.parseBool(rawValue);
+    }
+
+    _getMicSettings() {
+        const deviceId = CookieManager.getCookie("settings.vc.mic.deviceId") || null;
+
+        return {
+            deviceId,
+            echoCancellation: this._readMicBoolSetting("settings.vc.mic.echoCancellation", true),
+            noiseSuppression: this._readMicBoolSetting("settings.vc.mic.noiseSuppression", true),
+        };
+    }
+
+    _buildMicCaptureOptions(settings = this._getMicSettings()) {
+        const options = {
+            echoCancellation: settings.echoCancellation,
+            noiseSuppression: settings.noiseSuppression,
+            autoGainControl: false,
+            channelCount: 1,
+            sampleRate: 48000,
+        };
+
+        if (settings.deviceId) options.deviceId = { exact: settings.deviceId };
+
+        return options;
+    }
+
+    _syncRoomMicDefaults(settings = this._getMicSettings()) {
+        if (!this.room?.options) return;
+
+        this.room.options.audioCaptureDefaults = {
+            ...this._buildMicCaptureOptions(settings),
+            voiceIsolation: settings.noiseSuppression,
+        };
+    }
+
+    _getMicPrimeKey(settings = this._getMicSettings()) {
+        return JSON.stringify({
+            deviceId: settings.deviceId || "",
+            echoCancellation: !!settings.echoCancellation,
+            noiseSuppression: !!settings.noiseSuppression,
+        });
+    }
+
+    async _primeMicrophone(settings = this._getMicSettings(), force = false) {
+        if (!navigator?.mediaDevices?.getUserMedia) return;
+
+        const primeKey = this._getMicPrimeKey(settings);
+        if (!force && this._primedMicKey === primeKey) return;
+
+        // Priming the input once here makes PipeWire expose the mic node
+        // before LiveKit tries to publish it inside the desktop client.
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: this._buildMicCaptureOptions(settings),
+            video: false,
+        });
+
+        try {
+            stream.getTracks().forEach(track => track.stop());
+        } finally {
+            this._primedMicKey = primeKey;
+        }
+    }
+
+    async _applyMicDevice(settings = this._getMicSettings()) {
+        this._syncRoomMicDefaults(settings);
+
+        if (!this.room?.localParticipant) return;
+
+        if (settings.deviceId && typeof this.room.switchActiveDevice === "function") {
+            await this.room.switchActiveDevice("audioinput", settings.deviceId);
+        }
+    }
+
+    async _enableMicrophone({ forcePrime = false } = {}) {
+        if (!this.room?.localParticipant) return null;
+
+        const settings = this._getMicSettings();
+
+        await this._primeMicrophone(settings, forcePrime);
+        await this._applyMicDevice(settings);
+
+        this._micPub = await this.room.localParticipant.setMicrophoneEnabled(true, {
+            ...this._buildMicCaptureOptions(settings),
+            voiceIsolation: settings.noiseSuppression,
+        });
+
+        return this._micPub;
+    }
+
+    async _handleMicSettingsChange() {
+        const settings = this._getMicSettings();
+
+        this._primedMicKey = null;
+        this._syncRoomMicDefaults(settings);
+
+        if (!this.room?.localParticipant) return;
+
+        if (!this._micEnabled()) {
+            await this._applyMicDevice(settings);
+            return;
+        }
+
+        await this._primeMicrophone(settings, true);
+        await this._applyMicDevice(settings);
+        this._micPub = await this.room.localParticipant.setMicrophoneEnabled(true, {
+            ...this._buildMicCaptureOptions(settings),
+            voiceIsolation: settings.noiseSuppression,
+        });
+    }
+
     async joinRoom(roomName, userName, memberId, channelId) {
+        const micSettings = this._getMicSettings();
+
         this.room = new LivekitClient.Room({
             publishDefaults: {
                 audioPreset: LivekitClient.AudioPresets.musicHighQuality
             },
             audioCaptureDefaults: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true,
-                sampleRate: 48000,
-                voiceIsolation: true,
+                ...this._buildMicCaptureOptions(micSettings),
+                voiceIsolation: micSettings.noiseSuppression,
             }
         });
 
@@ -264,12 +386,7 @@ class VoIP {
             const token = await this.getToken(roomName, userName, memberId, channelId);
             await this.room.connect(this.LIVEKIT_URL, token);
 
-            this._micPub = await this.room.localParticipant.setMicrophoneEnabled(true, {
-                echoCancellation: true,
-                noiseSuppression: true,
-                voiceIsolation: true,
-                autoGainControl: false
-            });
+            await this._enableMicrophone({ forcePrime: true });
 
             if (this.onJoin) this.onJoin(userName);
         } catch (e) {
@@ -600,12 +717,7 @@ class VoIP {
 
     async unmuteMic() {
         if (!this.room?.localParticipant) return;
-        await this.room.localParticipant.setMicrophoneEnabled(true, {
-            echoCancellation: true,
-            noiseSuppression: true,
-            voiceIsolation: true,
-            autoGainControl: false
-        }).catch(()=>{});
+        await this._enableMicrophone().catch(()=>{});
     }
 
 
@@ -616,12 +728,8 @@ class VoIP {
     async toggleMic() {
         if (!this.room?.localParticipant) return;
         const nextEnabled = this.isMuted();
-        await this.room.localParticipant.setMicrophoneEnabled(nextEnabled, {
-            echoCancellation: true,
-            noiseSuppression: true,
-            voiceIsolation: true,
-            autoGainControl: false
-        });
+        if (nextEnabled) await this._enableMicrophone();
+        else await this.room.localParticipant.setMicrophoneEnabled(false);
         return nextEnabled;
     }
 

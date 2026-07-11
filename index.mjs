@@ -1,6 +1,14 @@
 import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
+// handle startup args
+let nodeArgs = process.argv;
 
-console.clear();
+// remove the first few arguments because fuck that lol
+nodeArgs.shift();
+nodeArgs.shift();
+
+if(!isPtero()){
+    console.clear();
+}
 console.log("Starting...");
 
 let versionPath = path.join(path.resolve(), "version");
@@ -26,8 +34,19 @@ import crypto from "crypto";
 
 // dSync Libs
 import dSyncAuth from "@hackthedev/dsync-auth";
+//import dSyncAuth from "E:\\network-z-dev\\dSyncAuth\\index.mjs";
+
 import {dSyncSign} from "@hackthedev/dsync-sign";
+//import dSyncWeb from "E:\\network-z-dev\\dsync-web\\index.mjs";
+import dSyncWeb from "@hackthedev/dsync-web";
+
 import dSync from "@hackthedev/dsync";
+//import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
+
+import dSyncInbox from "@hackthedev/dsync-inbox"
+//import dSyncInbox from "/run/media/marcel/SSD/network-z-dev/dSyncInbox/index.mjs"
+
+import dSyncFiles from "@hackthedev/dsync-files";
 
 import Logger from "@hackthedev/terminal-logger"
 import dSyncSql from "@hackthedev/dsync-sql"
@@ -94,14 +113,6 @@ export let allowLogging = false;
 export let debugmode = process.env.DEBUG || false;
 export let configPath = "./configs/config.json";
 
-export let syncer = new dSync("dcts", app);
-export const signer = new dSyncSign("./configs/privatekey.json");
-export const auther = new dSyncAuth(app, signer, async function (data) {
-    if (data.valid === true) {
-        changeKeyVerification(data.publicKey, data.valid);
-    }
-});
-
 export let ipsec;
 export let io;
 
@@ -110,13 +121,6 @@ let fileHandle = null; // File handle for the config file
 let savedState = null; // In-memory config state
 let writeQueue = Promise.resolve(); // Queue for write operations
 let isClosing = false; // Flag to prevent multiple close attempts
-
-// handle startup args
-let nodeArgs = process.argv;
-
-// remove the first few arguments because fuck that lol
-nodeArgs.shift();
-nodeArgs.shift();
 
 if (nodeArgs.includes("--debug") || debugmode === true) {
     // enable debug logging
@@ -187,7 +191,14 @@ if(!serverconfig?.serverinfo?.sql?.username){
 
 
 // create sql pool
-export let db
+export let db = null;
+export let dsw = null;
+
+export let syncer = null;
+export let signer = null;
+export let auther = null;
+export let inbox = null;
+export let files = new dSyncFiles();
 try {
     db = new dSyncSql({
         host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
@@ -201,6 +212,130 @@ try {
     });
 
     await db.ready;
+
+    signer = new dSyncSign("./configs/privatekey.json");
+    auther = new dSyncAuth(app, signer, async function (data) {
+        if (data.valid === true) {
+            changeKeyVerification(data.publicKey, data.valid);
+        }
+    });
+
+    dsw = new dSyncWeb({
+        express,
+        app,
+        db,
+        dsa: dSyncAuth,
+        canAccess: async (req) => {
+            const { id, token } = req.body || {};
+            if (!id || !token) return false;
+
+            if(!await validateMemberId(id, null, token)) return false;
+            return await hasPermission(id, "administrator");
+        }
+    });
+
+    await dsw.setup();
+
+    syncer = new dSync({
+        prefix: "dcts",
+        app,
+        dSyncWeb: dsw,
+        host: serverconfig.serverinfo.app.url?.length >= 7 ? serverconfig.serverinfo.app.url : null
+    });
+
+    await files.registerFileUploadHandle({
+        app,
+        urlPath: "/upload",
+        uploadPath: "./public/uploads",
+        limits: {
+            getCorsHeaders: async (req) => ({
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "*",
+                "Access-Control-Allow-Headers": "*"
+            }),
+
+            getUploadPath: async (req) => {
+                let type = req.headers["x-upload-type"] ?? "upload";
+                console.log(type)
+
+                if (type === "emoji") return "./public/emojis";
+
+                return "./public/uploads";
+            },
+
+            getMaxMB: async (req) => {
+                let memberId = req.headers["x-member-id"] ?? null;
+                let memberToken = req.headers["x-member-token"] ?? null;
+                let sessionId = req.headers["x-session-id"] ?? null;
+                let publicKey = req.headers["x-public-key"] ?? null;
+
+                let isDCTSUser = memberId && memberToken;
+                let isRemote = sessionId && publicKey && !isDCTSUser;
+
+                if(isDCTSUser && await validateMemberId(memberId, null, memberToken)){
+                    var userUploadLimit = getMemberHighestUploadLimit(memberId);
+                    return userUploadLimit;
+                }
+                else if(isRemote){
+
+                    // validate session etc
+                    let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
+
+                    // if session is true we can try and see if the person connected to the server while using a client/app.
+                    // this way the account becomes automatically linked, allowing for possibly bigger, individual limits.
+                    if(sessionResult?.valid === true){
+
+                        // check n see if a member exists
+                        let memberObj = getMemberFromKey(publicKey);
+                        if(memberObj?.id){
+                            return getMemberHighestUploadLimit(memberObj.id);
+                        }
+                    }
+
+                    return 5; // setting when
+                }
+
+                return 0;
+            },
+
+            getMaxFolderSizeMB: async (req) => {
+                // the max. folder size of the uploadPath folder. uploads will
+                // fail once reached.
+                return serverconfig.serverinfo.maxUploadStorage || 1024; // 1 GB
+            },
+
+            getAllowedMimes: async (req) => {
+                // the type of media that can be uploaded
+                return serverconfig.serverinfo.uploadFileTypes
+            },
+
+            canUpload: async (req) => {
+                // optional, must return a boolean.
+                // in this example, users that arent signed in cant upload.
+                // you could extend this for checking if a user is banned etc..
+                return true;
+            },
+
+            canAccessFiles: (req, res, next) => {
+                // optional, default will always allow access.
+                // you could implement some sort of file verification feature or
+                // paywall content uploaded by creators.
+
+                return true
+            },
+
+            onFileAccess: async (req) => {
+                let fileName = req.params.id;
+                // you can make a view system or add a rate limit
+            },
+
+            onFinish: async (req) => {
+                // optional.
+                //Logger.info("Upload finished", req.user?.id);
+            }
+        }
+    });
+
 } catch (e) {
     if(isPtero()){
         if(debugmode === false) console.clear();
@@ -226,6 +361,7 @@ try {
         process.exit(0);
     }
     else{
+        Logger.error("Error while trying to connect to database!")
         Logger.error(e)
     }
 }
@@ -278,7 +414,7 @@ import {
     formatDateTime,
     findInJson,
     changeKeyVerification,
-    getSocketIp,
+    getSocketIp, hasPermission, getMemberFromKey,
 } from "./modules/functions/chat/main.mjs";
 
 import {
@@ -318,6 +454,8 @@ import {
 } from "./modules/functions/anti-spam/messages.mjs";
 import {renderChart} from "./modules/functions/anti-spam/charts.mjs";
 import {unbanIp} from "./modules/functions/ban-system/helpers.mjs";
+import {getMessageObjectById} from "./modules/sockets/resolveMessage.mjs";
+import {getMemberHighestRole, getMemberHighestUploadLimit} from "./modules/functions/chat/helper.mjs";
 
 /*
     Files for the plugin system
@@ -436,6 +574,56 @@ const processPlugins = async () => {
 // +1 convenience
 const tables = [
     {
+        name: "dm_rooms",
+        columns: [
+
+            {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "roomId", type: "varchar(20) NOT NULL UNIQUE KEY"},
+            {name: "title", type: "varchar(204) NOT NULL DEFAULT 'New Chat'"},
+            {name: "creatorId", type: "varchar(20) NOT NULL"},
+            {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+        ]
+    },
+    {
+        name: "dm_reads",
+        columns: [
+            {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "memberId", type: "varchar(204) NOT NULL"},
+            {name: "targetId", type: "varchar(100) NOT NULL"}, // roomId oder channelId
+            {name: "lastReadAt", type: "bigint NOT NULL DEFAULT 0"},
+        ],
+        keys: [
+            {name: "UNIQUE KEY", type: "unique_member_target (memberId, targetId)"},
+            {name: "KEY", type: "idx_memberId (memberId)"},
+        ]
+    },
+    {
+        name: "dm_room_participants",
+        columns: [
+            {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "roomId", type: "varchar(20) NOT NULL"},
+            {name: "memberId", type: "varchar(204) NOT NULL"},
+            {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+        ],
+        keys: [
+            {name: "UNIQUE KEY", type: "unique_room_member (roomId, memberId)"},
+            {name: "KEY", type: "idx_memberId (memberId)"},
+            {name: "KEY", type: "idx_roomId (roomId)"},
+        ]
+    },
+    {
+        name: "dms",
+        columns: [
+            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+            {name: "authorId", type: "varchar(100) NOT NULL"},
+            {name: "roomId", type: "varchar(100) NOT NULL"},
+            {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
+            {name: "message", type: "longtext NOT NULL"},
+            {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+            {name: "editedAt", type: "bigint NULL"},
+        ]
+    },
+    {
         name: "messages",
         columns: [
             {name: "authorId", type: "varchar(100) NOT NULL"},
@@ -487,21 +675,6 @@ const tables = [
         keys: [{name: "UNIQUE KEY", type: "migration_name (migration_name)"}],
     },
     {
-        name: "inbox",
-        columns: [
-            {name: "inboxId", type: "int(100) NOT NULL AUTO_INCREMENT PRIMARY KEY UNIQUE KEY"},
-            {name: "memberId", type: "varchar(250) NOT NULL"},
-            {name: "customId", type: "varchar(250) DEFAULT NULL"},
-            {name: "data", type: "longtext NOT NULL"},
-            {name: "type", type: "varchar(250) NOT NULL"},
-            {name: "isRead", type: "bigint NOT NULL DEFAULT 0"},
-            {
-                name: "createdAt",
-                type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)",
-            },
-        ]
-    },
-    {
         name: "message_logs",
         columns: [
             {name: "id", type: "int(100) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT"},
@@ -530,151 +703,6 @@ const tables = [
             {name: "reportNotes", type: "longtext NULL"},
             {name: "reportStatus", type: "varchar(100) NOT NULL DEFAULT 'pending'"},
         ],
-    }, // home section stuff
-    {
-        name: "dms_threads",
-        columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "type", type: "varchar(50) NOT NULL"},
-            {name: "title", type: "text NULL"},
-        ],
-    },
-    {
-        name: "dms_participants",
-        columns: [
-            { name: "threadId", type: "varchar(100) NOT NULL" },
-            { name: "memberId", type: "varchar(100) NOT NULL" },
-        ],
-        keys: [
-            { name: "PRIMARY KEY", type: "(threadId, memberId)" },
-            { name: "KEY", type: "memberId (memberId)" }
-        ]
-    },
-    {
-        name: "dms_message_logs",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT"},
-            {name: "messageId", type: "varchar(100) NOT NULL"},
-            {name: "threadId", type: "varchar(100) NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "message", type: "longtext NOT NULL"},
-            {name: "loggedAt", type: "datetime NOT NULL"},
-        ]
-    },
-    {
-        name: "dms_messages",
-        columns: [
-            {name: "messageId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "threadId", type: "varchar(100) NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "message", type: "longtext NOT NULL"},
-            {name: "createdAt", type: "datetime NOT NULL"},
-
-            {name: "supportIdentity", type: "varchar(20) NOT NULL DEFAULT 'self'"}, // 'self' | 'support_tagged' | 'support_anon'
-            {name: "displayName", type: "text NULL"},
-        ],
-        keys: [
-            {name: "KEY", type: "threadId (threadId)"},
-        ],
-    },
-    {
-        name: "tickets",
-        columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "creatorId", type: "varchar(100) NOT NULL"},
-            {name: "status", type: "varchar(20) NOT NULL DEFAULT 'open'"},
-            {
-                name: "createdAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
-            },
-            {
-                name: "updatedAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
-            },
-        ],
-        keys: [
-            {name: "KEY", type: "status (status)"},
-            {name: "KEY", type: "creatorId (creatorId)"},
-        ],
-    },
-
-    {
-        name: "posts",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "title", type: "text NOT NULL"},
-            {name: "body", type: "longtext NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "tag", type: "varchar(100) NULL"},
-            {name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0"},
-            {
-                name: "createdAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
-            },
-        ]
-    },
-    {
-        name: "news",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "title", type: "text NOT NULL"},
-            {name: "body", type: "longtext NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0"},
-            {
-                name: "createdAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
-            },
-        ]
-    },
-    {
-        name: "help",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "slug", type: "varchar(120) NOT NULL UNIQUE KEY"},
-            {name: "title", type: "text NOT NULL"},
-            {name: "body", type: "longtext NOT NULL"},
-            {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "pinned", type: "tinyint(1) NOT NULL DEFAULT 0"},
-            {
-                name: "createdAt",
-                type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP",
-            },
-        ]
-    },
-    {
-        name: "dms_reads",
-        columns: [
-            {name: "threadId", type: "varchar(100) NOT NULL PRIMARY KEY"},
-            {name: "memberId", type: "varchar(100) NOT NULL"},
-            {name: "last_read_at", type: "text NOT NULL"},
-        ]
-    },
-    {
-        name: "content_reads",
-        columns: [
-            {name: "id", type: "bigint NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "contentType", type: "varchar(32) NOT NULL"},
-            {name: "contentId", type: "bigint NOT NULL"},
-            {name: "userId", type: "varchar(128) NOT NULL"},
-            {name: "readAt", type: "datetime NULL"},
-            {name: "createdAt",type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP" },
-        ],
-        keys: [
-            {name: "UNIQUE KEY uq_content_user",type: "(contentType, contentId, userId)"},
-            {name: "INDEX idx_user_unread", type: "(userId, readAt)"},
-            {name: "INDEX idx_content", type: "(contentType, contentId)"},
-        ],
-    },
-    {
-        name: "network_servers",
-        columns: [
-            {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "address", type: "varchar(255) NOT NULL UNIQUE KEY"},
-            {name: "status", type: "varchar(255) NOT NULL"},
-            {name: "data", type: "longtext"},
-            {name: "last_sync", type: "datetime NULL"},
-        ]
     },
     {
         name: "auditlog",
@@ -698,6 +726,7 @@ const tables = [
             {name: "aboutme", type: "text DEFAULT ''"},
             {name: "icon", type: "longtext DEFAULT ''"},
             {name: "banner", type: "longtext DEFAULT ''"},
+            {name: "card", type: "longtext DEFAULT ''"},
             {name: "joined", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
             {name: "isOnline", type: "BOOLEAN DEFAULT FALSE"},
             {name: "lastOnline", type: "bigint DEFAULT 0"},
@@ -914,6 +943,7 @@ async function waitForTable(table, interval = 1000) {
         const results = await FrontendLibs.installMultiple([
             { package: '@hackthedev/file-manager@1.0.0', path: libDir },
             { package: '@hackthedev/element-loader@1.0.0', path: libDir },
+            { package: '@hackthedev/rich-editor@latest', path: libDir },
         ]);
 
         results.forEach((r) => {
@@ -1000,6 +1030,20 @@ export async function startServer() {
         }
 
         syncDiscoveredHosts(true);
+
+        /*
+        syncer.on("ping", { ipRequestLimit: 1, requestLimit: 10 }, (payload, response) => {
+            response({ pong: true, from: "B" })
+        })
+
+        syncer.emit("ping", {
+            hello: "A and C",
+            title: "Connection Test Ping",
+            desc: "Just a simple test ping"
+        }, (res) => {
+            console.log(res)
+        })
+         */
     });
 }
 
@@ -1089,41 +1133,45 @@ const registerSocketEvents = (socket) => {
 
 export async function checkPow(socket) {
     if (powVerifiedUsers.includes(socket.id)) {
-        socket.powValidated = true;
-        return;
+        socket.powValidated = true
+        return
     }
 
-    listenToPow(socket);
-    sendPow(socket);
+    let difficulty = serverconfig.serverinfo.pow.difficulty
+    let { challenge } = auther.createPowChallenge(difficulty)
+    let { estimatedSeconds } = dSyncAuth.estimatePoWDuration(difficulty)
+    let timeout = (estimatedSeconds * 2) + 600
 
-    let powResult = await waitForPowSolution(socket);
-    if (!powResult) {
-        // send error to user?
-        sendMessageToUser(
-            socket.id,
-            JSON.parse(
-                `{
-                        "title": "PoW Timeout",
-                        "message": "It took you too long to upgrade your identity...",
-                        "buttons": {
-                            "0": {
-                                "text": "Ok",
-                                "events": "onclick='closeModal()'"
-                            }
-                        },
-                        "type": "error",
-                        "displayTime": 600000
-                    }`,
-            ),
-        );
+    socket.emit("powChallenge", { challenge, difficulty })
 
-        socket.disconnect(true);
-    } else {
-        // let client know pow was successful.
-        socket.emit("powAccepted");
+    let pow = auther.waitForPow(challenge, difficulty, timeout)
+
+    socket.on("verifyPow", (data, response) => {
+        checkRateLimit(socket)
+        let result = pow.verify(data.solution)
+        response(result)
+    })
+
+    try {
+        await pow
+        powVerifiedUsers.push(socket.id)
+        socket.emit("powAccepted")
+    } catch (err) {
+        sendMessageToUser(socket.id, {
+            title: "PoW Timeout",
+            message: "It took you too long to upgrade your identity...",
+            buttons: {
+                "0": {
+                    text: "Ok",
+                    events: "onclick='closeModal()'"
+                }
+            },
+            type: "error",
+            displayTime: 600000
+        })
+        socket.disconnect(true)
     }
 }
-
 
 async function listenToIO(){
     io.on("connection", async function (socket) {
@@ -1155,7 +1203,7 @@ async function listenToIO(){
         if (serverconfig.ipblacklist.hasOwnProperty(ip)) {
             if (Date.now() <= serverconfig.ipblacklist[ip]) {
                 let detailText = "";
-                let banListResult = findInJson(serverconfig.banlist, "ip", ip);
+                let banListResult = findInJson(serverconfig?.banlist, "ip", ip);
                 if (banListResult != null) {
                     let bannedUntilDate = new Date(banListResult.until);
                     bannedUntilDate.getFullYear() === "9999"
@@ -1193,6 +1241,66 @@ async function listenToIO(){
             }
         }
     });
+
+    /*
+    app.use((req, res) => {
+        res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
+    });
+     */
+
+    // init here cauz we need io
+    inbox = new dSyncInbox({
+        io,
+        app,
+        express,
+        dSyncSign: signer,
+        dSyncSql: db,
+        dSyncAuth: auther,
+        isValidated: async (req, res) => {
+            const {inboxId, timestamp, customId} = req?.params;
+            const { id, token, sessionId, publicKey } = req.body;
+
+            if(serverconfig.servermembers[id]?.token === token && !sessionId) return true;
+
+            if(sessionId){
+                let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
+                return sessionResult?.valid ?? false;
+            }
+
+            return false;
+        },
+        getIdentifier: async (req, res) => {
+            const {inboxId, timestamp, customId} = req?.params;
+            let { id, token, sessionId, publicKey } = req.body;
+
+            if(!id && !token && publicKey){
+                let member = await getMemberFromKey(publicKey);
+                if (member){
+                    id = member.id;
+                    token = member.token;
+                }
+            }
+
+            return id ?? null;
+        },
+        beforeReturn: async (req, res, inbox) => {
+            if(Array.isArray(inbox) && inbox.length > 0){
+                for(let item of inbox){
+                    let itemType = item?.type;
+
+                    // chat mentions
+                    if(itemType === "mention"){
+                        let messageId = item?.data?.messageId;
+                        if(!messageId || messageId?.length !== 12) continue;
+
+                        item.data = await getMessageObjectById(messageId);
+                    }
+                }
+            }
+        }
+    })
+
+    await inbox.init();
 }
 
 function initConfig(filePath) {

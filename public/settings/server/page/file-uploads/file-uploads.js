@@ -85,11 +85,9 @@ function updatePreview(){
             setting_localFsLimit.value != localUploadLimit
 
         ){
-            console.log("Not same");
             saveButton.style.display = "block";
         }
         else{
-            console.log("same");
             saveButton.style.display = "none";
         }
 

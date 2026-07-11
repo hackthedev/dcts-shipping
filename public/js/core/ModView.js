@@ -391,7 +391,7 @@ class ModView {
     static showReports(reports) {
         let messageReports = reports.filter(r => r.reportType === "message");
         let userReports = reports.filter(r => r.reportType === "user");
-        let dmReports = reports.filter(r => r.reportType === "dm_message");
+        let dmReports = reports.filter(r => r.reportType === "dm");
         this.reports = reports
 
         let html = `
@@ -457,8 +457,8 @@ class ModView {
         `;
 
         reports.forEach(report => {
-            let reportCreator = ModView.parseJson(report.reportCreator);
-            let reportedUser = ModView.parseJson(report.reportedUser);
+            let reportCreator = report.reportCreator;
+            let reportedUser = report.reportedUser;
 
             table += `
                 <tr class="modview_" onclick="ModView.showReportDetails(${report.id})">
@@ -507,21 +507,20 @@ class ModView {
             return;
         }
 
-        let reportCreator = this.parseJson(report.reportCreator);
-        let reportedUser = this.parseJson(report.reportedUser);
+        let reportCreator = report.reportCreator;
+        let reportedUser = report.reportedUser;
         let reportData = report.reportData
+        let reportType = report.reportType;
+
         reportData.author = await ChatManager.resolveMember(reportData?.author?.id);
         if(!reportData?.author?.name){
             console.error("Unable to resolve reported message member")
         }
 
-        console.log(reportData)
-
         let reportMessage = "";
-        if(report.reportType === "dm_message") {
+        if(reportType === "dm") {
             // if is string parse it
-            if(typeof reportData.message === "string") reportData.message = JSON.parse(reportData.message);
-            reportMessage = reportData.message.content
+            reportMessage = reportData.payload.data.message
         }
         else{
             if(reportData.message.substring(0, 4).includes(("{"))){
@@ -564,10 +563,10 @@ class ModView {
             </div>
 
             <div class="user-section reported">
-                <img src="${reportedUser.icon || '/img/default_pfp.png'}" class="user-icon" onclick='getMemberProfile("${reportedUser.id}", null, null, event)'>
+                <img src="${stripHTML(reportedUser?.icon) || '/img/default_pfp.png'}" class="user-icon" onclick='getMemberProfile("${reportedUser.id}", null, null, event)'>
                 <div>
                     <h3>Reported</h3>
-                    <p><strong>Name:</strong> ${reportedUser.name} (${reportedUser.id})</p>
+                    <p><strong>Name:</strong> ${stripHTML(reportedUser.name)} (${stripHTML(reportedUser.id)})</p>
                     <!--<p><strong>Status:</strong> 
                         <select class="status-select">
                             <option value="active" ${reportedUser.isMuted === 0 && reportCreator.isBanned === 0 ? "selected" : ""}>Normal</option>
@@ -605,7 +604,7 @@ class ModView {
         <div class="modview_message-container">
             <h3>Reported Message</h3>
             <div class="modview_message-box">
-                <p><strong>User:</strong> ${reportData?.author?.name} (${reportData?.author?.id})</p>
+                <p><strong>User:</strong> ${stripHTML(reportData?.author?.name)} (${stripHTML(reportData?.author?.id)})</p>
                 <p><strong>Message:</strong></p> <div class="reported-message"><span>${reportMessage}</span></div>
                 <p><strong>Time:</strong> ${new Date(reportData.timestamp).toLocaleString()}</p>
             </div>
@@ -623,7 +622,7 @@ class ModView {
 
                             // check if the reported message isnt there anymore but logged
                             let messageColorhint = "";
-                            if (reportData.message == msg.message) {
+                            if (reportData.message === msg.message) {
                                 messageColorhint = "background:rgba(236, 105, 105, 0.6);"
                             }
                             else {
@@ -635,7 +634,7 @@ class ModView {
                                         <span class="history-time" style="font-style: italic;">${new Date(msg.editedTimestamp).toLocaleString()}:</span>
 
                                         <div class="history-msg" style="margin: 10px 0 0px 0; padding:10px; width:calc(100% - 20px);${messageColorhint}">
-                                            ${clean}
+                                            ${sanitizeHtmlForRender(clean)}
                                         </div>
                                     </div>`;
                         })
@@ -651,7 +650,7 @@ class ModView {
 
         <div class="modview_action-buttons action-buttons" >
             <button class="delete-btn" onclick="ModView.deleteReport('${report.id}')">Delete Report</button>
-            <button class="kick-btn" onclick="ModView.deleteMessage('${reportData.messageId}', '${reportCreator.id}', '${reportedUser.id}')">Delete Reported Message</button>
+            <button class="kick-btn" onclick="ModView.deleteMessage('${reportData.messageId}', '${reportCreator.id}', '${reportedUser.id}', '${reportType}')">Delete Reported Message</button>
         </div>
 
         <button class="back-button" onclick="ModView.showReports(ModView.reports)">Back</button>
@@ -683,30 +682,43 @@ class ModView {
         })
     }
 
-    static deleteMessage(messageId, reporterId, reportedId) {
+    static deleteMessage(messageId, reporterId, reportedId, messageType) {
         ModView.close();
 
         customPrompts.showConfirm(
-            "Do you want to delete this report??",
+            "Do you want to delete the reported message??",
             [["Yes", "success"], ["No", "error"]],
             (selectedOption) => {
 
-                if (selectedOption == "yes") {
+                if (selectedOption === "yes") {
                     socket.emit("deleteMessageInReport", {
                         id: UserManager.getID(),
                         token: UserManager.getToken(),
-                        messageId: messageId,
-                        reporterId: reporterId,
-                        reportedId: reportedId,
+                        messageId,
+                        reporterId,
+                        reportedId,
+                        messageType
                     }, function (response) {
-                        showSystemMessage({
-                            title: response.msg,
-                            text: "",
-                            icon: response.type,
-                            img: null,
-                            type: response.type,
-                            duration: 4000
-                        });
+                        if(response?.error){
+                            showSystemMessage({
+                                title: "Error deleting message",
+                                text: response?.error,
+                                icon: "error",
+                                img: null,
+                                type: "error",
+                                duration: 4000
+                            });
+                        }
+                        else{
+                            showSystemMessage({
+                                title: "Message deleted",
+                                text: "",
+                                icon: "success",
+                                img: null,
+                                type: "success",
+                                duration: 4000
+                            });
+                        }
                     });
                 }
             },

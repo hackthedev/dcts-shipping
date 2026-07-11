@@ -1,5 +1,5 @@
 import {queryDatabase} from "./mysql.mjs";
-import {XMLHttpRequest, fetch, serverconfig} from "../../../index.mjs";
+import {XMLHttpRequest, fetch, serverconfig, inbox} from "../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import fs from "fs";
 import {spawn} from "child_process";
@@ -34,8 +34,12 @@ export async function exportDatabaseFromPool(pool, outFile) {
 export async function saveMemberToDB(id, data) {
     if (!data || typeof data !== "object" || !id) return console.log("[saveMemberToDB] invalid data", data);
 
-    const cols = Object.keys(data);
-    const vals = Object.values(data);
+    const cleaned = Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [key, value === undefined ? null : value])
+    );
+
+    const cols = Object.keys(cleaned);
+    const vals = Object.values(cleaned);
     const placeholders = cols.map(() => "?").join(",");
 
     const sql = `
@@ -45,16 +49,12 @@ export async function saveMemberToDB(id, data) {
                                  ${cols.map(c => `${c}=VALUES(${c})`).join(",")}
     `;
 
-
     try {
         await queryDatabase(sql, vals);
     } catch (err) {
         Logger.debug(err);
     }
 }
-
-
-
 
 export async function loadMembersFromDB() {
     if (!serverconfig || typeof serverconfig !== "object") return;
@@ -190,18 +190,12 @@ export async function markInboxMessageAsRead(memberId, inboxId) {
 
 
 export async function addInboxMessage(memberId, data = {}, type = "general", customId = null) {
-    let query = `INSERT INTO inbox (memberId, type, data, createdAt)
-                 VALUES (?, ?, ?, ?)`;
-
-    if (customId) {
-        query = `INSERT
-        INTO inbox (memberId, type, data, createdAt, customId) VALUES (?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE data=VALUES(data)`;
-
-        return await queryDatabase(query, [memberId, type, JSON.stringify(data), new Date().getTime(), customId]);
-    }
-
-    return await queryDatabase(query, [memberId, type, JSON.stringify(data), new Date().getTime()]);
+    return await inbox.setInboxEntry({
+        targetId: memberId,
+        type,
+        customId,
+        data,
+    })
 }
 
 export async function getInboxMessages({
@@ -210,6 +204,7 @@ export async function getInboxMessages({
                                            inboxId = null,
                                            onlyUnread = false
                                        } = {}) {
+    return null;
     index = Number(index ?? -1);
 
     if (inboxId !== null) {
@@ -324,7 +319,7 @@ export async function getMessageLogsFromDb(msgId) {
     return await queryDatabase(query, [msgId]);
 }
 
-export async function deleteChatMessagesFromDb(messageId) {
+export async function deleteChatMessagesFromDb(messageId, type = null) {
     if (!messageId) {
         Logger.warn("Tried to delete a message from the db but the message id was null");
         Logger.warn(messageId)
@@ -332,9 +327,9 @@ export async function deleteChatMessagesFromDb(messageId) {
     }
 
     // dm message
-    if (messageId?.startsWith("m_")) {
+    if (type === "dm") {
         const query = `DELETE
-                       FROM dms_messages
+                       FROM dms
                        WHERE messageId = ?`;
         return await queryDatabase(query, [messageId]);
     }

@@ -13,11 +13,17 @@ export default (io) => (socket) => {
                 return;
             }
 
-            if(!member?.channel) return response({ members: {}, index: 0, error: "No channel id provided" });
-
-            let {members, index} = await getMemberList(member, member?.channel, member?.lastIndex);
-            
-            response({ members, index })
+            if(!member?.channel) {
+                if(member?.group) {
+                    let {members, index} = await getMemberList(member, member?.group, member?.lastIndex);
+                    response({ members, index })
+                } else {
+                    return response({ members: {}, index: 0, error: "No channel id provided" });
+                }
+            } else {
+                let {members, index} = await getMemberList(member, member?.channel, member?.lastIndex);
+                response({ members, index })
+            }   
         }
     });
 }

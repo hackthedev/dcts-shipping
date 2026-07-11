@@ -82,11 +82,10 @@ export async function checkHostDiscovery(address, forceSync = false){
                 // save it in the database
                 if(!forceSync) Logger.success(`Discovered new host! : ${extractHost(address)}`);
                 let result = await queryDatabase(
-                    `INSERT IGNORE INTO network_servers (address, status, data, last_sync) VALUES (?, ?, ?, NOW())
+                    `INSERT IGNORE INTO network_servers (address, status, last_sync) VALUES (?, ?, NOW())
                         ON DUPLICATE KEY UPDATE
-                            data = VALUES(data),
                             last_sync = NOW()`,
-                    [extractHost(address), serverconfig.serverinfo?.discovery?.defaultStatus, JSON.stringify(jsonResponse)])
+                    [extractHost(address), serverconfig.serverinfo?.discovery?.defaultStatus])
 
                 if(forceSync){
                     Logger.info(`Synced with host ${extractHost(address)}`);

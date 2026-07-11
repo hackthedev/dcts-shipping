@@ -17,9 +17,9 @@ function setUrl(param) {
 }
 
 function getUrlParams(param) {
-    var url = window.location.search;
-    var urlParams = new URLSearchParams(url);
-    var urlChannel = urlParams.get(param);
+    ChatManager.getUrlParams(param);
+}
 
-    return urlChannel;
+function closeSettings(){
+    ChatManager.goBackToChatWindowFromPopup('settingsPopup')
 }

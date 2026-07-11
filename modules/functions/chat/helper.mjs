@@ -21,6 +21,27 @@ export function findEmojiByID(id){
     return filename;
 }
 
+export function getMemberHighestUploadLimit(id){
+    var roles = serverconfig.serverroles;
+    var uploadMB = null;
+
+    Object.keys(roles).forEach(function(role) {
+        if(roles[role].members.includes(id)){
+            let roleUploadMB = Number(roles[role].permissions?.maxUpload ?? 0);
+
+            if(uploadMB === null || roleUploadMB > uploadMB){
+                uploadMB = roleUploadMB;
+            }
+        }
+    });
+
+    if(uploadMB === null){
+        return Number(roles["0"]?.permissions?.maxUpload ?? 0);
+    }
+
+    return uploadMB;
+}
+
 export function getMemberHighestRole(id){
     var roles = serverconfig.serverroles;
     var sortIndex = 0;
@@ -46,7 +67,7 @@ export async function getMemberLatestMessage(memberId, issuerMemberId){
     if(!memberId) throw new Error("Member id not specified");
 
     let messageRow = await queryDatabase(`SELECT * FROM messages WHERE authorId = ? ORDER BY createdAt DESC LIMIT 1`, [memberId])
-    if(messageRow?.length == null) return null;
+    if(messageRow?.length === 0) return null;
 
     // some simple processing
     let messageObj = messageRow[0]?.message;

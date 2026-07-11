@@ -23,10 +23,17 @@ export async function saveThemeCache(data){
 
 export async function listThemes() {
     let cachedGithub = await loadThemeCache();
-    let githubThemes = cachedGithub;
+    let githubThemes = cachedGithub?.data;
 
-    // no cache so we fetch new themes lol
-    if (!githubThemes) {
+    if (typeof githubThemes === "string") {
+        try {
+            githubThemes = JSON.parse(githubThemes);
+        } catch {
+            githubThemes = [];
+        }
+    }
+
+    if (!Array.isArray(githubThemes) || !githubThemes.length) {
         githubThemes = await getThemes();
         await saveThemeCache(githubThemes);
     }

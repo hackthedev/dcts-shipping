@@ -1,0 +1,14 @@
+{
+  "name": "@hackthedev/rich-editor",
+  "version": "1.0.1",
+  "description": "",
+  "keywords": [
+    "frontend"
+  ],
+  "license": "ISC",
+  "author": "",
+  "main": "RichEditor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

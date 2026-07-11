@@ -75,7 +75,7 @@ async function displayDiscoveredHosts(){
     discoveredHostList.innerHTML = "";
 
     // add local servers to the list too
-    if(Client()){
+    if(await isLauncher()){
         let localServers = await Client().GetServers();
 
         for(let localServerKey in localServers){
@@ -98,9 +98,13 @@ async function displayDiscoveredHosts(){
     }
 
     if(discoveredHosts?.error == null){
+
+        let redirectUrl = "/serverlist";
+        if(await isLauncher() && typeof await Client().GetLocalServerAddress === "function") redirectUrl = await Client().GetLocalServerAddress();
+
         // add main button to go home
         discoveredHostList.insertAdjacentHTML("beforeend",
-            `<a class="networkServerEntry" href="/serverlist" title="Discovery" style="border: none;">
+            `<a class="networkServerEntry" href="${redirectUrl}" title="Discovery" style="border: none;">
                     <img class="home" src="/img/discover.png">
                 </a><hr style="width: 100%;">`)
 

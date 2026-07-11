@@ -116,8 +116,8 @@
 
     function getTypeColor(type) {
         switch(type) {
-            case 'success': return 'green';
-            case 'warning': return 'orange';
+            case 'success': return 'mediumseagreen';
+            case 'warning': return 'chocolate';
             case 'error': return 'indianred';
             default: return '#36393F';
         }
@@ -198,7 +198,7 @@
         }, duration);
     }
 
-    window.showSystemMessage = function({ title, text, icon = '', img = '', type = 'neutral', duration = 3000, onClick = null }) {
+    window.showSystemMessage = function({ title = "", text = "", icon = '', img = '', type = 'neutral', duration = 3000, onClick = null }) {
         displayMessage({ title, text, icon, img, type, duration, onClick });
     };
 

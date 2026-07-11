@@ -370,7 +370,6 @@
         Liberation Mono,
         monospace;
     font-size: 12px;
-    word-wrap: normal;
 }
 
 .markdown-body .octicon {
@@ -752,24 +751,24 @@
 
 .markdown-body .highlight pre {
     margin-bottom: 0;
-    word-break: normal;
 }
 
 .markdown-body .highlight pre,
-.markdown-body pre {
+.markdown-body pre, pre {
     padding: 1rem;
     overflow: auto;
     font-size: 85%;
     line-height: 1.45;
     color: hsl(from var(--main) h s calc(l * 10) / 100%);
     background-color: hsl(from var(--main) h s calc(l * 1.5) / 100%);
+    border: 2px solid var(--border-color);
     border-radius: 6px;
 }
 
 .markdown-body pre code,
 .markdown-body pre tt {
     display: inline;
-    max-width: auto;
+    max-width: 100%;
     padding: 0;
     margin: 0;
     overflow: visible;

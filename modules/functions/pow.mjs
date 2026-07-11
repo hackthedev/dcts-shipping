@@ -33,9 +33,3 @@ export function formatTimeDifference(startTimestamp, endTimestamp) {
 
     return parts.join(', ');
 }
-
-/*
-const result = await estimatePoWDuration(6);
-console.log(`Hashrate: ${result.hashRate} H/s`);
-console.log(`Estimated time: ${result.estimatedSeconds} seconds`);
-*/

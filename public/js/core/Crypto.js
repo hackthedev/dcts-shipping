@@ -113,10 +113,30 @@ class Crypto {
         };
     }
 
-    static async DecryptEnvelope(envelopeInput, keyOrPass = null) {
-        if (!isLauncher()) return;
+    static setE2EE(value){
+        if(typeof value !== "boolean") throw new Error("Boolean required");
+        localStorage.setItem("enable-e2ee", value);
 
-        console.log("DecryptEnvelope input:", envelopeInput);
+        // absolutely required HERE so its impossible to forget!!
+        showSystemMessage({
+            text: `E2EE was ${value === true ? "enabled" : "disabled"}`,
+            type: value === true ? "success" : "warning",
+            duration: 1000
+        })
+
+        // for the sake of it and updating ui stuff.
+        // could be cool, lets see how it goes
+        document.dispatchEvent(
+            new CustomEvent("set-e2ee", { detail: { enabled: value } })
+        );
+    }
+
+    static getE2EE(){
+        return localStorage.getItem("enable-e2ee") === "true" ?? false;
+    }
+
+    static async DecryptEnvelope(envelopeInput) {
+        if (!isLauncher()) return;
 
         if (!envelopeInput) {
             console.error("Cant decrypt envelope because of missing data");
@@ -124,7 +144,6 @@ class Crypto {
         }
 
         const env = this.GetEnvelopeStructure(envelopeInput);
-        console.log("DecryptEnvelope parsed:", env);
 
         if (!env.method || !env.ciphertext) {
             console.error("Cant decrypt envelope because of missing data");

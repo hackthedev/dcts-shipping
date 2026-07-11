@@ -30,8 +30,6 @@
     <link href="/settings/account/page/profile/profile.css?v={{random}}" rel="stylesheet">
     <link rel="stylesheet" href="/css/markdown-parser.css?v={{random}}">
 
-
-
     <link href="/css/markdown.css?v={{random}}" rel="stylesheet">
     <link href="/css/inbox.css?v={{random}}" rel="stylesheet">
     <link href="/css/messages.css?v={{random}}" rel="stylesheet">
@@ -87,12 +85,16 @@
 
     <script src="/js/core/livekit.js?v={{random}}"></script>
     <script src="/js/core/memberlist.js?v={{random}}"></script>
+
     <script src="/js/libs/file-manager/FileManager.js?v={{random}}"></script>
+    <script src="/js/libs/rich-editor/RichEditor.js?v={{version}}"></script>
+    <script src="/js/libs/rich-editor/quill.js?v={{version}}"></script>
+    <script src="/js/libs/element-loader/ElementLoader.js?v={{random}}"></script>
+
     <script src="/js/core/ModView.js?v={{random}}"></script>
     <script src="/js/core/UserReports.js?v={{random}}"></script>
     <script src="/js/core/ContextMenu.js?v={{random}}"></script>
     <script src="/js/docs.js?v={{random}}"></script>
-    <script src="/js/libs/element-loader/ElementLoader.js?v={{random}}"></script>
     <script src="/js/markdown.js?v={{random}}"></script>
     <script src="/js/core/markdown-parser.js?v={{random}}"></script>
     <script src="/js/emojis.js?v={{random}}"></script>
@@ -108,7 +110,7 @@
     <script src="/js/core/Crypto.js?v={{random}}"></script>
     <script src="/js/core/Client.js?v={{random}}"></script>
     <script src="/js/core/Client.js?v={{random}}"></script>
-    <script src="/js/core/RichEditor.js?v={{version}}"></script>
+
 
     <script src="/js/effects/confetti.js?v={{random}}"></script>
     <script src="/js/effects/party.js?v={{version}}"></script>
@@ -168,7 +170,7 @@
                         <div id="mobile_channelList"></div>
 
                         <div id="profile_settings">
-                            <a href="/settings/account">Account Settings</a>
+                            <a onclick="ChatManager.openPagePopup('settingsPopup', '/settings/account')">Account Settings</a>
                         </div>
                     </div>
                 </div>
@@ -230,7 +232,7 @@
                     </div>
 
                     <div class="profile-qa-actions right">
-                        <a href="/settings/account">
+                        <a onclick="ChatManager.openPagePopup('settingsPopup', '/settings/account')">
                             <div class="profile-qa-icon settings"></div>
                         </a>
                     </div>
@@ -288,8 +290,8 @@
                             <span class="ql-formats">
                                 <button class="ql-clean" title="Remove formatting"></button>
                                  <button class="ql-link" title="Link"></button>
-                                <!--<button title="Image" class="ql-image"></button>
-                                <button title="Video" class="ql-video"></button>-->
+                                <button title="Image" class="ql-image"></button>
+                                <button title="Video" class="ql-video"></button>
                             </span>
 
                             <span class="ql-formats">
@@ -514,7 +516,5 @@
     </div>
 </div>
 
-
-<div id="homeScreen"></div>
 </body>
 </html>

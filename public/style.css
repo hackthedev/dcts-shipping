@@ -19,28 +19,6 @@
     --input-border: 1px solid rgb(98, 98, 98);
 }
 
-#homeScreen {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 100px;
-
-    background: #24292e;
-    z-index: 99990;
-    display: none;
-    transition:
-        left 180ms ease,
-        right 180ms ease;
-}
-
-#homeScreen.visible {
-    display: block;
-    transition:
-        left 180ms ease,
-        right 180ms ease;
-}
-
 .homeDivider {
     width: 80%;
     margin: 10px !important;
@@ -388,21 +366,60 @@ sortable-chosen.sortable-ghost {
 }
 
 .memberlist-container {
+    position: relative;
     display: flex;
+    align-items: center;
+
     flex-direction: row;
     flex-shrink: 0;
     gap: 4px;
 
     width: 100%;
-    background-color: transparent;
     margin-bottom: 12px;
     cursor: pointer;
 
     text-overflow: ellipsis;
     overflow: hidden;
 }
+.memberlist-container > .card {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    align-content: center;
 
+    margin: auto;
+    margin-left: 16px;
+
+    inset: 0;
+
+    object-fit: cover;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+
+    border-radius: 4px;
+    z-index: 0;
+}
+
+.memberlist-container > .card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    border-radius: 4px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+
+    background: linear-gradient(
+            to right,
+            rgba(0,0,0,0.75),
+            rgba(0,0,0,0.75),
+            rgba(0,0,0,0.5),
+            rgba(0,0,0,0.25)
+    );
+}
 .memberlist-img {
+    z-index: 1;
     width: 35px;
     height: 35px;
     min-width: 35px;
@@ -418,15 +435,21 @@ sortable-chosen.sortable-ghost {
 }
 
 .memberlist-member-info {
+    display: flex;
+    flex-direction: column;
+
+
+    background-color: transparent;
+
+    z-index: 1;
     box-sizing: border-box;
-    height: 20px;
     overflow: hidden;
     margin-left: 8px;
-    background-color: transparent;
     user-select: none;
 }
 
 .memberlist-member-info.status {
+    z-index: 1;
     font-size: 12px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -485,6 +508,20 @@ code.markdown{
 .ql-editor img {
     max-width: 100px;
     max-height: 100px;
+}
+
+.ql-toolbar button svg {
+    margin: auto !important;
+    width: 18px !important;
+    height: 18px !important;
+    border: none !important;
+}
+.ql-toolbar button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+    border: none !important;
 }
 
 .image-embed,
@@ -616,7 +653,7 @@ code.markdown{
     border-radius: 50%;
     border: 2px solid black;
 
-    z-index: 2;
+    z-index: 2 !important;
     text-align: center;
     font-style: normal;
 
@@ -625,11 +662,6 @@ code.markdown{
 
     margin: 0;
     padding: 2px 6px;
-}
-
-#mobile_GroupList .home-indicator {
-    top: 2px !important;
-    left: 38px !important;
 }
 
 .home-indicator.visible {
@@ -1001,8 +1033,14 @@ li.info:hover {
 }
 
 .qr-code img{
+    width: 200px;
+    height: 200px;
     margin: 8px;
     padding: 8px;
     border-radius: 10px;
     background-color: white;
+}
+
+.popupPageContainer{
+    z-index: 25 !important;
 }

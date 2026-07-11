@@ -1,1 +1,0 @@
-import{_ as e,o as t,c as a}from"./chunks/framework.DsLHkhEs.js";const p=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"install NodeJS.md","filePath":"install NodeJS.md"}'),o={name:"install NodeJS.md"};function s(n,r,c,l,d,i){return t(),a("div")}const m=e(o,[["render",s]]);export{p as __pageData,m as default};

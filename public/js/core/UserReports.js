@@ -71,11 +71,9 @@ class UserReports {
             id: UserManager.getID(),
             token: UserManager.getToken()
         }, function (response) {
-
             try {
-                if (response.type == "success") {
-                    let reports = response.reports;
-                    ModView.showReports(reports)
+                if (response.type === "success") {
+                    ModView.showReports(response.reports)
                 }
             }
             catch (error) {

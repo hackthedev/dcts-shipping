@@ -53,7 +53,6 @@ app.get("/discover", pingLimiter, express.json(), async (req, res) => {
                         reserved: serverconfig.serverinfo.slots.reserved,
                     },
                     registration: serverconfig.serverinfo.registration.enabled,
-                    tenor: serverconfig.serverinfo.tenor.enabled,
                     uploadFileTypes: serverconfig.serverinfo.uploadFileTypes,
                     turn: serverconfig.serverinfo.turn.enabled,
                     version: versionCode

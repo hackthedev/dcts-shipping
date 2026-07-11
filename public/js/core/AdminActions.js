@@ -81,14 +81,27 @@ class AdminActions {
     }
 
     static createGroup() {
-        var catname = prompt("Group Name:");
+        customPrompts.showPrompt(
+            "Create Group",
+            `
+        <div class="prompt-form-group">
+            <label class="prompt-label" for="groupName">Group Name</label>
+            <input class="prompt-input" type="text" id="groupName" name="groupName" placeholder="Enter a group name">
+        </div>
+        `,
+            (values) => {
+                const groupName = values.groupName?.trim();
 
-        if (catname == null || catname.length <= 0) {
-            return;
-        }
-        else {
-            socket.emit("createGroup", { id: UserManager.getID(), value: catname, token: UserManager.getToken() });
-        }
+                if (!groupName) {
+                    return;
+                }
+
+                socket.emit("createGroup", { id: UserManager.getID(), value: groupName, token: UserManager.getToken() });
+            },
+            ["Create", "success"],
+            false,
+            250
+        );
     }
 
     static editServer() {
@@ -229,6 +242,20 @@ class AdminActions {
 
 
     static createChannel(category) {
+        const normalizedCategory = String(category || "").replace("category-", "").trim();
+
+        if (!normalizedCategory) {
+            showSystemMessage({
+                title: "Couldnt create channel",
+                text: "No category was selected.",
+                icon: "error",
+                img: null,
+                type: "error",
+                duration: 2000
+            });
+            return;
+        }
+
         customPrompts.showPrompt(
             "Create a channel",
             `
@@ -249,20 +276,48 @@ class AdminActions {
         </div>
         `,
             (values) => {
+                const channelName = String(values.channelName || "").trim();
+                const channelType = values.selected;
+
+                if (!channelName) {
+                    showSystemMessage({
+                        title: "Channel name required",
+                        text: "",
+                        icon: "error",
+                        img: null,
+                        type: "error",
+                        duration: 1500
+                    });
+                    return false;
+                }
+
+                if (!["text", "voice"].includes(channelType)) {
+                    showSystemMessage({
+                        title: "Channel type required",
+                        text: "",
+                        icon: "error",
+                        img: null,
+                        type: "error",
+                        duration: 1500
+                    });
+                    return false;
+                }
+
                 socket.emit("createChannel", {
                     id: UserManager.getID(),
-                    value: values.channelName,
-                    type: values.selected,
+                    value: channelName,
+                    type: channelType,
                     token: UserManager.getToken(),
                     group: UserManager.getGroup().replace("group-", ""),
-                    category: category.replace("category-", "")
+                    category: normalizedCategory
                 }, function (response) {
+                    const isError = Boolean(response?.error);
                     showSystemMessage({
-                        title: response.msg,
+                        title: isError ? response.error : "Channel created successfully",
                         text: "",
-                        icon: response.type,
+                        icon: isError ? "error" : "success",
                         img: null,
-                        type: response.type,
+                        type: isError ? "error" : "success",
                         duration: 1000
                     });
                 });

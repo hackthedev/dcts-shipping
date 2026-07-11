@@ -1,6 +1,24 @@
 var socket = io.connect();
 let splash;
 
+document.addEventListener("error", (e) => {
+    const el = e.target;
+    if (el.tagName === "IMG") {
+        el.setAttribute("data-src", el.src)
+
+        if (ChatManager.chance(20)) {
+            el.src = "/img/worker.png";
+        }
+        else {
+            el.src = "/img/default_pfp.png";
+        }
+
+        // lets see if this will break something
+        el.style.maxHeight = "50px"
+        el.style.maxWidth = "50px"
+    }
+}, true);
+
 Element.prototype.fadeIn = function (duration = 300, display = "block") {
     const el = this;
 

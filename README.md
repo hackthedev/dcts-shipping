@@ -1,19 +1,23 @@
 # DCTS - Direct Communication Through Sockets
-[Reddit](https://www.reddit.com/r/dcts/) • [Feature list](https://github.com/hackthedev/dcts-shipping/blob/beta/docs/Feature%20List.md) • [Discord](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [Tutorial Playlist](https://www.youtube.com/watch?v=b1RXJ-ykdgc&list=PL2xF-BCo1FWav36ktSvBG4nDsbhfLkFR-&index=1) • [Forum](https://dcts.community/) • [Documentation](https://docs.dcts.community/)
+[Reddit](https://www.reddit.com/r/dcts/) • [Feature list](https://github.com/hackthedev/dcts-shipping/blob/beta/docs/Feature%20List.md) • [Discord](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [Tutorial Playlist](https://www.youtube.com/watch?v=b1RXJ-ykdgc&list=PL2xF-BCo1FWav36ktSvBG4nDsbhfLkFR-&index=1) • [Forum](https://dcts.community/) • [Documentation](https://docs.dcts.community/) • [Desktop Client](https://github.com/hackthedev/dcts-client-shipping) • [Android app](https://play.google.com/store/apps/details?id=community.dcts.app)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
 
-This project was made with the goal to provide a platform that aims to fix issues with existing solutions like Discord, TeamSpeak, Revolt, Fosscord, Matrix, TeaSpeak and all others out there and to create new, advanced and easy to use features while creating as little friction as possible and keeping things intuitive.
+DCTS was created in 2023 because existing solutions at the time all had fundamental issues and sucked. Fast forward to today and the only thing that has changed are the names and some new players entering the game that sadly also suck in terms of concept, vision and execution. 
 
-Although there are still some rough edges and a few missing features, DCTS is evolving rapidly due to the massive amount of work being put into its development. This includes adding new features as well as refining existing ones or improving the general experience. Compared to other alternatives, DCTS is evolving lightning fast.
+The general goal is to provide a software thats easy to use for admins, users and devs and to be as independent as possible so that DCTS can still exist without issues for the next 10 years or more. To achieve this we wont accept investors, make custom code libraries and keep a high code quality by refactoring it if needed to also avoid tech debt. It pays off very well, as features are implemented lightning fast and the code base being nice to work with.
 
-**If you need help** or wanna reach out to me feel free to create a **post on** the **subreddit/forum**, **message** me **on discord**, or text me **on signal: shydevil.89**.
+> [!TIP]
+>
+> DCTS is not only a community chat software, but also has an end-to-end messenger feature built into the desktop client and mobile app! Think of it like signal with the option to be self-hosted too if needed!
+
+You can bet your horses on DCTS because so far everything has just been getting better and better and we have some pretty cool plans for the future when it comes to features and other software (Reddit alternative, Tenor, ...). While DCTS is the "only app" for now, we have planned to develop an entire custom ecosystem!
 
 *The following screenshots use a custom theme so if you dont like anime dont be scared.*
 
-![image-20260218045751768](./assets/image-20260218045751768.png)
+![image-20260529214146477](./assets/image-20260529214146477.png)
 
-![image-20260218045906914](./assets/image-20260218045906914.png)
+![image-20260529214529621](./assets/image-20260529214529621.png)
 
 ![image-20260218061015595](./assets/image-20260218061015595.png)
 
@@ -33,9 +37,7 @@ Based on this information you can choose your version. Generally its recommended
 
 ## Support the Project <3
 
-Without community support, development may slow down significantly and could even come to a halt over time :(
-
-If you value the vision of DCTS and want to see it grow, consider making a donation. Every contribution helps accelerate development and ensures the project's future. Thank you for helping to keep DCTS alive!
+To stay independent DCTS will only accept donations and no investors and alike. Unlike others we wont use any FOMO-like tactics or super special perks. By donating you're "investing" into a better future and software!
 
 - [Donate via PayPal](https://www.paypal.me/devilsstore) / [Ko-fi](https://ko-fi.com/shydevil)
 - [Bitcoin](https://mempool.space/address/bc1qeu9j4xh8qhya3s47j05yu78rla3hxe2yz65c9z) (BTC)
@@ -78,14 +80,17 @@ While DCTS is an app, its going to be part of a bigger ecosystem in order to mak
 ------
 
 ## Installing
+
+Please note that if you plan to make it available to the public or want to connect to your server from another machine you WILL need a SSL/TLS certificate.
+
 ### Docker Installation
 
 > [!IMPORTANT]
 >
-> Make sure that you have a reverse proxy setup for your chat instance! Checkout the docs folder!
+> Make sure that you have a reverse proxy setup for your chat instance! Checkout the docs folder or https://docs.dcts.community!
 
 ```bash
-wget https://raw.githubusercontent.com/hackthedev/dcts-shipping/refs/heads/main/docker-compose.yml
+wget https://raw.githubusercontent.com/hackthedev/dcts-shipping/refs/heads/main/Docker/docker-compose.yml
 docker compose up
 ```
 

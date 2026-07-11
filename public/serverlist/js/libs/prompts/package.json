@@ -1,0 +1,14 @@
+{
+  "name": "@hackthedev/prompts",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [
+    "frontend"
+  ],
+  "license": "ISC",
+  "author": "",
+  "main": "prompts.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

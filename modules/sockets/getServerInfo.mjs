@@ -34,6 +34,7 @@ export async function getPublicServerInfoObject(){
             uploadFileTypes: serverconfig.serverinfo.uploadFileTypes,
             messageLoadLimit: serverconfig.serverinfo.messageLoadLimit,
             voip: serverconfig.serverinfo.livekit.enabled,
+            messenger: 1,
             registration: serverconfig.serverinfo.registration.enabled,
             instance: {
                 contact: serverconfig.serverinfo.instance.contact

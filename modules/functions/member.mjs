@@ -102,7 +102,6 @@ export async function updateMember(member) {
     }
 
     await cleanMemberData(member)
-
     if (member?.token !== undefined) serverconfig.servermembers[member?.id].token = stripHTML(member?.token);
     if (member?.name !== undefined && normalizeVar(member?.name)?.length > 0) serverconfig.servermembers[member?.id].name = stripHTML(normalizeVar(member?.name));
     if (member?.loginName !== undefined && normalizeVar(member?.name)?.length > 0) serverconfig.servermembers[member?.id].loginName = stripHTML(member?.loginName);
@@ -116,5 +115,6 @@ export async function updateMember(member) {
     if (member?.isVerifiedKey !== undefined) serverconfig.servermembers[member?.id].isVerifiedKey = member?.isVerifiedKey
     if (member?.lastOnline !== undefined) serverconfig.servermembers[member?.id].lastOnline = Number(stripHTML(member?.lastOnline))
     if (member?.onboarding !== undefined) serverconfig.servermembers[member?.id].onboarding = Boolean(stripHTML(member?.onboarding))
+    if (member?.card !== undefined) serverconfig.servermembers[member?.id].card = stripHTML(member?.card)
     saveMemberToDB(member?.id, serverconfig.servermembers[member?.id]);
 }

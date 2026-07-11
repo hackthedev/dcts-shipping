@@ -424,7 +424,36 @@ class ChatManager {
         }
     }
 
-    static async userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false, callback = null) {
+    static getProtocol(host) {
+        if (!host) return "https";
+        const h = host.toLowerCase();
+
+        if (
+            h.includes("localhost") ||
+            h.startsWith("127.")
+        ) {
+            return "http";
+        }
+
+        return "https";
+    }
+
+    static getFixedUrl(host, url) {
+        if (!host || !url) return null;
+
+        const base = `${this.getProtocol(host)}://${host}`;
+        const cleanUrl = String(url).trim();
+
+        if (cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://")) {
+            return cleanUrl;
+        }
+
+        return cleanUrl.startsWith("/")
+            ? `${base}${cleanUrl}`
+            : `${base}/${cleanUrl}`;
+    }
+
+    static async userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false, callback = null, keySolution = null) {
         if (UserManager.getUsername() != null) {
             var username = UserManager.getUsername();
 
@@ -447,13 +476,36 @@ class ChatManager {
                 loginName: loginNameFlag,
                 publicKey: await UserManager.getPublicKey(),
                 knownServers,
+                keySolution,
                 code: accessCode,
                 pow: {
                     challenge: localStorage.getItem("pow_challenge"),
                     solution: localStorage.getItem("pow_solution")
                 }
             }, async function (response) {
-                // sync data
+
+                // automatic client auth using public key challenge
+                try{
+                    if(response?.keyAuth === true && response?.challenge && isLauncher() && await Crypto.getPublicKey() && !keySolution){
+                        if(typeof Client().DecryptData !== "function") throw new Error("Public Key Auth is not supported")
+                        let decrypted = await Client().DecryptData(
+                            response?.challenge.method,
+                            response?.challenge.encKey,
+                            response?.challenge.iv,
+                            response?.challenge.tag,
+                            response?.challenge.ciphertext
+                        );
+
+                        if(decrypted){
+                            return ChatManager.userJoined(true, null, null, null, true, null, decrypted);
+                        }
+                    }
+                }
+                catch(publicKeyAuthError){
+                    console.error(publicKeyAuthError)
+                }
+
+                // sync data if available
                 if (response?.token) CookieManager.setCookie("token", response.token);
                 if (response?.icon) CookieManager.setCookie("pfp", response.icon);
                 if (response?.banner) CookieManager.setCookie("banner", response.banner);
@@ -465,12 +517,29 @@ class ChatManager {
 
                 // account manager soon?
                 if (await isLauncher()) {
-                    if (await Client().setAccountCredentials) {
+                    if (typeof await Client().setAccountCredentials === "function") {
                         await Client().setAccountCredentials(
                             ChatManager.extractHost(window.location.origin),
                             UserManager.getID(),
                             UserManager.getToken()
                         );
+                    }
+
+                    // check for client nickname
+                    if(typeof await Client().GetNickname === "function" && await Client().GetUserConsistentSettings() === true){
+                        let clientName = await Client().GetNickname();
+                        if(clientName && clientName !== UserManager.getUsername()) await UserManager.updateMember({name: clientName});
+                        if(!clientName && clientName !== UserManager.getUsername()) await Client().SetNickname(UserManager.getUsername())
+                    }
+
+                    // check for client icon
+                    if(typeof await Client().GetUserIcon === "function" && await Client().GetUserConsistentSettings() === true){
+                        let clientIcon = await Client().GetUserIcon()
+
+                        if(clientIcon && clientIcon !== UserManager.getPFP()) await UserManager.updateMember({icon: clientIcon});
+                        if(!clientIcon && clientIcon !== UserManager.getPFP() && UserManager.getPFP()) await Client().SetUserIcon(UserManager.getPFP())
+
+                        console.log("did user icon")
                     }
 
                     UserManager.saveAccount()
@@ -819,12 +888,13 @@ class ChatManager {
 
     static async uploadFile(files, type = "upload") {
         const file = files[0] ?? files;
-        const chunkSize = 1024 * 256; // 256kb
+        const chunkSize = 1024 * 256;
         const totalChunks = Math.ceil(file.size / chunkSize);
         const fileId = crypto.randomUUID();
 
         const filename = file.name;
         const id = UserManager.getID();
+        const token = UserManager.getToken();
 
         let lastPercent = -1;
 
@@ -835,16 +905,17 @@ class ChatManager {
 
             const arrayBuf = await chunk.arrayBuffer();
 
-            const url = `/upload?` +
-                `id=${id}` +
-                `&type=${type}` +
-                `&filename=${encodeURIComponent(filename)}` +
-                `&chunkIndex=${i}` +
-                `&totalChunks=${totalChunks}` +
-                `&fileId=${fileId}`;
-
-            const res = await fetch(url, {
+            const res = await fetch("/upload", {
                 method: "POST",
+                headers: {
+                    "x-member-id": id,
+                    "x-member-token": token,
+                    "x-upload-type": type,
+                    "x-file-name": encodeURIComponent(filename),
+                    "x-chunk-index": String(i),
+                    "x-total-chunks": String(totalChunks),
+                    "x-file-id": fileId
+                },
                 body: arrayBuf
             });
 
@@ -854,6 +925,7 @@ class ChatManager {
                 return json;
 
             const percent = Math.round(((i + 1) / totalChunks) * 100);
+
             if (percent !== lastPercent) {
                 lastPercent = percent;
 
@@ -878,6 +950,7 @@ class ChatManager {
                         duration: 2000
                     });
                 }
+
                 return json;
             }
         }
@@ -903,8 +976,13 @@ class ChatManager {
         if (url.startsWith(encodeURIComponent(window.location.origin))) return decodeURIComponent(url);
         if (url.startsWith("data:")) return url;
         if (url.startsWith("/uploads")) return url;
+        if (url.startsWith("/upload")) return url;
         if (url.startsWith("/img")) return url;
         if (url.startsWith("/emojis")) return url;
+        if (url.startsWith(encodeURIComponent("/uploads"))) return url;
+        if (url.startsWith(encodeURIComponent("/upload"))) return url;
+        if (url.startsWith(encodeURIComponent("/img"))) return url;
+        if (url.startsWith(encodeURIComponent("/emojis"))) return url;
         return `/proxy?url=${encodeURIComponent(url)}`
     }
 

@@ -1,0 +1,57 @@
+:root {
+    --main: #131415;
+    --border-color: hsl(from var(--main) h s calc(l * 8) / 20%);
+    --border-color-bright: hsl(from var(--main) h s calc(l * 8) / 60%);
+    --accent: skyblue;
+    --accent-two: #6bb0b2;
+}
+
+a {
+    color: var(--accent);
+}
+
+.layout > .header {
+    border-bottom: 1.5px solid var(--border-color);
+    border-top: 1.5px solid var(--border-color);
+}
+
+.layout > .header input, .layout > .header button {
+    background-color: hsl(from var(--main) h s calc(l * 2));
+    color: hsl(from var(--main) h s calc(l * 10));
+
+    border: 1.5px solid var(--border-color);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+}
+
+.layout > .content-container > .navigation {
+    border-right: 1.5px solid var(--border-color);
+}
+.layout > .content-container > .navigation > .entry svg{
+    color: hsl(from var(--main) h s calc(l * 10));
+    stroke: hsl(from var(--main) h s calc(l * 10));
+}
+.layout > .content-container > .navigation > .entry{
+    background-color: hsl(from var(--main) h s calc(l * 2));
+    border: 1px solid var(--border-color);
+}
+.layout > .content-container > .navigation > .entry.selected{
+    background-color: hsl(from var(--main) h s calc(l * 4));
+    border: 1px solid var(--border-color);
+}
+
+.layout > .content-container > .content > .serverList > .server-card{
+    background-color: hsl(from var(--main) h s calc(l * 2.5));
+    border: 1px solid var(--border-color);
+}
+
+.layout > .content-container > .content > .serverList > .server-card .features .list .feature{
+    background-color: hsl(from var(--main) h s calc(l * 4));
+    border: 1.25px solid var(--border-color-bright);
+}
+
+.layout > .header .end-bar button {
+    background-color: hsl(from var(--main) h s calc(l * 2));
+    border: 1.5px solid var(--border-color);
+}

@@ -259,7 +259,7 @@ class ContextMenu {
             Object.entries(this.clickEvents).forEach(([_, {elements, callback, condition}]) => {
                 elements.forEach(async sel => {
                     if (this.matchesSelector(el, sel)) {
-                        el.style.cursor = "pointer";
+                        //el.style.cursor = "pointer";
                         const ctx = {element: el, X: mouseX, Y: mouseY, event};
                         if (!condition || (await condition(ctx)) === true) await callback(ctx);
                     }

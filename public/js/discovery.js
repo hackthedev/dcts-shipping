@@ -75,7 +75,7 @@ async function displayDiscoveredHosts(){
     discoveredHostList.innerHTML = "";
 
     // add local servers to the list too
-    if(Client()){
+    if(await isLauncher()){
         let localServers = await Client().GetServers();
 
         for(let localServerKey in localServers){

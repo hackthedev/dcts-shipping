@@ -983,8 +983,6 @@ class ChatManager {
         if (url.startsWith(encodeURIComponent("/upload"))) return url;
         if (url.startsWith(encodeURIComponent("/img"))) return url;
         if (url.startsWith(encodeURIComponent("/emojis"))) return url;
-
-        console.log(url)
         return `/proxy?url=${encodeURIComponent(url)}`
     }
 

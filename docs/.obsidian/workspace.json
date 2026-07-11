@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Privacy Policy.md",
+                "file": "Getting started.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Privacy Policy"
+              "title": "Getting started"
             }
           }
         ]
@@ -186,6 +186,7 @@
   },
   "active": "3a0469dcedf99830",
   "lastOpenFiles": [
+    "Privacy Policy.md",
     "Lore/Independence.md",
     "Lore/About DCTS.md",
     "Lore/Vision.md",
@@ -201,7 +202,6 @@
     "Graphs/dSync Explaination.md",
     "Graphs/Images/dSync Explaination (1).png",
     "Graphs/Images",
-    "Privacy Policy.md",
     "Graphs",
     "install NodeJS.md",
     "Managed Hosting",

@@ -44,7 +44,7 @@ import dSync from "@hackthedev/dsync";
 //import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
 
 import dSyncInbox from "@hackthedev/dsync-inbox"
-//import dSyncInbox from "E:\\network-z-dev\\dSyncInbox\\index.mjs"
+//import dSyncInbox from "/run/media/marcel/SSD/network-z-dev/dSyncInbox/index.mjs"
 
 import dSyncFiles from "@hackthedev/dsync-files";
 
@@ -361,6 +361,7 @@ try {
         process.exit(0);
     }
     else{
+        Logger.error("Error while trying to connect to database!")
         Logger.error(e)
     }
 }

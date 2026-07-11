@@ -44,7 +44,9 @@ import dSync from "@hackthedev/dsync";
 //import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
 
 import dSyncInbox from "@hackthedev/dsync-inbox"
-//import dSyncInbox from "E:\\network-z-dev\\dSyncInbox\\index.mjs"
+//import dSyncInbox from "/run/media/marcel/SSD/network-z-dev/dSyncInbox/index.mjs"
+
+import dSyncFiles from "@hackthedev/dsync-files";
 
 import Logger from "@hackthedev/terminal-logger"
 import dSyncSql from "@hackthedev/dsync-sql"
@@ -196,7 +198,7 @@ export let syncer = null;
 export let signer = null;
 export let auther = null;
 export let inbox = null;
-
+export let files = new dSyncFiles();
 try {
     db = new dSyncSql({
         host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
@@ -241,6 +243,99 @@ try {
         host: serverconfig.serverinfo.app.url?.length >= 7 ? serverconfig.serverinfo.app.url : null
     });
 
+    await files.registerFileUploadHandle({
+        app,
+        urlPath: "/upload",
+        uploadPath: "./public/uploads",
+        limits: {
+            getCorsHeaders: async (req) => ({
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "*",
+                "Access-Control-Allow-Headers": "*"
+            }),
+
+            getUploadPath: async (req) => {
+                let type = req.headers["x-upload-type"] ?? "upload";
+                console.log(type)
+
+                if (type === "emoji") return "./public/emojis";
+
+                return "./public/uploads";
+            },
+
+            getMaxMB: async (req) => {
+                let memberId = req.headers["x-member-id"] ?? null;
+                let memberToken = req.headers["x-member-token"] ?? null;
+                let sessionId = req.headers["x-session-id"] ?? null;
+                let publicKey = req.headers["x-public-key"] ?? null;
+
+                let isDCTSUser = memberId && memberToken;
+                let isRemote = sessionId && publicKey && !isDCTSUser;
+
+                if(isDCTSUser && await validateMemberId(memberId, null, memberToken)){
+                    var userUploadLimit = getMemberHighestUploadLimit(memberId);
+                    return userUploadLimit;
+                }
+                else if(isRemote){
+
+                    // validate session etc
+                    let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
+
+                    // if session is true we can try and see if the person connected to the server while using a client/app.
+                    // this way the account becomes automatically linked, allowing for possibly bigger, individual limits.
+                    if(sessionResult?.valid === true){
+
+                        // check n see if a member exists
+                        let memberObj = getMemberFromKey(publicKey);
+                        if(memberObj?.id){
+                            return getMemberHighestUploadLimit(memberObj.id);
+                        }
+                    }
+
+                    return 5; // setting when
+                }
+
+                return 0;
+            },
+
+            getMaxFolderSizeMB: async (req) => {
+                // the max. folder size of the uploadPath folder. uploads will
+                // fail once reached.
+                return serverconfig.serverinfo.maxUploadStorage || 1024; // 1 GB
+            },
+
+            getAllowedMimes: async (req) => {
+                // the type of media that can be uploaded
+                return serverconfig.serverinfo.uploadFileTypes
+            },
+
+            canUpload: async (req) => {
+                // optional, must return a boolean.
+                // in this example, users that arent signed in cant upload.
+                // you could extend this for checking if a user is banned etc..
+                return true;
+            },
+
+            canAccessFiles: (req, res, next) => {
+                // optional, default will always allow access.
+                // you could implement some sort of file verification feature or
+                // paywall content uploaded by creators.
+
+                return true
+            },
+
+            onFileAccess: async (req) => {
+                let fileName = req.params.id;
+                // you can make a view system or add a rate limit
+            },
+
+            onFinish: async (req) => {
+                // optional.
+                //Logger.info("Upload finished", req.user?.id);
+            }
+        }
+    });
+
 } catch (e) {
     if(isPtero()){
         if(debugmode === false) console.clear();
@@ -266,6 +361,7 @@ try {
         process.exit(0);
     }
     else{
+        Logger.error("Error while trying to connect to database!")
         Logger.error(e)
     }
 }
@@ -359,6 +455,7 @@ import {
 import {renderChart} from "./modules/functions/anti-spam/charts.mjs";
 import {unbanIp} from "./modules/functions/ban-system/helpers.mjs";
 import {getMessageObjectById} from "./modules/sockets/resolveMessage.mjs";
+import {getMemberHighestRole, getMemberHighestUploadLimit} from "./modules/functions/chat/helper.mjs";
 
 /*
     Files for the plugin system

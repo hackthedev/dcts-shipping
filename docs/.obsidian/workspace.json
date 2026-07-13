@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Getting started.md",
+                "file": "Legal/Contributor License Agreement.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Getting started"
+              "title": "Contributor License Agreement"
             }
           }
         ]
@@ -186,6 +186,9 @@
   },
   "active": "3a0469dcedf99830",
   "lastOpenFiles": [
+    "Getting started.md",
+    "Legal/Contributor License Agreement.md",
+    "Legal",
     "Privacy Policy.md",
     "Lore/Independence.md",
     "Lore/About DCTS.md",
@@ -215,10 +218,8 @@
     "sql/errors",
     "sql/Configurating SQL.md",
     "Web Client/Main/Instance Info.md",
-    "Getting started.md",
     "VoIP Setup.md",
     "network/Reverse Proxy Setup.md",
-    "Feature List.md",
     "DCTS Docs Base.base",
     "Unbenannt.base",
     "assets/Pasted image 20260228193820.png",

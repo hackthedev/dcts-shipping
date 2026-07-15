@@ -43,21 +43,7 @@ export default (io) => (socket) => {
                         Logger.debug(`User ${serverconfig.servermembers[member.id].name} (${serverconfig.servermembers[member.id].id}) redeemed the role ${role.info.name} (${roleId}) with the following key`, "Log")
                         Logger.debug(`${member.key}`, "Log")
 
-                        sendMessageToUser(socket.id, JSON.parse(
-                            `{
-                                "title": "${role.info.name} redeemed!",
-                                "message": "",
-                                "buttons": {
-                                    "0": {
-                                        "text": "Ok",
-                                        "events": "closeModal();"
-                                    }
-                                },
-                                "type": "success",
-                                "popup_type": "confirm"
-                            }`));
-
-                        if(response) response({ error: null })
+                        if(response) response({ error: null, message: `${role.info.name} redeemed!`})
 
                         io.emit("updateMemberList");
                     }
@@ -66,20 +52,6 @@ export default (io) => (socket) => {
                         Logger.error("Couldnt redeem key".red)
                         Logger.error(e);
 
-                        sendMessageToUser(socket.id, JSON.parse(
-                            `{
-                            "title": "Couldnt redeem key",
-                            "message": "A unkown error occured",
-                            "buttons": {
-                                "0": {
-                                    "text": "Ok",
-                                    "events": "closePrompt();"
-                                }
-                            },
-                            "popup_type": "confirm",
-                            "type": "error"
-                        }`));
-
                         if(response) response({ error: "Couldnt redeem key!" })
                     }
                 }
@@ -87,38 +59,11 @@ export default (io) => (socket) => {
 
             // Only show message if all loops failed
             if (foundTokenInRole === false) {
-                sendMessageToUser(socket.id, JSON.parse(
-                    `{
-                        "title": "Wrong key!",
-                        "message": "The key you've entered was wrong",
-                        "buttons": {
-                            "0": {
-                                "text": "Ok",
-                                "events": ""
-                            }
-                        },
-                        "popup_type": "confirm",
-                        "type": "error"
-                    }`));
 
                 if(response) response({ error: "Key not found!" })
             }
 
             if (alreadyInRole) {
-                sendMessageToUser(socket.id, JSON.parse(
-                    `{
-                        "title": "You cant use this key anymore.",
-                        "message": "You are already part of this role!",
-                        "buttons": {
-                            "0": {
-                                "text": "Ok",
-                                "events": "closePrompt();"
-                            }
-                        },
-                        "type": "success",
-                        "popup_type": "confirm"
-                    }`));
-
                 if(response) response({ error: "You cant use this key because you already have this role!" })
             }
         }

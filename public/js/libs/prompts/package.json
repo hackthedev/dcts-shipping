@@ -1,13 +1,13 @@
 {
-  "name": "@hackthedev/mobile-ui",
-  "version": "1.0.0",
+  "name": "@hackthedev/prompts",
+  "version": "1.0.1",
   "description": "",
   "keywords": [
     "frontend"
   ],
   "license": "ISC",
   "author": "",
-  "main": "MobileUI.js",
+  "main": "prompts.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }

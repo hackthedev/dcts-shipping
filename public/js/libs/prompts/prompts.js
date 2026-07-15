@@ -327,16 +327,26 @@ class Prompt {
         }
     }
 
-    showConfirm(titleText, options, callback, afterSubmitAction = null) {
+    showConfirm(textData, options, callback, afterSubmitAction = null) {
         this.currentCallback = callback;
         this.afterSubmitAction = afterSubmitAction;
+
+        let titleText = null;
+
+        if(typeof textData === 'object') {
+            if(textData?.title) titleText = textData.title;
+            if(textData?.text) this.promptContent.innerHTML = textData.text;
+        }
+        else{
+            titleText = textData;
+        }
 
         const titleElement = this.modal.querySelector('h2');
         if (titleElement) {
             titleElement.innerText = titleText;
         }
 
-        this.promptContent.innerHTML = '';
+        if(!textData?.text) this.promptContent.innerHTML = '';
         this.submitButton.style.display = 'none';
         this.helpButton.style.display = 'none';
         this.closeButton.style.display = 'none';
@@ -446,13 +456,10 @@ class Prompt {
             }
         });
 
-        const callbackResult = this.currentCallback ? this.currentCallback(values) : undefined;
-
         if (this.currentCallback) {
+            this.currentCallback(values);
             this.currentCallback = null;
         }
-
-        if (callbackResult === false) return;
 
         if (this.afterSubmitAction) {
             this.afterSubmitAction({ canceled: false, values });

@@ -636,14 +636,61 @@ function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
 }
 
 
-function redeemKey() {
-    var key = prompt("Enter the key you want to redeem");
+function redeemKey({
+    key = null,
+    error = null,
+                   } = {}) {
 
-    if (key == null || key.length <= 0) {
+    customPrompts.showPrompt(
+        "Redeem Key",
+        `
 
-    } else {
-        socket.emit("redeemKey", { id: UserManager.getID(), key: key, token: UserManager.getToken() });
-    }
+        <style>
+            p.error {
+                padding: 0.5rem;
+                background-color: rgb(205 92 92 / 0.25);
+                border: 1.5px solid indianred;
+                border-radius: 0.25rem;
+                color: indianred;
+            }
+        </style>
+
+        ${error ?
+            `<p class="error">${error}</p>`
+            : ""
+        }
+        
+        <p>Enter a key to receive a role.</p>
+
+        <div class="prompt-form-group">
+            <label class="prompt-label">Key</label>
+            <input type="text" class="prompt-input" id="key" name="key" value="${key ?? ""}">
+        </div>
+        `,
+        async (values) => {
+            if(values.key){
+
+                socket.emit("redeemKey", { id: UserManager.getID(), key: values.key, token: UserManager.getToken() }, function (response){
+                    if(response.error){
+                        redeemKey({
+                            error: response.error,
+                            key: values.key
+                        })
+                    }
+                    else{
+                        showSystemMessage({
+                            title: "",
+                            text: response?.message,
+                            icon: "success",
+                            img: null,
+                            type: "success",
+                            duration: 10_000
+                        });
+                    }
+                });
+            }
+        }
+    )
 }
 
 function dataURLtoBlob(dataUrl) {

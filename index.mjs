@@ -277,7 +277,6 @@ try {
                     return userUploadLimit;
                 }
                 else if(isRemote){
-
                     // validate session etc
                     let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
 
@@ -292,7 +291,7 @@ try {
                         }
                     }
 
-                    return 5; // setting when
+                    return serverconfig.serverinfo.messenger.defaultFileUploadLimit ?? 0; // setting when
                 }
 
                 return 0;

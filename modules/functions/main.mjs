@@ -560,6 +560,7 @@ export function checkBool(value, type) {
 export function checkConfigAdditions() {
 
 
+    checkObjectKeys(serverconfig, "serverinfo.messenger.defaultFileUploadLimit", 10)
     checkObjectKeys(serverconfig, "serverinfo.dms.maxParticipants", 10)
 
     // recreating the config example minimum base so that copying isnt needed anymore

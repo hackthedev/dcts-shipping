@@ -203,7 +203,6 @@ async function deleteServer(ip) {
 document.addEventListener('DOMContentLoaded', async () => {
     customPrompts = new Prompt();
 
-    ensureDomPurify();
     buildNavHTML(true);
     getSavedServers(getContentElement())
 });

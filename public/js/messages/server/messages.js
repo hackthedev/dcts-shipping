@@ -964,18 +964,7 @@ async function showMessageInChat({
 
 
 function truncateText(text, length) {
-    let actualLength = 0;
-    if (text?.length <= length) {
-        actualLength = text.length;
-    } else {
-        actualLength = length;
-    }
-
-    if (text?.length > length) {
-        return text?.substring(0, actualLength) + "..."
-    }
-
-    return text?.substring(0, actualLength)
+    return ChatTools.Sanitize.truncateText(text, length);
 }
 
 function hidePopup() {
@@ -1160,14 +1149,14 @@ async function createMsgHTML({
     let messageRow =
         `
         <div class="content ${isSystem ? "system" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}"  
-            ${message?.plainText ? `data-plain-text="${unescapeHtmlEntities(sanitizeHtmlForRender(encodeURIComponent(message.plainText), false), true)}"` : ""}
+            ${message?.plainText ? `data-plain-text="${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(encodeURIComponent(message.plainText), false), true)}"` : ""}
             data-message-id="${message.messageId}" 
-            data-member-id="${unescapeHtmlEntities(sanitizeHtmlForRender(message?.author?.id, false), true)}" 
+            data-member-id="${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(message?.author?.id, false), true)}" 
             data-timestamp="${message.timestamp}"
             ${messageType ? `data-message-type="${messageType}"` : ""}>
             
             ${createActions === true ? createMsgActions(message?.author?.id, isSystem) : ""}
-            ${sanitizeHtmlForRender(message.message)}  ${message?.editCode ? message?.editCode : ""}    
+            ${ChatTools.Sanitize.forRender(message.message)}  ${message?.editCode ? message?.editCode : ""}    
             
             ${messageReactionsRow ? messageReactionsRow : ""}
         </div>
@@ -1189,15 +1178,15 @@ async function createMsgHTML({
                 <div class="box"></div>
             
                 <div class="icon-container">    
-                    <img class="icon" draggable="false" src="${sanitizeHtmlForRender(reply?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
+                    <img class="icon" draggable="false" src="${ChatTools.Sanitize.forRender(reply?.author?.icon, false)}" data-member-id="${ChatTools.Sanitize.forRender(reply?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>
                 <div class="meta">
-                    <label class="username" data-member-id="${unescapeHtmlEntities(sanitizeHtmlForRender(reply?.author?.id, false), true)}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
-                        ${sanitizeHtmlForRender(truncateText(reply?.author?.name, 25), false)}
+                    <label class="username" data-member-id="${unescapeHtmlEntities(ChatTools.Sanitize.forRender(reply?.author?.id, false), true)}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
+                        ${ChatTools.Sanitize.forRender(ChatTools.Sanitize.truncateText(reply?.author?.name, 25), false)}
                     </label>
                 </div>
-                <div class="content reply" data-message-id="${reply?.messageId}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" data-timestamp="${reply?.timestamp}">
-                    ${unescapeHtmlEntities(sanitizeHtmlForRender(reply?.message), false) || "[ Click to view message ]"} 
+                <div class="content reply" data-message-id="${reply?.messageId}" data-member-id="${ChatTools.Sanitize.forRender(reply?.author?.id, false)}" data-timestamp="${reply?.timestamp}">
+                    ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(reply?.message), false) || "[ Click to view message ]"} 
                 </div>
             </div>
         `;
@@ -1211,21 +1200,21 @@ async function createMsgHTML({
             ${replyCode}
             <div class="row ${isSystem === true ? `system` : ""}" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}">
                 ${isSystem !== true ?
-        `<div class="icon-container">
-                    <img class="icon" draggable="false" src="${sanitizeHtmlForRender(message?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
+                `<div class="icon-container">
+                    <img class="icon" draggable="false" src="${ChatTools.Sanitize.forRender(message?.author?.icon, false)}" data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>` : ""}
                 
                <div class="content-container" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}"> <!-- for the flex layout -->
                  <div class="meta">
                  
                     ${isSystem !== true ?
-        `<label class="username" 
-                        data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" 
+                        `<label class="username" 
+                        data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}" 
                         style="color: ${message?.author?.color}; background: ${message?.author?.background}; 
                         background-clip: ${message?.author?.backgroundClip};"
                         >
-                            ${unescapeHtmlEntities(sanitizeHtmlForRender(truncateText(message?.author?.name, 30), true))
-        }</label>` : ""}
+                            ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(truncateText(message?.author?.name, 30), true))
+                        }</label>` : ""}
                     
                     
                     <label class="timestamp" data-timestamp="${message.timestamp}">
@@ -1243,7 +1232,7 @@ async function createMsgHTML({
                     </label>
                  </div>
                 
-                 <div class="contentRows" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}">
+                 <div class="contentRows" data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}">
                     ${messageRow}
                  </div>
                 
@@ -1488,7 +1477,7 @@ async function displayMessagesInElement({
     }
 }
 
-function getChatlog(container, index = -1, appendTop = false, scrollPosition = null) {
+async function getChatlog(container, index = -1, appendTop = false) {
     if (UserManager.getChannel() === null) return
     if (UserManager.getCategory() === null) return
     if (UserManager.getGroup() === null) return
@@ -1506,6 +1495,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
 
     Clock.start("load_messages_request")
     Clock.start("load_messages_total")
+
     socket.emit("getChatlog", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
@@ -1577,7 +1567,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
 
             updateMarkdownLinks(2000)
         } else {
-            if (appendTop && scrollPosition !== null) {
+            if (appendTop) {
                 displayAwaitedMessages(container)
             }
         }

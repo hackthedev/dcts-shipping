@@ -16,10 +16,8 @@ export default (io) => (socket) => {
             var category = resolveCategoryByChannelId(room);
             var channel = room;
 
-            console.log(room, group, category, channel);
-
             // annoying
-            if (channel === "null" || category === "null" || group === "null") return;
+            if (channel === "null" || category === "null" || group === "null" || !channel || category || group) return;
 
             if (!await hasPermission(member.id, "viewChannel", channel)) {
                 sendMessageToUser(socket.id, JSON.parse(

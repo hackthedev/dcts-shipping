@@ -64,7 +64,6 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.on('newDmMessage', async function (response) {
         let roomId = response?.payload?.data?.roomId;
         let currentRoom = ChatManager.getUrlParams("dm");
-        console.log(roomId, currentRoom);
 
         if (roomId === currentRoom) {
             if (response?.payload?.messageEditId) {

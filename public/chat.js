@@ -115,18 +115,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
     Docs.registerContextMenu()
 
-    ChatManager.registerMessageInfiniteLoad(
-        document.getElementById("content"),
-        async (element) => {
-            const topElement = getFirstMessage(element);
-            if (!topElement) return;
 
-            const timeStamp = Number(topElement?.element?.getAttribute("data-timestamp"));
-            await getChatlog(element, timeStamp, true, ChatTools.Scroll.getScrollPosition(element, topElement?.element));
-    })
+    await ChatTools.Scroll.registerMessageInfiniteLoad(getContentMainContainer(), async (element) => {
+        const topElement = getFirstMessage(element);
+        if (!topElement) return;
+
+        const timeStamp = Number(topElement?.element?.getAttribute("data-timestamp"));
+        await getChatlog(element, timeStamp, true);
+    });
+
+    ChatTools.Scroll.observeContainer(getContentMainContainer(), {
+        adjustDiff: false
+    });
 
     registerMessageCreateEvent();
-    ChatTools.Scroll.observeContainer(getContentMainContainer());
     initAudioPlayerEvents();
 
     customPrompts = new Prompt();
@@ -478,9 +480,6 @@ socket.on("updatedEmojis", async function () {
 socket.on("memberUpdated", async function () {
     getMemberList();
 })
-
-// very important
-ensureDomPurify()
 
 
 voip = new VoIP(`${window.location.origin.includes("https") ? "wss" : "ws"}://{{livekit.url}}/`);
@@ -1048,7 +1047,7 @@ socket.on('showUserJoinMessage', async function (author) {
     var message = '<div class="systemAnnouncementChat">' + '            <p>User <label class="systemAnnouncementChatUsername" id="">' + author.username + '</label> joined the chat!</p>' + '        </div>';
 
     addToChatLog(chatlog, message);
-    ChatTools.Scroll.scrollDown(getContentMainContainer());
+    if(ChatTools.Scroll.isScrolledToBottom(getContentMainContainer())) ChatTools.Scroll.scrollDown(getContentMainContainer());
 });
 
 socket.on('updateGroupList', async function (author) {
@@ -1155,15 +1154,6 @@ socket.on('markChannel', async function (data) {
     markChannel(data.channelId, false, data?.count);
 });
 
-socket.on('createMessageEmbed', async function (data) {
-    document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
-    ChatTools.Scroll.scrollDown(getContentMainContainer());
-});
-
-socket.on('createMessageLink', async function (data) {
-    document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
-    ChatTools.Scroll.scrollDown(getContentMainContainer());
-});
 
 socket.on('receiveCurrentChannel', async function (channel) {
     try {
@@ -1206,20 +1196,8 @@ socket.on('newMemberJoined', async function (author) {
     var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + author.name + '</label> joined the server! <label class="timestamp" id="' + author.timestamp + '">' + author.timestamp.toLocaleString("narrow") + '</p>' + '        </div>';
 
     addToChatLog(chatlog, message);
-    ChatTools.Scroll.scrollDown(getContentMainContainer());
+    if(ChatTools.Scroll.isScrolledToBottom(getContentMainContainer())) ChatTools.Scroll.scrollDown(getContentMainContainer());
 
-});
-
-socket.on('memberOnline', async function (member) {
-
-    // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
-    var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + member.username + '</label> is now online!</p>' + '        </div>';
-
-    addToChatLog(chatlog, message);
-    ChatTools.Scroll.scrollDown(getContentMainContainer());
-});
-
-socket.on('memberPresent', async function (member) {
 });
 
 socket.on('receiveGifImage', async function (response) {

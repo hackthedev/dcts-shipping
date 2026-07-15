@@ -99,7 +99,6 @@ async function updateMarkdownLinks(delay) {
     // adjust new media stuff. would have been mindblowing to think about that earlier
     if (markdownChanged) {
         await updateMissingMeta()
-        watchMediaLoads(container)
         if (isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer())
     } else {
         await updateMissingMeta()

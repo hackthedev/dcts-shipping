@@ -14,35 +14,6 @@ class ChatTools {
             }
         }
 
-        static setScrollPosition(container, info) {
-            if(!container) throw new Error("Could not set scroll position because container not set")
-            if (typeof info === "number") {
-                container.scrollTop = info
-                return
-            }
-
-            if (!info?.ref || !info.ref.isConnected) return
-
-            let cTop = container.getBoundingClientRect().top
-            let rTop = info.ref.getBoundingClientRect().top
-
-            let diff = (rTop - cTop) - info.offset
-            container.scrollTop += diff
-        }
-
-        static getScrollPosition(container, refEl) {
-            if(!container) throw new Error("Could not find scroll position because container not set")
-            if (!refEl) return container.scrollTop
-
-            let cTop = container.getBoundingClientRect().top
-            let rTop = refEl.getBoundingClientRect().top
-
-            return {
-                ref: refEl,
-                offset: rTop - cTop
-            }
-        }
-
         static scrollDown(containerElement, opts = {}) {
             const el = containerElement
             if (!el || typeof el === "string"){
@@ -127,7 +98,9 @@ class ChatTools {
             tick();
         }
 
-        static observeContainer(containerElement) {
+        static observeContainer(containerElement, {
+            adjustDiff = true,
+        }) {
             if(!containerElement) throw new Error("Could not find container");
             let container = containerElement;
             let savedHeight = 0;
@@ -139,7 +112,7 @@ class ChatTools {
                         let diff = container.scrollHeight - savedHeight;
 
                         this.toggleSmoothScroll(container, false)
-                        container.scrollTop += diff;
+                        if(adjustDiff) container.scrollTop += diff;
                         this.toggleSmoothScroll(container, true)
                         savedHeight = container.scrollHeight;
                     }

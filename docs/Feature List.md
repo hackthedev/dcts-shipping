@@ -5,6 +5,8 @@ This document will provide a list of all features[^1] and may describe some as w
 > [!Important]
 >
 > The list below is somewhat simplified and may not show all details or features.
+> 
+> This document hasnt been updated for a while
 
 ------
 

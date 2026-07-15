@@ -735,10 +735,10 @@ function replaceUrlEmbeds(element) {
         // wrap shit if needed
         if (!element.querySelector("p")) {
             let text = element.textContent.trim();
-            if (text) element.innerHTML = `<p>${text}</p>`;
+            if (text) element.innerHTML = `<p>${ChatTools.Sanitize.forRender(text. false)}</p>`;
         }
 
-        element.innerHTML = element.innerHTML.replace(/\s+/g, " ").trim();
+        element.innerHTML = ChatTools.Sanitize.forRender(element.innerHTML.replace(/\s+/g, " ").trim(), false)
     }
 }
 

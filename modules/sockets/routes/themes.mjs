@@ -60,6 +60,10 @@ export async function downloadTheme(themeName){
     const cssPath = path.join(targetDir, `${themeName}.css`);
     const configPath = path.join(targetDir, "config.json");
 
+    if(themeName.indexOf("..")) return {
+        error: "Malicious filename"
+    }
+
     if(!fs.existsSync(targetDir)){
         fs.mkdirSync(themesDir, { recursive: true });
 
@@ -100,6 +104,15 @@ export async function downloadTheme(themeName){
     }
 
     let config = null;
+
+    if(configPath.indexOf("..")) return {
+        error: "Malicious filename"
+    }
+
+    if(cssPath.indexOf("..")) return {
+        error: "Malicious filename"
+    }
+
     if(fs.existsSync(configPath)){
         config = JSONTools.tryParse(fs.readFileSync(configPath, "utf8"));
     }

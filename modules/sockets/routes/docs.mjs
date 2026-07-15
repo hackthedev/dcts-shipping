@@ -1,6 +1,14 @@
 import {app, fs} from "../../../index.mjs";
+import {rateLimit} from "../../functions/ratelimit.mjs";
 
-app.get("/docs/list", async (req, res) => {
+const docsLimiter = rateLimit({
+    windowMs: 60_000,
+    ipLimit: 20,
+    sigLimit: 500,
+    trustProxy: true
+});
+
+app.get("/docs/list", docsLimiter, async (req, res) => {
     if (!fs.existsSync("docs")) return res.status(404).json({ error: "No docs folder found" });
 
     let docs = fs

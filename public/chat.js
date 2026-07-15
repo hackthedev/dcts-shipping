@@ -1227,7 +1227,15 @@ socket.on('updateGroupList', async function (data) {
 socket.on('receiveGroupList', async function (data) {
     if (serverlist.innerHTML !== data) {
         serverlist.innerHTML = "";
-        serverlist.innerHTML = data;
+
+        // show navigation indicator on mobile (quick fix);
+        if(MobilePanel.isMobile()){
+            await displayNavigationButton(serverlist, {
+                isServerEntry: true,
+            });
+        }
+
+        serverlist.innerHTML += data;
 
         let mobileGroupList = document.getElementById("mobile_GroupList");
         mobileGroupList.innerHTML = data;

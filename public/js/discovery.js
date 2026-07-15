@@ -1,25 +1,25 @@
-async function getDiscoveredHosts(){
+async function getDiscoveredHosts() {
     return new Promise(async (resolve, reject) => {
         let servers = await fetch("/servers");
         resolve(servers.json())
     })
 }
 
-async function syncHostData(){
+async function syncHostData() {
     let serverSyncResponse = await fetch(`${window.location.origin}/discover`);
 
-    if(serverSyncResponse.status === 200){
+    if (serverSyncResponse.status === 200) {
         let json = await serverSyncResponse.json();
 
-        if(isLauncher() && json){
+        if (isLauncher() && json) {
             let server = await Client().GetServer(window.location.host);
             await Client().SaveServer(window.location.host, server?.isFav ?? false);
         }
     }
 }
 
-function extractHost(url){
-    if(!url) return null;
+function extractHost(url) {
+    if (!url) return null;
     const s = String(url).trim();
 
     const looksLikeBareIPv6 = !s.includes('://') && !s.includes('/') && s.includes(':') && /^[0-9A-Fa-f:.]+$/.test(s);
@@ -44,41 +44,66 @@ function extractHost(url){
     }
 }
 
-async function testHost(host){
-    try{
+async function testHost(host) {
+    try {
         // test host
         let testHost = await fetch(`https://${extractHost(host)}/discover`);
 
         // is a valid host so we conenct
-        if(testHost.status === 200){
+        if (testHost.status === 200) {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
-    }catch(e){
+    } catch (e) {
         console.warn(e)
         return false;
     }
 }
 
-async function NavigateHome(){
-    if(isLauncher()){
+async function NavigateHome() {
+    if (isLauncher()) {
         Client().NavigateHome();
     }
 }
 
-async function displayDiscoveredHosts(){
+async function displayNavigationButton(element, {
+    classList = null,
+    isServerEntry = false,
+} = {}) {
+    if (!element) throw new Error("Missing element for navigation button!")
+
+    let redirectUrl = "";
+    if (await isLauncher() && typeof await Client().GetLocalServerAddress === "function") redirectUrl = await Client().GetLocalServerAddress();
+
+    if (isServerEntry) {
+        return element.insertAdjacentHTML("beforeend", `<a href="${redirectUrl}">
+                        <div class="group-entry-marker"></div>
+                        <div class="server-entry home">
+                           <img title="Home" class="server-icon" src="/img/discover.png">    
+                           <span class="home-indicator"></span>                       
+                        </div>
+                    </a><hr class="homeDivider">`);
+    }
+
+
+    element.insertAdjacentHTML("beforeend",
+        `<a class="networkServerEntry" href="${redirectUrl}" title="Discovery" style="border: none;">
+                    <img class="home" src="/img/discover.png">
+                </a><hr style="width: 100%;">`)
+}
+
+async function displayDiscoveredHosts() {
     let discoveredHosts = await getDiscoveredHosts();
     let discoveredHostList = document.querySelector("#networkServerList");
 
     discoveredHostList.innerHTML = "";
 
     // add local servers to the list too
-    if(await isLauncher()){
+    if (await isLauncher()) {
         let localServers = await Client().GetServers();
 
-        for(let localServerKey in localServers){
+        for (let localServerKey in localServers) {
             let localServer = localServers[localServerKey];
             discoveredHosts.servers.push({
                 address: localServer.Address,
@@ -97,46 +122,37 @@ async function displayDiscoveredHosts(){
 
     }
 
-    if(discoveredHosts?.error == null){
-
-        let redirectUrl = "/serverlist";
-        if(await isLauncher() && typeof await Client().GetLocalServerAddress === "function") redirectUrl = await Client().GetLocalServerAddress();
-
+    if (discoveredHosts?.error == null) {
         // add main button to go home
-        discoveredHostList.insertAdjacentHTML("beforeend",
-            `<a class="networkServerEntry" href="${redirectUrl}" title="Discovery" style="border: none;">
-                    <img class="home" src="/img/discover.png">
-                </a><hr style="width: 100%;">`)
+        await displayNavigationButton(discoveredHostList);
 
 
-
-        for(let server of discoveredHosts.servers){
+        for (let server of discoveredHosts.servers) {
             let host = extractHost(server.address);
-            if(!host) continue;
+            if (!host) continue;
 
             let externalServerInfo = null;
             let externalServerData = null;
 
-            try{
+            try {
                 externalServerInfo = await fetch(`https://${host}/discover`);
                 externalServerData = await externalServerInfo.json();
-            }
-            catch(error){
+            } catch (error) {
                 console.warn(error);
                 continue;
             }
 
-            if(await testHost(host) === false){
+            if (await testHost(host) === false) {
                 console.warn(`Host ${host} wasnt reachable`);
                 continue;
             }
 
-            if(isLauncher()){
+            if (isLauncher()) {
                 Client().SaveServer(host, server?.favourite ?? false);
             }
 
             discoveredHostList.insertAdjacentHTML("beforeend",
-        `<a class="networkServerEntry" href="https://${host}" title="${externalServerData?.serverinfo?.name}">
+                `<a class="networkServerEntry" href="https://${host}" title="${externalServerData?.serverinfo?.name}">
                     <img class="networkServerEntryImage" data-fav="${!!server?.IsFavourite}" data-host="${host}" src="https://${host}/${externalServerData?.serverinfo?.icon}">
                     <div class="networkIndicator">50</div>
                 </a>`)
@@ -144,30 +160,29 @@ async function displayDiscoveredHosts(){
         }
 
         // if any server was found display the network server list
-        if(discoveredHosts?.servers.length > 0){
+        if (discoveredHosts?.servers.length > 0) {
             let networkServerContainer = document.querySelector("#networkServers");
-            if(!networkServerContainer) {
+            if (!networkServerContainer) {
                 console.error("Couldnt show network server container!")
                 return;
             }
 
             networkServerContainer.style.display = "flex";
         }
-    }
-    else{
+    } else {
         console.error("Wasnt able to get discovered hosts")
         console.error(discoveredHosts?.error)
     }
 }
 
-async function changeFavouriteNetworkServer(address){
-    if(!isLauncher()){
+async function changeFavouriteNetworkServer(address) {
+    if (!isLauncher()) {
         console.warn("Servers can only be marked as fav in the desktop client")
         return;
     }
 
     let server = await Client().GetServer(address)
-    if(!server){
+    if (!server) {
         console.warn("Couldnt get server and mark server as fav");
         return;
     }

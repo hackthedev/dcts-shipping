@@ -1,5 +1,10 @@
 import {serverconfig, typingMembers, usersocket, xssFilters} from "../../index.mjs";
-import {formatDateTime, hasPermission} from "../functions/chat/main.mjs";
+import {
+    formatDateTime,
+    hasPermission,
+    resolveCategoryByChannelId,
+    resolveGroupByChannelId
+} from "../functions/chat/main.mjs";
 import {saveChatMessage} from "../functions/io.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import {
@@ -94,22 +99,17 @@ export default (io) => (socket) => {
                 return;
             }
 
-            if (isNaN(member.group) === true) {
-                Logger.debug("Group was not a number");
-                return response({error: "Group was not a number"});
-            }
-            if (isNaN(member.channel) === true) {
+            if (member?.channel == null) {
                 Logger.debug("Channel was not a number");
                 return response({error: "Channel was not a number"});
-            }
-            if (isNaN(member.category) === true) {
-                Logger.debug("Category was not a number");
-                return response({error: "Category was not a number"});
             }
             if (member.message.replaceAll(" ").length <= 0) {
                 Logger.debug("Message is shorter than 1 charachter");
                 return response({error: "Message is shorter than 1 charachter"});
             }
+
+            member.group = resolveGroupByChannelId(member.channel);
+            member.category = resolveCategoryByChannelId(member.channel);
 
             // if message is signed, verify the signature
             if (member?.sig !== null && member?.sig?.length > 10 && serverconfig.servermembers[member?.id]?.isVerifiedKey === true) {
@@ -169,18 +169,17 @@ export default (io) => (socket) => {
                     member.message = member.message?.substring(0, 8000)
 
                     // create room key
-                    let room = `${member.group}-${member.category}-${member.channel}`
+                    let room = `${member.channel}`
                     member.room = room;
 
                     if (member.message.trim() === "" || member.message.trim().length === 0) {
-                        console.log("Message was empty")
                         return response({error: "Message was empty"});
                     }
 
                     // If the message was edited
                     if (member.editedMsgId != null) {
                         // Get Original message
-                        let room = `${member.group}-${member.category}-${member.channel}`
+                        let room = `${member.channel}`
                         let originalMsg = await getChatMessagesFromDb(room, 1, member.editedMsgId);
                         let originalMsgObj = decodeAndParseJSON(originalMsg[0].message);
 

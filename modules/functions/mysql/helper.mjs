@@ -122,6 +122,11 @@ export async function deleteReport(reportId) {
 }
 
 export async function saveChatMessageInDb(message) {
+
+    // i thought we would delete this as it would be somewhat redundant.
+    let messageRoom = message.room;
+    delete message.room;
+
     const query = `
         INSERT INTO messages (authorId, messageId, message, room)
         VALUES (?, ?, ?, ?) ON DUPLICATE KEY
@@ -138,7 +143,7 @@ export async function saveChatMessageInDb(message) {
     }
 
     const encodedMessage = JSON.stringify(message);
-    return await queryDatabase(query, [message.author.id, message.messageId, encodedMessage, message.room]);
+    return await queryDatabase(query, [message.author.id, message.messageId, encodedMessage, messageRoom]);
 }
 
 export async function logEditedChatMessageInDb(message) {

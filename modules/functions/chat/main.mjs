@@ -170,28 +170,35 @@ export async function hasPermission(userId, permissions, channelOrGroupId = null
 export function resolveGroupByChannelId(id) {
     for (const group of Object.keys(serverconfig.groups).reverse()) {
         const categories = serverconfig.groups[group].channels.categories;
+
         for (const category of Object.keys(categories).reverse()) {
             const channels = categories[category].channel;
-            if (channels.hasOwnProperty(id)) {
-                return group; // Return as soon as the group is found
+            const channelFound = Object.values(channels).some(channel => channel.id === id);
+
+            if (channelFound) {
+                return group;
             }
         }
     }
-    return null; // Return null if no group is found
-}
 
+    return null; // not found
+}
 
 export function resolveCategoryByChannelId(id) {
     for (const group of Object.keys(serverconfig.groups).reverse()) {
         const categories = serverconfig.groups[group].channels.categories;
+
         for (const category of Object.keys(categories).reverse()) {
             const channels = categories[category].channel;
-            if (channels.hasOwnProperty(id)) {
-                return category; // Return as soon as the category is found
+            const channelFound = Object.values(channels).some(channel => channel.id === id);
+
+            if (channelFound) {
+                return category;
             }
         }
     }
-    return null; // Return null if no category is found
+
+    return null; // not found
 }
 
 

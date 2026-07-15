@@ -1,5 +1,6 @@
 import {getFreshConfig, reloadConfig, versionCode} from "../../index.mjs";
 import {generateId} from "./main.mjs";
+import {resolveCategoryByChannelId, resolveGroupByChannelId} from "./chat/main.mjs";
 
 // templateMiddleware.mjs
 export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfig) {
@@ -60,8 +61,10 @@ export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfi
     }
 
     function renderTemplate(template, query) {
-        const { group, category, channel } = query;
+        const { channel } = query;
 
+        let group = resolveGroupByChannelId(channel)
+        let category = resolveCategoryByChannelId(channel)
         let config = getFreshConfig();
 
         let placeholders = [

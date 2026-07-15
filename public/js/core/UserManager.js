@@ -327,7 +327,7 @@ class UserManager {
     }
 
     static getRoom() {
-        return ChatManager.getUrlParams("group") + "-" + ChatManager.getUrlParams("category") + "-" + ChatManager.getUrlParams("channel");
+        return ChatManager.getUrlParams("channel");
     }
 
     static getCategory() {

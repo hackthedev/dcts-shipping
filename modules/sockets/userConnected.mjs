@@ -258,7 +258,7 @@ export default (io) => (socket) => {
             }
 
             // error if no password passed
-            if(!member?.password) return response({error: "Missing password field in plaintext"})
+            if(!member?.password) return response({error: "Missing password field in plaintext<br><a onclick='UserManager.resetAccount();'>Reset Session</a>"})
 
             var userToken = generateId(48);
             member.token = userToken;
@@ -330,7 +330,7 @@ export default (io) => (socket) => {
             castingMember.group = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);
             castingMember.category = resolveCategoryByChannelId(serverconfig.serverinfo.defaultChannel);
             castingMember.channel = serverconfig.serverinfo.defaultChannel;
-            castingMember.room = `${resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel)}-${resolveCategoryByChannelId(serverconfig.serverinfo.defaultChannel)}-${serverconfig.serverinfo.defaultChannel}`;
+            castingMember.room = `${serverconfig.serverinfo.defaultChannel}`;
 
             castingMember.timestamp = new Date().getTime();
             castingMember.messageId = generateId(12);

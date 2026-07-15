@@ -39,7 +39,7 @@ function initChannelSettings(){
                 // chart shit
                 let channels = await getChannelTree();
                 let channelConfigPath = getChannelPathFromGroupConfig(channels, getUrlParams("id"));
-                let defaultChannelRoom = `${channelConfigPath.groupId}-${channelConfigPath.categoryId}-${channelConfigPath.channelId}`;
+                let defaultChannelRoom = `${channelConfigPath.channelId}`;
                 if(!defaultChannelRoom) throw new Error("Somehow unable to contruct room string?", defaultChannelRoom)
 
                 let charts = await getRoomCharts(defaultChannelRoom);

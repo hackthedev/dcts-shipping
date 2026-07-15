@@ -21,6 +21,19 @@ export function findEmojiByID(id){
     return filename;
 }
 
+export function getAllChannels() {
+    return Object.entries(serverconfig.groups).flatMap(([groupId, group]) =>
+        Object.entries(group.channels.categories).flatMap(([categoryId, category]) =>
+            Object.entries(category.channel).map(([channelId, channel]) => ({
+                groupId,
+                categoryId,
+                channelId,
+                channel
+            }))
+        )
+    );
+}
+
 export function getMemberHighestUploadLimit(id){
     var roles = serverconfig.serverroles;
     var uploadMB = null;

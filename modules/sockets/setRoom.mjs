@@ -1,5 +1,5 @@
 import { usersocket, serverconfig, xssFilters } from "../../index.mjs";
-import { hasPermission } from "../functions/chat/main.mjs";
+import {hasPermission, resolveCategoryByChannelId, resolveGroupByChannelId} from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 import { leaveAllRooms } from "../functions/mysql/helper.mjs";
@@ -11,10 +11,12 @@ export default (io) => (socket) => {
         ) {
             leaveAllRooms(socket, member.id);
 
-            var room = member.room.split('-');
-            var group = room[0];
-            var category = room[1];
-            var channel = room[2];
+            var room = member.room;
+            var group = resolveGroupByChannelId(room);
+            var category = resolveCategoryByChannelId(room);
+            var channel = room;
+
+            console.log(room, group, category, channel);
 
             // annoying
             if (channel === "null" || category === "null" || group === "null") return;

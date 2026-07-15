@@ -576,7 +576,7 @@ const tables = [
         columns: [
 
             {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "roomId", type: "varchar(20) NOT NULL UNIQUE KEY"},
+            {name: "roomId", type: "varchar(200) NOT NULL UNIQUE KEY"},
             {name: "title", type: "varchar(204) NOT NULL DEFAULT 'New Chat'"},
             {name: "creatorId", type: "varchar(20) NOT NULL"},
             {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
@@ -599,7 +599,7 @@ const tables = [
         name: "dm_room_participants",
         columns: [
             {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "roomId", type: "varchar(20) NOT NULL"},
+            {name: "roomId", type: "varchar(200) NOT NULL"},
             {name: "memberId", type: "varchar(204) NOT NULL"},
             {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
         ],
@@ -614,7 +614,7 @@ const tables = [
         columns: [
             {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
             {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "roomId", type: "varchar(100) NOT NULL"},
+            {name: "roomId", type: "varchar(200) NOT NULL"},
             {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
             {name: "message", type: "longtext NOT NULL"},
             {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
@@ -626,7 +626,7 @@ const tables = [
         columns: [
             {name: "authorId", type: "varchar(100) NOT NULL"},
             {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
-            {name: "room", type: "varchar(25) NOT NULL"},
+            {name: "room", type: "varchar(200) NOT NULL"},
             {name: "message", type: "longtext NOT NULL"},
             {
                 name: "createdAt",

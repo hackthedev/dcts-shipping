@@ -9,7 +9,7 @@ export default (io) => (socket) => {
         if (await validateMemberId(member?.id, socket, member?.token) === true) {
 
             if (!await hasPermission(member.id, "viewGroup", member.group)) {
-                response({ error: true, msg: "You arent allowed to view this group", type: "error" })
+                response({ error: "You arent allowed to view this group", type: "error" })
                 return;
             }
 

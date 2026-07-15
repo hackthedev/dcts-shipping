@@ -21,6 +21,7 @@ class ChannelTree {
         }, function (response) {
             let group = UserManager.getGroup();
 
+            if(!response?.data?.groups) return console.error("No group data found!");
             const catCollection = response.data.groups[group].categories;
             let sortedCats = Object.keys(catCollection).sort((a, b) => {
                 return catCollection[b].info.sortId - catCollection[a].info.sortId;

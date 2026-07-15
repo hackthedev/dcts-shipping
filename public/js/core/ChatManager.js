@@ -9,9 +9,18 @@ class ChatManager {
     }
 
     static closePagePopup(id) {
-        let pagePopup = window.parent.document.querySelector(`#${id}`);
+        if (id === "*") {
+            window.parent.document
+                .querySelectorAll(".popupPageContainer")
+                .forEach(popup => popup.remove());
+
+            return;
+        }
+
+        const pagePopup = window.parent.document.querySelector(`#${CSS.escape(id)}`);
+
         if (pagePopup) {
-            pagePopup.remove()
+            pagePopup.remove();
         }
     }
 
@@ -516,6 +525,9 @@ class ChatManager {
                 if (response?.id) CookieManager.setCookie("id", response.id);
 
                 // account manager soon?
+                // july 2026: This is kinda deprecated now
+                // there will be a better way to handle this type of stuff and was
+                // mostly used for mobile
                 if (await isLauncher()) {
                     if (typeof await Client().setAccountCredentials === "function") {
                         await Client().setAccountCredentials(
@@ -529,7 +541,6 @@ class ChatManager {
                     if(typeof await Client().GetNickname === "function" && await Client().GetUserConsistentSettings() === true){
                         let clientName = await Client().GetNickname();
                         if(clientName && clientName !== UserManager.getUsername()) await UserManager.updateMember({name: clientName});
-                        if(!clientName && clientName !== UserManager.getUsername()) await Client().SetNickname(UserManager.getUsername())
                     }
 
                     // check for client icon
@@ -537,9 +548,13 @@ class ChatManager {
                         let clientIcon = await Client().GetUserIcon()
 
                         if(clientIcon && clientIcon !== UserManager.getPFP()) await UserManager.updateMember({icon: clientIcon});
-                        if(!clientIcon && clientIcon !== UserManager.getPFP() && UserManager.getPFP()) await Client().SetUserIcon(UserManager.getPFP())
+                    }
 
-                        console.log("did user icon")
+                    // check for client banner
+                    if(typeof await Client().GetUserBanner === "function" && await Client().GetUserConsistentSettings() === true){
+                        let clientBanner = await Client().GetUserBanner()
+
+                        if(clientBanner && clientBanner !== UserManager.getBanner()) await UserManager.updateMember({banner: clientBanner});
                     }
 
                     UserManager.saveAccount()
@@ -579,6 +594,7 @@ class ChatManager {
                     });
 
                     if (initial) {
+                        console.log("Auth is done!")
                         /* Quill Emoji Autocomplete */
                         initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
                         initializeMentionAutocomplete(document.querySelector('.ql-editor'));

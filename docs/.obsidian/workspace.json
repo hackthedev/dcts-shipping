@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Legal/Contributor License Agreement.md",
+                "file": "Setup/Getting started.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Contributor License Agreement"
+              "title": "Getting started"
             }
           }
         ]
@@ -184,10 +184,11 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "3a0469dcedf99830",
+  "active": "37a4cdff02af2a98",
   "lastOpenFiles": [
-    "Getting started.md",
+    "Setup",
     "Legal/Contributor License Agreement.md",
+    "Setup/Getting started.md",
     "Legal",
     "Privacy Policy.md",
     "Lore/Independence.md",
@@ -219,7 +220,6 @@
     "sql/Configurating SQL.md",
     "Web Client/Main/Instance Info.md",
     "VoIP Setup.md",
-    "network/Reverse Proxy Setup.md",
     "DCTS Docs Base.base",
     "Unbenannt.base",
     "assets/Pasted image 20260228193820.png",

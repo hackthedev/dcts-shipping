@@ -8,13 +8,13 @@ This document explains how to get started with the chat application and explain 
 
 > [!Warning]
 >
-> Always stop the server before editing the *`config.json`* file. Data may be overwritten otherwise!
+> Always stop the server before editing the *`config.json`* file. Data may be overwritten otherwise! It will be automatically generated when you launch the DCTS server once.
 
 ------
 
 ## Requirements & Recommendations
 
-The software was designed to be setup and run as simple as possible. Using the *`config.json`* file you can manage additional settings that are not present in the web client. For example you could configurate a SQL server compatible with MariaDB to improve overall functionality **and unlock all the features**.
+The software was designed to be setup and run as simple as possible. Using the *`config.json`* file you can manage additional settings that are not present in the web client. 
 
 | Feature        | Description                                                                                                |
 | -------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -27,8 +27,9 @@ The software was designed to be setup and run as simple as possible. Using the *
 > [!TIP]
 > If you want to follow this tutorial make sure the following is installed:
 > ```bash
-> apt install curl
-> apt install unzip
+> apt install curl -y
+> apt install unzip -y
+> apt install wget -y
 > ```
 
 ------
@@ -87,15 +88,15 @@ Example:
 cd /path/to/dcts
 
 # install all packages, only required on initial setup
-bun i
+bun i                    # use 'npm i' if using nodejs
 
 # start the server
-bun .
+bun .                    # use 'node .' if using nodejs
 ```
 
-As you can see all you really need is one command to launch the chat app if the requirements are already installed. This was made with the goal to be very user friendly and easy to setup and use.
+As you can see all you really need is one command to launch the chat app server if the requirements are already installed. This was made with the goal to be very user friendly and easy to setup and use.
 
-Its possible to use more advanced and better starting methods, such as using docker, a sytem service or supervisor and screen. Information about these can be found in the other documents.
+Its possible to use more advanced and better starting methods, such as using docker, a sytem service, supervisor and screen. Information about these can be found in the other documents.
 
 > [!IMPORTANT]
 > Its important that we launch the server briefly so that the `configs/config.json` file is automatically generated. The server should automatically terminate itself. If not you can press `CTRL + C` to terminate it.
@@ -168,7 +169,7 @@ Of course if you installed and ran the chat app on your server you would need to
 > Check the above notice for public access.
 >
 
-![image-20251108165123275](./assets/image-20251108165123275.png)
+![image-20251108165123275](../assets/image-20251108165123275.png)
 
 ------
 
@@ -176,11 +177,11 @@ Of course if you installed and ran the chat app on your server you would need to
 
 When you open the chat app for the first time in the web client you will be prompted to register for an account. After that you will notice that you're just a normal member. In the console you can find a Server Admin Token.
 
-![image-20250201122217494](./assets/image-20250201122217494.png)
+![image-20250201122217494](../assets/image-20250201122217494.png)
 
 You can use it to redeem the administrator role in the web client. To do so right click any group and click *`Redeem Key`* like in the screenshot. After entering the key you will receive the Administrator role. 
 
-![image-20260219182529359](./assets/image-20260219182529359.png)
+![image-20260219182529359](../assets/image-20260219182529359.png)
 
 > [!NOTE]
 >

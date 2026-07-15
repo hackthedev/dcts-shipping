@@ -405,8 +405,19 @@ export default (io) => (socket) => {
 
                 if (session.valid) {
                     let serverMemberObj = await getMemberFromKey(session.publicKey);
+
+                    // if a member with that key already exists
                     if (serverMemberObj) {
+                        Logger.debug("Existing member joined via key auth")
                         await successfulAuthResponse(serverMemberObj);
+                        return { keepExecution: false };
+                    }
+                    // else create a new member!
+                    else if(!serverMemberObj){
+                        Logger.debug("Creating member joined via key auth")
+                        await createKeyAuthedMember()
+                        let newMember = await getMemberFromKey(member?.publicKey)
+                        await successfulAuthResponse(newMember);
                         return { keepExecution: false };
                     }
                 }
@@ -421,6 +432,8 @@ export default (io) => (socket) => {
                     socket.keyAuthIdentifier = keyChallengeResult.identifier;
                     socket.keyAuthSolution = keyChallengeResult.challengeString;
 
+                    Logger.debug("Member tried to join via key auth without solution. Requesting challenge.")
+
                     // then send response to client to solve
                     response({ keyAuth: true, challenge: keyChallengeResult.challenge });
                     return {
@@ -432,7 +445,12 @@ export default (io) => (socket) => {
                     // if the user successfully authenticated let them know it all worked
                     if(socket.keyAuthSolution === member.keySolution){
                         let serverMemberObj = await getMemberFromKey(member?.publicKey)
-                        if(!serverMemberObj) return { keepExecution: true } // no member found, continue logic
+                        if(!serverMemberObj){
+                            await createKeyAuthedMember()
+                            let newMember = await getMemberFromKey(member?.publicKey)
+                            await successfulAuthResponse(newMember);
+                            return { keepExecution: false };
+                        }
 
                         await successfulAuthResponse(serverMemberObj)
 
@@ -445,6 +463,43 @@ export default (io) => (socket) => {
 
             return {
                 keepExecution: true,
+            }
+
+            async function createKeyAuthedMember(){
+                // setup member
+                let memberId = generateId(12) ?? null;
+                let memberToken = generateId(48) ?? null;
+                let generatedPassword = crypto.randomUUID();
+                let generatedLoginName = crypto.randomUUID();
+
+                const now = new Date().getTime();
+                const hashedPassword = await hashPassword(generatedPassword);
+
+                // Check if member is in default role
+                if (serverconfig.serverroles["0"].members.includes(memberId) === false) {
+                    serverconfig.serverroles["0"].members.push(memberId);
+                    saveConfig(serverconfig);
+                }
+
+                await createMember(                    {
+                    id: memberId,
+                    token: memberToken,
+                    name: "Member",
+                    loginName: generatedLoginName,
+                    icon: null,
+                    banner: null,
+                    aboutme: null,
+                    status: null,
+                    country_code: null,
+                    publicKey: member?.publicKey ? stripHTML(member.publicKey) : "",
+                    joined: now,
+                    lastOnline: now,
+                    password: hashedPassword,
+                    isVerifiedKey: true,
+                    onboarding: true
+                })
+
+                return { keepExecution: false };
             }
         }
     });

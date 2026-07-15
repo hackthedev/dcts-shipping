@@ -607,8 +607,7 @@ class UserManager {
             CookieManager.setCookie("banner", null, 365);
             CookieManager.setCookie("pow_challenge", null, 365);
             CookieManager.setCookie("pow_solution", null, 365);
-
-            window.location.href = window.location.origin;
+            window.top.location.href = window.top.location.origin;
         }
     }
 

@@ -1396,7 +1396,6 @@ export async function getCastingMemberObject(member) {
 }
 
 export async function findAndVerifyUser(loginName, password) {
-    await reloadConfig();
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
     let serverMembers = serverconfigEditable.servermembers;
 

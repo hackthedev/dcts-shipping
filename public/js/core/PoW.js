@@ -76,7 +76,7 @@ function setupAccountFromData(data) {
 
 async function setupAccount(challenge, difficulty) {
     if(await isLauncher()){
-        if(await Client().pickAccount) await Client().pickAccount();
+        return createNewAccount();
     }
 
     customPrompts.showPrompt(
@@ -167,20 +167,24 @@ async function setupAccount(challenge, difficulty) {
         };
 
         document.getElementById("createNewBtn").onclick = async () => {
-            // Handle new account
-            customPrompts.closePrompt();
-
-            const solution = await solvePow(challenge, difficulty);
-            solvedPow = true;
-
-            verifyPow(challenge, solution)
-            CookieManager.setCookie("pow_challenge", challenge)
-            CookieManager.setCookie("pow_solution", solution)
-
-            window.location.reload();
+            createNewAccount();
         };
 
-    }, 0);
+    }, 10);
+
+    async function createNewAccount(){
+        // Handle new account
+        customPrompts.closePrompt();
+
+        const solution = await solvePow(challenge, difficulty);
+        solvedPow = true;
+
+        verifyPow(challenge, solution)
+        CookieManager.setCookie("pow_challenge", challenge)
+        CookieManager.setCookie("pow_solution", solution)
+
+        window.location.reload();
+    }
 }
 
 async function showPowProgressPrompt(challenge, currentLevel = 0, targetLevel = 4) {

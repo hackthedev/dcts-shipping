@@ -1,0 +1,14 @@
+{
+  "name": "@hackthedev/chat-tools",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [
+    "frontend"
+  ],
+  "license": "UNLICENSED",
+  "author": "",
+  "main": "ChatTools.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

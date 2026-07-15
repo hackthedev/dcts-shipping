@@ -122,10 +122,11 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (!topElement) return;
 
             const timeStamp = Number(topElement?.element?.getAttribute("data-timestamp"));
-            await getChatlog(element, timeStamp, true, getScrollPosition(element, topElement?.element));
+            await getChatlog(element, timeStamp, true, ChatTools.Scroll.getScrollPosition(element, topElement?.element));
     })
 
     registerMessageCreateEvent();
+    ChatTools.Scroll.observeContainer(getContentMainContainer());
     initAudioPlayerEvents();
 
     customPrompts = new Prompt();
@@ -209,7 +210,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     window.addEventListener('resize', function (event) {
         // do stuff here
 
-        let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+        let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(document.getElementById("content"));
 
         var emojiContainer = document.getElementById("emoji-box-container");
         var profileContainer = document.getElementById("profile_container");
@@ -222,7 +223,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             profileContainer.style.display = "none";
         }
 
-        if (isScrolledDown) scrollDown("window resizer");
+        if (isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer());
     });
 
     document.addEventListener("keydown", (event) => {
@@ -908,15 +909,13 @@ function replaceInlineEmojis() {
         img.replaceWith(code);
     }
 }
-
-
 async function sendMessageToServer(authorId = UserManager.getID(),
     authorUsername = UserManager.getUsername(),
     pfp = UserManager.getPFP(),
     message,
     bypassQuill = false) {
     Clock.start("send_message");
-    let isScrolledDown = isScrolledToBottom(getContentMainContainer());
+    let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(getContentMainContainer());
 
     if (UserManager.getGroup() == null || UserManager.getGroup().length <= 0 || UserManager.getCategory() == null || UserManager.getCategory().length <= 0 || UserManager.getChannel() == null || UserManager.getChannel().length <= 0) {
         showSystemMessage({
@@ -989,7 +988,7 @@ async function sendMessageToServer(authorId = UserManager.getID(),
                 cancelMessageEdit();
                 cancelMessageReply();
 
-                scrollDown("sendMessageToServer"); // forgot that
+                ChatTools.Scroll.scrollDown(getContentMainContainer()); // forgot that
                 setTimeout(() => focusEditor(), 1)
                 editor.innerHTML = "<p><br></p>"
 
@@ -1049,7 +1048,7 @@ socket.on('showUserJoinMessage', async function (author) {
     var message = '<div class="systemAnnouncementChat">' + '            <p>User <label class="systemAnnouncementChatUsername" id="">' + author.username + '</label> joined the chat!</p>' + '        </div>';
 
     addToChatLog(chatlog, message);
-    scrollDown("userJoinMessage");
+    ChatTools.Scroll.scrollDown(getContentMainContainer());
 });
 
 socket.on('updateGroupList', async function (author) {
@@ -1158,12 +1157,12 @@ socket.on('markChannel', async function (data) {
 
 socket.on('createMessageEmbed', async function (data) {
     document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
-    scrollDown("createMessageEmbed");
+    ChatTools.Scroll.scrollDown(getContentMainContainer());
 });
 
 socket.on('createMessageLink', async function (data) {
     document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
-    scrollDown("createMessageLink");
+    ChatTools.Scroll.scrollDown(getContentMainContainer());
 });
 
 socket.on('receiveCurrentChannel', async function (channel) {
@@ -1207,7 +1206,7 @@ socket.on('newMemberJoined', async function (author) {
     var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + author.name + '</label> joined the server! <label class="timestamp" id="' + author.timestamp + '">' + author.timestamp.toLocaleString("narrow") + '</p>' + '        </div>';
 
     addToChatLog(chatlog, message);
-    scrollDown("newMemberJoined");
+    ChatTools.Scroll.scrollDown(getContentMainContainer());
 
 });
 
@@ -1217,7 +1216,7 @@ socket.on('memberOnline', async function (member) {
     var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + member.username + '</label> is now online!</p>' + '        </div>';
 
     addToChatLog(chatlog, message);
-    scrollDown("memberOnline");
+    ChatTools.Scroll.scrollDown(getContentMainContainer());
 });
 
 socket.on('memberPresent', async function (member) {

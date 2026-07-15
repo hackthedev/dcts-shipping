@@ -273,8 +273,7 @@ try {
                 let isRemote = sessionId && publicKey && !isDCTSUser;
 
                 if(isDCTSUser && await validateMemberId(memberId, null, memberToken)){
-                    var userUploadLimit = getMemberHighestUploadLimit(memberId);
-                    return userUploadLimit;
+                    return getMemberHighestUploadLimit(memberId);
                 }
                 else if(isRemote){
                     // validate session etc

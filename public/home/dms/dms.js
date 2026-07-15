@@ -497,7 +497,7 @@ async function renderDmRoom(roomId) {
             getContentElement().dataset.menuInit = "1";
         }
 
-        observeContainer();
+        ChatTools.Scroll.observeContainer(getContentMainContainer());
         await displayDmMessages(roomId)
 
         await updateMarkdownLinks(2000)
@@ -619,7 +619,7 @@ async function renderDmRoom(roomId) {
 
             await markAsRead(null, roomId);
             if(!appendTop){
-                scrollDown("dm", {
+                ChatTools.Scroll.scrollDown(getContentMainContainer(), {
                     tolerancePx: 10
                 });
             }

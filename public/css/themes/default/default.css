@@ -24,7 +24,6 @@ body {
 *{
     box-sizing: border-box;
 
-    scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: hsl(from var(--main) h s calc(l * 3)) transparent;
     font-family: 'Roboto', sans-serif;

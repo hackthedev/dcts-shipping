@@ -399,6 +399,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 })
 
+function getContentMainContainer(){
+    let container = document.getElementById("content");
+    if(!container) container = document.querySelector(".layout.home > .content .dm-container > .content");
+    return container
+}
+
 async function updateEditedMessage(message){
     // handling for dms
     if(message?.data){
@@ -426,7 +432,7 @@ async function updateEditedMessage(message){
         editElement.innerHTML += getMessageEditedHTML(message);
         editElement.innerHTML += createMsgActions(message.messageId);
 
-        if (isScrolledToBottom(getContentMainContainer())) scrollDown("messageEdited")
+        if (ChatTools.Scroll.isScrolledToBottom(getContentMainContainer())) ChatTools.Scroll.scrollDown("messageEdited")
     })
 }
 
@@ -460,7 +466,7 @@ function toggleEditor(value) {
 
 async function addNewMessageToChatLog(message, type = null) {
     let container = getContentMainContainer();
-    let isScrolledDown = isScrolledToBottom(container, 20);
+    let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(container, 20);
 
     if (!message) throw new Error("No message found to display");
     message.type = type;
@@ -511,7 +517,7 @@ async function addNewMessageToChatLog(message, type = null) {
     await updateUIIndicators(message)
 
     if (isScrolledDown) {
-        scrollDown("messageCreated");
+        ChatTools.Scroll.scrollDown(getContentMainContainer());
     }
 }
 
@@ -642,8 +648,8 @@ function initQuillShit(customQuill = null){
 
         // editor resize fix where chat wont scroll down
         const editorResizeObserver = new ResizeObserver(() => {
-            let isScrolledDown =  isScrolledToBottom(document.getElementById("content"));
-            if(isScrolledDown) scrollDown();
+            let isScrolledDown =  ChatTools.Scroll.isScrolledToBottom(document.getElementById("content"));
+            if(isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer());
         });
         editorResizeObserver.observe(editor);
 
@@ -672,25 +678,25 @@ function cancelMessageEdit() {
 }
 
 function showRateLimitNotice() {
-    let isScrolledDown = isScrolledToBottom(getContentMainContainer());
+    let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(getContentMainContainer());
     if (replyMessageId == null && editorHints) {
         if (editorHints?.querySelector("#ratelimitHint") != null) editorHints?.querySelector("#ratelimitHint").remove();
 
         editorHints.insertAdjacentHTML("afterbegin", `<p id="ratelimitHint" >You have been rate limited</p>`)
     }
 
-    if (isScrolledDown) scrollDown("showRateLimitNotice")
+    if (isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer())
 }
 
 function showSlowmodeNotice(timestamp) {
-    let isScrolledDown = isScrolledToBottom(getContentMainContainer());
+    let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(getContentMainContainer());
     if (replyMessageId == null && editorHints) {
         if (editorHints?.querySelector("#slowmodeHint") != null) editorHints?.querySelector("#slowmodeHint").remove();
 
         editorHints.insertAdjacentHTML("afterbegin", `<p id="slowmodeHint" >Slowmode is active! You need to wait for ${getReadableDuration(new Date(timestamp))}</p>`)
     }
 
-    if (isScrolledDown) scrollDown("showSlowmodeNotice")
+    if (isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer())
 }
 
 function replyToMessage(messageId) {
@@ -1035,7 +1041,7 @@ function navigateToMessage(messageId) {
 }
 
 function deleteMessageFromChat(id, type = "message") {
-    let isScrolledDown = isScrolledToBottom(getContentMainContainer())
+    let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(getContentMainContainer())
 
     socket.emit("deleteMessage", {
         id: UserManager.getID(),
@@ -1046,12 +1052,12 @@ function deleteMessageFromChat(id, type = "message") {
         channel: UserManager.getChannel(),
         type
     }, function (response) {
-        if(isScrolledDown) scrollDown("");
+        if(isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer());
     });
 }
 
 async function updateMessageReactionsElementById(messageId, container = getContentMainContainer()) {
-    let wasScrolledDown = isScrolledToBottom(container);
+    let wasScrolledDown = ChatTools.Scroll.isScrolledToBottom(container);
 
     let contentContainer = document.querySelector(`.message-container .content:not(.reply)[data-message-id="${messageId}"]`);
     let reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
@@ -1070,7 +1076,7 @@ async function updateMessageReactionsElementById(messageId, container = getConte
         reactionRow.outerHTML = await getMessageReactionsHTML(messageObj);
     })
 
-    if (wasScrolledDown) scrollDown()
+    if (wasScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer())
 }
 
 async function getMessageReactionsHTML(messageObj) {
@@ -1561,14 +1567,13 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())
         ChatManager.setChannelMarker(UserManager.getChannel(), false)
 
-
         if (!appendTop) {
             displayAwaitedMessages(container)
 
             // just scroll down as we dont have any anchor anyway
-            toggleSmoothScroll(container, false)
-            scrollDown();
-            toggleSmoothScroll(container, true)
+            ChatTools.Scroll.toggleSmoothScroll(getContentMainContainer(), false)
+            ChatTools.Scroll.scrollDown(getContentMainContainer());
+            ChatTools.Scroll.toggleSmoothScroll(getContentMainContainer(), true)
 
             updateMarkdownLinks(2000)
         } else {

@@ -11,8 +11,6 @@ body {
 
 *{
     box-sizing: border-box;
-
-    scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: white transparent;
     font-family: 'consolas', sans-serif;

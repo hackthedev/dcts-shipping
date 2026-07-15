@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     ChatTools.Scroll.observeContainer(getContentMainContainer(), {
-        adjustDiff: false
+        adjustDiff: true
     });
 
     registerMessageCreateEvent();

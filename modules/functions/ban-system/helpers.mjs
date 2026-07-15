@@ -1,9 +1,10 @@
 import {checkRateLimit, isLocalhostIp} from "../main.mjs";
 import Logger from "@hackthedev/terminal-logger";
-import {saveConfig, serverconfig} from "../../../index.mjs";
+import {saveConfig, serverconfig, signer} from "../../../index.mjs";
 import {formatDateTime, getJson, getNewDate, getSocketIp} from "../chat/main.mjs";
 import {queryDatabase} from "../mysql/mysql.mjs";
 import DateTools from "@hackthedev/datetools";
+import {dSyncSign} from "@hackthedev/dsync-sign";
 
 export async function banIp(socket, durationTimestamp = -1) {
     let ip = getSocketIp(socket);
@@ -19,12 +20,6 @@ export async function banIp(socket, durationTimestamp = -1) {
     }
 }
 
-export async function isIpBanned(ip){
-    let ban = await getBan(ip);
-    return !!ban;
-}
-
-
 export async function unbanIp(socket) {
     let ip = getSocketIp(socket)
 
@@ -39,23 +34,28 @@ export async function addBan({
                            reason = "",
                            until = -1,
                            ip = null,
+                           publicKey = null,
                        } = {}){
     if(!identifier) throw new Error("Identifier was undefined!")
 
+    if(publicKey) publicKey = signer.normalizePublicKey(publicKey)
+
     let result = await queryDatabase(
-        `INSERT INTO bans (memberId, issuerId, ip, reason, until)
-               VALUES (?,?,?,?,?) 
-                ON DUPLICATE KEY UPDATE issuerId=VALUES(issuerId), ip=VALUES(ip), reason=VALUES(reason), until=VALUES(until)
-    `, [identifier, bannedBy, ip, (reason).length === 0 ? null : reason, until])
+        `INSERT INTO bans (memberId, issuerId, ip, publicKey, reason, until)
+               VALUES (?,?,?,?,?,?) 
+                ON DUPLICATE KEY UPDATE issuerId=VALUES(issuerId), ip=VALUES(ip),publicKey=VALUES(publicKey), reason=VALUES(reason), until=VALUES(until)
+    `, [identifier, bannedBy, ip, publicKey, (reason).length === 0 ? null : reason, until])
 
     return result?.affectedRows >= 0;
 }
 
 export async function getBan(identifier){
     if(!identifier) throw new Error("Identifier not set")
+
+    let normalized = signer.normalizePublicKey(identifier);
     let row = await queryDatabase(
-        `SELECT * FROM bans WHERE memberId = ? OR ip = ?`,
-        [identifier, identifier]
+        `SELECT * FROM bans WHERE memberId = ? OR ip = ? OR publicKey = ?`,
+        [identifier, identifier, normalized]
     )
 
     if(row?.length === 0) return null;
@@ -91,8 +91,8 @@ export async function removeBan(identifier){
 
     if(ban){
         let result = await queryDatabase(
-            `DELETE FROM bans WHERE memberId = ? OR ip = ?`,
-            [identifier, identifier]
+            `DELETE FROM bans WHERE memberId = ? OR ip = ? OR publicKey = ?`,
+            [identifier, identifier, identifier]
         )
 
         if(result?.affectedRows >= 0){
@@ -114,7 +114,8 @@ export async function banUser(socket, member) {
         bannedBy: member?.id,
         reason: member?.reason,
         until: bannedUntil,
-        ip: ip
+        ip: ip,
+        publicKey: signer.normalizePublicKey(member?.publicKey)
     });
 
     Logger.warn(` User ${serverconfig.servermembers[member.target].name} (IP ${ip}) was added to the banlist because he was banned`.yellow);
@@ -122,11 +123,18 @@ export async function banUser(socket, member) {
 }
 
 export async function checkMemberBan(socket, member) {
-    let ip = getSocketIp(socket);
-    checkRateLimit(socket);
+    if(socket){
+        let ip = getSocketIp(socket);
+        checkRateLimit(socket);
+
+        let ipCheckResult = checkAndUnbanIp(ip);
+        if(ipCheckResult?.result === true) return ipCheckResult
+    }
+    else{
+        Logger.warn("Skipped IP Check and Rate limit as socket wasnt provided!")
+    }
 
     let userBan = await getBan(member?.id);
-    let ipBan = ip ? await getBan(ip) : null;
 
     // check banlist for member
     if (userBan) {
@@ -142,37 +150,57 @@ export async function checkMemberBan(socket, member) {
         }
     }
 
-    return checkAndUnbanIp(ip);
+    let publicKeyCheckResult = checkAndUnbanPublicKey(member?.publicKey);
+    return publicKeyCheckResult;
+}
 
-    function checkAndUnbanIp(ip){
-        // check ip blacklist
-        if (ipBan) {
-            if (Date.now() >= ipBan?.until) {
-                removeBan(ip);
-                return {result: false, timestamp: null, text: null}
-            } else {
-                return {result: true, timestamp: ipBan?.until, text: getBannedText(userBan)}
-            }
+async function checkAndUnbanIp(ip){
+
+    let ipBan = ip ? await getBan(ip) : null;
+
+    // check ip blacklist
+    if (ipBan) {
+        if (Date.now() >= ipBan?.until) {
+            removeBan(ip);
+            return {result: false, timestamp: null, text: null}
+        } else {
+            return {result: true, timestamp: ipBan?.until, text: getBannedText(userBan)}
         }
-
-        return {result: false, timestamp: null, text: null}
     }
 
-    function getBannedText(banInfo){
-        let banText = "You've been ";
+    return {result: false, timestamp: null, text: null}
+}
 
-        if (banInfo?.timestamp) {
-            if (new Date(banInfo.timestamp).getFullYear() === 9999) {
-                banText += "permanently banned";
-            } else {
-                banText = `banned until <br>${formatDateTime(new Date(banInfo.timestamp))}`;
-            }
+export async function checkAndUnbanPublicKey(publicKey){
+    let normalized = signer.normalizePublicKey(publicKey) ?? null
+    let publicKeyBan = normalized ? await getBan(normalized) : null;
+
+    // check publicKey blacklist
+    if (publicKeyBan) {
+        if (Date.now() >= publicKeyBan?.until) {
+            removeBan(publicKey);
+            return {result: false, timestamp: null, text: null}
+        } else {
+            return {result: true, timestamp: publicKeyBan?.until, text: getBannedText(publicKeyBan)}
         }
-
-        if (banInfo?.reason) {
-            banText += `<br><br>Reason:<br>${banInfo.reason}`;
-        }
-
-        return banText;
     }
+
+    return {result: false, timestamp: null, text: null}
+}
+
+function getBannedText(banInfo){
+    let banText = "You've been ";
+    if (banInfo?.until) {
+        if (new Date(banInfo.until).getFullYear() === 9999) {
+            banText += "permanently banned";
+        } else {
+            banText += `banned until <br>${formatDateTime(new Date(banInfo.until))}`;
+        }
+    }
+
+    if (banInfo?.reason) {
+        banText += `<br><br>Reason:<br>${banInfo.reason}`;
+    }
+
+    return banText;
 }

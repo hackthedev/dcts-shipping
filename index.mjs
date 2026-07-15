@@ -451,7 +451,7 @@ import {
     getChannelMessageFrequency, getChannelRateLimit,
 } from "./modules/functions/anti-spam/messages.mjs";
 import {renderChart} from "./modules/functions/anti-spam/charts.mjs";
-import {unbanIp} from "./modules/functions/ban-system/helpers.mjs";
+import {checkAndUnbanPublicKey, getBan, unbanIp} from "./modules/functions/ban-system/helpers.mjs";
 import {getMessageObjectById} from "./modules/sockets/resolveMessage.mjs";
 import {getMemberHighestRole, getMemberHighestUploadLimit} from "./modules/functions/chat/helper.mjs";
 
@@ -1258,6 +1258,12 @@ async function listenToIO(){
         isValidated: async (req, res) => {
             const {inboxId, timestamp, customId} = req?.params;
             const { id, token, sessionId, publicKey } = req.body;
+
+            // if public key is banned
+            if(publicKey){
+                let publicKeyCheckResult = await checkAndUnbanPublicKey(publicKey);
+                if(publicKeyCheckResult?.result === true) return false;
+            }
 
             if(serverconfig.servermembers[id]?.token === token && !sessionId) return true;
 

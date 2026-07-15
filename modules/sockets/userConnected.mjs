@@ -186,6 +186,21 @@ export default (io) => (socket) => {
         if (member?.pow?.challenge) member.pow.challenge = String(stripHTML(member?.pow?.challenge));
         if (member?.pow?.solution) member.pow.solution = String(stripHTML(member?.pow?.solution));
 
+        // check member ban and disconnect if needed.
+        // will also auto remove the ban again
+        let banResult = await checkMemberBan(socket, member);
+        if (banResult.result === true) {
+            response({
+                error: banResult.text,
+                type: "error",
+                msg: banResult.text,
+                displayTime: 1000 * 60,
+            });
+
+            return socket.disconnect();
+        }
+
+
         await cleanMemberData(member);
 
         checkRateLimit(socket);
@@ -210,20 +225,6 @@ export default (io) => (socket) => {
         // handle invites
         let inviteResult = handleInviteCode(member, socket, response);
         if (!inviteResult) return;
-
-        // check member ban and disconnect if needed.
-        // will also auto remove the ban again
-        let banResult = await checkMemberBan(socket, member);
-        if (banResult.result === true) {
-            response({
-                error: banResult.text,
-                type: "error",
-                msg: banResult.text,
-                displayTime: 1000 * 60,
-            });
-
-            return socket.disconnect();
-        }
 
         // call checkMemberMute so it unmutes automatically
         checkMemberMute(socket, member);

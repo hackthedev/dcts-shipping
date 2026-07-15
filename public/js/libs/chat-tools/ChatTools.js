@@ -100,7 +100,7 @@ class ChatTools {
 
         static observeContainer(containerElement, {
             adjustDiff = true,
-        }) {
+        } = {}) {
             if(!containerElement) throw new Error("Could not find container");
             let container = containerElement;
             let savedHeight = 0;

@@ -470,7 +470,6 @@ async function addNewMessageToChatLog(message, type = null) {
 
     // lets increase the channel count first
     // then mark it for ourselves
-    console.log(message.channel)
     if (message?.channel) {
         ChatManager.increaseChannelMarkerCount(message.channel)
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())
@@ -505,6 +504,7 @@ async function addNewMessageToChatLog(message, type = null) {
             channelId: UserManager.getChannel(),
             container: getContentMainContainer(),
             appendTop: false,
+            messageType: message?.type,
             index: null,
             refElement: null,
             pingMentions: true
@@ -1149,8 +1149,8 @@ async function createMsgHTML({
     let isAdmin = message?.isAdmin
 
     let messageReactionsRow = await getMessageReactionsHTML(message);
-
-    let sanitized = ChatTools.Sanitize.forRender(message.message) ?? null;
+    let isThirdPartyMessageType = messageType != null && messageType !== "dm" && messageType !== "text";
+    let sanitized = ChatTools.Sanitize.forRender(message.message, isThirdPartyMessageType) ?? null;
 
     if(sanitized.trim().length === 0) sanitized = "<span style='color: orange;font-size: 10px;'>[ UNSUPPORTED CONTENT ]</span>";
 
@@ -1181,7 +1181,6 @@ async function createMsgHTML({
                             background: ${message?.author?.background ?? ""}; 
                             background-clip: ${message?.author?.backgroundClip ?? ""}`
 
-
     // if message was a reply
     let replyCode = "";
     if (reply?.messageId) {
@@ -1200,11 +1199,11 @@ async function createMsgHTML({
                 </div>
                 <div class="meta">
                     <label class="username" data-member-id="${unescapeHtmlEntities(ChatTools.Sanitize.forRender(reply?.author?.id, false), true)}" style="${replyColorStyle};">
-                        ${ChatTools.Sanitize.forRender(ChatTools.Sanitize.truncateText(reply?.author?.name, 25), false)}
+                        ${ChatTools.Sanitize.forRender(ChatTools.Sanitize.truncateText(reply?.author?.name, 25), isThirdPartyMessageType)}
                     </label>
                 </div>
                 <div class="content reply" data-message-id="${reply?.messageId}" data-member-id="${ChatTools.Sanitize.forRender(reply?.author?.id, false)}" data-timestamp="${reply?.timestamp}">
-                    ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(reply?.message), false) || "[ Click to view message ]"} 
+                    ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(reply?.message), isThirdPartyMessageType) || "[ Click to view message ]"} 
                 </div>
             </div>
         `;
@@ -1423,6 +1422,7 @@ async function displayMessagesInElement({
     for (let message of appendTop ? data.reverse() : data) {
         // if user switches channel we cancel this shit
         message = await transformDmMessage(message, messageType)
+        if(!messageType) messageType = message?.type ?? null
 
         if (!getChannel) {
             if (channelId !== UserManager.getChannel()) return;

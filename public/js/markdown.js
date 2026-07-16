@@ -117,7 +117,9 @@ async function getUrlMeta(url){
     }
 
     try{
-        let meta = await fetch(`/meta/${encodeURIComponent(url)}`)
+        let meta = await fetch(`/meta/${encodeURIComponent(url)}`, {
+            signal: AbortSignal.timeout(400)
+        })
         if(meta?.status === 200){
             let metaJson = await meta.json();
 

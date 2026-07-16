@@ -117,6 +117,13 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
     await ChatTools.Scroll.registerMessageInfiniteLoad(getContentMainContainer(), async (element) => {
+        EventDispatcher.send("infiniteScroll", {
+            element,
+            channelType: await getCurrentChannelType(),
+            channelId: UserManager.getChannel()
+        });
+
+
         const topElement = getFirstMessage(element);
         if (!topElement) return;
 
@@ -1008,7 +1015,7 @@ async function sendMessageToServer(authorId = UserManager.getID(),
     // only send dcts messages and dispatch
     let channelType = await getCurrentChannelType(UserManager.getChannel());
 
-    EventDispatcher.send("messageCreate", {
+    EventDispatcher.send("messageSend", {
         message: msgPayload,
         channelType,
     })
@@ -1412,11 +1419,26 @@ async function waitFor(callback, timeout = 0) {
     });
 }
 
-async function getCurrentChannelType(){
-    let channelId = UserManager.getChannel()
+async function getCurrentChannelType(customChannelId = null, timeout = 5000, interval = 100) {
+    const channelId = customChannelId ?? UserManager.getChannel();
+    const start = Date.now();
 
-    let channelElementInList = document.querySelector(`#channeltree a.channelTrigger[data-channel-id="${channelId}"]`);
-    return channelElementInList?.getAttribute("data-channel-type") ?? null;
+    // kinda hate this hack but im kinda lazy rn
+    while (Date.now() - start < timeout) {
+        const channelElementInList = document.querySelector(
+            `#channeltree a.channelTrigger[data-channel-id="${channelId}"]`
+        );
+
+        const type = channelElementInList?.getAttribute("data-channel-type");
+
+        if (type !== undefined && type !== null) {
+            return type;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, interval));
+    }
+
+    return null;
 }
 
 async function setUrl(param, isVC = false) {

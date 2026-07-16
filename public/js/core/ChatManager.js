@@ -204,7 +204,11 @@ class ChatManager {
     static async showThemePage() {
         initThemePageContext();
 
-        let themesRes = await fetch("/themes/list");
+        let themesRes = await fetch("/themes/list", {
+            signal: AbortSignal.timeout(3000)
+        });
+        console.log(themesRes)
+
         let themes;
         if (themesRes.status === 200) {
             let responseJson = await themesRes.json();
@@ -594,7 +598,6 @@ class ChatManager {
                     });
 
                     if (initial) {
-                        console.log("Auth is done!")
                         /* Quill Emoji Autocomplete */
                         initializeEmojiAutocomplete(document.querySelector('.ql-editor'));
                         initializeMentionAutocomplete(document.querySelector('.ql-editor'));

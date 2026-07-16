@@ -345,7 +345,7 @@ export default (io) => (socket) => {
 
             io.emit("updateMemberList");
             let room = castingMember.room;
-            io.in(room).emit("messageCreate", castingMember);
+            io.emit("messageCreate", castingMember);
 
             // this join call is absolutely important so we can always emit
             // data to ourselves based on the member id. very helpful!

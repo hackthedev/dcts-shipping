@@ -1,5 +1,5 @@
 import { serverconfig, xssFilters } from "../../index.mjs";
-import { getMemberList, hasPermission } from "../functions/chat/main.mjs";
+import {getMemberList, hasPermission, resolveGroupByChannelId} from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
@@ -13,17 +13,10 @@ export default (io) => (socket) => {
                 return;
             }
 
-            if(!member?.channel) {
-                if(member?.group) {
-                    let {members, index} = await getMemberList(member, member?.group, member?.lastIndex);
-                    response({ members, index })
-                } else {
-                    return response({ members: {}, index: 0, error: "No channel id provided" });
-                }
-            } else {
-                let {members, index} = await getMemberList(member, member?.channel, member?.lastIndex);
-                response({ members, index })
-            }   
+            if(!member?.channel) return response({ error: "Missing channel id from memberlist" })
+
+            let {members, index} = await getMemberList(member, member?.group, member?.lastIndex);
+            response({ members, index })
         }
     });
 }

@@ -117,7 +117,7 @@ class AdminActions {
     }
 
     static editChannel(channelId) {
-        ChatManager.openPagePopup("channelSettings", `/settings/channel?id=${channelId}`);
+        ChatManager.openPagePopup("channelSettings", `/settings/channel?id=${channelId}&group=${UserManager.getGroup()}`);
     }
 
     static createCategory() {

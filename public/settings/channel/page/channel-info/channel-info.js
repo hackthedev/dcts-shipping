@@ -17,7 +17,7 @@ function initChannelSettings(){
 
     socket.emit("getChannelInfo", {id: UserManager.getID(), token: UserManager.getToken(), channel: getUrlParams("id")}, async function (response) {
         try{
-            console.log(response)
+            console.log(response.data)
             if(response?.error){
                 showSystemMessage(
                     {
@@ -37,8 +37,10 @@ function initChannelSettings(){
                 showChannelSettings(response.data);
 
                 // chart shit
-                let channels = await getChannelTree();
+                let channels = await getChannelTree(getUrlParams("group"));
+                console.log(channels)
                 let channelConfigPath = getChannelPathFromGroupConfig(channels, getUrlParams("id"));
+
                 let defaultChannelRoom = `${channelConfigPath.channelId}`;
                 if(!defaultChannelRoom) throw new Error("Somehow unable to contruct room string?", defaultChannelRoom)
 
@@ -56,8 +58,6 @@ function initChannelSettings(){
         catch(err){
             console.log("Unable to get Channel Information");
             console.log(err);
-
-            alert("Unable to get channel info. Please try to reload slowly until it works. Known bug!");
         }
 
     });

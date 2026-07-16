@@ -345,10 +345,6 @@ export async function saveChatMessage(message, editedMsgId = null) {
 
     saveChatMessageInDb(message);
 
-    // increase count and save it
-    serverconfig.groups[group].channels.categories[category].channel[channel].msgCount += 1;
-    saveConfig(serverconfig);
-
     let mentions = getMentionIdsFromText(message.message)
 
     // add mentions to to inbox based on user mention

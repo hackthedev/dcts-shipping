@@ -425,15 +425,13 @@ async function updateEditedMessage(message){
 
 
     let lastMsg = getLastMessage(getContentMainContainer())
-    await withScrollLock(null, lastMsg?.element, async () => {
-        editElement.innerHTML = convertedMentions.text
-        editElement.innerHTML = sanitizeHtmlForRender(convertedMentions.text)
+    editElement.innerHTML = convertedMentions.text
+    editElement.innerHTML = sanitizeHtmlForRender(convertedMentions.text)
 
-        editElement.innerHTML += getMessageEditedHTML(message);
-        editElement.innerHTML += createMsgActions(message.messageId);
+    editElement.innerHTML += getMessageEditedHTML(message);
+    editElement.innerHTML += createMsgActions(message.messageId);
 
-        if (ChatTools.Scroll.isScrolledToBottom(getContentMainContainer())) ChatTools.Scroll.scrollDown("messageEdited")
-    })
+    if (ChatTools.Scroll.isScrolledToBottom(getContentMainContainer())) ChatTools.Scroll.scrollDown(getContentMainContainer())
 }
 
 function focusEditor() {
@@ -468,11 +466,11 @@ async function addNewMessageToChatLog(message, type = null) {
     let container = getContentMainContainer();
     let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(container, 20);
 
-    if (!message) throw new Error("No message found to display");
-    message.type = type;
+    if (!message) throw new Error("No message found to display");;
 
     // lets increase the channel count first
     // then mark it for ourselves
+    console.log(message.channel)
     if (message?.channel) {
         ChatManager.increaseChannelMarkerCount(message.channel)
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())
@@ -528,7 +526,13 @@ function registerMessageCreateEvent() {
 
 
     socket.on('messageCreate', async function (message) {
-        addNewMessageToChatLog(message)
+        await addNewMessageToChatLog(message)
+
+        requestAnimationFrame(() => {
+            EventDispatcher.send("messageCreate", {
+                message
+            });
+        })
     });
 }
 
@@ -1146,6 +1150,10 @@ async function createMsgHTML({
 
     let messageReactionsRow = await getMessageReactionsHTML(message);
 
+    let sanitized = ChatTools.Sanitize.forRender(message.message) ?? null;
+
+    if(sanitized.trim().length === 0) sanitized = "<span style='color: orange;font-size: 10px;'>[ UNSUPPORTED CONTENT ]</span>";
+
     let messageRow =
         `
         <div class="content ${isSystem ? "system" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}"  
@@ -1156,7 +1164,7 @@ async function createMsgHTML({
             ${messageType ? `data-message-type="${messageType}"` : ""}>
             
             ${createActions === true ? createMsgActions(message?.author?.id, isSystem) : ""}
-            ${ChatTools.Sanitize.forRender(message.message)}  ${message?.editCode ? message?.editCode : ""}    
+            ${sanitized}  ${message?.editCode ? message?.editCode : ""}    
             
             ${messageReactionsRow ? messageReactionsRow : ""}
         </div>
@@ -1215,6 +1223,8 @@ async function createMsgHTML({
                         >
                             ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(truncateText(message?.author?.name, 30), true))
                         }</label>` : ""}
+                    
+                    <div class="badge-${message?.type}"></div>
                     
                     
                     <label class="timestamp" data-timestamp="${message.timestamp}">
@@ -1477,7 +1487,8 @@ async function displayMessagesInElement({
     }
 }
 
-async function getChatlog(container, index = -1, appendTop = false) {
+async function getChatlog(container, index = -1, appendTop = false, preventDispatch = false) {
+
     if (UserManager.getChannel() === null) return
     if (UserManager.getCategory() === null) return
     if (UserManager.getGroup() === null) return
@@ -1486,6 +1497,12 @@ async function getChatlog(container, index = -1, appendTop = false) {
     let channelId = UserManager.getChannel();
     let refElement = getFirstMessage(container)?.element
     let channelbar = document.querySelector("#channelname-bar");
+
+    if(preventDispatch === false){
+        EventDispatcher.send("getChatLog", {
+            container, index, appendTop, channelId, channelType: await getCurrentChannelType(channelId), firstElement: refElement, preventDispatch
+        });
+    }
 
     ElementLoader.start(channelbar, {
         style: "linear",
@@ -1509,7 +1526,7 @@ async function getChatlog(container, index = -1, appendTop = false) {
         // reset chat
         if (response?.error === "denied") container.innerHTML = ""; // fuck em
         if (response.data == null) {
-            console.log("Data was null history");
+            console.log("Data was null - history");
             Clock.stop("load_messages_total")
             ElementLoader.stop(channelbar);
             return;
@@ -1551,7 +1568,11 @@ async function getChatlog(container, index = -1, appendTop = false) {
         Clock.stop("load_messages_processing")
 
         if (response.data.length === 0 && UserManager.getChannel() && container.innerText.trim().length === 0) {
-            container.insertAdjacentHTML("beforeend", `<div style="width: 100%;text-align: center; color: gray; font-style: italic;display: block !important; float: left !important;" id="msg-0">No messages yet... be the first one!</div>`);
+            container.insertAdjacentHTML("beforeend", `<div class="no-data-indicator" style="width: 100%;text-align: center; color: gray; font-style: italic;display: block !important; float: left !important;" id="msg-0">No messages yet... be the first one!</div>`);
+        }
+        else{
+            let noDataIndicator = getContentMainContainer().querySelector(".no-data-indicator");
+            if(noDataIndicator) noDataIndicator.remove();
         }
 
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())
@@ -1576,6 +1597,10 @@ async function getChatlog(container, index = -1, appendTop = false) {
         ElementLoader.stop(channelbar);
 
         Inbox.updateInboxMessageEntries();
+
+        EventDispatcher.send("getChatLog_finish", {
+            container, index, appendTop, channelId, channelType: await getCurrentChannelType(channelId), firstElement: refElement, preventDispatch
+        });
     });
 }
 
@@ -1635,7 +1660,6 @@ function getLastMessage(container) {
     if (lastMessageInChat) {
         let messageContainer = lastMessageInChat.closest(".message-container");
 
-
         let usernameElement = messageContainer.querySelector(".username");
         if (!usernameElement) {
             console.warn("Couldnt get last message because username element wasnt found")
@@ -1653,8 +1677,6 @@ function getLastMessage(container) {
             element: lastMessageInChat,
             userId
         }
-    } else {
-        console.warn("couldnt get last message")
     }
 }
 

@@ -60,7 +60,7 @@ export async function downloadTheme(themeName){
     const cssPath = path.join(targetDir, `${themeName}.css`);
     const configPath = path.join(targetDir, "config.json");
 
-    if(themeName.indexOf("..")) return {
+    if(themeName.includes("..")) return {
         error: "Malicious filename"
     }
 
@@ -105,11 +105,11 @@ export async function downloadTheme(themeName){
 
     let config = null;
 
-    if(configPath.indexOf("..")) return {
+    if(configPath.includes("..")) return {
         error: "Malicious filename"
     }
 
-    if(cssPath.indexOf("..")) return {
+    if(cssPath.includes("..")) return {
         error: "Malicious filename"
     }
 

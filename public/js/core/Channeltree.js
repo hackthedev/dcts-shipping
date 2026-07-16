@@ -85,7 +85,7 @@ class ChannelTree {
                                     
                                     <!-- unkown fallback -->
                                     ${channel.type !== "voice" && channel.type !== "text" ?
-                                    `<img src="/img/worker.png" alt="Unkown" class="inline-text-emoji default">` : ""}
+                                    `<img src="/img/worker.png" alt="Unkown" class="inline-text-emoji default channellist-icon ${channel.type}">` : ""}
                                     
                                     ${channel.name}
                                     
@@ -142,6 +142,8 @@ class ChannelTree {
 
             markCurrentChannelStyle(UserManager.getChannel())
             localStorage.setItem("channeltree_html_cache", channeltree.innerHTML);
+
+            EventDispatcher.send("getChannelTree_finish");
         });
     }
 

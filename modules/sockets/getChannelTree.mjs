@@ -8,11 +8,9 @@ export default (io) => (socket) => {
     socket.on('getChannelTree', async function (member, response) {
         if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
-            member.id = xssFilters.inHTMLData(member.id)
-            member.token = xssFilters.inHTMLData(member.token)
-            member.group = xssFilters.inHTMLData(member.group)
+            if(!member?.group) return response({ error: "Missing group id"})
 
-            if (!await hasPermission(member.id, ["viewGroup", "manageChannels"], member.group)) {
+            if (!await hasPermission(member.id, ["viewGroup", "manageChannels"], member?.group)) {
                 return response({ type: "error", error: "Your access to this group was denied" });
             }
 

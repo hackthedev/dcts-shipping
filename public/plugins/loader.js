@@ -1,6 +1,5 @@
 function loadPlugins(){
     socket.emit("getPluginList", {id: UserManager.getID(), token: UserManager.getToken()}, function (response) {
-        console.log(response);
         Object.keys(response.plugins).forEach(function(plugin) {
             let pluginObj = response.plugins[plugin];
 
@@ -33,4 +32,27 @@ function loadScript(url, callback) {
     };
 
     document.head.appendChild(script);
+}
+
+async function injectCss(src, id = null) {
+    const existing = id
+        ? document.getElementById(id)
+        : [...document.querySelectorAll('link[rel="stylesheet"]')]
+            .find(link => link.href === new URL(src, document.baseURI).href);
+
+    if (existing) return existing;
+
+    return new Promise((resolve, reject) => {
+        const link = document.createElement("link");
+
+        link.rel = "stylesheet";
+        link.href = src;
+
+        if (id) link.id = id;
+
+        link.onload = () => resolve(link);
+        link.onerror = () => reject(new Error(`Could not load CSS: ${src}`));
+
+        document.head.appendChild(link);
+    });
 }

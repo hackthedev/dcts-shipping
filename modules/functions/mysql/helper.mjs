@@ -68,6 +68,11 @@ export async function loadMembersFromDB() {
 
     for (const row of rows) {
         serverconfig.servermembers[row.id] = row;
+
+        // check if member is in default role
+        if (!serverconfig.serverroles["0"].members.includes(row.id)) {
+            serverconfig.serverroles["0"].members.push(row.id);
+        }
     }
 
     const sys = {
@@ -131,8 +136,8 @@ export async function saveChatMessageInDb(message) {
     delete message.editedAt
 
     const query = `
-        INSERT INTO messages (authorId, messageId, message, room, editedAt)
-        VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY
+        INSERT INTO messages (createdAt, authorId, messageId, message, room, editedAt)
+        VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY
         UPDATE message = VALUES (message), room = VALUES (room), editedAt = VALUES (editedAt)
     `;
 
@@ -143,7 +148,7 @@ export async function saveChatMessageInDb(message) {
     }
 
     const encodedMessage = JSON.stringify(message);
-    return await queryDatabase(query, [message.author.id, message.messageId, encodedMessage, messageRoom, messageEditedAt]);
+    return await queryDatabase(query, [message?.createdAt ?? new Date().getTime(), message.author.id, message.messageId, encodedMessage, messageRoom, messageEditedAt ?? null]);
 }
 
 export async function logEditedChatMessageInDb(message) {

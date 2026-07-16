@@ -14,7 +14,7 @@ export default (io) => (socket) => {
             member.id = xssFilters.inHTMLData(member.id)
             member.token = xssFilters.inHTMLData(member.token)
             member.target = xssFilters.inHTMLData(member.target)
-            
+
             try {
                 var executer = getMemberHighestRole(member.id);
                 var target = getMemberHighestRole(member.target);

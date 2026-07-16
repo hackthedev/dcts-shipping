@@ -45,7 +45,7 @@ export default (io) => (socket) => {
 
                     serverconfig.serverroles[member.role].members.push(member.target);
                     saveConfig(serverconfig);
-                    
+
                     io.emit("updateMemberList");
                     io.to(usersocket[member.target]).emit("updateMemberList");
                     response({ type: "success", msg: "Role assigned" });

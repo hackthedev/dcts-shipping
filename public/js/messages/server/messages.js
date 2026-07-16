@@ -1177,9 +1177,19 @@ async function createMsgHTML({
     if (!message?.author?.name) message.author.name = "Unkown Member?";
     if (reply?.messageId && !reply?.author?.name) message.author.name = "Unkown Member?";
 
+    let colorStyle = `color: ${!message?.author?.background ? "" : message?.author?.color}; 
+                            background: ${message?.author?.background ?? ""}; 
+                            background-clip: ${message?.author?.backgroundClip ?? ""}`
+
+
     // if message was a reply
     let replyCode = "";
     if (reply?.messageId) {
+
+        let replyColorStyle = `color: ${!reply?.author?.background ? "" : reply?.author?.color}; 
+                            background: ${reply?.author?.background ?? ""}; 
+                            background-clip: ${reply?.author?.backgroundClip ?? ""}`
+
         replyCode = `
             <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${stripHTML(reply?.author?.id, false)} ${messageType ? `data-message-type="${messageType}"` : ""}">            
                 <!-- very creative name indeed -->
@@ -1189,7 +1199,7 @@ async function createMsgHTML({
                     <img class="icon" draggable="false" src="${ChatTools.Sanitize.forRender(reply?.author?.icon, false)}" data-member-id="${ChatTools.Sanitize.forRender(reply?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>
                 <div class="meta">
-                    <label class="username" data-member-id="${unescapeHtmlEntities(ChatTools.Sanitize.forRender(reply?.author?.id, false), true)}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
+                    <label class="username" data-member-id="${unescapeHtmlEntities(ChatTools.Sanitize.forRender(reply?.author?.id, false), true)}" style="${replyColorStyle};">
                         ${ChatTools.Sanitize.forRender(ChatTools.Sanitize.truncateText(reply?.author?.name, 25), false)}
                     </label>
                 </div>
@@ -1218,12 +1228,7 @@ async function createMsgHTML({
                     ${isSystem !== true ?
                         `<label class="username" 
                         data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}" 
-                        style="
-                            color: ${message?.author?.color}; 
-                            background: ${message?.author?.background ?? ""}; 
-                            background-clip: ${message?.author?.backgroundClip ?? ""};
-                        "
-                        >
+                        style="${colorStyle}">
                             ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(truncateText(message?.author?.name, 30), true))
                         }</label>` : ""}
                     

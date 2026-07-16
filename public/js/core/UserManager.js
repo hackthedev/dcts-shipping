@@ -72,12 +72,18 @@ class UserManager {
         let roleCode = "";
         for (let i = 0; i < memberObj?.roles.length; i++) {
             var role = memberObj?.roles[i];
-            var roleColor = role.color;
+            var roleColor = role.color ?? "";
             var roleBackground = role?.background?.replace("text", "");
             var roleBackgroundClip = role.backgroundClip;
             var roleName = role.name;
 
-            roleCode += `<code class="role" id="profile-role-entry-${role.id}"><div class="role_color" style="background: ${roleColor === "transparent" ? roleBackground : roleColor};"></div><span style="color: ${roleColor};background: ${roleBackground};background-clip: ${roleBackgroundClip};">${roleName}</span></code>`;
+            let colorStyle = `color: ${!roleBackground ? "" : roleColor}; 
+                            background: ${roleBackground ?? ""}; 
+                            background-clip: ${roleBackgroundClip ?? ""}`
+
+            roleCode += `<code class="role" id="profile-role-entry-${role.id}" data-role-id="${role.id}">
+            <div class="role_color" style="${colorStyle}"></div>
+            <span style="color: ${roleColor};background: ${roleBackground};background-clip: ${roleBackgroundClip};">${roleName}</span></code>`;
         }
 
         let isMuted = memberObj?.isMuted;

@@ -1218,8 +1218,11 @@ async function createMsgHTML({
                     ${isSystem !== true ?
                         `<label class="username" 
                         data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}" 
-                        style="color: ${message?.author?.color}; background: ${message?.author?.background}; 
-                        background-clip: ${message?.author?.backgroundClip};"
+                        style="
+                            color: ${message?.author?.color}; 
+                            background: ${message?.author?.background ?? ""}; 
+                            background-clip: ${message?.author?.backgroundClip ?? ""};
+                        "
                         >
                             ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(truncateText(message?.author?.name, 30), true))
                         }</label>` : ""}
@@ -1359,8 +1362,7 @@ function createMsgActions(messageId, isSystem = false) {
 }
 
 function getUrlFromText(text) {
-    var geturl = new RegExp("(^|[ \t\r\n])((ftp|http|https|mailto|file):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))", "g");
-    return text.match(geturl)
+    return ChatTools.Media.getUrlFromText(text);
 }
 
 async function transformDmMessage(message, messageType){

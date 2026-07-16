@@ -480,7 +480,7 @@ async function addNewMessageToChatLog(message, type = null) {
 
     // the message was not created in the room we're currently in, but thats fine.
     // we will instead show the notification icon and return;
-    if (message?.room !== UserManager.getRoom() && type === null) {
+    if (message?.room !== UserManager.getChannel() && type === null) {
         ChatManager.setChannelMarker(message.channel, true);
         await updateUIIndicators(message)
         return console.warn("Not showing message");
@@ -872,7 +872,7 @@ function compareTimestamps(stamp1, stamp2) {
 function getMessageEditedHTML(message) {
     return `
             <div class="edit-notice">
-                <span>Edited </span> <span class="editedMsg">(${new Date(message.lastEdited).toLocaleString("narrow")})</span>
+                <span>Edited </span> <span class="editedMsg">(${new Date(message.lastEdited ?? message.editedAt).toLocaleString("narrow")})</span>
             </div>
             `;
 }
@@ -1125,7 +1125,7 @@ async function createMsgHTML({
     let isSigned = message?.sig?.length > 10;
     let reply = message?.reply;
 
-    if (message?.lastEdited != null) {
+    if (message?.lastEdited != null || message?.editedAt != null) {
         message.editCode = getMessageEditedHTML(message);
     }
 

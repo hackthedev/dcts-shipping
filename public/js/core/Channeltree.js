@@ -80,7 +80,14 @@ class ChannelTree {
                                     style="display: block;"
                                 >                               
                                     <span class="message-marker-icon"></span>
-                                    ${channel.type === "text" ? emojiCodeToImg("⌨", true) : emojiCodeToImg("🎙", true)} ${channel.name}
+                                    ${channel.type === "text" ? emojiCodeToImg("⌨", true) : ""} 
+                                    ${channel.type === "voice" ? emojiCodeToImg("🎙", true) : ""}
+                                    
+                                    <!-- unkown fallback -->
+                                    ${channel.type !== "voice" && channel.type !== "text" ?
+                                    `<img src="/img/worker.png" alt="Unkown" class="inline-text-emoji default">` : ""}
+                                    
+                                    ${channel.name}
                                     
                                     <span class="channel-mention-marker" data-channel-id="${channel.id}">5</span>     
                                 </a>

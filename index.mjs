@@ -256,7 +256,6 @@ try {
 
             getUploadPath: async (req) => {
                 let type = req.headers["x-upload-type"] ?? "upload";
-                console.log(type)
 
                 if (type === "emoji") return "./public/emojis";
 
@@ -462,21 +461,31 @@ import {getMemberHighestRole, getMemberHighestUploadLimit} from "./modules/funct
 const pluginsDir = path.join(__dirname, "plugins");
 const publicPluginsDir = path.join(__dirname, "public", "plugins");
 
-// Function to dynamically load and register socket event handlers
-const registerPluginSocketEvents = async (socket, pluginSocketsDir) => {
-    const files = fs.readdirSync(pluginSocketsDir);
+// function to dynamically load and register socket event handlers
+const registerPluginSocketEvents = async (io, socket, pluginSocketsDir) => {
+    const files = fs.readdirSync(pluginSocketsDir, {
+        recursive: true
+    });
+
     for (const file of files) {
-        if (file.endsWith(".mjs")) {
-            const filePath = path.join(pluginSocketsDir, file);
+        if (!file.endsWith(".mjs")) continue;
+
+        const filePath = path.join(pluginSocketsDir, file);
+
+        try {
             const fileUrl = pathToFileURL(filePath).href;
             const {default: handler} = await import(fileUrl);
 
-            try {
-                handler(socket);
-            } catch (e) {
-                Logger.error(fileUrl);
-                Logger.error(e);
+            if (typeof handler !== "function") {
+                throw new Error(`Default export is not a function: ${filePath}`);
             }
+
+            handler(io, socket);
+
+            Logger.debug(`Preloaded socket handler: ${filePath}`);
+        } catch (error) {
+            Logger.error(filePath);
+            Logger.error(error);
         }
     }
 };
@@ -540,7 +549,8 @@ const processPlugins = async () => {
             Logger.warn(
                 `Skipped loading plugin ${pluginTitle} (${pluginName}) because its not enabled`,
             );
-            continue;
+            Logger.warn("This was temporarily enabled due to testing!")
+            //continue;
         }
 
         // Load and execute plugin functions
@@ -551,13 +561,14 @@ const processPlugins = async () => {
         // Register socket events
         if (fs.existsSync(pluginSocketsDir)) {
             io.on("connection", (socket) => {
-                registerPluginSocketEvents(socket, pluginSocketsDir).catch((err) =>
+                registerPluginSocketEvents(io, socket, pluginSocketsDir).catch((err) =>
                     console.error(err),
                 );
             });
         }
 
         // Move web folders to the public directory
+        console.log(pluginWebDir)
         if (fs.existsSync(pluginWebDir)) {
             await moveWebFolders(pluginWebDir, pluginName);
         }
@@ -631,6 +642,10 @@ const tables = [
             {
                 name: "createdAt",
                 type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)",
+            },
+            {
+                name: "editedAt",
+                type: "bigint DEFAULT NULL",
             },
         ]
     },
@@ -732,6 +747,7 @@ const tables = [
             {name: "isMuted", type: "BOOLEAN DEFAULT FALSE"},
             {name: "password", type: "text DEFAULT NULL"},
             {name: "publicKey", type: "text DEFAULT ''"},
+            {name: "type", type: "varchar(500) DEFAULT NULL"},
             {name: "isVerifiedKey", type: "BOOLEAN DEFAULT FALSE"},
             {name: "pow", type: "text DEFAULT ''"},
         ]

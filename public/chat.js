@@ -996,12 +996,27 @@ async function sendMessageToServer(authorId = UserManager.getID(),
         category: UserManager.getCategory(),
         channel: UserManager.getChannel(),
         editedMsgId: editMessageId,
-        replyMsgId: replyMessageId
+        replyMsgId: replyMessageId,
+        type: null,
     };
 
     // if we're using the client, sign the message
     if (isLauncher()) {
         msgPayload = await Client().SignJson(msgPayload);
+    }
+
+    // only send dcts messages and dispatch
+    let channelType = await getCurrentChannelType(UserManager.getChannel());
+
+    EventDispatcher.send("messageCreate", {
+        message: msgPayload,
+        channelType,
+    })
+
+
+    if(channelType !== "text" && channelType != null){
+        resetEditorStates();
+        return;
     }
 
     return new Promise((resolve, reject) => {
@@ -1029,21 +1044,25 @@ async function sendMessageToServer(authorId = UserManager.getID(),
                 ChatManager.setChannelMarkerCounter(UserManager.getChannel())
 
                 // reset all flags
-                editMessageId = null;
-                replyMessageId = null;
-                cancelMessageEdit();
-                cancelMessageReply();
-
-                ChatTools.Scroll.scrollDown(getContentMainContainer()); // forgot that
-                setTimeout(() => focusEditor(), 1)
-                editor.innerHTML = "<p><br></p>"
-
-                saveChannelMessageDraft(UserManager.getChannel(), null)
+                resetEditorStates();
 
                 resolve(true);
             }
         });
     })
+
+    function resetEditorStates(){
+        editMessageId = null;
+        replyMessageId = null;
+        cancelMessageEdit();
+        cancelMessageReply();
+
+        ChatTools.Scroll.scrollDown(getContentMainContainer()); // forgot that
+        setTimeout(() => focusEditor(), 1)
+        editor.innerHTML = "<p><br></p>"
+
+        saveChannelMessageDraft(UserManager.getChannel(), null)
+    }
 }
 
 function getReadableDuration(date) {
@@ -1391,6 +1410,13 @@ async function waitFor(callback, timeout = 0) {
             resolve(result)
         }, timeout)
     });
+}
+
+async function getCurrentChannelType(){
+    let channelId = UserManager.getChannel()
+
+    let channelElementInList = document.querySelector(`#channeltree a.channelTrigger[data-channel-id="${channelId}"]`);
+    return channelElementInList?.getAttribute("data-channel-type") ?? null;
 }
 
 async function setUrl(param, isVC = false) {

@@ -251,6 +251,7 @@ export async function getSavedChatMessage(channelId, index = -1) {
 
                 // restore deleted room key in saveChatMessageInDb.
                 if(!message?.room) message.room = loadedMessages[i].room;
+                if(!message?.editedAt) message.editedAt = loadedMessages[i].editedAt;
 
                 if (message?.message) {
                     // new, enhanced message system

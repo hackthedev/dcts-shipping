@@ -1177,7 +1177,8 @@ async function createMsgHTML({
     if (!message?.author?.name) message.author.name = "Unkown Member?";
     if (reply?.messageId && !reply?.author?.name) message.author.name = "Unkown Member?";
 
-    let colorStyle = `color: ${!message?.author?.background ? "" : message?.author?.color}; 
+
+    let colorStyle = `color: ${message?.author?.color}; 
                             background: ${message?.author?.background ?? ""}; 
                             background-clip: ${message?.author?.backgroundClip ?? ""}`
 
@@ -1185,7 +1186,7 @@ async function createMsgHTML({
     let replyCode = "";
     if (reply?.messageId) {
 
-        let replyColorStyle = `color: ${!reply?.author?.background ? "" : reply?.author?.color}; 
+        let replyColorStyle = `color: ${reply?.author?.color}; 
                             background: ${reply?.author?.background ?? ""}; 
                             background-clip: ${reply?.author?.backgroundClip ?? ""}`
 

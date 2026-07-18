@@ -1104,11 +1104,6 @@ class UserManager {
             </div>
             `,
             async (values) => {
-                console.log('Username:', values.username);
-                console.log('Login Name:', values.loginName);
-                console.log('Password:', values.password);
-                console.log('Repeated Password:', values.repeatedPassword);
-
                 // validate password
                 if (values.repeatedPassword !== values.password) {
                     customAlerts.showAlert("error", "Your repeated password is incorrect");
@@ -1143,7 +1138,7 @@ class UserManager {
 
 
                 // resubmit userjoin but with onboarding done
-                await ChatManager.userJoined(true, values.password, values.loginName, code)
+                await ChatManager.userJoined(true, values.password, values.loginName, code, true)
             },
             null,
             null,

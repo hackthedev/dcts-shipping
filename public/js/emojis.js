@@ -622,6 +622,7 @@ async function displayGifsInPicker(gifs){
                     <div class="gif-entry-wrapper ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}">
                         <img class="gif-entry ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}"
                         onclick="sendGif('${cleanUrl}')" src="${ChatManager.proxyUrl(cleanUrl)}"
+                        data-src="${cleanUrl}"
                         >
                          ${(isNSFW || isSensitive) ? `
                             <span class="notice ${isNSFW ? "nsfw" : "sensitive"}">

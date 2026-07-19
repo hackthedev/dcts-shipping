@@ -327,6 +327,8 @@ document.addEventListener("DOMContentLoaded", function () {
             ".image-embed-container img",
             ".video-embed",
             ".emoji-entry img",
+            "img",
+            "video",
             ".message-container .contentRows img",
             "#popup-content img",
         ],
@@ -342,19 +344,27 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
 
                     openNewTab(url);
+                },
+                condition: async (data) => {
+                    let url = data.element.src || data.element?.getAttribute("data-src")
+                    return url != null;
                 }
             },
             {
                 icon: "&#9741;",
                 text: "Copy Link",
                 callback: async (data) => {
-                    let url = data.element?.getAttribute("data-original-url") || data.element.src || data.element?.getAttribute("data-src")
+                    let url = data.element?.getAttribute("data-src") || data.element?.getAttribute("data-original-url") || data.element.src
                     if (!url) {
                         console.warn("Couldnt copy link because src wasnt found");
                         return;
                     }
 
                     navigator.clipboard.writeText(url);
+                },
+                condition: async (data) => {
+                    let url = data.element?.getAttribute("data-src") || data.element.src || data.element?.getAttribute("data-original-url")
+                    return url != null;
                 }
             }
         ]

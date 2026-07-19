@@ -583,8 +583,10 @@ function clearGifContainer() {
             <input autocomplete="off" id="gif-searchbar-input" placeholder="Search anything, then press enter" type="text" value="${search?.value ? search?.value : ""}">
         </div>
         
-        <div class="gif-entries"></div>
-`;
+        <div class="gif-entries-scroll">
+            <div class="gif-entries"></div>
+        </div>
+        `;
     listenForGifSearch();
 }
 
@@ -616,9 +618,19 @@ async function displayGifsInPicker(gifs){
             if(!getGifEntryListElement()) throw new Error("No gif container element found!");
 
             getGifEntryListElement()?.insertAdjacentHTML("beforeend", `
-                    <img class="gif-entry ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}"
-                    onclick="sendGif('${cleanUrl}')" src="${ChatManager.proxyUrl(cleanUrl)}"
-                    >`);
+                    
+                    <div class="gif-entry-wrapper ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}">
+                        <img class="gif-entry ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}"
+                        onclick="sendGif('${cleanUrl}')" src="${ChatManager.proxyUrl(cleanUrl)}"
+                        >
+                         ${(isNSFW || isSensitive) ? `
+                            <span class="notice ${isNSFW ? "nsfw" : "sensitive"}">
+                                ${isNSFW ? "NSFW" : "Sensitive"}
+                            </span>
+                        ` : ""}
+                    </div>
+                    
+                    `);
         }
 
         requestAnimationFrame(() => {

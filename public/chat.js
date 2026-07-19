@@ -1281,24 +1281,6 @@ socket.on('newMemberJoined', async function (author) {
 
 });
 
-socket.on('receiveGifImage', async function (response) {
-    clearGifContainer()
-
-    if (response?.gifs) {
-        for (let gif of response.gifs) {
-            document.getElementById("gif-entry-container").insertAdjacentHTML("beforeend", `<img
-                    onclick="sendGif('${gif.media_formats.gif.url}')" src="${ChatManager.proxyUrl(gif.media_formats.nanogif.url)}"
-                    style="padding: 1%;border-radius: 20px;float: left;width: 48%; height: fit-content;">`);
-        }
-    }
-
-    requestAnimationFrame(() => {
-        var gifSearchbarInput = document.getElementById("gif-searchbar-input");
-        focusElementInput(gifSearchbarInput)
-        Clock.stop("gifSearch")
-    })
-});
-
 
 socket.on('receiveToken', async function (data) {
     CookieManager.setCookie("dcts_token", data, 365);

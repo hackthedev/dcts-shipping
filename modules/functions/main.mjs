@@ -1060,69 +1060,20 @@ export function escapeHtml(text) {
     });
 }
 
-export function httpGetAsync(theUrl, callback, id) {
-    // create the request object
-    var xmlHttp = new XMLHttpRequest();
+export async function searchGif(search) {
+    // using default locale of en_US
+    var search_url = `https://gifs.dcts.community/gifs/search/${encodeURIComponent(search)}/0/200`;
+    if(!search) search_url = `https://gifs.dcts.community/gifs/trending`;
 
-    // set the state change callback to capture when the response comes in
-    xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            callback(xmlHttp.responseText, id);
-        }
+    let response = await fetch(search_url, {
+        signal: AbortSignal.timeout(5_000)
+    })
+
+    if(response.status !== 200){
+        return response;
     }
 
-    // open as a GET call, pass in the url and set async = True
-    xmlHttp.open("GET", theUrl, true);
-    //xmlHttp.setRequestHeader('Content-Type', 'application/json');
-
-    /*
-    xmlHttp.setRequestHeader('Access-Control-Allow-Headers', '*');
-     xmlHttp.setRequestHeader('Content-Type', 'application/json');
-    xmlHttp.setRequestHeader('Access-Control-Allow-Headers', '*');
-    xmlHttp.setRequestHeader("Access-Control-Allow-Origin", "*")
-    xmlHttp.setRequestHeader("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS")
-
-     */
-
-    // call send with no params as they were passed in on the url string
-    xmlHttp.send(null);
-
-    return;
-}
-
-export function tenorCallback_search(responsetext, id) {
-    // Parse the JSON response
-    var response_objects = JSON.parse(responsetext);
-
-    var top_10_gifs = response_objects["results"];
-
-    // load the GIFs -- for our example we will load the first GIFs preview size (nanogif) and share size (gif)
-
-    const targetSocket = [...io.sockets.sockets.values()]
-        .find(s => s.data.memberId === id);
-
-    targetSocket.emit("receiveGifImage", {
-        gifs: top_10_gifs
-    });
-
-}
-
-export function searchTenor(search, id) {
-    // set the apikey and limit
-    var apikey = serverconfig.serverinfo.tenor.api_key;
-    var clientkey = serverconfig.serverinfo.tenor.client_key;
-    var lmt = serverconfig.serverinfo.tenor.limit;
-
-    // test search term
-    var search_term = search;
-
-    // using default locale of en_US
-    var search_url = `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(search_term)}&key=${apikey}&client_key=${clientkey}&limit=${lmt}`;
-
-    httpGetAsync(search_url, tenorCallback_search, id);
-
-    // data will be loaded by each call's callback
-    return;
+    return await response?.json();
 }
 
 export function addMinutesToDate(date, minutes) {

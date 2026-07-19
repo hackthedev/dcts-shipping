@@ -501,44 +501,46 @@ function removeUnusedEmojisFromContainer(emojiResponseData) {
 }
 
 
-function queryTenorSearch(search) {
-    Clock.start("gifSearch")
-    socket.emit("searchTenorGif", {
-        id: UserManager.getID(),
-        token: UserManager.getToken(),
-        search
-    }, function (response) {
-        if (response.type === "success") {
-            console.log("Tenor Response", response);
-        } else {
-            showSystemMessage({
-                title: response.msg || "",
-                text: "",
-                icon: response.type,
-                img: null,
-                type: response.type,
-                duration: 1000
-            });
-        }
-    });
+async function queryGifSearch(search) {
+    return new Promise(resolve => {
+        socket.emit("searchGif", {
+            id: UserManager.getID(),
+            token: UserManager.getToken(),
+            search
+        }, function (response) {
+            if (!response.error) {
+                console.log("Response", response);
+                resolve(response?.gifs);
+
+            } else {
+                showSystemMessage({
+                    title: response.error || "",
+                    text: "",
+                    icon: response.type,
+                    img: null,
+                    type: response.type,
+                    duration: 1000
+                });
+                resolve(response?.error);
+            }
+        });
+    })
 }
 
 function listenForGifSearch() {
-    const gifContainer = document.getElementById("gif-entry-container");
-    const emojiEntryContainer = document.getElementById("emoji-entry-container");
-
     var gifSearchbarInput = document.getElementById("gif-searchbar-input");
-    // Execute a function when the user presses a key on the keyboard
+
+    // basically what we're doing here is waiting for the user to input something and once done we
+    // will search for the stuff instead of instantly searching for something
     let gifSearchTimeout;
-    gifSearchbarInput.addEventListener("input", function () {
+    gifSearchbarInput.addEventListener("input", async function () {
         clearTimeout(gifSearchTimeout);
 
-        gifSearchTimeout = setTimeout(() => {
+        gifSearchTimeout = setTimeout(async () => {
             const query = gifSearchbarInput.value
-            if (!query) return;
-
-            queryTenorSearch(query);
-        }, 500);
+            let gifs = await queryGifSearch(query);
+            await displayGifsInPicker(gifs)
+        }, 1000);
     });
 }
 
@@ -570,22 +572,61 @@ function changeGIFSrc(url, element) {
     element.src = url;
 }
 
+function getGifEntryListElement(){
+    return document.querySelector("#gif-entry-container .gif-entries") ?? null;
+}
+
 function clearGifContainer() {
     let search = document.getElementById("gif-searchbar-input");
-    document.getElementById("gif-entry-container").innerHTML = `<div id="gif-searchbar"><input autocomplete="off" id="gif-searchbar-input"
-                                                       placeholder="Search anything, then press enter" type="text" value="${search?.value ? search?.value : ""}"></div>`;
+    document.getElementById("gif-entry-container").innerHTML =
+        `<div id="gif-searchbar">
+            <input autocomplete="off" id="gif-searchbar-input" placeholder="Search anything, then press enter" type="text" value="${search?.value ? search?.value : ""}">
+        </div>
+        
+        <div class="gif-entries"></div>
+`;
     listenForGifSearch();
 }
 
-function getGifs() {
+async function getGifs() {
     var gifEntryContainer = document.getElementById("gif-entry-container");
     var emojiEntryContainer = document.getElementById("emoji-entry-container");
 
     emojiEntryContainer.style.display = "none"
     gifEntryContainer.style.display = "flex"
-    clearGifContainer()
-    queryTenorSearch("trending")
 
+    let gifs = await queryGifSearch();
+    await displayGifsInPicker(gifs);
+}
+
+async function displayGifsInPicker(gifs){
+    if(!gifs) throw new Error("No gifs provided!")
+    clearGifContainer()
+
+    if(Object.keys(gifs ?? {})?.length > 0){
+        for (let gif of gifs) {
+
+            let gifHost = gif?.host ?? "gifs.dcts.community";
+            let gifUrl = `https://${gifHost}/upload/${gif.fileHash}`;
+            let cleanUrl = ChatTools.Sanitize.stripHTML(gifUrl);
+
+            let isNSFW = gif.isNSFW;
+            let isSensitive = gif.isSensitive;
+
+            if(!getGifEntryListElement()) throw new Error("No gif container element found!");
+
+            getGifEntryListElement()?.insertAdjacentHTML("beforeend", `
+                    <img class="gif-entry ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}"
+                    onclick="sendGif('${cleanUrl}')" src="${ChatManager.proxyUrl(cleanUrl)}"
+                    >`);
+        }
+
+        requestAnimationFrame(() => {
+            var gifSearchbarInput = document.getElementById("gif-searchbar-input");
+            focusElementInput(gifSearchbarInput)
+            Clock.stop("gifSearch")
+        })
+    }
 }
 
 

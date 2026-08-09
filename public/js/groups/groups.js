@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 condition: async (data) => {
                     let groupId = getGroupIdFromElement(data.element);
                     if(!groupId){
-                        console.error("Cant change  group icon because cant get group id from element")
+                        console.warn("Cant change  group icon because cant get group id from element")
                         return;
                     }
                     return await UserManager.checkPermission("manageGroups") === true

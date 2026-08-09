@@ -34,8 +34,7 @@ export async function listThemes() {
     }
 
     if (!Array.isArray(githubThemes) || !githubThemes.length) {
-        githubThemes = await getThemes();
-        await saveThemeCache(githubThemes);
+        githubThemes = []
     }
 
     const localDir = path.resolve("public", "css", "themes");

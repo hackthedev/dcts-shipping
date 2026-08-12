@@ -11,6 +11,7 @@
         "@hackthedev/frontend-libs": "1.1.0",
         "@hackthedev/json-tools": "1.0.8",
         "@hackthedev/terminal-logger": "1.0.1",
-        "@hackthedev/arraytools": "1.0.2"
+        "@hackthedev/arraytools": "1.0.2",
+        "@hackthedev/datetools": "1.0.3"
     }
 }

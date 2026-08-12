@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "bun install.mjs",
+    "postinstall": "bun postinstall.mjs",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
@@ -33,6 +33,7 @@
     "jsonwebtoken": "^9.0.3",
     "livekit-server-sdk": "^2.15.5",
     "multer": "^2.2.0",
+    "mysql2": "^3.23.3",
     "node-fetch": "^3.3.2",
     "sanitize-html": "^2.17.5",
     "socket.io": "^4.8.3",

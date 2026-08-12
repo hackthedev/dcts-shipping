@@ -433,10 +433,7 @@ import {
 } from "./modules/functions/mysql/helper.mjs";
 import {checkMemberMigration} from "./modules/functions/migrations/memberJsonToDb.mjs";
 import {
-    checkMigrations,
-    completeMigrationTask,/mnt/SSD/network-z-dev/dSyncSql
-    createMigrationTask,
-    getMigrationTask
+    checkMigrations
 } from "./modules/functions/migrations/helper.mjs";
 import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./modules/functions/migrations/messageMigration.mjs";
 import JSONTools from "@hackthedev/json-tools";

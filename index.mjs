@@ -434,7 +434,7 @@ import {
 import {checkMemberMigration} from "./modules/functions/migrations/memberJsonToDb.mjs";
 import {
     checkMigrations,
-    completeMigrationTask,
+    completeMigrationTask,/mnt/SSD/network-z-dev/dSyncSql
     createMigrationTask,
     getMigrationTask
 } from "./modules/functions/migrations/helper.mjs";

@@ -604,5 +604,70 @@ class ChatTools {
             if (text.length <= length) return text;
             return text.substr(0, length) + "\u2026";
         }
+
+        static truncateHTML(html, length, wrapParagraphs = false) {
+            html = String(html || "");
+            if (html.length <= length) return html;
+
+            // so this is different in a way that we try to truncate only the text
+            // inside the html and ignore text like <tag> so its truly just the text
+            let tempDom = document.createElement('div');
+            tempDom.innerHTML = this.forRender(html, wrapParagraphs);
+
+            // and this will be the small logic to either display "..." or not
+            let addCutoff = tempDom.textContent?.length > length;
+            tempDom.textContent = html.substr(0, length) + `${addCutoff ? "\u2026" : ""}`
+
+            return tempDom.innerHTML;
+        }
+    }
+
+    static Dom = class {
+        static findAttributeUp(element, attr, maxDepth = 10) {
+            if(!element) throw new Error('element is required');
+            
+            for (let i = 0; i <= maxDepth && element; i++) {
+                const val = element.getAttribute?.(attr);
+                if (val !== null) return val;
+                element = element.parentNode;
+            }
+            return null;
+        }
+
+        static async waitForFrame(){
+            return new Promise(resolve => requestAnimationFrame(resolve));
+        }
+
+        static async renderAfterExecution(element, callback, transition = 150){
+            if(!element) throw new Error('element not found');
+            if(!callback) throw new Error('callback not found');
+
+            await this.hideElement(element, transition);
+            await callback();
+            await this.showElement(element, transition);
+        }
+
+        static async hideElement(element, transition = 150){
+            if(!element) throw new Error('element not found');
+            element.style.transition = `opacity ${transition}ms ease`;
+            element.style.opacity = "0";
+
+            await new Promise(resolve => {
+                setTimeout(resolve, transition);
+            });
+        }
+
+        static async showElement(element, transition = 150){
+            if(!element) throw new Error('element not found');
+            element.style.transition = `opacity ${transition}ms ease`;
+
+            await this.waitForFrame();
+            element.style.opacity = "1";
+
+            await new Promise(resolve => {
+                setTimeout(resolve, transition);
+            });
+        }
+
     }
 }

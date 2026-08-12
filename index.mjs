@@ -953,6 +953,7 @@ async function waitForTable(table, interval = 1000) {
             { package: '@hackthedev/file-manager@1.0.0', path: libDir },
             { package: '@hackthedev/element-loader@1.0.0', path: libDir },
             { package: '@hackthedev/rich-editor@latest', path: libDir },
+            { package: '@hackthedev/chat-tools@1.0.1', path: libDir },
         ]);
 
         results.forEach((r) => {

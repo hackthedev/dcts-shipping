@@ -2,4 +2,79 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    align-content: center;
+    text-align: center;
+}
+
+.plugin-list {
+    margin: 2rem;
+    display: flex;
+    width: calc(100% - 4rem);
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.plugin-list > .plugin-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+
+    padding: 1rem;
+    padding-bottom: 0;
+
+    background-color: hsl(from var(--main) h s calc(l * 1));
+    color: hsl(from var(--main) h s calc(l * 12));
+
+    border-radius: 0.5rem;
+    border: 2px solid var(--border-color);
+
+    box-shadow: 10px 10px 10px rgb(0 0 0 / 0.1);
+    transition: all 200ms ease-in-out !important;
+    overflow: hidden;
+}
+.plugin-list > .plugin-card:hover{
+    transform: translateY(-0.5rem);
+    background-color: hsl(from var(--main) h s calc(l * 12));
+    color: hsl(from var(--main) h s calc(l * 1));
+    cursor: pointer;
+}
+.plugin-list > .plugin-card:hover .description{
+    color: hsl(from var(--main) h s calc(l * 1));
+}
+
+
+.plugin-list > .plugin-card > .image {
+    display: flex;
+    align-self: center;
+
+    margin: calc(-1rem - 2px) -1rem 1rem -1rem;
+
+    width: calc(100% + 2rem + 4px) !important;
+    aspect-ratio: 16 / 9;
+
+    object-fit: cover;
+    background-image: linear-gradient(
+        100deg,
+        hsl(from var(--main) h s calc(l * 4)),
+        hsl(from var(--main) h s calc(l * 1))
+    ) !important;
+
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+.plugin-list > .plugin-card > .title {
+    font-size: 1.4rem;
+    margin: 0;
+}
+
+.plugin-list > .plugin-card > .description{
+    font-size: 1rem;
+    color: hsl(from var(--main) h s calc(l * 8));
 }

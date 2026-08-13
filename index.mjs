@@ -53,7 +53,6 @@ import dSyncSql from "@hackthedev/dsync-sql"
 import dSyncIPSec from "@hackthedev/dsync-ipsec"
 import FrontendLibs from "@hackthedev/frontend-libs";
 
-
 // Depending on the SSL setting, this will switch.
 export let server; // = http.createServer(app);
 import {Server} from "socket.io";

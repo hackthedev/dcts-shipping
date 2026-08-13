@@ -15,10 +15,10 @@ import {
     sanitizeHtml,
     bcrypt,
     crypto,
-    fs, signer, db
+    fs, signer, db, auther
 } from "../../index.mjs"
 import {
-    generateGid,
+    generateGid, getMemberFromKey,
     getNewDate,
     hasPermission,
 } from "./chat/main.mjs";
@@ -29,12 +29,14 @@ import {powVerifiedUsers} from "../sockets/pow.mjs";
 import {sendSystemMessage} from "../sockets/home/general.mjs";
 import {checkMemberMigration} from "./migrations/memberJsonToDb.mjs";
 import {clearBase64FromDatabase, clearMemberBase64FromDb} from "./migrations/base64_fixer.mjs";
-import {getMemberHighestRole} from "./chat/helper.mjs";
+import {getMemberHighestRole, getMemberHighestUploadLimit} from "./chat/helper.mjs";
 import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./migrations/messageMigration.mjs";
 import archiver from "archiver";
 import {banIp, checkMemberBan, getBan, isIdentifierBanned, removeBan} from "./ban-system/helpers.mjs";
 import checkPermission from "../sockets/checkPermission.mjs";
 import {sanitizeHTML} from "./sanitizing/functions.mjs";
+
+import dSyncAuth from "@hackthedev/dsync-auth";
 
 var serverconfigEditable;
 
@@ -989,6 +991,40 @@ export function generateId(length) {
         counter += 1;
     }
     return result;
+}
+
+export async function checkHttpAuth(req){
+    let memberId = req.headers["x-member-id"] ?? null;
+    let memberToken = req.headers["x-member-token"] ?? null;
+    let sessionId = req.headers["x-session-id"] ?? null;
+    let publicKey = req.headers["x-public-key"] ?? null;
+
+    let isDCTSUser = memberId && memberToken;
+    let isRemote = sessionId && publicKey && !isDCTSUser;
+
+    if(isDCTSUser && await validateMemberId(memberId, null, memberToken)){
+        return {
+            valid: true,
+            member: await getCastingMemberObject(serverconfig.servermembers[memberId])
+        };
+    }
+    else if(isRemote){
+        // validate session etc
+        let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
+
+        // if session is true we can try and see if the person connected to the server while using a client/app.
+        // this way the account becomes automatically linked, allowing for possibly bigger, individual limits.
+        let isValid =  !! sessionResult?.valid === true
+        return {
+            valid: !!isValid,
+            member: !!isValid ? await getCastingMemberObject(serverconfig.servermembers[memberId]) : null
+        };
+    }
+
+    return {
+        valid: false,
+        member: null
+    };
 }
 
 export async function validateMemberId(id, socket, token, bypass = false) {

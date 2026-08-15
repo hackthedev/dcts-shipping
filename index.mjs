@@ -2,6 +2,10 @@ import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
 // handle startup args
 let nodeArgs = process.argv;
 
+// init web server
+import express from "express";
+export const app = express();
+
 // remove the first few arguments because fuck that lol
 nodeArgs.shift();
 nodeArgs.shift();
@@ -17,10 +21,6 @@ if(!fs.existsSync(versionPath)) {
     process.exit(1);
 }
 export let versionCode = fs.readFileSync(versionPath).toString();
-
-import express from "express";
-
-export const app = express();
 
 import https from "https";
 import http from "http";
@@ -137,7 +137,6 @@ checkFile("./plugins/settings.json", true, "{}");
     Holy Server config file.
     needs to be above the imports else serverconfig will be undefined
  */
-
 export var serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, {encoding: "utf-8"})) : {};
 checkConfigAdditions();
 
@@ -177,16 +176,15 @@ if (dbUser) serverconfig.serverinfo.sql.username = dbUser;
 if (dbPass) serverconfig.serverinfo.sql.password = dbPass;
 if (dbName) serverconfig.serverinfo.sql.database = dbName;
 
-if (dbHost || dbUser || dbPass || dbName) {
-}
-saveConfig(serverconfig);
-
 // nicer warning
 serverconfig.serverinfo.sql.enabled = true;
 if(!serverconfig?.serverinfo?.sql?.username){
     Logger.warn("Congrats, setup worked! Please go to the /configs/config.json file and enter the SQL information under 'sql'");
     process.exit(0);
 }
+
+// do not await this
+saveConfig(serverconfig);
 
 
 // create sql pool
@@ -198,6 +196,7 @@ export let signer = null;
 export let auther = null;
 export let inbox = null;
 export let files = new dSyncFiles();
+
 try {
     db = new dSyncSql({
         host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
@@ -446,129 +445,13 @@ import {renderChart} from "./modules/functions/anti-spam/charts.mjs";
 import {checkAndUnbanPublicKey, getBan, unbanIp} from "./modules/functions/ban-system/helpers.mjs";
 import {getMessageObjectById} from "./modules/sockets/resolveMessage.mjs";
 import {getMemberHighestRole, getMemberHighestUploadLimit} from "./modules/functions/chat/helper.mjs";
+import {initPluginSystem} from "./modules/sockets/routes/plugins.mjs";
 
 /*
     Files for the plugin system
 */
-// Directories where plugin files are located
-const pluginsDir = path.join(__dirname, "plugins");
-const publicPluginsDir = path.join(__dirname, "public", "plugins");
 
-// function to dynamically load and register socket event handlers
-const registerPluginSocketEvents = async (io, socket, pluginSocketsDir) => {
-    const files = fs.readdirSync(pluginSocketsDir, {
-        recursive: true
-    });
 
-    for (const file of files) {
-        if (!file.endsWith(".mjs")) continue;
-
-        const filePath = path.join(pluginSocketsDir, file);
-
-        try {
-            const fileUrl = pathToFileURL(filePath).href;
-            const {default: handler} = await import(fileUrl);
-
-            if (typeof handler !== "function") {
-                throw new Error(`Default export is not a function: ${filePath}`);
-            }
-
-            handler(io, socket);
-
-            Logger.debug(`Preloaded socket handler: ${filePath}`);
-        } catch (error) {
-            Logger.error(filePath);
-            Logger.error(error);
-        }
-    }
-};
-
-// Function to dynamically load and execute plugin functions
-const loadAndExecutePluginFunctions = async (pluginFunctionsDir) => {
-    const files = fs.readdirSync(pluginFunctionsDir);
-    for (const file of files) {
-        if (file.endsWith(".mjs")) {
-            const filePath = path.join(pluginFunctionsDir, file);
-            const fileUrl = pathToFileURL(filePath).href;
-            const module = await import(fileUrl);
-
-            // Iterate over all exports in the module
-            for (const [name, func] of Object.entries(module)) {
-                // Check if the export is a function and its name includes 'onLoad'
-                if (typeof func === "function" && name.includes("onLoad")) {
-                    func();
-                }
-            }
-        }
-    }
-};
-
-// Function to move web folders to the public directory
-const moveWebFolders = async (pluginWebDir, pluginName) => {
-    const destinationDir = path.join(publicPluginsDir, pluginName);
-    await fse.ensureDir(destinationDir); // Ensure the destination directory exists
-    await fse.copy(pluginWebDir, destinationDir, {overwrite: true});
-};
-
-// Iterate over each plugin and process it
-const processPlugins = async () => {
-    const pluginDirs = fs.readdirSync(pluginsDir);
-
-    for (const pluginName of pluginDirs) {
-        // ignore files
-        if (fs.lstatSync(path.join(pluginsDir, pluginName)).isFile() === true)
-            continue;
-
-        const pluginDir = path.join(pluginsDir, pluginName);
-        const pluginFunctionsDir = path.join(pluginDir, "functions");
-        const pluginSocketsDir = path.join(pluginDir, "sockets");
-        const pluginWebDir = path.join(pluginDir, "web");
-
-        let pluginConfigPath = path.join(pluginDir, "config.json");
-        let pluginConfig = null;
-
-        if (fs.existsSync(pluginConfigPath)) {
-            pluginConfig = JSON.parse(fs.readFileSync(pluginConfigPath));
-        }
-
-        // some plugin meta
-        let pluginTitle = pluginConfig?.title || false;
-        let pluginEnabled = pluginConfig?.enabled || false;
-        let pluginAuthor = pluginConfig?.author || "";
-        let pluginVersion = pluginConfig?.version || 0;
-
-        // skip disabled plugin
-        if (pluginEnabled !== true) {
-            Logger.warn(
-                `Skipped loading plugin ${pluginTitle} (${pluginName}) because its not enabled`,
-            );
-            Logger.warn("This was temporarily enabled due to testing!")
-            //continue;
-        }
-
-        // Load and execute plugin functions
-        if (fs.existsSync(pluginFunctionsDir)) {
-            await loadAndExecutePluginFunctions(pluginFunctionsDir);
-        }
-
-        // Register socket events
-        if (fs.existsSync(pluginSocketsDir)) {
-            io.on("connection", (socket) => {
-                registerPluginSocketEvents(io, socket, pluginSocketsDir).catch((err) =>
-                    console.error(err),
-                );
-            });
-        }
-
-        // Move web folders to the public directory
-        console.log(pluginWebDir)
-        if (fs.existsSync(pluginWebDir)) {
-            await moveWebFolders(pluginWebDir, pluginName);
-        }
-
-        consolas(colors.yellow(`Loaded plugin ${colors.white(pluginName)}`));
-    }
-};
 
 // Create a connection pool if sql is enabled
 // SQL Database Structure needed
@@ -1073,73 +956,6 @@ app.use(
     ),
 );
 
-// Process plugins at server start
-processPlugins().catch((err) => console.error(err));
-
-const socketHandlers = [];
-const activeSockets = new Map();
-
-const loadSocketHandlers = async (mainHandlersDir, io) => {
-    const fileList = [];
-
-    const scanDir = (dir) => {
-        const files = fs.readdirSync(dir, {withFileTypes: true});
-        for (const file of files) {
-            const filePath = path.join(dir, file.name);
-            if (file.isDirectory()) {
-                scanDir(filePath);
-            } else if (file.name.endsWith(".mjs")) {
-                fileList.push(filePath);
-            }
-        }
-    };
-
-    scanDir(mainHandlersDir);
-
-    for (const filePath of fileList) {
-        const fileUrl = pathToFileURL(filePath).href;
-        try {
-            const {default: handlerFactory} = await import(fileUrl);
-            const handler = handlerFactory(io);
-
-            if (typeof handler === "function") {
-                socketHandlers.push(handler);
-                Logger.debug(`Preloaded socket handler: ${filePath}`);
-            } else {
-                Logger.warn(`Ignored invalid socket handler in ${filePath}`);
-            }
-        } catch (err) {
-            Logger.error(`Error importing socket handler: ${fileUrl}`);
-            Logger.error(err);
-        }
-    }
-};
-
-const registerSocketEvents = (socket) => {
-    try {
-        const attachedHandlers = [];
-
-        for (const handler of socketHandlers) {
-            const cleanup = handler(socket);
-            if (typeof cleanup === "function") {
-                attachedHandlers.push(cleanup);
-            }
-        }
-
-        activeSockets.set(socket.id, attachedHandlers);
-    } catch (err) {
-        console.error("Error registering socket events:", err);
-    }
-};
-
-(async () => {
-    try {
-        await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
-    } catch (err) {
-        console.error("Critical error loading socket handlers:", err);
-    }
-})();
-
 export async function checkPow(socket) {
     if (powVerifiedUsers.includes(socket.id)) {
         socket.powValidated = true
@@ -1419,3 +1235,69 @@ export function flipDebug() {
 export function isPtero(){
     return nodeArgs?.includes("--ptero")
 }
+
+
+const socketHandlers = [];
+const activeSockets = new Map();
+
+const loadSocketHandlers = async (mainHandlersDir, io) => {
+    const fileList = [];
+
+    const scanDir = (dir) => {
+        const files = fs.readdirSync(dir, {withFileTypes: true});
+        for (const file of files) {
+            const filePath = path.join(dir, file.name);
+            if (file.isDirectory()) {
+                scanDir(filePath);
+            } else if (file.name.endsWith(".mjs")) {
+                fileList.push(filePath);
+            }
+        }
+    };
+
+    scanDir(mainHandlersDir);
+
+    for (const filePath of fileList) {
+        const fileUrl = pathToFileURL(filePath).href;
+        try {
+            const {default: handlerFactory} = await import(fileUrl);
+            const handler = handlerFactory(io);
+
+            if (typeof handler === "function") {
+                socketHandlers.push(handler);
+                Logger.debug(`Preloaded socket handler: ${filePath}`);
+            } else {
+                Logger.warn(`Ignored invalid socket handler in ${filePath}`);
+            }
+        } catch (err) {
+            Logger.error(`Error importing socket handler: ${fileUrl}`);
+            Logger.error(err);
+        }
+    }
+};
+
+const registerSocketEvents = (socket) => {
+    try {
+        const attachedHandlers = [];
+
+        for (const handler of socketHandlers) {
+            const cleanup = handler(socket);
+            if (typeof cleanup === "function") {
+                attachedHandlers.push(cleanup);
+            }
+        }
+
+        activeSockets.set(socket.id, attachedHandlers);
+    } catch (err) {
+        console.error("Error registering socket events:", err);
+    }
+};
+
+(async () => {
+    try {
+        await initPluginSystem();
+        await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
+    } catch (err) {
+        console.error("Critical error loading socket handlers:", err);
+    }
+})();

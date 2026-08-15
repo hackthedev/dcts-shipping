@@ -29,31 +29,35 @@ async function getPackageInfo(packageName, customObj = null) {
     if (!packageName) throw new Error("No Package name provided!");
     let url = `https://dist.dcts.community/api/package/${packageName}`
 
-    let packageRes = await fetch(url, {
-        signal: AbortSignal.timeout(2500)
-    })
+    // only fetch info if no custom obj is passed
+    if(!customObj){
+        let packageRes = await fetch(url, {
+            signal: AbortSignal.timeout(2500)
+        })
 
-    if (packageRes.status !== 200) {
-        console.error("Unable to get package from server")
-        console.error(packageRes.status, packageRes.statusText)
+        if (packageRes.status !== 200) {
+            console.error("Unable to get package from server")
+            console.error(packageRes.status, packageRes.statusText)
 
-        if (customObj) return {
-            ...customObj
-        };
+            return {
+                name: packageName,
+                title: packageName,
+            };
+        }
 
-        return {
-            name: packageName,
-            title: packageName,
-        };
+        return (await packageRes.json())?.package ?? {};
     }
 
-    return (await packageRes.json())?.package ?? {};
+    // if we provide the object we give it back as well.
+    if (customObj) return {
+        ...customObj
+    };
 }
 
 function getSanitizedPluginInfo(pluginObj){
     if(!pluginObj) throw new Error("No Plugin obj provided!");
 
-    let image = ChatTools.Sanitize.stripHTML(pluginObj?.image?.trim() ?? "/img/default_banner.png");
+    let image = !!pluginObj?.image?.trim() ? ChatTools.Sanitize.stripHTML(pluginObj?.image?.trim()) : "/img/default_banner.png";
     let title = pluginObj?.title ? ChatTools.Sanitize.stripHTML(pluginObj?.title) : null;
     let name = pluginObj?.name ? ChatTools.Sanitize.stripHTML(pluginObj?.name) : null;
     let description = pluginObj?.description ? ChatTools.Sanitize.truncateText(ChatTools.Sanitize.stripHTML(pluginObj?.about ?? pluginObj?.description), 150) : null;
@@ -77,6 +81,7 @@ async function getPluginCardElement(pluginObj) {
     }
 
     let info = getSanitizedPluginInfo(pluginObj);
+    console.log(info)
 
     let pluginCard = document.createElement("div");
     pluginCard.className = "plugin-card";
@@ -97,6 +102,22 @@ async function getPluginCardElement(pluginObj) {
     })
 
     return pluginCard
+}
+
+async function installPlugin(pluginName) {
+    let res = await fetch(`/plugin/${pluginName}/download`, {
+        headers: {
+            "x-member-id": UserManager.getID(),
+            "x-member-token": UserManager.getToken(),
+        },
+        method: "POST",
+    })
+
+    if (res.status !== 200) {
+        return console.error("Unable to get local plugins! ", res.status, res.statusText)
+    }
+
+    return (await res.json()) ?? null
 }
 
 async function getInstalledPlugins() {
@@ -136,7 +157,8 @@ async function getPluginCardListElement(customPluginsObj = null) {
 
     for (let plugin of plugins) {
         let pluginName = customPluginsObj ? Object.keys(plugin)[0] : plugin?.name ?? plugin ?? null;
-        let pluginObj = customPluginsObj ? customPluginsObj[pluginName] : {}
+        let pluginObj = customPluginsObj ? customPluginsObj[pluginName] : null
+
 
         if (!pluginName) {
             console.warn("no plugin name found");
@@ -188,6 +210,8 @@ async function renderLocalPluginPage(pluginObj){
     pluginNavButtonAbout?.addEventListener("click", async e => {
         await showPluginAbout(pluginObj);
     })
+
+    console.log(pluginObj)
 
     // determine if is local etc
     if(pluginObj?.settings){

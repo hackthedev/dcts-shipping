@@ -11,8 +11,6 @@ import unzipper from "unzipper";
 import {Readable} from "stream";
 import {getThemes} from "../getThemes.mjs";
 import {getCache, setCache} from "../../functions/ip-cache.mjs";
-
-
 export async function loadThemeCache(force = false){
     return await getCache("theme_cache", "theme_cache")
 }
@@ -121,7 +119,6 @@ export async function downloadTheme(themeName){
         config
     };
 }
-
 
 
 app.get("/themes/list", async (req, res) => {

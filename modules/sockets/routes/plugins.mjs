@@ -113,25 +113,17 @@ export async function getLocalPlugins() {
 async function handlePluginEndpointAuth(req, res, next) {
     let authInfo = await checkHttpAuth(req);
 
-    // session is straight up not valid
     if (authInfo?.isValid === false) {
-        res.status(403).json({error: "You need to be authorized for this"});
-        return next();
+        return res.status(403).json({error: "You need to be authorized for this"});
     }
 
-    // no account found
     if (!authInfo?.member?.id) {
-        res.status(403).json({error: "You need to be authorized for this"});
-        return next();
+        return res.status(403).json({error: "You need to be authorized for this"});
     }
 
-    // doesnt have the perms
     if (!await hasPermission(authInfo?.member.id, "managePluins")) {
-        res.status(403).json({error: "You need to be authorized for this"});
-        return next();
+        return res.status(403).json({error: "You need to be authorized for this"});
     }
-
-    if (res.finished) next();
 }
 
 export async function initPluginSystem() {
@@ -274,46 +266,84 @@ export async function initPluginSystem() {
 async function initPluginRoutes(){
     app.get("/plugins/list", async (req, res, next) => {
         await handlePluginEndpointAuth(req, res, next);
+        if (res.headersSent) return;
+
         let plugins = await getLocalPlugins();
-        return res.status(200).json({ok: true, plugins});
+        return res.status(200).json({ error: null, plugins});
     });
 
-    app.post("/plugin/:plugin/download", async (req, res, next) => {
+    app.post("/plugin/:plugin/:action", async (req, res, next) => {
         await handlePluginEndpointAuth(req, res, next);
+        if (res.headersSent) return;
 
-        let pluginName = req.params.plugin;
-        if (!pluginName) return res.status(403).json({error: "missing plugin identifier"});
+        const action = req?.params?.action ?? null;
 
-        // lookup plugin info
-        let pluginDetails = await getPackageDetails(pluginName);
-        if (!pluginDetails?.package?.name) return res.status(404).json({error: `plugin not found: ${pluginDetails?.error ?? ""}`})
-
-        // then lookup files to download
-        let fileUrl = `${getPackageHost(pluginName)}/${pluginDetails.package.meta.paths.files}/no-version`;
-        let pluginFiles = await getPackageFiles(fileUrl);
-        let fileListObj = pluginFiles?.files;
-
-        if (fileListObj?.length === 0) return res.status(404).json({error: `no plugin download files found`})
-
-        // check if the local folder exists
-        let pluginDirLocation = path.join(pluginBasePath, pluginName);
-        let pluginConfigLocation = path.join(pluginBasePath, pluginName, "config.json");
-        if (!fs.existsSync(pluginDirLocation)) fs.mkdirSync(pluginDirLocation);
-
-        // download the files
-        for (let file of fileListObj) {
-            let fileDownloadUrl = `${getPackageUrl(pluginDetails.package.name)}/${file}`
-            let localFilePath = path.join(pluginDirLocation, file)
-
-            await downloadFile(fileDownloadUrl, localFilePath)
+        if(action === "install"){
+            return await installPlugin(req, res, next);
         }
 
-        // check if the config exists so we can install dependencies etc
-        if (!fs.existsSync(pluginConfigLocation)) return res.status(404).json({error: `plugin config.json not found`});
-        await installPluginDependencies(pluginName);
+        if(action === "uninstall"){
+            return await uninstallPlugin(req, res, next);
+        }
 
-        return res.status(200).json({ok: true});
+        return res.status(200).json({error: null});
     });
+}
+
+async function uninstallPlugin(req, res, next){
+    let pluginName = req.params.plugin;
+    if (!pluginName) return res.status(403).json({error: "missing plugin identifier"});
+
+    if(pluginName.indexOf("..") !== -1) res.status(403).json({error: "Malicious request"});
+
+    // check if the plugin dir exists and if so delete it
+    let pluginDirLocation = path.join(pluginBasePath, pluginName);
+    if(fs.existsSync(pluginDirLocation)){
+        fs.rmSync(pluginDirLocation, {
+            recursive: true,
+            force: true
+        });
+    }
+
+    res.status(200).json({error: null});
+}
+
+async function installPlugin(req, res){
+    let pluginName = req.params.plugin;
+    if (!pluginName) return res.status(403).json({error: "missing plugin identifier"});
+
+    // fuck you
+    if(pluginName.indexOf("..") !== -1) res.status(403).json({error: "Malicious request"});
+
+    // lookup plugin info
+    let pluginDetails = await getPackageDetails(pluginName);
+    if (!pluginDetails?.package?.name) return res.status(404).json({error: `plugin not found: ${pluginDetails?.error ?? ""}`})
+
+    // then lookup files to download
+    let fileUrl = `${getPackageHost(pluginName)}/${pluginDetails.package.meta.paths.files}/no-version`;
+    let pluginFiles = await getPackageFiles(fileUrl);
+    let fileListObj = pluginFiles?.files;
+
+    if (fileListObj?.length === 0) return res.status(404).json({error: `no plugin download files found`})
+
+    // check if the local folder exists
+    let pluginDirLocation = path.join(pluginBasePath, pluginName);
+    let pluginConfigLocation = path.join(pluginBasePath, pluginName, "config.json");
+    if (!fs.existsSync(pluginDirLocation)) fs.mkdirSync(pluginDirLocation);
+
+    // download the files
+    for (let file of fileListObj) {
+        let fileDownloadUrl = `${getPackageUrl(pluginDetails.package.name)}/${file}`
+        let localFilePath = path.join(pluginDirLocation, file)
+
+        await downloadFile(fileDownloadUrl, localFilePath)
+    }
+
+    // check if the config exists so we can install dependencies etc
+    if (!fs.existsSync(pluginConfigLocation)) return res.status(404).json({error: `plugin config.json not found`});
+    await installPluginDependencies(pluginName);
+
+    return res.status(200).json({ error: null})
 }
 
 export async function installPluginDependencies(pluginName) {

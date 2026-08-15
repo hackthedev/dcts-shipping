@@ -31,6 +31,7 @@ async function getPackageInfo(packageName, customObj = null) {
 
     // only fetch info if no custom obj is passed
     if(!customObj){
+        console.log("fetching for ", packageName)
         let packageRes = await fetch(url, {
             signal: AbortSignal.timeout(2500)
         })
@@ -60,7 +61,7 @@ function getSanitizedPluginInfo(pluginObj){
     let image = !!pluginObj?.image?.trim() ? ChatTools.Sanitize.stripHTML(pluginObj?.image?.trim()) : "/img/default_banner.png";
     let title = pluginObj?.title ? ChatTools.Sanitize.stripHTML(pluginObj?.title) : null;
     let name = pluginObj?.name ? ChatTools.Sanitize.stripHTML(pluginObj?.name) : null;
-    let description = pluginObj?.description ? ChatTools.Sanitize.truncateText(ChatTools.Sanitize.stripHTML(pluginObj?.about ?? pluginObj?.description), 150) : null;
+    let description = (pluginObj?.about ?? pluginObj?.description) ? ChatTools.Sanitize.truncateText(ChatTools.Sanitize.stripHTML(pluginObj?.about ?? pluginObj?.description), 150) : null;
     let authorName = ChatTools.Sanitize.stripHTML(pluginObj?.account?.username ?? pluginObj?.author ?? "Unkown") ?? null;
     let readme = pluginObj?.meta?.readme ? ChatTools.Sanitize.forRender(markdownit().render(pluginObj?.meta?.readme)) : null;
 
@@ -81,7 +82,6 @@ async function getPluginCardElement(pluginObj) {
     }
 
     let info = getSanitizedPluginInfo(pluginObj);
-    console.log(info)
 
     let pluginCard = document.createElement("div");
     pluginCard.className = "plugin-card";
@@ -104,8 +104,15 @@ async function getPluginCardElement(pluginObj) {
     return pluginCard
 }
 
-async function installPlugin(pluginName) {
-    let res = await fetch(`/plugin/${pluginName}/download`, {
+async function uninstallPlugin(pluginName){
+    if(!pluginName) throw new Error("No plugin name provided!");
+    return await installPlugin(pluginName, true);
+}
+
+async function installPlugin(pluginName, remove = false) {
+    if(!pluginName) throw new Error("No plugin name provided!");
+
+    let res = await fetch(`/plugin/${pluginName}/${remove ? "uninstall" : "install"}`, {
         headers: {
             "x-member-id": UserManager.getID(),
             "x-member-token": UserManager.getToken(),
@@ -118,6 +125,18 @@ async function installPlugin(pluginName) {
     }
 
     return (await res.json()) ?? null
+}
+
+async function isInstalledPlugin(pluginName){
+    return Object.values(await getInstalledPlugins()).find(plugin => {
+        return plugin?.name === pluginName;
+    })?.name === pluginName;
+}
+
+async function getLocalPlugin(pluginName){
+    return Object.values(await getInstalledPlugins()).find(plugin => {
+        return plugin?.name === pluginName;
+    });
 }
 
 async function getInstalledPlugins() {
@@ -157,13 +176,14 @@ async function getPluginCardListElement(customPluginsObj = null) {
 
     for (let plugin of plugins) {
         let pluginName = customPluginsObj ? Object.keys(plugin)[0] : plugin?.name ?? plugin ?? null;
-        let pluginObj = customPluginsObj ? customPluginsObj[pluginName] : null
-
 
         if (!pluginName) {
             console.warn("no plugin name found");
             continue;
         }
+
+        let pluginObj = customPluginsObj ? customPluginsObj[pluginName] : null
+        if(await isInstalledPlugin(pluginName)) pluginObj = await getLocalPlugin(pluginName)
 
         let pluginInfoObj = await getPackageInfo(pluginName, pluginObj);
         listElement.insertAdjacentElement("beforeend", await getPluginCardElement(pluginInfoObj))
@@ -189,6 +209,7 @@ async function displayLocalPlugins() {
 }
 
 async function renderLocalPluginPage(pluginObj){
+    await ChatTools.Dom.hideElement(getPluginListContainerElement());
     getPluginListContainerElement().innerHTML = `
         <div class="plugin-panel">
             <div class="nav">
@@ -211,10 +232,8 @@ async function renderLocalPluginPage(pluginObj){
         await showPluginAbout(pluginObj);
     })
 
-    console.log(pluginObj)
-
     // determine if is local etc
-    if(pluginObj?.settings){
+    if(await isInstalledPlugin(pluginObj.name)){
         // settings button
         let settingsButton = document.createElement("button");
         settingsButton.classList.add("settings");
@@ -229,8 +248,16 @@ async function renderLocalPluginPage(pluginObj){
         uninstallButton.classList.add("uninstall");
         uninstallButton.textContent = "Uninstall";
         uninstallButton.addEventListener("click", async e => {
-            // to be implemented
+            let response = await uninstallPlugin(pluginObj.name);
+            if(!response?.error) return await renderLocalPluginPage(pluginObj);
+
+            showSystemMessage({
+                title: "Error uninstalling plugin",
+                text: response.error,
+                type: "error"
+            })
         })
+
         pluginPanelNavElement.appendChild(uninstallButton);
     }
     // its not locally saved yet!
@@ -240,12 +267,21 @@ async function renderLocalPluginPage(pluginObj){
         installButton.classList.add("install");
         installButton.textContent = "Install";
         installButton.addEventListener("click", async e => {
-            // to be implemented
+            let response = await installPlugin(pluginObj.name);
+            if(!response?.error) return await renderLocalPluginPage(pluginObj);
+
+            showSystemMessage({
+                title: "Error installing plugin",
+                text: response.error,
+                type: "error"
+            })
         })
+
         pluginPanelNavElement.appendChild(installButton);
     }
 
     await showPluginAbout(pluginObj);
+    await ChatTools.Dom.showElement(getPluginListContainerElement());
 }
 
 async function showPluginAbout(pluginObj){
@@ -271,6 +307,7 @@ async function showPluginAbout(pluginObj){
 }
 
 async function showPluginSettings(pluginObj) {
+    console.log(pluginObj)
     if (!pluginObj?.settings) return console.warn("Plugin has no settings specified - ignored")
 
     // some funky shit ngl

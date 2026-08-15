@@ -1237,7 +1237,7 @@ export function isPtero(){
 }
 
 
-const socketHandlers = [];
+export const socketHandlers = [];
 const activeSockets = new Map();
 
 const loadSocketHandlers = async (mainHandlersDir, io) => {

@@ -1,4 +1,4 @@
-import {app, io} from "../../../index.mjs";
+import {app, io, socketHandlers} from "../../../index.mjs";
 import path from "path";
 import fs from "fs";
 
@@ -133,7 +133,7 @@ export async function initPluginSystem() {
     const publicPluginsDir = path.join(path.resolve(), "public", "plugins");
 
     // function to dynamically load and register socket event handlers
-    const registerPluginSocketEvents = async (io, socket, pluginSocketsDir) => {
+    const loadPluginSocketEvents = async (pluginSocketsDir, socketHandlers) => {
         const files = fs.readdirSync(pluginSocketsDir, {
             recursive: true
         });
@@ -151,16 +151,17 @@ export async function initPluginSystem() {
                     throw new Error(`Default export is not a function: ${filePath}`);
                 }
 
-                handler(io, socket);
+                socketHandlers.push((socket) => {
+                    return handler(io, socket);
+                });
 
-                Logger.debug(`Preloaded socket handler: ${filePath}`);
+                Logger.debug(`Preloaded plugin socket handler: ${filePath}`);
             } catch (error) {
                 Logger.error(filePath);
                 Logger.error(error);
             }
         }
     };
-
     // Function to dynamically load and execute plugin functions
     const loadAndExecutePluginFunctions = async (pluginFunctionsDir) => {
         const files = fs.readdirSync(pluginFunctionsDir);
@@ -242,11 +243,7 @@ export async function initPluginSystem() {
 
             // Register socket events
             if (fs.existsSync(pluginSocketsDir)) {
-                io.on("connection", (socket) => {
-                    registerPluginSocketEvents(io, socket, pluginSocketsDir).catch((err) =>
-                        console.error(err),
-                    );
-                });
+                await loadPluginSocketEvents(pluginSocketsDir, socketHandlers);
             }
 
             // Move web folders to the public directory

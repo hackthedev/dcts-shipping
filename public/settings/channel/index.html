@@ -18,14 +18,16 @@
 
     <script src="/js/core/MobileUI.js"></script>
     <script src="/js/core/JsonEditor.js"></script>
+    <script src="/js/libs/event-dispatcher/EventDispatcher.js"></script>
     <script src="/js/escape.js"></script>
     <script src="/js/core/purify.js"></script>
     <script src="/js/sysmsg.js"></script>
     <script src="/notify.js"></script>
-    <script src="/js/prompts.js"></script>
+    <script src="/js/libs/prompts/prompts.js"></script>
     <script src="/js/core/PermUI.js"></script>
     <script src="/js/core/ChatManager.js"></script>
     <script src="/js/core/UserManager.js"></script>
+    <script src="/js/libs/chat-tools/ChatTools.js"></script>
     <script defer src="/js/core/PoW.js"></script>
     <script src="/js/core/CookieManager.js"></script>
     <script src="../utility.js"></script>
@@ -54,7 +56,7 @@
             var channelId = getUrlParams('id');
         }
         catch(e){
-            if(channelId == null || isNaN(channelId)){
+            if(channelId == null){
                 console.log("The channel was not found.");
             }
         }

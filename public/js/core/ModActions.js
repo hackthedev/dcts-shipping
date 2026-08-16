@@ -213,7 +213,7 @@ class ModActions {
 
                 var roleObj = roles[role]
 
-                var roleId = Number(roleObj.info.id);
+                var roleId = roleObj.info.id;
                 var roleName = roleObj.info.name;
                 var roleColor = roleObj.info.color;
                 var roleBackground = roleObj.info.background;

@@ -15,12 +15,12 @@ import {
     sanitizeHtml,
     bcrypt,
     crypto,
-    fs, signer, db
+    fs, signer, db, auther
 } from "../../index.mjs"
 import {
-    generateGid,
+    generateGid, getMemberFromKey,
     getNewDate,
-    hasPermission,
+    hasPermission, resolveGroupByChannelId,
 } from "./chat/main.mjs";
 import {consolas} from "./io.mjs";
 import Logger from "@hackthedev/terminal-logger"
@@ -29,12 +29,14 @@ import {powVerifiedUsers} from "../sockets/pow.mjs";
 import {sendSystemMessage} from "../sockets/home/general.mjs";
 import {checkMemberMigration} from "./migrations/memberJsonToDb.mjs";
 import {clearBase64FromDatabase, clearMemberBase64FromDb} from "./migrations/base64_fixer.mjs";
-import {getMemberHighestRole} from "./chat/helper.mjs";
+import {getMemberHighestRole, getMemberHighestUploadLimit} from "./chat/helper.mjs";
 import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./migrations/messageMigration.mjs";
 import archiver from "archiver";
 import {banIp, checkMemberBan, getBan, isIdentifierBanned, removeBan} from "./ban-system/helpers.mjs";
 import checkPermission from "../sockets/checkPermission.mjs";
 import {sanitizeHTML} from "./sanitizing/functions.mjs";
+
+import dSyncAuth from "@hackthedev/dsync-auth";
 
 var serverconfigEditable;
 
@@ -560,6 +562,7 @@ export function checkBool(value, type) {
 export function checkConfigAdditions() {
 
 
+    checkObjectKeys(serverconfig, "serverinfo.messenger.defaultFileUploadLimit", 10)
     checkObjectKeys(serverconfig, "serverinfo.dms.maxParticipants", 10)
 
     // recreating the config example minimum base so that copying isnt needed anymore
@@ -990,6 +993,40 @@ export function generateId(length) {
     return result;
 }
 
+export async function checkHttpAuth(req){
+    let memberId = req.headers["x-member-id"] ?? null;
+    let memberToken = req.headers["x-member-token"] ?? null;
+    let sessionId = req.headers["x-session-id"] ?? null;
+    let publicKey = req.headers["x-public-key"] ?? null;
+
+    let isDCTSUser = memberId && memberToken;
+    let isRemote = sessionId && publicKey && !isDCTSUser;
+
+    if(isDCTSUser && await validateMemberId(memberId, null, memberToken)){
+        return {
+            valid: true,
+            member: await getCastingMemberObject(serverconfig.servermembers[memberId])
+        };
+    }
+    else if(isRemote){
+        // validate session etc
+        let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
+
+        // if session is true we can try and see if the person connected to the server while using a client/app.
+        // this way the account becomes automatically linked, allowing for possibly bigger, individual limits.
+        let isValid =  !! sessionResult?.valid === true
+        return {
+            valid: !!isValid,
+            member: !!isValid ? await getCastingMemberObject(serverconfig.servermembers[memberId]) : null
+        };
+    }
+
+    return {
+        valid: false,
+        member: null
+    };
+}
+
 export async function validateMemberId(id, socket, token, bypass = false) {
     id = String(id)
 
@@ -1059,69 +1096,20 @@ export function escapeHtml(text) {
     });
 }
 
-export function httpGetAsync(theUrl, callback, id) {
-    // create the request object
-    var xmlHttp = new XMLHttpRequest();
+export async function searchGif(search) {
+    // using default locale of en_US
+    var search_url = `https://gifs.dcts.community/gifs/search/${encodeURIComponent(search)}/0/200`;
+    if(!search) search_url = `https://gifs.dcts.community/gifs/trending`;
 
-    // set the state change callback to capture when the response comes in
-    xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            callback(xmlHttp.responseText, id);
-        }
+    let response = await fetch(search_url, {
+        signal: AbortSignal.timeout(5_000)
+    })
+
+    if(response.status !== 200){
+        return response;
     }
 
-    // open as a GET call, pass in the url and set async = True
-    xmlHttp.open("GET", theUrl, true);
-    //xmlHttp.setRequestHeader('Content-Type', 'application/json');
-
-    /*
-    xmlHttp.setRequestHeader('Access-Control-Allow-Headers', '*');
-     xmlHttp.setRequestHeader('Content-Type', 'application/json');
-    xmlHttp.setRequestHeader('Access-Control-Allow-Headers', '*');
-    xmlHttp.setRequestHeader("Access-Control-Allow-Origin", "*")
-    xmlHttp.setRequestHeader("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS")
-
-     */
-
-    // call send with no params as they were passed in on the url string
-    xmlHttp.send(null);
-
-    return;
-}
-
-export function tenorCallback_search(responsetext, id) {
-    // Parse the JSON response
-    var response_objects = JSON.parse(responsetext);
-
-    var top_10_gifs = response_objects["results"];
-
-    // load the GIFs -- for our example we will load the first GIFs preview size (nanogif) and share size (gif)
-
-    const targetSocket = [...io.sockets.sockets.values()]
-        .find(s => s.data.memberId === id);
-
-    targetSocket.emit("receiveGifImage", {
-        gifs: top_10_gifs
-    });
-
-}
-
-export function searchTenor(search, id) {
-    // set the apikey and limit
-    var apikey = serverconfig.serverinfo.tenor.api_key;
-    var clientkey = serverconfig.serverinfo.tenor.client_key;
-    var lmt = serverconfig.serverinfo.tenor.limit;
-
-    // test search term
-    var search_term = search;
-
-    // using default locale of en_US
-    var search_url = `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(search_term)}&key=${apikey}&client_key=${clientkey}&limit=${lmt}`;
-
-    httpGetAsync(search_url, tenorCallback_search, id);
-
-    // data will be loaded by each call's callback
-    return;
+    return await response?.json();
 }
 
 export function addMinutesToDate(date, minutes) {
@@ -1209,6 +1197,15 @@ export function getChannelCastingObject(channelObject) {
             delete channelObject[key];
         }
     });
+
+    // add some extras
+    let channelId = channelObject.id;
+    let groupId = resolveGroupByChannelId(channelId);
+    let groupObj = serverconfig.groups[groupId];
+
+    channelObject.group ??= {
+        ...groupObj
+    }
 
     return channelObject;
 }
@@ -1396,7 +1393,6 @@ export async function getCastingMemberObject(member) {
 }
 
 export async function findAndVerifyUser(loginName, password) {
-    await reloadConfig();
     serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
     let serverMembers = serverconfigEditable.servermembers;
 

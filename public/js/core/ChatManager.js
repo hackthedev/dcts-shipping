@@ -9,9 +9,18 @@ class ChatManager {
     }
 
     static closePagePopup(id) {
-        let pagePopup = window.parent.document.querySelector(`#${id}`);
+        if (id === "*") {
+            window.parent.document
+                .querySelectorAll(".popupPageContainer")
+                .forEach(popup => popup.remove());
+
+            return;
+        }
+
+        const pagePopup = window.parent.document.querySelector(`#${CSS.escape(id)}`);
+
         if (pagePopup) {
-            pagePopup.remove()
+            pagePopup.remove();
         }
     }
 
@@ -195,7 +204,11 @@ class ChatManager {
     static async showThemePage() {
         initThemePageContext();
 
-        let themesRes = await fetch("/themes/list");
+        let themesRes = await fetch("/themes/list", {
+            signal: AbortSignal.timeout(3000)
+        });
+        console.log(themesRes)
+
         let themes;
         if (themesRes.status === 200) {
             let responseJson = await themesRes.json();
@@ -516,6 +529,9 @@ class ChatManager {
                 if (response?.id) CookieManager.setCookie("id", response.id);
 
                 // account manager soon?
+                // july 2026: This is kinda deprecated now
+                // there will be a better way to handle this type of stuff and was
+                // mostly used for mobile
                 if (await isLauncher()) {
                     if (typeof await Client().setAccountCredentials === "function") {
                         await Client().setAccountCredentials(
@@ -529,7 +545,6 @@ class ChatManager {
                     if(typeof await Client().GetNickname === "function" && await Client().GetUserConsistentSettings() === true){
                         let clientName = await Client().GetNickname();
                         if(clientName && clientName !== UserManager.getUsername()) await UserManager.updateMember({name: clientName});
-                        if(!clientName && clientName !== UserManager.getUsername()) await Client().SetNickname(UserManager.getUsername())
                     }
 
                     // check for client icon
@@ -537,9 +552,13 @@ class ChatManager {
                         let clientIcon = await Client().GetUserIcon()
 
                         if(clientIcon && clientIcon !== UserManager.getPFP()) await UserManager.updateMember({icon: clientIcon});
-                        if(!clientIcon && clientIcon !== UserManager.getPFP() && UserManager.getPFP()) await Client().SetUserIcon(UserManager.getPFP())
+                    }
 
-                        console.log("did user icon")
+                    // check for client banner
+                    if(typeof await Client().GetUserBanner === "function" && await Client().GetUserConsistentSettings() === true){
+                        let clientBanner = await Client().GetUserBanner()
+
+                        if(clientBanner && clientBanner !== UserManager.getBanner()) await UserManager.updateMember({banner: clientBanner});
                     }
 
                     UserManager.saveAccount()
@@ -971,18 +990,17 @@ class ChatManager {
     }
 
     static proxyUrl(url) {
+        url = decodeURIComponent(url)
         if (!url) return null;
         if (url.startsWith(window.location.origin)) return url;
-        if (url.startsWith(encodeURIComponent(window.location.origin))) return decodeURIComponent(url);
-        if (url.startsWith("data:")) return url;
-        if (url.startsWith("/uploads")) return url;
-        if (url.startsWith("/upload")) return url;
-        if (url.startsWith("/img")) return url;
-        if (url.startsWith("/emojis")) return url;
-        if (url.startsWith(encodeURIComponent("/uploads"))) return url;
-        if (url.startsWith(encodeURIComponent("/upload"))) return url;
-        if (url.startsWith(encodeURIComponent("/img"))) return url;
-        if (url.startsWith(encodeURIComponent("/emojis"))) return url;
+        if (url.startsWith(window.location.origin)) return encodeURIComponent(url);
+        if (url.startsWith("data:")) return encodeURIComponent(url);
+        if (url.startsWith("/uploads")) return encodeURIComponent(url);
+        if (url.startsWith("/upload")) return encodeURIComponent(url);
+        if (url.startsWith("/emojis")) return encodeURIComponent(url);
+        if (url.startsWith("/uploads") || url.startsWith("/upload")) return encodeURIComponent(url);
+        if (url.startsWith("/img") || url.startsWith("img/")) return encodeURIComponent(url);
+        if (url.startsWith("/emojis")) return encodeURIComponent(url);
         return `/proxy?url=${encodeURIComponent(url)}`
     }
 

@@ -327,6 +327,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ".image-embed-container img",
             ".video-embed",
             ".emoji-entry img",
+            ".gif-entriey",
             ".message-container .contentRows img",
             "#popup-content img",
         ],
@@ -342,19 +343,27 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
 
                     openNewTab(url);
+                },
+                condition: async (data) => {
+                    let url = data.element.src || data.element?.getAttribute("data-src")
+                    return url != null;
                 }
             },
             {
                 icon: "&#9741;",
                 text: "Copy Link",
                 callback: async (data) => {
-                    let url = data.element?.getAttribute("data-original-url") || data.element.src || data.element?.getAttribute("data-src")
+                    let url = data.element?.getAttribute("data-src") || data.element?.getAttribute("data-original-url") || data.element.src
                     if (!url) {
                         console.warn("Couldnt copy link because src wasnt found");
                         return;
                     }
 
                     navigator.clipboard.writeText(url);
+                },
+                condition: async (data) => {
+                    let url = data.element?.getAttribute("data-src") || data.element.src || data.element?.getAttribute("data-original-url")
+                    return url != null;
                 }
             }
         ]
@@ -399,6 +408,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 })
 
+function getContentMainContainer(){
+    let container = document.getElementById("content");
+    if(!container) container = document.querySelector(".layout.home > .content .dm-container > .content");
+    return container
+}
+
 async function updateEditedMessage(message){
     // handling for dms
     if(message?.data){
@@ -419,15 +434,13 @@ async function updateEditedMessage(message){
 
 
     let lastMsg = getLastMessage(getContentMainContainer())
-    await withScrollLock(null, lastMsg?.element, async () => {
-        editElement.innerHTML = convertedMentions.text
-        editElement.innerHTML = sanitizeHtmlForRender(convertedMentions.text)
+    editElement.innerHTML = convertedMentions.text
+    editElement.innerHTML = sanitizeHtmlForRender(convertedMentions.text)
 
-        editElement.innerHTML += getMessageEditedHTML(message);
-        editElement.innerHTML += createMsgActions(message.messageId);
+    editElement.innerHTML += getMessageEditedHTML(message);
+    editElement.innerHTML += createMsgActions(message.messageId);
 
-        if (isScrolledToBottom(getContentMainContainer())) scrollDown("messageEdited")
-    })
+    if (ChatTools.Scroll.isScrolledToBottom(getContentMainContainer())) ChatTools.Scroll.scrollDown(getContentMainContainer())
 }
 
 function focusEditor() {
@@ -460,10 +473,9 @@ function toggleEditor(value) {
 
 async function addNewMessageToChatLog(message, type = null) {
     let container = getContentMainContainer();
-    let isScrolledDown = isScrolledToBottom(container, 20);
+    let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(container, 20);
 
-    if (!message) throw new Error("No message found to display");
-    message.type = type;
+    if (!message) throw new Error("No message found to display");;
 
     // lets increase the channel count first
     // then mark it for ourselves
@@ -474,7 +486,7 @@ async function addNewMessageToChatLog(message, type = null) {
 
     // the message was not created in the room we're currently in, but thats fine.
     // we will instead show the notification icon and return;
-    if (message?.room !== UserManager.getRoom() && type === null) {
+    if (message?.room !== UserManager.getChannel() && type === null) {
         ChatManager.setChannelMarker(message.channel, true);
         await updateUIIndicators(message)
         return console.warn("Not showing message");
@@ -501,6 +513,7 @@ async function addNewMessageToChatLog(message, type = null) {
             channelId: UserManager.getChannel(),
             container: getContentMainContainer(),
             appendTop: false,
+            messageType: message?.type,
             index: null,
             refElement: null,
             pingMentions: true
@@ -511,7 +524,7 @@ async function addNewMessageToChatLog(message, type = null) {
     await updateUIIndicators(message)
 
     if (isScrolledDown) {
-        scrollDown("messageCreated");
+        ChatTools.Scroll.scrollDown(getContentMainContainer());
     }
 }
 
@@ -522,7 +535,13 @@ function registerMessageCreateEvent() {
 
 
     socket.on('messageCreate', async function (message) {
-        addNewMessageToChatLog(message)
+        await addNewMessageToChatLog(message)
+
+        requestAnimationFrame(() => {
+            EventDispatcher.send("messageCreate", {
+                message
+            });
+        })
     });
 }
 
@@ -642,13 +661,13 @@ function initQuillShit(customQuill = null){
 
         // editor resize fix where chat wont scroll down
         const editorResizeObserver = new ResizeObserver(() => {
-            let isScrolledDown =  isScrolledToBottom(document.getElementById("content"));
-            if(isScrolledDown) scrollDown();
+            let isScrolledDown =  ChatTools.Scroll.isScrolledToBottom(document.getElementById("content"));
+            if(isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer());
         });
         editorResizeObserver.observe(editor);
 
         editor.addEventListener('keydown', function (event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
+            if (event.key === 'Enter' && !event.shiftKey && !ac.isActive() && !mentionAc.isActive()) {
                 event.preventDefault();
                 sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), quill.root.innerHTML);
             }
@@ -672,25 +691,25 @@ function cancelMessageEdit() {
 }
 
 function showRateLimitNotice() {
-    let isScrolledDown = isScrolledToBottom(getContentMainContainer());
+    let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(getContentMainContainer());
     if (replyMessageId == null && editorHints) {
         if (editorHints?.querySelector("#ratelimitHint") != null) editorHints?.querySelector("#ratelimitHint").remove();
 
         editorHints.insertAdjacentHTML("afterbegin", `<p id="ratelimitHint" >You have been rate limited</p>`)
     }
 
-    if (isScrolledDown) scrollDown("showRateLimitNotice")
+    if (isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer())
 }
 
 function showSlowmodeNotice(timestamp) {
-    let isScrolledDown = isScrolledToBottom(getContentMainContainer());
+    let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(getContentMainContainer());
     if (replyMessageId == null && editorHints) {
         if (editorHints?.querySelector("#slowmodeHint") != null) editorHints?.querySelector("#slowmodeHint").remove();
 
         editorHints.insertAdjacentHTML("afterbegin", `<p id="slowmodeHint" >Slowmode is active! You need to wait for ${getReadableDuration(new Date(timestamp))}</p>`)
     }
 
-    if (isScrolledDown) scrollDown("showSlowmodeNotice")
+    if (isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer())
 }
 
 function replyToMessage(messageId) {
@@ -729,10 +748,10 @@ function replaceUrlEmbeds(element) {
         // wrap shit if needed
         if (!element.querySelector("p")) {
             let text = element.textContent.trim();
-            if (text) element.innerHTML = `<p>${text}</p>`;
+            if (text) element.innerHTML = `<p>${ChatTools.Sanitize.forRender(text. false)}</p>`;
         }
 
-        element.innerHTML = element.innerHTML.replace(/\s+/g, " ").trim();
+        element.innerHTML = ChatTools.Sanitize.forRender(element.innerHTML.replace(/\s+/g, " ").trim(), false)
     }
 }
 
@@ -866,7 +885,7 @@ function compareTimestamps(stamp1, stamp2) {
 function getMessageEditedHTML(message) {
     return `
             <div class="edit-notice">
-                <span>Edited </span> <span class="editedMsg">(${new Date(message.lastEdited).toLocaleString("narrow")})</span>
+                <span>Edited </span> <span class="editedMsg">(${new Date(message.lastEdited ?? message.editedAt).toLocaleString("narrow")})</span>
             </div>
             `;
 }
@@ -958,18 +977,7 @@ async function showMessageInChat({
 
 
 function truncateText(text, length) {
-    let actualLength = 0;
-    if (text?.length <= length) {
-        actualLength = text.length;
-    } else {
-        actualLength = length;
-    }
-
-    if (text?.length > length) {
-        return text?.substring(0, actualLength) + "..."
-    }
-
-    return text?.substring(0, actualLength)
+    return ChatTools.Sanitize.truncateText(text, length);
 }
 
 function hidePopup() {
@@ -1035,7 +1043,7 @@ function navigateToMessage(messageId) {
 }
 
 function deleteMessageFromChat(id, type = "message") {
-    let isScrolledDown = isScrolledToBottom(getContentMainContainer())
+    let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(getContentMainContainer())
 
     socket.emit("deleteMessage", {
         id: UserManager.getID(),
@@ -1046,12 +1054,12 @@ function deleteMessageFromChat(id, type = "message") {
         channel: UserManager.getChannel(),
         type
     }, function (response) {
-        if(isScrolledDown) scrollDown("");
+        if(isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer());
     });
 }
 
 async function updateMessageReactionsElementById(messageId, container = getContentMainContainer()) {
-    let wasScrolledDown = isScrolledToBottom(container);
+    let wasScrolledDown = ChatTools.Scroll.isScrolledToBottom(container);
 
     let contentContainer = document.querySelector(`.message-container .content:not(.reply)[data-message-id="${messageId}"]`);
     let reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
@@ -1070,7 +1078,7 @@ async function updateMessageReactionsElementById(messageId, container = getConte
         reactionRow.outerHTML = await getMessageReactionsHTML(messageObj);
     })
 
-    if (wasScrolledDown) scrollDown()
+    if (wasScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer())
 }
 
 async function getMessageReactionsHTML(messageObj) {
@@ -1130,7 +1138,7 @@ async function createMsgHTML({
     let isSigned = message?.sig?.length > 10;
     let reply = message?.reply;
 
-    if (message?.lastEdited != null) {
+    if (message?.lastEdited != null || message?.editedAt != null) {
         message.editCode = getMessageEditedHTML(message);
     }
 
@@ -1150,18 +1158,22 @@ async function createMsgHTML({
     let isAdmin = message?.isAdmin
 
     let messageReactionsRow = await getMessageReactionsHTML(message);
+    let isThirdPartyMessageType = messageType != null && messageType !== "dm" && messageType !== "text";
+    let sanitized = ChatTools.Sanitize.forRender(message.message, isThirdPartyMessageType) ?? null;
+
+    if(sanitized.trim().length === 0) sanitized = "<span style='color: orange;font-size: 10px;'>[ UNSUPPORTED CONTENT ]</span>";
 
     let messageRow =
         `
         <div class="content ${isSystem ? "system" : ""} ${waitWithDisplay ? "waitForDisplay" : ""}"  
-            ${message?.plainText ? `data-plain-text="${unescapeHtmlEntities(sanitizeHtmlForRender(encodeURIComponent(message.plainText), false), true)}"` : ""}
+            ${message?.plainText ? `data-plain-text="${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(encodeURIComponent(message.plainText), false), true)}"` : ""}
             data-message-id="${message.messageId}" 
-            data-member-id="${unescapeHtmlEntities(sanitizeHtmlForRender(message?.author?.id, false), true)}" 
+            data-member-id="${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(message?.author?.id, false), true)}" 
             data-timestamp="${message.timestamp}"
             ${messageType ? `data-message-type="${messageType}"` : ""}>
             
             ${createActions === true ? createMsgActions(message?.author?.id, isSystem) : ""}
-            ${sanitizeHtmlForRender(message.message)}  ${message?.editCode ? message?.editCode : ""}    
+            ${sanitized}  ${message?.editCode ? message?.editCode : ""}    
             
             ${messageReactionsRow ? messageReactionsRow : ""}
         </div>
@@ -1174,24 +1186,34 @@ async function createMsgHTML({
     if (!message?.author?.name) message.author.name = "Unkown Member?";
     if (reply?.messageId && !reply?.author?.name) message.author.name = "Unkown Member?";
 
+
+    let colorStyle = `color: ${message?.author?.color === "#000000" && !message?.author?.background ? "white" : message?.author?.color}; 
+                            background: ${message?.author?.background ?? ""}; 
+                            background-clip: ${message?.author?.backgroundClip ?? ""}`
+
     // if message was a reply
     let replyCode = "";
     if (reply?.messageId) {
+
+        let replyColorStyle = `color: ${reply?.author?.color === "#000000" && !reply?.author?.background ? "white" : reply?.author?.color}; 
+                            background: ${reply?.author?.background ?? ""}; 
+                            background-clip: ${reply?.author?.backgroundClip ?? ""}`
+
         replyCode = `
             <div class="row reply" data-message-id="${reply?.messageId}" data-member-id="${stripHTML(reply?.author?.id, false)} ${messageType ? `data-message-type="${messageType}"` : ""}">            
                 <!-- very creative name indeed -->
                 <div class="box"></div>
             
                 <div class="icon-container">    
-                    <img class="icon" draggable="false" src="${sanitizeHtmlForRender(reply?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
+                    <img class="icon" draggable="false" src="${ChatTools.Sanitize.forRender(reply?.author?.icon, false)}" data-member-id="${ChatTools.Sanitize.forRender(reply?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>
                 <div class="meta">
-                    <label class="username" data-member-id="${unescapeHtmlEntities(sanitizeHtmlForRender(reply?.author?.id, false), true)}" style="color: ${reply?.author?.color}; background: ${reply?.author?.background}; background-clip: ${reply?.author?.backgroundClip};">
-                        ${sanitizeHtmlForRender(truncateText(reply?.author?.name, 25), false)}
+                    <label class="username" data-member-id="${unescapeHtmlEntities(ChatTools.Sanitize.forRender(reply?.author?.id, false), true)}" style="${replyColorStyle};">
+                        ${ChatTools.Sanitize.forRender(ChatTools.Sanitize.truncateText(reply?.author?.name, 25), isThirdPartyMessageType)}
                     </label>
                 </div>
-                <div class="content reply" data-message-id="${reply?.messageId}" data-member-id="${sanitizeHtmlForRender(reply?.author?.id, false)}" data-timestamp="${reply?.timestamp}">
-                    ${unescapeHtmlEntities(sanitizeHtmlForRender(reply?.message), false) || "[ Click to view message ]"} 
+                <div class="content reply" data-message-id="${reply?.messageId}" data-member-id="${ChatTools.Sanitize.forRender(reply?.author?.id, false)}" data-timestamp="${reply?.timestamp}">
+                    ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(reply?.message), isThirdPartyMessageType) || "[ Click to view message ]"} 
                 </div>
             </div>
         `;
@@ -1205,21 +1227,21 @@ async function createMsgHTML({
             ${replyCode}
             <div class="row ${isSystem === true ? `system` : ""}" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}">
                 ${isSystem !== true ?
-        `<div class="icon-container">
-                    <img class="icon" draggable="false" src="${sanitizeHtmlForRender(message?.author?.icon, false)}" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
+                `<div class="icon-container">
+                    <img class="icon" draggable="false" src="${ChatTools.Sanitize.forRender(message?.author?.icon, false)}" data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}" onerror="this.src = '/img/default_pfp.png';">
                 </div>` : ""}
                 
                <div class="content-container" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}"> <!-- for the flex layout -->
                  <div class="meta">
                  
                     ${isSystem !== true ?
-        `<label class="username" 
-                        data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}" 
-                        style="color: ${message?.author?.color}; background: ${message?.author?.background}; 
-                        background-clip: ${message?.author?.backgroundClip};"
-                        >
-                            ${unescapeHtmlEntities(sanitizeHtmlForRender(truncateText(message?.author?.name, 30), true))
-        }</label>` : ""}
+                        `<label class="username" 
+                        data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}" 
+                        style="${colorStyle}">
+                            ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(truncateText(message?.author?.name, 30), true))
+                        }</label>` : ""}
+                    
+                    <div class="badge-${message?.type}"></div>
                     
                     
                     <label class="timestamp" data-timestamp="${message.timestamp}">
@@ -1237,7 +1259,7 @@ async function createMsgHTML({
                     </label>
                  </div>
                 
-                 <div class="contentRows" data-member-id="${sanitizeHtmlForRender(message?.author?.id, false)}">
+                 <div class="contentRows" data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}">
                     ${messageRow}
                  </div>
                 
@@ -1354,8 +1376,7 @@ function createMsgActions(messageId, isSystem = false) {
 }
 
 function getUrlFromText(text) {
-    var geturl = new RegExp("(^|[ \t\r\n])((ftp|http|https|mailto|file):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))", "g");
-    return text.match(geturl)
+    return ChatTools.Media.getUrlFromText(text);
 }
 
 async function transformDmMessage(message, messageType){
@@ -1411,6 +1432,7 @@ async function displayMessagesInElement({
     for (let message of appendTop ? data.reverse() : data) {
         // if user switches channel we cancel this shit
         message = await transformDmMessage(message, messageType)
+        if(!messageType) messageType = message?.type ?? null
 
         if (!getChannel) {
             if (channelId !== UserManager.getChannel()) return;
@@ -1482,7 +1504,8 @@ async function displayMessagesInElement({
     }
 }
 
-function getChatlog(container, index = -1, appendTop = false, scrollPosition = null) {
+async function getChatlog(container, index = -1, appendTop = false, preventDispatch = false) {
+
     if (UserManager.getChannel() === null) return
     if (UserManager.getCategory() === null) return
     if (UserManager.getGroup() === null) return
@@ -1492,6 +1515,12 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
     let refElement = getFirstMessage(container)?.element
     let channelbar = document.querySelector("#channelname-bar");
 
+    if(preventDispatch === false){
+        EventDispatcher.send("getChatLog", {
+            container, index, appendTop, channelId, channelType: await getCurrentChannelType(channelId), firstElement: refElement, preventDispatch
+        });
+    }
+
     ElementLoader.start(channelbar, {
         style: "linear",
         color: "hsl(from var(--main) h s calc(l * 8))",
@@ -1500,6 +1529,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
 
     Clock.start("load_messages_request")
     Clock.start("load_messages_total")
+
     socket.emit("getChatlog", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
@@ -1513,7 +1543,7 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
         // reset chat
         if (response?.error === "denied") container.innerHTML = ""; // fuck em
         if (response.data == null) {
-            console.log("Data was null history");
+            console.log("Data was null - history");
             Clock.stop("load_messages_total")
             ElementLoader.stop(channelbar);
             return;
@@ -1555,24 +1585,27 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
         Clock.stop("load_messages_processing")
 
         if (response.data.length === 0 && UserManager.getChannel() && container.innerText.trim().length === 0) {
-            container.insertAdjacentHTML("beforeend", `<div style="width: 100%;text-align: center; color: gray; font-style: italic;display: block !important; float: left !important;" id="msg-0">No messages yet... be the first one!</div>`);
+            container.insertAdjacentHTML("beforeend", `<div class="no-data-indicator" style="width: 100%;text-align: center; color: gray; font-style: italic;display: block !important; float: left !important;" id="msg-0">No messages yet... be the first one!</div>`);
+        }
+        else{
+            let noDataIndicator = getContentMainContainer().querySelector(".no-data-indicator");
+            if(noDataIndicator) noDataIndicator.remove();
         }
 
         ChatManager.setChannelMarkerCounter(UserManager.getChannel())
         ChatManager.setChannelMarker(UserManager.getChannel(), false)
 
-
         if (!appendTop) {
             displayAwaitedMessages(container)
 
             // just scroll down as we dont have any anchor anyway
-            toggleSmoothScroll(container, false)
-            scrollDown();
-            toggleSmoothScroll(container, true)
+            ChatTools.Scroll.toggleSmoothScroll(getContentMainContainer(), false)
+            ChatTools.Scroll.scrollDown(getContentMainContainer());
+            ChatTools.Scroll.toggleSmoothScroll(getContentMainContainer(), true)
 
             updateMarkdownLinks(2000)
         } else {
-            if (appendTop && scrollPosition !== null) {
+            if (appendTop) {
                 displayAwaitedMessages(container)
             }
         }
@@ -1581,6 +1614,10 @@ function getChatlog(container, index = -1, appendTop = false, scrollPosition = n
         ElementLoader.stop(channelbar);
 
         Inbox.updateInboxMessageEntries();
+
+        EventDispatcher.send("getChatLog_finish", {
+            container, index, appendTop, channelId, channelType: await getCurrentChannelType(channelId), firstElement: refElement, preventDispatch
+        });
     });
 }
 
@@ -1640,7 +1677,6 @@ function getLastMessage(container) {
     if (lastMessageInChat) {
         let messageContainer = lastMessageInChat.closest(".message-container");
 
-
         let usernameElement = messageContainer.querySelector(".username");
         if (!usernameElement) {
             console.warn("Couldnt get last message because username element wasnt found")
@@ -1658,8 +1694,6 @@ function getLastMessage(container) {
             element: lastMessageInChat,
             userId
         }
-    } else {
-        console.warn("couldnt get last message")
     }
 }
 

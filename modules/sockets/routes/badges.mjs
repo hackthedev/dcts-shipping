@@ -1,6 +1,7 @@
 import {app, fs} from "../../../index.mjs";
 import {getCache, setCache} from "../../functions/ip-cache.mjs";
 import JSONTools from "@hackthedev/json-tools";
+import {rateLimit} from "../../functions/ratelimit.mjs";
 
 
 export async function getBadges(type, id, beta = false){
@@ -32,7 +33,14 @@ export async function getBadges(type, id, beta = false){
     });
 }
 
-app.get("/badges/:type/:id", async (req, res) => {
+const badgeLimiter = rateLimit({
+    windowMs: 60_000,
+    ipLimit: 10,
+    sigLimit: 2_000,
+    trustProxy: true
+});
+
+app.get("/badges/:type/:id", badgeLimiter, async (req, res) => {
     const { type, id} = req.params;
 
     if(!type) return res.status(403).send("Missing type param");

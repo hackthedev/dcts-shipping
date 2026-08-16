@@ -12,7 +12,6 @@ document.addEventListener("pagechange", e => {
     initBanList();
 });
 
-
 function initBanList(){
     setupNotify();
 
@@ -36,6 +35,68 @@ function initBanList(){
 
 // document.querySelector("#ban-reason-119012019689").innerText = "Fag"
 
+async function banPublicKey(){
+    customPrompts.showPrompt(
+        "Ban Public Key",
+        `
+            <div class="prompt-form-group">
+                <label class="prompt-label" for="banReason">Public Key</label>
+                <input class="prompt-input" id="tt_banUserDialog_banReason" type="text" name="publicKey">
+            </div>
+            
+            <div class="prompt-form-group">
+                <label class="prompt-label" for="banReason">Reason (optional)</label>
+                <input class="prompt-input" id="tt_banUserDialog_banReason" type="text" name="banReason">
+            </div>
+    
+            <div class="prompt-form-group">
+                <label class="prompt-label" for="banDurationType">Ban Duration Type</label>            
+                <input class="prompt-input" type="number" id="tt_banUserDialog_banDurationNumber" min="0" step="1" name="banDurationNumber" placeholder="Number in days, e.g. 7">
+                
+                <select class="prompt-input prompt-select" id="tt_banUserDialog_banDurationType" name="banDurationType">
+                    <option value="seconds">Seconds</option>
+                    <option value="minutes">Minutes</option>
+                    <option value="hours">Hours</option>
+                    <option default selected value="days">Days</option>
+                    <option value="weeks">Weeks</option>
+                    <option value="months">Months</option>
+                    <option value="perma">Permanent</option>
+                </select>
+            </div>
+    
+            `,
+        (values) => {
+            console.log('Submitted Values:', values);
+
+            let banReason = values.banReason;
+            let banDuration = `${Math.floor(values.banDurationNumber)} ${values.banDurationType}`
+
+            socket.emit("banPublicKey", {
+                id: UserManager.getID(),
+                token: UserManager.getToken(),
+                targetKey: values?.publicKey,
+                reason: banReason,
+                duration: banDuration
+            }, function (response) {
+                showSystemMessage({
+                    title: response.msg ?? "",
+                    text: response?.error ?? response?.message ?? "",
+                    icon: response?.error ? "error" : "success",
+                    img: null,
+                    type: response?.error ? "error" : "success",
+                    duration: 10_000
+                });
+            });
+        },
+        ["Ban", "error"],
+        false,
+        250,
+        () => {
+            tooltipSystem.clearTooltipLocalStorage("tt_banUserDialog_");
+            banUserTooltip();
+        }
+    );
+}
 
 function unbanUser(id) {
     var container = document.querySelector(`tr[data-member-id="${id}"]`);

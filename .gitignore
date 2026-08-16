@@ -26,3 +26,5 @@ public/css/themes/your-name/background.gif
 public/css/themes/your-name/config.json
 public/css/themes/your-name/thumbnail.png
 public/css/themes/your-name/your-name.css
+public/js/libs/
+.vitepress/

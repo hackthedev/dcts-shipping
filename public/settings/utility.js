@@ -198,9 +198,9 @@ async function saveServerInfoSettings(jsonData){
         });
     })
 }
-async function getChannelTree(){
+async function getChannelTree(groupId){
     return new Promise((resolve, reject) => {
-        socket.emit("getChannelTree", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageChannels" }, function (response) {
+        socket.emit("getChannelTree", {id: UserManager.getID(), token: UserManager.getToken(), permission: "manageChannels", group: groupId }, function (response) {
             resolve(response?.data || response);
         });
     })
@@ -228,6 +228,7 @@ function getChannelPathFromGroupConfig(data, channelId) {
             }
         }
     }
+
     return null;
 }
 

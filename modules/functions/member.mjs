@@ -12,7 +12,8 @@ export async function createMember({
                                        token,
                                        name,
                                        loginName,
-                                       icon, banner,
+                                       icon,
+                                       banner,
                                        aboutme,
                                        status,
                                        country_code,
@@ -21,7 +22,8 @@ export async function createMember({
                                        lastOnline,
                                        password,
                                        isVerifiedKey,
-                                       onboarding
+                                       onboarding,
+                                        type
                                    } = {}) {
     if (!id) throw new Error("Member id is missing when creating member.")
     if (!token) throw new Error("Member token is missing when creating member.")
@@ -48,6 +50,7 @@ export async function createMember({
         password: normalizeVar(stripHTML(password)) ?? null,
         isVerifiedKey: isVerifiedKey ?? false,
         onboarding: onboarding ?? null,
+        type: type ?? null,
     }
 
     await cleanMemberData(serverconfig.servermembers[id])

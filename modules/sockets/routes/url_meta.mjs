@@ -6,6 +6,23 @@ import JSONTools from "@hackthedev/json-tools";
 async function url_meta(url) {
     if (!url.startsWith("http")) url = "https://" + url;
 
+    // i wonder if this could be done better
+    let parsed;
+    try {
+        parsed = new URL(url);
+    } catch {
+        return {
+            error: "invalid url",
+        }
+    }
+
+    // harden protocol lol
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+        return {
+            error: "Invalid protocol"
+        }
+    }
+
     const res = await fetch(url, {
         headers: { "user-agent": "Mozilla/5.0 (compatible; bot/1.0)" },
         signal: AbortSignal.timeout(10000),

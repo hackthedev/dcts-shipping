@@ -1,5 +1,5 @@
 import { usersocket, serverconfig, xssFilters } from "../../index.mjs";
-import { hasPermission } from "../functions/chat/main.mjs";
+import {hasPermission, resolveCategoryByChannelId, resolveGroupByChannelId} from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, escapeHtml, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 import { leaveAllRooms } from "../functions/mysql/helper.mjs";
@@ -11,30 +11,13 @@ export default (io) => (socket) => {
         ) {
             leaveAllRooms(socket, member.id);
 
-            var room = member.room.split('-');
-            var group = room[0];
-            var category = room[1];
-            var channel = room[2];
+            var room = member.room;
+            var group = resolveGroupByChannelId(room);
+            var category = resolveCategoryByChannelId(room);
+            var channel = room;
 
             // annoying
-            if (channel === "null" || category === "null" || group === "null") return;
-
-            if (!await hasPermission(member.id, "viewChannel", channel)) {
-                sendMessageToUser(socket.id, JSON.parse(
-                    `{
-                        "title": "Access denied",
-                        "msg": "You dont have access to this channel.",
-                        "buttons": {
-                            "0": {
-                                "text": "Ok",
-                                "events": ""
-                            }
-                        },
-                        "type": "error",
-                        "popup_type": "confirm"
-                    }`));
-                return;
-            }
+            if (channel === "null" || category === "null" || group === "null" || !channel || !category || !group) return;
 
             try {
                 // If the channel exists
@@ -43,8 +26,26 @@ export default (io) => (socket) => {
                     // If its a text channel
                     if (serverconfig.groups[group].channels.categories[category].channel[channel].type === "text") {
 
-                        // Permission already checked above for text on default                        
-                        socket.join(escapeHtml(member.room));
+                        if (!await hasPermission(member.id, "viewChannel", channel)) {
+                            sendMessageToUser(socket.id, JSON.parse(
+                                `{
+                                    "title": "Access denied",
+                                    "message": "You're not allowed to talk in this channel",
+                                    "buttons": {
+                                        "0": {
+                                            "text": "Ok",
+                                            "events": ""
+                                        }
+                                    },
+                                    "type": "error",
+                                    "popup_type": "confirm"
+                                }`));
+                            return;
+                        }
+
+                        // Permission already checked above for text on default
+                        socket.join(escapeHtml(member.channel));
+                        socket.data.room = member.channel
                     }
                     // If its a voice channel
                     else if (serverconfig.groups[group].channels.categories[category].channel[channel].type === "voice") {
@@ -67,20 +68,30 @@ export default (io) => (socket) => {
                             return;
                         }
 
-                        socket.join(escapeHtml(member.room));
+                        socket.join(channel);
+                        socket.data.room = channel
                     }
+                    else{
+                        Logger.info(`Joined room channel: ${channel}`);
+                        socket.join(channel);
+                        socket.data.room = channel
+                    }
+                }
+                else{
+                    Logger.warn("Channel cant be joined cauz it wasnt found")
                 }
             }
             catch (error) {
 
                 try {
-                    socket.leave(escapeHtml(member.room));
+                    socket.leave(escapeHtml(member.channel));
+                    socket.data.room = null;
                 }
                 catch (ww) {
                     console.log(ww)
                 }
 
-                Logger.error(`Couldnt find room ${member.room}`);
+                Logger.error(`Couldnt find room ${member.channel}`);
                 Logger.error(error);
                 return;
             }

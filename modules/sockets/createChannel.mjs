@@ -30,7 +30,7 @@ export default (io) => (socket) => {
             if (!["text", "voice"].includes(member.type)) return response({ error: "Couldnt create channel: invalid channel type" })
 
             try {
-                var channelId = generateId(4);
+                var channelId = crypto.randomUUID();
 
                 category.channel[channelId] = {
                     id: channelId,

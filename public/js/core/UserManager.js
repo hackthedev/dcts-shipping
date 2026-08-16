@@ -72,12 +72,20 @@ class UserManager {
         let roleCode = "";
         for (let i = 0; i < memberObj?.roles.length; i++) {
             var role = memberObj?.roles[i];
-            var roleColor = role.color;
+            var roleColor = role.color ?? "white";
             var roleBackground = role?.background?.replace("text", "");
             var roleBackgroundClip = role.backgroundClip;
             var roleName = role.name;
 
-            roleCode += `<code class="role" id="profile-role-entry-${role.id}"><div class="role_color" style="background: ${roleColor === "transparent" ? roleBackground : roleColor};"></div><span style="color: ${roleColor};background: ${roleBackground};background-clip: ${roleBackgroundClip};">${roleName}</span></code>`;
+            let actualRoleColor = roleColor === "#000000" && !roleBackground ? "white" : roleColor;
+
+            let colorStyle = `color: ${actualRoleColor}; 
+                            background: ${roleBackground ?? "transparent"}; 
+                            background-clip: ${roleBackgroundClip ?? "none"}`
+
+            roleCode += `<code class="role" id="profile-role-entry-${role.id}" data-role-id="${role.id}">
+            <div class="role_color" style="background-color: ${actualRoleColor};"></div>
+            <span style="${colorStyle};">${roleName}</span></code>`;
         }
 
         let isMuted = memberObj?.isMuted;
@@ -327,7 +335,7 @@ class UserManager {
     }
 
     static getRoom() {
-        return ChatManager.getUrlParams("group") + "-" + ChatManager.getUrlParams("category") + "-" + ChatManager.getUrlParams("channel");
+        return ChatManager.getUrlParams("channel");
     }
 
     static getCategory() {
@@ -607,8 +615,7 @@ class UserManager {
             CookieManager.setCookie("banner", null, 365);
             CookieManager.setCookie("pow_challenge", null, 365);
             CookieManager.setCookie("pow_solution", null, 365);
-
-            window.location.href = window.location.origin;
+            window.top.location.href = window.top.location.origin;
         }
     }
 
@@ -1097,11 +1104,6 @@ class UserManager {
             </div>
             `,
             async (values) => {
-                console.log('Username:', values.username);
-                console.log('Login Name:', values.loginName);
-                console.log('Password:', values.password);
-                console.log('Repeated Password:', values.repeatedPassword);
-
                 // validate password
                 if (values.repeatedPassword !== values.password) {
                     customAlerts.showAlert("error", "Your repeated password is incorrect");
@@ -1136,7 +1138,7 @@ class UserManager {
 
 
                 // resubmit userjoin but with onboarding done
-                await ChatManager.userJoined(true, values.password, values.loginName, code)
+                await ChatManager.userJoined(true, values.password, values.loginName, code, true)
             },
             null,
             null,

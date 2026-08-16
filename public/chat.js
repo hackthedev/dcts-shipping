@@ -115,15 +115,25 @@ document.addEventListener("DOMContentLoaded", async function () {
     ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
     Docs.registerContextMenu()
 
-    ChatManager.registerMessageInfiniteLoad(
-        document.getElementById("content"),
-        async (element) => {
-            const topElement = getFirstMessage(element);
-            if (!topElement) return;
+    // infinite scroll for chat when scrolling all the way up
+    await ChatTools.Scroll.registerMessageInfiniteLoad(getContentMainContainer(), async (element) => {
+        EventDispatcher.send("infiniteScroll", {
+            element,
+            channelType: await getCurrentChannelType(),
+            channelId: UserManager.getChannel()
+        });
 
-            const timeStamp = Number(topElement?.element?.getAttribute("data-timestamp"));
-            await getChatlog(element, timeStamp, true, getScrollPosition(element, topElement?.element));
-    })
+
+        const topElement = getFirstMessage(element);
+        if (!topElement) return;
+
+        const timeStamp = Number(topElement?.element?.getAttribute("data-timestamp"));
+        await getChatlog(element, timeStamp, true);
+    });
+
+    ChatTools.Scroll.observeContainer(getContentMainContainer(), {
+        adjustDiff: true
+    });
 
     registerMessageCreateEvent();
     initAudioPlayerEvents();
@@ -209,7 +219,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     window.addEventListener('resize', function (event) {
         // do stuff here
 
-        let isScrolledDown = isScrolledToBottom(document.getElementById("content"));
+        let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(document.getElementById("content"));
 
         var emojiContainer = document.getElementById("emoji-box-container");
         var profileContainer = document.getElementById("profile_container");
@@ -222,7 +232,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             profileContainer.style.display = "none";
         }
 
-        if (isScrolledDown) scrollDown("window resizer");
+        if (isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer());
     });
 
     document.addEventListener("keydown", (event) => {
@@ -416,9 +426,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                     }
                 }
             });
-
-
-            console.log("rendered")
         }
     )
 
@@ -477,9 +484,6 @@ socket.on("updatedEmojis", async function () {
 socket.on("memberUpdated", async function () {
     getMemberList();
 })
-
-// very important
-ensureDomPurify()
 
 
 voip = new VoIP(`${window.location.origin.includes("https") ? "wss" : "ws"}://{{livekit.url}}/`);
@@ -636,14 +640,61 @@ function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
 }
 
 
-function redeemKey() {
-    var key = prompt("Enter the key you want to redeem");
+function redeemKey({
+    key = null,
+    error = null,
+                   } = {}) {
 
-    if (key == null || key.length <= 0) {
+    customPrompts.showPrompt(
+        "Redeem Key",
+        `
 
-    } else {
-        socket.emit("redeemKey", { id: UserManager.getID(), key: key, token: UserManager.getToken() });
-    }
+        <style>
+            p.error {
+                padding: 0.5rem;
+                background-color: rgb(205 92 92 / 0.25);
+                border: 1.5px solid indianred;
+                border-radius: 0.25rem;
+                color: indianred;
+            }
+        </style>
+
+        ${error ?
+            `<p class="error">${error}</p>`
+            : ""
+        }
+        
+        <p>Enter a key to receive a role.</p>
+
+        <div class="prompt-form-group">
+            <label class="prompt-label">Key</label>
+            <input type="text" class="prompt-input" id="key" name="key" value="${key ?? ""}">
+        </div>
+        `,
+        async (values) => {
+            if(values.key){
+
+                socket.emit("redeemKey", { id: UserManager.getID(), key: values.key, token: UserManager.getToken() }, function (response){
+                    if(response.error){
+                        redeemKey({
+                            error: response.error,
+                            key: values.key
+                        })
+                    }
+                    else{
+                        showSystemMessage({
+                            title: "",
+                            text: response?.message,
+                            icon: "success",
+                            img: null,
+                            type: "success",
+                            duration: 10_000
+                        });
+                    }
+                });
+            }
+        }
+    )
 }
 
 function dataURLtoBlob(dataUrl) {
@@ -908,15 +959,13 @@ function replaceInlineEmojis() {
         img.replaceWith(code);
     }
 }
-
-
 async function sendMessageToServer(authorId = UserManager.getID(),
     authorUsername = UserManager.getUsername(),
     pfp = UserManager.getPFP(),
     message,
     bypassQuill = false) {
     Clock.start("send_message");
-    let isScrolledDown = isScrolledToBottom(getContentMainContainer());
+    let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(getContentMainContainer());
 
     if (UserManager.getGroup() == null || UserManager.getGroup().length <= 0 || UserManager.getCategory() == null || UserManager.getCategory().length <= 0 || UserManager.getChannel() == null || UserManager.getChannel().length <= 0) {
         showSystemMessage({
@@ -951,12 +1000,27 @@ async function sendMessageToServer(authorId = UserManager.getID(),
         category: UserManager.getCategory(),
         channel: UserManager.getChannel(),
         editedMsgId: editMessageId,
-        replyMsgId: replyMessageId
+        replyMsgId: replyMessageId,
+        type: null,
     };
 
     // if we're using the client, sign the message
     if (isLauncher()) {
         msgPayload = await Client().SignJson(msgPayload);
+    }
+
+    // only send dcts messages and dispatch
+    let channelType = await getCurrentChannelType(UserManager.getChannel());
+
+    EventDispatcher.send("messageSend", {
+        message: msgPayload,
+        channelType,
+    })
+
+
+    if(channelType !== "text" && channelType != null){
+        resetEditorStates();
+        return;
     }
 
     return new Promise((resolve, reject) => {
@@ -984,21 +1048,25 @@ async function sendMessageToServer(authorId = UserManager.getID(),
                 ChatManager.setChannelMarkerCounter(UserManager.getChannel())
 
                 // reset all flags
-                editMessageId = null;
-                replyMessageId = null;
-                cancelMessageEdit();
-                cancelMessageReply();
-
-                scrollDown("sendMessageToServer"); // forgot that
-                setTimeout(() => focusEditor(), 1)
-                editor.innerHTML = "<p><br></p>"
-
-                saveChannelMessageDraft(UserManager.getChannel(), null)
+                resetEditorStates();
 
                 resolve(true);
             }
         });
     })
+
+    function resetEditorStates(){
+        editMessageId = null;
+        replyMessageId = null;
+        cancelMessageEdit();
+        cancelMessageReply();
+
+        ChatTools.Scroll.scrollDown(getContentMainContainer()); // forgot that
+        setTimeout(() => focusEditor(), 1)
+        editor.innerHTML = "<p><br></p>"
+
+        saveChannelMessageDraft(UserManager.getChannel(), null)
+    }
 }
 
 function getReadableDuration(date) {
@@ -1049,7 +1117,7 @@ socket.on('showUserJoinMessage', async function (author) {
     var message = '<div class="systemAnnouncementChat">' + '            <p>User <label class="systemAnnouncementChatUsername" id="">' + author.username + '</label> joined the chat!</p>' + '        </div>';
 
     addToChatLog(chatlog, message);
-    scrollDown("userJoinMessage");
+    if(ChatTools.Scroll.isScrolledToBottom(getContentMainContainer())) ChatTools.Scroll.scrollDown(getContentMainContainer());
 });
 
 socket.on('updateGroupList', async function (author) {
@@ -1156,15 +1224,6 @@ socket.on('markChannel', async function (data) {
     markChannel(data.channelId, false, data?.count);
 });
 
-socket.on('createMessageEmbed', async function (data) {
-    document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
-    scrollDown("createMessageEmbed");
-});
-
-socket.on('createMessageLink', async function (data) {
-    document.querySelector("#msg-" + data.messageId).innerHTML = data.code;
-    scrollDown("createMessageLink");
-});
 
 socket.on('receiveCurrentChannel', async function (channel) {
     try {
@@ -1191,7 +1250,15 @@ socket.on('updateGroupList', async function (data) {
 socket.on('receiveGroupList', async function (data) {
     if (serverlist.innerHTML !== data) {
         serverlist.innerHTML = "";
-        serverlist.innerHTML = data;
+
+        // show navigation indicator on mobile (quick fix);
+        if(MobilePanel.isMobile()){
+            await displayNavigationButton(serverlist, {
+                isServerEntry: true,
+            });
+        }
+
+        serverlist.innerHTML += data;
 
         let mobileGroupList = document.getElementById("mobile_GroupList");
         mobileGroupList.innerHTML = data;
@@ -1207,38 +1274,8 @@ socket.on('newMemberJoined', async function (author) {
     var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + author.name + '</label> joined the server! <label class="timestamp" id="' + author.timestamp + '">' + author.timestamp.toLocaleString("narrow") + '</p>' + '        </div>';
 
     addToChatLog(chatlog, message);
-    scrollDown("newMemberJoined");
+    if(ChatTools.Scroll.isScrolledToBottom(getContentMainContainer())) ChatTools.Scroll.scrollDown(getContentMainContainer());
 
-});
-
-socket.on('memberOnline', async function (member) {
-
-    // <p>User <label class="systemAnnouncementChat username">' + author.username + '</label> joined the chat!</p>' +
-    var message = '<div class="systemAnnouncementChat">' + '            <p><label class="systemAnnouncementChatUsername">' + member.username + '</label> is now online!</p>' + '        </div>';
-
-    addToChatLog(chatlog, message);
-    scrollDown("memberOnline");
-});
-
-socket.on('memberPresent', async function (member) {
-});
-
-socket.on('receiveGifImage', async function (response) {
-    clearGifContainer()
-
-    if (response?.gifs) {
-        for (let gif of response.gifs) {
-            document.getElementById("gif-entry-container").insertAdjacentHTML("beforeend", `<img
-                    onclick="sendGif('${gif.media_formats.gif.url}')" src="${ChatManager.proxyUrl(gif.media_formats.nanogif.url)}"
-                    style="padding: 1%;border-radius: 20px;float: left;width: 48%; height: fit-content;">`);
-        }
-    }
-
-    requestAnimationFrame(() => {
-        var gifSearchbarInput = document.getElementById("gif-searchbar-input");
-        focusElementInput(gifSearchbarInput)
-        Clock.stop("gifSearch")
-    })
 });
 
 
@@ -1359,6 +1396,28 @@ async function waitFor(callback, timeout = 0) {
             resolve(result)
         }, timeout)
     });
+}
+
+async function getCurrentChannelType(customChannelId = null, timeout = 5000, interval = 100) {
+    const channelId = customChannelId ?? UserManager.getChannel();
+    const start = Date.now();
+
+    // kinda hate this hack but im kinda lazy rn
+    while (Date.now() - start < timeout) {
+        const channelElementInList = document.querySelector(
+            `#channeltree a.channelTrigger[data-channel-id="${channelId}"]`
+        );
+
+        const type = channelElementInList?.getAttribute("data-channel-type");
+
+        if (type !== undefined && type !== null) {
+            return type;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, interval));
+    }
+
+    return null;
 }
 
 async function setUrl(param, isVC = false) {

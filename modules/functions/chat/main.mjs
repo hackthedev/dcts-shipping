@@ -3,12 +3,12 @@
  */
 import {serverconfig, xssFilters, colors, saveConfig, usersocket, server, ipsec} from "../../../index.mjs"
 import {io} from "../../../index.mjs";
-import {getMemberHighestRole} from "./helper.mjs";
+import {getChannelMessageCount, getMemberHighestRole} from "./helper.mjs";
 import {
     checkBool,
     checkEmptyConfigVar,
     copyObject, generateId,
-    getCastingMemberObject, getRoleCastingObject, isLocalhostIp,
+    getCastingMemberObject, getChannelCastingObject, getRoleCastingObject, isLocalhostIp,
     removeFromArray,
     sendMessageToUser
 } from "../main.mjs";
@@ -21,15 +21,24 @@ import {getBan} from "../ban-system/helpers.mjs";
 var serverconfigEditable = serverconfig;
 
 export async function getMemberLastOnline(memberId) {
-    if (!memberId || !serverconfig.servermembers[memberId]) return null;
+    if (!memberId || !serverconfig.servermembers[memberId]) {
+        return null
+    };
 
     const member = serverconfig.servermembers[memberId];
-    if (await shouldIgnoreMember(member)) return null;
+    if (await shouldIgnoreMember(member)) {
+        return null
+    }
 
     const lastOnline = Number(member.lastOnline || 0);
     const now = Date.now();
     const minutesPassed = Math.floor((now - lastOnline) / 60000);
-    const isOnline = Array.from(io.sockets.sockets.values()).some(s => s.data?.memberId === memberId);
+
+    // for discord bridge
+    const hasSocket = Array.from(io.sockets.sockets.values())
+        .some(s => s.data?.memberId === memberId);
+
+    const isOnline = hasSocket || minutesPassed < 5;
 
     return { isOnline, minutesPassed };
 }
@@ -55,7 +64,9 @@ export async function getOnlineMemberCount() {
 }
 
 export async function hasPermission(userId, permissions, channelOrGroupId = null, mode = "any") {
-    if(await shouldIgnoreMember(serverconfig.servermembers[userId])) return false;
+    if(await shouldIgnoreMember(serverconfig.servermembers[userId])){
+        return false;
+    }
 
     const permsToCheck = Array.isArray(permissions) ? permissions : [permissions];
 
@@ -119,7 +130,9 @@ export async function hasPermission(userId, permissions, channelOrGroupId = null
     }
 
     const userRoles = getUserRoles();
-    if (userRoles.length === 0) return false;
+    if (userRoles.length === 0) {
+        return false;
+    }
 
     // admin bypass
     for (const rid of userRoles) {
@@ -170,28 +183,35 @@ export async function hasPermission(userId, permissions, channelOrGroupId = null
 export function resolveGroupByChannelId(id) {
     for (const group of Object.keys(serverconfig.groups).reverse()) {
         const categories = serverconfig.groups[group].channels.categories;
+
         for (const category of Object.keys(categories).reverse()) {
             const channels = categories[category].channel;
-            if (channels.hasOwnProperty(id)) {
-                return group; // Return as soon as the group is found
+            const channelFound = Object.values(channels).some(channel => channel.id === id);
+
+            if (channelFound) {
+                return group;
             }
         }
     }
-    return null; // Return null if no group is found
-}
 
+    return null; // not found
+}
 
 export function resolveCategoryByChannelId(id) {
     for (const group of Object.keys(serverconfig.groups).reverse()) {
         const categories = serverconfig.groups[group].channels.categories;
+
         for (const category of Object.keys(categories).reverse()) {
             const channels = categories[category].channel;
-            if (channels.hasOwnProperty(id)) {
-                return category; // Return as soon as the category is found
+            const channelFound = Object.values(channels).some(channel => channel.id === id);
+
+            if (channelFound) {
+                return category;
             }
         }
     }
-    return null; // Return null if no category is found
+
+    return null; // not found
 }
 
 
@@ -352,7 +372,7 @@ export async function getMemberIpInfo(socket){
 }
 
 
-export async function getMemberList(member, channel) {
+export async function getMemberList(member, group) {
     var members = serverconfig.servermembers;
     const memberKeys = Object.keys(members);
     let sortedMembers = {};
@@ -366,7 +386,9 @@ export async function getMemberList(member, channel) {
         if(!memberObj.loginName) continue;
         if(await shouldIgnoreMember(memberObj)) continue;
 
-        if(!await hasPermission(memberId, "viewChannel", channel)) continue
+        if(!await hasPermission(memberId, "viewChannel", member.channel)) {
+            continue;
+        }
 
         var highestMemberRole = getMemberHighestRole(memberId);
         sortedMembers[memberId] = await getCastingMemberObject(memberObj);
@@ -556,11 +578,6 @@ export function getJson(obj, pathOrPaths) {
 
 
 export async function getChannelTree(member) {
-
-    member.id = xssFilters.inHTMLData(member.id)
-    member.token = xssFilters.inHTMLData(member.token)
-    member.group = xssFilters.inHTMLData(member.group)
-
     var group = member.group;
 
     var addedChannels = [];
@@ -638,6 +655,8 @@ export async function getChannelTree(member) {
                 setJson(channeltree, `groups.${group}.categories.${cat.info.id}.info`, serverconfig.groups[group].channels.categories[cat.info.id].info)
             }
 
+            chan.msgCount = await getChannelMessageCount(chan.id);
+
             // Foreach server role
             for (const role of Object.keys(roles)) {
 
@@ -648,7 +667,7 @@ export async function getChannelTree(member) {
                     if (await hasPermission(member.id, "viewChannel", chan.id) || await hasPermission(member.id, "manageChannels", member.group)) {
 
 
-                        setJson(channeltree, `groups.${group}.categories.${cat.info.id}.channel.${chan.id}`, serverconfig.groups[group].channels.categories[cat.info.id].channel[chan.id])
+                        setJson(channeltree, `groups.${group}.categories.${cat.info.id}.channel.${chan.id}`, getChannelCastingObject(serverconfig.groups[group].channels.categories[cat.info.id].channel[chan.id]))
 
                         if (added_channels.includes(chan.id + "_" + chan.name) === false) {
 

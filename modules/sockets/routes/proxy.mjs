@@ -4,6 +4,7 @@ import fetch from "node-fetch";
 import dns from "dns/promises";
 import net from "net";
 import { app, fs } from "../../../index.mjs";
+import {rateLimit} from "../../functions/ratelimit.mjs";
 
 const CACHE_DIR = "./cache/proxy";
 const TTL = 1000 * 60 * 60 * 24;
@@ -82,7 +83,14 @@ function isAllowedImageType(type) {
     return true;
 }
 
-app.get("/proxy", async (req, res) => {
+const proxyLimiter = rateLimit({
+    windowMs: 60_000,
+    ipLimit: 200,
+    sigLimit: 2_000,
+    trustProxy: true
+});
+
+app.get("/proxy", proxyLimiter, async (req, res) => {
     const url = req.query.url;
     if (!url || typeof url !== "string") return res.status(400).send("Invalid URL");
 

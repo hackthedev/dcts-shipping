@@ -30,18 +30,7 @@ async function renderHome() {
                     </div>
                 </div>
                 
-                <div class="info">
-                    <div class="contact">                
-                       <label class="hint-label" style="margin: 0;">Contact Information</label>     
-                       <ul style="padding-left: 20px;line-height: 1.5;">
-                            ${contactData.email ? `<li>Email: <a href=mailto:"${contactData.email}" target="_blank">${contactData.email}</a></li>` : ""}
-                            ${contactData.website ? `<li>Website: <a href="${contactData.website}" target="_blank">${contactData.website}</a></li>` : ""}
-                            ${contactData.reddit ? `<li>Reddit: <a href="${contactData.reddit}" target="_blank">${shortRedditUrl}</a></li>` : ""}
-                            ${contactData.github ? `<li>Github: <a href="${contactData.github}" target="_blank">${shortGithubUrl}</a></li>` : ""}
-                            ${contactData.discord ? `<li>Discord: <a href="${contactData.discord}" target="_blank">${shortDiscordUrl}</a></li>` : ""}
-                            ${contactData.signal ? `<li>Signal: ${contactData.signal}</li>` : ""}
-                        </ul>    
-                    </div>
+                <div class="info">                 
                     
                     <div class="public-key">
                         <label class="hint-label" style="margin: 0;">Server Public Key</label>                    
@@ -53,6 +42,18 @@ async function renderHome() {
                             </div>
                         </div>
                         
+                    </div>
+                    
+                     <div class="contact">                
+                       <label class="hint-label" style="margin: 0;">Contact Information</label>     
+                       <ul style="padding-left: 20px;line-height: 1.5;">
+                            ${contactData.email ? `<li>Email: <a href=mailto:"${contactData.email}" target="_blank">${contactData.email}</a></li>` : ""}
+                            ${contactData.website ? `<li>Website: <a href="${contactData.website}" target="_blank">${contactData.website}</a></li>` : ""}
+                            ${contactData.reddit ? `<li>Reddit: <a href="${contactData.reddit}" target="_blank">${shortRedditUrl}</a></li>` : ""}
+                            ${contactData.github ? `<li>Github: <a href="${contactData.github}" target="_blank">${shortGithubUrl}</a></li>` : ""}
+                            ${contactData.discord ? `<li>Discord: <a href="${contactData.discord}" target="_blank">${shortDiscordUrl}</a></li>` : ""}
+                            ${contactData.signal ? `<li>Signal: ${contactData.signal}</li>` : ""}
+                        </ul>    
                     </div>
                 </div>
             </div>

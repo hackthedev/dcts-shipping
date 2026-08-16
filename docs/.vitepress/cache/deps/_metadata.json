@@ -1,31 +1,32 @@
 {
-  "hash": "ddb5a3ee",
-  "configHash": "161f8a20",
-  "lockfileHash": "b8da4a23",
-  "browserHash": "0cfbf022",
+  "hash": "b0668e2d",
+  "configHash": "3c603f04",
+  "lockfileHash": "b3656ccb",
+  "browserHash": "5eb2fd0b",
   "optimized": {
-    "vue": {
-      "src": "../../../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
-      "file": "vue.js",
-      "fileHash": "c0494d58",
-      "needsInterop": false
-    },
     "vitepress > @vue/devtools-api": {
       "src": "../../../../node_modules/@vue/devtools-api/dist/index.js",
-      "file": "vitepress___@vue_devtools-api.js",
-      "fileHash": "9de6e09d",
+      "file": "vitepress_n_@vue_devtools-api.js",
+      "fileHash": "c5550907",
       "needsInterop": false
     },
     "vitepress > @vueuse/core": {
       "src": "../../../../node_modules/@vueuse/core/dist/index.js",
-      "file": "vitepress___@vueuse_core.js",
-      "fileHash": "fa2a51ec",
+      "file": "vitepress_n_@vueuse_core.js",
+      "fileHash": "7606b19c",
+      "needsInterop": false
+    },
+    "vue": {
+      "src": "../../../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "75809ef2",
       "needsInterop": false
     }
   },
   "chunks": {
-    "chunk-WUHDQSIQ": {
-      "file": "chunk-WUHDQSIQ.js"
+    "vue.runtime.esm-bundler-D4M2X7UN": {
+      "file": "vue.runtime.esm-bundler-D4M2X7UN.js",
+      "isDynamicEntry": false
     }
   }
 }

@@ -1,5 +1,5 @@
 import { serverconfig, xssFilters } from "../../index.mjs";
-import { hasPermission } from "../functions/chat/main.mjs";
+import {hasPermission, resolveCategoryByChannelId, resolveGroupByChannelId} from "../functions/chat/main.mjs";
 import {
     anonymizeMessage, autoAnonymizeMember,
     autoAnonymizeMessage,
@@ -9,6 +9,7 @@ import {
 } from "../functions/main.mjs";
 import {decodeFromBase64, getChatMessageById} from "../functions/mysql/helper.mjs";
 import {getMessageReactionsById} from "./messageReactions.mjs";
+import JSONTools from "@hackthedev/json-tools";
 
 export function decodeString(string){
     try{
@@ -83,7 +84,8 @@ export async function getMessageObjectById(messageId){
         return { error: "Message not found", message: null}
     }
 
-    let message = decodeAndParseJSON(messageRow.message);
+    let message = JSONTools.tryParse(messageRow.message);
+    message.room = messageRow.room
 
     if(message?.id) delete message.id;
     if(message?.color) delete message.color;
@@ -91,8 +93,11 @@ export async function getMessageObjectById(messageId){
     message = await checkMessageObjAuthor(message);
     message = await checkMessageObjReactions(message);
 
-    if(message?.group && message?.category && message?.channel){
-        message.channelName = serverconfig.groups[message.group].channels.categories[message.category].channel[message.channel].name
+    let groupId = resolveGroupByChannelId(messageRow.room)
+    let categoryId = resolveCategoryByChannelId(messageRow.room)
+
+    if(groupId && categoryId){
+        message.channelName = serverconfig.groups[groupId].channels.categories[categoryId].channel[message.room].name
     }
 
     return { error: null, message };

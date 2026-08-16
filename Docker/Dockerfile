@@ -6,7 +6,7 @@ FROM oven/bun:1-slim
 
 WORKDIR /app
 
-RUN apt-get update -y && apt-get install -y curl
+RUN apt-get install -y curl
 
 COPY package.json bun.lock postinstall.mjs rider.json ./
 

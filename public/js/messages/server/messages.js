@@ -667,7 +667,7 @@ function initQuillShit(customQuill = null){
         editorResizeObserver.observe(editor);
 
         editor.addEventListener('keydown', function (event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
+            if (event.key === 'Enter' && !event.shiftKey && !ac.isActive() && !mentionAc.isActive()) {
                 event.preventDefault();
                 sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), quill.root.innerHTML);
             }

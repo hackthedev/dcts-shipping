@@ -52,6 +52,10 @@ class Autocomplete {
         this.hide();
     }
 
+    isActive() {
+        return this.container.style.display !== "none" && this.filtered.length > 0;
+    }
+
     showFiltered(term, identifier = null) {
         if (this.hiddenBySelect) return;
 
@@ -65,15 +69,21 @@ class Autocomplete {
 
         if (e.key === "ArrowDown") {
             e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
             this.move(1);
         }
         else if (e.key === "ArrowUp") {
             e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
             this.move(-1);
         }
         else if (e.key === "Enter") {
             if (this.index >= 0) {
                 e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
                 this.anchor.focus();
                 this.select(this.filtered[this.index]);
             }
@@ -81,6 +91,8 @@ class Autocomplete {
         else if (e.key === "Tab") {
             if (this.index >= 0) {
                 e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
                 this.anchor.focus();
                 this.select(this.filtered[this.index]);
             }

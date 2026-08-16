@@ -203,7 +203,7 @@ async function convertMention(message, isString = false) {
 async function getUserMentions(text) {
     try {
         const userIds = [];
-        const matches = [...text.matchAll(/&lt;@(\d+)&gt;/g)];
+        const matches = [...text.matchAll(/&lt;@([^&]+)&gt;/g)];
 
         for (const match of matches) {
             const id = match[1];
@@ -225,7 +225,7 @@ async function getUserMentions(text) {
 async function getRoleMentions(text) {
     try {
         const roleIds = [];
-        const matches = [...text.matchAll(/&lt;!@(\d+)&gt;/g)];
+        const matches = [...text.matchAll(/&lt;@([^&]+)&gt;/g)];
 
         for (const match of matches) {
             const id = match[1];
@@ -247,7 +247,7 @@ async function getRoleMentions(text) {
 async function getChannelMentions(text) {
     try {
         const channelIds = [];
-        const matches = [...text.matchAll(/&lt;#@(\d+)&gt;/g)];
+        const matches = [...text.matchAll(/&lt;#@([^&]+)&gt;/g)];
 
         for (const match of matches) {
             const id = match[1];

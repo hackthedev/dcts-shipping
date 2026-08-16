@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "General/Changing Member Passwords.md",
+                "file": "plugins/Your first plugin.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Changing Member Passwords"
+              "title": "Your first plugin"
             }
           }
         ]
@@ -41,7 +41,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "Dateiexplorer"
@@ -174,18 +176,22 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "obsidian-excalidraw-plugin:New drawing": false,
       "switcher:Schnellauswahl öffnen": false,
       "graph:Graph-Ansicht öffnen": false,
       "canvas:Neuen Canvas erstellen": false,
       "daily-notes:Heutige Notiz öffnen": false,
       "templates:Vorlage einfügen": false,
       "command-palette:Befehlspalette öffnen": false,
-      "bases:Neue Base erstellen": false,
-      "obsidian-excalidraw-plugin:New drawing": false
+      "bases:Neue Base erstellen": false
     }
   },
-  "active": "3a0469dcedf99830",
+  "active": "37a4cdff02af2a98",
   "lastOpenFiles": [
+    "plugins/Event Dispatchers.md",
+    "plugins/Your first plugin.md",
+    "plugins/Plugin System.md",
+    "General/Changing Member Passwords.md",
     "VoIP Setup.md",
     "Privacy Policy.md",
     "Performance.md",
@@ -216,10 +222,6 @@
     "Lore/Architecture.md",
     "sql/Configure SQL.md",
     "network/Port forwarding.md",
-    "network/DynDNS.md",
-    "network/DNS Setup.md",
-    "network/Caddy Setup.md",
-    "sql/errors/SQL Tables and Columns not setting up automatically.md",
     "sql/errors",
     "DCTS Docs Base.base",
     "Unbenannt.base",

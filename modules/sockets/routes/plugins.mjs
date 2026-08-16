@@ -262,29 +262,37 @@ export async function initPluginSystem() {
 
 async function initPluginRoutes(){
     app.get("/plugins/list", async (req, res, next) => {
-        await handlePluginEndpointAuth(req, res, next);
-        if (res.headersSent) return;
-
-        let plugins = await getLocalPlugins();
-        return res.status(200).json({ error: null, plugins});
+        return await handlePluginList(req, res, next);
     });
 
     app.post("/plugin/:plugin/:action", async (req, res, next) => {
-        await handlePluginEndpointAuth(req, res, next);
-        if (res.headersSent) return;
-
-        const action = req?.params?.action ?? null;
-
-        if(action === "install"){
-            return await installPlugin(req, res, next);
-        }
-
-        if(action === "uninstall"){
-            return await uninstallPlugin(req, res, next);
-        }
-
-        return res.status(200).json({error: null});
+        return await handlePluginAction(req, res, next);
     });
+}
+
+export async function handlePluginList(req, res, next){
+    await handlePluginEndpointAuth(req, res, next);
+    if (res.headersSent) return;
+
+    let plugins = await getLocalPlugins();
+    return res.status(200).json({ error: null, plugins});
+}
+
+export async function handlePluginAction(req, res, next){
+    await handlePluginEndpointAuth(req, res, next);
+    if (res.headersSent) return;
+
+    const action = req?.params?.action ?? null;
+
+    if(action === "install"){
+        return await installPlugin(req, res, next);
+    }
+
+    if(action === "uninstall"){
+        return await uninstallPlugin(req, res, next);
+    }
+
+    return res.status(200).json({error: null});
 }
 
 async function uninstallPlugin(req, res, next){

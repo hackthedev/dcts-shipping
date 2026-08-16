@@ -6,7 +6,7 @@ FROM oven/bun:1-slim
 
 WORKDIR /app
 
-COPY package.json bun.lock ./
+COPY package.json bun.lock postinstall.mjs ./
 
 RUN bun install
 

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "plugins/Your first plugin.md",
+                "file": "Getting started.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Your first plugin"
+              "title": "Getting started"
             }
           }
         ]
@@ -188,8 +188,8 @@
   },
   "active": "37a4cdff02af2a98",
   "lastOpenFiles": [
-    "plugins/Event Dispatchers.md",
     "plugins/Your first plugin.md",
+    "plugins/Event Dispatchers.md",
     "plugins/Plugin System.md",
     "General/Changing Member Passwords.md",
     "VoIP Setup.md",

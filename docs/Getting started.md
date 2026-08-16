@@ -169,7 +169,7 @@ Of course if you installed and ran the chat app on your server you would need to
 > Check the above notice for public access.
 >
 
-![image-20251108165123275](../assets/image-20251108165123275.png)
+![image-20251108165123275](./assets/image-20251108165123275.png)
 
 ------
 
@@ -177,11 +177,11 @@ Of course if you installed and ran the chat app on your server you would need to
 
 When you open the chat app for the first time in the web client you will be prompted to register for an account. After that you will notice that you're just a normal member. In the console you can find a Server Admin Token.
 
-![image-20250201122217494](../assets/image-20250201122217494.png)
+![image-20250201122217494](./assets/image-20250201122217494.png)
 
 You can use it to redeem the administrator role in the web client. To do so right click any group and click *`Redeem Key`* like in the screenshot. After entering the key you will receive the Administrator role. 
 
-![image-20260219182529359](../assets/image-20260219182529359.png)
+![image-20260219182529359](./assets/image-20260219182529359.png)
 
 > [!NOTE]
 >

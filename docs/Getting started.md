@@ -2,6 +2,8 @@
 
 This document explains how to get started with the chat application and explain some concepts. If you ever need help you can make a post on [our subreddit](https://www.reddit.com/r/dcts/).
 
+Wanna install using docker? » [Docker Setup](Docker%20Setup.md)
+
 > [!TIP]
 >
 > There's now an official [Youtube Tutorial playlist](https://www.youtube.com/watch?v=b1RXJ-ykdgc&list=PL2xF-BCo1FWav36ktSvBG4nDsbhfLkFR-) which is recommended! It will simply the setup massively.

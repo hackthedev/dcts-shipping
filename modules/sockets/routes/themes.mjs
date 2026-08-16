@@ -57,7 +57,7 @@ export async function downloadTheme(themeName){
     const cssPath = path.join(targetDir, `${themeName}.css`);
     const configPath = path.join(targetDir, "config.json");
 
-    if(themeName.includes("..")) return {
+    if(themeName.includes("..") || cssPath.includes("..")) return {
         error: "Malicious filename"
     }
 

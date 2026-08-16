@@ -11,8 +11,17 @@ import fse from "fs-extra";
 import {pathToFileURL} from "url";
 import {consolas} from "../../functions/io.mjs";
 import colors from "colors";
+import {rateLimit} from "../../functions/ratelimit.mjs";
 
 export let pluginBasePath = path.join(process.cwd(), "plugins");
+
+const pluginLimiter = rateLimit({
+    windowMs: 60_000,
+    ipLimit: 20,
+    sigLimit: 100,
+    trustProxy: true
+});
+
 
 export function getPackageHost() {
     return "https://dist.dcts.community";
@@ -28,6 +37,13 @@ export async function downloadFile(url, targetPath) {
 
     if (!response.ok) {
         throw new Error(`Download failed: ${response.status} - ${response.statusText} » ${url}`);
+    }
+
+    // safety n shit
+    if(targetPath.indexOf("..") !== -1) {
+        Logger.error(`Found malicious download url! ${targetPath}`);
+        Logger.error("Skipping download...")
+        return null;
     }
 
     if (!fs.existsSync(targetPath)) fs.mkdirSync(path.dirname(targetPath), {recursive: true});
@@ -261,11 +277,11 @@ export async function initPluginSystem() {
 }
 
 async function initPluginRoutes(){
-    app.get("/plugins/list", async (req, res, next) => {
+    app.get("/plugins/list", pluginLimiter, async (req, res, next) => {
         return await handlePluginList(req, res, next);
     });
 
-    app.post("/plugin/:plugin/:action", async (req, res, next) => {
+    app.post("/plugin/:plugin/:action", pluginLimiter, async (req, res, next) => {
         return await handlePluginAction(req, res, next);
     });
 }
@@ -299,10 +315,10 @@ async function uninstallPlugin(req, res, next){
     let pluginName = req.params.plugin;
     if (!pluginName) return res.status(403).json({error: "missing plugin identifier"});
 
-    if(pluginName.indexOf("..") !== -1) res.status(403).json({error: "Malicious request"});
-
     // check if the plugin dir exists and if so delete it
     let pluginDirLocation = path.join(pluginBasePath, pluginName);
+    if(pluginDirLocation.indexOf("..") !== -1) res.status(403).json({error: `Malicious uninstall request by '${pluginName}'`});
+
     if(fs.existsSync(pluginDirLocation)){
         fs.rmSync(pluginDirLocation, {
             recursive: true,
@@ -334,12 +350,22 @@ async function installPlugin(req, res){
     // check if the local folder exists
     let pluginDirLocation = path.join(pluginBasePath, pluginName);
     let pluginConfigLocation = path.join(pluginBasePath, pluginName, "config.json");
+
+    // check for malicious paths
+    if(pluginDirLocation.indexOf("..") !== -1) return res.status(403).json({error: "Malicious request"});
+    if(pluginConfigLocation.indexOf("..") !== -1) return res.status(403).json({error: "Malicious request"});
+
     if (!fs.existsSync(pluginDirLocation)) fs.mkdirSync(pluginDirLocation);
 
     // download the files
     for (let file of fileListObj) {
         let fileDownloadUrl = `${getPackageUrl(pluginDetails.package.name)}/${file}`
         let localFilePath = path.join(pluginDirLocation, file)
+
+        if(localFilePath.indexOf("..") !== -1) {
+            Logger.error(`Found malicious path from plugin ${pluginName}! Skipping file download`);
+            continue;
+        }
 
         await downloadFile(fileDownloadUrl, localFilePath)
     }
@@ -359,6 +385,11 @@ export async function installPluginDependencies(pluginName) {
 
     if (!fs.existsSync(pluginConfigLocation)) {
         return Logger.error(`Plugin config.json not found for plugin '${pluginName}'`)
+    }
+
+    // lol
+    if(pluginConfigLocation.indexOf("..") !== -1){
+        return Logger.error(`Malicious plugin '${pluginName}' tried to do path traversal!`)
     }
 
     // parse plugin config.

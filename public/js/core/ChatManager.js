@@ -990,18 +990,17 @@ class ChatManager {
     }
 
     static proxyUrl(url) {
+        url = decodeURIComponent(url)
         if (!url) return null;
         if (url.startsWith(window.location.origin)) return url;
-        if (url.startsWith(encodeURIComponent(window.location.origin))) return decodeURIComponent(url);
-        if (url.startsWith("data:")) return url;
-        if (url.startsWith("/uploads")) return url;
-        if (url.startsWith("/upload")) return url;
-        if (url.startsWith("/img")) return url;
-        if (url.startsWith("/emojis")) return url;
-        if (url.startsWith(encodeURIComponent("/uploads"))) return url;
-        if (url.startsWith(encodeURIComponent("/upload"))) return url;
-        if (url.startsWith(encodeURIComponent("/img"))) return url;
-        if (url.startsWith(encodeURIComponent("/emojis"))) return url;
+        if (url.startsWith(window.location.origin)) return encodeURIComponent(url);
+        if (url.startsWith("data:")) return encodeURIComponent(url);
+        if (url.startsWith("/uploads")) return encodeURIComponent(url);
+        if (url.startsWith("/upload")) return encodeURIComponent(url);
+        if (url.startsWith("/emojis")) return encodeURIComponent(url);
+        if (url.startsWith("/uploads") || url.startsWith("/upload")) return encodeURIComponent(url);
+        if (url.startsWith("/img") || url.startsWith("img/")) return encodeURIComponent(url);
+        if (url.startsWith("/emojis")) return encodeURIComponent(url);
         return `/proxy?url=${encodeURIComponent(url)}`
     }
 

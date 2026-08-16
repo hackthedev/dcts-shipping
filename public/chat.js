@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     ChatManager.applyThemeOnLoad(UserManager.getTheme(), UserManager.getThemeAccent());
     Docs.registerContextMenu()
 
-
+    // infinite scroll for chat when scrolling all the way up
     await ChatTools.Scroll.registerMessageInfiniteLoad(getContentMainContainer(), async (element) => {
         EventDispatcher.send("infiniteScroll", {
             element,
@@ -426,9 +426,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                     }
                 }
             });
-
-
-            console.log("rendered")
         }
     )
 

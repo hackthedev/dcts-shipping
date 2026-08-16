@@ -302,8 +302,17 @@ async function updateMentionAutocompleteData() {
 
     let i = 0;
     for (let channel of Object.values(channels)) {
+        console.log(channel.group?.info?.icon)
+
         const name = channel.name;
-        const html = `<span data-channel-id="${channel.id}">#${name}</span>`;
+        const html = `
+            <img 
+                style="background-color: black;
+                width: 20px; 
+                height: 20px;
+                border-radius: 50%;" 
+                src="${ChatManager.proxyUrl(channel.group?.info?.icon) || "/img/default_icon.png"}">
+            <span data-channel-id="${channel.id}">#${name}</span>`;
 
         const mention = new Mention("channel", { channel, html });
         mentionList[i++] = mention;
@@ -321,7 +330,8 @@ async function updateMentionAutocompleteData() {
         if (!role?.info) continue;
 
         const name = role.info.name;
-        const html = `<span data-role-id="${roleId}" style="color:${role.info.color}; background:${role.info.background}; background-clip:${role.info.backgroundClip};">@${name}</span>`;
+        const html = `
+            <span data-role-id="${roleId}" style="color:${role.info.color}; background:${role.info.background}; background-clip:${role.info.backgroundClip};">@${name}</span>`;
 
         const mention = new Mention("role", { role: { id: roleId, ...role.info }, html });
         mentionList[i++] = mention;
@@ -344,7 +354,7 @@ async function updateMentionAutocompleteData() {
                                 width: 20px; 
                                 height: 20px;
                                 border-radius: 50%;" 
-                                src="${ChatManager.proxyUrl(member?.icon) || "/img/default_icon.png"}"
+                                src="${ChatManager.proxyUrl(member?.icon) || "/img/default_icon.png"}">
                                 <span data-role-id="${memberId}">@${name}</span>`;
 
         const mention = new Mention("member", { member: { id: memberId, ...member }, html });
@@ -385,7 +395,6 @@ async function initializeMentionAutocomplete(element) {
         const length = match[0].length;
 
         let insert = "";
-        console.log(item)
         if (item?.data?.type === "channel") {
             insert = `<#@${item.data.channel.id}>`;
         } else if (item?.data?.type === "member") {

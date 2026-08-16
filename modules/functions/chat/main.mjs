@@ -8,7 +8,7 @@ import {
     checkBool,
     checkEmptyConfigVar,
     copyObject, generateId,
-    getCastingMemberObject, getRoleCastingObject, isLocalhostIp,
+    getCastingMemberObject, getChannelCastingObject, getRoleCastingObject, isLocalhostIp,
     removeFromArray,
     sendMessageToUser
 } from "../main.mjs";
@@ -667,7 +667,7 @@ export async function getChannelTree(member) {
                     if (await hasPermission(member.id, "viewChannel", chan.id) || await hasPermission(member.id, "manageChannels", member.group)) {
 
 
-                        setJson(channeltree, `groups.${group}.categories.${cat.info.id}.channel.${chan.id}`, serverconfig.groups[group].channels.categories[cat.info.id].channel[chan.id])
+                        setJson(channeltree, `groups.${group}.categories.${cat.info.id}.channel.${chan.id}`, getChannelCastingObject(serverconfig.groups[group].channels.categories[cat.info.id].channel[chan.id]))
 
                         if (added_channels.includes(chan.id + "_" + chan.name) === false) {
 

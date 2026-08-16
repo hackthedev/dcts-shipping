@@ -20,7 +20,7 @@ import {
 import {
     generateGid, getMemberFromKey,
     getNewDate,
-    hasPermission,
+    hasPermission, resolveGroupByChannelId,
 } from "./chat/main.mjs";
 import {consolas} from "./io.mjs";
 import Logger from "@hackthedev/terminal-logger"
@@ -1197,6 +1197,15 @@ export function getChannelCastingObject(channelObject) {
             delete channelObject[key];
         }
     });
+
+    // add some extras
+    let channelId = channelObject.id;
+    let groupId = resolveGroupByChannelId(channelId);
+    let groupObj = serverconfig.groups[groupId];
+
+    channelObject.group ??= {
+        ...groupObj
+    }
 
     return channelObject;
 }

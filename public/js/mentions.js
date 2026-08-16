@@ -414,13 +414,6 @@ async function initializeMentionAutocomplete(element) {
     };
 
     startMentionAutocompleteListener();
-
-    document.addEventListener("keydown", e => {
-        if (e.key === "Tab" && mentionAc && mentionAc.container.style.display !== "none") {
-            e.preventDefault();
-            mentionAc.onKey(e);
-        }
-    }, true);
 }
 
 function startMentionAutocompleteListener() {

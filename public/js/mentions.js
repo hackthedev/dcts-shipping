@@ -318,11 +318,13 @@ async function updateMentionAutocompleteData() {
         mentionList[i++] = mention;
 
         mentionAc.addEntry(name, {
-            type: "channel",
-            channel: { ...channel },
-            html
-        }, html);
-    }
+                type: "channel",
+                channel: { ...channel },
+                html
+            },
+            html,
+            "#");
+        }
 
     // handle roles
     for (let roleId of Object.keys(serverRoles)) {
@@ -340,7 +342,7 @@ async function updateMentionAutocompleteData() {
             type: "role",
             role: { id: roleId, ...role.info },
             html
-        }, html);
+        }, html, "@");
     }
 
     // handle server members
@@ -364,7 +366,7 @@ async function updateMentionAutocompleteData() {
             type: "member",
             member: { id: memberId, ...member },
             html
-        }, html);
+        }, html, "@");
     }
 }
 
@@ -388,7 +390,7 @@ async function initializeMentionAutocomplete(element) {
         if (!range) return;
 
         const text = getTextBeforeCursor();
-        const match = text.match(/@([^\s]*)$/);
+        const match = text.match(/([@#€])([^\s@#€]*)$/);
         if (!match) return;
 
         const start = range.index - match[0].length;
@@ -429,18 +431,16 @@ function startMentionAutocompleteListener() {
 
     quill.on("text-change", () => {
         const text = getTextBeforeCursor();
-        const match = [...text.matchAll(/@([^\s]*)/g)].pop();
+        const match = text.match(/([@#])([^\s@#]*)$/);
+
         if (!match) {
             mentionAc.hide();
             return;
         }
 
-        const searchTerm = match[1];
-        if (!searchTerm) {
-            mentionAc.hide();
-            return;
-        }
+        const identifier = match[1];
+        const searchTerm = match[2];
 
-        mentionAc.showFiltered(searchTerm);
+        mentionAc.showFiltered(searchTerm, identifier);
     });
 }

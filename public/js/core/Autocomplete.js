@@ -33,16 +33,13 @@ class Autocomplete {
         }
     }
 
-    addEntry(label, data = {}, html = null) {
-        this.entries.push({ label, data, html });
+    addEntry(label, data = {}, html = null, identifier = "@") {
+        this.entries.push({ label, data, html, identifier });
     }
 
-    removeEntry(label) {
-        this.entries = this.entries.filter(e => e.label !== label);
-    }
-
-    filterEntries(term) {
+    filterEntries(term, identifier) {
         return this.entries.filter(e =>
+            e.identifier === identifier &&
             e?.label?.toLowerCase().includes(term.toLowerCase())
         );
     }
@@ -55,13 +52,13 @@ class Autocomplete {
         this.hide();
     }
 
-    showFiltered(term) {
+    showFiltered(term, identifier = null) {
         if (this.hiddenBySelect) return;
-        this.filtered = this.filterEntries(term);
+
+        this.filtered = this.filterEntries(term, identifier);
         this.index = this.filtered.length > 0 ? 0 : -1;
         this.render();
     }
-
 
     onKey(e) {
         if (this.container.style.display === "none") return;

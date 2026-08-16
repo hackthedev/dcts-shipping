@@ -81,7 +81,9 @@ async function fetchEmojis() {
             function (response) {
                 if (response.type !== "success") {
                     emojiList = [];
-                    reject(response.msg);
+                    registerTwEmojis();
+
+                    resolve(response.msg);
                     return;
                 }
 
@@ -99,29 +101,34 @@ async function fetchEmojis() {
                             <span>${parsed.name}</span>
 `;
 
-                        ac.addEntry(parsed.name, e, html);
+                        ac.addEntry(parsed.name, e, html, ":");
                     }
 
-                    for (const group of twemojiIndex) {
-                        for (const e of group.emojis) {
-                            const html = `
-                                <img src="/img/default_emojis/${e.code}.svg" style="width:25px;height:25px;margin-right:8px;">
-                                <span>${e.name}</span>
-                            `;
-
-                            ac.addEntry(
-                                e.name,
-                                {code: e.code, name: e.name, default: true},
-                                html
-                            );
-                        }
-                    }
+                    registerTwEmojis();
                 }
 
                 resolve(emojiList);
             }
         );
     });
+
+    function registerTwEmojis(){
+        for (const group of twemojiIndex) {
+            for (const e of group.emojis) {
+                const html = `
+                                <img src="/img/default_emojis/${e.code}.svg" style="width:25px;height:25px;margin-right:8px;">
+                                <span>${e.name}</span>
+                            `;
+
+                ac.addEntry(
+                    e.name,
+                    {code: e.code, name: e.name, default: true},
+                    html,
+                    ":"
+                );
+            }
+        }
+    }
 }
 
 function getTextBeforeCursor() {
@@ -189,7 +196,7 @@ function startEmojiAutocompleteListener() {
             return;
         }
 
-        ac.showFiltered(searchTerm);
+        ac.showFiltered(searchTerm, ":");
     });
 }
 

@@ -1,0 +1,120 @@
+#gif-entry-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#gif-searchbar {
+    display: flex;
+    flex-shrink: 0;
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+#gif-searchbar-input {
+    width: 100%;
+    outline: none;
+    background-color: #40444B;
+    border: 1px solid #40444B;
+    padding: 4px;
+    color: white;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#gif-entry-container .gif-entries-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#gif-entry-container .gif-entries {
+    columns: 2;
+    column-gap: 6px;
+    width: 100%;
+}
+
+#gif-entry-container .gif-entries img {
+    display: block;
+    width: 100%;
+    height: auto;
+
+    margin-bottom: 6px;
+    break-inside: avoid;
+    box-sizing: border-box;
+    border-radius: 8px;
+}
+
+/* flag filters */
+#gif-entry-container .gif-entries .gif-entry-wrapper {
+    position: relative;
+    overflow: hidden;
+    break-inside: avoid;
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+
+#gif-entry-container .gif-entries .gif-entry-wrapper img {
+    transition: filter 4000ms ease;
+    cursor: pointer;
+}
+
+#gif-entry-container .gif-entries .gif-entry-wrapper.sensitive img,
+#gif-entry-container .gif-entries .gif-entry-wrapper.nsfw img {
+    filter: blur(1.5rem);
+}
+
+#gif-entry-container .gif-entries .gif-entry-wrapper .notice {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    pointer-events: none;
+    transition: opacity 4000ms ease;
+}
+
+#gif-entry-container .gif-entries .gif-entry-wrapper .notice::before {
+    content: "";
+    position: absolute;
+    inset: -40px;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* stolen from DCTS-Projects/gifs :D */
+#gif-entry-container .gif-entries .gif-entry-wrapper .notice.sensitive::before {
+    background: radial-gradient(
+            circle,
+            rgba(0, 0, 0, 0.6) 0%,
+            rgba(0, 0, 0, 0.5) 35%,
+            rgba(0, 0, 0, 0.4) 55%,
+            rgba(0, 0, 0, 0.3) 74%
+    );
+}
+
+#gif-entry-container .gif-entries .gif-entry-wrapper .notice.nsfw::before {
+    background: radial-gradient(
+            circle,
+            rgba(255, 0, 0, 0.4) 0%,
+            rgba(255, 0, 0, 0.3) 35%,
+            rgba(255, 0, 0, 0.2) 55%,
+            rgba(255, 0, 0, 0.1) 75%
+    );
+}
+
+#gif-entry-container .gif-entries .gif-entry-wrapper:hover img {
+    filter: none;
+}
+
+#gif-entry-container .gif-entries .gif-entry-wrapper:hover .notice {
+    opacity: 0;
+}

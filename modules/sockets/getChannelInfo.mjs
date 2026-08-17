@@ -14,7 +14,7 @@ export default (io) => (socket) => {
         if (await validateMemberId(member?.id, socket, member?.token) === true
         ) {
             if (await hasPermission(member.id, "manageChannels")) {
-                var channelObj = resolveChannelById(member.channel.replace("channel-", ""));
+                var channelObj = resolveChannelById(member.channel);
                 response({ type: "success", msg: "Successfully resolved channel", data: channelObj });
             }
             else {

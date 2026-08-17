@@ -203,7 +203,7 @@ async function convertMention(message, isString = false) {
 async function getUserMentions(text) {
     try {
         const userIds = [];
-        const matches = [...text.matchAll(/&lt;@(\d+)&gt;/g)];
+        const matches = [...text.matchAll(/&lt;@([^&]+)&gt;/g)];
 
         for (const match of matches) {
             const id = match[1];
@@ -225,7 +225,7 @@ async function getUserMentions(text) {
 async function getRoleMentions(text) {
     try {
         const roleIds = [];
-        const matches = [...text.matchAll(/&lt;!@(\d+)&gt;/g)];
+        const matches = [...text.matchAll(/&lt;@([^&]+)&gt;/g)];
 
         for (const match of matches) {
             const id = match[1];
@@ -247,7 +247,7 @@ async function getRoleMentions(text) {
 async function getChannelMentions(text) {
     try {
         const channelIds = [];
-        const matches = [...text.matchAll(/&lt;#@(\d+)&gt;/g)];
+        const matches = [...text.matchAll(/&lt;#@([^&]+)&gt;/g)];
 
         for (const match of matches) {
             const id = match[1];
@@ -302,18 +302,29 @@ async function updateMentionAutocompleteData() {
 
     let i = 0;
     for (let channel of Object.values(channels)) {
+        console.log(channel.group?.info?.icon)
+
         const name = channel.name;
-        const html = `<span data-channel-id="${channel.id}">#${name}</span>`;
+        const html = `
+            <img 
+                style="background-color: black;
+                width: 20px; 
+                height: 20px;
+                border-radius: 50%;" 
+                src="${ChatManager.proxyUrl(channel.group?.info?.icon) || "/img/default_icon.png"}">
+            <span data-channel-id="${channel.id}">#${name}</span>`;
 
         const mention = new Mention("channel", { channel, html });
         mentionList[i++] = mention;
 
         mentionAc.addEntry(name, {
-            type: "channel",
-            channel: { ...channel },
-            html
-        }, html);
-    }
+                type: "channel",
+                channel: { ...channel },
+                html
+            },
+            html,
+            "#");
+        }
 
     // handle roles
     for (let roleId of Object.keys(serverRoles)) {
@@ -321,7 +332,8 @@ async function updateMentionAutocompleteData() {
         if (!role?.info) continue;
 
         const name = role.info.name;
-        const html = `<span data-role-id="${roleId}" style="color:${role.info.color}; background:${role.info.background}; background-clip:${role.info.backgroundClip};">@${name}</span>`;
+        const html = `
+            <span data-role-id="${roleId}" style="color:${role.info.color}; background:${role.info.background}; background-clip:${role.info.backgroundClip};">@${name}</span>`;
 
         const mention = new Mention("role", { role: { id: roleId, ...role.info }, html });
         mentionList[i++] = mention;
@@ -330,7 +342,7 @@ async function updateMentionAutocompleteData() {
             type: "role",
             role: { id: roleId, ...role.info },
             html
-        }, html);
+        }, html, "@");
     }
 
     // handle server members
@@ -344,7 +356,7 @@ async function updateMentionAutocompleteData() {
                                 width: 20px; 
                                 height: 20px;
                                 border-radius: 50%;" 
-                                src="${ChatManager.proxyUrl(member?.icon) || "/img/default_icon.png"}"
+                                src="${ChatManager.proxyUrl(member?.icon) || "/img/default_icon.png"}">
                                 <span data-role-id="${memberId}">@${name}</span>`;
 
         const mention = new Mention("member", { member: { id: memberId, ...member }, html });
@@ -354,7 +366,7 @@ async function updateMentionAutocompleteData() {
             type: "member",
             member: { id: memberId, ...member },
             html
-        }, html);
+        }, html, "@");
     }
 }
 
@@ -378,14 +390,13 @@ async function initializeMentionAutocomplete(element) {
         if (!range) return;
 
         const text = getTextBeforeCursor();
-        const match = text.match(/@([^\s]*)$/);
+        const match = text.match(/([@#€])([^\s@#€]*)$/);
         if (!match) return;
 
         const start = range.index - match[0].length;
         const length = match[0].length;
 
         let insert = "";
-        console.log(item)
         if (item?.data?.type === "channel") {
             insert = `<#@${item.data.channel.id}>`;
         } else if (item?.data?.type === "member") {
@@ -403,13 +414,6 @@ async function initializeMentionAutocomplete(element) {
     };
 
     startMentionAutocompleteListener();
-
-    document.addEventListener("keydown", e => {
-        if (e.key === "Tab" && mentionAc && mentionAc.container.style.display !== "none") {
-            e.preventDefault();
-            mentionAc.onKey(e);
-        }
-    }, true);
 }
 
 function startMentionAutocompleteListener() {
@@ -420,18 +424,16 @@ function startMentionAutocompleteListener() {
 
     quill.on("text-change", () => {
         const text = getTextBeforeCursor();
-        const match = [...text.matchAll(/@([^\s]*)/g)].pop();
+        const match = text.match(/([@#])([^\s@#]*)$/);
+
         if (!match) {
             mentionAc.hide();
             return;
         }
 
-        const searchTerm = match[1];
-        if (!searchTerm) {
-            mentionAc.hide();
-            return;
-        }
+        const identifier = match[1];
+        const searchTerm = match[2];
 
-        mentionAc.showFiltered(searchTerm);
+        mentionAc.showFiltered(searchTerm, identifier);
     });
 }

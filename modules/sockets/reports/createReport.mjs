@@ -43,7 +43,7 @@ export default (io) => (socket) => {
 
                         // if data is available
                         if (messageAuthorId) {
-                            let room = message[0]?.room; // 1-2-3
+                            let room = message[0]?.room; // 34535-fdsgf4-sdfs4-...
                             let channelId = room.split("-")[2]; // 3
 
                             if (!serverconfig.servermembers[messageAuthorId]) {

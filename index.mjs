@@ -2,6 +2,10 @@ import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
 // handle startup args
 let nodeArgs = process.argv;
 
+// init web server
+import express from "express";
+export const app = express();
+
 // remove the first few arguments because fuck that lol
 nodeArgs.shift();
 nodeArgs.shift();
@@ -17,10 +21,6 @@ if(!fs.existsSync(versionPath)) {
     process.exit(1);
 }
 export let versionCode = fs.readFileSync(versionPath).toString();
-
-import express from "express";
-
-export const app = express();
 
 import https from "https";
 import http from "http";
@@ -52,7 +52,6 @@ import Logger from "@hackthedev/terminal-logger"
 import dSyncSql from "@hackthedev/dsync-sql"
 import dSyncIPSec from "@hackthedev/dsync-ipsec"
 import FrontendLibs from "@hackthedev/frontend-libs";
-
 
 // Depending on the SSL setting, this will switch.
 export let server; // = http.createServer(app);
@@ -138,7 +137,6 @@ checkFile("./plugins/settings.json", true, "{}");
     Holy Server config file.
     needs to be above the imports else serverconfig will be undefined
  */
-
 export var serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, {encoding: "utf-8"})) : {};
 checkConfigAdditions();
 
@@ -178,16 +176,15 @@ if (dbUser) serverconfig.serverinfo.sql.username = dbUser;
 if (dbPass) serverconfig.serverinfo.sql.password = dbPass;
 if (dbName) serverconfig.serverinfo.sql.database = dbName;
 
-if (dbHost || dbUser || dbPass || dbName) {
-}
-saveConfig(serverconfig);
-
 // nicer warning
 serverconfig.serverinfo.sql.enabled = true;
 if(!serverconfig?.serverinfo?.sql?.username){
     Logger.warn("Congrats, setup worked! Please go to the /configs/config.json file and enter the SQL information under 'sql'");
     process.exit(0);
 }
+
+// do not await this
+saveConfig(serverconfig);
 
 
 // create sql pool
@@ -199,6 +196,7 @@ export let signer = null;
 export let auther = null;
 export let inbox = null;
 export let files = new dSyncFiles();
+
 try {
     db = new dSyncSql({
         host: process.env.DB_HOST || serverconfig.serverinfo.sql.host,
@@ -256,7 +254,6 @@ try {
 
             getUploadPath: async (req) => {
                 let type = req.headers["x-upload-type"] ?? "upload";
-                console.log(type)
 
                 if (type === "emoji") return "./public/emojis";
 
@@ -273,11 +270,9 @@ try {
                 let isRemote = sessionId && publicKey && !isDCTSUser;
 
                 if(isDCTSUser && await validateMemberId(memberId, null, memberToken)){
-                    var userUploadLimit = getMemberHighestUploadLimit(memberId);
-                    return userUploadLimit;
+                    return getMemberHighestUploadLimit(memberId);
                 }
                 else if(isRemote){
-
                     // validate session etc
                     let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
 
@@ -292,7 +287,7 @@ try {
                         }
                     }
 
-                    return 5; // setting when
+                    return serverconfig.serverinfo.messenger.defaultFileUploadLimit ?? 0; // setting when
                 }
 
                 return 0;
@@ -380,10 +375,7 @@ import {
     generateId,
     escapeHtml,
     addMinutesToDate,
-    searchTenor,
     sendMessageToUser,
-    tenorCallback_search,
-    httpGetAsync,
     sanitizeInput,
     copyObject,
     sanitizeFilename,
@@ -439,10 +431,7 @@ import {
 } from "./modules/functions/mysql/helper.mjs";
 import {checkMemberMigration} from "./modules/functions/migrations/memberJsonToDb.mjs";
 import {
-    checkMigrations,
-    completeMigrationTask,
-    createMigrationTask,
-    getMigrationTask
+    checkMigrations
 } from "./modules/functions/migrations/helper.mjs";
 import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./modules/functions/migrations/messageMigration.mjs";
 import JSONTools from "@hackthedev/json-tools";
@@ -453,120 +442,16 @@ import {
     getChannelMessageFrequency, getChannelRateLimit,
 } from "./modules/functions/anti-spam/messages.mjs";
 import {renderChart} from "./modules/functions/anti-spam/charts.mjs";
-import {unbanIp} from "./modules/functions/ban-system/helpers.mjs";
+import {checkAndUnbanPublicKey, getBan, unbanIp} from "./modules/functions/ban-system/helpers.mjs";
 import {getMessageObjectById} from "./modules/sockets/resolveMessage.mjs";
 import {getMemberHighestRole, getMemberHighestUploadLimit} from "./modules/functions/chat/helper.mjs";
+import {initPluginSystem} from "./modules/sockets/routes/plugins.mjs";
 
 /*
     Files for the plugin system
 */
-// Directories where plugin files are located
-const pluginsDir = path.join(__dirname, "plugins");
-const publicPluginsDir = path.join(__dirname, "public", "plugins");
 
-// Function to dynamically load and register socket event handlers
-const registerPluginSocketEvents = async (socket, pluginSocketsDir) => {
-    const files = fs.readdirSync(pluginSocketsDir);
-    for (const file of files) {
-        if (file.endsWith(".mjs")) {
-            const filePath = path.join(pluginSocketsDir, file);
-            const fileUrl = pathToFileURL(filePath).href;
-            const {default: handler} = await import(fileUrl);
 
-            try {
-                handler(socket);
-            } catch (e) {
-                Logger.error(fileUrl);
-                Logger.error(e);
-            }
-        }
-    }
-};
-
-// Function to dynamically load and execute plugin functions
-const loadAndExecutePluginFunctions = async (pluginFunctionsDir) => {
-    const files = fs.readdirSync(pluginFunctionsDir);
-    for (const file of files) {
-        if (file.endsWith(".mjs")) {
-            const filePath = path.join(pluginFunctionsDir, file);
-            const fileUrl = pathToFileURL(filePath).href;
-            const module = await import(fileUrl);
-
-            // Iterate over all exports in the module
-            for (const [name, func] of Object.entries(module)) {
-                // Check if the export is a function and its name includes 'onLoad'
-                if (typeof func === "function" && name.includes("onLoad")) {
-                    func();
-                }
-            }
-        }
-    }
-};
-
-// Function to move web folders to the public directory
-const moveWebFolders = async (pluginWebDir, pluginName) => {
-    const destinationDir = path.join(publicPluginsDir, pluginName);
-    await fse.ensureDir(destinationDir); // Ensure the destination directory exists
-    await fse.copy(pluginWebDir, destinationDir, {overwrite: true});
-};
-
-// Iterate over each plugin and process it
-const processPlugins = async () => {
-    const pluginDirs = fs.readdirSync(pluginsDir);
-
-    for (const pluginName of pluginDirs) {
-        // ignore files
-        if (fs.lstatSync(path.join(pluginsDir, pluginName)).isFile() === true)
-            continue;
-
-        const pluginDir = path.join(pluginsDir, pluginName);
-        const pluginFunctionsDir = path.join(pluginDir, "functions");
-        const pluginSocketsDir = path.join(pluginDir, "sockets");
-        const pluginWebDir = path.join(pluginDir, "web");
-
-        let pluginConfigPath = path.join(pluginDir, "config.json");
-        let pluginConfig = null;
-
-        if (fs.existsSync(pluginConfigPath)) {
-            pluginConfig = JSON.parse(fs.readFileSync(pluginConfigPath));
-        }
-
-        // some plugin meta
-        let pluginTitle = pluginConfig?.title || false;
-        let pluginEnabled = pluginConfig?.enabled || false;
-        let pluginAuthor = pluginConfig?.author || "";
-        let pluginVersion = pluginConfig?.version || 0;
-
-        // skip disabled plugin
-        if (pluginEnabled !== true) {
-            Logger.warn(
-                `Skipped loading plugin ${pluginTitle} (${pluginName}) because its not enabled`,
-            );
-            continue;
-        }
-
-        // Load and execute plugin functions
-        if (fs.existsSync(pluginFunctionsDir)) {
-            await loadAndExecutePluginFunctions(pluginFunctionsDir);
-        }
-
-        // Register socket events
-        if (fs.existsSync(pluginSocketsDir)) {
-            io.on("connection", (socket) => {
-                registerPluginSocketEvents(socket, pluginSocketsDir).catch((err) =>
-                    console.error(err),
-                );
-            });
-        }
-
-        // Move web folders to the public directory
-        if (fs.existsSync(pluginWebDir)) {
-            await moveWebFolders(pluginWebDir, pluginName);
-        }
-
-        consolas(colors.yellow(`Loaded plugin ${colors.white(pluginName)}`));
-    }
-};
 
 // Create a connection pool if sql is enabled
 // SQL Database Structure needed
@@ -578,7 +463,7 @@ const tables = [
         columns: [
 
             {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "roomId", type: "varchar(20) NOT NULL UNIQUE KEY"},
+            {name: "roomId", type: "varchar(200) NOT NULL UNIQUE KEY"},
             {name: "title", type: "varchar(204) NOT NULL DEFAULT 'New Chat'"},
             {name: "creatorId", type: "varchar(20) NOT NULL"},
             {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
@@ -601,7 +486,7 @@ const tables = [
         name: "dm_room_participants",
         columns: [
             {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-            {name: "roomId", type: "varchar(20) NOT NULL"},
+            {name: "roomId", type: "varchar(200) NOT NULL"},
             {name: "memberId", type: "varchar(204) NOT NULL"},
             {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
         ],
@@ -616,7 +501,7 @@ const tables = [
         columns: [
             {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
             {name: "authorId", type: "varchar(100) NOT NULL"},
-            {name: "roomId", type: "varchar(100) NOT NULL"},
+            {name: "roomId", type: "varchar(200) NOT NULL"},
             {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
             {name: "message", type: "longtext NOT NULL"},
             {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
@@ -628,11 +513,15 @@ const tables = [
         columns: [
             {name: "authorId", type: "varchar(100) NOT NULL"},
             {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
-            {name: "room", type: "varchar(25) NOT NULL"},
+            {name: "room", type: "varchar(200) NOT NULL"},
             {name: "message", type: "longtext NOT NULL"},
             {
                 name: "createdAt",
                 type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)",
+            },
+            {
+                name: "editedAt",
+                type: "bigint DEFAULT NULL",
             },
         ]
     },
@@ -734,6 +623,7 @@ const tables = [
             {name: "isMuted", type: "BOOLEAN DEFAULT FALSE"},
             {name: "password", type: "text DEFAULT NULL"},
             {name: "publicKey", type: "text DEFAULT ''"},
+            {name: "type", type: "varchar(500) DEFAULT NULL"},
             {name: "isVerifiedKey", type: "BOOLEAN DEFAULT FALSE"},
             {name: "pow", type: "text DEFAULT ''"},
         ]
@@ -743,6 +633,7 @@ const tables = [
         columns: [
             {name: "rowId", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
             {name: "memberId", type: "varchar(100) NOT NULL UNIQUE"},
+            {name: "publicKey", type: "text NULL UNIQUE"},
             {name: "issuerId", type: "varchar(100) NOT NULL"},
             {name: "ip", type: "varchar(100) DEFAULT NULL"},
             {name: "reason", type: "varchar(500) DEFAULT NULL"},
@@ -944,6 +835,10 @@ async function waitForTable(table, interval = 1000) {
             { package: '@hackthedev/file-manager@1.0.0', path: libDir },
             { package: '@hackthedev/element-loader@1.0.0', path: libDir },
             { package: '@hackthedev/rich-editor@latest', path: libDir },
+            { package: '@hackthedev/chat-tools@1.0.1', path: libDir },
+            { package: '@hackthedev/autocomplete@latest', path: libDir },
+            { package: '@hackthedev/prompts@latest', path: libDir },
+            { package: '@hackthedev/event-dispatcher@latest', path: libDir },
         ]);
 
         results.forEach((r) => {
@@ -1063,73 +958,6 @@ app.use(
     }*/,
     ),
 );
-
-// Process plugins at server start
-processPlugins().catch((err) => console.error(err));
-
-const socketHandlers = [];
-const activeSockets = new Map();
-
-const loadSocketHandlers = async (mainHandlersDir, io) => {
-    const fileList = [];
-
-    const scanDir = (dir) => {
-        const files = fs.readdirSync(dir, {withFileTypes: true});
-        for (const file of files) {
-            const filePath = path.join(dir, file.name);
-            if (file.isDirectory()) {
-                scanDir(filePath);
-            } else if (file.name.endsWith(".mjs")) {
-                fileList.push(filePath);
-            }
-        }
-    };
-
-    scanDir(mainHandlersDir);
-
-    for (const filePath of fileList) {
-        const fileUrl = pathToFileURL(filePath).href;
-        try {
-            const {default: handlerFactory} = await import(fileUrl);
-            const handler = handlerFactory(io);
-
-            if (typeof handler === "function") {
-                socketHandlers.push(handler);
-                Logger.debug(`Preloaded socket handler: ${filePath}`);
-            } else {
-                Logger.warn(`Ignored invalid socket handler in ${filePath}`);
-            }
-        } catch (err) {
-            Logger.error(`Error importing socket handler: ${fileUrl}`);
-            Logger.error(err);
-        }
-    }
-};
-
-const registerSocketEvents = (socket) => {
-    try {
-        const attachedHandlers = [];
-
-        for (const handler of socketHandlers) {
-            const cleanup = handler(socket);
-            if (typeof cleanup === "function") {
-                attachedHandlers.push(cleanup);
-            }
-        }
-
-        activeSockets.set(socket.id, attachedHandlers);
-    } catch (err) {
-        console.error("Error registering socket events:", err);
-    }
-};
-
-(async () => {
-    try {
-        await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
-    } catch (err) {
-        console.error("Critical error loading socket handlers:", err);
-    }
-})();
 
 export async function checkPow(socket) {
     if (powVerifiedUsers.includes(socket.id)) {
@@ -1259,6 +1087,12 @@ async function listenToIO(){
         isValidated: async (req, res) => {
             const {inboxId, timestamp, customId} = req?.params;
             const { id, token, sessionId, publicKey } = req.body;
+
+            // if public key is banned
+            if(publicKey){
+                let publicKeyCheckResult = await checkAndUnbanPublicKey(publicKey);
+                if(publicKeyCheckResult?.result === true) return false;
+            }
 
             if(serverconfig.servermembers[id]?.token === token && !sessionId) return true;
 
@@ -1404,3 +1238,69 @@ export function flipDebug() {
 export function isPtero(){
     return nodeArgs?.includes("--ptero")
 }
+
+
+export const socketHandlers = [];
+const activeSockets = new Map();
+
+const loadSocketHandlers = async (mainHandlersDir, io) => {
+    const fileList = [];
+
+    const scanDir = (dir) => {
+        const files = fs.readdirSync(dir, {withFileTypes: true});
+        for (const file of files) {
+            const filePath = path.join(dir, file.name);
+            if (file.isDirectory()) {
+                scanDir(filePath);
+            } else if (file.name.endsWith(".mjs")) {
+                fileList.push(filePath);
+            }
+        }
+    };
+
+    scanDir(mainHandlersDir);
+
+    for (const filePath of fileList) {
+        const fileUrl = pathToFileURL(filePath).href;
+        try {
+            const {default: handlerFactory} = await import(fileUrl);
+            const handler = handlerFactory(io);
+
+            if (typeof handler === "function") {
+                socketHandlers.push(handler);
+                Logger.debug(`Preloaded socket handler: ${filePath}`);
+            } else {
+                Logger.warn(`Ignored invalid socket handler in ${filePath}`);
+            }
+        } catch (err) {
+            Logger.error(`Error importing socket handler: ${fileUrl}`);
+            Logger.error(err);
+        }
+    }
+};
+
+const registerSocketEvents = (socket) => {
+    try {
+        const attachedHandlers = [];
+
+        for (const handler of socketHandlers) {
+            const cleanup = handler(socket);
+            if (typeof cleanup === "function") {
+                attachedHandlers.push(cleanup);
+            }
+        }
+
+        activeSockets.set(socket.id, attachedHandlers);
+    } catch (err) {
+        console.error("Error registering socket events:", err);
+    }
+};
+
+(async () => {
+    try {
+        await initPluginSystem();
+        await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
+    } catch (err) {
+        console.error("Critical error loading socket handlers:", err);
+    }
+})();

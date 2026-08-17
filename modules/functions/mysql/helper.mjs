@@ -68,6 +68,11 @@ export async function loadMembersFromDB() {
 
     for (const row of rows) {
         serverconfig.servermembers[row.id] = row;
+
+        // check if member is in default role
+        if (!serverconfig.serverroles["0"].members.includes(row.id)) {
+            serverconfig.serverroles["0"].members.push(row.id);
+        }
     }
 
     const sys = {
@@ -122,13 +127,18 @@ export async function deleteReport(reportId) {
 }
 
 export async function saveChatMessageInDb(message) {
+
+    // i thought we would delete this as it would be somewhat redundant.
+    let messageRoom = message.room;
+    delete message.room;
+
+    let messageEditedAt = message?.editedAt
+    delete message.editedAt
+
     const query = `
-        INSERT INTO messages (authorId, messageId, message, room)
-        VALUES (?, ?, ?, ?) ON DUPLICATE KEY
-        UPDATE
-            message =
-        VALUES (message), room =
-        VALUES (room)
+        INSERT INTO messages (createdAt, authorId, messageId, message, room, editedAt)
+        VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY
+        UPDATE message = VALUES (message), room = VALUES (room), editedAt = VALUES (editedAt)
     `;
 
     // get rid of the entire author object
@@ -138,7 +148,7 @@ export async function saveChatMessageInDb(message) {
     }
 
     const encodedMessage = JSON.stringify(message);
-    return await queryDatabase(query, [message.author.id, message.messageId, encodedMessage, message.room]);
+    return await queryDatabase(query, [message?.createdAt ?? new Date().getTime(), message.author.id, message.messageId, encodedMessage, messageRoom, messageEditedAt ?? null]);
 }
 
 export async function logEditedChatMessageInDb(message) {
@@ -155,7 +165,7 @@ export async function logEditedChatMessageInDb(message) {
 export function leaveAllRooms(socket, memberId = null) {
     const rooms = socket.rooms;
     rooms.forEach((room) => {
-        if (room !== socket.id && room !== memberId && !room.startsWith("vc_")) { // Exclude the socket's own room
+        if (room !== socket.id && room !== memberId && !room?.startsWith("vc_")) { // Exclude the socket's own room
             socket.leave(room);
         }
     });
@@ -261,7 +271,7 @@ export async function getInboxMessages({
 export async function getChatMessagesFromDb(roomId, index, msgId = null) {
     if (msgId != null) {
         return await queryDatabase(
-            `SELECT messageId, authorId, room, message, createdAt
+            `SELECT *
              FROM messages
              WHERE messageId = ?`,
             [msgId]
@@ -270,7 +280,7 @@ export async function getChatMessagesFromDb(roomId, index, msgId = null) {
 
     if (index === -1) {
         return await queryDatabase(
-            `SELECT messageId, authorId, message, createdAt
+            `SELECT *
              FROM messages
              WHERE room = ?
              ORDER BY createdAt DESC
@@ -279,7 +289,7 @@ export async function getChatMessagesFromDb(roomId, index, msgId = null) {
         );
     } else {
         return await queryDatabase(
-            `SELECT messageId, authorId, message, createdAt
+            `SELECT *
              FROM messages
              WHERE room = ?
                AND createdAt < ?

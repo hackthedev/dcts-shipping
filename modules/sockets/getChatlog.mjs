@@ -30,7 +30,7 @@ export default (io) => (socket) => {
                     // filter messages
                     let messages
                     await Clock.start("Chatlog Message Fetching", async () => {
-                        messages = await getSavedChatMessage(member.groupId, member.categoryId, member.channelId, member.index);
+                        messages = await getSavedChatMessage(member.channelId, member.index);
                     });
 
                     await Clock.start("Chatlog Message Anon", async () => {

@@ -186,6 +186,21 @@ export default (io) => (socket) => {
         if (member?.pow?.challenge) member.pow.challenge = String(stripHTML(member?.pow?.challenge));
         if (member?.pow?.solution) member.pow.solution = String(stripHTML(member?.pow?.solution));
 
+        // check member ban and disconnect if needed.
+        // will also auto remove the ban again
+        let banResult = await checkMemberBan(socket, member);
+        if (banResult.result === true) {
+            response({
+                error: banResult.text,
+                type: "error",
+                msg: banResult.text,
+                displayTime: 1000 * 60,
+            });
+
+            return socket.disconnect();
+        }
+
+
         await cleanMemberData(member);
 
         checkRateLimit(socket);
@@ -210,20 +225,6 @@ export default (io) => (socket) => {
         // handle invites
         let inviteResult = handleInviteCode(member, socket, response);
         if (!inviteResult) return;
-
-        // check member ban and disconnect if needed.
-        // will also auto remove the ban again
-        let banResult = await checkMemberBan(socket, member);
-        if (banResult.result === true) {
-            response({
-                error: banResult.text,
-                type: "error",
-                msg: banResult.text,
-                displayTime: 1000 * 60,
-            });
-
-            return socket.disconnect();
-        }
 
         // call checkMemberMute so it unmutes automatically
         checkMemberMute(socket, member);
@@ -258,7 +259,7 @@ export default (io) => (socket) => {
             }
 
             // error if no password passed
-            if(!member?.password) return response({error: "Missing password field in plaintext"})
+            if(!member?.password) return response({error: "Missing password field in plaintext<br><a onclick='UserManager.resetAccount();'>Reset Session</a>"})
 
             var userToken = generateId(48);
             member.token = userToken;
@@ -330,7 +331,7 @@ export default (io) => (socket) => {
             castingMember.group = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);
             castingMember.category = resolveCategoryByChannelId(serverconfig.serverinfo.defaultChannel);
             castingMember.channel = serverconfig.serverinfo.defaultChannel;
-            castingMember.room = `${resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel)}-${resolveCategoryByChannelId(serverconfig.serverinfo.defaultChannel)}-${serverconfig.serverinfo.defaultChannel}`;
+            castingMember.room = `${serverconfig.serverinfo.defaultChannel}`;
 
             castingMember.timestamp = new Date().getTime();
             castingMember.messageId = generateId(12);
@@ -344,7 +345,7 @@ export default (io) => (socket) => {
 
             io.emit("updateMemberList");
             let room = castingMember.room;
-            io.in(room).emit("messageCreate", castingMember);
+            io.emit("messageCreate", castingMember);
 
             // this join call is absolutely important so we can always emit
             // data to ourselves based on the member id. very helpful!
@@ -405,8 +406,19 @@ export default (io) => (socket) => {
 
                 if (session.valid) {
                     let serverMemberObj = await getMemberFromKey(session.publicKey);
+
+                    // if a member with that key already exists
                     if (serverMemberObj) {
+                        Logger.debug("Existing member joined via key auth")
                         await successfulAuthResponse(serverMemberObj);
+                        return { keepExecution: false };
+                    }
+                    // else create a new member!
+                    else if(!serverMemberObj){
+                        Logger.debug("Creating member joined via key auth")
+                        await createKeyAuthedMember()
+                        let newMember = await getMemberFromKey(member?.publicKey)
+                        await successfulAuthResponse(newMember);
                         return { keepExecution: false };
                     }
                 }
@@ -421,6 +433,8 @@ export default (io) => (socket) => {
                     socket.keyAuthIdentifier = keyChallengeResult.identifier;
                     socket.keyAuthSolution = keyChallengeResult.challengeString;
 
+                    Logger.debug("Member tried to join via key auth without solution. Requesting challenge.")
+
                     // then send response to client to solve
                     response({ keyAuth: true, challenge: keyChallengeResult.challenge });
                     return {
@@ -432,7 +446,12 @@ export default (io) => (socket) => {
                     // if the user successfully authenticated let them know it all worked
                     if(socket.keyAuthSolution === member.keySolution){
                         let serverMemberObj = await getMemberFromKey(member?.publicKey)
-                        if(!serverMemberObj) return { keepExecution: true } // no member found, continue logic
+                        if(!serverMemberObj){
+                            await createKeyAuthedMember()
+                            let newMember = await getMemberFromKey(member?.publicKey)
+                            await successfulAuthResponse(newMember);
+                            return { keepExecution: false };
+                        }
 
                         await successfulAuthResponse(serverMemberObj)
 
@@ -445,6 +464,43 @@ export default (io) => (socket) => {
 
             return {
                 keepExecution: true,
+            }
+
+            async function createKeyAuthedMember(){
+                // setup member
+                let memberId = generateId(12) ?? null;
+                let memberToken = generateId(48) ?? null;
+                let generatedPassword = crypto.randomUUID();
+                let generatedLoginName = crypto.randomUUID();
+
+                const now = new Date().getTime();
+                const hashedPassword = await hashPassword(generatedPassword);
+
+                // Check if member is in default role
+                if (serverconfig.serverroles["0"].members.includes(memberId) === false) {
+                    serverconfig.serverroles["0"].members.push(memberId);
+                    saveConfig(serverconfig);
+                }
+
+                await createMember(                    {
+                    id: memberId,
+                    token: memberToken,
+                    name: "Member",
+                    loginName: generatedLoginName,
+                    icon: null,
+                    banner: null,
+                    aboutme: null,
+                    status: null,
+                    country_code: null,
+                    publicKey: member?.publicKey ? stripHTML(member.publicKey) : "",
+                    joined: now,
+                    lastOnline: now,
+                    password: hashedPassword,
+                    isVerifiedKey: true,
+                    onboarding: true
+                })
+
+                return { keepExecution: false };
             }
         }
     });

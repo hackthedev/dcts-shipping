@@ -27,17 +27,19 @@ Plugins are located inside the project's main folder's plugin folder. If the pro
 ```
 E:\dcts\plugins:
 └───sample
-    ├───functions
-    │       info.mjs
+    ├─── config.json
+    ├─── functions
     │       plugin_onLoad.mjs
     │
-    ├───sockets
+    ├─── sockets
     │       test.mjs
     │
-    └───web
+    └─── web
             main.js
 ```
 
+> [!NOTE]
+> The plugin config file needs to have a specific structure as well. Checkout ...
 ### Running Server-side Code
 
 In order to run code on the server side you need to go into the *`functions`* folder of your plugin. To execute your code when the server starts you need to create a file containing *`onLoad`* in the filename. It also needs to have the *`.mjs`* file extension. As you can see in the example structure the filename *`plugin_onLoad.mjs`* would be valid and executed when the server starts.

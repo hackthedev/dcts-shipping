@@ -64,6 +64,10 @@ async function initChannelRoles(){
 
         console.log(editChannel)
 
+        if(!editChannel){
+            return console.error("No Channel found!")
+        }
+
         // Foreach role in the channel permissions
         Object.keys(editChannel.permissions).forEach(function (perm) {
 

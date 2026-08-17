@@ -1,5 +1,7 @@
 
 function getMemberList() {
+    if(!UserManager.getChannel()) return;
+
     // hehe
     let infolist = document.getElementById("infolist");
     if(localStorage.getItem("memberlist_html_cache") && infolist?.innerText?.trim()?.length  === 0) infolist.innerHTML = localStorage.getItem("memberlist_html_cache");

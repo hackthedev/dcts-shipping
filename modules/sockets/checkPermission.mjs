@@ -3,7 +3,7 @@ import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, getCastingMemberObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 
-let permList = {
+export let permList = {
     "readMessages": {
         name: "Read Messages",
         type: "checkbox",

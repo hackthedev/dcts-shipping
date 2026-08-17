@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { serverconfig } from "../index.mjs";
+import {serverconfig, signer} from "../index.mjs";
 import { mock, beforeAll, afterAll } from "bun:test";
 import { Server } from "socket.io";
 import { createServer } from "http";
@@ -123,7 +123,7 @@ mock.module("../index.mjs", () => ({
         }
     },
     io: defaultTestOverwrites.io,
-    signer: {},
+    signer,
     usersocket: {},
     xssFilters: xssFilters
 }));

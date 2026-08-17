@@ -58,7 +58,7 @@ async function updateMissingMeta() {
 async function updateMarkdownLinks(delay) {
     let container = getContentMainContainer()
     if(!container) throw new Error("no container found!");
-    let isScrolledDown = isScrolledToBottom(container, 10)
+    let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(container, 10)
 
     let elements = container.querySelectorAll(".contentRows .content p")
     let markdownChanged = false
@@ -99,8 +99,7 @@ async function updateMarkdownLinks(delay) {
     // adjust new media stuff. would have been mindblowing to think about that earlier
     if (markdownChanged) {
         await updateMissingMeta()
-        watchMediaLoads(container)
-        if (isScrolledDown) scrollDown("updateMarkdown")
+        if (isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer())
     } else {
         await updateMissingMeta()
     }
@@ -118,7 +117,9 @@ async function getUrlMeta(url){
     }
 
     try{
-        let meta = await fetch(`/meta/${encodeURIComponent(url)}`)
+        let meta = await fetch(`/meta/${encodeURIComponent(url)}`, {
+            signal: AbortSignal.timeout(400)
+        })
         if(meta?.status === 200){
             let metaJson = await meta.json();
 

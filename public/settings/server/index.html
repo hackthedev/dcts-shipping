@@ -15,13 +15,17 @@
     <link rel="stylesheet" href="/css/themes/default/default.css">
     <link rel="stylesheet" href="/css/notes.css">
     <link rel="stylesheet" href="/css/settings.css">
+    <link rel="stylesheet" href="/css/markdown-parser.css">
+    <link rel="stylesheet" href="/highlight.css">
     <link rel="stylesheet" href="/css/mobile/main.css">
 
 
     <script src="/js/core/MobileUI.js"></script>
     <script src="/js/sysmsg.js"></script>
 
-    <script src="/js/prompts.js"></script>
+    <script src="/js/libs/prompts/prompts.js"></script>
+    <script src="/js/libs/chat-tools/ChatTools.js"></script>
+    <script src="/js/libs/event-dispatcher/EventDispatcher.js"></script>
     <script src="/js/core/UserManager.js"></script>
     <script src="/js/core/JsonEditor.js"></script>
     <script src="/js/core/Emoji.js"></script>
@@ -32,6 +36,7 @@
     <script src="/js/hover.js"></script>
     <script src="/js/escape.js"></script>
     <script src="/js/core/purify.js"></script>
+    <script src="/js/core/markdown-parser.js"></script>
 
     <script src="/notify.js"></script>
     <script src="/js/core/sortable.js"></script>
@@ -64,6 +69,7 @@
                 <h2>General Settings</h2>
                 <a onclick='loadPageContent("server-info")' id="manageServerInfo" data-permission="administrator">Server Info</a>
                 <a onclick='loadPageContent("rate-limit")' id="manageRateSettings" data-permission="administrator">Rate Limit</a>
+                <a onclick='loadPageContent("plugins")' id="managePlugins" data-permission="administrator">Plugins</a>
                 <hr id="general-hr">
             </div>
 

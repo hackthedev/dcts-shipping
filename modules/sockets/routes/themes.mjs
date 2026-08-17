@@ -11,8 +11,6 @@ import unzipper from "unzipper";
 import {Readable} from "stream";
 import {getThemes} from "../getThemes.mjs";
 import {getCache, setCache} from "../../functions/ip-cache.mjs";
-
-
 export async function loadThemeCache(force = false){
     return await getCache("theme_cache", "theme_cache")
 }
@@ -34,8 +32,7 @@ export async function listThemes() {
     }
 
     if (!Array.isArray(githubThemes) || !githubThemes.length) {
-        githubThemes = await getThemes();
-        await saveThemeCache(githubThemes);
+        githubThemes = []
     }
 
     const localDir = path.resolve("public", "css", "themes");
@@ -59,6 +56,10 @@ export async function downloadTheme(themeName){
     const targetDir = path.join(themesDir, themeName);
     const cssPath = path.join(targetDir, `${themeName}.css`);
     const configPath = path.join(targetDir, "config.json");
+
+    if(themeName.includes("..") || cssPath.includes("..")) return {
+        error: "Malicious filename"
+    }
 
     if(!fs.existsSync(targetDir)){
         fs.mkdirSync(themesDir, { recursive: true });
@@ -100,6 +101,15 @@ export async function downloadTheme(themeName){
     }
 
     let config = null;
+
+    if(configPath.includes("..")) return {
+        error: "Malicious filename"
+    }
+
+    if(cssPath.includes("..")) return {
+        error: "Malicious filename"
+    }
+
     if(fs.existsSync(configPath)){
         config = JSONTools.tryParse(fs.readFileSync(configPath, "utf8"));
     }
@@ -109,7 +119,6 @@ export async function downloadTheme(themeName){
         config
     };
 }
-
 
 
 app.get("/themes/list", async (req, res) => {

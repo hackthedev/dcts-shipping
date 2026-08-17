@@ -25,7 +25,13 @@ import {
     addInboxMessage
 } from "./mysql/helper.mjs"
 import {getMentionIdsFromText} from "../sockets/messageSend.mjs";
-import {getJson, hasPermission, shouldIgnoreMember} from "./chat/main.mjs";
+import {
+    getJson,
+    hasPermission,
+    resolveCategoryByChannelId, resolveChannelById,
+    resolveGroupByChannelId,
+    shouldIgnoreMember
+} from "./chat/main.mjs";
 import {copyObject, generateId, getCastingMemberObject} from "./main.mjs";
 import {
     checkMessageObjAuthor,
@@ -223,20 +229,30 @@ export async function getMessageLogsById(msgId) {
     return logs;
 }
 
-export async function getSavedChatMessage(group, category, channel, index = -1) {
+export async function getSavedChatMessage(channelId, index = -1) {
     // add setting for checking if db storage should be used
+
+    let group = resolveGroupByChannelId(channelId);
+    let category = resolveCategoryByChannelId(channelId);
+    let channel = resolveChannelById(channelId)
+
     var sortedMessages = [];
     if (serverconfig.serverinfo.sql.enabled === true) {
 
         await Clock.start("Chatlog Processing", async () => {
             let loadedMessages = null;
             await Clock.start("Chatlog Processing Load", async () => {
-                loadedMessages = await getChatMessagesFromDb(`${group}-${category}-${channel}`, index);
+                loadedMessages = await getChatMessagesFromDb(`${channelId}`, index);
             });
 
             for (let i = 0; i < loadedMessages.length; i++) {
 
                 let message = decodeAndParseJSON(loadedMessages[i].message);
+
+                // restore deleted room key in saveChatMessageInDb.
+                if(!message?.room) message.room = loadedMessages[i].room;
+                if(!message?.editedAt) message.editedAt = loadedMessages[i].editedAt;
+
                 if (message?.message) {
                     // new, enhanced message system
                     if (message?.author?.id) {
@@ -328,10 +344,6 @@ export async function saveChatMessage(message, editedMsgId = null) {
     }
 
     saveChatMessageInDb(message);
-
-    // increase count and save it
-    serverconfig.groups[group].channels.categories[category].channel[channel].msgCount += 1;
-    saveConfig(serverconfig);
 
     let mentions = getMentionIdsFromText(message.message)
 

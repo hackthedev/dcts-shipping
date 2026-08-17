@@ -21,6 +21,7 @@ class ChannelTree {
         }, function (response) {
             let group = UserManager.getGroup();
 
+            if(!response?.data?.groups) return console.error("No group data found!");
             const catCollection = response.data.groups[group].categories;
             let sortedCats = Object.keys(catCollection).sort((a, b) => {
                 return catCollection[b].info.sortId - catCollection[a].info.sortId;
@@ -79,7 +80,14 @@ class ChannelTree {
                                     style="display: block;"
                                 >                               
                                     <span class="message-marker-icon"></span>
-                                    ${channel.type === "text" ? emojiCodeToImg("⌨", true) : emojiCodeToImg("🎙", true)} ${channel.name}
+                                    ${channel.type === "text" ? emojiCodeToImg("⌨", true) : ""} 
+                                    ${channel.type === "voice" ? emojiCodeToImg("🎙", true) : ""}
+                                    
+                                    <!-- unkown fallback -->
+                                    ${channel.type !== "voice" && channel.type !== "text" ?
+                                    `<img src="/img/worker.png" alt="Unkown" class="inline-text-emoji default channellist-icon ${channel.type}">` : ""}
+                                    
+                                    ${channel.name}
                                     
                                     <span class="channel-mention-marker" data-channel-id="${channel.id}">5</span>     
                                 </a>
@@ -134,6 +142,8 @@ class ChannelTree {
 
             markCurrentChannelStyle(UserManager.getChannel())
             localStorage.setItem("channeltree_html_cache", channeltree.innerHTML);
+
+            EventDispatcher.send("getChannelTree_finish");
         });
     }
 

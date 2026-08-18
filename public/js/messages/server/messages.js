@@ -1067,16 +1067,13 @@ async function updateMessageReactionsElementById(messageId, container = getConte
     let messageObj = await ChatManager.resolveMessage(messageId);
     if (!messageObj) return console.error(`Couldnt find message object for message reaction update ${messageId}`);
 
-    let lastMsg = getLastMessage(container)
-    await withScrollLock(container, lastMsg?.element, async () => {
-        // no reactions were present so add the container
-        if (!reactionRow) {
-            contentContainer.innerHTML += await getMessageReactionsHTML(messageObj);
-            reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
-        }
+    // no reactions were present so add the container
+    if (!reactionRow) {
+        contentContainer.innerHTML += await getMessageReactionsHTML(messageObj);
+        reactionRow = document.querySelector(`.message-reaction-row[data-message-id="${messageId}"]`);
+    }
 
-        reactionRow.outerHTML = await getMessageReactionsHTML(messageObj);
-    })
+    reactionRow.outerHTML = await getMessageReactionsHTML(messageObj);
 
     if (wasScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer())
 }
@@ -1333,7 +1330,6 @@ async function addMessageReaction(messageId, emojiHash, isDefault = false) {
         default: isDefault
     }, async (response) => {
         if (response?.error) {
-            console.log(response.error);
             showSystemMessage({
                 title: "Error while reacting",
                 message: response.error,

@@ -3,6 +3,7 @@ import {getMessageObjectById} from "./resolveMessage.mjs";
 import {queryDatabase} from "../functions/mysql/mysql.mjs";
 import xssFilters from "xss-filters";
 import Logger from "@hackthedev/terminal-logger"
+import {stripHTML} from "../functions/sanitizing/functions.mjs";
 
 export async function getMessageReactionsById(messageId){
     if(!messageId){
@@ -67,10 +68,10 @@ export default (io) => (socket) => {
             let messageObj = messageObjResult?.message;
 
             if(!messageObj) return response({ error: `Message ${member.messageId} not found` });
-            await addMessageReactionById(member.messageId, xssFilters.inHTMLData(member.emojiHash), member.id);
+            let reactionResult = await addMessageReactionById(member.messageId, stripHTML(member.emojiHash), member.id);
 
-            response({ error: null })
             io.in(messageObj.room).emit("updateReactions", messageObj);
+            response({ error: null })
         }
     });
 

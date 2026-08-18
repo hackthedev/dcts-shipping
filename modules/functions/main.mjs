@@ -847,7 +847,8 @@ export function checkConfigAdditions() {
                 ".md": "text/markdown",
                 ".txt": "text/plain",
             }
-        });
+        }
+    );
 }
 
 export function setLongInterval(fn, ms) {

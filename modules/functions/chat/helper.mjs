@@ -62,10 +62,10 @@ export function getMemberHighestUploadLimit(id) {
     });
 
     if (uploadMB === null) {
-        return Number(roles["0"]?.permissions?.maxUpload ?? 0);
+        return Number(roles["0"]?.permissions?.maxUpload ?? serverconfig.serverinfo.messenger.defaultFileUploadLimit ?? 0);
     }
 
-    return uploadMB;
+    return uploadMB === 0 ? serverconfig.serverinfo.messenger.defaultFileUploadLimit : uploadMB;
 }
 
 export function getMemberHighestRole(id) {

@@ -21,7 +21,7 @@ export default (io) => (socket) => {
 
             try {
                 // If the channel exists
-                if (serverconfig.groups[group].channels.categories[category].channel[channel] != null) {
+                if (serverconfig.groups?.[group]?.channels?.categories?.[category]?.channel?.[channel] != null) {
 
                     // If its a text channel
                     if (serverconfig.groups[group].channels.categories[category].channel[channel].type === "text") {

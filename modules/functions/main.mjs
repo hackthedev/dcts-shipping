@@ -825,15 +825,29 @@ export function checkConfigAdditions() {
     // Delete entire uploadFileTypes section from config file to recreate it
     // with the extended list or add manually. will not update if already exists
     checkObjectKeys(serverconfig, "serverinfo.uploadFileTypes",
-        [
-            "image/png",
-            "image/jpeg",
-            "image/gif",
-            "image/webp",
-            "audio/mpeg",
-            "video/mp4",
-            "audio/vnd.wave"
-        ])
+        {
+            allowed: [
+                "image/png",
+                "image/jpeg",
+                "application/pdf",
+                "application/json",
+                "text/plain",
+                "text/markdown",
+                "image/png",
+                "image/jpeg",
+                "image/gif",
+                "image/webp",
+                "audio/mpeg",
+                "video/mp4",
+                "audio/vnd.wave"
+            ],
+
+            fallback: {
+                ".json": "application/json",
+                ".md": "text/markdown",
+                ".txt": "text/plain",
+            }
+        });
 }
 
 export function setLongInterval(fn, ms) {

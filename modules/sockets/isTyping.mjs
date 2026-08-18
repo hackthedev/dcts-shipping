@@ -10,8 +10,8 @@ export default (io) => (socket) => {
     socket.on('isTyping', async function (member) {
         if(!await validateMemberId(member?.id, socket, member?.token)) return;
 
-        if (!await hasPermission(member.id, "viewChannel", member.room.split("-")[2])) return;
-        if (!await hasPermission(member.id, "sendMessages", member.room.split("-")[2])) return;
+        if (!await hasPermission(member.id, "viewChannel", member.room)) return;
+        if (!await hasPermission(member.id, "sendMessages", member.room)) return;
 
         const room = member.room;
         const id = member.id;

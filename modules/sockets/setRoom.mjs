@@ -17,7 +17,7 @@ export default (io) => (socket) => {
             var channel = room;
 
             // annoying
-            if (channel === "null" || category === "null" || group === "null" || !channel || !category || !group) return;
+            if (channel === "null" || category === "null" || group === "null" || !channel || !category || !group) console.warn("Cant join room");
 
             try {
                 // If the channel exists
@@ -40,12 +40,13 @@ export default (io) => (socket) => {
                                     "type": "error",
                                     "popup_type": "confirm"
                                 }`));
+
                             return;
                         }
 
                         // Permission already checked above for text on default
-                        socket.join(escapeHtml(member.channel));
-                        socket.data.room = member.channel
+                        socket.join(channel);
+                        socket.data.room = channel
                     }
                     // If its a voice channel
                     else if (serverconfig.groups[group].channels.categories[category].channel[channel].type === "voice") {
@@ -72,7 +73,6 @@ export default (io) => (socket) => {
                         socket.data.room = channel
                     }
                     else{
-                        Logger.info(`Joined room channel: ${channel}`);
                         socket.join(channel);
                         socket.data.room = channel
                     }

@@ -85,7 +85,7 @@ export async function getMessageObjectById(messageId){
     }
 
     let message = JSONTools.tryParse(messageRow.message);
-    message.room = messageRow.room
+    message.room = message.channel
 
     if(message?.id) delete message.id;
     if(message?.color) delete message.color;

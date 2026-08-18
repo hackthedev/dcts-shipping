@@ -344,7 +344,6 @@ export default (io) => (socket) => {
             await saveChatMessage(castingMember);
 
             io.emit("updateMemberList");
-            let room = castingMember.room;
             io.emit("messageCreate", castingMember);
 
             // this join call is absolutely important so we can always emit

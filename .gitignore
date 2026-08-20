@@ -28,3 +28,4 @@ public/css/themes/your-name/thumbnail.png
 public/css/themes/your-name/your-name.css
 public/js/libs/
 .vitepress/
+docs/.vitepress/

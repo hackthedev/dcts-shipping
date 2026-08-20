@@ -68,7 +68,6 @@ class UserManager {
     }
 
     static async getMemberProfileHTML(memberObj) {
-
         let roleCode = "";
         for (let i = 0; i < memberObj?.roles.length; i++) {
             var role = memberObj?.roles[i];
@@ -83,9 +82,11 @@ class UserManager {
                             background: ${roleBackground ?? "transparent"}; 
                             background-clip: ${roleBackgroundClip ?? "none"}`
 
-            roleCode += `<code class="role" id="profile-role-entry-${role.id}" data-role-id="${role.id}">
-            <div class="role_color" style="background-color: ${actualRoleColor};"></div>
-            <span style="${colorStyle};">${roleName}</span></code>`;
+            roleCode += `
+            <code class="role" id="profile-role-entry-${role.id}" data-role-id="${role.id}">
+                <div class="role_color" style="background-color: ${actualRoleColor};"></div>
+                <span class="role_name" style="${colorStyle};">${roleName}</span>
+            </code>`;
         }
 
         let isMuted = memberObj?.isMuted;

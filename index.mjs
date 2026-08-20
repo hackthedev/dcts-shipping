@@ -2,6 +2,14 @@ import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
 // handle startup args
 let nodeArgs = process.argv;
 
+// make it so that tests cant clear console
+if (process.env.NODE_ENV === "test") {
+    console.clear = () => {};
+    Logger.log = () => {};
+}
+
+
+
 // init web server
 import express from "express";
 export const app = express();

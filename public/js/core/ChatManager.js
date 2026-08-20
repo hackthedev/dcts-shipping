@@ -995,12 +995,9 @@ class ChatManager {
         if (url.startsWith(window.location.origin)) return url;
         if (url.startsWith(window.location.origin)) return encodeURIComponent(url);
         if (url.startsWith("data:")) return (url);
-        if (url.startsWith("/uploads")) return (url);
-        if (url.startsWith("/upload")) return (url);
-        if (url.startsWith("/emojis")) return (url);
-        if (url.startsWith("/uploads") || url.startsWith("/upload")) return (url);
+        if (url.startsWith("/upload") || url.startsWith("upload/")) return (url);
+        if (url.startsWith("/emojis") || url.startsWith("emojis/")) return (url);
         if (url.startsWith("/img") || url.startsWith("img/")) return (url);
-        if (url.startsWith("/emojis")) return (url);
         return `/proxy?url=${encodeURIComponent(url)}`
     }
 

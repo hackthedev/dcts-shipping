@@ -42,7 +42,7 @@ You can download and install different versions of DCTS based on your needs. How
 
 ```bash
 # Download beta version from github
-wget https://github.com/hackthedev/dcts-shipping/archive/refs/heads/beta.zip -O dcts.zip
+wget https://github.com/hackthedev/dcts-shipping/archive/refs/heads/main.zip -O dcts.zip
 
 # unzip it
 unzip dcts.zip

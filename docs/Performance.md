@@ -31,7 +31,6 @@ For the sake of simplicity only the first few bigger tables are listed.
 | members  | 2.174  | 2,3 MiB  | Member Account Data                                              |
 | dms      | 1.580  | 3,1 MiB  | User DMs (Server)                                                |
 | Total    | 34.716 | 30,6 MiB | Includes deprecated tables                                       |
-|          |        |          |                                                                  |
 As you can see it takes up almost no storage and has a total size of only 30,6 MiB, even tho this includes old, deprecated tables that arent used anymore.
 
 > [!NOTE]

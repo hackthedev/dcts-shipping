@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Getting started.md",
+                "file": "Performance.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Getting started"
+              "title": "Performance"
             }
           }
         ]
@@ -188,10 +188,11 @@
   },
   "active": "37a4cdff02af2a98",
   "lastOpenFiles": [
+    "Getting started.md",
     "Docker Setup.md",
+    "Feature List.md",
     "VoIP Setup.md",
     "Privacy Policy.md",
-    "Getting started.md",
     "index.md",
     "Legal/Contributor License Agreement.md",
     "Lore/About DCTS.md",
@@ -202,7 +203,6 @@
     "plugins/Plugin System.md",
     "General/Changing Member Passwords.md",
     "Performance.md",
-    "Feature List.md",
     "Setup",
     "Legal",
     "Lore/Independence.md",

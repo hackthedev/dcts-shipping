@@ -2,6 +2,14 @@ import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
 // handle startup args
 let nodeArgs = process.argv;
 
+// make it so that tests cant clear console
+if (process.env.NODE_ENV === "test") {
+    console.clear = () => {};
+    Logger.log = () => {};
+}
+
+
+
 // init web server
 import express from "express";
 export const app = express();
@@ -176,6 +184,9 @@ if (dbUser) serverconfig.serverinfo.sql.username = dbUser;
 if (dbPass) serverconfig.serverinfo.sql.password = dbPass;
 if (dbName) serverconfig.serverinfo.sql.database = dbName;
 
+// do not await this
+saveConfig(serverconfig);
+
 // nicer warning
 serverconfig.serverinfo.sql.enabled = true;
 if(!serverconfig?.serverinfo?.sql?.username){
@@ -183,8 +194,6 @@ if(!serverconfig?.serverinfo?.sql?.username){
     process.exit(0);
 }
 
-// do not await this
-saveConfig(serverconfig);
 
 
 // create sql pool

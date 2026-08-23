@@ -274,6 +274,12 @@ try {
         urlPath: "/upload",
         uploadPath: "./public/uploads",
         limits: {
+            getCorsHeaders: async (req) => ({
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "*",
+                "Access-Control-Allow-Headers": "*"
+            }),
+
             getUploadPath: async (req) => {
                 let type = req.headers["x-upload-type"] ?? "upload";
 

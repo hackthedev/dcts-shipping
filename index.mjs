@@ -14,6 +14,25 @@ if (process.env.NODE_ENV === "test") {
 import express from "express";
 export const app = express();
 
+// important for api and everything
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Vary", "Origin");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+    res.header("Access-Control-Max-Age", "86400");
+    res.set("Cache-Control", "no-store");
+
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(204);
+    }
+
+    next();
+});
+
+
 // remove the first few arguments because fuck that lol
 nodeArgs.shift();
 nodeArgs.shift();
@@ -1078,12 +1097,6 @@ async function listenToIO(){
             }
         }
     });
-
-    /*
-    app.use((req, res) => {
-        res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
-    });
-     */
 
     // init here cauz we need io
     inbox = new dSyncInbox({

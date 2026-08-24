@@ -1,0 +1,59 @@
+.step-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-content: center;
+    background-color: var(--gray-background);
+    padding: 1.5rem 1rem;
+    
+    border-top: 1.5px solid var(--gray);
+    border-bottom: 1.5px solid var(--gray);
+}
+
+.step {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    
+    margin: auto 1rem;
+    width: fit-content;
+    gap: 1rem;
+}
+
+.step .icon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    
+    width: 30px;
+    aspect-ratio: 1/1;
+    margin: auto;
+
+    border: 2px solid var(--gray);
+    border-radius: 50%;
+}
+.step .icon.active{
+    background-color: black;
+    color: white;
+}
+.step .icon.done{
+    background-color: rgba(0, 128, 0, 0.2);
+    color: green;
+    border: 2px solid green;
+}
+
+.step .title{
+    display: flex;
+    margin: auto;
+    line-height: 1;
+}
+
+.step-divider{
+    display: flex;
+    margin: auto;
+
+    flex: 1 1 auto;
+    height: 1px;
+    background-color: var(--gray);
+}

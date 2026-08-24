@@ -734,9 +734,6 @@ async function initDCTSServer(){
 
 
     initIPSec();
-
-    // these two are deprecated and will be replaced soon.
-    registerTemplateMiddleware(app, __dirname, fs, path, serverconfig);
     app.use(express.static(__dirname + "/public"));
 
     app.use(
@@ -853,7 +850,7 @@ async function initSetupWizard(){
     if(!serverconfig?.serverinfo?.sql?.username){
         setupWizard.addStep({
             id: "sql",
-            title: "MariaDB SQL Database",
+            title: "Database",
             description: "Please add your sql database credentials",
             fields: [
                 {
@@ -882,11 +879,40 @@ async function initSetupWizard(){
                 }
             ]
         })
+
+        setupWizard.addStep({
+            id: "livekit",
+            title: "LiveKit VoIP",
+            description: "Please add your livekit informations",
+            fields: [
+                {
+                    id: "key",
+                    text: "Key",
+                    placeholder: null,
+                    value: serverconfig?.serverinfo?.livekit?.key ?? null,
+                },
+                {
+                    id: "secret",
+                    text: "Secret",
+                    placeholder: null,
+                    value: serverconfig?.serverinfo?.livekit?.secret ?? null,
+                },
+                {
+                    id: "url",
+                    text: "Url",
+                    placeholder: null,
+                    value: serverconfig?.serverinfo?.livekit?.url ?? null,
+                }
+            ]
+        })
     }
 }
 
 export async function startWebServer() {
     server = http.createServer(app)
+
+
+    registerTemplateMiddleware(app, __dirname, fs, path, serverconfig);
 
     // important for api and everything
     app.use((req, res, next) => {

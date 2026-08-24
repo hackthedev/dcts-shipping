@@ -832,6 +832,15 @@ async function initDCTSServer(){
     }
 
     syncDiscoveredHosts(true);
+
+    try {
+        await initPluginSystem();
+        await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
+    } catch (err) {
+        console.error("Critical error loading socket handlers:", err);
+    }
+
+    initSocketHandlers();
 }
 
 async function initSetupWizard(){
@@ -851,33 +860,70 @@ async function initSetupWizard(){
         setupWizard.addStep({
             id: "sql",
             title: "Database",
+            subtitle: "Connection Info",
             description: "Please add your sql database credentials",
             fields: [
                 {
+                    id: "host",
+                    text: "Host",
+                    placeholder: null,
+                    type: "text",
+                    value: serverconfig?.serverinfo?.sql?.host ?? null,
+                    test: async (value) => {
+                        return !!value?.trim() && typeof value === "string";
+                    }
+                },
+                {
                     id: "username",
                     text: "Username",
-                    placeholder: "root",
+                    placeholder: null,
+                    type: "number",
                     value: serverconfig?.serverinfo?.sql?.username ?? null,
+                    test: async (value) => {
+                        return !!value?.trim() && typeof value === "number";
+                    }
                 },
                 {
                     id: "password",
                     text: "Password",
+                    type: "text",
                     placeholder: null,
+                    isSensitive: true,
                     value: serverconfig?.serverinfo?.sql?.password ?? null,
+                    test: async (value) => {
+                        return !!value?.trim() && typeof value === "string";
+                    }
                 },
                 {
                     id: "database",
                     text: "Database Name",
+                    type: "text",
                     placeholder: null,
                     value: serverconfig?.serverinfo?.sql?.db ?? null,
+                    test: async (value) => {
+                        return !!value?.trim() && typeof value === "string";
+                    }
                 },
                 {
                     id: "port",
                     text: "Port",
                     placeholder: null,
+                    type: "number",
                     value: serverconfig?.serverinfo?.sql?.port ?? null,
+                    test: async (value) => {
+                        return !!value?.trim() && typeof value === "number";
+                    }
                 }
-            ]
+            ],
+            test: async(data) => {
+                console.log(data)
+                let dbTest = await dSyncSql.testConnection({...data})
+                console.log(dbTest)
+
+                return {
+                    error: "Database Connection failed."
+                };
+            }
         })
 
         setupWizard.addStep({
@@ -889,19 +935,33 @@ async function initSetupWizard(){
                     id: "key",
                     text: "Key",
                     placeholder: null,
+                    type: "text",
+                    isSensitive: true,
                     value: serverconfig?.serverinfo?.livekit?.key ?? null,
+                    test: async (value) => {
+                        return !!value?.trim() && typeof value === "string";
+                    }
                 },
                 {
                     id: "secret",
                     text: "Secret",
                     placeholder: null,
+                    type: "text",
+                    isSensitive: true,
                     value: serverconfig?.serverinfo?.livekit?.secret ?? null,
+                    test: async (value) => {
+                        return !!value?.trim() && typeof value === "string";
+                    }
                 },
                 {
                     id: "url",
                     text: "Url",
                     placeholder: null,
+                    type: "text",
                     value: serverconfig?.serverinfo?.livekit?.url ?? null,
+                    test: async (value) => {
+                        return !!value?.trim() && typeof value === "string";
+                    }
                 }
             ]
         })
@@ -1216,66 +1276,60 @@ export function isPtero(){
 
 
 export const socketHandlers = [];
-const activeSockets = new Map();
+async function initSocketHandlers(){
+    const activeSockets = new Map();
 
-const loadSocketHandlers = async (mainHandlersDir, io) => {
-    const fileList = [];
+    const loadSocketHandlers = async (mainHandlersDir, io) => {
+        const fileList = [];
 
-    const scanDir = (dir) => {
-        const files = fs.readdirSync(dir, {withFileTypes: true});
-        for (const file of files) {
-            const filePath = path.join(dir, file.name);
-            if (file.isDirectory()) {
-                scanDir(filePath);
-            } else if (file.name.endsWith(".mjs")) {
-                fileList.push(filePath);
+        const scanDir = (dir) => {
+            const files = fs.readdirSync(dir, {withFileTypes: true});
+            for (const file of files) {
+                const filePath = path.join(dir, file.name);
+                if (file.isDirectory()) {
+                    scanDir(filePath);
+                } else if (file.name.endsWith(".mjs")) {
+                    fileList.push(filePath);
+                }
+            }
+        };
+
+        scanDir(mainHandlersDir);
+
+        for (const filePath of fileList) {
+            const fileUrl = pathToFileURL(filePath).href;
+            try {
+                const {default: handlerFactory} = await import(fileUrl);
+                const handler = handlerFactory(io);
+
+                if (typeof handler === "function") {
+                    socketHandlers.push(handler);
+                    Logger.debug(`Preloaded socket handler: ${filePath}`);
+                } else {
+                    Logger.warn(`Ignored invalid socket handler in ${filePath}`);
+                }
+            } catch (err) {
+                Logger.error(`Error importing socket handler: ${fileUrl}`);
+                Logger.error(err);
             }
         }
     };
 
-    scanDir(mainHandlersDir);
-
-    for (const filePath of fileList) {
-        const fileUrl = pathToFileURL(filePath).href;
+    const registerSocketEvents = (socket) => {
         try {
-            const {default: handlerFactory} = await import(fileUrl);
-            const handler = handlerFactory(io);
+            const attachedHandlers = [];
 
-            if (typeof handler === "function") {
-                socketHandlers.push(handler);
-                Logger.debug(`Preloaded socket handler: ${filePath}`);
-            } else {
-                Logger.warn(`Ignored invalid socket handler in ${filePath}`);
+            for (const handler of socketHandlers) {
+                const cleanup = handler(socket);
+                if (typeof cleanup === "function") {
+                    attachedHandlers.push(cleanup);
+                }
             }
+
+            activeSockets.set(socket.id, attachedHandlers);
         } catch (err) {
-            Logger.error(`Error importing socket handler: ${fileUrl}`);
-            Logger.error(err);
+            console.error("Error registering socket events:", err);
         }
-    }
-};
+    };
 
-const registerSocketEvents = (socket) => {
-    try {
-        const attachedHandlers = [];
-
-        for (const handler of socketHandlers) {
-            const cleanup = handler(socket);
-            if (typeof cleanup === "function") {
-                attachedHandlers.push(cleanup);
-            }
-        }
-
-        activeSockets.set(socket.id, attachedHandlers);
-    } catch (err) {
-        console.error("Error registering socket events:", err);
-    }
-};
-
-(async () => {
-    try {
-        await initPluginSystem();
-        await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
-    } catch (err) {
-        console.error("Critical error loading socket handlers:", err);
-    }
-})();
+}

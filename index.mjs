@@ -8,8 +8,6 @@ if (process.env.NODE_ENV === "test") {
     Logger.log = () => {};
 }
 
-
-
 // init web server
 import express from "express";
 export const app = express();
@@ -206,13 +204,49 @@ if (dbName) serverconfig.serverinfo.sql.database = dbName;
 // do not await this
 saveConfig(serverconfig);
 
+
+let setupWizard = new SetupWizard({
+    onCompleted: async () => {
+        
+    }
+});
+
+
 // nicer warning
 serverconfig.serverinfo.sql.enabled = true;
 if(!serverconfig?.serverinfo?.sql?.username){
-    Logger.warn("Congrats, setup worked! Please go to the /configs/config.json file and enter the SQL information under 'sql'");
-    process.exit(0);
+    setupWizard.addStep({
+        id: "sql",
+        title: "MariaDB SQL Database",
+        description: "Please add your sql database credentials",
+        fields: [
+            {
+                id: "username",
+                text: "Username",
+                placeholder: "root",
+                value: serverconfig?.serverinfo?.sql?.username ?? null,
+            },
+            {
+                id: "password",
+                text: "Password",
+                placeholder: null,
+                value: serverconfig?.serverinfo?.sql?.password ?? null,
+            },
+            {
+                id: "database",
+                text: "Database Name",
+                placeholder: null,
+                value: serverconfig?.serverinfo?.sql?.db ?? null,
+            },
+            {
+                id: "port",
+                text: "Port",
+                placeholder: null,
+                value: serverconfig?.serverinfo?.sql?.port ?? null,
+            }
+        ]
+    })
 }
-
 
 
 // create sql pool
@@ -474,6 +508,7 @@ import {checkAndUnbanPublicKey, getBan, unbanIp} from "./modules/functions/ban-s
 import {getMessageObjectById} from "./modules/sockets/resolveMessage.mjs";
 import {getMemberHighestRole, getMemberHighestUploadLimit} from "./modules/functions/chat/helper.mjs";
 import {initPluginSystem} from "./modules/sockets/routes/plugins.mjs";
+import SetupWizard from "./modules/prototyping/wizard/wizard.mjs";
 
 /*
     Files for the plugin system

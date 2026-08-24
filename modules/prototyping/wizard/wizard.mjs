@@ -1,21 +1,30 @@
 import Logger from "@hackthedev/terminal-logger";
 import crypto from "crypto"
+import path from "path"
+
+import { fileURLToPath } from "url";
+
+export const __filename = fileURLToPath(import.meta.url);
+export const __dirname = path.dirname(__filename);
 
 export default class SetupWizard {
-    contructor({
+    constructor({
         app = null,
         express = null,
+        server = null,
         onCompleted = null,
     } = {}){
         if(!app) throw new Error("Express App instance needed!")
         if(!express) throw new Error("Express instance needed!")
+        if(!server) throw new Error("Express server needed!")
 
         this.app = app;
         this.express = express;
+        this.server = server;
 
         // current step
         this.index = 0;
-        this.steps = new Set();
+        this.steps = new Map();
         this.values = {}
 
         // callbacks
@@ -31,23 +40,27 @@ export default class SetupWizard {
         if(!step?.description) Logger.warn(`Step ${step?.id} is missing a description. Its recommended!`)
 
         // avoid duplicates
-        if(this.steps.some(set => set.id === id)){
+        if(this.steps.has(step.id)){
             return Logger.warn(`Step ${step.id} already exists! Skipped...`)
         }
 
-        this.steps.add(step)
+        this.steps.set(step.id, step)
     }
 
     registerWebEndpoint(){
-        this.app.get(`/wizard/${this.webEndpointId}/steps`, express.json(), async(req, res, next) => {
-            res.status(200).json({steps: this.steps})
+        this.app.get(`/wizard/${this.webEndpointId}/steps`, this.express.json(), async(req, res, next) => {
+            res.status(200).json({steps: Object.fromEntries(this.steps)})
         })
         
         this.app.use(
             `/wizard/${this.webEndpointId}`,
-            express.static(
-                path.join(__dirname, "wizard")
+            this.express.static(
+                path.join(__dirname, "web")
             )
         );
+
+        Logger.success("Setup Page is available at:")
+        Logger.success(`http://localhost:${this.server.address().port}/wizard/${this.webEndpointId}`)
+        Logger.warn("Copy the url to continue the setup process.")
     }
 }

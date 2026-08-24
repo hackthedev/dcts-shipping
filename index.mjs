@@ -877,10 +877,10 @@ async function initSetupWizard(){
                     id: "username",
                     text: "Username",
                     placeholder: null,
-                    type: "number",
+                    type: "text",
                     value: serverconfig?.serverinfo?.sql?.username ?? null,
                     test: async (value) => {
-                        return !!value?.trim() && typeof value === "number";
+                        return !!value?.trim() && typeof value === "string";
                     }
                 },
                 {
@@ -916,12 +916,10 @@ async function initSetupWizard(){
                 }
             ],
             test: async(data) => {
-                console.log(data)
                 let dbTest = await dSyncSql.testConnection({...data})
-                console.log(dbTest)
 
                 return {
-                    error: "Database Connection failed."
+                    error: dbTest === false ? "Error connecting to database :/" : null
                 };
             }
         })

@@ -41,7 +41,7 @@
     "sqlstring": "^2.3.3",
     "tough-cookie": "^6.0.2",
     "unzipper": "^0.12.5",
-    "uuid": "^9.0.1",
+    "uuid": "^14.0.0",
     "xhr2": "^0.2.1",
     "xss-filters": "^1.2.7",
     "zip": "^1.2.0"

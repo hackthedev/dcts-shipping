@@ -49,8 +49,9 @@ export async function addBan({
     return result?.affectedRows >= 0;
 }
 
-export async function getBan(identifier){
-    if(!identifier) throw new Error("Identifier not set")
+export async function getBan(identifier = null){
+    if(identifier === null) throw new Error("Identifier not set")
+    if(identifier === 0) return null;
 
     let normalized = signer.normalizePublicKey(identifier);
     let row = await queryDatabase(

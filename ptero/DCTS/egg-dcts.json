@@ -10,7 +10,7 @@
     "description": "DCTS - self-hosted Discord\/TeamSpeak-style chat platform with E2E encrypted DMs and decentralized server discovery.",
     "features": [],
     "docker_images": {
-        "DCTS Beta": "ghcr.io\/hackthedev\/ptero-dcts:beta"
+        "DCTS latest": "ghcr.io\/hackthedev\/ptero-dcts:latest"
     },
     "file_denylist": [],
     "startup": "PORT={{SERVER_PORT}} bun . --ptero",
@@ -22,7 +22,7 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!\/bin\/bash\r\nexport HOME=\/mnt\/server\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\n\r\ngit config --global --add safe.directory \/mnt\/server\r\n\r\nif [ ! -d \".git\" ]; then\r\n  echo \"Cloning from github...\"\r\n  git clone -b beta https:\/\/github.com\/hackthedev\/dcts-shipping.git .\r\nelse\r\n  echo \"Updating existing installation...\"\r\n  git fetch origin beta\r\n  git reset --hard origin\/beta\r\nfi\r\n\r\necho -e \"Preparing directories and fixing permissions...\"\r\nmkdir -p sv configs public\/uploads public\/emojis plugins themes livekit\r\necho -e \"Installation completed.\\nDependencies will be installed on first start.\"",
+            "script": "#!\/bin\/bash\r\nexport HOME=\/mnt\/server\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\n\r\ngit config --global --add safe.directory \/mnt\/server\r\n\r\nif [ ! -d \".git\" ]; then\r\n  echo \"Cloning from github...\"\r\n  git clone https:\/\/github.com\/hackthedev\/dcts-shipping.git .\r\nelse\r\n  echo \"Updating existing installation...\"\r\n  git fetch origin beta\r\n  git reset --hard origin\/beta\r\nfi\r\n\r\necho -e \"Preparing directories and fixing permissions...\"\r\nmkdir -p sv configs public\/uploads public\/emojis plugins themes livekit\r\necho -e \"Installation completed.\\nDependencies will be installed on first start.\"",
             "container": "ghcr.io\/pterodactyl\/installers:debian",
             "entrypoint": "bash"
         }

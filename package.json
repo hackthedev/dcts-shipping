@@ -46,7 +46,7 @@
     "zip": "^1.2.0"
   },
   "devDependencies": {
-    "happy-dom": "^20.11.12",
+    "happy-dom": "^20.11.13",
     "socket.io-client": "^4.8.3",
     "typescript": "^5.9.3",
     "vitepress": "^2.0.0-alpha.19",

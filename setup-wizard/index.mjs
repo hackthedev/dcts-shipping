@@ -103,19 +103,32 @@ export default class SetupWizard {
             if(checkCommands?.length === 0) return res.status(404).json({ error: `Prerequisites checks not found for ${stepId}-${this.getOSName()}`}) 
 
             // check system test commands
-            let testResults = new Map();
+            let testResults = {}
             for(let i = 0; i < checkCommands.length; i++){
                 let command = checkCommands[0];
 
                 let cmd = command[0];
                 let expect = command[1] ?? null;
 
-                const {success, stdout, stderr} = await this.runCommand(cmd);
-                
-                console.log(stderr)
+                let {success, stdout, stderr, code} = await this.runCommand(cmd);
+                if(stderr?.trim() === "") stderr = null;
+
+                const isWorking = success === true && stdout.includes(expect) && !stderr;
+
+                testResults= {
+                    success: !!isWorking,
+                    stdout,
+                    stderr,
+                    code
+                }
+
+                if(isWorking === false){
+                    Logger.warn(`Prerequisite check was not successful for ${stepId} (${prerequisitieIndex})`)
+                    Logger.warn(testResults)
+                }
             }
 
-            res.status(200).json({ error: null});
+            res.status(200).json({ error: null, results: testResults});
         })
 
         this.app.post(`/wizard/${this.webEndpointId}/step/:stepId/test`, this.express.json(), async(req, res, next) => {

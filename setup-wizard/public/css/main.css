@@ -34,6 +34,7 @@ html, body {
     min-height: 50vh;
 
     max-height: 90vh;
+    max-width: 90vw;
 
     box-shadow: 6px 6px 10px 1px rgba(0, 0, 0, 0.1);
     border-radius: 1rem;

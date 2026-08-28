@@ -989,6 +989,18 @@ async function initSetupWizard(){
                         execute: [
                             "livekit-server --config /tmp/test.yaml"
                         ]
+                    },
+                    {
+                        title: "Ass Installation",
+                        check: [
+                            ["ass --version", "assassination"]
+                        ],
+                        install: [
+                            "echo shitmypants"
+                        ],
+                        execute: [
+                            "ass ."
+                        ]
                     }
                 ],
                 "windows": []

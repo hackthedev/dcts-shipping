@@ -49,10 +49,7 @@ async function checkStepPrerequisite(stepId = null, prerequisiteIndex = null) {
         return null;
     }
 
-    let data = (await prereqCheckRes.json()) ?? null;
-    console.log(data)
-
-    return data;
+    return (await prereqCheckRes.json()) ?? null;
 }
 
 
@@ -419,8 +416,6 @@ async function getWelcomeSteps() {
 
             // for each prerequisite of the step
             if (hasPrerequisites) {
-                console.log(prerequisites)
-
                 // for each prerequisite
                 for (let preI = 0; preI < prerequisites.length; preI++) { // prerequisite index
                     const prerequisite = prerequisites[preI];
@@ -432,8 +427,6 @@ async function getWelcomeSteps() {
 
                     let isActiveStep = currentPrerequisiteStep === preI;
                     if (isActiveStep) prerequisiteElement.classList.add("active");
-
-                    console.log(prerequisite)
 
                     prerequisiteElement.innerHTML = `
                         <div class="title">
@@ -475,6 +468,7 @@ async function getWelcomeSteps() {
             let preI = values[1];
 
             let checkResult = await checkStepPrerequisite(stepId, preI)
+            // if response error
             if(checkResult?.error){
                 await setPrerequisiteStatus(prereqId, {
                     text: checkResult.error,
@@ -483,11 +477,23 @@ async function getWelcomeSteps() {
                 })
             }
             else{
-                await setPrerequisiteStatus(prereqId, {
-                    text: "Done",
-                    type: "success",
-                    icon: "check",
-                })
+                // if response ok...
+                // if no command error and successful
+                if(!checkResult?.results?.stderr && checkResult?.results?.success === true){
+                    await setPrerequisiteStatus(prereqId, {
+                        text: "Done",
+                        type: "success",
+                        icon: "check",
+                    })
+                }
+                // if command error
+                else if(checkResult?.results?.stderr){
+                    await setPrerequisiteStatus(prereqId, {
+                        text: checkResult.results?.stderr.split(":").pop() ?? "Error checking availability",
+                        type: "error",
+                        icon: "x",
+                    })
+                }
             }
         }
     }

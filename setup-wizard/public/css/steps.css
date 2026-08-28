@@ -30,8 +30,12 @@
     text-align: center;
     
     width: 20px;
+    height: 20px;
+    max-width: 20px;
+    max-height: 20px;
+
     font-size: 12px;
-    aspect-ratio: 1/1;
+    aspect-ratio: 1/1 !important;
     margin: auto;
 
     border: 2px solid var(--gray);

@@ -41,6 +41,9 @@
     text-align: center;
     
     width: 16px;
+    height: 16px;
+
+    overflow: hidden;
     font-size: 12px;
     aspect-ratio: 1/1;
 

@@ -375,6 +375,8 @@ async function setPrerequisiteStatus(index, {
     statusContainer.style.display = text?.trim() ? "flex" : "none";
 
     // used for animation
+
+
     if (ms > 0) {
         statusElement.style.animation = `prerequisite-spin ${ms}ms linear infinite`;
     }
@@ -444,7 +446,7 @@ async function getWelcomeSteps() {
 
                     // check if prerequisite has checks and add it to list
                     if (prerequisite?.check){
-                        pendingPrerequisiteChecks.set(prereqId, [step.id, preI]);
+                        pendingPrerequisiteChecks.set(prereqId, [step.id, preI, prerequisite]);
 
                         await setPrerequisiteStatus(prereqId, {
                             text: "Checking requirements",
@@ -466,6 +468,7 @@ async function getWelcomeSteps() {
             let values = map[1];
             let stepId = values[0];
             let preI = values[1];
+            let prerequisite = values[2];
 
             let checkResult = await checkStepPrerequisite(stepId, preI)
             // if response error
@@ -481,7 +484,7 @@ async function getWelcomeSteps() {
                 // if no command error and successful
                 if(!checkResult?.results?.stderr && checkResult?.results?.success === true){
                     await setPrerequisiteStatus(prereqId, {
-                        text: "Done",
+                        text: "Installed",
                         type: "success",
                         icon: "check",
                     })
@@ -489,10 +492,21 @@ async function getWelcomeSteps() {
                 // if command error
                 else if(checkResult?.results?.stderr){
                     await setPrerequisiteStatus(prereqId, {
-                        text: checkResult.results?.stderr.split(":").pop() ?? "Error checking availability",
+                        text: "Not installed",
                         type: "error",
                         icon: "x",
                     })
+
+                    if(prerequisite?.install){
+                        await setPrerequisiteStatus(prereqId, {
+                            text: "Installing...",
+                            type: null,
+                            icon: "loader",
+                            ms: 1000
+                        })
+
+                        // call install
+                    }
                 }
             }
         }

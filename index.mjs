@@ -854,10 +854,8 @@ async function initSetupWizard(){
         }
     });
 
-
-    // nicer warning
     serverconfig.serverinfo.sql.enabled = true;
-    if(!serverconfig?.serverinfo?.sql?.username){
+    if(serverconfig.serverinfo.setup === 0){
         setupWizard.addStep({
             id: "sql",
             title: "Database",
@@ -989,6 +987,16 @@ async function initSetupWizard(){
                         execute: [
                             "livekit-server --config /tmp/test.yaml"
                         ]
+                    },
+                    {
+                        title: "Screen Installation",
+                        check: [
+                            ["screen --version", "Screen version"]
+                        ],
+                        install: [
+                            "sudo apt install screen"
+                        ],
+                        execute: []
                     },
                     {
                         title: "Ass Installation",

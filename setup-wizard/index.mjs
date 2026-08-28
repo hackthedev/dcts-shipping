@@ -115,13 +115,14 @@ export default class SetupWizard {
 
                 const isWorking = success === true && stdout.includes(expect) && !stderr;
 
-                testResults= {
+                testResults = {
                     success: !!isWorking,
                     stdout,
                     stderr,
                     code
                 }
 
+                // some debug help
                 if(isWorking === false){
                     Logger.warn(`Prerequisite check was not successful for ${stepId} (${prerequisitieIndex})`)
                     Logger.warn(testResults)
@@ -164,6 +165,10 @@ export default class SetupWizard {
         Logger.success("Setup Page is available at:")
         Logger.success(`http://localhost:${this.server.address().port}/wizard/${this.webEndpointId}`)
         Logger.warn("Copy the url to continue the setup process.")
+    }
+
+    async installPrerequisites(){
+
     }
 
     runCommand(command) {

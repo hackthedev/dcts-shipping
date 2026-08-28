@@ -29,12 +29,12 @@
     align-items: center;
     text-align: center;
     
-    width: 20px;
-    height: 20px;
-    max-width: 20px;
-    max-height: 20px;
+    width: 24px;
+    height: 24px;
+    max-width: 24px;
+    max-height: 24px;
 
-    font-size: 12px;
+    font-size: 14px;
     aspect-ratio: 1/1 !important;
     margin: auto;
 
@@ -59,7 +59,7 @@
     display: flex;
     margin: auto;
     line-height: 1;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--gray-mid);
 }
 

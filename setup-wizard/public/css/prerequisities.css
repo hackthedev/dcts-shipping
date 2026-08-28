@@ -15,6 +15,7 @@
     transition: all 200ms ease-in-out;
 
     box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.1);
+    gap: 0.5rem;
 }
 .prerequisites-container .prerequisite:hover {
     border: 1.5px solid var(--gray-brighter);
@@ -27,11 +28,30 @@
 }
 
 .prerequisites-container .prerequisite .title h1{
-    font-size: 12px;
+    font-size: 14px;
     color: var(--gray-mid);
 }
 .prerequisites-container .prerequisite.active .title h1{
     color: black;
+}
+
+.prerequisites-container .prerequisite .status-container{
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+}
+
+.prerequisites-container .prerequisite .status-container .status-icon,
+.prerequisites-container .prerequisite .status-container .status-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.prerequisites-container .prerequisite .status-container .status-text{
+    font-size: 14px;
+    color: var(--gray-mid);
+    margin: 0;
 }
 
 .prerequisite .icon{
@@ -59,4 +79,36 @@
     background-color: rgb(60 179 113 / 0.2) !important;
     color: mediumseagreen !important;
     border: 2px solid mediumseagreen;
+}
+
+.prerequisite.success h1,
+.prerequisite.success .status-container .status-text,
+.prerequisite.success .status-container .status-icon,
+.prerequisite.success .icon{
+    color: mediumseagreen !important;
+}
+.prerequisite.success .icon {
+    border: 2px solid mediumseagreen !important;
+    background-color: rgb(60 179 113 / 0.2) !important;
+}
+
+.prerequisite.error h1,
+.prerequisite.error .status-container .status-text,
+.prerequisite.error .status-container .status-icon,
+.prerequisite.error .icon{
+    color: indianred !important;
+}
+.prerequisite.error .icon {
+    border: 2px solid indianred !important;
+    background-color: rgb(205 92 92 / 0.2) !important;
+}
+
+@keyframes prerequisite-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }

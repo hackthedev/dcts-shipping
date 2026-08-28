@@ -1,12 +1,16 @@
 #!/bin/bash
-#echo "Starting DCTS Check Script"
-name="$1"
-if [[ -z "$name" ]]; then
-  echo "Couldnt check dcts as no screen session name was supplied"
-  validArgs=0
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# this starts the dcts server
+if ! screen -list | grep -q "dcts_main"; then
+    echo "dcts is not running"
+    screen -dmSL "dcts_main" bun "$SCRIPT_DIR/../"
+    echo "$SCRIPT_DIR"
 fi
 
-if ! screen -list | grep -q "$name"; then
-    echo "is not running"
-    bash /home/dcts/sv/start.sh "$name"
+# this will start the livekit server
+if ! screen -list | grep -q "dcts_livekit"; then
+    echo "livekit is not running"
+    screen -dmSL "dcts_livekit" livekit-server --config "$SCRIPT_DIR/../livekit/livekit.yaml"
 fi

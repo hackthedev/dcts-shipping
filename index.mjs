@@ -856,6 +856,83 @@ async function initSetupWizard(){
 
     serverconfig.serverinfo.sql.enabled = true;
     if(serverconfig.serverinfo.setup === 0){
+
+        setupWizard.addStep({
+            id: "welcome",
+            title: "Welcome!",
+            description: "Lets check on the requirements! You can continue once they're done!",
+            fields: [],
+            prerequisites: {
+                "linux": [
+                    {
+                        title: "Screen",
+                        check: [
+                            ["screen --version", "Screen version"]
+                        ],
+                        install: [
+                            "sudo apt install screen"
+                        ],
+                        execute: []
+                    },
+                    {
+                        title: "cURL",
+                        check: [
+                            ["curl", "curl:"]
+                        ],
+                        install: [
+                            "apt install curl -y"
+                        ],
+                        execute: []
+                    },
+                    {
+                        title: "wget",
+                        check: [
+                            ["wget", "wget:"]
+                        ],
+                        install: [
+                            "apt install wget -y"
+                        ],
+                        execute: []
+                    },
+                    {
+                        title: "LiveKit",
+                        check: [
+                            ["livekit-server --version", "livekit-server version"]
+                        ],
+                        install: [
+                            "curl -sSL https://get.livekit.io | bash"
+                        ],
+                        execute: [
+                            `screen -dmS livekit livekit-server --config ${path.join(__dirname, "livekit", "livekit.yaml")}`
+                        ]
+                    },
+                    {
+                        title: "MariaDB",
+                        check: [
+                            ["mariadb --version", "mariadb from"]
+                        ],
+                        install: [
+                            "curl -sSL https://get.livekit.io | bash"
+                        ],
+                        execute: [
+                            "livekit-server --config /tmp/test.yaml"
+                        ]
+                    },
+                    {
+                        title: "Rider",
+                        check: [
+                            ["rider hello", "Rider is available"]
+                        ],
+                        install: [
+                            "curl -fsSL https://dist.dcts.community/api/package/rider-cli/install.sh | bash"
+                        ],
+                        execute: []
+                    }
+                ],
+                "windows": []
+            }
+        })
+
         setupWizard.addStep({
             id: "sql",
             title: "Database",
@@ -961,58 +1038,7 @@ async function initSetupWizard(){
                         return !!value?.trim() && typeof value === "string";
                     }
                 }
-            ],            
-            prerequisites: {
-                "linux": [
-                    {
-                        title: "LiveKit Installation",
-                        check: [
-                            ["livekit-server --version", "livekit-server version"]
-                        ],
-                        install: [
-                            "curl -sSL https://get.livekit.io | bash"
-                        ],
-                        execute: [
-                            "livekit-server --config /tmp/test.yaml"
-                        ]
-                    },
-                    {
-                        title: "MariaDB Installation",
-                        check: [
-                            ["mariadb --version", "mariadb from"]
-                        ],
-                        install: [
-                            "curl -sSL https://get.livekit.io | bash"
-                        ],
-                        execute: [
-                            "livekit-server --config /tmp/test.yaml"
-                        ]
-                    },
-                    {
-                        title: "Screen Installation",
-                        check: [
-                            ["screen --version", "Screen version"]
-                        ],
-                        install: [
-                            "sudo apt install screen"
-                        ],
-                        execute: []
-                    },
-                    {
-                        title: "Ass Installation",
-                        check: [
-                            ["ass --version", "assassination"]
-                        ],
-                        install: [
-                            "echo shitmypants"
-                        ],
-                        execute: [
-                            "ass ."
-                        ]
-                    }
-                ],
-                "windows": []
-            }
+            ]
         })
     }
 }

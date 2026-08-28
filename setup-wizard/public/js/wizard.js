@@ -491,12 +491,6 @@ async function getWelcomeSteps() {
                 }
                 // if command error
                 else if(checkResult?.results?.stderr){
-                    await setPrerequisiteStatus(prereqId, {
-                        text: "Not installed",
-                        type: "error",
-                        icon: "x",
-                    })
-
                     if(prerequisite?.install){
                         await setPrerequisiteStatus(prereqId, {
                             text: "Installing...",
@@ -506,6 +500,13 @@ async function getWelcomeSteps() {
                         })
 
                         // call install
+                    }
+                    else{
+                        await setPrerequisiteStatus(prereqId, {
+                            text: "Not installed",
+                            type: "error",
+                            icon: "x",
+                        })
                     }
                 }
             }

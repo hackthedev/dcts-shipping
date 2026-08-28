@@ -113,12 +113,12 @@ export default class SetupWizard {
                 let {success, stdout, stderr, code} = await this.runCommand(cmd);
                 if(stderr?.trim() === "") stderr = null;
 
-                const isWorking = success === true && stdout.includes(expect) && !stderr;
+                const isWorking = stdout.includes(expect) || stderr?.includes(expect);
 
                 testResults = {
                     success: !!isWorking,
                     stdout,
-                    stderr,
+                    stderr: isWorking ? null : stderr,
                     code
                 }
 

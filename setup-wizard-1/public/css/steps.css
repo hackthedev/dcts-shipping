@@ -1,0 +1,77 @@
+.step-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-content: center;
+    background-color: var(--gray-background);
+    padding: 1.5rem 1rem;
+    
+    border-top: 1.5px solid var(--gray);
+    border-bottom: 1.5px solid var(--gray);
+}
+
+.step {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    
+    margin: auto 1rem;
+    width: fit-content;
+    gap: 1rem;
+}
+.step:hover{
+    cursor: pointer;
+}
+
+.step .icon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    
+    width: 20px;
+    font-size: 12px;
+    aspect-ratio: 1/1;
+    margin: auto;
+
+    border: 2px solid var(--gray);
+    color: var(--gray-mid);
+    border-radius: 50%;
+}
+.step.active .icon{
+    background-color: black;
+    color: white;
+}
+.step.done .icon{
+    background-color: rgb(60 179 113 / 0.2) !important;
+    color: mediumseagreen !important;
+    border: 2px solid mediumseagreen;
+}
+.step.done .title{
+    color: mediumseagreen;
+}
+
+.step .title{
+    display: flex;
+    margin: auto;
+    line-height: 1;
+    font-size: 14px;
+    color: var(--gray-mid);
+}
+
+.step.active .title{
+    color: black;
+}
+.step.active .icon{
+    background-color: black;
+    color: white;
+}
+
+.step-divider{
+    display: flex;
+    margin: auto;
+
+    flex: 1 1 auto;
+    height: 1px;
+    background-color: var(--gray);
+}

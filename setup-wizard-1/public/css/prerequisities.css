@@ -1,0 +1,59 @@
+.prerequisites-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+}
+
+.prerequisites-container .prerequisite {
+    display: flex;
+    flex-direction: column;
+    border: 1.5px solid var(--gray);
+    border-radius: 6px;
+
+    padding: 1rem;
+    margin: 0.5rem;
+    transition: all 200ms ease-in-out;
+
+    box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.1);
+}
+.prerequisites-container .prerequisite:hover {
+    border: 1.5px solid var(--gray-brighter);
+}
+
+.prerequisites-container .prerequisite .title{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.prerequisites-container .prerequisite .title h1{
+    font-size: 12px;
+    color: var(--gray-mid);
+}
+.prerequisites-container .prerequisite.active .title h1{
+    color: black;
+}
+
+.prerequisite .icon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    
+    width: 16px;
+    font-size: 12px;
+    aspect-ratio: 1/1;
+
+    border: 2px solid var(--gray);
+    color: var(--gray-mid);
+    border-radius: 50%;
+}
+.prerequisite.active .icon{
+    background-color: black;
+    color: white;
+}
+.prerequisite.done .icon{
+    background-color: rgb(60 179 113 / 0.2) !important;
+    color: mediumseagreen !important;
+    border: 2px solid mediumseagreen;
+}

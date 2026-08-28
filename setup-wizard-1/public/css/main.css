@@ -1,0 +1,127 @@
+:root {
+    --gray-background: rgba(128, 128, 128, 0.05);
+    --gray: rgba(128, 128, 128, 0.2);
+    --gray-brighter: rgba(128, 128, 128, 0.6);
+    --gray-mid: rgba(128, 128, 128, 0.8);
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: gray transparent;
+    font-family: 'Roboto', sans-serif;
+    overflow-anchor: none;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box !important;
+}
+
+.layout {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+}
+
+.layout .modal {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 900px;
+    min-height: 50vh;
+
+    max-height: 90vh;
+
+    box-shadow: 6px 6px 10px 1px rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
+    border: 2px solid rgba(0,0,0, 0.075);
+}
+
+.layout .modal .progress .error.visible{
+    display: flex;
+}
+.layout .modal .progress .message{
+    display: none;
+    padding: 1rem;
+}
+.layout .modal .progress .message.error{
+    color: indianred;
+    background-color: rgb(205 92 92 / 0.2);
+    border-top: 1.5px solid indianred;
+}
+.layout .modal .progress .message.info{
+    color: cornflowerblue;
+    background-color: rgb(100 149 237 / 0.2);
+    border-top: 1.5px solid cornflowerblue;
+}
+.layout .modal .progress .message.success{
+    color: mediumseagreen;
+    background-color: rgb(60 179 113 / 0.2);
+    border-top: 1.5px solid mediumseagreen;
+}
+.layout .modal .progress .message.warning{
+    color: darkorange;
+    background-color: rgb(255 140 0 / 0.2);
+    border-top: 1.5px solid darkorange;
+}
+
+
+.layout .modal .progress{
+    display: flex;
+    flex-direction: column;
+}
+
+.layout .modal .header {
+    padding: 2rem 2rem;
+}
+
+.layout .modal .header h1{
+    font-size: 20px;
+    margin: 0 0 4px 0;
+}
+.layout .modal .header span {
+    font-size: 14px;
+    color: var(--gray-brighter);
+}
+
+.layout .modal .content {
+    padding: 2rem;
+    overflow: auto;
+}
+
+
+.layout .modal .content .content-headings{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 3rem;
+}
+
+.layout .modal .content .subheading h1{
+    font-size: 12px !important;
+}
+.layout .modal .content .subheading hr{
+    margin-bottom: 1rem;
+}
+
+.layout .modal .content h1,
+.layout .modal .content h2,
+.layout .modal .content p{
+    margin: 0;
+}
+.layout .modal .content h1.subtitle {
+    color: var(--gray-brighter);
+    font-size: 14px;
+    text-transform: uppercase;
+}
+.layout .modal .content p{
+    font-size: 14px;
+    color: var(--gray-mid);
+}
+.layout .modal .content hr {
+    border: 1.25px solid var(--gray);
+    width: 100%;
+}

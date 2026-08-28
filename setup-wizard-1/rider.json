@@ -1,0 +1,6 @@
+{
+    "packages": {
+        "@hackthedev/frontend-libs": "1.1.6",
+        "@hackthedev/terminal-logger": "1.0.1"
+    }
+}

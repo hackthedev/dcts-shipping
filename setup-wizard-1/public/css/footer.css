@@ -1,0 +1,39 @@
+.layout .modal .footer {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: center;
+    margin-top: auto;
+    padding: 1rem 2rem;
+    bottom: 0 !important;
+
+    border-top: 1.5px solid var(--gray);
+}
+
+.layout .modal .footer .actions{
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: center;
+    justify-content: end;
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.layout .modal .footer .actions button{
+    padding: 0.5rem 1rem;
+    border: none;
+    outline: none;
+    border-radius: 1rem;
+    cursor: pointer;
+}
+.layout .modal .footer .actions button.next{
+    font-size: 1rem;
+    background-color: black;
+    color: white;
+}
+.layout .modal .footer .actions button.previous{
+    background-color: transparent;
+    color: var(--gray-mid);
+}

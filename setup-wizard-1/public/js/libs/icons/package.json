@@ -1,0 +1,14 @@
+{
+    "name": "@hackthedev/icons",
+    "version": "2.0.0",
+    "description": "Small SVG icon library. You call a function » you get a html svg string back- simple as that.",
+    "keywords": [
+        "frontend"
+    ],
+    "license": "ISC",
+    "author": "",
+    "main": "Icons.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    }
+}

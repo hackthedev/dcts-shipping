@@ -989,32 +989,7 @@ async function initSetupWizard(){
                         execute: [
                             "livekit-server --config /tmp/test.yaml"
                         ]
-                    },
-                    {
-                        title: "MariaDB Installation",
-                        check: [
-                            ["mariadb --version", "mariadb from"]
-                        ],
-                        install: [
-                            "curl -sSL https://get.livekit.io | bash"
-                        ],
-                        execute: [
-                            "livekit-server --config /tmp/test.yaml"
-                        ]
-                    },
-                    {
-                        title: "MariaDB Installation",
-                        check: [
-                            ["mariadb --version", "mariadb from"]
-                        ],
-                        install: [
-                            "curl -sSL https://get.livekit.io | bash"
-                        ],
-                        execute: [
-                            "livekit-server --config /tmp/test.yaml"
-                        ]
                     }
-
                 ],
                 "windows": []
             }

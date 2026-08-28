@@ -1,15 +1,22 @@
 .prerequisites-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(6, 1fr);
 }
-
-.prerequisite:nth-last-child(1):nth-child(3n + 1) {
-    grid-column: 1 / -1;
+.prerequisite {
+    grid-column: span 2;
 }
-
+.prerequisites-container:has(> :only-child) .prerequisite {
+    grid-column: span 6;
+}
+.prerequisites-container:has(> :nth-child(2):last-child) .prerequisite {
+    grid-column: span 3;
+}
+.prerequisite:last-child:nth-child(3n + 1) {
+    grid-column: span 6;
+}
 .prerequisite:nth-last-child(2):nth-child(3n + 1),
-.prerequisite:nth-last-child(1):nth-child(3n + 2) {
-    grid-column: span 1;
+.prerequisite:last-child:nth-child(3n + 2) {
+    grid-column: span 3;
 }
 
 .prerequisites-container .prerequisite {

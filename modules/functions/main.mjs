@@ -31,7 +31,6 @@ import {checkMemberMigration} from "./migrations/memberJsonToDb.mjs";
 import {clearBase64FromDatabase, clearMemberBase64FromDb} from "./migrations/base64_fixer.mjs";
 import {getMemberHighestRole, getMemberHighestUploadLimit} from "./chat/helper.mjs";
 import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./migrations/messageMigration.mjs";
-import archiver from "archiver";
 import {banIp, checkMemberBan, getBan, isIdentifierBanned, removeBan} from "./ban-system/helpers.mjs";
 import checkPermission from "../sockets/checkPermission.mjs";
 import {sanitizeHTML} from "./sanitizing/functions.mjs";
@@ -132,6 +131,7 @@ export async function backupSystem() {
     //    `${baseDir}/${serverconfig.serverinfo.sql.database}.sql`
     //);
 
+    /*
     await new Promise((resolve, reject) => {
         const output = fs.createWriteStream(zipPath);
         const archive = archiver("zip", { zlib: { level: 9 } });
@@ -145,6 +145,7 @@ export async function backupSystem() {
     });
 
     fs.rmSync(baseDir, { recursive: true, force: true });
+    */
 }
 
 

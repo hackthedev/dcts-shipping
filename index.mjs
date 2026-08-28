@@ -96,7 +96,7 @@ import {checkAndUnbanPublicKey, unbanIp} from "./modules/functions/ban-system/he
 import {getMessageObjectById} from "./modules/sockets/resolveMessage.mjs";
 import {getMemberHighestUploadLimit} from "./modules/functions/chat/helper.mjs";
 import {initPluginSystem} from "./modules/sockets/routes/plugins.mjs";
-import SetupWizard from "/mnt/SSD/network-z-dev/setup-wizard/index.mjs";
+import SetupWizard from "./setup-wizard/index.mjs";
 
 
 // define quite some important stuff
@@ -849,6 +849,7 @@ async function initSetupWizard(){
         express,
         server,
         onCompleted: async () => {
+            console.log("Completed")
             initDCTSServer();
         }
     });
@@ -921,7 +922,8 @@ async function initSetupWizard(){
                 return {
                     error: dbTest === false ? "Error connecting to database :/" : null
                 };
-            }
+            },
+            prerequisites: []
         })
 
         setupWizard.addStep({
@@ -961,14 +963,66 @@ async function initSetupWizard(){
                         return !!value?.trim() && typeof value === "string";
                     }
                 }
-            ]
+            ],            
+            prerequisites: {
+                "linux": [
+                    {
+                        title: "LiveKit Install Check",
+                        check: [
+                            ["livekit-server -v", "v1.12.2"]
+                        ],
+                        install: [
+                            "curl -sSL https://get.livekit.io | bash"
+                        ],
+                        execute: [
+                            "livekit-server --config /tmp/test.yaml"
+                        ]
+                    },
+                    {
+                        title: "LiveKit Install 2",
+                        check: [
+                            ["livekit-server -v", "v1.12.2"]
+                        ],
+                        install: [
+                            "curl -sSL https://get.livekit.io | bash"
+                        ],
+                        execute: [
+                            "livekit-server --config /tmp/test.yaml"
+                        ]
+                    },
+                    {
+                        title: "LiveKit Install 3",
+                        check: [
+                            ["livekit-server -v", "v1.12.2"]
+                        ],
+                        install: [
+                            "curl -sSL https://get.livekit.io | bash"
+                        ],
+                        execute: [
+                            "livekit-server --config /tmp/test.yaml"
+                        ]
+                    },
+                    {
+                        title: "LiveKit Install 4",
+                        check: [
+                            ["livekit-server -v", "v1.12.2"]
+                        ],
+                        install: [
+                            "curl -sSL https://get.livekit.io | bash"
+                        ],
+                        execute: [
+                            "livekit-server --config /tmp/test.yaml"
+                        ]
+                    }
+                ],
+                "windows": []
+            }
         })
     }
 }
 
 export async function startWebServer() {
     server = http.createServer(app)
-
 
     registerTemplateMiddleware(app, __dirname, fs, path, serverconfig);
 

@@ -967,9 +967,9 @@ async function initSetupWizard(){
             prerequisites: {
                 "linux": [
                     {
-                        title: "LiveKit Install Check",
+                        title: "LiveKit Installation",
                         check: [
-                            ["livekit-server -v", "v1.12.2"]
+                            ["livekit-server --version", "livekit-server version"]
                         ],
                         install: [
                             "curl -sSL https://get.livekit.io | bash"
@@ -979,9 +979,9 @@ async function initSetupWizard(){
                         ]
                     },
                     {
-                        title: "LiveKit Install 2",
+                        title: "MariaDB Installation",
                         check: [
-                            ["livekit-server -v", "v1.12.2"]
+                            ["mariadb --version", "mariadb from"]
                         ],
                         install: [
                             "curl -sSL https://get.livekit.io | bash"
@@ -991,9 +991,9 @@ async function initSetupWizard(){
                         ]
                     },
                     {
-                        title: "LiveKit Install 3",
+                        title: "MariaDB Installation",
                         check: [
-                            ["livekit-server -v", "v1.12.2"]
+                            ["mariadb --version", "mariadb from"]
                         ],
                         install: [
                             "curl -sSL https://get.livekit.io | bash"
@@ -1003,9 +1003,9 @@ async function initSetupWizard(){
                         ]
                     },
                     {
-                        title: "LiveKit Install 4",
+                        title: "MariaDB Installation",
                         check: [
-                            ["livekit-server -v", "v1.12.2"]
+                            ["mariadb --version", "mariadb from"]
                         ],
                         install: [
                             "curl -sSL https://get.livekit.io | bash"
@@ -1014,6 +1014,7 @@ async function initSetupWizard(){
                             "livekit-server --config /tmp/test.yaml"
                         ]
                     }
+
                 ],
                 "windows": []
             }

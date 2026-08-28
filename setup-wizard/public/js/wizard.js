@@ -354,7 +354,7 @@ function getPrerequisiteStatusContainerElement(index) {
 }
 
 
-function setPrerequisiteStatus(index, {
+async function setPrerequisiteStatus(index, {
     text,
     type = null,
     icon = null,
@@ -368,6 +368,7 @@ function setPrerequisiteStatus(index, {
     let statusContainer = getPrerequisiteStatusContainerElement(index);
 
     if (!textElement || !statusElement) throw new Error("Element not found to set status of prerequisite")
+    await ChatTools.Dom.hideElement(statusContainer);
 
     // setting the values
     textElement.textContent = text;
@@ -391,6 +392,8 @@ function setPrerequisiteStatus(index, {
     // goal is to only have one set at a time.
     if (type === "error") container.classList.add("error");
     if (type === "success") container.classList.add("success");
+
+    await ChatTools.Dom.showElement(statusContainer);
 }
 
 async function getWelcomeSteps() {
@@ -401,10 +404,12 @@ async function getWelcomeSteps() {
     prerequsitiesContainer.className = "prerequisites-container";
 
     let currentPrerequisiteStep = getCurrentPrerequisiteStep();
+    let pendingPrerequisiteChecks = new Map();
 
     // if we have any steps
     if (stepsLength > 0) {
         getContentElement().innerHTML += getSubHeadingHTML("Prerequisites")
+        getContentElement().insertAdjacentElement("beforeend", prerequsitiesContainer);
 
         // for each step
         for (let i = 0; i < stepsLength; i++) {
@@ -414,21 +419,21 @@ async function getWelcomeSteps() {
 
             // for each prerequisite of the step
             if (hasPrerequisites) {
+                console.log(prerequisites)
+
+                // for each prerequisite
                 for (let preI = 0; preI < prerequisites.length; preI++) { // prerequisite index
-                    const prerequisite = prerequisites[i];
+                    const prerequisite = prerequisites[preI];
+                    const prereqId = `${step.id}-${preI}`;
 
                     let prerequisiteElement = document.createElement("div");
                     prerequisiteElement.className = "prerequisite";
-                    prerequisiteElement.setAttribute("data-index", String(preI));
+                    prerequisiteElement.setAttribute("data-index", String(prereqId));
 
                     let isActiveStep = currentPrerequisiteStep === preI;
                     if (isActiveStep) prerequisiteElement.classList.add("active");
 
-                    // check prerequisite
-                    if (prerequisite?.check) {
-                        let checkResult = await checkStepPrerequisite(step.id, preI)
-                        console.log(checkResult)
-                    }
+                    console.log(prerequisite)
 
                     prerequisiteElement.innerHTML = `
                         <div class="title">
@@ -443,11 +448,48 @@ async function getWelcomeSteps() {
                     `
 
                     prerequsitiesContainer.appendChild(prerequisiteElement)
+
+                    // check if prerequisite has checks and add it to list
+                    if (prerequisite?.check){
+                        pendingPrerequisiteChecks.set(prereqId, [step.id, preI]);
+
+                        await setPrerequisiteStatus(prereqId, {
+                            text: "Checking requirements",
+                            type: null,
+                            icon: "loader",
+                            ms: 1000,
+                        })
+                    }
                 }
             }
         }
+    }
 
-        getContentElement().insertAdjacentElement("beforeend", prerequsitiesContainer);
+    // now do pending checks
+    // im really proud of this one here
+    if(pendingPrerequisiteChecks.size > 0){
+        for(let map of [...pendingPrerequisiteChecks]){
+            let prereqId = map[0];
+            let values = map[1];
+            let stepId = values[0];
+            let preI = values[1];
+
+            let checkResult = await checkStepPrerequisite(stepId, preI)
+            if(checkResult?.error){
+                await setPrerequisiteStatus(prereqId, {
+                    text: checkResult.error,
+                    type: "error",
+                    icon: "error",
+                })
+            }
+            else{
+                await setPrerequisiteStatus(prereqId, {
+                    text: "Done",
+                    type: "success",
+                    icon: "check",
+                })
+            }
+        }
     }
 }
 

@@ -1,14 +1,14 @@
 {
-  "name": "@hackthedev/chat-tools",
-  "version": "1.0.0",
-  "description": "",
-  "keywords": [
-    "frontend"
-  ],
-  "license": "UNLICENSED",
-  "author": "",
-  "main": "ChatTools.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+    "name": "@hackthedev/chat-tools",
+    "version": "1.0.1",
+    "description": "A very important core library with many helpful features like DOM sanitizing, Element animations, Infinite Scroll functions and other helpful tools!",
+    "keywords": [
+        "frontend"
+    ],
+    "license": "UNLICENSED",
+    "author": "",
+    "main": "ChatTools.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    }
 }

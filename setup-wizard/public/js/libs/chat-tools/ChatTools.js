@@ -1,8 +1,25 @@
 class ChatTools {
     static Scroll = class {
+        static async registerMessageInfiniteLoad(element, callback = null) {
+            if(!element) throw new Error("Element for infinite scroll not found");
+
+            if(!element.getAttribute("data-scroll-init")){
+                element.addEventListener("scroll", async function () {
+                    if (element.scrollTop === 0) {
+                        if(callback && typeof callback === "function") await callback(element);
+                    }
+                });
+
+                element.setAttribute("data-scroll-init", true)
+            }
+        }
+
         static scrollDown(containerElement, opts = {}) {
             const el = containerElement
-            if (!el) return;
+            if (!el || typeof el === "string"){
+                console.trace();
+                throw new Error("Scroll down doesnt support strings");
+            }
 
             const tolerancePx = Number.isFinite(opts.tolerancePx) ? opts.tolerancePx : 2;
             const maxMs = Number.isFinite(opts.maxMs) ? opts.maxMs : 5000;
@@ -81,7 +98,10 @@ class ChatTools {
             tick();
         }
 
-        static observeContainer(containerElement) {
+        static observeContainer(containerElement, {
+            adjustDiff = true,
+        } = {}) {
+            if(!containerElement) throw new Error("Could not find container");
             let container = containerElement;
             let savedHeight = 0;
 
@@ -92,7 +112,7 @@ class ChatTools {
                         let diff = container.scrollHeight - savedHeight;
 
                         this.toggleSmoothScroll(container, false)
-                        container.scrollTop += diff;
+                        if(adjustDiff) container.scrollTop += diff;
                         this.toggleSmoothScroll(container, true)
                         savedHeight = container.scrollHeight;
                     }
@@ -124,7 +144,11 @@ class ChatTools {
 
         static toggleSmoothScroll(element, toggle) {
             if(!element) throw new Error("Could not toggle smooth scroll container not set")
-            element.style.scrollBehavior = toggle ? "smooth" : "auto"
+            if (toggle) {
+                element.style.scrollBehavior = "smooth";
+            } else {
+                element.style.removeProperty("scroll-behavior");
+            }
         }
 
         static isScrolledToBottom(element, tolerancePx = 50) {
@@ -161,7 +185,9 @@ class ChatTools {
                 containerElement.querySelector(`iframe[data-original-url="${url}"]`) ||
                 containerElement.querySelector(`a[data-original-url="${url}"]`);
 
-            if (nodeBlacklist?.some(node => node?.contains(el))) return null;
+            if (nodeBlacklist?.some(selector => el?.closest(selector))) {
+                return null
+            }
 
             return el ? el.getAttribute("data-media-type") : null;
         }
@@ -241,22 +267,21 @@ class ChatTools {
                 return;
             }
 
-            let embed = "https://www.youtube.com/embed/" + code;
+            let embed = "https://www.youtube-nocookie.com/embed/" + code;
             if (t) embed += "?start=" + parseInt(t);
 
             return `
-                <div data-identifier="${identifier}" class="iframe-container" id="${identifier}">
-                    <a href="${url}" target="_blank">${url}</a><br>
+                <div data-identifier="${ChatTools.Sanitize.stripHTML(identifier)}" class="iframe-container" id="${identifier}">
+                    <a href="${url}" target="_blank">${ChatTools.Sanitize.forRender(url)}</a><br>
                     <iframe
-                        data-original-url="${url}"
-                        data-identifier="${identifier}"
+                        data-original-url="${ChatTools.Sanitize.stripHTML(url)}"
+                        data-identifier="${ChatTools.Sanitize.stripHTML(identifier)}"
                         data-media-type="youtube"
                         style="border:none"
                         src="${embed}"
                         frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen
-                        referrerpolicy="strict-origin-when-cross-origin">
+                        allowfullscreen>
                     </iframe>
         
                 </div>
@@ -264,9 +289,10 @@ class ChatTools {
         }
 
         static getUrlFromText(text) {
-            if(!text) throw new Error("No text provided");
-            var geturl = new RegExp("(^|[ \t\r\n])((ftp|http|https|mailto|file):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))", "g");
-            return text.match(geturl)
+            if (!text) return []
+
+            const regex = /\b(?:https?|mailto):[^\s<>"']+/gi
+            return text.match(regex) ?? []
         }
 
 
@@ -279,6 +305,15 @@ class ChatTools {
             if (!htmlInput || !identifier || !containerElement) return {isMarkdown: false, html: htmlInput};
 
             let urls = this.getUrlFromText(htmlInput);
+            if (!urls?.length) return {isMarkdown: false, html: htmlInput};
+
+            urls = urls.filter(url => {
+                let cleanUrl = ChatTools.Sanitize.stripHTML(url);
+                let escapedUrl = cleanUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+                return !new RegExp(`(?:src|href|data-original-url|data-media-type)=["']${escapedUrl}["']`).test(htmlInput);
+            });
+
             if (!urls?.length) return {isMarkdown: false, html: htmlInput};
 
             let changed = false;
@@ -317,7 +352,13 @@ class ChatTools {
 
                 // lets try to convert the url to html if it matches and
                 // skip execution if it did so.
-                let convertedHTML = this.convertUrlToHTML(url, media)
+                let convertedHTML = this.convertUrlToHTML({
+                    url,
+                    proxy,
+                    media,
+                    htmlInput
+                });
+
                 if(convertedHTML !== htmlInput) {
                     htmlInput = convertedHTML;
                     changed = true;
@@ -331,13 +372,13 @@ class ChatTools {
                         <div class="markdown-urlEmbed-container">
                             <a class="markdown-urlEmbed"
                                data-media-type="link"
-                               data-original-url="${url}"
-                               href="${url}" ${url.startsWith(location.origin) ? "" : 'target="_blank"'}>
+                               data-original-url="${ChatTools.Sanitize.stripHTML(url)}"
+                               href="${ChatTools.Sanitize.stripHTML(url)}" ${url.startsWith(location.origin) ? "" : 'target="_blank"'}>
                                 <span class="meta-info title">
-                                    ${urlMeta?.meta?.title ? stripHTML(truncateText(urlMeta.meta.title, 75)) : ""}
+                                    ${urlMeta?.meta?.title ? ChatTools.Sanitize.stripHTML(ChatTools.Sanitize.truncateText(urlMeta.meta.title, 75)) : ""}
                                 </span>
                                 <span class="meta-info description">
-                                    ${urlMeta?.meta?.description ? stripHTML(truncateText(urlMeta.meta.description, 300)) : ""}
+                                    ${urlMeta?.meta?.description ? ChatTools.Sanitize.stripHTML(ChatTools.Sanitize.truncateText(urlMeta.meta.description, 300)) : ""}
                                 </span>
                             </a>
                         </div>`;
@@ -349,7 +390,7 @@ class ChatTools {
 
                 // fallback to make it a clickable link
                 htmlInput = htmlInput.replace(url,
-                    `<a draggable="false" data-media-type="link" data-message-id="${identifier}" href="${url}" ${url.startsWith(location.origin) ? "" : "target=\"_blank\""}> ${unescapeHtmlEntities(sanitizeHtmlForRender(url))} </a>`
+                    `<a draggable="false" data-media-type="link" data-message-id="${ChatTools.Sanitize.stripHTML(identifier)}" href="${ChatTools.Sanitize.stripHTML(url)}" ${url.startsWith(location.origin) ? "" : "target=\"_blank\""}> ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(url))} </a>`
                 );
                 changed = true;
             }
@@ -367,8 +408,8 @@ class ChatTools {
                 htmlInput = htmlInput.replace(
                     url,
                     ` <img decoding="async" loading="lazy" draggable="false" class="image-embed"
-                         src="${proxy}"
-                         data-original-url="${url}"
+                         src="${ChatTools.Sanitize.stripHTML(proxy)}"
+                         data-original-url="${ChatTools.Sanitize.stripHTML(url)}"
                          data-media-type="image">`
                 );
 
@@ -384,8 +425,8 @@ class ChatTools {
                 htmlInput = htmlInput.replace(
                     url,
                     `<video class="video-embed" controls preload="auto"
-                        src="${proxy}"
-                        data-original-url="${url}"
+                        src="${ChatTools.Sanitize.stripHTML(proxy)}"
+                        data-original-url="${ChatTools.Sanitize.stripHTML(url)}"
                         data-media-type="video"></video>`
                 );
 
@@ -400,14 +441,233 @@ class ChatTools {
             const filename = src.split('/').pop().split("_").splice(2).join('_');
             return `
                 <div class="audio-player">
-                    <p>${filename}</p>
+                    <p>${ChatTools.Sanitize.stripHTML(filename)}</p>
                     <audio
                         controls
                         preload="metadata"
-                        src="${src}">
+                        src="${ChatTools.Sanitize.stripHTML(src)}">
                     </audio>
                 </div>
             `;
         }
+    }
+
+    static Sanitize = class {
+        static _hooksInstalled = false;
+        static SANITIZE_OPTIONS = {
+            ALLOWED_TAGS: [
+                'div',
+                'source',
+                'video',
+                'audio',
+                'span',
+                'p',
+                'br',
+                'b',
+                'i',
+                'u',
+                's',
+                'a',
+                'ul',
+                'ol',
+                'li',
+                'h1',
+                'h2',
+                'h3',
+                'pre',
+                'code',
+                "label",
+                'blockquote',
+                'strong',
+                "details",
+                "summary",
+                'em',
+                'img',
+                'mark',
+                "button",
+                "iframe" // needed for embeds
+            ]
+            ,
+
+            ALLOWED_ATTR: [
+                'href',
+                'target',
+                'rel',
+                'src',
+                'alt',
+                'class',
+                //'style', // needs to be removed but with testing
+                'data-id',
+                'controls',
+                'title',
+                'data-member-id',
+                'data-message-id'
+            ],
+
+            //ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+            //ALLOW_DATA_ATTR: false,
+            //FORBID_ATTR: ['style', 'onerror', 'onclick', 'onload', 'onmouseover', 'onfocus', 'onblur'],
+        };
+
+        static stripHTML(html) {
+            if(typeof html === "object") return;
+            if(Array.isArray(html)) return;
+            if (html == null) return '';
+            return DOMPurify.sanitize(String(html), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+        }
+        static forRender(html, wrapParagraphs = false) {
+            if (html == null) return '';
+
+            this.installDomPurifyHooks();
+            let clean = DOMPurify.sanitize(String(html), this.SANITIZE_OPTIONS);
+
+            if (wrapParagraphs) {
+                clean = `<p>${clean}</p>`;
+            }
+
+            return clean.trim();
+        }
+
+        static encodePlainText(s) {
+            return String(s || '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        static unescapeHtmlEntities(str, raw = false) {
+            if (str == null) return '';
+
+            if(raw === true){
+                const txt = document.createElement('textarea');
+                txt.innerHTML = DOMPurify.sanitize(String(str), this.SANITIZE_OPTIONS);
+                return txt.value;
+            }
+
+            const txt = document.createElement('label');
+            txt.innerHTML = DOMPurify.sanitize(String(str), this.SANITIZE_OPTIONS);
+            let unescaped = txt.textContent;
+
+            const div = document.createElement('div');
+            div.innerHTML = DOMPurify.sanitize(unescaped, this.SANITIZE_OPTIONS);
+            return div.textContent || "";
+        }
+
+        static installDomPurifyHooks() {
+            if (this._hooksInstalled || !window.DOMPurify) return;
+            this._hooksInstalled = true;
+
+            DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+                if (node.tagName === 'A') {
+                    node.setAttribute('target', '_blank');
+                    node.setAttribute('rel', 'noopener noreferrer nofollow');
+
+                    const href = (node.getAttribute('href') || '').toLowerCase().trim();
+                    if (href.startsWith('javascript:') || href.startsWith('data:') || href.startsWith('vbscript:')) {
+                        node.removeAttribute('href');
+                    }
+                }
+
+                if (node.tagName === 'IMG') {
+                    const src = (node.getAttribute('src') || '').toLowerCase().trim();
+                    if (src.startsWith('javascript:') || src.startsWith('data:') || src.startsWith('vbscript:')) {
+                        node.remove();
+                    }
+                }
+            });
+        }
+
+        static normalizeVar(v) {
+            if (v === null || v === undefined) return null;
+
+            if (typeof v === "string") {
+                const val = v.trim().toLowerCase();
+
+                if (val === "true") return true;
+                if (val === "false") return false;
+                if (val === "null" || val === "undefined" || val === "") return null;
+
+                if (/^-?\d+(\.\d+)?$/.test(val)) {
+                    if (val.length < 10) {
+                        return Number(val);
+                    }
+                }
+            }
+
+            return String(v);
+        }
+
+        static truncateText(text, length) {
+            text = String(text || "");
+            if (text.length <= length) return text;
+            return text.substr(0, length) + "\u2026";
+        }
+
+        static truncateHTML(html, length, wrapParagraphs = false) {
+            html = String(html || "");
+            if (html.length <= length) return html;
+
+            // so this is different in a way that we try to truncate only the text
+            // inside the html and ignore text like <tag> so its truly just the text
+            let tempDom = document.createElement('div');
+            tempDom.innerHTML = this.forRender(html, wrapParagraphs);
+
+            // and this will be the small logic to either display "..." or not
+            let addCutoff = tempDom.textContent?.length > length;
+            tempDom.textContent = html.substr(0, length) + `${addCutoff ? "\u2026" : ""}`
+
+            return tempDom.innerHTML;
+        }
+    }
+
+    static Dom = class {
+        static findAttributeUp(element, attr, maxDepth = 10) {
+            if(!element) throw new Error('element is required');
+            
+            for (let i = 0; i <= maxDepth && element; i++) {
+                const val = element.getAttribute?.(attr);
+                if (val !== null) return val;
+                element = element.parentNode;
+            }
+            return null;
+        }
+
+        static async waitForFrame(){
+            return new Promise(resolve => requestAnimationFrame(resolve));
+        }
+
+        static async renderAfterExecution(element, callback, transition = 150){
+            if(!element) throw new Error('element not found');
+            if(!callback) throw new Error('callback not found');
+
+            await this.hideElement(element, transition);
+            await callback();
+            await this.showElement(element, transition);
+        }
+
+        static async hideElement(element, transition = 150){
+            if(!element) throw new Error('element not found');
+            element.style.transition = `opacity ${transition}ms ease`;
+            element.style.opacity = "0";
+
+            await new Promise(resolve => {
+                setTimeout(resolve, transition);
+            });
+        }
+
+        static async showElement(element, transition = 150){
+            if(!element) throw new Error('element not found');
+            element.style.transition = `opacity ${transition}ms ease`;
+
+            await this.waitForFrame();
+            element.style.opacity = "1";
+
+            await new Promise(resolve => {
+                setTimeout(resolve, transition);
+            });
+        }
+
     }
 }

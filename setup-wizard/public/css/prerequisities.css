@@ -1,7 +1,15 @@
 .prerequisites-container {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.prerequisite:nth-last-child(1):nth-child(3n + 1) {
+    grid-column: 1 / -1;
+}
+
+.prerequisite:nth-last-child(2):nth-child(3n + 1),
+.prerequisite:nth-last-child(1):nth-child(3n + 2) {
+    grid-column: span 1;
 }
 
 .prerequisites-container .prerequisite {

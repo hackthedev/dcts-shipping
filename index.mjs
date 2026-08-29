@@ -856,7 +856,6 @@ async function initSetupWizard(){
 
     serverconfig.serverinfo.sql.enabled = true;
     if(serverconfig.serverinfo.setup === 0){
-
         setupWizard.addStep({
             id: "welcome",
             title: "Welcome!",
@@ -865,12 +864,22 @@ async function initSetupWizard(){
             prerequisites: {
                 "linux": [
                     {
+                        title: "Repository Update",
+                        check: [
+                            ["nuhuh", "non-existent"]
+                        ],
+                        install: [
+                            "apt update -y"
+                        ],
+                        execute: []
+                    },
+                    {
                         title: "Screen",
                         check: [
                             ["screen --version", "Screen version"]
                         ],
                         install: [
-                            "sudo apt install screen"
+                            "apt install screen -y"
                         ],
                         execute: []
                     },
@@ -903,7 +912,7 @@ async function initSetupWizard(){
                             "curl -sSL https://get.livekit.io | bash"
                         ],
                         execute: [
-                            `screen -dmS livekit livekit-server --config ${path.join(__dirname, "livekit", "livekit.yaml")}`
+                            `screen -list | grep -q "dcts_livekit" || screen -dmS dcts_livekit livekit-server --config ${path.join(__dirname, "livekit", "livekit.yaml")}`
                         ]
                     },
                     {
@@ -912,7 +921,10 @@ async function initSetupWizard(){
                             ["mariadb --version", "mariadb from"]
                         ],
                         install: [
-                            "curl -sSL https://get.livekit.io | bash"
+                            `apt install mariadb-server mariadb-client -y`,
+                            `mariadb -e "CREATE DATABASE IF NOT EXISTS dcts;"`,
+                            `mariadb -e "CREATE USER IF NOT EXISTS 'dcts'@'localhost' IDENTIFIED BY 'secret';"`,
+                            `mariadb -e "GRANT ALL PRIVILEGES ON dcts.* TO 'dcts'@'localhost'; FLUSH PRIVILEGES;"`
                         ],
                         execute: [
                             "livekit-server --config /tmp/test.yaml"

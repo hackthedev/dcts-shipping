@@ -83,7 +83,65 @@ export default class SetupWizard {
         this.steps.set(step.id, step)
     }
 
+    getStepPrerequisite(stepId, prerequisitieIndex){
+        let step = this.steps.get(stepId);
+        if(!Object.hasOwn(step, "prerequisites")) return null;
+
+        let prerequisite = step?.prerequisites?.[prerequisitieIndex];
+        let installCommands = prerequisite?.install;
+        if(installCommands?.length === 0) return null;
+
+        return {
+            check: prerequisite?.check ?? null,
+            install: prerequisite?.install ?? null,
+            execute: prerequisite?.execute ?? null,
+        }
+    }
+
     registerWebEndpoint(){
+        this.app.post(`/wizard/${this.webEndpointId}/step/:stepId/prerequisites/:prerequisitieIndex/install`, this.express.json(), async(req, res, next) => {
+            let stepId = req?.params?.stepId ?? null;
+            let prerequisitieIndex = req?.params?.prerequisitieIndex ?? null;
+            let data = req.body ?? null;
+
+            if(!stepId) return res.status(404).json({ error: "Step not found"})
+            if(!prerequisitieIndex) return res.status(404).json({ error: "Prerequisite id not found"})
+            if(!this.steps.has(stepId)) return res.status(404).json({ error: "Step not found"})
+
+            // get the actions like check, install, execute
+            let prerequisite = this.getStepPrerequisite(stepId, prerequisitieIndex);
+            if(!prerequisite) return res.status(404).json({ error: `Prerequisites install steps not found for ${stepId}-${this.getOSName()}`})
+
+            let installCommands = prerequisite?.install;
+            if(installCommands?.length === 0) return res.status(404).json({ error: `Prerequisites install step not found for ${stepId}-${this.getOSName()}`})
+
+            // check system test commands
+            let testResults = {}
+            for(let i = 0; i < installCommands.length; i++){
+                let command = installCommands[i];
+
+                let {success, stdout, stderr, code} = await this.runCommand(command);
+                if(stderr?.trim() === "") stderr = null;
+
+                const isWorking = success === true && !stderr;
+
+                testResults = {
+                    success: !!isWorking,
+                    stdout,
+                    stderr: isWorking ? null : stderr,
+                    code
+                }
+
+                // some debug help
+                if(isWorking === false){
+                    Logger.warn(`Prerequisite install was not successful for ${stepId} (${prerequisitieIndex})`)
+                    Logger.warn(testResults)
+                }
+            }
+
+            res.status(200).json({ error: null, results: testResults});
+        })
+
         this.app.post(`/wizard/${this.webEndpointId}/step/:stepId/prerequisites/:prerequisitieIndex/check`, this.express.json(), async(req, res, next) => {
             let stepId = req?.params?.stepId ?? null;
             let prerequisitieIndex = req?.params?.prerequisitieIndex ?? null;

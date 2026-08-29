@@ -4,86 +4,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     testedSteps = loadTestedSteps();
 }, {once: true})
 
-function getCurrentStep() {
-    return Number(localStorage.getItem("wizard_currentStep")) ?? 0;
-}
-
-function saveTestedSteps() {
-    localStorage.setItem("wizard_testedSteps", JSON.stringify([...testedSteps]));
-}
-
-function getCurrentPrerequisiteStep() {
-    return Number(localStorage.getItem("wizard_prerequisiteStep")) ?? 0;
-}
-
-function setCurrentPrerequisiteStep(number) {
-    if (isNaN(number)) throw new Error("Invalid step number");
-    return localStorage.setItem("wizard_prerequisiteStep", String(number));
-}
-
-function loadTestedSteps() {
-    let trustedSteps = localStorage.getItem("wizard_testedSteps");
-    if (trustedSteps) return new Map(JSON.parse(trustedSteps));
-    return new Map();
-}
-
-function setCurrentStep(number) {
-    if (isNaN(number)) throw new Error("Invalid step number");
-    return localStorage.setItem("wizard_currentStep", String(number));
-}
-
-async function checkStepPrerequisite(stepId = null, prerequisiteIndex = null) {
-    if (!stepId) throw new Error("stepid not set!")
-    if (!prerequisiteIndex && prerequisiteIndex !== 0) throw new Error("prerequisite not set!")
-
-    let prereqCheckRes = await fetch(`${window.location.href}step/${stepId}/prerequisites/${prerequisiteIndex}/check`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-
-    if (prereqCheckRes.status !== 200) {
-        console.error(prereqCheckRes)
-        console.error(prereqCheckRes.status, prereqCheckRes.statusText)
-        return null;
-    }
-
-    return (await prereqCheckRes.json()) ?? null;
-}
-
-
-async function getSteps() {
-    let stepsRes = await fetch(`${window.location.href}steps`, {
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-
-    if (stepsRes.status !== 200) {
-        console.error(stepsRes.status, stepsRes.statusText)
-        return null;
-    }
-
-    let steps = (await stepsRes.json())?.steps ?? null;
-
-    if (!steps?.["welcome"]) {
-        steps = {
-            "welcome": {
-                title: "Welcome!",
-                subtitle: null,
-                description: null,
-                fields: [],
-                prerequisits: []
-            },
-            ...steps
-        }
-    }
-
-    window.steps = steps;
-    return steps;
-}
-
 async function setStepProgressElement() {
     let steps = await getSteps()
 
@@ -135,7 +55,6 @@ function getStepKeyFromCount(stepCount) {
 
 async function renderStep(stepCount = null) {
     if (stepCount === null) throw new Error("step count wasnt provided");
-
 
     setCurrentStep(stepCount);
     await setFieldsElement(steps[getStepKeyFromCount(stepCount)])
@@ -277,34 +196,6 @@ function setModalFooterHTML(stepCount) {
         `
 }
 
-async function testStep(stepCount) {
-    let stepId = getStepKeyFromCount(stepCount);
-
-    let testRes = await fetch(`${window.location.href}step/${stepId}/test`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            ...getFieldsValues()
-        })
-    });
-
-    if (testRes.status !== 200) {
-        console.error(testRes.statusText, testRes.status);
-    }
-
-    let jsonData = await testRes.json();
-    if (jsonData?.error) {
-        setModalMessage(jsonData?.error, "error");
-    } else {
-        setModalMessage("Successful test!", "success")
-        testedSteps.set(stepId, true);
-        saveTestedSteps();
-        setModalFooterHTML(stepCount);
-    }
-}
-
 async function renderNextStep() {
     setModalMessage();
     let steps = window.steps;
@@ -328,71 +219,6 @@ async function renderPreviousStep() {
 
 function finishSetup() {
 
-}
-
-function getPrerequisiteElement(index) {
-    if (!index && index !== 0) throw new Error("No index set");
-    return getContentElement().querySelector(`.prerequisites-container .prerequisite[data-index="${index}"]`)
-}
-
-function getPrerequisiteStatusTextElement(index) {
-    if (!index && index !== 0) throw new Error("No index set");
-    return getPrerequisiteStatusContainerElement(index).querySelector(`.status-text`)
-}
-
-function getPrerequisiteStatusIconElement(index) {
-    if (!index && index !== 0) throw new Error("No index set");
-    return getPrerequisiteStatusContainerElement(index).querySelector(`.status-icon`)
-}
-
-function getPrerequisiteStatusContainerElement(index) {
-    if (!index && index !== 0) throw new Error("No index set");
-    return getPrerequisiteElement(index).querySelector(`.status-container`)
-}
-
-
-async function setPrerequisiteStatus(index, {
-    text,
-    type = null,
-    icon = null,
-    ms = 0,
-} = {}) {
-    if (!index && index !== 0) throw new Error("Index must be provided");
-
-    let textElement = getPrerequisiteStatusTextElement(index);
-    let statusElement = getPrerequisiteStatusIconElement(index);
-    let container = getPrerequisiteElement(index);
-    let statusContainer = getPrerequisiteStatusContainerElement(index);
-
-    if (!textElement || !statusElement) throw new Error("Element not found to set status of prerequisite")
-    await ChatTools.Dom.hideElement(statusContainer);
-
-    // setting the values
-    textElement.textContent = text;
-    statusElement.innerHTML = Icon.display(icon);
-
-    // and display or hide it based on the text value
-    statusContainer.style.display = text?.trim() ? "flex" : "none";
-
-    // used for animation
-
-
-    if (ms > 0) {
-        statusElement.style.animation = `prerequisite-spin ${ms}ms linear infinite`;
-    }
-    else{
-        statusElement.style.animation = "";
-    }
-
-    // remove any status class flags and then set the once needed
-    if (container.classList.contains("error")) container.classList.remove("error");
-    if (container.classList.contains("success")) container.classList.remove("success");
-
-    // goal is to only have one set at a time.
-    if (type === "error") container.classList.add("error");
-    if (type === "success") container.classList.add("success");
-
-    await ChatTools.Dom.showElement(statusContainer);
 }
 
 async function getWelcomeSteps() {
@@ -499,7 +325,21 @@ async function getWelcomeSteps() {
                             ms: 1000
                         })
 
-                        // call install
+                        let installResult = await installStepPrerequisite(stepId, preI)
+                        if(installResult?.error || installResult?.results?.success === false){
+                            await setPrerequisiteStatus(prereqId, {
+                                text: "Error during install",
+                                type: "error",
+                                icon: "x",
+                            })
+                        }
+                        else if(installResult?.results?.success === true){
+                            await setPrerequisiteStatus(prereqId, {
+                                text: "Installed",
+                                type: "success",
+                                icon: "check",
+                            })
+                        }
                     }
                     else{
                         await setPrerequisiteStatus(prereqId, {

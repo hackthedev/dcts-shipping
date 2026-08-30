@@ -845,17 +845,14 @@ async function initDCTSServer(){
 }
 
 async function initSetupWizard(){
-    let setupWizard = new SetupWizard({
-        debug: debugmode,
-        onCompleted: async () => {
-            console.log("Completed")
-            startWebServer()
-            initDCTSServer();
-        }
-    });
-
     serverconfig.serverinfo.sql.enabled = true;
     if(serverconfig.serverinfo.setup === 0){
+        let setupWizard = new SetupWizard({
+            debug: debugmode,
+            onCompleted: async () => {
+                finishSetup();
+            }
+        });
 
         // sql setup
         let setupDbPass = generateId(64);
@@ -1107,6 +1104,14 @@ async function initSetupWizard(){
             },
         })
     }
+    else{
+        finishSetup();
+    }
+
+    function finishSetup(){
+        startWebServer()
+        initDCTSServer();
+    }
 }
 
 export async function startWebServer() {
@@ -1212,6 +1217,7 @@ async function listenToIO(){
             if (Date.now() <= serverconfig.ipblacklist[ip]) {
                 let detailText = "";
                 let banListResult = findInJson(serverconfig?.banlist, "ip", ip);
+
                 if (banListResult != null) {
                     let bannedUntilDate = new Date(banListResult.until);
                     bannedUntilDate.getFullYear() === "9999"
@@ -1311,19 +1317,6 @@ async function listenToIO(){
     await inbox.init();
 }
 
-function initConfig(filePath) {
-    try {
-        fileHandle = fs.openSync(filePath, "r+");
-        const fileContent = fs.readFileSync(filePath, {encoding: "utf-8"});
-        savedState = JSON.parse(fileContent);
-    } catch (error) {
-        console.error("Failed to initialize config file:", error);
-        throw error;
-    }
-}
-
-
-
 export async function saveConfig(config) {
     if (!config) return;
 
@@ -1415,61 +1408,60 @@ export function isPtero(){
 
 
 export const socketHandlers = [];
+const activeSockets = new Map();
 async function initSocketHandlers(){
-    const activeSockets = new Map();
-
-    const loadSocketHandlers = async (mainHandlersDir, io) => {
-        const fileList = [];
-
-        const scanDir = (dir) => {
-            const files = fs.readdirSync(dir, {withFileTypes: true});
-            for (const file of files) {
-                const filePath = path.join(dir, file.name);
-                if (file.isDirectory()) {
-                    scanDir(filePath);
-                } else if (file.name.endsWith(".mjs")) {
-                    fileList.push(filePath);
-                }
-            }
-        };
-
-        scanDir(mainHandlersDir);
-
-        for (const filePath of fileList) {
-            const fileUrl = pathToFileURL(filePath).href;
-            try {
-                const {default: handlerFactory} = await import(fileUrl);
-                const handler = handlerFactory(io);
-
-                if (typeof handler === "function") {
-                    socketHandlers.push(handler);
-                    Logger.debug(`Preloaded socket handler: ${filePath}`);
-                } else {
-                    Logger.warn(`Ignored invalid socket handler in ${filePath}`);
-                }
-            } catch (err) {
-                Logger.error(`Error importing socket handler: ${fileUrl}`);
-                Logger.error(err);
-            }
-        }
-    };
-
-    const registerSocketEvents = (socket) => {
-        try {
-            const attachedHandlers = [];
-
-            for (const handler of socketHandlers) {
-                const cleanup = handler(socket);
-                if (typeof cleanup === "function") {
-                    attachedHandlers.push(cleanup);
-                }
-            }
-
-            activeSockets.set(socket.id, attachedHandlers);
-        } catch (err) {
-            console.error("Error registering socket events:", err);
-        }
-    };
-
     await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
 }
+
+const loadSocketHandlers = async (mainHandlersDir, io) => {
+    const fileList = [];
+
+    const scanDir = (dir) => {
+        const files = fs.readdirSync(dir, {withFileTypes: true});
+        for (const file of files) {
+            const filePath = path.join(dir, file.name);
+            if (file.isDirectory()) {
+                scanDir(filePath);
+            } else if (file.name.endsWith(".mjs")) {
+                fileList.push(filePath);
+            }
+        }
+    };
+
+    scanDir(mainHandlersDir);
+
+    for (const filePath of fileList) {
+        const fileUrl = pathToFileURL(filePath).href;
+        try {
+            const {default: handlerFactory} = await import(fileUrl);
+            const handler = handlerFactory(io);
+
+            if (typeof handler === "function") {
+                socketHandlers.push(handler);
+                Logger.debug(`Preloaded socket handler: ${filePath}`);
+            } else {
+                Logger.warn(`Ignored invalid socket handler in ${filePath}`);
+            }
+        } catch (err) {
+            Logger.error(`Error importing socket handler: ${fileUrl}`);
+            Logger.error(err);
+        }
+    }
+};
+
+const registerSocketEvents = (socket) => {
+    try {
+        const attachedHandlers = [];
+
+        for (const handler of socketHandlers) {
+            const cleanup = handler(socket);
+            if (typeof cleanup === "function") {
+                attachedHandlers.push(cleanup);
+            }
+        }
+
+        activeSockets.set(socket.id, attachedHandlers);
+    } catch (err) {
+        console.error("Error registering socket events:", err);
+    }
+};

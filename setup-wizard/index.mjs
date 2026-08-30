@@ -7,6 +7,7 @@ import { exec } from "child_process";
 
 
 import { fileURLToPath } from "url";
+import fs from "node:fs";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
@@ -16,11 +17,15 @@ export default class SetupWizard {
         onCompleted = null,
         debug = false,
         title = "Setup Wizard",
-        subtitle = "Easy Web App Installer",
+        subtitle = "Easy Web Installer",
     } = {}){
+        this.webEndpointId = "test" ?? crypto.randomUUID();
+
         this.starter = new ExpressStarter()
         this.starter.registerErrorHandlers(); // avoid crashing and enable error logging
         this.starter.registerTemplateMiddleware({
+            publicWebDir: path.join(__dirname, "public"),
+            urlPrefix: `/wizard/${this.webEndpointId}`,
             getPlaceholders: async (req) => {
                 return [
                     ["setup.title", () => title],
@@ -45,7 +50,6 @@ export default class SetupWizard {
         // callbacks
         this.onCompleted = onCompleted
 
-        this.webEndpointId = "test" ?? crypto.randomUUID();
         this.registerWebEndpoint();
         this.installLibs();
     }

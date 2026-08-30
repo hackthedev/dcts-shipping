@@ -166,8 +166,8 @@ function getFieldsValues() {
 
 async function setModalHeaderHTML() {
     getHeaderElement().innerHTML = `
-        <h1>Setup Wizard</h1>
-        <span>DCTS - Decentralized Open Source Communication Platform</span>
+        <h1>{{setup.title}}</h1>
+        <span>{{setup.subtitle}}</span>
     `
 }
 

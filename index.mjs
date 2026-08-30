@@ -185,7 +185,6 @@ else{
 export let server; // = http.createServer(app);
 import express from "express";
 export const app = express();
-startWebServer();
 
 // check version file for update check
 let versionPath = path.join(path.resolve(), "version");
@@ -273,6 +272,8 @@ process.on("unhandledRejection", (reason) => {
     emitErrorToTestingClient(reason)
 });
 
+
+initSetupWizard();
 
 async function waitForTable(table, interval = 1000) {
     while (true) {
@@ -835,7 +836,7 @@ async function initDCTSServer(){
 
     try {
         await initPluginSystem();
-        await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
+        await initSocketHandlers()
     } catch (err) {
         console.error("Critical error loading socket handlers:", err);
     }
@@ -845,11 +846,10 @@ async function initDCTSServer(){
 
 async function initSetupWizard(){
     let setupWizard = new SetupWizard({
-        app,
-        express,
-        server,
+        debug: debugmode,
         onCompleted: async () => {
             console.log("Completed")
+            startWebServer()
             initDCTSServer();
         }
     });
@@ -857,21 +857,37 @@ async function initSetupWizard(){
     serverconfig.serverinfo.sql.enabled = true;
     if(serverconfig.serverinfo.setup === 0){
 
+        // sql setup
         let setupDbPass = generateId(64);
         let setupDbUser = `dcts_${generateId(10)}`;
         let setupDbName = `dcts_${generateId(10)}`;
-
-        let setupLivekitKey = generateId(32);
-        let setupLivekitSecret = generateId(64);
 
         serverconfig.serverinfo.sql.password = setupDbPass;
         serverconfig.serverinfo.sql.username = setupDbUser;
         serverconfig.serverinfo.sql.database = setupDbName;
 
+        // livekit config setup
+        let setupLivekitKey = generateId(32);
+        let setupLivekitSecret = generateId(64);
+
+        let livekitConfigFilePath = path.join(__dirname, "livekit", "livekit.yaml");
+        let livekitConfig = null;
+
+        // manipulate the livekit yaml file
+        if(fs.existsSync(livekitConfigFilePath)){
+            livekitConfig = JSONTools.parseYaml(fs.readFileSync(livekitConfigFilePath, "utf8"));
+            // reset keys
+            livekitConfig.keys = {};
+            livekitConfig.keys[setupLivekitKey] = setupLivekitSecret;
+            // then save it
+            fs.writeFileSync(livekitConfigFilePath, JSONTools.toYaml(livekitConfig));
+        }
+
         serverconfig.serverinfo.livekit.enabled = true;
         serverconfig.serverinfo.livekit.key = setupLivekitKey;
         serverconfig.serverinfo.livekit.secret = setupLivekitSecret;
 
+        // add the setup steps here
         setupWizard.addStep({
             id: "welcome",
             title: "Welcome!",
@@ -925,7 +941,7 @@ async function initSetupWizard(){
                             ["livekit-server --version", "livekit-server version"]
                         ],
                         install: [
-                            "curl -sSL https://get.livekit.io | bash"
+                            "curl -sSL https://get.livekit.io | bash",
                         ],
                         execute: [
                             `screen -list | grep -q "dcts_livekit" || screen -dmS dcts_livekit livekit-server --config ${path.join(__dirname, "livekit", "livekit.yaml")}`
@@ -1120,7 +1136,6 @@ export async function startWebServer() {
     let port = process.env.PORT || serverconfig.serverinfo.port;
     server.listen(port, "0.0.0.0", async function () {
         Logger.info("Web server is running on port " + port);
-        await initSetupWizard();
     });
 }
 
@@ -1456,4 +1471,5 @@ async function initSocketHandlers(){
         }
     };
 
+    await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
 }

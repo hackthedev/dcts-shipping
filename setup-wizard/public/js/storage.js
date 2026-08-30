@@ -1,3 +1,8 @@
+function checkStorageReset(){
+    let lastSetupPath = window.location.pathname;
+    if(localStorage.getItem("lastSetupPath") !== lastSetupPath) localStorage.clear()
+}
+
 function getCurrentStep() {
     return Number(localStorage.getItem("wizard_currentStep")) ?? 0;
 }

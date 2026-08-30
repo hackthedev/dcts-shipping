@@ -1,3 +1,24 @@
+async function executeStepPrerequisite(stepId = null, prerequisiteIndex = null) {
+    if (!stepId) throw new Error("stepid not set!")
+    if (!prerequisiteIndex && prerequisiteIndex !== 0) throw new Error("prerequisite not set!")
+
+    let prereqCheckRes = await fetch(`${window.location.href}step/${stepId}/prerequisites/${prerequisiteIndex}/execute`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+
+    if (prereqCheckRes.status !== 200) {
+        console.error(prereqCheckRes)
+        console.error(prereqCheckRes.status, prereqCheckRes.statusText)
+        return null;
+    }
+
+    return (await prereqCheckRes.json()) ?? null;
+}
+
+
 async function installStepPrerequisite(stepId = null, prerequisiteIndex = null) {
     if (!stepId) throw new Error("stepid not set!")
     if (!prerequisiteIndex && prerequisiteIndex !== 0) throw new Error("prerequisite not set!")
@@ -59,11 +80,25 @@ async function testStep(stepCount) {
     if (jsonData?.error) {
         setModalMessage(jsonData?.error, "error");
     } else {
-        setModalMessage("Successful test!", "success")
         testedSteps.set(stepId, true);
         saveTestedSteps();
-        setModalFooterHTML(stepCount);
+        await setStepProgressElement()
+        setModalMessage("Successful test!", "success")
     }
+}
+
+async function finishSetup() {
+    let stepsRes = await fetch(`${window.location.href}finish`, {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+
+    if (stepsRes.status !== 200) {
+        return setModalMessage("Failed to finish setup", "error")
+    }
+
+    setModalMessage("You can now close this page!", "success")
 }
 
 async function getSteps() {

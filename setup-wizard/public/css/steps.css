@@ -46,13 +46,13 @@
     background-color: black;
     color: white;
 }
-.step.done .icon{
-    background-color: rgb(60 179 113 / 0.2) !important;
-    color: mediumseagreen !important;
-    border: 2px solid mediumseagreen;
+
+.step.active .title{
+    color: black;
 }
-.step.done .title{
-    color: mediumseagreen;
+.step.active .icon{
+    background-color: black;
+    color: white;
 }
 
 .step .title{
@@ -63,12 +63,13 @@
     color: var(--gray-mid);
 }
 
-.step.active .title{
-    color: black;
+.step.done .icon{
+    background-color: rgb(60 179 113 / 0.2) !important;
+    color: mediumseagreen !important;
+    border: 2px solid mediumseagreen;
 }
-.step.active .icon{
-    background-color: black;
-    color: white;
+.step.done .title{
+    color: mediumseagreen;
 }
 
 .step-divider{

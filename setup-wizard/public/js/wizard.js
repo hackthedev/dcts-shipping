@@ -77,11 +77,11 @@ function markProgressStep(stepCount) {
             let stepCount = step.getAttribute("data-step-count");
             if (step.classList.contains("active")) step.classList.remove("active");
 
-            if (testedSteps.has(getStepKeyFromCount(stepCount))) {
+            let stepKey = getStepKeyFromCount(stepCount);
+            if (testedSteps.has(stepKey) || (stepKey === "welcome" && Number(stepCount) < getCurrentStep()) ) {
                 step.classList.add("done");
                 setProgressStepIconContent(stepCount, Icon.display("check"))
             }
-
         })
     }
 
@@ -176,11 +176,9 @@ function setModalFooterHTML(stepCount) {
     let previousButton = `<button class="previous" onclick="renderPreviousStep();">Previous</button>`
 
     let stepKey = getStepKeyFromCount(stepCount);
-    let step = window.steps[stepKey];
     let wasTested = testedSteps.has(stepKey);
-    let hasTests = Object.hasOwn(step, "test");
     let isPreviousPossible = (stepCount) > 0;
-
+    let isLastStep = stepCount === Object.keys(window.steps).length -1;
 
     if (!wasTested && stepKey !== "welcome") {
         nextButtonText = `<button class="next" onclick="testStep('${stepCount}');">Test</button>`;
@@ -188,6 +186,10 @@ function setModalFooterHTML(stepCount) {
 
     if (!isPreviousPossible) {
         previousButton = ""
+    }
+
+    if(isLastStep && wasTested){
+        nextButtonText = `<button class="next" onclick="finishSetup();">Finish</button>`;
     }
 
     getFooterElement().innerHTML = `
@@ -217,10 +219,6 @@ async function renderPreviousStep() {
     if (nextStepCount >= 0) {
         await renderStep(nextStepCount);
     }
-}
-
-function finishSetup() {
-
 }
 
 async function getWelcomeSteps() {
@@ -341,6 +339,29 @@ async function getWelcomeSteps() {
                                 type: "success",
                                 icon: "check",
                             })
+
+                            await setPrerequisiteStatus(prereqId, {
+                                text: "Launching...",
+                                type: null,
+                                icon: "loader",
+                                ms: 1000
+                            })
+
+                            let executeResult = await executeStepPrerequisite(stepId, preI);
+                            if(executeResult?.error){
+                                await setPrerequisiteStatus(prereqId, {
+                                    text: "Startup Error",
+                                    type: "error",
+                                    icon: "x",
+                                })
+                            }
+                            else{
+                                await setPrerequisiteStatus(prereqId, {
+                                    text: "Running",
+                                    type: "success",
+                                    icon: "check",
+                                })
+                            }
                         }
                     }
                     else{

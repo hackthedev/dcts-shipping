@@ -34,6 +34,7 @@
         "uuid": "^14.0.2",
         "xhr2": "^0.2.1",
         "xss-filters": "^1.2.7",
+        "yaml": "^2.9.0",
         "zip": "^1.2.0",
       },
       "devDependencies": {
@@ -867,6 +868,8 @@
     "xmlhttprequest-ssl": ["xmlhttprequest-ssl@2.1.2", "", {}, "sha512-TEU+nJVUUnA4CYJFLvK5X9AOeH4KvDvhIfm0vV1GaQRtchnG0hgK5p8hw/xjv8cunWYCsiPCSDzObPyhEwq3KQ=="],
 
     "xss-filters": ["xss-filters@1.2.7", "", {}, "sha512-KzcmYT/f+YzcYrYRqw6mXxd25BEZCxBQnf+uXTopQDIhrmiaLwO+f+yLsIvvNlPhYvgff8g3igqrBxYh9k8NbQ=="],
+
+    "yaml": ["yaml@2.9.0", "", { "bin": { "yaml": "bin.mjs" } }, "sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA=="],
 
     "zip": ["zip@1.2.0", "", { "dependencies": { "bops": "~0.1.1" } }, "sha512-8B4Z9BXJKkI8BkHhKvQan4rwCzUENnj95YHFYrI7F1NbqKCIdW86kujctzEB+kJ6XapHPiAhiZ9xi5GbW5SPdw=="],
 

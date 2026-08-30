@@ -1,8 +1,10 @@
 import Logger from "@hackthedev/terminal-logger";
 import FrontendLibs from "@hackthedev/frontend-libs";
+import ExpressStarter from "@hackthedev/express-starter"
 import crypto from "crypto"
 import path from "path"
 import { exec } from "child_process";
+
 
 import { fileURLToPath } from "url";
 
@@ -11,18 +13,29 @@ export const __dirname = path.dirname(__filename);
 
 export default class SetupWizard {
     constructor({
-        app = null,
-        express = null,
-        server = null,
         onCompleted = null,
+        debug = false,
+        title = "Setup Wizard",
+        subtitle = "Easy Web App Installer",
     } = {}){
-        if(!app) throw new Error("Express App instance needed!")
-        if(!express) throw new Error("Express instance needed!")
-        if(!server) throw new Error("Express server needed!")
+        this.starter = new ExpressStarter()
+        this.starter.registerErrorHandlers(); // avoid crashing and enable error logging
+        this.starter.registerTemplateMiddleware({
+            getPlaceholders: async (req) => {
+                return [
+                    ["setup.title", () => title],
+                    ["setup.subtitle", () => subtitle]
+                ]
+            }
+        }); // cool template engine
+        this.starter.app.use(this.starter.express.static(this.starter.dirname + "/public")); // serve static files
+        this.starter.startHttpServer(5000) // begin listening on whatever port
 
-        this.app = app;
-        this.express = express;
-        this.server = server;
+        this.debug = debug;
+        this.app = this.starter.app;
+        this.express = this.starter.express;
+
+        Logger.logDebug = debug;
 
         // current step
         this.index = 0;
@@ -99,6 +112,50 @@ export default class SetupWizard {
     }
 
     registerWebEndpoint(){
+        this.app.post(`/wizard/${this.webEndpointId}/step/:stepId/prerequisites/:prerequisitieIndex/execute`, this.express.json(), async(req, res, next) => {
+            let stepId = req?.params?.stepId ?? null;
+            let prerequisitieIndex = req?.params?.prerequisitieIndex ?? null;
+            let data = req.body ?? null;
+
+            if(!stepId) return res.status(404).json({ error: "Step not found"})
+            if(!prerequisitieIndex) return res.status(404).json({ error: "Prerequisite id not found"})
+            if(!this.steps.has(stepId)) return res.status(404).json({ error: "Step not found"})
+
+            // get the actions like check, install, execute
+            let prerequisite = this.getStepPrerequisite(stepId, prerequisitieIndex);
+            if(!prerequisite) return res.status(404).json({ error: `Prerequisites execute steps not found for ${stepId}-${this.getOSName()}`})
+
+            let executeCommands = prerequisite?.execute;
+            if(executeCommands?.length === 0) return res.status(200).json({ error: null})
+
+            // check system test commands
+            let testResults = {}
+            for(let i = 0; i < executeCommands.length; i++){
+                let command = executeCommands[i];
+
+                let {success, stdout, stderr, code} = await this.runCommand(command);
+                if(stderr?.trim() === "") stderr = null;
+
+                const isWorking = success === true && !stderr;
+
+                testResults = {
+                    success: !!isWorking,
+                    stdout,
+                    stderr: isWorking ? null : stderr,
+                    code
+                }
+
+                // some debug help
+                if(isWorking === false){
+                    Logger.debug(`Prerequisite execute was not successful for ${stepId} (${prerequisitieIndex})`)
+                    Logger.debug(testResults)
+                }
+            }
+
+            res.status(200).json({ error: null, results: testResults});
+        })
+
+
         this.app.post(`/wizard/${this.webEndpointId}/step/:stepId/prerequisites/:prerequisitieIndex/install`, this.express.json(), async(req, res, next) => {
             let stepId = req?.params?.stepId ?? null;
             let prerequisitieIndex = req?.params?.prerequisitieIndex ?? null;
@@ -134,8 +191,8 @@ export default class SetupWizard {
 
                 // some debug help
                 if(isWorking === false){
-                    Logger.warn(`Prerequisite install was not successful for ${stepId} (${prerequisitieIndex})`)
-                    Logger.warn(testResults)
+                    Logger.debug(`Prerequisite install was not successful for ${stepId} (${prerequisitieIndex})`)
+                    Logger.debug(testResults)
                 }
             }
 
@@ -203,6 +260,11 @@ export default class SetupWizard {
         this.app.get(`/wizard/${this.webEndpointId}/steps`, this.express.json(), async(req, res, next) => {
             res.status(200).json({steps: Object.fromEntries(this.steps)})
         })
+
+        this.app.get(`/wizard/${this.webEndpointId}/finish`, this.express.json(), async(req, res, next) => {
+            if(this.onCompleted && typeof this.onCompleted === "function") await this.onCompleted();
+            res.status(200).json({ error: null})
+        })
         
         this.app.use(
             `/wizard/${this.webEndpointId}`,
@@ -212,12 +274,8 @@ export default class SetupWizard {
         );
 
         Logger.success("Setup Page is available at:")
-        Logger.success(`http://localhost:${this.server.address().port}/wizard/${this.webEndpointId}`)
+        Logger.success(`http://localhost:${this.starter.server.address().port}/wizard/${this.webEndpointId}`)
         Logger.warn("Copy the url to continue the setup process.")
-    }
-
-    async installPrerequisites(){
-
     }
 
     runCommand(command) {

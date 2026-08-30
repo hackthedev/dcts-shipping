@@ -43,6 +43,7 @@
     "uuid": "^14.0.2",
     "xhr2": "^0.2.1",
     "xss-filters": "^1.2.7",
+    "yaml": "^2.9.0",
     "zip": "^1.2.0"
   },
   "devDependencies": {

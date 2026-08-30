@@ -856,6 +856,22 @@ async function initSetupWizard(){
 
     serverconfig.serverinfo.sql.enabled = true;
     if(serverconfig.serverinfo.setup === 0){
+
+        let setupDbPass = generateId(64);
+        let setupDbUser = `dcts_${generateId(10)}`;
+        let setupDbName = `dcts_${generateId(10)}`;
+
+        let setupLivekitKey = generateId(32);
+        let setupLivekitSecret = generateId(64);
+
+        serverconfig.serverinfo.sql.password = setupDbPass;
+        serverconfig.serverinfo.sql.username = setupDbUser;
+        serverconfig.serverinfo.sql.database = setupDbName;
+
+        serverconfig.serverinfo.livekit.enabled = true;
+        serverconfig.serverinfo.livekit.key = setupLivekitKey;
+        serverconfig.serverinfo.livekit.secret = setupLivekitSecret;
+
         setupWizard.addStep({
             id: "welcome",
             title: "Welcome!",
@@ -869,7 +885,7 @@ async function initSetupWizard(){
                             ["nuhuh", "non-existent"]
                         ],
                         install: [
-                            "apt update -y"
+                            "DEBIAN_FRONTEND=noninteractive apt-get update -y"
                         ],
                         execute: []
                     },
@@ -879,7 +895,7 @@ async function initSetupWizard(){
                             ["screen --version", "Screen version"]
                         ],
                         install: [
-                            "apt install screen -y"
+                            "DEBIAN_FRONTEND=noninteractive apt-get install -y screen"
                         ],
                         execute: []
                     },
@@ -922,12 +938,13 @@ async function initSetupWizard(){
                         ],
                         install: [
                             `apt install mariadb-server mariadb-client -y`,
-                            `mariadb -e "CREATE DATABASE IF NOT EXISTS dcts;"`,
-                            `mariadb -e "CREATE USER IF NOT EXISTS 'dcts'@'localhost' IDENTIFIED BY 'secret';"`,
-                            `mariadb -e "GRANT ALL PRIVILEGES ON dcts.* TO 'dcts'@'localhost'; FLUSH PRIVILEGES;"`
+                            `service mariadb start`,
+                            `mariadb -e "CREATE DATABASE IF NOT EXISTS ${setupDbName};"`,
+                            `mariadb -e "CREATE USER IF NOT EXISTS '${setupDbUser}'@'localhost' IDENTIFIED BY '${setupDbPass}';"`,
+                            `mariadb -e "GRANT ALL PRIVILEGES ON ${setupDbName}.* TO '${setupDbUser}'@'localhost'; FLUSH PRIVILEGES;"`
                         ],
                         execute: [
-                            "livekit-server --config /tmp/test.yaml"
+                            `service mariadb start`
                         ]
                     },
                     {
@@ -1005,6 +1022,15 @@ async function initSetupWizard(){
             ],
             test: async(data) => {
                 let dbTest = await dSyncSql.testConnection({...data})
+
+                if(dbTest === true){
+                    serverconfig.serverinfo.sql.host = data?.host;
+                    serverconfig.serverinfo.sql.username = data?.username;
+                    serverconfig.serverinfo.sql.password = data?.password;
+                    serverconfig.serverinfo.sql.database = data?.database;
+                    serverconfig.serverinfo.sql.port = data?.port;
+                    await saveConfig(serverconfig);
+                }
 
                 return {
                     error: dbTest === false ? "Error connecting to database :/" : null

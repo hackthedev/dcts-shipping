@@ -175,12 +175,14 @@ function setModalFooterHTML(stepCount) {
     let nextButtonText = `<button class="next" onclick="renderNextStep();">Next</button>`;
     let previousButton = `<button class="previous" onclick="renderPreviousStep();">Previous</button>`
 
-    let step = window.steps[getStepKeyFromCount(stepCount)];
-    let wasTested = testedSteps.has(getStepKeyFromCount(stepCount));
+    let stepKey = getStepKeyFromCount(stepCount);
+    let step = window.steps[stepKey];
+    let wasTested = testedSteps.has(stepKey);
     let hasTests = Object.hasOwn(step, "test");
     let isPreviousPossible = (stepCount) > 0;
 
-    if (!wasTested && hasTests) {
+
+    if (!wasTested && stepKey !== "welcome") {
         nextButtonText = `<button class="next" onclick="testStep('${stepCount}');">Test</button>`;
     }
 

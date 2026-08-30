@@ -151,14 +151,11 @@ export default class SetupWizard {
             if(!prerequisitieIndex) return res.status(404).json({ error: "Prerequisite id not found"})
             if(!this.steps.has(stepId)) return res.status(404).json({ error: "Step not found"})
 
-            let step = this.steps.get(stepId);
-            if(!Object.hasOwn(step, "prerequisites")) return res.status(200).json({ error: null});
+            let prerequisite = this.getStepPrerequisite(stepId, prerequisitieIndex);
+            if(!prerequisite) return res.status(404).json({ error: `Prerequisites check steps not found for ${stepId}-${this.getOSName()}`})
 
-            let prerequisites = step.prerequisites?.[prerequisitieIndex] ?? {};
-            if(!prerequisites) return res.status(200).json({ error: null});
-            
-            let checkCommands = prerequisites?.check;
-            if(checkCommands?.length === 0) return res.status(404).json({ error: `Prerequisites checks not found for ${stepId}-${this.getOSName()}`}) 
+            let checkCommands = prerequisite?.check;
+            if(checkCommands?.length === 0) return res.status(404).json({ error: `Prerequisites check step not found for ${stepId}-${this.getOSName()}`})
 
             // check system test commands
             let testResults = {}
@@ -178,12 +175,6 @@ export default class SetupWizard {
                     stdout,
                     stderr: isWorking ? null : stderr,
                     code
-                }
-
-                // some debug help
-                if(isWorking === false){
-                    Logger.warn(`Prerequisite check was not successful for ${stepId} (${prerequisitieIndex})`)
-                    Logger.warn(testResults)
                 }
             }
 

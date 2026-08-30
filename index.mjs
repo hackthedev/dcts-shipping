@@ -944,7 +944,7 @@ async function initSetupWizard(){
                             `mariadb -e "GRANT ALL PRIVILEGES ON ${setupDbName}.* TO '${setupDbUser}'@'localhost'; FLUSH PRIVILEGES;"`
                         ],
                         execute: [
-                            `service mariadb start`
+                            `systemctl is-active --quiet mariadb || service mariadb start`
                         ]
                     },
                     {
@@ -1004,7 +1004,7 @@ async function initSetupWizard(){
                     text: "Database Name",
                     type: "text",
                     placeholder: null,
-                    value: serverconfig?.serverinfo?.sql?.db ?? null,
+                    value: serverconfig?.serverinfo?.sql?.database ?? null,
                     test: async (value) => {
                         return !!value?.trim() && typeof value === "string";
                     }
@@ -1035,8 +1035,7 @@ async function initSetupWizard(){
                 return {
                     error: dbTest === false ? "Error connecting to database :/" : null
                 };
-            },
-            prerequisites: []
+            }
         })
 
         setupWizard.addStep({
@@ -1076,7 +1075,20 @@ async function initSetupWizard(){
                         return !!value?.trim() && typeof value === "string";
                     }
                 }
-            ]
+            ],
+            test: async(data) => {
+                let livekitResponse = await fetch(data.url, {
+                    signal: AbortSignal.timeout(2500)
+                });
+
+               if(livekitResponse.status === 200) return {
+                   error: null
+               }
+
+                return {
+                    error: livekitResponse.status
+                };
+            },
         })
     }
 }

@@ -1,4 +1,3 @@
-import {serverconfig} from "../../index.mjs";
 import {saveMemberToDB} from "./mysql/helper.mjs";
 import {sanitizeHTML, stripHTML} from "./sanitizing/functions.mjs";
 import {normalizeVar} from "../sockets/userConnected.mjs";
@@ -6,6 +5,7 @@ import {hasVerifiedKey} from "./chat/main.mjs";
 import {emitBasedOnMemberId} from "./main.mjs";
 import {autobanXSS} from "./sanitizing/actions.mjs";
 import {truncateText} from "../sockets/userConnected.mjs";
+import {serverconfig} from "./init/config.mjs";
 
 export async function createMember({
                                        id,

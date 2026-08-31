@@ -1,13 +1,10 @@
-import {ipsec, saveConfig, serverconfig, versionCode, xssFilters} from "../../index.mjs";
+import {ipsec, saveConfig } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
-import Logger from "../functions/logger.mjs";
+import Logger from "@hackthedev/terminal-logger";
 import {
-    checkObjectKeys,
-    copyObject,
-    getCastingMemberObject,
-    sendMessageToUser,
     validateMemberId
 } from "../functions/main.mjs";
+import {serverconfig} from "../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

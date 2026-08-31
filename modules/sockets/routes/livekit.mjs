@@ -1,10 +1,12 @@
-import {app, fs, serverconfig} from "../../../index.mjs";
+import {app,} from "../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger";
 import yaml from "js-yaml";
 import {AccessToken, WebhookReceiver} from "livekit-server-sdk";
 import {hasPermission} from "../../functions/chat/main.mjs";
 import express from "express";
 import path from "path";
+import fs from "fs";
+import {serverconfig} from "../../functions/init/config.mjs";
 
 
 export async function initLivekitEndpoints(){

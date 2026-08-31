@@ -1,13 +1,9 @@
-import { serverconfig, xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import {
-    anonymizeMember,
-    copyObject,
-    getRoleCastingObject,
-    sendMessageToUser,
     validateMemberId
 } from "../functions/main.mjs";
+import {serverconfig} from "../functions/init/config.mjs";
 
 export function resolveMemberRoles(memberId){
     let roles = [];

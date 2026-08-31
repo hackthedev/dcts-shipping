@@ -3,7 +3,7 @@ import {
     checkPow,
     saveConfig,
     server,
-    serverconfig, signer,
+    signer,
     socketToIP,
     usersocket,
     xssFilters,

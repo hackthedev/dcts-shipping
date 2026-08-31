@@ -1,5 +1,4 @@
-import Logger from "@hackthedev/terminal-logger"
-import {db} from "../../../index.mjs";
+import {db} from "../init/database.mjs";
 
 export async function queryDatabase(query, params, retryCount = 3) {
     return await db.queryDatabase(query, params, retryCount);

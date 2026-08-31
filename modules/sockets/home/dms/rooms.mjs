@@ -4,11 +4,11 @@ import {
     getCastingMemberObject,
     validateMemberId
 } from "../../../functions/main.mjs";
-import { serverconfig } from "../../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger";
 import JSONTools from "@hackthedev/json-tools";
 import { processMessageObject } from "../../resolveMessage.mjs";
 import { io } from "../../../../index.mjs";
+import {serverconfig} from "../../../functions/init/config.mjs";
 
 export async function getMemberDmRooms(memberId) {
     if (!memberId) throw new Error("Member Id is required");

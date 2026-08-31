@@ -1,7 +1,8 @@
-import { fs, serverconfig, xssFilters } from "../../index.mjs";
+import { xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
-import { checkRateLimit, copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { checkRateLimit, validateMemberId } from "../functions/main.mjs";
+import fs from "fs"
 
 export default (io) => (socket) => {
     // socket.on code here

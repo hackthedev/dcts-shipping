@@ -1,6 +1,6 @@
-import {server, serverconfig, http, https, app, setServer, fs, saveConfig} from "../../index.mjs";
+import {http, https, app, setServer, fs, saveConfig} from "../../index.mjs";
 import Logger from "@hackthedev/terminal-logger"
-import {lookupIP} from "./chat/main.mjs";
+import {serverconfig} from "./init/config.mjs";
 
 
 function getClientIp(req) {

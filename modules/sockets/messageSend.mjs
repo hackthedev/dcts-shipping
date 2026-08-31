@@ -1,4 +1,4 @@
-import {serverconfig, typingMembers, usersocket, xssFilters} from "../../index.mjs";
+import {typingMembers, usersocket} from "../../index.mjs";
 import {
     formatDateTime,
     hasPermission,
@@ -24,7 +24,7 @@ import {decodeAndParseJSON, getMessageObjectById} from "./resolveMessage.mjs";
 import {getChannelRateLimit} from "../functions/anti-spam/messages.mjs";
 import {getMemberLatestMessage} from "../functions/chat/helper.mjs";
 import DateTools from "@hackthedev/datetools";
-import dSyncRateLimit from "@hackthedev/dsync-ratelimit";
+import {serverconfig} from "../functions/init/config.mjs";
 
 export function getMentionIdsFromText(text) {
     return {

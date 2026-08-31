@@ -1,22 +1,19 @@
 /*
     The functions here are basically the "core" of the chat app on the server side.
  */
-import {serverconfig, xssFilters, colors, saveConfig, usersocket, server, ipsec} from "../../../index.mjs"
+import {xssFilters, saveConfig, ipsec} from "../../../index.mjs"
 import {io} from "../../../index.mjs";
 import {getChannelMessageCount, getMemberHighestRole} from "./helper.mjs";
 import {
-    checkBool,
-    checkEmptyConfigVar,
-    copyObject, generateId,
-    getCastingMemberObject, getChannelCastingObject, getRoleCastingObject, isLocalhostIp,
-    removeFromArray,
+    copyObject,
+    getCastingMemberObject, getChannelCastingObject, getRoleCastingObject,
     sendMessageToUser
 } from "../main.mjs";
 import {encodeToBase64} from "../mysql/helper.mjs";
 import {signer} from "../../../index.mjs"
-import Logger from "@hackthedev/terminal-logger"
 import {queryDatabase} from "../mysql/mysql.mjs";
 import {getBan} from "../ban-system/helpers.mjs";
+import {serverconfig} from "../init/config.mjs";
 
 var serverconfigEditable = serverconfig;
 

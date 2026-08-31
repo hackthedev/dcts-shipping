@@ -1,16 +1,15 @@
-import { saveConfig, serverconfig, usersocket, xssFilters } from "../../index.mjs";
+
 import { getMemberHighestRole } from "../functions/chat/helper.mjs";
 import {getMemberFromKey, getNewDate, hasPermission} from "../functions/chat/main.mjs";
-import Logger from "../functions/logger.mjs";
+
 import {
-    copyObject,
     escapeHtml,
     findSocketByMemberId,
     generateId,
     sendMessageToUser,
     validateMemberId
 } from "../functions/main.mjs";
-import {addBan, banUser} from "../functions/ban-system/helpers.mjs";
+import {addBan} from "../functions/ban-system/helpers.mjs";
 import DateTools from "@hackthedev/datetools";
 
 export default (io) => (socket) => {

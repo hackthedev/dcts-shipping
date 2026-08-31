@@ -1,8 +1,5 @@
-import { serverconfig, xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
-import Logger from "../functions/logger.mjs";
-import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
-import {queryDatabase} from "../functions/mysql/mysql.mjs";
+import { validateMemberId } from "../functions/main.mjs";
 import {getAllDiscoveredHosts} from "../functions/discovery.mjs";
 
 export default (io) => (socket) => {

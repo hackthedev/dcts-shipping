@@ -1,15 +1,15 @@
-import { serverconfig, xssFilters } from "../../index.mjs";
 import {hasPermission, resolveCategoryByChannelId, resolveGroupByChannelId} from "../functions/chat/main.mjs";
 import {
-    anonymizeMessage, autoAnonymizeMember,
+    autoAnonymizeMember,
     autoAnonymizeMessage,
-    copyObject, getCastingMemberObject,
-    sendMessageToUser,
+    copyObject,
+    getCastingMemberObject,
     validateMemberId
 } from "../functions/main.mjs";
 import {decodeFromBase64, getChatMessageById} from "../functions/mysql/helper.mjs";
 import {getMessageReactionsById} from "./messageReactions.mjs";
 import JSONTools from "@hackthedev/json-tools";
+import {serverconfig} from "../functions/init/config.mjs";
 
 export function decodeString(string){
     try{

@@ -13,7 +13,7 @@
 /cache
 /backups
 privatekey.json
-dcts/
+/dcts
 
 .idea
 .package-lock.json

@@ -184,6 +184,7 @@ else{
 // init web server
 export let server; // = http.createServer(app);
 import express from "express";
+import {initLivekitEndpoints} from "./modules/sockets/routes/livekit.mjs";
 export const app = express();
 
 // check version file for update check
@@ -322,6 +323,8 @@ async function initIPSec(){
 }
 
 async function initDCTSServer(){
+    await initLivekitEndpoints();
+
     try {
         let dbConnectionTest = await dSyncSql.testConnection({
             host: serverconfig.serverinfo.sql.host,

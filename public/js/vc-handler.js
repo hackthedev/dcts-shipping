@@ -356,7 +356,7 @@ async function toggleCamera() {
 }
 
 async function setupVC(roomId) {
-    if (!roomId) return;
+    if (!roomId) throw new Error("Missing room id");
 
     const channelIcons = document.getElementById("channelname-icons");
     let contentContainer = document.getElementById("content");

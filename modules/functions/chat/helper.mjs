@@ -22,7 +22,7 @@ export function findEmojiByID(id) {
 }
 
 export async function getChannelMessageCount(channelId) {
-    if (!channelId) throw new Error("no channel id provided")
+    if (!channelId && channelId !== 0) throw new Error("no channel id provided")
 
     const rows = await queryDatabase(
         `SELECT COUNT(*) AS count

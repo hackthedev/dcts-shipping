@@ -882,7 +882,7 @@ async function initSetupWizard(){
     registerSetupPrerequisites();
 
     // first time setup
-    if(serverconfig.serverinfo.setup === 0 || await checkPrerequisites() === false){
+    if((serverconfig.serverinfo.setup === 0 || await checkPrerequisites() === false) && !skipSetup()){
         serverconfig.serverinfo.sql.password = setupDbPass;
         serverconfig.serverinfo.sql.username = setupDbUser;
         serverconfig.serverinfo.sql.database = setupDbName;
@@ -1486,6 +1486,9 @@ export function isPtero(){
     return nodeArgs?.includes("--ptero")
 }
 
+export function skipSetup(){
+    return nodeArgs?.includes("--skip-setup")
+}
 
 export const socketHandlers = [];
 const activeSockets = new Map();

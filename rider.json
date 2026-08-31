@@ -13,6 +13,8 @@
         "@hackthedev/terminal-logger": "1.0.1",
         "@hackthedev/arraytools": "1.0.2",
         "@hackthedev/datetools": "1.0.3",
-        "@hackthedev/icons": "2.0.1"
+        "@hackthedev/icons": "2.0.1",
+        "@hackthedev/setup-wizard": "1.0.1",
+        "@hackthedev/express-starter": "1.0.8"
     }
 }

@@ -96,7 +96,9 @@ import {checkAndUnbanPublicKey, unbanIp} from "./modules/functions/ban-system/he
 import {getMessageObjectById} from "./modules/sockets/resolveMessage.mjs";
 import {getMemberHighestUploadLimit} from "./modules/functions/chat/helper.mjs";
 import {initPluginSystem} from "./modules/sockets/routes/plugins.mjs";
-import SetupWizard from "./setup-wizard/index.mjs";
+
+//import SetupWizard from "/mnt/SSD/network-z-dev/setup-wizard/index.mjs";
+import SetupWizard from "@hackthedev/setup-wizard";
 
 
 // define quite some important stuff

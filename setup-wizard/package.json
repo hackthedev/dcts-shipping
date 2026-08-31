@@ -1,9 +1,0 @@
-{
-    "name": "@hackthedev/setup-wizard",
-    "description": "",
-    "version": "1.0.0",
-    "license": "NONE",
-    "dependencies": {
-        "@hackthedev/express-starter": "^1.0.6"
-    }
-}

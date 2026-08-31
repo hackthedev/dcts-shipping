@@ -24,6 +24,8 @@ export default class SetupWizard {
         this.starter.registerErrorHandlers(); // avoid crashing and enable error logging
         
         this.starter.registerTemplateMiddleware({
+            publicWebDir: path.join(__dirname, "public"),
+            urlPrefix: `/wizard/${this.webEndpointId}`,
             getPlaceholders: async (req) => {
                 return [
                     ["setup.title", () => title],

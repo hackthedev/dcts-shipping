@@ -235,6 +235,25 @@ export let auther = null;
 export let inbox = null;
 export let files = new dSyncFiles();
 
+// Catch uncaught errors
+process.on("uncaughtException", function (err) {
+    // Handle the error safely
+    Logger.error("UNEXPECTED ERROR");
+    Logger.error(err.message);
+    Logger.error("Details: ");
+    Logger.error(err.stack);
+    emitErrorToTestingClient(err)
+});
+
+process.on("unhandledRejection", (reason) => {
+    Logger.error("UNHANDLED PROMISE REJECTION");
+    Logger.error(reason?.stack || reason);
+    emitErrorToTestingClient(reason)
+});
+
+
+initSetupWizard();
+
 async function runDbTask(task) {
     if (task.enabled !== true) return;
 
@@ -254,26 +273,6 @@ function scheduleDbTasks(tasks) {
         setLongInterval(() => runDbTask(task), ms);
     }
 }
-
-
-// Catch uncaught errors
-process.on("uncaughtException", function (err) {
-    // Handle the error safely
-    Logger.error("UNEXPECTED ERROR");
-    Logger.error(err.message);
-    Logger.error("Details: ");
-    Logger.error(err.stack);
-    emitErrorToTestingClient(err)
-});
-
-process.on("unhandledRejection", (reason) => {
-    Logger.error("UNHANDLED PROMISE REJECTION");
-    Logger.error(reason?.stack || reason);
-    emitErrorToTestingClient(reason)
-});
-
-
-initSetupWizard();
 
 async function waitForTable(table, interval = 1000) {
     while (true) {
@@ -324,6 +323,22 @@ async function initIPSec(){
 
 async function initDCTSServer(){
     try {
+        let dbConnectionTest = await dSyncSql.testConnection({
+            host: serverconfig.serverinfo.sql.host,
+            port: serverconfig.serverinfo.sql.port,
+            username: serverconfig.serverinfo.sql.username,
+            password: serverconfig.serverinfo.sql.password,
+            database: serverconfig.serverinfo.sql.database,
+        })
+
+        // if connection is invalid show it
+        if(!dbConnectionTest){
+            Logger.error("Database credentials are wrong!")
+            Logger.error(serverconfig.serverinfo.sql)
+            return;
+        }
+
+
         // init database connection
         db = new dSyncSql({
             host: serverconfig.serverinfo.sql.host,
@@ -337,6 +352,240 @@ async function initDCTSServer(){
         });
 
         await db.ready;
+
+        Logger.info("Checking and waiting for database connection...");
+        Logger.info("If it takes too long check the data inside the config.json file");
+        Logger.info("and make sure the database is running and accessible.");
+        await db.waitForConnection();
+        Logger.success("Connection established!");
+        Logger.space();
+
+        // Create a connection pool if sql is enabled
+        // SQL Database Structure needed
+        // it will create everything if missing (except database)
+        // +1 convenience
+        const tables = [
+            {
+                name: "dm_rooms",
+                columns: [
+
+                    {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+                    {name: "roomId", type: "varchar(200) NOT NULL UNIQUE KEY"},
+                    {name: "title", type: "varchar(204) NOT NULL DEFAULT 'New Chat'"},
+                    {name: "creatorId", type: "varchar(20) NOT NULL"},
+                    {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+                ]
+            },
+            {
+                name: "dm_reads",
+                columns: [
+                    {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+                    {name: "memberId", type: "varchar(204) NOT NULL"},
+                    {name: "targetId", type: "varchar(100) NOT NULL"}, // roomId oder channelId
+                    {name: "lastReadAt", type: "bigint NOT NULL DEFAULT 0"},
+                ],
+                keys: [
+                    {name: "UNIQUE KEY", type: "unique_member_target (memberId, targetId)"},
+                    {name: "KEY", type: "idx_memberId (memberId)"},
+                ]
+            },
+            {
+                name: "dm_room_participants",
+                columns: [
+                    {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+                    {name: "roomId", type: "varchar(200) NOT NULL"},
+                    {name: "memberId", type: "varchar(204) NOT NULL"},
+                    {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+                ],
+                keys: [
+                    {name: "UNIQUE KEY", type: "unique_room_member (roomId, memberId)"},
+                    {name: "KEY", type: "idx_memberId (memberId)"},
+                    {name: "KEY", type: "idx_roomId (roomId)"},
+                ]
+            },
+            {
+                name: "dms",
+                columns: [
+                    {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+                    {name: "authorId", type: "varchar(100) NOT NULL"},
+                    {name: "roomId", type: "varchar(200) NOT NULL"},
+                    {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
+                    {name: "message", type: "longtext NOT NULL"},
+                    {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+                    {name: "editedAt", type: "bigint NULL"},
+                ]
+            },
+            {
+                name: "messages",
+                columns: [
+                    {name: "authorId", type: "varchar(100) NOT NULL"},
+                    {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
+                    {name: "room", type: "varchar(200) NOT NULL"},
+                    {name: "message", type: "longtext NOT NULL"},
+                    {
+                        name: "createdAt",
+                        type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)",
+                    },
+                    {
+                        name: "editedAt",
+                        type: "bigint DEFAULT NULL",
+                    },
+                ]
+            },
+            {
+                name: "message_reactions",
+                columns: [
+                    {name: "cid", type: "varchar(500) NOT NULL UNIQUE KEY"},
+                    {name: "reactionId", type: "int(100) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+                    {name: "messageId", type: "varchar(100) NOT NULL"},
+                    {name: "emojiHash", type: "longtext NOT NULL"},
+                    {name: "memberId", type: "varchar(100) NOT NULL"},
+                    {name: "react_timestamp", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"}
+                ]
+            },
+            {
+                name: "ip_cache",
+                columns: [
+                    {name: "ip", type: "varchar(100) NOT NULL UNIQUE KEY"},
+                    {name: "data", type: "longtext NOT NULL"},
+                    {name: "last_sync", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"}
+                ]
+            },
+            {
+                name: "cache",
+                columns: [
+                    {name: "rowId", type: "int(12) NOT NULL AUTO_INCREMENT PRIMARY KEY"},
+                    {name: "identifier", type: "varchar(255) NOT NULL UNIQUE KEY"},
+                    {name: "type", type: "varchar(255) NOT NULL"},
+                    {name: "data", type: "longtext NOT NULL"},
+                    {name: "last_update", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+                    {name: "created", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"}
+                ]
+            },
+            {
+                name: "migrations",
+                columns: [
+                    {name: "migration_name", type: "varchar(100) NOT NULL"},
+                    {name: "done", type: "int(10) NOT NULL DEFAULT 0"},
+                ],
+                keys: [{name: "UNIQUE KEY", type: "migration_name (migration_name)"}],
+            },
+            {
+                name: "message_logs",
+                columns: [
+                    {name: "id", type: "int(100) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT"},
+                    {name: "authorId", type: "varchar(100) NOT NULL"},
+                    {name: "messageId", type: "varchar(100) NOT NULL"},
+                    {name: "room", type: "text NOT NULL"},
+                    {name: "message", type: "longtext NOT NULL"},
+                ]
+            },
+            {
+                name: "url_cache",
+                columns: [
+                    {name: "id", type: "int(11) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT"},
+                    {name: "url", type: "longtext NOT NULL UNIQUE KEY"},
+                    {name: "media_type", type: "text NOT NULL"},
+                ]
+            },
+            {
+                name: "reports",
+                columns: [
+                    {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
+                    {name: "reportCreator", type: "longtext NOT NULL"},
+                    {name: "reportedUser", type: "longtext NOT NULL"},
+                    {name: "reportType", type: "text NOT NULL"},
+                    {name: "reportData", type: "longtext NULL"},
+                    {name: "reportNotes", type: "longtext NULL"},
+                    {name: "reportStatus", type: "varchar(100) NOT NULL DEFAULT 'pending'"},
+                ],
+            },
+            {
+                name: "auditlog",
+                columns: [
+                    {name: "text", type: "longtext NOT NULL"},
+                    {name: "datetime", type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP"},
+                ],
+            },
+            {
+                name: "members",
+                columns: [
+                    {name: "rowId", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+                    {name: "id", type: "varchar(100) NOT NULL UNIQUE"},
+                    {name: "token", type: "varchar(255)"},
+                    {name: "onboarding", type: "BOOLEAN DEFAULT FALSE"},
+                    {name: "loginName", type: "varchar(100)"},
+                    {name: "name", type: "varchar(100) NOT NULL DEFAULT 'User'"},
+                    {name: "nickname", type: "varchar(100) DEFAULT NULL"},
+                    {name: "country_code", type: "varchar(50) DEFAULT NULL"},
+                    {name: "status", type: "text DEFAULT ''"},
+                    {name: "aboutme", type: "text DEFAULT ''"},
+                    {name: "icon", type: "longtext DEFAULT ''"},
+                    {name: "banner", type: "longtext DEFAULT ''"},
+                    {name: "card", type: "longtext DEFAULT ''"},
+                    {name: "joined", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+                    {name: "isOnline", type: "BOOLEAN DEFAULT FALSE"},
+                    {name: "lastOnline", type: "bigint DEFAULT 0"},
+                    {name: "isBanned", type: "BOOLEAN DEFAULT FALSE"},
+                    {name: "isMuted", type: "BOOLEAN DEFAULT FALSE"},
+                    {name: "password", type: "text DEFAULT NULL"},
+                    {name: "publicKey", type: "text DEFAULT ''"},
+                    {name: "type", type: "varchar(500) DEFAULT NULL"},
+                    {name: "isVerifiedKey", type: "BOOLEAN DEFAULT FALSE"},
+                    {name: "pow", type: "text DEFAULT ''"},
+                ]
+            },
+            {
+                name: "bans",
+                columns: [
+                    {name: "rowId", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+                    {name: "memberId", type: "varchar(100) NOT NULL UNIQUE"},
+                    {name: "publicKey", type: "text NULL UNIQUE"},
+                    {name: "issuerId", type: "varchar(100) NOT NULL"},
+                    {name: "ip", type: "varchar(100) DEFAULT NULL"},
+                    {name: "reason", type: "varchar(500) DEFAULT NULL"},
+                    {name: "created", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+                    {name: "until", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+                ]
+            },
+        ];
+
+        const dbTasks = [
+            {
+                name: "Purge Old Message Logs",
+                enabled: serverconfig.serverinfo.reports.enabled,
+                interval: toSeconds("12 hours"),
+                query: `
+                    DELETE
+                    ml
+                        FROM message_logs ml
+                        LEFT JOIN messages m
+                        ON m.messageId = ml.messageId
+                        LEFT JOIN reports r
+                        ON JSON_UNQUOTE(JSON_EXTRACT(r.reportData, '$.messageId')) = ml.messageId
+                        WHERE m.messageId IS NULL
+                        AND r.id IS NULL;
+                `,
+            },
+        ];
+
+        // create missing database schema
+        for (const table of tables) {
+            await db.checkAndCreateTable(table);
+        }
+        
+        // then wait for these tables to exist to avoid errors
+        const criticalTables = ["members", "messages", "cache", "migrations", "message_logs", "reports"];
+        for (const t of criticalTables) {
+            await waitForTable(t);
+        }
+
+        // after the tables exist etc we will fire up our awesome new job(s)
+        scheduleDbTasks(dbTasks);
+
+        // load some data etc
+        await loadMembersFromDB();
+        await checkMigrations();
 
         signer = new dSyncSign("./configs/privatekey.json");
         auther = new dSyncAuth(app, signer, async function (data) {
@@ -468,216 +717,6 @@ async function initDCTSServer(){
             Logger.error(e)
             process.exit(1)
     }
-    
-
-    // Create a connection pool if sql is enabled
-    // SQL Database Structure needed
-    // it will create everything if missing (except database)
-    // +1 convenience
-    const tables = [
-        {
-            name: "dm_rooms",
-            columns: [
-
-                {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-                {name: "roomId", type: "varchar(200) NOT NULL UNIQUE KEY"},
-                {name: "title", type: "varchar(204) NOT NULL DEFAULT 'New Chat'"},
-                {name: "creatorId", type: "varchar(20) NOT NULL"},
-                {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
-            ]
-        },
-        {
-            name: "dm_reads",
-            columns: [
-                {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-                {name: "memberId", type: "varchar(204) NOT NULL"},
-                {name: "targetId", type: "varchar(100) NOT NULL"}, // roomId oder channelId
-                {name: "lastReadAt", type: "bigint NOT NULL DEFAULT 0"},
-            ],
-            keys: [
-                {name: "UNIQUE KEY", type: "unique_member_target (memberId, targetId)"},
-                {name: "KEY", type: "idx_memberId (memberId)"},
-            ]
-        },
-        {
-            name: "dm_room_participants",
-            columns: [
-                {name: "id", type: "int(20) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-                {name: "roomId", type: "varchar(200) NOT NULL"},
-                {name: "memberId", type: "varchar(204) NOT NULL"},
-                {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
-            ],
-            keys: [
-                {name: "UNIQUE KEY", type: "unique_room_member (roomId, memberId)"},
-                {name: "KEY", type: "idx_memberId (memberId)"},
-                {name: "KEY", type: "idx_roomId (roomId)"},
-            ]
-        },
-        {
-            name: "dms",
-            columns: [
-                {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-                {name: "authorId", type: "varchar(100) NOT NULL"},
-                {name: "roomId", type: "varchar(200) NOT NULL"},
-                {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
-                {name: "message", type: "longtext NOT NULL"},
-                {name: "createdAt", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
-                {name: "editedAt", type: "bigint NULL"},
-            ]
-        },
-        {
-            name: "messages",
-            columns: [
-                {name: "authorId", type: "varchar(100) NOT NULL"},
-                {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
-                {name: "room", type: "varchar(200) NOT NULL"},
-                {name: "message", type: "longtext NOT NULL"},
-                {
-                    name: "createdAt",
-                    type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)",
-                },
-                {
-                    name: "editedAt",
-                    type: "bigint DEFAULT NULL",
-                },
-            ]
-        },
-        {
-            name: "message_reactions",
-            columns: [
-                {name: "cid", type: "varchar(500) NOT NULL UNIQUE KEY"},
-                {name: "reactionId", type: "int(100) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-                {name: "messageId", type: "varchar(100) NOT NULL"},
-                {name: "emojiHash", type: "longtext NOT NULL"},
-                {name: "memberId", type: "varchar(100) NOT NULL"},
-                {name: "react_timestamp", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"}
-            ]
-        },
-        {
-            name: "ip_cache",
-            columns: [
-                {name: "ip", type: "varchar(100) NOT NULL UNIQUE KEY"},
-                {name: "data", type: "longtext NOT NULL"},
-                {name: "last_sync", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"}
-            ]
-        },
-        {
-            name: "cache",
-            columns: [
-                {name: "rowId", type: "int(12) NOT NULL AUTO_INCREMENT PRIMARY KEY"},
-                {name: "identifier", type: "varchar(255) NOT NULL UNIQUE KEY"},
-                {name: "type", type: "varchar(255) NOT NULL"},
-                {name: "data", type: "longtext NOT NULL"},
-                {name: "last_update", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
-                {name: "created", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"}
-            ]
-        },
-        {
-            name: "migrations",
-            columns: [
-                {name: "migration_name", type: "varchar(100) NOT NULL"},
-                {name: "done", type: "int(10) NOT NULL DEFAULT 0"},
-            ],
-            keys: [{name: "UNIQUE KEY", type: "migration_name (migration_name)"}],
-        },
-        {
-            name: "message_logs",
-            columns: [
-                {name: "id", type: "int(100) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT"},
-                {name: "authorId", type: "varchar(100) NOT NULL"},
-                {name: "messageId", type: "varchar(100) NOT NULL"},
-                {name: "room", type: "text NOT NULL"},
-                {name: "message", type: "longtext NOT NULL"},
-            ]
-        },
-        {
-            name: "url_cache",
-            columns: [
-                {name: "id", type: "int(11) NOT NULL PRIMARY KEY UNIQUE KEY AUTO_INCREMENT"},
-                {name: "url", type: "longtext NOT NULL UNIQUE KEY"},
-                {name: "media_type", type: "text NOT NULL"},
-            ]
-        },
-        {
-            name: "reports",
-            columns: [
-                {name: "id", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT"},
-                {name: "reportCreator", type: "longtext NOT NULL"},
-                {name: "reportedUser", type: "longtext NOT NULL"},
-                {name: "reportType", type: "text NOT NULL"},
-                {name: "reportData", type: "longtext NULL"},
-                {name: "reportNotes", type: "longtext NULL"},
-                {name: "reportStatus", type: "varchar(100) NOT NULL DEFAULT 'pending'"},
-            ],
-        },
-        {
-            name: "auditlog",
-            columns: [
-                {name: "text", type: "longtext NOT NULL"},
-                {name: "datetime", type: "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP"},
-            ],
-        },
-        {
-            name: "members",
-            columns: [
-                {name: "rowId", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
-                {name: "id", type: "varchar(100) NOT NULL UNIQUE"},
-                {name: "token", type: "varchar(255)"},
-                {name: "onboarding", type: "BOOLEAN DEFAULT FALSE"},
-                {name: "loginName", type: "varchar(100)"},
-                {name: "name", type: "varchar(100) NOT NULL DEFAULT 'User'"},
-                {name: "nickname", type: "varchar(100) DEFAULT NULL"},
-                {name: "country_code", type: "varchar(50) DEFAULT NULL"},
-                {name: "status", type: "text DEFAULT ''"},
-                {name: "aboutme", type: "text DEFAULT ''"},
-                {name: "icon", type: "longtext DEFAULT ''"},
-                {name: "banner", type: "longtext DEFAULT ''"},
-                {name: "card", type: "longtext DEFAULT ''"},
-                {name: "joined", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
-                {name: "isOnline", type: "BOOLEAN DEFAULT FALSE"},
-                {name: "lastOnline", type: "bigint DEFAULT 0"},
-                {name: "isBanned", type: "BOOLEAN DEFAULT FALSE"},
-                {name: "isMuted", type: "BOOLEAN DEFAULT FALSE"},
-                {name: "password", type: "text DEFAULT NULL"},
-                {name: "publicKey", type: "text DEFAULT ''"},
-                {name: "type", type: "varchar(500) DEFAULT NULL"},
-                {name: "isVerifiedKey", type: "BOOLEAN DEFAULT FALSE"},
-                {name: "pow", type: "text DEFAULT ''"},
-            ]
-        },
-        {
-            name: "bans",
-            columns: [
-                {name: "rowId", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
-                {name: "memberId", type: "varchar(100) NOT NULL UNIQUE"},
-                {name: "publicKey", type: "text NULL UNIQUE"},
-                {name: "issuerId", type: "varchar(100) NOT NULL"},
-                {name: "ip", type: "varchar(100) DEFAULT NULL"},
-                {name: "reason", type: "varchar(500) DEFAULT NULL"},
-                {name: "created", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
-                {name: "until", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
-            ]
-        },
-    ];
-
-    const dbTasks = [
-        {
-            name: "Purge Old Message Logs",
-            enabled: serverconfig.serverinfo.reports.enabled,
-            interval: toSeconds("12 hours"),
-            query: `
-                DELETE
-                ml
-                    FROM message_logs ml
-                    LEFT JOIN messages m
-                    ON m.messageId = ml.messageId
-                    LEFT JOIN reports r
-                    ON JSON_UNQUOTE(JSON_EXTRACT(r.reportData, '$.messageId')) = ml.messageId
-                    WHERE m.messageId IS NULL
-                    AND r.id IS NULL;
-            `,
-        },
-    ];
 
     let magentaBlinkColor = Logger.colors.blink + Logger.colors.bright + Logger.colors.fgMagenta
 
@@ -746,16 +785,8 @@ async function initDCTSServer(){
         })
     );
 
-
-    Logger.info("Checking and waiting for database connection...");
-    Logger.info("If it takes too long check the data inside the config.json file");
-    Logger.info("and make sure the database is running and accessible.");
-    await db.waitForConnection();
-    Logger.success("Connection established!");
-    Logger.space();
-
     // check admin token and setup
-    if (serverconfig.serverinfo.setup === 0) {
+    if (serverconfig.serverroles["1111"]?.token?.length === 0) {
         var adminToken = generateId(64);
         serverconfig.serverinfo.setup = 1;
         serverconfig.serverroles["1111"].token.push(adminToken);
@@ -785,24 +816,6 @@ async function initDCTSServer(){
         });
         allowLogging = true;
     }
-
-    // create missing database schema
-    for (const table of tables) {
-        await db.checkAndCreateTable(table);
-    }
-    
-    // then wait for these tables to exist to avoid errors
-    const criticalTables = ["members", "messages", "cache", "migrations", "message_logs", "reports"];
-    for (const t of criticalTables) {
-        await waitForTable(t);
-    }
-
-    // load some data etc
-    await loadMembersFromDB();
-    await checkMigrations();
-
-    // after the tables exist etc we will fire up our awesome new job(s)
-    scheduleDbTasks(dbTasks);
 
     //initPaymentSystem(app)
     listenToIO();
@@ -846,29 +859,33 @@ async function initDCTSServer(){
 
 async function initSetupWizard(){
     serverconfig.serverinfo.sql.enabled = true;
-    if(serverconfig.serverinfo.setup === 0){
-        let setupWizard = new SetupWizard({
-            debug: debugmode,
-            onCompleted: async () => {
-                finishSetup();
-            }
-        });
 
-        // sql setup
-        let setupDbPass = generateId(64);
-        let setupDbUser = `dcts_${generateId(10)}`;
-        let setupDbName = `dcts_${generateId(10)}`;
+    let setupWizard = new SetupWizard({
+        debug: debugmode,
+        onCompleted: async () => {
+            await finishSetup();
+        }
+    });
 
+    // sql setup
+    let setupDbPass = generateId(64);
+    let setupDbUser = `dcts_${generateId(10)}`;
+    let setupDbName = `dcts_${generateId(10)}`;
+
+    // livekit config setup
+    let setupLivekitKey = generateId(32);
+    let setupLivekitSecret = generateId(64);
+
+    let livekitConfigFilePath = path.join(__dirname, "livekit", "livekit.yaml");
+    let livekitConfig = null;
+
+    registerSetupPrerequisites();
+
+    // first time setup
+    if(serverconfig.serverinfo.setup === 0 || await checkPrerequisites() === false){
         serverconfig.serverinfo.sql.password = setupDbPass;
         serverconfig.serverinfo.sql.username = setupDbUser;
         serverconfig.serverinfo.sql.database = setupDbName;
-
-        // livekit config setup
-        let setupLivekitKey = generateId(32);
-        let setupLivekitSecret = generateId(64);
-
-        let livekitConfigFilePath = path.join(__dirname, "livekit", "livekit.yaml");
-        let livekitConfig = null;
 
         // manipulate the livekit yaml file
         if(fs.existsSync(livekitConfigFilePath)){
@@ -884,95 +901,108 @@ async function initSetupWizard(){
         serverconfig.serverinfo.livekit.key = setupLivekitKey;
         serverconfig.serverinfo.livekit.secret = setupLivekitSecret;
 
+        registerSetupSteps();
+    }
+    else{
+        setupWizard.exitSetup();
+        registerSetupPrerequisites();
+        registerSetupSteps();
+        await finishSetup();
+    }
+
+    function registerSetupPrerequisites(){
+        setupWizard.addPrerequisites({
+            "linux": [
+                {
+                    title: "Repository Update",
+                    check: [
+                        ["nuhuh", "non-existent"]
+                    ],
+                    install: [
+                        "DEBIAN_FRONTEND=noninteractive apt-get update -y"
+                    ],
+                    execute: []
+                },
+                {
+                    title: "Screen",
+                    check: [
+                        ["screen --version", "Screen version"]
+                    ],
+                    install: [
+                        "DEBIAN_FRONTEND=noninteractive apt-get install -y screen"
+                    ],
+                    execute: []
+                },
+                {
+                    title: "cURL",
+                    check: [
+                        ["curl", "curl:"]
+                    ],
+                    install: [
+                        "DEBIAN_FRONTEND=noninteractive apt install curl -y"
+                    ],
+                    execute: []
+                },
+                {
+                    title: "wget",
+                    check: [
+                        ["wget", "wget:"]
+                    ],
+                    install: [
+                        "DEBIAN_FRONTEND=noninteractive apt install wget -y"
+                    ],
+                    execute: []
+                },
+                {
+                    title: "LiveKit",
+                    check: [
+                        ["livekit-server --version", "livekit-server version"]
+                    ],
+                    install: [
+                        "curl -sSL https://get.livekit.io | bash",
+                    ],
+                    execute: [
+                        `screen -list | grep -q "dcts_livekit" || screen -dmS dcts_livekit livekit-server --config ${path.join(__dirname, "livekit", "livekit.yaml")}`
+                    ]
+                },
+                {
+                    title: "MariaDB",
+                    check: [
+                        ["mariadb --version", "mariadb from"]
+                    ],
+                    install: [
+                        `DEBIAN_FRONTEND=noninteractive apt install mariadb-server mariadb-client -y`,
+                        `service mariadb start`,
+                        `mariadb -e "CREATE DATABASE IF NOT EXISTS ${setupDbName};"`,
+                        `mariadb -e "CREATE USER IF NOT EXISTS '${setupDbUser}'@'localhost' IDENTIFIED BY '${setupDbPass}';"`,
+                        `mariadb -e "GRANT ALL PRIVILEGES ON ${setupDbName}.* TO '${setupDbUser}'@'localhost'; FLUSH PRIVILEGES;"`
+                    ],
+                    execute: [
+                        `systemctl is-active --quiet mariadb || service mariadb start`
+                    ]
+                },
+                {
+                    title: "Rider",
+                    check: [
+                        ["rider hello", "Rider is available"]
+                    ],
+                    install: [
+                        "curl -fsSL https://dist.dcts.community/api/package/rider-cli/install.sh | bash"
+                    ],
+                    execute: []
+                }
+            ],
+            "windows": []
+        })
+    }
+
+    function registerSetupSteps(){
         // add the setup steps here
         setupWizard.addStep({
             id: "welcome",
             title: "Welcome!",
             description: "Lets check on the requirements! You can continue once they're done!",
-            fields: [],
-            prerequisites: {
-                "linux": [
-                    {
-                        title: "Repository Update",
-                        check: [
-                            ["nuhuh", "non-existent"]
-                        ],
-                        install: [
-                            "DEBIAN_FRONTEND=noninteractive apt-get update -y"
-                        ],
-                        execute: []
-                    },
-                    {
-                        title: "Screen",
-                        check: [
-                            ["screen --version", "Screen version"]
-                        ],
-                        install: [
-                            "DEBIAN_FRONTEND=noninteractive apt-get install -y screen"
-                        ],
-                        execute: []
-                    },
-                    {
-                        title: "cURL",
-                        check: [
-                            ["curl", "curl:"]
-                        ],
-                        install: [
-                            "apt install curl -y"
-                        ],
-                        execute: []
-                    },
-                    {
-                        title: "wget",
-                        check: [
-                            ["wget", "wget:"]
-                        ],
-                        install: [
-                            "apt install wget -y"
-                        ],
-                        execute: []
-                    },
-                    {
-                        title: "LiveKit",
-                        check: [
-                            ["livekit-server --version", "livekit-server version"]
-                        ],
-                        install: [
-                            "curl -sSL https://get.livekit.io | bash",
-                        ],
-                        execute: [
-                            `screen -list | grep -q "dcts_livekit" || screen -dmS dcts_livekit livekit-server --config ${path.join(__dirname, "livekit", "livekit.yaml")}`
-                        ]
-                    },
-                    {
-                        title: "MariaDB",
-                        check: [
-                            ["mariadb --version", "mariadb from"]
-                        ],
-                        install: [
-                            `apt install mariadb-server mariadb-client -y`,
-                            `service mariadb start`,
-                            `mariadb -e "CREATE DATABASE IF NOT EXISTS ${setupDbName};"`,
-                            `mariadb -e "CREATE USER IF NOT EXISTS '${setupDbUser}'@'localhost' IDENTIFIED BY '${setupDbPass}';"`,
-                            `mariadb -e "GRANT ALL PRIVILEGES ON ${setupDbName}.* TO '${setupDbUser}'@'localhost'; FLUSH PRIVILEGES;"`
-                        ],
-                        execute: [
-                            `systemctl is-active --quiet mariadb || service mariadb start`
-                        ]
-                    },
-                    {
-                        title: "Rider",
-                        check: [
-                            ["rider hello", "Rider is available"]
-                        ],
-                        install: [
-                            "curl -fsSL https://dist.dcts.community/api/package/rider-cli/install.sh | bash"
-                        ],
-                        execute: []
-                    }
-                ],
-                "windows": []
-            }
+            fields: []
         })
 
         setupWizard.addStep({
@@ -1104,13 +1134,63 @@ async function initSetupWizard(){
             },
         })
     }
-    else{
-        finishSetup();
-    }
 
-    function finishSetup(){
+    async function finishSetup(){
+        serverconfig.serverinfo.setup = 1
+        await saveConfig(serverconfig);
+        await executePrerequisites();
         startWebServer()
         initDCTSServer();
+    }
+
+    async function executePrerequisites(){
+        await doForEachSetupPrerequisite(async (prerequisite) => {
+            // if there are startup commands after install etc
+            if(prerequisite?.execute) {
+                for(let command in prerequisite.execute){
+                    await setupWizard.runCommand(command)
+                }
+            }
+        })
+    }
+
+    async function checkPrerequisites(){
+        let result = await doForEachSetupPrerequisite(async (prerequisite) => {
+            // if there are startup commands after install etc
+            let hadErrors = false;
+            if(prerequisite?.check) {
+                for(let command in prerequisite.check){
+                    let runResult = await setupWizard.runCommand(command)
+                    if(!runResult.success) hadErrors = true;
+                }
+            }
+
+            return hadErrors;
+        })
+
+        let hadError = false;
+        for(let res of result){
+            if(res[1] === true) hadError = true;
+        }
+
+        // invert it so it makes more sense to use.
+        // false = there was a eror
+        return !hadError;
+    }
+
+    async function doForEachSetupPrerequisite(callback){
+        if(!callback ||typeof callback !== "function") throw new Error("Missing setup callback");
+        let prerequisites = setupWizard.prerequisites?.[setupWizard.getOSName()];
+        let prereqLength = Object.keys(prerequisites).length;
+
+        let results = new Map();
+        for (let i = 0; i < prereqLength; i++) { // prerequisite index
+            const prerequisite = prerequisites[i];
+            let result = await callback(prerequisite)
+            results.set(i, result);
+        }
+
+        return results;
     }
 }
 

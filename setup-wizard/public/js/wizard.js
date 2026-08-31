@@ -222,8 +222,8 @@ async function renderPreviousStep() {
 }
 
 async function getWelcomeSteps() {
-    let steps = window.steps;
-    let stepsLength = Object.keys(steps ?? {})?.length ?? 0;
+    let prerequisites = await getPrerequisites();
+    let prereqLength = Object.keys(prerequisites).length;
 
     let prerequsitiesContainer = document.createElement("div");
     prerequsitiesContainer.className = "prerequisites-container";
@@ -232,56 +232,47 @@ async function getWelcomeSteps() {
     let pendingPrerequisiteChecks = new Map();
 
     // if we have any steps
-    if (stepsLength > 0) {
+    if (prereqLength > 0) {
         getContentElement().innerHTML += getSubHeadingHTML("Prerequisites")
         getContentElement().insertAdjacentElement("beforeend", prerequsitiesContainer);
 
-        // for each step
-        for (let i = 0; i < stepsLength; i++) {
-            let step = steps[getStepKeyFromCount(i)];
-            let prerequisites = step?.prerequisites ?? []
-            let hasPrerequisites = prerequisites?.length > 0
+        // for each prerequisite
+        for (let preI = 0; preI < prereqLength; preI++) { // prerequisite index
+            const prerequisite = prerequisites[preI];
+            console.log(prerequisite)
+            const prereqId = `${preI}`;
 
-            // for each prerequisite of the step
-            if (hasPrerequisites) {
-                // for each prerequisite
-                for (let preI = 0; preI < prerequisites.length; preI++) { // prerequisite index
-                    const prerequisite = prerequisites[preI];
-                    const prereqId = `${step.id}-${preI}`;
+            let prerequisiteElement = document.createElement("div");
+            prerequisiteElement.className = "prerequisite";
+            prerequisiteElement.setAttribute("data-index", String(prereqId));
 
-                    let prerequisiteElement = document.createElement("div");
-                    prerequisiteElement.className = "prerequisite";
-                    prerequisiteElement.setAttribute("data-index", String(prereqId));
+            let isActiveStep = currentPrerequisiteStep === preI;
+            if (isActiveStep) prerequisiteElement.classList.add("active");
 
-                    let isActiveStep = currentPrerequisiteStep === preI;
-                    if (isActiveStep) prerequisiteElement.classList.add("active");
+            prerequisiteElement.innerHTML = `
+                <div class="title">
+                    <span class="icon">${preI + 1}</span>
+                    <h1>${prerequisite.title}</h1>
+                </div>
+                
+                <div class="status-container">
+                    <span class="status-icon"></span>
+                    <p class="status-text"></p>
+                </div>
+            `
 
-                    prerequisiteElement.innerHTML = `
-                        <div class="title">
-                            <span class="icon">${preI + 1}</span>
-                            <h1>${prerequisite.title}</h1>
-                        </div>
-                        
-                        <div class="status-container">
-                            <span class="status-icon"></span>
-                            <p class="status-text"></p>
-                        </div>
-                    `
+            prerequsitiesContainer.appendChild(prerequisiteElement)
 
-                    prerequsitiesContainer.appendChild(prerequisiteElement)
+            // check if prerequisite has checks and add it to list
+            if (prerequisite?.check){
+                pendingPrerequisiteChecks.set(prereqId, [preI, prerequisite]);
 
-                    // check if prerequisite has checks and add it to list
-                    if (prerequisite?.check){
-                        pendingPrerequisiteChecks.set(prereqId, [step.id, preI, prerequisite]);
-
-                        await setPrerequisiteStatus(prereqId, {
-                            text: "Checking requirements",
-                            type: null,
-                            icon: "loader",
-                            ms: 1000,
-                        })
-                    }
-                }
+                await setPrerequisiteStatus(prereqId, {
+                    text: "Checking requirements",
+                    type: null,
+                    icon: "loader",
+                    ms: 1000,
+                })
             }
         }
     }
@@ -292,11 +283,11 @@ async function getWelcomeSteps() {
         for(let map of [...pendingPrerequisiteChecks]){
             let prereqId = map[0];
             let values = map[1];
-            let stepId = values[0];
-            let preI = values[1];
-            let prerequisite = values[2];
+            
+            let preI = values[0];
+            let prerequisite = values[1];
 
-            let checkResult = await checkStepPrerequisite(stepId, preI)
+            let checkResult = await checkPrerequisite(preI)
             // if response error
             if(checkResult?.error){
                 await setPrerequisiteStatus(prereqId, {
@@ -314,55 +305,13 @@ async function getWelcomeSteps() {
                         type: "success",
                         icon: "check",
                     })
+
+                    await launchPrereq(prereqId);
                 }
                 // if command error
                 else if(checkResult?.results?.stderr){
                     if(prerequisite?.install){
-                        await setPrerequisiteStatus(prereqId, {
-                            text: "Installing...",
-                            type: null,
-                            icon: "loader",
-                            ms: 1000
-                        })
-
-                        let installResult = await installStepPrerequisite(stepId, preI)
-                        if(installResult?.error || installResult?.results?.success === false){
-                            await setPrerequisiteStatus(prereqId, {
-                                text: "Error during install",
-                                type: "error",
-                                icon: "x",
-                            })
-                        }
-                        else if(installResult?.results?.success === true){
-                            await setPrerequisiteStatus(prereqId, {
-                                text: "Installed",
-                                type: "success",
-                                icon: "check",
-                            })
-
-                            await setPrerequisiteStatus(prereqId, {
-                                text: "Launching...",
-                                type: null,
-                                icon: "loader",
-                                ms: 1000
-                            })
-
-                            let executeResult = await executeStepPrerequisite(stepId, preI);
-                            if(executeResult?.error){
-                                await setPrerequisiteStatus(prereqId, {
-                                    text: "Startup Error",
-                                    type: "error",
-                                    icon: "x",
-                                })
-                            }
-                            else{
-                                await setPrerequisiteStatus(prereqId, {
-                                    text: "Running",
-                                    type: "success",
-                                    icon: "check",
-                                })
-                            }
-                        }
+                        await installPrereq(prereqId)
                     }
                     else{
                         await setPrerequisiteStatus(prereqId, {
@@ -373,6 +322,59 @@ async function getWelcomeSteps() {
                     }
                 }
             }
+        }
+    }
+
+    async function installPrereq(prereqId){
+        await setPrerequisiteStatus(prereqId, {
+            text: "Installing...",
+            type: null,
+            icon: "loader",
+            ms: 1000
+        })
+
+        // check if there is a install instruction
+        let installResult = await installPrerequisite(prereqId)
+        if(installResult?.error || installResult?.results?.success === false){
+            await setPrerequisiteStatus(prereqId, {
+                text: "Error during install",
+                type: "error",
+                icon: "x",
+            })
+        }
+        else if(installResult?.results?.success === true){
+            await setPrerequisiteStatus(prereqId, {
+                text: "Installed",
+                type: "success",
+                icon: "check",
+            })
+
+            await launchPrereq(prereqId);
+        }
+    }
+
+    async function launchPrereq(prereqId){
+        await setPrerequisiteStatus(prereqId, {
+            text: "Launching...",
+            type: null,
+            icon: "loader",
+            ms: 1000
+        })
+
+        let executeResult = await executePrerequisite(prereqId);
+        if(executeResult?.error){
+            await setPrerequisiteStatus(prereqId, {
+                text: "Startup Error",
+                type: "error",
+                icon: "x",
+            })
+        }
+        else{
+            await setPrerequisiteStatus(prereqId, {
+                text: "Running",
+                type: "success",
+                icon: "check",
+            })
         }
     }
 }

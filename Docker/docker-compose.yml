@@ -17,7 +17,6 @@ services:
       - 5349:5349/tcp
     restart: unless-stopped
     volumes:
-      - ../dcts/sv:/app/sv
       - ../dcts/configs:/app/configs
       - ../dcts/uploads:/app/public/uploads
       - ../dcts/emojis:/app/public/emojis

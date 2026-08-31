@@ -10,3 +10,4 @@ sudo docker compose logs -f
 #
 # sudo docker exec -it docker-dcts-app-1 bash
 # sudo docker restart docker-dcts-app-1
+# sudo docker logs -f dcts-app-1

@@ -1,6 +1,7 @@
 {
     "packages": {
         "@hackthedev/frontend-libs": "1.1.6",
-        "@hackthedev/terminal-logger": "1.0.1"
+        "@hackthedev/terminal-logger": "1.0.1",
+        "@hackthedev/express-starter": "1.0.8"
     }
 }

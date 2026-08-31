@@ -1,8 +1,7 @@
-async function executeStepPrerequisite(stepId = null, prerequisiteIndex = null) {
-    if (!stepId) throw new Error("stepid not set!")
+async function executePrerequisite(prerequisiteIndex = null) {
     if (!prerequisiteIndex && prerequisiteIndex !== 0) throw new Error("prerequisite not set!")
 
-    let prereqCheckRes = await fetch(`${window.location.href}step/${stepId}/prerequisites/${prerequisiteIndex}/execute`, {
+    let prereqCheckRes = await fetch(`${window.location.href}prerequisites/${prerequisiteIndex}/execute`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -19,11 +18,10 @@ async function executeStepPrerequisite(stepId = null, prerequisiteIndex = null) 
 }
 
 
-async function installStepPrerequisite(stepId = null, prerequisiteIndex = null) {
-    if (!stepId) throw new Error("stepid not set!")
+async function installPrerequisite(prerequisiteIndex = null) {
     if (!prerequisiteIndex && prerequisiteIndex !== 0) throw new Error("prerequisite not set!")
 
-    let prereqCheckRes = await fetch(`${window.location.href}step/${stepId}/prerequisites/${prerequisiteIndex}/install`, {
+    let prereqCheckRes = await fetch(`${window.location.href}prerequisites/${prerequisiteIndex}/install`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -39,11 +37,10 @@ async function installStepPrerequisite(stepId = null, prerequisiteIndex = null) 
     return (await prereqCheckRes.json()) ?? null;
 }
 
-async function checkStepPrerequisite(stepId = null, prerequisiteIndex = null) {
-    if (!stepId) throw new Error("stepid not set!")
+async function checkPrerequisite(prerequisiteIndex = null) {
     if (!prerequisiteIndex && prerequisiteIndex !== 0) throw new Error("prerequisite not set!")
 
-    let prereqCheckRes = await fetch(`${window.location.href}step/${stepId}/prerequisites/${prerequisiteIndex}/check`, {
+    let prereqCheckRes = await fetch(`${window.location.href}prerequisites/${prerequisiteIndex}/check`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -99,6 +96,23 @@ async function finishSetup() {
     }
 
     setModalMessage("You can now close this page!", "success")
+}
+
+async function getPrerequisites() {
+    let prereqRes = await fetch(`${window.location.href}prerequisites`, {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+
+    if (prereqRes.status !== 200) {
+        console.error(prereqRes.status, prereqRes.statusText)
+        return null;
+    }
+
+    let prerequisites = (await prereqRes.json())?.prerequisites ?? null;
+    window.prerequisites = prerequisites;
+    return prerequisites;
 }
 
 async function getSteps() {

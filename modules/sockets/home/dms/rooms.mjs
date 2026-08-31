@@ -1,18 +1,14 @@
 import { queryDatabase } from "../../../functions/mysql/mysql.mjs";
 import {
-    autoAnonymizeMember,
-    autoAnonymizeMessage,
     generateId,
     getCastingMemberObject,
-    removeFromArray,
     validateMemberId
 } from "../../../functions/main.mjs";
 import { serverconfig } from "../../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger";
 import JSONTools from "@hackthedev/json-tools";
-import { checkMessageObjAuthor, processMessageObject } from "../../resolveMessage.mjs";
+import { processMessageObject } from "../../resolveMessage.mjs";
 import { io } from "../../../../index.mjs";
-import { hasPermission } from "../../../functions/chat/main.mjs";
 
 export async function getMemberDmRooms(memberId) {
     if (!memberId) throw new Error("Member Id is required");

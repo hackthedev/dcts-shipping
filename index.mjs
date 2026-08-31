@@ -254,6 +254,7 @@ process.on("unhandledRejection", (reason) => {
     emitErrorToTestingClient(reason)
 });
 
+signer = new dSyncSign("./configs/privatekey.json");
 
 initSetupWizard();
 
@@ -324,7 +325,7 @@ async function initIPSec(){
     await ipsec.filterExpressTraffic(app)
 }
 
-async function initDCTSServer(){
+export async function initDCTSServer(){
     await initLivekitEndpoints();
 
     try {
@@ -342,7 +343,6 @@ async function initDCTSServer(){
             Logger.error(serverconfig.serverinfo.sql)
             return;
         }
-
 
         // init database connection
         db = new dSyncSql({
@@ -592,7 +592,6 @@ async function initDCTSServer(){
         await loadMembersFromDB();
         await checkMigrations();
 
-        signer = new dSyncSign("./configs/privatekey.json");
         auther = new dSyncAuth(app, signer, async function (data) {
             if (data.valid === true) {
                 changeKeyVerification(data.publicKey, data.valid);

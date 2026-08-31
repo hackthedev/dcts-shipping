@@ -1,5 +1,5 @@
 import { test, expect, describe, mock } from "bun:test";
-import { defaultTestOverwrites, setupSocketMock } from "../test-client.mjs";
+import { defaultTestOverwrites, setupSocketMock } from "../../test-client.mjs";
 
 
 mock.module("../../modules/functions/mysql/mysql.mjs", () => ({
@@ -110,12 +110,12 @@ mock.module("../../modules/functions/ban-system/helpers.mjs", () => ({
 
 
 // Import the handler AFTER mocks
-import messageSendHandler from "../../modules/sockets/messageSend.mjs";
-import deleteMessageHandler from "../../modules/sockets/deleteMessage.mjs";
-import messageReactionsHandler from "../../modules/sockets/messageReactions.mjs";
+import messageSendHandler from "../../../modules/sockets/messageSend.mjs";
+import deleteMessageHandler from "../../../modules/sockets/deleteMessage.mjs";
+import messageReactionsHandler from "../../../modules/sockets/messageReactions.mjs";
 
 import DateTools from "@hackthedev/datetools";
-import {serverconfig} from "../../index.mjs";
+import {serverconfig} from "../../../index.mjs";
 
 describe("Server Chat", () => {
     const env = setupSocketMock(messageSendHandler, deleteMessageHandler, messageReactionsHandler);

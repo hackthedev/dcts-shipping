@@ -1,15 +1,15 @@
 import { test, expect, describe, mock } from "bun:test";
-import { defaultTestOverwrites, setupSocketMock } from "../test-client.mjs";
+import { defaultTestOverwrites, setupSocketMock } from "../../test-client.mjs";
 
 // ok so these mocks seem to be super cool as they can kinda
 // overwrite functions and what not so we dont fuck shit up
 // which is hella cool
 
 // Import the handler AFTER mocks
-import dmsRoomHandler from "../../modules/sockets/home/dms/rooms.mjs";
-import {getLocalPlugins} from "../../modules/sockets/routes/plugins.mjs";
-import {checkHttpAuth, getCastingMemberObject} from "../../modules/functions/main.mjs";
-import {serverconfig} from "../../index.mjs";
+import dmsRoomHandler from "../../../modules/sockets/home/dms/rooms.mjs";
+import {getLocalPlugins} from "../../../modules/sockets/routes/plugins.mjs";
+import {checkHttpAuth, getCastingMemberObject} from "../../../modules/functions/main.mjs";
+import {serverconfig} from "../../../index.mjs";
 
 mock.module("../modules/functions/main.mjs", () => ({
     checkHttpAuth: mock(async (allowPass) => {

@@ -5,7 +5,7 @@
   "main": "index.mjs",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "bun test tests/backend && bun test tests/frontend",
     "postinstall": "bun postinstall.mjs",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",

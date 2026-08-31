@@ -1,10 +1,10 @@
 import { test, expect, describe, mock } from "bun:test";
-import { defaultTestOverwrites, setupSocketMock } from "../test-client.mjs";
+import { defaultTestOverwrites, setupSocketMock } from "../../test-client.mjs";
 
 // ok so these mocks seem to be super cool as they can kinda
 // overwrite functions and what not so we dont fuck shit up
 // which is hella cool
-mock.module("../../modules/functions/mysql/mysql.mjs", () => ({
+mock.module("../../../modules/functions/mysql/mysql.mjs", () => ({
     queryDatabase: mock(async (query, args) => {
         const q = query.toLowerCase();
 
@@ -36,14 +36,14 @@ mock.module("../../modules/functions/mysql/mysql.mjs", () => ({
 
 // mock some important shit from the index. i love this shit so much
 
-mock.module("../../modules/sockets/resolveMessage.mjs", () => ({
+mock.module("../../../modules/sockets/resolveMessage.mjs", () => ({
     processMessageObject: mock(async (msg) => ({ author: { id: "123456789012" } })),
     checkMessageObjAuthor: mock()
 }));
 
 
 // Import the handler AFTER mocks
-import dmsRoomHandler from "../../modules/sockets/home/dms/rooms.mjs";
+import dmsRoomHandler from "../../../modules/sockets/home/dms/rooms.mjs";
 
 describe("DM System", () => {
     const env = setupSocketMock(dmsRoomHandler);

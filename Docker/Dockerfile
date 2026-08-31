@@ -6,13 +6,16 @@ FROM oven/bun:1-slim
 
 WORKDIR /app
 
-RUN apt-get update -y && apt-get install -y curl
+RUN apt-get update -y && apt-get install -y curl && apt-get install -y unzip
 
 COPY package.json bun.lock postinstall.mjs rider.json ./
 
 RUN bun install
 
 COPY . .
+
+# temporary fix for dev time
+RUN cd setup-wizard/ && rider install
 
 EXPOSE 2052
 

@@ -317,6 +317,7 @@ class VoIP {
     }
 
     async joinRoom(roomName, userName, memberId, channelId) {
+        if(!roomName && roomName !== 0) throw new Error("Cant join room cauz no room name provided")
         const micSettings = this._getMicSettings();
 
         this.room = new LivekitClient.Room({

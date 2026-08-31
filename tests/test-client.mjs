@@ -1,9 +1,9 @@
 import { io } from "socket.io-client";
-import {serverconfig, signer} from "../index.mjs";
 import { mock, beforeAll, afterAll } from "bun:test";
 import { Server } from "socket.io";
 import { createServer } from "http";
 import xssFilters from "xss-filters";
+import {dSyncSign} from "@hackthedev/dsync-sign";
 
 export let defaultTestOverwrites = {
     validateMemberId: mock(async (id, socket, token) => {
@@ -30,6 +30,85 @@ export let defaultTestOverwrites = {
     powVerifiedUsers: ["123456789012"]
 }
 
+let serverconfig = {
+    serverinfo: {
+        dms: {
+            maxParticipants: 10
+        },
+        moderation: {
+            ratelimit: {
+                actions: {
+                    user_slowmode_duration: "1 minute"
+                }
+            }
+        }
+    },
+    servermembers: {
+        "123456789012": {
+            id: "123456789012",
+                token: "test",
+                name: "Test",
+                onboarding: true
+        },
+        "123456789013": {
+            id: "123456789013",
+                token: "test",
+                name: "Test",
+                onboarding: true
+        }
+    },
+    mutelist: {},
+    groups: {
+        0: {
+            info: {
+                id: 0,
+                    name: "Home",
+                    icon: "img/default_icon.png",
+                    banner: "/img/default_banner.png",
+                    isDeletable: 1,
+                    sortId: 2,
+                    access: []
+            },
+            channels: {
+                categories: {
+                    0: {
+                        info: {
+                            id: 0,
+                                name: "General",
+                                sortId: 0
+                        },
+                        channel: {
+                            0: {
+                                id: 0,
+                                    name: "chat",
+                                    type: "text",
+                                    description: "",
+                                    sortId: 3,
+                                    permissions: {
+                                    0: {
+                                        readMessages: 1,
+                                            sendMessages: 1,
+                                            viewChannel: 1,
+                                            viewChannelHistory: 1
+                                    }
+                                },
+                                msgCount: 0
+                            }
+                        }
+                    }
+                }
+            },
+            permissions: {
+                0: {
+                    viewGroup: 1,
+                        sendMessages: 1,
+                        readMessages: 1
+                }
+            }
+        }
+    }
+}
+
 mock.module("../modules/sockets/pow.mjs", () => ({
     powVerifiedUsers: defaultTestOverwrites.powVerifiedUsers
 }));
@@ -44,88 +123,14 @@ mock.module("../modules/functions/main.mjs", () => ({
 }));
 
 mock.module("../index.mjs", () => ({
-    serverconfig: {
-        serverinfo: {
-            dms: {
-                maxParticipants: 10
-            },
-            moderation: {
-                ratelimit: {
-                    actions: {
-                        user_slowmode_duration: "1 minute"
-                    }
-                }
-            }
-        },
-        servermembers: {
-            "123456789012": {
-                id: "123456789012",
-                token: "test",
-                name: "Test",
-                onboarding: true
-            },
-            "123456789013": {
-                id: "123456789013",
-                token: "test",
-                name: "Test",
-                onboarding: true
-            }
-        },
-        mutelist: {},
-        groups: {
-            0: {
-                info: {
-                    id: 0,
-                    name: "Home",
-                    icon: "img/default_icon.png",
-                    banner: "/img/default_banner.png",
-                    isDeletable: 1,
-                    sortId: 2,
-                    access: []
-                },
-                channels: {
-                    categories: {
-                        0: {
-                            info: {
-                                id: 0,
-                                name: "General",
-                                sortId: 0
-                            },
-                            channel: {
-                                0: {
-                                    id: 0,
-                                    name: "chat",
-                                    type: "text",
-                                    description: "",
-                                    sortId: 3,
-                                    permissions: {
-                                        0: {
-                                            readMessages: 1,
-                                            sendMessages: 1,
-                                            viewChannel: 1,
-                                            viewChannelHistory: 1
-                                        }
-                                    },
-                                    msgCount: 0
-                                }
-                            }
-                        }
-                    }
-                },
-                permissions: {
-                    0: {
-                        viewGroup: 1,
-                        sendMessages: 1,
-                        readMessages: 1
-                    }
-                }
-            }
-        }
-    },
+    serverconfig,
     io: defaultTestOverwrites.io,
-    signer,
+    signer: new dSyncSign("./configs/privatekey.json"),
     usersocket: {},
-    xssFilters: xssFilters
+    xssFilters: xssFilters,
+    db: {
+        queryDatabase: mock(async () => [])
+    }
 }));
 
 export function createTestClient(target = 2052) {

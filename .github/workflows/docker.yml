@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - beta
+      - dev
   release:
     types: [published]
 
@@ -85,7 +85,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           context: .
-          file: ./ptero/Dockerfile.dcts
+          file: ./Docker/ptero/Dockerfile.dcts
           push: true
           tags: ${{ steps.ptero-dcts-branch.outputs.tags || steps.ptero-dcts-release.outputs.tags }}
-
+

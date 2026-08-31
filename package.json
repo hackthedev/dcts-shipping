@@ -5,7 +5,7 @@
   "main": "index.mjs",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "bun test tests/backend && bun test tests/frontend",
     "postinstall": "bun postinstall.mjs",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
@@ -17,7 +17,6 @@
     "@hackthedev/dsync-pay": "^1.0.8",
     "@hackthedev/dsync-shop": "^1.0.1",
     "@hackthedev/dsync-web": "^1.0.4",
-    "archiver": "^7.0.1",
     "bcrypt": "^6.0.0",
     "canvas": "^3.2.3",
     "chartjs-node-canvas": "^5.0.0",
@@ -29,28 +28,29 @@
     "fs-extra": "^11.4.0",
     "get-folder-size": "^2.0.1",
     "htmlparser2": "^10.1.0",
-    "isomorphic-dompurify": "^3.22.0",
-    "js-yaml": "^4.3.1",
+    "isomorphic-dompurify": "^3.23.0",
+    "js-yaml": "^4.3.2",
     "jsonwebtoken": "^9.0.3",
-    "livekit-server-sdk": "^2.17.0",
+    "livekit-server-sdk": "^2.18.0",
     "multer": "^2.2.0",
-    "mysql2": "^3.23.3",
+    "mysql2": "^3.24.2",
     "node-fetch": "^3.3.2",
     "sanitize-html": "^2.17.7",
     "socket.io": "^4.8.3",
     "sqlstring": "^2.3.3",
     "tough-cookie": "^6.0.2",
     "unzipper": "^0.12.5",
-    "uuid": "^9.0.1",
+    "uuid": "^14.0.2",
     "xhr2": "^0.2.1",
     "xss-filters": "^1.2.7",
+    "yaml": "^2.9.0",
     "zip": "^1.2.0"
   },
   "devDependencies": {
-    "happy-dom": "^20.11.6",
+    "happy-dom": "^20.11.13",
     "socket.io-client": "^4.8.3",
     "typescript": "^5.9.3",
     "vitepress": "^2.0.0-alpha.19",
-    "vitepress-sidebar": "^1.38.0"
+    "vitepress-sidebar": "^1.39.0"
   }
 }

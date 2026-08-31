@@ -1,6 +1,5 @@
 keys:
-  dev: Minimum32CharacterLongKeyForSecurity
-
+  "123456789012": "123456789012"
 turn:
   enabled: false
   domain: domain.com

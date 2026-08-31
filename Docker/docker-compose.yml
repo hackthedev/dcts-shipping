@@ -1,10 +1,10 @@
 services:
   dcts-app:
     #For local development
-    build:
-      context: ../
-      dockerfile: ./Docker/Dockerfile
-    #image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:latest}
+    #build:
+    #  context: ../
+    #  dockerfile: ./Docker/Dockerfile
+    image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:latest}
     environment:
       - DEBUG=${DEBUG:-false}
     ports:

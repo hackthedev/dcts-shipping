@@ -3,8 +3,12 @@
     needs to be above the imports else serverconfig will be undefined
  */
 import JSONTools from "@hackthedev/json-tools"
+import Logger from "@hackthedev/terminal-logger"
 import fs from "fs";
 import {checkObjectKeys} from "../main.mjs";
+import {queryDatabase} from "../mysql/mysql.mjs";
+import {saveMemberToDB} from "../mysql/helper.mjs";
+
 export let configPath = "./configs/config.json";
 
 export var serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, {encoding: "utf-8"})) : {};
@@ -301,4 +305,51 @@ export function checkConfigAdditions() {
             }
         }
     );
+}
+
+export async function saveConfig(config) {
+    if (!config) return;
+
+    // save members only to DB
+    try {
+        if (config.servermembers && Object.keys(config.servermembers).length > 0) {
+            for (const [id, member] of Object.entries(config.servermembers)) {
+                if (member && member.id) {
+                    await saveMemberToDB(id, member);
+                }
+            }
+        }
+    } catch (exception) {
+        Logger.error("error while trying to save config");
+        Logger.error(exception);
+    }
+
+    // write config without members
+    const fileContent = JSON.stringify(
+        config,
+        (k, v) => (k === "servermembers" ? undefined : v),
+        4,
+    );
+
+    fs.writeFileSync(configPath, fileContent);
+}
+
+export async function reloadConfig() {
+    return; // deprecated
+
+    try {
+        const json = fs.readFileSync(configPath, "utf8");
+        const parsed = JSON.parse(json);
+
+        for (const key of Object.keys(serverconfig)) delete serverconfig[key];
+        Object.assign(serverconfig, parsed);
+
+        const rows = await queryDatabase("SELECT * FROM members");
+        serverconfig.servermembers = {};
+        for (const row of rows) {
+            serverconfig.servermembers[row.id] = row;
+        }
+    } catch (err) {
+        serverconfig.servermembers = {};
+    }
 }

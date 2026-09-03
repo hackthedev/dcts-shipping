@@ -14,9 +14,6 @@ RUN bun install
 
 COPY . .
 
-# temporary fix for dev time
-RUN cd setup-wizard/ && rider install
-
 EXPOSE 2052
 
 CMD ["bun", "."]

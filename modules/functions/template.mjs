@@ -1,6 +1,7 @@
-import {getFreshConfig, reloadConfig, versionCode} from "../../index.mjs";
+import {getFreshConfig, versionCode} from "../../index.mjs";
 import {generateId} from "./main.mjs";
 import {resolveCategoryByChannelId, resolveGroupByChannelId} from "./chat/main.mjs";
+import {reloadConfig} from "./init/config.mjs";
 
 // templateMiddleware.mjs
 export function registerTemplateMiddleware(app, __dirname, fs, path, serverconfig) {

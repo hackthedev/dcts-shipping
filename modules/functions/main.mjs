@@ -3,8 +3,6 @@ import {
     colors,
     versionCode,
     io,
-    saveConfig,
-    reloadConfig,
     flipDebug,
     ratelimit,
     setRatelimit,
@@ -29,7 +27,7 @@ import {banIp, checkMemberBan, getBan, isIdentifierBanned, removeBan} from "./ba
 import {sanitizeHTML} from "./sanitizing/functions.mjs";
 
 import dSyncAuth from "@hackthedev/dsync-auth";
-import {serverconfig} from "./init/config.mjs";
+import {reloadConfig, saveConfig, serverconfig} from "./init/config.mjs";
 
 var serverconfigEditable;
 

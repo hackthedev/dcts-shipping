@@ -1,8 +1,8 @@
-import { saveConfig, usersocket } from "../../index.mjs";
+import { usersocket } from "../../index.mjs";
 import { getChannelTree, hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import { validateMemberId } from "../functions/main.mjs";
-import {serverconfig} from "../functions/init/config.mjs";
+import {saveConfig, serverconfig} from "../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

@@ -249,6 +249,10 @@ export default (io) => (socket) => {
 
                 } else {
                     Logger.debug("Couldnt find message channel");
+                    console.log(serverconfig?.groups[member.group]?.channels?.categories[member.category]?.channel[member.channel])
+                    console.log(member.group)
+                    console.log(member.category)
+                    console.log(member.channel)
 
                     var msg = `We were unable to send the message because the 
                         channel wasnt found. Maybe it was deleted? Reselect a channel from the channel list`.replaceAll("\n", "");

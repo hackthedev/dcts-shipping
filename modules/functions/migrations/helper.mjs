@@ -1,8 +1,7 @@
 import {queryDatabase} from "../mysql/mysql.mjs";
 import {backupSystem} from "../main.mjs";
-import {saveConfig, } from "../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger";
-import {serverconfig} from "../init/config.mjs";
+import {saveConfig, serverconfig} from "../init/config.mjs";
 
 export async function createMigrationTask(name){
     return await queryDatabase("INSERT IGNORE INTO migrations (migration_name) VALUES (?)", [name])

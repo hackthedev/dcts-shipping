@@ -1,8 +1,8 @@
-import { saveConfig } from "../../index.mjs";
+
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "@hackthedev/terminal-logger";
 import { escapeHtml, limitString, validateMemberId } from "../functions/main.mjs";
-import {serverconfig} from "../functions/init/config.mjs";
+import {saveConfig, serverconfig} from "../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

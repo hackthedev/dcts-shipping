@@ -1,7 +1,7 @@
 /*
     The functions here are basically the "core" of the chat app on the server side.
  */
-import {xssFilters, saveConfig, ipsec} from "../../../index.mjs"
+import {xssFilters, ipsec} from "../../../index.mjs"
 import {io} from "../../../index.mjs";
 import {getChannelMessageCount, getMemberHighestRole} from "./helper.mjs";
 import {
@@ -13,7 +13,7 @@ import {encodeToBase64} from "../mysql/helper.mjs";
 import {signer} from "../../../index.mjs"
 import {queryDatabase} from "../mysql/mysql.mjs";
 import {getBan} from "../ban-system/helpers.mjs";
-import {serverconfig} from "../init/config.mjs";
+import {saveConfig, serverconfig} from "../init/config.mjs";
 
 var serverconfigEditable = serverconfig;
 

@@ -1,7 +1,7 @@
-import { saveConfig} from "../../index.mjs";
+
 import { hasPermission } from "../functions/chat/main.mjs";
 import { validateMemberId } from "../functions/main.mjs";
-import {serverconfig} from "../functions/init/config.mjs";
+import {saveConfig, serverconfig} from "../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

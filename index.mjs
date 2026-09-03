@@ -12,23 +12,18 @@ import crypto from "crypto";
 // dSync Libs
 import dSyncAuth from "@hackthedev/dsync-auth";
 //import dSyncAuth from "E:\\network-z-dev\\dSyncAuth\\index.mjs";
-
 import {dSyncSign} from "@hackthedev/dsync-sign";
 //import dSyncWeb from "E:\\network-z-dev\\dsync-web\\index.mjs";
-import dSyncWeb from "@hackthedev/dsync-web";
-
-import dSync from "@hackthedev/dsync";
 //import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
-
 import dSyncInbox from "@hackthedev/dsync-inbox"
 //import dSyncInbox from "/run/media/marcel/SSD/network-z-dev/dSyncInbox/index.mjs"
-
 import dSyncFiles from "@hackthedev/dsync-files";
 
 import Logger from "@hackthedev/terminal-logger"
 import dSyncSql from "@hackthedev/dsync-sql"
 import dSyncIPSec from "@hackthedev/dsync-ipsec"
 import FrontendLibs from "@hackthedev/frontend-libs";
+import dSync from "@hackthedev/dsync";
 
 // Depending on the SSL setting, this will switch.
 import {Server} from "socket.io";
@@ -44,46 +39,33 @@ import xssFilters from "xss-filters";
 // Special thanks to Kannustin <3
 // Main functions for chat
 import {
-    checkVersionUpdate,
-    handleTerminalCommands,
-    validateMemberId,
     checkRateLimit,
+    checkVersionUpdate,
     generateId,
-    sendMessageToUser,
+    handleTerminalCommands,
     removeFromArray,
+    sendMessageToUser,
+    validateMemberId,
 } from "./modules/functions/main.mjs";
 
 // IO related functions
-import {
-    checkFile,
-    checkServerDirectories,
-} from "./modules/functions/io.mjs";
+import {checkFile, checkServerDirectories,} from "./modules/functions/io.mjs";
 
 // Chat functions
 import {
-    formatDateTime,
-    findInJson,
     changeKeyVerification,
-    getSocketIp, hasPermission, getMemberFromKey,
+    findInJson,
+    formatDateTime,
+    getMemberFromKey,
+    getSocketIp, hasPermission,
 } from "./modules/functions/chat/main.mjs";
-
-import {
-    queryDatabase,
-} from "./modules/functions/mysql/mysql.mjs";
 
 import {fileURLToPath, pathToFileURL} from "url";
 import {registerTemplateMiddleware} from "./modules/functions/template.mjs";
-import {
-    powVerifiedUsers,
-} from "./modules/sockets/pow.mjs";
+import {powVerifiedUsers,} from "./modules/sockets/pow.mjs";
 
-import {
-    loadMembersFromDB,
-    saveMemberToDB,
-} from "./modules/functions/mysql/helper.mjs";
-import {
-    checkMigrations
-} from "./modules/functions/migrations/helper.mjs";
+import {loadMembersFromDB} from "./modules/functions/mysql/helper.mjs";
+import {checkMigrations} from "./modules/functions/migrations/helper.mjs";
 import JSONTools from "@hackthedev/json-tools";
 import {getCache, setCache} from "./modules/functions/ip-cache.mjs";
 import {emitErrorToTestingClient} from "./modules/sockets/onErrorTesting.mjs";
@@ -94,15 +76,16 @@ import {initPluginSystem} from "./modules/sockets/routes/plugins.mjs";
 
 //import SetupWizard from "/mnt/SSD/network-z-dev/setup-wizard/index.mjs";
 import SetupWizard from "@hackthedev/setup-wizard";
+import express from "express";
+import {initLivekitEndpoints} from "./modules/sockets/routes/livekit.mjs";
+import {db, processDbEnvData, setupDbConnection} from "./modules/functions/init/database.mjs";
+import {configPath, saveConfig, serverconfig} from "./modules/functions/init/config.mjs";
+import dSyncWeb from "@hackthedev/dsync-web";
 
 
 // define quite some important stuff
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
-
-const fetch = globalThis.fetch;
-const FormData = globalThis.FormData;
-const fileFrom = undefined;
 
 
 // improved now
@@ -116,9 +99,6 @@ export {
     path,
     sanitizeHtml,
     bcrypt,
-    FormData,
-    fileFrom,
-    fetch,
     getSize,
     fileTypeFromBuffer,
     colors,
@@ -129,13 +109,9 @@ export {
 export let checkedMediaCacheUrls = {};
 export let usersocket = [];
 export let loginAttempts = [];
-export let userOldRoom = {};
 export let useridFromSocket = [];
-export let peopleInVC = {};
-export let showedOfflineMessage = [];
 
 export let typingMembers = [];
-export let typingMembersTimeout = [];
 
 export let ratelimit = [];
 export let socketToIP = [];
@@ -171,10 +147,6 @@ else{
 
 // init web server
 export let server; // = http.createServer(app);
-import express from "express";
-import {initLivekitEndpoints} from "./modules/sockets/routes/livekit.mjs";
-import {db, processDbEnvData, setupDbConnection} from "./modules/functions/init/database.mjs";
-import {configPath, serverconfig} from "./modules/functions/init/config.mjs";
 export const app = express();
 
 // check version file for update check
@@ -212,6 +184,7 @@ export let signer = null;
 export let auther = null;
 export let inbox = null;
 export let files = new dSyncFiles();
+export let port = process.env.PORT || serverconfig?.serverinfo?.port;
 
 // Catch uncaught errors
 process.on("uncaughtException", function (err) {
@@ -279,8 +252,6 @@ export async function initDCTSServer(){
             }
         });
 
-        // dsync web interface. currently unused and left for testing
-        /*
         dsw = new dSyncWeb({
             express,
             app,
@@ -304,7 +275,6 @@ export async function initDCTSServer(){
             dSyncWeb: dsw,
             host: serverconfig.serverinfo.app.url?.length >= 7 ? serverconfig.serverinfo.app.url : null
         });
-        */
 
         // upload handler
         await files.registerFileUploadHandle({
@@ -547,6 +517,7 @@ async function initSetupWizard(){
 
     let setupWizard = new SetupWizard({
         debug: debugmode,
+        redirectUrl: `http://localhost:${port}`,
         onCompleted: async () => {
             await finishSetup();
         }
@@ -903,7 +874,6 @@ export async function startWebServer() {
     });
 
     // Start the app server
-    let port = process.env.PORT || serverconfig.serverinfo.port;
     server.listen(port, "0.0.0.0", async function () {
         Logger.info("Web server is running on port " + port);
     });
@@ -1082,33 +1052,6 @@ async function listenToIO(){
     await inbox.init();
 }
 
-export async function saveConfig(config) {
-    if (!config) return;
-
-    // save members only to DB
-    try {
-        if (config.servermembers && Object.keys(config.servermembers).length > 0) {
-            for (const [id, member] of Object.entries(config.servermembers)) {
-                if (member && member.id) {
-                    await saveMemberToDB(id, member);
-                }
-            }
-        }
-    } catch (exception) {
-        Logger.error("error while trying to save config");
-        Logger.error(exception);
-    }
-
-    // write config without members
-    const fileContent = JSON.stringify(
-        config,
-        (k, v) => (k === "servermembers" ? undefined : v),
-        4,
-    );
-
-    fs.writeFileSync(configPath, fileContent);
-}
-
 function closeConfigFile() {
     if (isClosing) return;
     isClosing = true;
@@ -1129,26 +1072,6 @@ function closeConfigFile() {
 process.on("exit", closeConfigFile);
 process.on("SIGINT", closeConfigFile); // Handle Ctrl+C
 process.on("SIGTERM", closeConfigFile); // Handle termination
-
-export async function reloadConfig() {
-    return; // deprecated
-
-    try {
-        const json = fs.readFileSync(configPath, "utf8");
-        const parsed = JSON.parse(json);
-
-        for (const key of Object.keys(serverconfig)) delete serverconfig[key];
-        Object.assign(serverconfig, parsed);
-
-        const rows = await queryDatabase("SELECT * FROM members");
-        serverconfig.servermembers = {};
-        for (const row of rows) {
-            serverconfig.servermembers[row.id] = row;
-        }
-    } catch (err) {
-        serverconfig.servermembers = {};
-    }
-}
 
 export function getFreshConfig() {
     // used for edge cases

@@ -1,9 +1,8 @@
 // create sql pool
 import {queryDatabase} from "../mysql/mysql.mjs";
 import {setLongInterval, toSeconds} from "../main.mjs";
-import {saveConfig} from "../../../index.mjs";
 import Logger from "../logger.mjs";
-import {serverconfig} from "./config.mjs";
+import {saveConfig, serverconfig} from "./config.mjs";
 import dSyncSql from "@hackthedev/dsync-sql"
 
 export let db = null;

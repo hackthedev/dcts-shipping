@@ -1,19 +1,13 @@
 import {
     auther,
     checkPow,
-    saveConfig,
-    server,
-    serverconfig, signer,
-    socketToIP,
+    signer,
     usersocket,
-    xssFilters,
 } from "../../index.mjs";
 import {
-    formatDateTime,
     getJson, getMemberFromKey,
     getMemberIpInfo,
     getMemberLastOnline,
-    hasVerifiedKey,
     resolveCategoryByChannelId,
     resolveGroupByChannelId,
 } from "../functions/chat/main.mjs";
@@ -22,21 +16,20 @@ import Logger from "../functions/logger.mjs";
 import {
     checkMemberMute,
     checkRateLimit,
-    emitBasedOnMemberId,
     generateId,
     getCastingMemberObject,
     hashPassword,
     removeFromArray,
-    sendMessageToUser, validateMemberId,
+    validateMemberId,
 } from "../functions/main.mjs";
 import {sendSystemMessage} from "./home/general.mjs";
 import {discoverHosts} from "../functions/discovery.mjs";
-import {isValidProof, powVerifiedUsers} from "./pow.mjs";
+import {powVerifiedUsers} from "./pow.mjs";
 import {checkMemberBan} from "../functions/ban-system/helpers.mjs";
 import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
-import {autobanXSS} from "../functions/sanitizing/actions.mjs";
 import {cleanMemberData, createMember, updateMember} from "../functions/member.mjs";
 import dSyncAuth from "@hackthedev/dsync-auth";
+import {saveConfig, serverconfig} from "../functions/init/config.mjs";
 
 export function normalizeVar(v) {
     if (v === null || v === undefined) return "";

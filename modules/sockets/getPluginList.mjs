@@ -1,6 +1,6 @@
-import { validateMemberId, copyObject } from "../functions/main.mjs";
-import { serverconfig, path } from "../../index.mjs";
+import { copyObject } from "../functions/main.mjs";
 import { scanDirectory } from "../functions/io.mjs";
+import path from "path";
 
 export default (io) => (socket) => {
     socket.on('getPluginList', async (member, response) => {

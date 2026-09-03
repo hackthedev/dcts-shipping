@@ -1,9 +1,6 @@
-import { serverconfig, usersocket, xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
-import { getMessageLogsById, getSavedChatMessage } from "../functions/io.mjs";
-import Logger from "../functions/logger.mjs";
-import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
-import { getChatMessageById } from "../functions/mysql/helper.mjs";
+import { getMessageLogsById } from "../functions/io.mjs";
+import {  validateMemberId } from "../functions/main.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

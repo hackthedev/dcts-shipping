@@ -1,8 +1,8 @@
-import { serverconfig, xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
-import { copyObject, getCastingMemberObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { getCastingMemberObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 import {getBans} from "../functions/ban-system/helpers.mjs"
+import {serverconfig} from "../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

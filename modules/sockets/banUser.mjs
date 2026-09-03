@@ -1,8 +1,7 @@
-import { saveConfig, serverconfig, usersocket, xssFilters } from "../../index.mjs";
+import { usersocket } from "../../index.mjs";
 import { getMemberHighestRole } from "../functions/chat/helper.mjs";
-import { getNewDate, hasPermission } from "../functions/chat/main.mjs";
-import Logger from "../functions/logger.mjs";
-import {copyObject, escapeHtml, findSocketByMemberId, sendMessageToUser, validateMemberId} from "../functions/main.mjs";
+import { getNewDate, hasPermission } from "../functions/chat/main.mjs";;
+import {escapeHtml, findSocketByMemberId, sendMessageToUser, validateMemberId} from "../functions/main.mjs";
 import {banUser} from "../functions/ban-system/helpers.mjs";
 
 export default (io) => (socket) => {

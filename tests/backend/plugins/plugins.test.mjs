@@ -8,8 +8,8 @@ import { defaultTestOverwrites, setupSocketMock } from "../../test-client.mjs";
 // Import the handler AFTER mocks
 import dmsRoomHandler from "../../../modules/sockets/home/dms/rooms.mjs";
 import {getLocalPlugins} from "../../../modules/sockets/routes/plugins.mjs";
-import {checkHttpAuth, getCastingMemberObject} from "../../../modules/functions/main.mjs";
-import {serverconfig} from "../../../index.mjs";
+import {getCastingMemberObject} from "../../../modules/functions/main.mjs";
+import {serverconfig} from "../../../modules/functions/init/config.mjs";
 
 mock.module("../modules/functions/main.mjs", () => ({
     checkHttpAuth: mock(async (allowPass) => {

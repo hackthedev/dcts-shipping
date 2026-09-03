@@ -2,7 +2,7 @@ import fs from "fs";
 import {ChartJSNodeCanvas} from "chartjs-node-canvas";
 import {getChannelMessageFrequency, getChannelRateLimit} from "./messages.mjs";
 import path from "path";
-import {serverconfig} from "../../../index.mjs";
+import {serverconfig} from "../init/config.mjs";
 
 // This was mostly AI, like 90% or smth.
 // Why? Cauz im too lazy to deal with boring shit like this

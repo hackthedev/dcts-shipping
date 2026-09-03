@@ -1,7 +1,5 @@
-import { serverconfig, xssFilters } from "../../index.mjs";
-import {getMemberList, hasPermission, resolveGroupByChannelId} from "../functions/chat/main.mjs";
-import Logger from "../functions/logger.mjs";
-import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import {getMemberList, hasPermission,} from "../functions/chat/main.mjs";
+import { validateMemberId } from "../functions/main.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

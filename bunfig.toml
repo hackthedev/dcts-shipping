@@ -1,2 +1,5 @@
 [test]
-preload = "./tests/frontend/setup.js"
+preload = [
+    "./tests/frontend/setup.js",
+    "./tests/test-client.mjs"
+]

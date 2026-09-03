@@ -1,8 +1,7 @@
-import { serverconfig, usersocket, xssFilters } from "../../index.mjs";
+import { usersocket, xssFilters } from "../../index.mjs";
 import { getMemberHighestRole } from "../functions/chat/helper.mjs";
-import { disconnectUser, hasPermission, muteUser } from "../functions/chat/main.mjs";
-import Logger from "../functions/logger.mjs";
-import { copyObject, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { disconnectUser, hasPermission, } from "../functions/chat/main.mjs";
+import { validateMemberId } from "../functions/main.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

@@ -1,4 +1,4 @@
-import { serverconfig, xssFilters, checkedMediaCacheUrls } from "../../index.mjs";
+import { xssFilters, checkedMediaCacheUrls } from "../../index.mjs";
 import Logger from "../functions/logger.mjs";
 import { copyObject, validateMemberId } from "../functions/main.mjs";
 
@@ -8,6 +8,7 @@ import {
     checkMediaTypeAsync,
     isURL,
 } from "../functions/mysql/helper.mjs"
+import {serverconfig} from "../functions/init/config.mjs";
 
 export function compareTimestamps(stamp1, stamp2) {
     // Calculate time passed

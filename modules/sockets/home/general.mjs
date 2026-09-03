@@ -1,4 +1,4 @@
-import {io, serverconfig, signer, usersocket, xssFilters} from "../../../index.mjs";
+import {io, usersocket} from "../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import { queryDatabase } from "../../functions/mysql/mysql.mjs";
 import {createMemberDmRoom, saveRoomDmMessage} from "./dms/rooms.mjs";

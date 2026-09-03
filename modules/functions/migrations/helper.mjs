@@ -1,11 +1,7 @@
 import {queryDatabase} from "../mysql/mysql.mjs";
 import {backupSystem} from "../main.mjs";
-import {migrateOldMessagesToNewMessageSystemWithoutEncoding} from "./messageMigration.mjs";
-import {clearMemberBase64FromDb} from "./base64_fixer.mjs";
-import {saveConfig, serverconfig, versionCode} from "../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger";
-import {getAllChannels} from "../chat/helper.mjs";
-import JSONTools from "@hackthedev/json-tools";
+import {saveConfig, serverconfig} from "../init/config.mjs";
 
 export async function createMigrationTask(name){
     return await queryDatabase("INSERT IGNORE INTO migrations (migration_name) VALUES (?)", [name])

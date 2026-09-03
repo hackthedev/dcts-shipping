@@ -115,7 +115,7 @@ import deleteMessageHandler from "../../../modules/sockets/deleteMessage.mjs";
 import messageReactionsHandler from "../../../modules/sockets/messageReactions.mjs";
 
 import DateTools from "@hackthedev/datetools";
-import {serverconfig} from "../../../index.mjs";
+import {serverconfig} from "../../../modules/functions/init/config.mjs";
 
 describe("Server Chat", () => {
     const env = setupSocketMock(messageSendHandler, deleteMessageHandler, messageReactionsHandler);

@@ -1,7 +1,8 @@
-import { saveConfig, serverconfig, xssFilters } from "../../index.mjs";
+import { xssFilters } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
-import { copyObject, generateId, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import { generateId, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import {saveConfig, serverconfig} from "../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

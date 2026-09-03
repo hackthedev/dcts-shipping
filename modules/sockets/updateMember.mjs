@@ -1,6 +1,6 @@
-import {serverconfig} from "../../index.mjs";
 import {validateMemberId} from "../functions/main.mjs";
 import {updateMember} from "../functions/member.mjs";
+import {serverconfig} from "../functions/init/config.mjs";
 
 
 export default (io) => (socket) => {

@@ -1,8 +1,8 @@
 import Logger from "@hackthedev/terminal-logger"
 import {queryDatabase} from "./mysql/mysql.mjs";
 import {extractHost} from "./http.mjs";
-import {serverconfig} from "../../index.mjs";;
-import {sleep} from "../functions/main.mjs"
+import {sleep} from "./main.mjs"
+import {serverconfig} from "./init/config.mjs";
 
 
 async function syncHosts(){

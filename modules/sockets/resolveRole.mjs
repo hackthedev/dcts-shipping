@@ -1,19 +1,17 @@
-import { serverconfig, xssFilters } from "../../index.mjs";
-import { hasPermission } from "../functions/chat/main.mjs";
+import { xssFilters } from "../../index.mjs";
 import Logger from "../functions/logger.mjs";
 import {
     copyObject,
-    getCastingMemberObject,
     getRoleCastingObject,
-    sendMessageToUser,
     validateMemberId
 } from "../functions/main.mjs";
+import {serverconfig} from "../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
     socket.on('resolveRole', async function (member, response) {
-        if (await validateMemberId(member.id, socket) == true
-            && serverconfig.servermembers[member.id].token == member.token
+        if (await validateMemberId(member.id, socket) === true
+            && serverconfig.servermembers[member.id].token === member.token
         ) {
 
             member.id = xssFilters.inHTMLData(member.id)

@@ -1,11 +1,11 @@
-import { io, serverconfig, usersocket, xssFilters } from "../../../index.mjs";
-import { hasPermission, resolveChannelById } from "../../functions/chat/main.mjs";
-import { getSavedChatMessage } from "../../functions/io.mjs";
-import Logger from "../../functions/logger.mjs";
+import { usersocket } from "../../../index.mjs";
+import { hasPermission } from "../../functions/chat/main.mjs";
+import Logger from "@hackthedev/terminal-logger";
 import {emitBasedOnPermission, getCastingMemberObject, sanitizeInput, validateMemberId} from "../../functions/main.mjs";
-import { getChatMessagesFromDb, saveReport, decodeFromBase64 } from "../../functions/mysql/helper.mjs";
+import { getChatMessagesFromDb, saveReport } from "../../functions/mysql/helper.mjs";
 import {queryDatabase} from "../../functions/mysql/mysql.mjs";
 import {stripHTML} from "../../functions/sanitizing/functions.mjs";
+import {serverconfig} from "../../functions/init/config.mjs";
 
 export default (io) => (socket) => {
 

@@ -1,13 +1,14 @@
-import { serverconfig, xssFilters } from "../../index.mjs";
+import { xssFilters } from "../../index.mjs";
 import { copyObject, validateMemberId } from "../functions/main.mjs";
 import { queryDatabase } from "../functions/mysql/mysql.mjs";
+import {serverconfig} from "../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     socket.on('getGroupStats', async function (member, response) {
-        if (await validateMemberId(member?.id, socket) == true
-            && serverconfig.servermembers[member?.id]?.token == member?.token
+        if (await validateMemberId(member?.id, socket) === true
+            && serverconfig.servermembers[member?.id]?.token === member?.token
         ) {
-            if (member.group == undefined || member.group == null) {
+            if (member.group === undefined || member.group === null) {
                 response({ type: "error", msg: "No group id passed." })
                 return;
             }

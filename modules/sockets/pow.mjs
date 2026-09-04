@@ -1,4 +1,4 @@
-import { crypto, useridFromSocket } from "../../index.mjs";
+import { useridFromSocket } from "../../index.mjs";
 import { formatDateTime } from "../functions/chat/main.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import { checkConnectionLimit, checkRateLimit, removeFromArray, validateMemberId } from "../functions/main.mjs";

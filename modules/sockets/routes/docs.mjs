@@ -1,5 +1,5 @@
-import {app, fs} from "../../../index.mjs";
 import {rateLimit} from "../../functions/ratelimit.mjs";
+import {app} from "../../functions/init/web.mjs";
 
 const docsLimiter = rateLimit({
     windowMs: 60_000,

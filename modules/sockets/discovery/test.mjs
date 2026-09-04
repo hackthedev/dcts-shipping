@@ -1,9 +1,10 @@
-import {app, versionCode} from "../../../index.mjs";
+import {versionCode} from "../../../index.mjs";
 import {getOnlineMemberCount, resolveGroupByChannelId} from "../../functions/chat/main.mjs";
 import Logger from "@hackthedev/terminal-logger";
 import {rateLimit} from "../../functions/ratelimit.mjs";
 import express from "express";
 import {serverconfig} from "../../functions/init/config.mjs";
+import {app} from "../../functions/init/web.mjs";
 
 const pingLimiter = rateLimit({
     windowMs: 60_000,

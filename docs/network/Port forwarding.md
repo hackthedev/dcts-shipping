@@ -3,9 +3,9 @@
 A common issue is that ports arent being forwarded which will lead to connection failures. Since there are so many different setups its hard to make a guide on how to do it.
 
 > [!TIP]
-> You can use tools like https://canyouseeme.org/ to check if your port is publicly available. If not, your port is not forwarded.
+> You can use tools like https://canyouseeme.org/ to check if your webPort is publicly available. If not, your webPort is not forwarded.
 
-In addition to port forwarding its also possible that a firewall is blocking the forwarded port as well. This could be done on an OS level or in your router, or maybe both. Since this depends on many factors its again hard to make a guide about it, which is why its recommended to check google for your specific setup.
+In addition to webPort forwarding its also possible that a firewall is blocking the forwarded webPort as well. This could be done on an OS level or in your router, or maybe both. Since this depends on many factors its again hard to make a guide about it, which is why its recommended to check google for your specific setup.
 
 
 ---

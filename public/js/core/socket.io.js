@@ -2395,7 +2395,7 @@
                         _this.secure = null != opts.secure ? opts.secure : typeof location !== "undefined" && "https:" === location.protocol;
 
                         if (opts.hostname && !opts.port) {
-                            // if no port is specified manually, use the protocol default
+                            // if no webPort is specified manually, use the protocol default
                             opts.port = _this.secure ? "443" : "80";
                         }
 
@@ -3575,7 +3575,7 @@
 
                         if (typeof location !== "undefined") {
                             var isSSL = "https:" === location.protocol;
-                            var port = location.port; // some user agents have empty `location.port`
+                            var port = location.port; // some user agents have empty `location.webPort`
 
                             if (!port) {
                                 port = isSSL ? 443 : 80;
@@ -4152,7 +4152,7 @@
                                 query.b64 = 1;
                             }
 
-                            query = parseqs.encode(query); // avoid port if default for schema
+                            query = parseqs.encode(query); // avoid webPort if default for schema
 
                             if (this.opts.port && ("https" === schema && Number(this.opts.port) !== 443 || "http" === schema && Number(this.opts.port) !== 80)) {
                                 port = ":" + this.opts.port;
@@ -4439,7 +4439,7 @@
                         value: function uri() {
                             var query = this.query || {};
                             var schema = this.opts.secure ? "wss" : "ws";
-                            var port = ""; // avoid port if default for schema
+                            var port = ""; // avoid webPort if default for schema
 
                             if (this.opts.port && ("wss" === schema && Number(this.opts.port) !== 443 || "ws" === schema && Number(this.opts.port) !== 80)) {
                                 port = ":" + this.opts.port;

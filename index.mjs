@@ -3,11 +3,9 @@ import {syncDiscoveredHosts} from "./modules/functions/discovery.mjs";
 import https from "https";
 import http from "http";
 import fs from "fs";
-import fse from "fs-extra"; // Use fs-extra for easy directory copying
 import path from "path";
 import sanitizeHtml from "sanitize-html";
 import bcrypt from "bcrypt";
-import crypto from "crypto";
 
 // dSync Libs
 import dSyncAuth from "@hackthedev/dsync-auth";
@@ -57,11 +55,11 @@ import {
     findInJson,
     formatDateTime,
     getMemberFromKey,
-    getSocketIp, hasPermission,
+    getSocketIp,
+    hasPermission,
 } from "./modules/functions/chat/main.mjs";
 
 import {fileURLToPath, pathToFileURL} from "url";
-import {registerTemplateMiddleware} from "./modules/functions/template.mjs";
 import {powVerifiedUsers,} from "./modules/sockets/pow.mjs";
 
 import {loadMembersFromDB} from "./modules/functions/mysql/helper.mjs";
@@ -81,6 +79,8 @@ import {initLivekitEndpoints} from "./modules/sockets/routes/livekit.mjs";
 import {db, processDbEnvData, setupDbConnection} from "./modules/functions/init/database.mjs";
 import {configPath, saveConfig, serverconfig} from "./modules/functions/init/config.mjs";
 import dSyncWeb from "@hackthedev/dsync-web";
+import {app, initWebserver, server, starter, webPort} from "./modules/functions/init/web.mjs";
+import ExpressStarter from "@hackthedev/express-starter";
 
 
 // define quite some important stuff
@@ -94,17 +94,12 @@ export {
     Server,
     xssFilters,
     http,
-    fs,
-    fse,
-    path,
     sanitizeHtml,
     bcrypt,
     getSize,
     fileTypeFromBuffer,
     colors,
-    crypto,
 };
-
 
 export let checkedMediaCacheUrls = {};
 export let usersocket = [];
@@ -145,10 +140,6 @@ else{
     console.log("Starting...");
 }
 
-// init web server
-export let server; // = http.createServer(app);
-export const app = express();
-
 // check version file for update check
 let versionPath = path.join(path.resolve(), "version");
 if(!fs.existsSync(versionPath)) {
@@ -184,7 +175,6 @@ export let signer = null;
 export let auther = null;
 export let inbox = null;
 export let files = new dSyncFiles();
-export let port = process.env.PORT || serverconfig?.serverinfo?.port;
 
 // Catch uncaught errors
 process.on("uncaughtException", function (err) {
@@ -238,6 +228,7 @@ async function initIPSec(){
 
 export async function initDCTSServer(){
     await initLivekitEndpoints();
+    await listenToIO()
 
     try {
         await setupDbConnection();
@@ -278,7 +269,7 @@ export async function initDCTSServer(){
 
         // upload handler
         await files.registerFileUploadHandle({
-            app,
+            app: starter.app,
             urlPath: "/upload",
             uploadPath: "./public/uploads",
             limits: {
@@ -367,6 +358,65 @@ export async function initDCTSServer(){
             }
         });
 
+        // init here cauz we need io
+        inbox = new dSyncInbox({
+            io,
+            app,
+            express,
+            dSyncSign: signer,
+            dSyncSql: db,
+            dSyncAuth: auther,
+            isValidated: async (req, res) => {
+                const {inboxId, timestamp, customId} = req?.params;
+                const { id, token, sessionId, publicKey } = req.body;
+
+                // if public key is banned
+                if(publicKey){
+                    let publicKeyCheckResult = await checkAndUnbanPublicKey(publicKey);
+                    if(publicKeyCheckResult?.result === true) return false;
+                }
+
+                if(serverconfig.servermembers[id]?.token === token && !sessionId) return true;
+
+                if(sessionId){
+                    let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
+                    return sessionResult?.valid ?? false;
+                }
+
+                return false;
+            },
+            getIdentifier: async (req, res) => {
+                const {inboxId, timestamp, customId} = req?.params;
+                let { id, token, sessionId, publicKey } = req.body;
+
+                if(!id && !token && publicKey){
+                    let member = await getMemberFromKey(publicKey);
+                    if (member){
+                        id = member.id;
+                        token = member.token;
+                    }
+                }
+
+                return id ?? null;
+            },
+            beforeReturn: async (req, res, inbox) => {
+                if(Array.isArray(inbox) && inbox.length > 0){
+                    for(let item of inbox){
+                        let itemType = item?.type;
+
+                        // chat mentions
+                        if(itemType === "mention"){
+                            let messageId = item?.data?.messageId;
+                            if(!messageId || messageId?.length !== 12) continue;
+
+                            item.data = await getMessageObjectById(messageId);
+                        }
+                    }
+                }
+            }
+        })
+
+        await inbox.init();
     } catch (e) {
             Logger.error("Error while trying to connect to database!")
             Logger.error(e)
@@ -401,19 +451,6 @@ export async function initDCTSServer(){
         Logger.space();
     }
 
-    // Check if SSL is used or not
-    io = new Server(server, {
-        maxHttpBufferSize: 1e8,
-        secure: true,
-        pingInterval: 25000,
-        pingTimeout: 60000,
-        cors: {
-            origin: "*",
-            methods: ["GET", "POST"],
-            credentials: false,
-        },
-    });
-
     // Ability to enter "commands" into the terminal window
     process.stdin.resume();
     process.stdin.setEncoding("utf8");
@@ -429,7 +466,6 @@ export async function initDCTSServer(){
 
 
     initIPSec();
-    app.use(express.static(__dirname + "/public"));
 
     app.use(
         "/docs",
@@ -473,7 +509,6 @@ export async function initDCTSServer(){
     }
 
     //initPaymentSystem(app)
-    listenToIO();
 
     try{
         let libDir = path.join(path.resolve(), "public", "js", "libs");
@@ -508,8 +543,6 @@ export async function initDCTSServer(){
     } catch (err) {
         console.error("Critical error loading socket handlers:", err);
     }
-
-    initSocketHandlers();
 }
 
 async function initSetupWizard(){
@@ -517,7 +550,7 @@ async function initSetupWizard(){
 
     let setupWizard = new SetupWizard({
         debug: debugmode,
-        redirectUrl: `http://localhost:${port}`,
+        redirectUrl: `http://localhost:${webPort}`,
         onCompleted: async () => {
             await finishSetup();
         }
@@ -795,8 +828,8 @@ async function initSetupWizard(){
         serverconfig.serverinfo.setup = 1
         await saveConfig(serverconfig);
         await executePrerequisites();
-        startWebServer()
-        initDCTSServer();
+        await initWebserver()
+        await initDCTSServer();
     }
 
     async function executePrerequisites(){
@@ -804,7 +837,12 @@ async function initSetupWizard(){
             // if there are startup commands after install etc
             if(prerequisite?.execute) {
                 for(let command in prerequisite.execute){
-                    await setupWizard.runCommand(command)
+                    try{
+                        await setupWizard.runCommand(command)
+                    }
+                    catch (err){
+                        Logger.error(err);
+                    }
                 }
             }
         })
@@ -850,35 +888,6 @@ async function initSetupWizard(){
     }
 }
 
-export async function startWebServer() {
-    server = http.createServer(app)
-
-    registerTemplateMiddleware(app, __dirname, fs, path, serverconfig);
-
-    // important for api and everything
-    app.use((req, res, next) => {
-        const origin = req.headers.origin;
-
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Vary", "Origin");
-        res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-        res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-        res.header("Access-Control-Max-Age", "86400");
-        res.set("Cache-Control", "no-store");
-
-        if (req.method === "OPTIONS") {
-            return res.sendStatus(204);
-        }
-
-        next();
-    });
-
-    // Start the app server
-    server.listen(port, "0.0.0.0", async function () {
-        Logger.info("Web server is running on port " + port);
-    });
-}
-
 export async function checkPow(socket) {
     if (powVerifiedUsers.includes(socket.id)) {
         socket.powValidated = true
@@ -921,7 +930,25 @@ export async function checkPow(socket) {
     }
 }
 
-async function listenToIO(){
+export async function listenToIO(){
+    const {server} = starter.getServerInfo();
+
+    if(!server){
+        throw new Error("server was undefined!")
+    }
+
+    io = new Server(server, {
+        maxHttpBufferSize: 1e8,
+        secure: true,
+        pingInterval: 25000,
+        pingTimeout: 60000,
+        cors: {
+            origin: "*",
+            methods: ["GET", "POST"],
+            credentials: false,
+        },
+    });
+
     io.on("connection", async function (socket) {
         // socket ip
         var ip = getSocketIp(socket);
@@ -990,66 +1017,6 @@ async function listenToIO(){
             }
         }
     });
-
-    // init here cauz we need io
-    inbox = new dSyncInbox({
-        io,
-        app,
-        express,
-        dSyncSign: signer,
-        dSyncSql: db,
-        dSyncAuth: auther,
-        isValidated: async (req, res) => {
-            const {inboxId, timestamp, customId} = req?.params;
-            const { id, token, sessionId, publicKey } = req.body;
-
-            // if public key is banned
-            if(publicKey){
-                let publicKeyCheckResult = await checkAndUnbanPublicKey(publicKey);
-                if(publicKeyCheckResult?.result === true) return false;
-            }
-
-            if(serverconfig.servermembers[id]?.token === token && !sessionId) return true;
-
-            if(sessionId){
-                let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
-                return sessionResult?.valid ?? false;
-            }
-
-            return false;
-        },
-        getIdentifier: async (req, res) => {
-            const {inboxId, timestamp, customId} = req?.params;
-            let { id, token, sessionId, publicKey } = req.body;
-
-            if(!id && !token && publicKey){
-                let member = await getMemberFromKey(publicKey);
-                if (member){
-                    id = member.id;
-                    token = member.token;
-                }
-            }
-
-            return id ?? null;
-        },
-        beforeReturn: async (req, res, inbox) => {
-            if(Array.isArray(inbox) && inbox.length > 0){
-                for(let item of inbox){
-                    let itemType = item?.type;
-
-                    // chat mentions
-                    if(itemType === "mention"){
-                        let messageId = item?.data?.messageId;
-                        if(!messageId || messageId?.length !== 12) continue;
-
-                        item.data = await getMessageObjectById(messageId);
-                    }
-                }
-            }
-        }
-    })
-
-    await inbox.init();
 }
 
 function closeConfigFile() {

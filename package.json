@@ -17,6 +17,7 @@
     "@hackthedev/dsync-pay": "^1.0.8",
     "@hackthedev/dsync-shop": "^1.0.1",
     "@hackthedev/dsync-web": "^1.0.4",
+    "@hackthedev/express-starter": "^1.0.6",
     "bcrypt": "^6.0.0",
     "canvas": "^3.2.3",
     "chartjs-node-canvas": "^5.0.0",

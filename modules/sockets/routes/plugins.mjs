@@ -1,4 +1,4 @@
-import {app, io, socketHandlers} from "../../../index.mjs";
+import {io, socketHandlers} from "../../../index.mjs";
 import path from "path";
 import fs from "fs";
 
@@ -12,6 +12,7 @@ import {pathToFileURL} from "url";
 import {consolas} from "../../functions/io.mjs";
 import colors from "colors";
 import {rateLimit} from "../../functions/ratelimit.mjs";
+import {app} from "../../functions/init/web.mjs";
 
 export let pluginBasePath = path.join(process.cwd(), "plugins");
 

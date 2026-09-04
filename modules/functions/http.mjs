@@ -1,6 +1,8 @@
-import {http, https, app, setServer, fs} from "../../index.mjs";
+import {http, https, setServer} from "../../index.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import {saveConfig, serverconfig} from "./init/config.mjs";
+import {app} from "./init/web.mjs";
+import fs from "fs";
 
 
 function getClientIp(req) {

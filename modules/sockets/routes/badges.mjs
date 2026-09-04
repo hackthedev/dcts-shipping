@@ -1,7 +1,7 @@
-import {app, fs} from "../../../index.mjs";
 import {getCache, setCache} from "../../functions/ip-cache.mjs";
 import JSONTools from "@hackthedev/json-tools";
 import {rateLimit} from "../../functions/ratelimit.mjs";
+import {app} from "../../functions/init/web.mjs";
 
 
 export async function getBadges(type, id, beta = false){

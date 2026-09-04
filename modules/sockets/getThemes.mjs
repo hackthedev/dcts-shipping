@@ -1,8 +1,7 @@
 import { validateMemberId } from "../functions/main.mjs";
-import { fs } from "../../index.mjs";
 import https from "https";
-import ArrayTools from "@hackthedev/arraytools";
 import {listThemes} from "./routes/themes.mjs";
+import fs from "fs";
 
 function getLocalThemes() {
     const dirs = fs.readdirSync("./public/css/themes/", { withFileTypes: true });

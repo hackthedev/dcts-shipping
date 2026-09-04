@@ -3,8 +3,9 @@ import crypto from "crypto";
 import fetch from "node-fetch";
 import dns from "dns/promises";
 import net from "net";
-import { app, fs } from "../../../index.mjs";
 import {rateLimit} from "../../functions/ratelimit.mjs";
+import {app} from "../../functions/init/web.mjs";
+import fs from "fs";
 
 const CACHE_DIR = "./cache/proxy";
 const TTL = 1000 * 60 * 60 * 24;

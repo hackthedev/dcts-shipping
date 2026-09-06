@@ -1,19 +1,15 @@
 # Performance
 
-DCTS itself is pretty lightweight and if your system can run NodeJS and a small database, it will 100% be able to run DCTS.  Generally speaking you can be sure that it will run on a potato too (not literally tho). There is still a lot of room to optimize the server and client more, and its already very fast :)
+DCTS itself is pretty lightweight and if your system can run Bun and a small database, it will 100% be able to run DCTS.  Generally speaking you can be sure that it will run on a potato too (not literally tho). There is still a lot of room to optimize the server and client more, and its already very fast :)
 
 ------
 
 ## Docker Performance
 
-Special thanks to **<u>scubanarc</u>** for sharing the docker stats on his system.
-
 ```
-docker stats --no-stream
-CONTAINER ID   NAME                            CPU %     MEM USAGE / LIMIT    MEM %     NET I/O           BLOCK I/O         PIDS
-xxxxxxxxxxxx   dcts-dcts-app-1                 0.00%     55.05MiB / 22.9GiB   0.23%     6.59MB / 75.1MB   1MB / 16.4kB      11
-xxxxxxxxxxxx   dcts-dcts-mariadb-1             0.00%     126.9MiB / 22.9GiB   0.54%     189kB / 266kB     6.56MB / 589kB    9
-xxxxxxxxxxxx   dcts-dcts-redis-1               0.12%     9.449MiB / 22.9GiB   0.04%     17.3kB / 126B     0B / 0B           6
+❯ docker stats --no-stream  
+CONTAINER ID   NAME      CPU %     MEM USAGE / LIMIT     MEM %     NET I/O   BLOCK I/O      PIDS  
+293fe8a4a9b7   dcts      0.02%     103.8MiB / 31.25GiB   0.32%     0B / 0B   41kB / 139kB   27
 ```
 
 ------

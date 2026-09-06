@@ -1,0 +1,63 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-09-06T11:51:36+00:00",
+    "name": "DCTS_SERVER",
+    "author": "marcel@dcts.community",
+    "description": "DCTS - self-hosted Discord\/TeamSpeak-style chat platform with E2E encrypted DMs and decentralized server discovery.",
+    "features": [],
+    "docker_images": {
+        "DCTS Latest": "ghcr.io\/hackthedev\/ptero-dcts:latest",
+        "DCTS Dev": "ghcr.io\/hackthedev\/ptero-dcts:dev"
+    },
+    "file_denylist": [],
+    "startup": "PORT={{SERVER_PORT}} bun . --ptero",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Welcome to DCTS\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\nexport HOME=\/mnt\/server\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\n\r\ngit config --global --add safe.directory \/mnt\/server\r\n\r\nif [ ! -d \".git\" ]; then\r\n  echo \"Cloning from github...\"\r\n  git clone -b main https:\/\/github.com\/hackthedev\/dcts-shipping.git .\r\nelse\r\n  echo \"Updating existing installation...\"\r\n  git fetch origin main\r\n  git reset --hard origin\/main\r\nfi\r\n\r\necho -e \"Preparing directories and fixing permissions...\"\r\nmkdir -p sv configs public\/uploads public\/emojis plugins themes livekit\r\necho -e \"Installation completed.\\nDependencies will be installed on first start.\"",
+            "container": "ghcr.io\/pterodactyl\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Port",
+            "description": "Main HTTP port for the DCTS web interface.",
+            "env_variable": "PORT",
+            "default_value": "2052",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Display name of the DCTS server.",
+            "env_variable": "DCTS_NAME",
+            "default_value": "My DCTS Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Debug Mode",
+            "description": "Enable debug logging.",
+            "env_variable": "DEBUG",
+            "default_value": "false",
+            "user_viewable": false,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        }
+    ]
+}

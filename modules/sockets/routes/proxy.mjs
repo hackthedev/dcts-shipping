@@ -3,8 +3,9 @@ import crypto from "crypto";
 import fetch from "node-fetch";
 import dns from "dns/promises";
 import net from "net";
-import { app, fs } from "../../../index.mjs";
 import {rateLimit} from "../../functions/ratelimit.mjs";
+import {app} from "../../functions/init/web.mjs";
+import fs from "fs";
 
 const CACHE_DIR = "./cache/proxy";
 const TTL = 1000 * 60 * 60 * 24;
@@ -29,7 +30,7 @@ setInterval(() => {
     }
 }, 1000 * 60 * 30);
 
-function isBlockedIp(ip) {
+export function isBlockedIp(ip) {
     if (net.isIP(ip) === 4) {
         const p = ip.split(".").map(Number);
         if (p[0] === 10) return true;
@@ -57,7 +58,7 @@ function isBlockedIp(ip) {
     return true;
 }
 
-async function assertSafeHost(hostname) {
+export async function assertSafeHost(hostname) {
     if (!hostname) throw new Error("Invalid host");
 
     if (net.isIP(hostname)) {

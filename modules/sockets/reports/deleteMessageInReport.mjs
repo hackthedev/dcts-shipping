@@ -1,11 +1,10 @@
-import { io, serverconfig, usersocket, xssFilters } from "../../../index.mjs";
-import { hasPermission, resolveChannelById } from "../../functions/chat/main.mjs";
-import { getSavedChatMessage } from "../../functions/io.mjs";
+import { hasPermission } from "../../functions/chat/main.mjs";
 import Logger from "../../functions/logger.mjs";
 import { sanitizeInput, validateMemberId } from "../../functions/main.mjs";
-import { deleteChatMessagesFromDb, getChatMessageById, getChatMessagesFromDb, getReports, saveReport } from "../../functions/mysql/helper.mjs";
+import { deleteChatMessagesFromDb } from "../../functions/mysql/helper.mjs";
 import { queryDatabase } from "../../functions/mysql/mysql.mjs";
 import { sendSystemMessage } from "../home/general.mjs";
+import {serverconfig} from "../../functions/init/config.mjs";
 
 
 

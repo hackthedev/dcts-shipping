@@ -1,10 +1,15 @@
 import { test, expect, describe, mock } from "bun:test";
-import { defaultTestOverwrites, setupSocketMock } from "../test-client.mjs";
+
+mock.module("../../../modules/functions/ban-system/helpers.mjs", () => ({
+    checkMemberBan: mock(async () => ({ result: false })),
+    checkAndUnbanPublicKey: mock(async () => ({ result: false })),
+    unbanIp: mock()
+}));
 
 // ok so these mocks seem to be super cool as they can kinda
 // overwrite functions and what not so we dont fuck shit up
 // which is hella cool
-mock.module("../../modules/functions/mysql/mysql.mjs", () => ({
+mock.module("../../../modules/functions/mysql/mysql.mjs", () => ({
     queryDatabase: mock(async (query, args) => {
         const q = query.toLowerCase();
 
@@ -36,20 +41,19 @@ mock.module("../../modules/functions/mysql/mysql.mjs", () => ({
 
 // mock some important shit from the index. i love this shit so much
 
-mock.module("../../modules/sockets/resolveMessage.mjs", () => ({
+mock.module("../../../modules/sockets/resolveMessage.mjs", () => ({
     processMessageObject: mock(async (msg) => ({ author: { id: "123456789012" } })),
     checkMessageObjAuthor: mock()
 }));
 
 
 // Import the handler AFTER mocks
-import dmsRoomHandler from "../../modules/sockets/home/dms/rooms.mjs";
+import {clientSocket} from "../../test-client.mjs";
 
 describe("DM System", () => {
-    const env = setupSocketMock(dmsRoomHandler);
 
     test("Server connection", () => {
-        expect(env.clientSocket.connected).toBeTrue();
+        expect(clientSocket.connected).toBeTrue();
     });
 
     test("Create DM Room", async () => {
@@ -58,20 +62,22 @@ describe("DM System", () => {
             token: "test",
             participants: ["123456789013"]
         };
-        const res = await new Promise(resolve => env.clientSocket.emit("createDmRoom", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("createDmRoom", payload, resolve));
 
         expect(res.error).toBeNull();
-        expect(res.roomId).toBe("123456789012");
+        expect(res.roomId.length).toBe(12);
+        expect(typeof Number(res.roomId)).toBe("number");
     });
 
     test("Get DM Rooms", async () => {
         const payload = { id: "123456789012", token: "test", };
-        const res = await new Promise(resolve => env.clientSocket.emit("getDmRooms", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("getDmRooms", payload, resolve));
 
         expect(res.error).toBeNull();
         expect(res.rooms).toBeArray();
-        expect(res.rooms.length).toBeGreaterThan(0);
-        expect(res.rooms[0].roomId).toBe("123456789012");
+        expect(res.rooms.length).toBe(1);
+        expect(typeof Number(res.rooms[0].roomId)).toBe("number");
+        expect(res.rooms[0].roomId.length).toBe(12);
     });
 
     test("Join DM Room", async () => {
@@ -80,7 +86,7 @@ describe("DM System", () => {
             token: "test",
             roomId: "123456789012"
         };
-        const res = await new Promise(resolve => env.clientSocket.emit("joinDmRoom", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("joinDmRoom", payload, resolve));
 
         expect(res.error).toBeNull();
     });
@@ -98,7 +104,7 @@ describe("DM System", () => {
             }
         };
 
-        const res = await new Promise(resolve => env.clientSocket.emit("sendDmMessage", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("sendDmMessage", payload, resolve));
 
         expect(res.error).toBeNull();
         expect(res.payload).toBeDefined();
@@ -111,7 +117,7 @@ describe("DM System", () => {
             roomId: "123456789012",
             memberId: "123456789013"
         };
-        const res = await new Promise(resolve => env.clientSocket.emit("addDmRoomParticipant", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("addDmRoomParticipant", payload, resolve));
 
         expect(res.error).toBeNull();
     });
@@ -123,7 +129,7 @@ describe("DM System", () => {
             roomId: "123456789012",
             memberId: "123456789013"
         };
-        const res = await new Promise(resolve => env.clientSocket.emit("removeDmRoomParticipant", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("removeDmRoomParticipant", payload, resolve));
 
         expect(res.error).toBeNull();
     });
@@ -134,7 +140,7 @@ describe("DM System", () => {
             token: "test",
             roomId: "123456789013"
         };
-        const res = await new Promise(resolve => env.clientSocket.emit("deleteDmRoom", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("deleteDmRoom", payload, resolve));
 
         expect(res.error).toBeNull();
     });

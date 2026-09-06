@@ -1,7 +1,8 @@
 import fetch from "node-fetch";
-import { app, fs } from "../../../index.mjs";
 import {getCache, setCache} from "../../functions/ip-cache.mjs";
 import JSONTools from "@hackthedev/json-tools";
+import {app} from "../../functions/init/web.mjs";
+import {assertSafeHost} from "./proxy.mjs";
 
 async function url_meta(url) {
     if (!url.startsWith("http")) url = "https://" + url;
@@ -15,6 +16,8 @@ async function url_meta(url) {
             error: "invalid url",
         }
     }
+
+    await assertSafeHost(parsed.hostname);
 
     // harden protocol lol
     if (!["http:", "https:"].includes(parsed.protocol)) {

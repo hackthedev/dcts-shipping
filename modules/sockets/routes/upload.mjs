@@ -1,11 +1,5 @@
-import { app } from "../../../index.mjs";
-import { fileTypeFromBuffer, fs, serverconfig } from "../../../index.mjs";
-import { getMemberHighestRole } from "../../functions/chat/helper.mjs";
-import { hasPermission } from "../../functions/chat/main.mjs";
-import { getFolderSize, sanitizeFilename } from "../../functions/main.mjs";
-import path from "path";
 import crypto from "crypto";
-import Logger from "../../functions/logger.mjs";
+import fs from "fs";
 
 const UPLOAD_DIR = "./public/uploads";
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });

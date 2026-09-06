@@ -1,5 +1,3 @@
-import { crypto } from "../../index.mjs";
-
 export async function estimatePoWDuration(difficulty, sampleSeconds = 3) {
     const hashRate = 18535;
     const expectedTries = Math.pow(2, 4 * difficulty);

@@ -1,5 +1,6 @@
-import { io, saveConfig, serverconfig, xssFilters } from "../../../index.mjs";
-import { copyObject, escapeHtml, limitString, sendMessageToUser, validateMemberId } from "../../functions/main.mjs";
+
+import { escapeHtml, limitString, validateMemberId } from "../../functions/main.mjs";
+import {saveConfig, serverconfig} from "../../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

@@ -1,4 +1,4 @@
-import {serverconfig, typingMembers, usersocket, xssFilters} from "../../index.mjs";
+import {typingMembers, usersocket} from "../../index.mjs";
 import {
     formatDateTime,
     hasPermission,
@@ -24,7 +24,7 @@ import {decodeAndParseJSON, getMessageObjectById} from "./resolveMessage.mjs";
 import {getChannelRateLimit} from "../functions/anti-spam/messages.mjs";
 import {getMemberLatestMessage} from "../functions/chat/helper.mjs";
 import DateTools from "@hackthedev/datetools";
-import dSyncRateLimit from "@hackthedev/dsync-ratelimit";
+import {serverconfig} from "../functions/init/config.mjs";
 
 export function getMentionIdsFromText(text) {
     return {
@@ -157,7 +157,7 @@ export default (io) => (socket) => {
 
             // Check if room exists
             try {
-                if (serverconfig?.groups[member.group]?.channels?.categories[member.category]?.channel[member.channel] != null) {
+                if (serverconfig?.groups?.[member?.group]?.channels?.categories?.[member?.category]?.channel?.[member?.channel] != null) {
                     let messageid = generateId(12);
                     member.timestamp = new Date().getTime();
                     member.messageId = messageid;
@@ -249,6 +249,10 @@ export default (io) => (socket) => {
 
                 } else {
                     Logger.debug("Couldnt find message channel");
+                    console.log(serverconfig?.groups[member.group]?.channels?.categories[member.category]?.channel[member.channel])
+                    console.log(member.group)
+                    console.log(member.category)
+                    console.log(member.channel)
 
                     var msg = `We were unable to send the message because the 
                         channel wasnt found. Maybe it was deleted? Reselect a channel from the channel list`.replaceAll("\n", "");

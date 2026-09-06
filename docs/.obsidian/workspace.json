@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Performance.md",
+                "file": "Getting started.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Performance"
+              "title": "Getting started"
             }
           }
         ]
@@ -188,21 +188,24 @@
   },
   "active": "37a4cdff02af2a98",
   "lastOpenFiles": [
+    "DCTS Docs Base.base",
+    "Performance.md",
+    "Running DCTS.md",
     "Getting started.md",
-    "Docker Setup.md",
+    "Installation/VoIP Setup.md",
+    "Installation/Docker Setup.md",
+    "Managed Hosting/Ptero Host Server Setup Notes.md",
+    "Messenger/Introduction.md",
+    "Installation",
     "Feature List.md",
-    "VoIP Setup.md",
     "Privacy Policy.md",
     "index.md",
     "Legal/Contributor License Agreement.md",
     "Lore/About DCTS.md",
-    "Managed Hosting/Ptero Host Server Setup Notes.md",
-    "Messenger/Introduction.md",
     "plugins/Your first plugin.md",
     "plugins/Event Dispatchers.md",
     "plugins/Plugin System.md",
     "General/Changing Member Passwords.md",
-    "Performance.md",
     "Setup",
     "Legal",
     "Lore/Independence.md",
@@ -220,10 +223,7 @@
     "Graphs",
     "install NodeJS.md",
     "Managed Hosting",
-    "Lore/Architecture.md",
-    "sql/Configure SQL.md",
     "sql/errors",
-    "DCTS Docs Base.base",
     "Unbenannt.base",
     "assets/Pasted image 20260228193820.png",
     "Pasted image 20260228193713.png"

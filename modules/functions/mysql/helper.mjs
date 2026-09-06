@@ -1,11 +1,12 @@
 import {queryDatabase} from "./mysql.mjs";
-import {XMLHttpRequest, fetch, serverconfig, inbox} from "../../../index.mjs";
+import {inbox} from "../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import fs from "fs";
 import {spawn} from "child_process";
 import JSONTools from "@hackthedev/json-tools";
 import {getMessageObjectById} from "../../sockets/resolveMessage.mjs";
 import {autoAnonymizeMessage} from "../main.mjs";
+import {serverconfig} from "../init/config.mjs";
 
 
 export async function exportDatabaseFromPool(pool, outFile) {

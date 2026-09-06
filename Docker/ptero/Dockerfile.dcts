@@ -5,21 +5,22 @@
 FROM oven/bun:1-alpine
 
 # Install dependencies and create container user
-RUN apk add --no-cache --update curl ca-certificates openssl git tar bash sqlite fontconfig tzdata iproute2 jq bc \
+RUN apk add --no-cache --update curl ca-certificates openssl git tar bash sqlite fontconfig tzdata iproute2 jq bc sudo \
     && curl -sL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq \
     && chmod +x /usr/local/bin/yq \
-    && adduser -D -h /home/container container
+    && adduser -D -h /home/container container \
+    && echo "container ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/container \
+    && chmod 440 /etc/sudoers.d/container
 
 RUN mkdir -p /home/container/.bun && chown -R container:container /home/container
 
 # Set environment
-USER container
+USER root
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
 
 # Copy entrypoint
-COPY --chown=container:container ./ptero/DCTS/entrypoint.sh /entrypoint.sh
+COPY --chown=container:container ./Docker/ptero/DCTS/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 CMD ["/bin/bash", "/entrypoint.sh"]
-

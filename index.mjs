@@ -422,7 +422,7 @@ export async function initDCTSServer(){
     } catch (e) {
             Logger.error("Error while trying to connect to database!")
             Logger.error(e)
-            process.exit(1)
+            process.exit(0)
     }
 
     let magentaBlinkColor = Logger.colors.blink + Logger.colors.bright + Logger.colors.fgMagenta

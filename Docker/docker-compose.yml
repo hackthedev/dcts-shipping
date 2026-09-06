@@ -1,5 +1,6 @@
 services:
   dcts-app:
+    container_name: dcts
     #For local development
     #build:
     #  context: ../

@@ -18,7 +18,7 @@ fi
 bun --version
 
 if [ -f "package.json" ]; then
-  bun install --ignore-scripts --frozen-lockfile || bun install --ignore-scripts
+  bun install --frozen-lockfile || bun install
 fi
 
 MODIFIED_STARTUP=$(echo "${STARTUP}" | sed -e 's/{{/${/g' -e 's/}}/}/g')

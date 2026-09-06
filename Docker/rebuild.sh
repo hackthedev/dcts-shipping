@@ -8,7 +8,7 @@ sudo docker compose logs -f
 
 # These are here on purpose because i will 100% forget these commands again.
 #
-# sudo docker exec -it docker-dcts-app-1 bash
-# sudo docker restart docker-dcts-app-1
-# sudo docker stop docker-dcts-app-1
-# sudo docker logs -f dcts-app-1
+# sudo docker exec -it dcts bash
+# sudo docker restart dcts
+# sudo docker stop dcts
+# sudo docker logs -f dcts

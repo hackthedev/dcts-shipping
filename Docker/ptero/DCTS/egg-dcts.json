@@ -4,13 +4,14 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-09-06T11:45:05+00:00",
-    "name": "DCTS_OLD",
+    "exported_at": "2026-09-06T11:51:36+00:00",
+    "name": "DCTS_SERVER",
     "author": "marcel@dcts.community",
     "description": "DCTS - self-hosted Discord\/TeamSpeak-style chat platform with E2E encrypted DMs and decentralized server discovery.",
     "features": [],
     "docker_images": {
-        "DCTS Latest": "ghcr.io\/hackthedev\/ptero-dcts:latest"
+        "DCTS Latest": "ghcr.io\/hackthedev\/ptero-dcts:latest",
+        "DCTS Dev": "ghcr.io\/hackthedev\/ptero-dcts:dev"
     },
     "file_denylist": [],
     "startup": "PORT={{SERVER_PORT}} bun . --ptero",

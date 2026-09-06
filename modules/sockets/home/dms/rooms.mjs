@@ -420,7 +420,7 @@ export async function createMemberDmRoom(memberId, participants) {
 
         // we're gonna build the chat title here with the member names.
         if (i < 3) {
-            let member = await getCastingMemberObject(serverconfig.servermembers[participant]);
+            let member = await getCastingMemberObject(serverconfig.servermembers?.[participant]);
             title += i === 0 ? `${member?.name}` : `,${member?.name}`;
         }
         // and if there are more participants we will just

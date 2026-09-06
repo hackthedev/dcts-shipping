@@ -157,7 +157,7 @@ export default (io) => (socket) => {
 
             // Check if room exists
             try {
-                if (serverconfig?.groups[member.group]?.channels?.categories[member.category]?.channel[member.channel] != null) {
+                if (serverconfig?.groups?.[member?.group]?.channels?.categories?.[member?.category]?.channel?.[member?.channel] != null) {
                     let messageid = generateId(12);
                     member.timestamp = new Date().getTime();
                     member.messageId = messageid;

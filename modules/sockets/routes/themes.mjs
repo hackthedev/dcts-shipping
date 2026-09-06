@@ -1,4 +1,3 @@
-import { app } from "../../../index.mjs";
 import path from "path";
 import fs from "fs";
 
@@ -11,6 +10,7 @@ import unzipper from "unzipper";
 import {Readable} from "stream";
 import {getThemes} from "../getThemes.mjs";
 import {getCache, setCache} from "../../functions/ip-cache.mjs";
+import {app} from "../../functions/init/web.mjs";
 export async function loadThemeCache(force = false){
     return await getCache("theme_cache", "theme_cache")
 }

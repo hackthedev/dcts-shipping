@@ -8,6 +8,7 @@
         "@hackthedev/dsync-pay": "^1.0.8",
         "@hackthedev/dsync-shop": "^1.0.1",
         "@hackthedev/dsync-web": "^1.0.4",
+        "@hackthedev/express-starter": "^1.0.6",
         "bcrypt": "^6.0.0",
         "canvas": "^3.2.3",
         "chartjs-node-canvas": "^5.0.0",
@@ -95,11 +96,17 @@
 
     "@exodus/bytes": ["@exodus/bytes@1.15.1", "", { "peerDependencies": { "@noble/hashes": "^1.8.0 || ^2.0.0" }, "optionalPeers": ["@noble/hashes"] }, "sha512-S6mL0yNB/Abt9Ei4tq8gDhcczc4S3+vQ4ra7vxnAf+YHC02srtqxKKZghx2Dq6p0e66THKwR6r8N6P95wEty7Q=="],
 
+    "@hackthedev/arraytools": ["@hackthedev/arraytools@1.0.2", "", {}, "sha512-rFr3L60vAqp6bs+ur2W3VqaavOzoyQxDFqGYU/R+ocgZ63Hh4nat7HRZOVqZ6BVHC/UuC4Q/Y8+BiX9i3xakkg=="],
+
     "@hackthedev/dsync-pay": ["@hackthedev/dsync-pay@1.0.8", "", {}, "sha512-P8VWLXEhVy86JidCx1fyFbsCdi+3rcFNmZKaq8orqcvUsUvK648RWi16nCIIl6sjGIo3TDOoVql7k0jmvRlbBg=="],
 
     "@hackthedev/dsync-shop": ["@hackthedev/dsync-shop@1.0.1", "", {}, "sha512-hO7vSMBQWaYJfoXynLI3uE5e8DhVa22U1FcFrvt6gDlrSaY8au6trmIM9ZbR5lb53wzBoHpXgvWhJ8BsHnEGKg=="],
 
     "@hackthedev/dsync-web": ["@hackthedev/dsync-web@1.0.4", "", {}, "sha512-S43uSCAA1lCVD2a6dONBApxqNqO4fnOHeCxGNjqGApN9HYgamWYepoNUdpymWyd2vPmaKOgVj/3ocM4nnCjF3A=="],
+
+    "@hackthedev/express-starter": ["@hackthedev/express-starter@1.0.6", "", { "dependencies": { "@hackthedev/arraytools": "^1.0.2", "@hackthedev/terminal-logger": "^1.0.0", "express": "^5.2.1", "socket.io": "^4.8.3" } }, "sha512-ZWXEOZ9jmn59HYRzGaQMMhVy646E0zFkUvyaQcxGiXDkdyBlxSVRsp7XdCsuq2NzQ3yUGq67f9eTccKKSr3p7Q=="],
+
+    "@hackthedev/terminal-logger": ["@hackthedev/terminal-logger@1.0.1", "", {}, "sha512-tTPLVfwLbiEYio6RfyVz6Uh2hiQeZUTyukaxwFM9hT7qazlufrcHCZxS+gakSbedqRVulgiiwPjlYESAwmal9g=="],
 
     "@iconify-json/simple-icons": ["@iconify-json/simple-icons@1.2.93", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-/XhANjfGYOuqvSR3TmUnkQkINvQ4GVjVuukvymRbxtVFBvIq/yiXJqCDycKcQPT401OYT9H2vIY6ihAlz1QIAw=="],
 

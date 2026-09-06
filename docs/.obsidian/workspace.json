@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Performance.md",
+                "file": "Getting started.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Performance"
+              "title": "Getting started"
             }
           }
         ]
@@ -186,10 +186,11 @@
       "bases:Neue Base erstellen": false
     }
   },
-  "active": "3a0469dcedf99830",
+  "active": "37a4cdff02af2a98",
   "lastOpenFiles": [
-    "Running DCTS.md",
+    "DCTS Docs Base.base",
     "Performance.md",
+    "Running DCTS.md",
     "Getting started.md",
     "Installation/VoIP Setup.md",
     "Installation/Docker Setup.md",
@@ -222,9 +223,7 @@
     "Graphs",
     "install NodeJS.md",
     "Managed Hosting",
-    "Lore/Architecture.md",
     "sql/errors",
-    "DCTS Docs Base.base",
     "Unbenannt.base",
     "assets/Pasted image 20260228193820.png",
     "Pasted image 20260228193713.png"

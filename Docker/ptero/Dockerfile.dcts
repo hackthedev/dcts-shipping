@@ -15,7 +15,7 @@ RUN apk add --no-cache --update curl ca-certificates openssl git tar bash sqlite
 RUN mkdir -p /home/container/.bun && chown -R container:container /home/container
 
 # Set environment
-USER container
+USER root
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
 

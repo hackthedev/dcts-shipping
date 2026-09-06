@@ -194,7 +194,9 @@ process.on("unhandledRejection", (reason) => {
 
 signer = new dSyncSign("./configs/privatekey.json");
 
-initSetupWizard();
+if (import.meta.main) {
+    await initSetupWizard();
+}
 
 async function initIPSec(){
     ipsec = new dSyncIPSec({
@@ -545,7 +547,7 @@ export async function initDCTSServer(){
     }
 }
 
-async function initSetupWizard(){
+export async function initSetupWizard(bypass = false){
     serverconfig.serverinfo.sql.enabled = true;
 
     let setupWizard = new SetupWizard({
@@ -571,7 +573,7 @@ async function initSetupWizard(){
     registerSetupPrerequisites();
 
     // first time setup
-    if((serverconfig.serverinfo.setup === 0 || await checkPrerequisites() === false) && !skipSetup()){
+    if( (serverconfig.serverinfo.setup === 0 || await checkPrerequisites() === false) && !skipSetup() && bypass === false){
         serverconfig.serverinfo.sql.password = setupDbPass;
         serverconfig.serverinfo.sql.username = setupDbUser;
         serverconfig.serverinfo.sql.database = setupDbName;

@@ -1,5 +1,4 @@
 import { test, expect, describe, mock } from "bun:test";
-import { defaultTestOverwrites, setupSocketMock } from "../../test-client.mjs";
 
 // ok so these mocks seem to be super cool as they can kinda
 // overwrite functions and what not so we dont fuck shit up
@@ -18,7 +17,6 @@ mock.module("../modules/functions/main.mjs", () => ({
             member: await getCastingMemberObject(serverconfig.servermembers["123456789012"])
         }
     }),
-    getCastingMemberObject: defaultTestOverwrites.getCastingMemberObject,
 }));
 
 

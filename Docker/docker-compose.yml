@@ -4,7 +4,7 @@ services:
     #build:
     #  context: ../
     #  dockerfile: ./Docker/Dockerfile
-    image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:latest}
+    image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:${VERSION:-latest}}
     environment:
       - DEBUG=${DEBUG:-false}
     ports:

@@ -615,6 +615,16 @@ export async function initSetupWizard(bypass = false){
                     execute: []
                 },
                 {
+                    title: "sudo",
+                    check: [
+                        ["sudo --version", "Sudo-Version"]
+                    ],
+                    install: [
+                        "DEBIAN_FRONTEND=noninteractive apt-get sudo -y screen"
+                    ],
+                    execute: []
+                },
+                {
                     title: "Screen",
                     check: [
                         ["screen --version", "Screen version"]

@@ -25,7 +25,7 @@
     "cookie-parser": "^1.4.7",
     "discord.js": "^14.27.0",
     "express": "^5.2.1",
-    "file-type": "^18.7.0",
+    "file-type": "^21.3.2",
     "fs-extra": "^11.4.0",
     "get-folder-size": "^2.0.1",
     "htmlparser2": "^10.1.0",

@@ -30,7 +30,7 @@ setInterval(() => {
     }
 }, 1000 * 60 * 30);
 
-function isBlockedIp(ip) {
+export function isBlockedIp(ip) {
     if (net.isIP(ip) === 4) {
         const p = ip.split(".").map(Number);
         if (p[0] === 10) return true;
@@ -58,7 +58,7 @@ function isBlockedIp(ip) {
     return true;
 }
 
-async function assertSafeHost(hostname) {
+export async function assertSafeHost(hostname) {
     if (!hostname) throw new Error("Invalid host");
 
     if (net.isIP(hostname)) {

@@ -1,8 +1,8 @@
-import { saveConfig, serverconfig, xssFilters } from "../../index.mjs";
+import { xssFilters } from "../../index.mjs";
 import { findInJson, hasPermission } from "../functions/chat/main.mjs";
-import { saveChatMessage } from "../functions/io.mjs";
-import { copyObject, validateMemberId } from "../functions/main.mjs";
+import { validateMemberId } from "../functions/main.mjs";
 import Logger from "@hackthedev/terminal-logger";
+import {saveConfig, serverconfig} from "../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

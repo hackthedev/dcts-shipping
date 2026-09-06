@@ -1,11 +1,12 @@
 /*
     The functions here are basically the "core" of the chat app on the server side.
  */
-import {serverconfig, fetch, fs} from "../../../index.mjs"
+import fs from "fs";
 import {queryDatabase} from "../mysql/mysql.mjs";
 import {checkMessageObjAuthor, checkMessageObjReactions} from "../../sockets/resolveMessage.mjs";
 import {autoAnonymizeMessage} from "../main.mjs";
 import JSONTools from "@hackthedev/json-tools";
+import {serverconfig} from "../init/config.mjs";
 
 export function findEmojiByID(id) {
     // Get all local emojis
@@ -22,7 +23,7 @@ export function findEmojiByID(id) {
 }
 
 export async function getChannelMessageCount(channelId) {
-    if (!channelId) throw new Error("no channel id provided")
+    if (!channelId && channelId !== 0) throw new Error("no channel id provided")
 
     const rows = await queryDatabase(
         `SELECT COUNT(*) AS count

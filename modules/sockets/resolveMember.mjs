@@ -1,15 +1,11 @@
-import { serverconfig, xssFilters } from "../../index.mjs";
-import { hasPermission } from "../functions/chat/main.mjs";
+
 import Logger from "../functions/logger.mjs";
 import {
-    anonymizeMember,
-    anonymizeMessage, autoAnonymizeMember, autoAnonymizeMessage,
-    copyObject,
+    autoAnonymizeMember,
     getCastingMemberObject,
-    sendMessageToUser,
     validateMemberId
 } from "../functions/main.mjs";
-import {getMemberHighestRole} from "../functions/chat/helper.mjs";
+import {serverconfig} from "../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

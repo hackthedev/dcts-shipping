@@ -1,8 +1,7 @@
 import {rateLimit} from "../../functions/ratelimit.mjs";
-import {app, serverconfig} from "../../../index.mjs";
-import {checkHostDiscovery, discoverHosts, getDiscoveredHosts} from "../../functions/discovery.mjs";
-import Logger from "../../functions/logger.mjs";
+import {checkHostDiscovery} from "../../functions/discovery.mjs";
 import express from "express";
+import {app} from "../../functions/init/web.mjs";
 
 const pingLimiter = rateLimit({
     windowMs: 60_000,

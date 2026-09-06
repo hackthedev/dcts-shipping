@@ -1,6 +1,6 @@
-import { serverconfig } from "../../index.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
 import {escapeHtml, validateMemberId} from "../functions/main.mjs";
+import {serverconfig} from "../functions/init/config.mjs";
 
 const typingMembers = {};
 const typingTimeouts = {};

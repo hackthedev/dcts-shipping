@@ -3,16 +3,9 @@
     everything that will handle stuff being read or written to the disk is here
  */
 import {
-    serverconfig,
-    fs,
-    path,
     colors,
     debugmode,
-    saveConfig,
-    reloadConfig,
-    flipDebug,
     allowLogging,
-    configPath
 } from "../../index.mjs"
 import Logger from "@hackthedev/terminal-logger"
 import {
@@ -40,6 +33,9 @@ import {
     getMessageObjectById
 } from "../sockets/resolveMessage.mjs";
 import {Clock} from "./clock.mjs";
+import {configPath, serverconfig} from "./init/config.mjs";
+import path from "path";
+import fs from "fs";
 
 
 var serverconfigEditable = serverconfig;

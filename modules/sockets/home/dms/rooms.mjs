@@ -1,18 +1,14 @@
 import { queryDatabase } from "../../../functions/mysql/mysql.mjs";
 import {
-    autoAnonymizeMember,
-    autoAnonymizeMessage,
     generateId,
     getCastingMemberObject,
-    removeFromArray,
     validateMemberId
 } from "../../../functions/main.mjs";
-import { serverconfig } from "../../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger";
 import JSONTools from "@hackthedev/json-tools";
-import { checkMessageObjAuthor, processMessageObject } from "../../resolveMessage.mjs";
+import { processMessageObject } from "../../resolveMessage.mjs";
 import { io } from "../../../../index.mjs";
-import { hasPermission } from "../../../functions/chat/main.mjs";
+import {serverconfig} from "../../../functions/init/config.mjs";
 
 export async function getMemberDmRooms(memberId) {
     if (!memberId) throw new Error("Member Id is required");
@@ -424,7 +420,7 @@ export async function createMemberDmRoom(memberId, participants) {
 
         // we're gonna build the chat title here with the member names.
         if (i < 3) {
-            let member = await getCastingMemberObject(serverconfig.servermembers[participant]);
+            let member = await getCastingMemberObject(serverconfig.servermembers?.[participant]);
             title += i === 0 ? `${member?.name}` : `,${member?.name}`;
         }
         // and if there are more participants we will just

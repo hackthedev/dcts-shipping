@@ -1,4 +1,4 @@
-import { fs, serverconfig } from "../../index.mjs";
+import fs from "fs"
 import Logger from "../functions/logger.mjs";
 import { validateMemberId } from "../functions/main.mjs";
 import path from "path";

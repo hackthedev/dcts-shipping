@@ -1,8 +1,8 @@
-import { fs, serverconfig, xssFilters } from "../../index.mjs";
 import { findEmojiByID } from "../functions/chat/helper.mjs";
 import { hasPermission } from "../functions/chat/main.mjs";
-import Logger from "../functions/logger.mjs";
-import {checkRateLimit, copyObject, sendMessageToUser, validateMemberId} from "../functions/main.mjs";
+import Logger from "@hackthedev/terminal-logger";
+import {checkRateLimit, sendMessageToUser, validateMemberId} from "../functions/main.mjs";
+import {serverconfig} from "../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

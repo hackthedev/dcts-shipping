@@ -1,8 +1,6 @@
 import { test, expect, describe, mock } from "bun:test";
-import { defaultTestOverwrites, setupSocketMock } from "../test-client.mjs";
 
-
-mock.module("../../modules/functions/mysql/mysql.mjs", () => ({
+mock.module("../../../modules/functions/mysql/mysql.mjs", () => ({
     queryDatabase: mock(async (query, args) => {
         const q = query.toLowerCase();
 
@@ -15,7 +13,7 @@ mock.module("../../modules/functions/mysql/mysql.mjs", () => ({
     })
 }));
 
-mock.module("../../modules/functions/mysql/helper.mjs", () => ({
+mock.module("../../../modules/functions/mysql/helper.mjs", () => ({
     getChatMessagesFromDb: mock(async (roomId, index, msgId = null) => {
         return [{
             messageId: "123456789012",
@@ -30,7 +28,7 @@ mock.module("../../modules/functions/mysql/helper.mjs", () => ({
 
 let slowmodeResult = false
 let rateLimitResult = false
-mock.module("../../modules/functions/anti-spam/messages.mjs", () => ({
+mock.module("../../../modules/functions/anti-spam/messages.mjs", () => ({
     getChannelRateLimit: mock(async (query, args) => {
         return {
             currentHourly: 0,
@@ -42,7 +40,7 @@ mock.module("../../modules/functions/anti-spam/messages.mjs", () => ({
     })
 }));
 
-mock.module("../../modules/functions/io.mjs", () => ({
+mock.module("../../../modules/functions/io.mjs", () => ({
     saveChatMessage: mock(async (query, args) => {})
 }));
 
@@ -51,7 +49,7 @@ mock.module("../../modules/functions/io.mjs", () => ({
 // but as of right now it works at least
 let mockPermissionResult = true;
 let isAdmin = false
-mock.module("../../modules/functions/chat/main.mjs", () => ({
+mock.module("../../../modules/functions/chat/main.mjs", () => ({
     hasPermission: mock(async (id, permission) => {
         if(!isAdmin && permission === "bypassSlowmode") return false
         if(!isAdmin && permission === "bypassRatelimit") return false
@@ -62,7 +60,7 @@ mock.module("../../modules/functions/chat/main.mjs", () => ({
 }));
 
 let getMemberLatestMessageTimestamp = null;
-mock.module("../../modules/functions/chat/helper.mjs", () => ({
+mock.module("../../../modules/functions/chat/helper.mjs", () => ({
     getMemberLatestMessage: mock(async (memberId, issuerId) => {
         return {
             timestamp: getMemberLatestMessageTimestamp ?? DateTools.getDateFromOffset("-5 minutes").getTime()
@@ -71,7 +69,7 @@ mock.module("../../modules/functions/chat/helper.mjs", () => ({
 }));
 
 let checkMemberMuteResult = false;
-mock.module("../../modules/functions/main.mjs", () => ({
+mock.module("../../../modules/functions/main.mjs", () => ({
     checkMemberMute: mock((socket, memberId) => {
         if(checkMemberMuteResult){
             return {
@@ -90,14 +88,14 @@ mock.module("../../modules/functions/main.mjs", () => ({
     }),
 }));
 
-mock.module("../../modules/sockets/resolveMessage.mjs", () => ({
+mock.module("../../../modules/sockets/resolveMessage.mjs", () => ({
     processMessageObject: mock(async (msg) => ({ author: { id: "user12345678" } })),
     checkMessageObjAuthor: mock(),
     getMessageObjectById: mock(async (msgId) => ({message: { author: { id: "123456789012"}, timestamp: null, reply: { messageId: null}}, error: null}))
 }));
 
 let checkMemberBanResult = false;
-mock.module("../../modules/functions/ban-system/helpers.mjs", () => ({
+mock.module("../../../modules/functions/ban-system/helpers.mjs", () => ({
     checkMemberBan: mock(async (socket, member) => {
         if(checkMemberBanResult){
             return {result: true, timestamp: DateTools.getDateFromOffset("+5 minutes"), reason: "Test Case"};
@@ -110,18 +108,13 @@ mock.module("../../modules/functions/ban-system/helpers.mjs", () => ({
 
 
 // Import the handler AFTER mocks
-import messageSendHandler from "../../modules/sockets/messageSend.mjs";
-import deleteMessageHandler from "../../modules/sockets/deleteMessage.mjs";
-import messageReactionsHandler from "../../modules/sockets/messageReactions.mjs";
-
-import DateTools from "@hackthedev/datetools";
-import {serverconfig} from "../../index.mjs";
+const { default: DateTools } = await import("@hackthedev/datetools");
+const { serverconfig } = await import("../../../modules/functions/init/config.mjs");
+const { clientSocket } = await import("../../test-client.mjs");
 
 describe("Server Chat", () => {
-    const env = setupSocketMock(messageSendHandler, deleteMessageHandler, messageReactionsHandler);
-
     test("Server connection", () => {
-        expect(env.clientSocket.connected).toBeTrue();
+        expect(clientSocket.connected).toBeTrue();
     });
 
     test("Send Message", async () => {
@@ -137,7 +130,7 @@ describe("Server Chat", () => {
         };
 
         mockPermissionResult = true
-        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("messageSend", payload, resolve));
         
         expect(res.error).toBeNull();
     });
@@ -155,7 +148,7 @@ describe("Server Chat", () => {
         };
 
         mockPermissionResult = false
-        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).toBe("You cant chat here! Missing permissions");
     });
 
@@ -173,7 +166,7 @@ describe("Server Chat", () => {
 
         mockPermissionResult = true
         checkMemberMuteResult = true;
-        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("messageSend", payload, resolve));
 
         expect(res.error).not.toBeNull();
         expect(res.muted).toBe(true);
@@ -195,7 +188,7 @@ describe("Server Chat", () => {
         checkMemberMuteResult = false;
         checkMemberBanResult = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).not.toBeNull();
     });
 
@@ -219,7 +212,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         getMemberLatestMessageTimestamp = new Date().getTime()
 
-        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("messageSend", payload, resolve));
 
         // here we need to do some calc shit like the server does so the expectedTimestamp etc will match
         let diff = DateTools.getDateFromOffset(serverconfig.serverinfo.moderation.ratelimit.actions.user_slowmode_duration, new Date(getMemberLatestMessageTimestamp)).getTime() - getMemberLatestMessageTimestamp;
@@ -250,7 +243,7 @@ describe("Server Chat", () => {
         isAdmin = true;
         getMemberLatestMessageTimestamp = new Date().getTime()
 
-        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).toBeNull();
     });
 
@@ -274,7 +267,7 @@ describe("Server Chat", () => {
         rateLimitResult = true
         isAdmin = false;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).not.toBeNull();
         expect(res.rateLimited).toBe(true);
     });
@@ -299,7 +292,7 @@ describe("Server Chat", () => {
         rateLimitResult = true
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).toBeNull();
     });
 
@@ -324,7 +317,7 @@ describe("Server Chat", () => {
         rateLimitResult = true
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).toBeNull();
     });
 
@@ -350,7 +343,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).toBeNull();
     });
 
@@ -376,7 +369,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).toBeNull();
     });
 
@@ -402,7 +395,7 @@ describe("Server Chat", () => {
         rateLimitResult = true
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("messageSend", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("messageSend", payload, resolve));
         expect(res.error).toBe("You cant edit others messages!");
     });
 
@@ -422,7 +415,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("addMessageReaction", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("addMessageReaction", payload, resolve));
         expect(res.error).toBeNull();
     });
 
@@ -441,7 +434,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("addMessageReaction", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("addMessageReaction", payload, resolve));
         expect(res.error).toBe("Missing message id");
     });
 
@@ -449,7 +442,6 @@ describe("Server Chat", () => {
         const payload = {
             id: "123456789012",
             token: "test",
-            messageId: "123456789012",
             messageId: "123456789012",
         };
 
@@ -462,7 +454,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("addMessageReaction", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("addMessageReaction", payload, resolve));
         expect(res.error).toBe("Missing emoji id");
     });
 
@@ -482,7 +474,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("addMessageReaction", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("addMessageReaction", payload, resolve));
         expect(res.error).toBe("Invalid emoji hash");
     });
 
@@ -503,7 +495,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("addMessageReaction", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("addMessageReaction", payload, resolve));
         expect(res.error).toBeNull();
     });
 
@@ -523,7 +515,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("removeMessageReaction", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("removeMessageReaction", payload, resolve));
         expect(res.error).toBeNull();
     });
 
@@ -542,7 +534,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("removeMessageReaction", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("removeMessageReaction", payload, resolve));
         expect(res.error).toBe("Missing message id");
     });
 
@@ -550,7 +542,6 @@ describe("Server Chat", () => {
         const payload = {
             id: "123456789012",
             token: "test",
-            messageId: "123456789012",
             messageId: "123456789012",
         };
 
@@ -563,7 +554,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("removeMessageReaction", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("removeMessageReaction", payload, resolve));
         expect(res.error).toBe("Missing emoji id");
     });
 
@@ -583,7 +574,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = false;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("deleteMessage", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("deleteMessage", payload, resolve));
         expect(res.error).toBeNull();
     });
 
@@ -603,7 +594,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = false;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("deleteMessage", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("deleteMessage", payload, resolve));
         expect(res.error).toBe("Unauthorized or not message author");
     });
 
@@ -623,7 +614,7 @@ describe("Server Chat", () => {
         rateLimitResult = false
         isAdmin = true;
 
-        const res = await new Promise(resolve => env.clientSocket.emit("deleteMessage", payload, resolve));
+        const res = await new Promise(resolve => clientSocket.emit("deleteMessage", payload, resolve));
         expect(res.error).toBeNull();
     });
 });

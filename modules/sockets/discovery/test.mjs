@@ -1,32 +1,16 @@
-import {app, serverconfig, versionCode} from "../../../index.mjs";
+import {versionCode} from "../../../index.mjs";
 import {getOnlineMemberCount, resolveGroupByChannelId} from "../../functions/chat/main.mjs";
-import Logger from "../../functions/logger.mjs";
+import Logger from "@hackthedev/terminal-logger";
 import {rateLimit} from "../../functions/ratelimit.mjs";
 import express from "express";
+import {serverconfig} from "../../functions/init/config.mjs";
+import {app} from "../../functions/init/web.mjs";
 
 const pingLimiter = rateLimit({
     windowMs: 60_000,
     ipLimit: 1500,
     sigLimit: 120000,
     trustProxy: true
-});
-
-
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Vary", "Origin");
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-    res.header("Access-Control-Max-Age", "86400");
-    res.set("Cache-Control", "no-store");
-
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(204);
-    }
-
-    next();
 });
 
 app.get("/discover", pingLimiter, express.json(), async (req, res) => {

@@ -73,7 +73,7 @@ The /sockets/test.mjs file could look like the following:
 
 ```js
 import { validateMemberId } from "../../../modules/functions/main.mjs";
-import { serverconfig } from "../../../index.mjs";
+import { serverconfig } from "../../../somefile.mjs";
 
 export default (socket) => {    
     socket.on('test', async (oMember, response) => {

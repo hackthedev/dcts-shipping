@@ -107,9 +107,9 @@ lk.your-domain.com {
 - You can check if your ports are publicly available with tools like https://canyouseeme.org/
 - If you run nginx and caddy you will run into possible conflicts. Use either one, not both.
 - When using caddy make sure it always runs as it will handle the reverse proxy
-- If you're new and want a more simpler experience, i would recommend using a VPS to avoid having to port forward and it has some other benefits too.
+- If you're new and want a more simpler experience, i would recommend using a VPS to avoid having to webPort forward and it has some other benefits too.
 - If you self-host from your own network and have a dynamic public ip you may want to use a DynDns Service like no-ip or similar.
 - If you're behind a CNAT you may experience issues and need to request your own IP from your carrier. Usually you can do so for free.
 
-[^portnote]: The port configured inside of your config.json file
+[^portnote]: The webPort configured inside of your config.json file
 

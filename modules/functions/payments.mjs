@@ -7,10 +7,10 @@ import dSyncShop from '@hackthedev/dsync-shop';
 //import dSyncShop from "E:\\network-z-dev\\dSyncShop\\index.mjs";
 
 
-import {db} from "../../index.mjs";
 import express from "express";
 import {validateMemberId} from "./main.mjs";
 import {hasPermission} from "./chat/main.mjs";
+import {db} from "./init/database.mjs";
 
 export let paymentConfig = {}
 let paymentConfigPath = path.join(path.resolve(), "configs", "payments.json")

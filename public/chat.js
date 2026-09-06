@@ -472,7 +472,11 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 // IMPORTANT! By default, socket.io() connects to the host that
 // served the page, so we dont have to pass the server url
-var socket = io.connect()
+var socket = io.connect(window.location.origin);
+
+socket.io.engine.on("transport", (transport) => {
+    transport.opts.port = window.location.port;
+});
 
 registerMentionClickEvent()
 

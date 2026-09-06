@@ -2,7 +2,7 @@ import {queryDatabase} from "../mysql/mysql.mjs";
 import {sleep} from "../main.mjs";
 import {decodeFromBase64, saveChatMessageInDb, saveMemberToDB} from "../mysql/helper.mjs";
 import {decodeAndParseJSON} from "../../sockets/resolveMessage.mjs";
-import {serverconfig} from "../../../index.mjs";
+import {serverconfig} from "../init/config.mjs";
 
 export async function clearBase64FromDatabase(){
     let msgIds = await queryDatabase("SELECT messageId FROM messages");

@@ -1,5 +1,5 @@
 import {addBan} from "../ban-system/helpers.mjs";
-import {serverconfig} from "../../../index.mjs";
+import {serverconfig} from "../init/config.mjs";
 
 export async function autobanXSS(identifier){
     console.log("checking ban")

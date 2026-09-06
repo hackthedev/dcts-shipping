@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Performance.md",
+                "file": "Managed Hosting/Ptero Host Server Setup Notes.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Performance"
+              "title": "Ptero Host Server Setup Notes"
             }
           }
         ]
@@ -186,23 +186,24 @@
       "bases:Neue Base erstellen": false
     }
   },
-  "active": "37a4cdff02af2a98",
+  "active": "3a0469dcedf99830",
   "lastOpenFiles": [
-    "Getting started.md",
-    "Docker Setup.md",
+    "Messenger/Introduction.md",
+    "Installation/Docker Setup.md",
+    "Installation/VoIP Setup.md",
+    "Installation/Getting started.md",
+    "Performance.md",
+    "Installation",
     "Feature List.md",
-    "VoIP Setup.md",
     "Privacy Policy.md",
     "index.md",
     "Legal/Contributor License Agreement.md",
     "Lore/About DCTS.md",
     "Managed Hosting/Ptero Host Server Setup Notes.md",
-    "Messenger/Introduction.md",
     "plugins/Your first plugin.md",
     "plugins/Event Dispatchers.md",
     "plugins/Plugin System.md",
     "General/Changing Member Passwords.md",
-    "Performance.md",
     "Setup",
     "Legal",
     "Lore/Independence.md",
@@ -221,7 +222,6 @@
     "install NodeJS.md",
     "Managed Hosting",
     "Lore/Architecture.md",
-    "sql/Configure SQL.md",
     "sql/errors",
     "DCTS Docs Base.base",
     "Unbenannt.base",

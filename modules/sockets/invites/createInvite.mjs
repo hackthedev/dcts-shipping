@@ -1,6 +1,7 @@
-import {copyObject, escapeHtml, sanitizeInput, sendMessageToUser, validateMemberId} from "../../functions/main.mjs";
-import {saveConfig, serverconfig, xssFilters} from "../../../index.mjs";
+import {escapeHtml, validateMemberId} from "../../functions/main.mjs";
+import {xssFilters} from "../../../index.mjs";
 import {hasPermission} from "../../functions/chat/main.mjs";
+import {saveConfig, serverconfig} from "../../functions/init/config.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here

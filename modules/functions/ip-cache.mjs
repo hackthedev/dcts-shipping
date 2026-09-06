@@ -1,4 +1,4 @@
-import {db} from "../../index.mjs";
+import {db} from "./init/database.mjs";
 
 export async function getCache(identifier, type) {
     if (!identifier) throw new Error("identifier not supplied.");

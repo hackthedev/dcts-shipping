@@ -1,3 +1,5 @@
+import {serverconfig} from "./config.mjs";
+
 export let io = null;
 
 import path from "path";
@@ -6,12 +8,16 @@ import {fileURLToPath, pathToFileURL} from "url";
 import {Server} from "socket.io";
 import fs from "fs";
 import Logger from "@hackthedev/terminal-logger";
+export let socketToIP = [];
 
 import {
     findInJson,
     formatDateTime,
     getSocketIp,
 } from "../chat/main.mjs";
+import {powVerifiedUsers} from "../../sockets/pow.mjs";
+import {removeFromArray, sendMessageToUser} from "../main.mjs";
+import {unbanIp} from "../ban-system/helpers.mjs";
 
 // define quite some important stuff
 export const __filename = fileURLToPath(import.meta.url);

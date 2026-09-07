@@ -100,7 +100,6 @@ export let useridFromSocket = [];
 export let typingMembers = [];
 
 export let ratelimit = [];
-export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = process.env.DEBUG || false;

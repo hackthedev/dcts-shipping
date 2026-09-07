@@ -425,7 +425,7 @@ function startMentionAutocompleteListener() {
     document.addEventListener("keydown", e => {
         if (!mentionAc) return;
         mentionAc.onKey(e);
-    });
+    }, true);
 
     quill.on("text-change", () => {
         const text = getTextBeforeCursor();

@@ -225,7 +225,7 @@ async function getUserMentions(text) {
 async function getRoleMentions(text) {
     try {
         const roleIds = [];
-        const matches = [...text.matchAll(/&lt;@([^&]+)&gt;/g)];
+        const matches = [...text.matchAll(/&lt;!@([^&]+)&gt;/g)];
 
         for (const match of matches) {
             const id = match[1];
@@ -393,9 +393,6 @@ async function initializeMentionAutocomplete(element) {
         const match = text.match(/([@#€])([^\s@#€]*)$/);
         if (!match) return;
 
-        const start = range.index - match[0].length;
-        const length = match[0].length;
-
         let insert = "";
         if (item?.data?.type === "channel") {
             insert = `<#@${item.data.channel.id}>`;
@@ -403,6 +400,14 @@ async function initializeMentionAutocomplete(element) {
             insert = `<@${item.data.member.id}>`;
         } else if (item?.data?.type === "role") {
             insert = `<!@${item.data.role.id}>`;
+        }
+
+        let start = range.index - match[0].length;
+        let length = match[0].length;
+
+        if (start > 0 && quill.getText(start - 1, 1) === "@") {
+            start--;
+            length++;
         }
 
         quill.deleteText(start, length);
@@ -420,7 +425,7 @@ function startMentionAutocompleteListener() {
     document.addEventListener("keydown", e => {
         if (!mentionAc) return;
         mentionAc.onKey(e);
-    });
+    }, true);
 
     quill.on("text-change", () => {
         const text = getTextBeforeCursor();

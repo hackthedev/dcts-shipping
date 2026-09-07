@@ -4,12 +4,17 @@ import {serverconfig} from "./config.mjs";
 import {generateId} from "../main.mjs";
 import {resolveCategoryByChannelId, resolveGroupByChannelId} from "../chat/main.mjs";
 import ExpressStarter from "@hackthedev/express-starter";
-export let webPort = process.env.PORT || serverconfig?.serverinfo?.port;
+import Logger from "@hackthedev/terminal-logger";
+import FrontendLibs from "@hackthedev/frontend-libs";
 
 export let starter = null;
 export let app = null;
 export let express = null;
 export let server = null;
+
+export function getWebPort(){
+    return process.env.PORT ?? serverconfig?.serverinfo?.port;
+}
 
 export async function initWebserver(onStarted = null){
     starter = new ExpressStarter()
@@ -74,9 +79,35 @@ export async function initWebserver(onStarted = null){
         )
     );
 
-    starter.startHttpServer(webPort)
+    starter.startHttpServer(getWebPort())
 }
 
+export async function installWebLibs(){
+    try{
+        let libDir = path.join(path.resolve(), "public", "js", "libs");
+        const results = await FrontendLibs.installMultiple([
+            { package: '@hackthedev/file-manager@1.0.0', path: libDir },
+            { package: '@hackthedev/element-loader@1.0.0', path: libDir },
+            { package: '@hackthedev/rich-editor@latest', path: libDir },
+            { package: '@hackthedev/chat-tools@1.0.1', path: libDir },
+            { package: '@hackthedev/autocomplete@latest', path: libDir },
+            { package: '@hackthedev/prompts@latest', path: libDir },
+            { package: '@hackthedev/event-dispatcher@latest', path: libDir },
+        ]);
+
+        results.forEach((r) => {
+            if(r?.success || r?.skipped){
+                Logger.debug(r?.message)
+            }
+            else{
+                Logger.error(r?.message)
+            }
+        });
+    }
+    catch(exc){
+        Logger.error(exc);
+    }
+}
 
 function getMetaTitle(groupId, categoryId, channelId) {
     try {

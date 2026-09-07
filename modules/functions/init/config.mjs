@@ -10,10 +10,13 @@ import {queryDatabase} from "../mysql/mysql.mjs";
 import {saveMemberToDB} from "../mysql/helper.mjs";
 
 export let configPath = "./configs/config.json";
+export let serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, {encoding: "utf-8"})) : {};
 
-export var serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, {encoding: "utf-8"})) : {};
-checkConfigAdditions();
 
+export async function initConfig(){
+    serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, {encoding: "utf-8"})) : {};
+    checkConfigAdditions();
+}
 
 export function checkConfigAdditions() {
 
@@ -24,7 +27,7 @@ export function checkConfigAdditions() {
     // recreating the config example minimum base so that copying isnt needed anymore
     checkObjectKeys(serverconfig, "serverinfo.name", "Default Server")
     checkObjectKeys(serverconfig, "serverinfo.description", "")
-    checkObjectKeys(serverconfig, "serverinfo.webPort", 2052)
+    checkObjectKeys(serverconfig, "serverinfo.port", 2052)
     checkObjectKeys(serverconfig, "serverinfo.setup", 0)
     checkObjectKeys(serverconfig, "serverinfo.maxUploadStorage", 1024)
     checkObjectKeys(serverconfig, "serverinfo.rateLimit", 512)
@@ -259,7 +262,7 @@ export function checkConfigAdditions() {
     // Added MySQL
     checkObjectKeys(serverconfig, "serverinfo.sql.enabled", false)
     checkObjectKeys(serverconfig, "serverinfo.sql.host", "localhost")
-    checkObjectKeys(serverconfig, "serverinfo.sql.webPort", 3306)
+    checkObjectKeys(serverconfig, "serverinfo.sql.port", 3306)
     checkObjectKeys(serverconfig, "serverinfo.sql.username", "")
     checkObjectKeys(serverconfig, "serverinfo.sql.password", "")
     checkObjectKeys(serverconfig, "serverinfo.sql.database", "dcts")

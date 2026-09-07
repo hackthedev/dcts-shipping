@@ -2,13 +2,13 @@ import {
     debugmode,
     colors,
     versionCode,
-    io,
     flipDebug,
     ratelimit,
     setRatelimit,
     bcrypt,
     auther
 } from "../../index.mjs"
+import {io} from "./init/sockets.mjs"
 import {
     generateGid,
     getNewDate,

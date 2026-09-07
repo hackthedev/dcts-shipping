@@ -1,4 +1,5 @@
-import {io, socketHandlers} from "../../../index.mjs";
+import {socketHandlers} from "../../functions/init/sockets.mjs";
+import { io } from "../../functions/init/sockets.mjs";
 import path from "path";
 import fs from "fs";
 
@@ -144,6 +145,7 @@ async function handlePluginEndpointAuth(req, res, next) {
 }
 
 export async function initPluginSystem() {
+    Logger.info("Initializing plugin system...");
 
     // Directories where plugin files are located
     const pluginsDir = path.join(path.resolve(), "plugins");

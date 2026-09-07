@@ -1,7 +1,8 @@
 /*
     The functions here are basically the "core" of the chat app on the server side.
  */
-import {io, request} from "../../../index.mjs";
+import {request} from "../../../index.mjs";
+import {io} from "../init/sockets.mjs"
 import {consolas} from "../io.mjs";
 
 export function isVideo(url) {

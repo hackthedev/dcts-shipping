@@ -2,7 +2,7 @@
     The functions here are basically the "core" of the chat app on the server side.
  */
 import {xssFilters, ipsec} from "../../../index.mjs"
-import {io} from "../../../index.mjs";
+import {io} from "../init/sockets.mjs"
 import {getChannelMessageCount, getMemberHighestRole} from "./helper.mjs";
 import {
     copyObject,
@@ -14,8 +14,6 @@ import {signer} from "../../../index.mjs"
 import {queryDatabase} from "../mysql/mysql.mjs";
 import {getBan} from "../ban-system/helpers.mjs";
 import {saveConfig, serverconfig} from "../init/config.mjs";
-
-var serverconfigEditable = serverconfig;
 
 export async function getMemberLastOnline(memberId) {
     if (!memberId || !serverconfig.servermembers[memberId]) {
@@ -183,7 +181,10 @@ export function resolveGroupByChannelId(id) {
 
         for (const category of Object.keys(categories).reverse()) {
             const channels = categories[category].channel;
-            const channelFound = Object.values(channels).some(channel => channel.id === id);
+
+            const channelFound = Object.values(channels).some(
+                channel => String(channel.id) === String(id)
+            );
 
             if (channelFound) {
                 return group;
@@ -191,7 +192,7 @@ export function resolveGroupByChannelId(id) {
         }
     }
 
-    return null; // not found
+    return null;
 }
 
 export function resolveCategoryByChannelId(id) {
@@ -200,7 +201,10 @@ export function resolveCategoryByChannelId(id) {
 
         for (const category of Object.keys(categories).reverse()) {
             const channels = categories[category].channel;
-            const channelFound = Object.values(channels).some(channel => channel.id === id);
+
+            const channelFound = Object.values(channels).some(
+                channel => String(channel.id) === String(id)
+            );
 
             if (channelFound) {
                 return category;
@@ -208,7 +212,7 @@ export function resolveCategoryByChannelId(id) {
         }
     }
 
-    return null; // not found
+    return null;
 }
 
 

@@ -7,6 +7,8 @@ import path from "path";
 import sanitizeHtml from "sanitize-html";
 import bcrypt from "bcrypt";
 
+import {io, loadSocketHandlers, registerSocketEvents, listenToIO} from "./modules/functions/init/sockets.mjs";
+
 // dSync Libs
 import dSyncAuth from "@hackthedev/dsync-auth";
 //import dSyncAuth from "E:\\network-z-dev\\dSyncAuth\\index.mjs";
@@ -20,7 +22,6 @@ import dSyncFiles from "@hackthedev/dsync-files";
 import Logger from "@hackthedev/terminal-logger"
 import dSyncSql from "@hackthedev/dsync-sql"
 import dSyncIPSec from "@hackthedev/dsync-ipsec"
-import FrontendLibs from "@hackthedev/frontend-libs";
 import dSync from "@hackthedev/dsync";
 
 // Depending on the SSL setting, this will switch.
@@ -52,14 +53,10 @@ import {checkFile, checkServerDirectories,} from "./modules/functions/io.mjs";
 // Chat functions
 import {
     changeKeyVerification,
-    findInJson,
-    formatDateTime,
     getMemberFromKey,
-    getSocketIp,
     hasPermission,
 } from "./modules/functions/chat/main.mjs";
 
-import {fileURLToPath, pathToFileURL} from "url";
 import {powVerifiedUsers,} from "./modules/sockets/pow.mjs";
 
 import {loadMembersFromDB} from "./modules/functions/mysql/helper.mjs";
@@ -77,15 +74,9 @@ import SetupWizard from "@hackthedev/setup-wizard";
 import express from "express";
 import {initLivekitEndpoints} from "./modules/sockets/routes/livekit.mjs";
 import {db, processDbEnvData, setupDbConnection} from "./modules/functions/init/database.mjs";
-import {configPath, saveConfig, serverconfig} from "./modules/functions/init/config.mjs";
+import {configPath, saveConfig, serverconfig, initConfig} from "./modules/functions/init/config.mjs";
 import dSyncWeb from "@hackthedev/dsync-web";
-import {app, initWebserver, server, starter, webPort} from "./modules/functions/init/web.mjs";
-import ExpressStarter from "@hackthedev/express-starter";
-
-
-// define quite some important stuff
-export const __filename = fileURLToPath(import.meta.url);
-export const __dirname = path.dirname(__filename);
+import {app, initWebserver, starter, getWebPort, installWebLibs} from "./modules/functions/init/web.mjs";
 
 
 // improved now
@@ -109,13 +100,13 @@ export let useridFromSocket = [];
 export let typingMembers = [];
 
 export let ratelimit = [];
-export let socketToIP = [];
 
 export let allowLogging = false;
 export let debugmode = process.env.DEBUG || false;
 
 export let ipsec;
-export let io;
+
+await initConfig();
 
 // handle startup args
 let nodeArgs = process.argv;
@@ -194,8 +185,10 @@ process.on("unhandledRejection", (reason) => {
 
 signer = new dSyncSign("./configs/privatekey.json");
 
-if (import.meta.main) {
-    await initSetupWizard();
+async function initSocketHandlers(){
+    Logger.info("Loading socket handlers...");
+    await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
+    Logger.info("Done!")
 }
 
 async function initIPSec(){
@@ -422,7 +415,7 @@ export async function initDCTSServer(){
     } catch (e) {
             Logger.error("Error while trying to connect to database!")
             Logger.error(e)
-            process.exit(0)
+            process.exit(1)
     }
 
     let magentaBlinkColor = Logger.colors.blink + Logger.colors.bright + Logger.colors.fgMagenta
@@ -467,7 +460,7 @@ export async function initDCTSServer(){
     });
 
 
-    initIPSec();
+    await initIPSec();
 
     app.use(
         "/docs",
@@ -512,32 +505,8 @@ export async function initDCTSServer(){
 
     //initPaymentSystem(app)
 
-    try{
-        let libDir = path.join(path.resolve(), "public", "js", "libs");
-        const results = await FrontendLibs.installMultiple([
-            { package: '@hackthedev/file-manager@1.0.0', path: libDir },
-            { package: '@hackthedev/element-loader@1.0.0', path: libDir },
-            { package: '@hackthedev/rich-editor@latest', path: libDir },
-            { package: '@hackthedev/chat-tools@1.0.1', path: libDir },
-            { package: '@hackthedev/autocomplete@latest', path: libDir },
-            { package: '@hackthedev/prompts@latest', path: libDir },
-            { package: '@hackthedev/event-dispatcher@latest', path: libDir },
-        ]);
-
-        results.forEach((r) => {
-            if(r?.success || r?.skipped){
-                Logger.debug(r?.message)
-            }
-            else{
-                Logger.error(r?.message)
-            }
-        });
-    }
-    catch(exc){
-        Logger.error(exc);
-    }
-
     syncDiscoveredHosts(true);
+    await installWebLibs();
 
     try {
         await initPluginSystem();
@@ -552,7 +521,7 @@ export async function initSetupWizard(bypass = false){
 
     let setupWizard = new SetupWizard({
         debug: debugmode,
-        redirectUrl: `http://localhost:${webPort}`,
+        redirectUrl: `http://localhost:${getWebPort()}`,
         onCompleted: async () => {
             await finishSetup();
         }
@@ -612,7 +581,8 @@ export async function initSetupWizard(bypass = false){
                     install: [
                         "DEBIAN_FRONTEND=noninteractive apt-get update -y"
                     ],
-                    execute: []
+                    execute: [],
+                    canMiss: true
                 },
                 {
                     title: "Screen",
@@ -627,7 +597,7 @@ export async function initSetupWizard(bypass = false){
                 {
                     title: "cURL",
                     check: [
-                        ["curl", "curl:"]
+                        ["curl --version", "curl "]
                     ],
                     install: [
                         "DEBIAN_FRONTEND=noninteractive apt install curl -y"
@@ -637,7 +607,7 @@ export async function initSetupWizard(bypass = false){
                 {
                     title: "wget",
                     check: [
-                        ["wget", "wget:"]
+                        ["wget --version", "GNU Wget"]
                     ],
                     install: [
                         "DEBIAN_FRONTEND=noninteractive apt install wget -y"
@@ -669,8 +639,9 @@ export async function initSetupWizard(bypass = false){
                         `mariadb -e "GRANT ALL PRIVILEGES ON ${setupDbName}.* TO '${setupDbUser}'@'localhost'; FLUSH PRIVILEGES;"`
                     ],
                     execute: [
-                        `systemctl is-active --quiet mariadb || service mariadb start`
-                    ]
+                        `service mariadb status >/dev/null 2>&1 || service mariadb start`
+                    ],
+                    canFail: true,
                 },
                 {
                     title: "Rider",
@@ -835,10 +806,11 @@ export async function initSetupWizard(bypass = false){
     }
 
     async function executePrerequisites(){
+        Logger.info("Launching prerequisites...")
         await doForEachSetupPrerequisite(async (prerequisite) => {
             // if there are startup commands after install etc
             if(prerequisite?.execute) {
-                for(let command in prerequisite.execute){
+                for(const command of prerequisite.execute){
                     try{
                         await setupWizard.runCommand(command)
                     }
@@ -851,13 +823,22 @@ export async function initSetupWizard(bypass = false){
     }
 
     async function checkPrerequisites(){
+        Logger.info("Checking prerequisites...")
         let result = await doForEachSetupPrerequisite(async (prerequisite) => {
             // if there are startup commands after install etc
             let hadErrors = false;
             if(prerequisite?.check) {
-                for(let command in prerequisite.check){
-                    let runResult = await setupWizard.runCommand(command)
-                    if(!runResult.success) hadErrors = true;
+                for(const check of prerequisite.check){
+                    let command = check[0];
+                    let runResult = await setupWizard.runCommand(command)      
+                    
+                    // wether or not something is an error
+                    if(!runResult.success && (!prerequisite?.canFail && !prerequisite?.canMiss)){
+                        hadErrors = true;
+                        Logger.warn(`Prerequisite "${prerequisite.title}" seemed to have failed with the following error:`)
+                        Logger.warn(`Command: ${command}`)
+                        Logger.warn(runResult?.error ?? runResult?.stdout + runResult?.stderr)
+                    }   
                 }
             }
 
@@ -865,14 +846,15 @@ export async function initSetupWizard(bypass = false){
         })
 
         let hadError = false;
-        for(let res of result){
-            if(res[1] === true) hadError = true;
+        for(let res of result.values()){
+            if(res === true) hadError = true;
         }
 
         // invert it so it makes more sense to use.
         // false = there was a eror
         return !hadError;
     }
+
 
     async function doForEachSetupPrerequisite(callback){
         if(!callback ||typeof callback !== "function") throw new Error("Missing setup callback");
@@ -932,95 +914,6 @@ export async function checkPow(socket) {
     }
 }
 
-export async function listenToIO(){
-    const {server} = starter.getServerInfo();
-
-    if(!server){
-        throw new Error("server was undefined!")
-    }
-
-    io = new Server(server, {
-        maxHttpBufferSize: 1e8,
-        secure: true,
-        pingInterval: 25000,
-        pingTimeout: 60000,
-        cors: {
-            origin: "*",
-            methods: ["GET", "POST"],
-            credentials: false,
-        },
-    });
-
-    io.on("connection", async function (socket) {
-        // socket ip
-        var ip = getSocketIp(socket);
-        if (serverconfig.banlist[ip]) {
-            socket.disconnect(true);
-        }
-
-        registerSocketEvents(socket);
-
-        socket.on("disconnect", async () => {
-            //Logger.info(`Socket ${socket.id} disconnected, cleaning up handlers...`);
-            if (activeSockets.has(socket.id)) {
-                activeSockets.get(socket.id).forEach((cleanup) => cleanup());
-                activeSockets.delete(socket.id); // Remove socket entry
-            }
-
-            // clean up stuff
-            try {
-                removeFromArray(powVerifiedUsers, socket.id);
-            } catch (cleanupError) {
-                Logger.error(cleanupError);
-            }
-        });
-
-        // Check if user ip is blacklisted
-        socketToIP[socket] = ip;
-        if (serverconfig.ipblacklist.hasOwnProperty(ip)) {
-            if (Date.now() <= serverconfig.ipblacklist[ip]) {
-                let detailText = "";
-                let banListResult = findInJson(serverconfig?.banlist, "ip", ip);
-
-                if (banListResult != null) {
-                    let bannedUntilDate = new Date(banListResult.until);
-                    bannedUntilDate.getFullYear() === "9999"
-                        ? (detailText = "permanently banned")
-                        : (detailText = `banned until: <br>${formatDateTime(bannedUntilDate)}`);
-                    detailText +=
-                        banListResult?.reason !== null
-                            ? `<br><br>Reason:<br>${banListResult.reason}`
-                            : "";
-                }
-
-                sendMessageToUser(
-                    socket.id,
-                    JSON.parse(
-                        `{
-                            "title": "IP Blacklisted ${ip}",
-                            "message": "Your IP Address was ${detailText || "banned"}",
-                            "buttons": {
-                                "0": {
-                                    "text": "Ok",
-                                    "events": "onclick='closeModal()'"
-                                }
-                            },
-                            "type": "error",
-                            "displayTime": 60000
-                        }`,
-                    ),
-                );
-
-                socket.disconnect();
-
-                Logger.debug("Disconnected user because ip is blacklisted");
-            } else if (Date.now() > serverconfig.ipblacklist[ip]) {
-                unbanIp(socket);
-            }
-        }
-    });
-}
-
 function closeConfigFile() {
     if (isClosing) return;
     isClosing = true;
@@ -1034,7 +927,7 @@ function closeConfigFile() {
         }
     }
 
-    process.exit();
+    process.exit(0);
 }
 
 // Automatically close the file on process exit
@@ -1067,61 +960,14 @@ export function skipSetup(){
     return nodeArgs?.includes("--skip-setup")
 }
 
-export const socketHandlers = [];
-const activeSockets = new Map();
-async function initSocketHandlers(){
-    await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
-}
-
-const loadSocketHandlers = async (mainHandlersDir, io) => {
-    const fileList = [];
-
-    const scanDir = (dir) => {
-        const files = fs.readdirSync(dir, {withFileTypes: true});
-        for (const file of files) {
-            const filePath = path.join(dir, file.name);
-            if (file.isDirectory()) {
-                scanDir(filePath);
-            } else if (file.name.endsWith(".mjs")) {
-                fileList.push(filePath);
-            }
-        }
-    };
-
-    scanDir(mainHandlersDir);
-
-    for (const filePath of fileList) {
-        const fileUrl = pathToFileURL(filePath).href;
+// something something deadlock
+if (import.meta.main) {
+    setImmediate(async () => {
         try {
-            const {default: handlerFactory} = await import(fileUrl);
-            const handler = handlerFactory(io);
-
-            if (typeof handler === "function") {
-                socketHandlers.push(handler);
-                Logger.debug(`Preloaded socket handler: ${filePath}`);
-            } else {
-                Logger.warn(`Ignored invalid socket handler in ${filePath}`);
-            }
+            await initSetupWizard();
         } catch (err) {
-            Logger.error(`Error importing socket handler: ${fileUrl}`);
             Logger.error(err);
+            process.exit(1);
         }
-    }
-};
-
-const registerSocketEvents = (socket) => {
-    try {
-        const attachedHandlers = [];
-
-        for (const handler of socketHandlers) {
-            const cleanup = handler(socket);
-            if (typeof cleanup === "function") {
-                attachedHandlers.push(cleanup);
-            }
-        }
-
-        activeSockets.set(socket.id, attachedHandlers);
-    } catch (err) {
-        console.error("Error registering socket events:", err);
-    }
-};
+    });
+}

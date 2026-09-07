@@ -1,14 +1,16 @@
 import { io } from "socket.io-client";
 import { beforeAll, afterAll } from "bun:test";
 import { initSetupWizard } from "../index.mjs";
-import { starter } from "../modules/functions/init/web.mjs";
-import {serverconfig} from "../modules/functions/init/config.mjs";
+import {installWebLibs, starter} from "../modules/functions/init/web.mjs";
+import {serverconfig, initConfig} from "../modules/functions/init/config.mjs";
 import {powVerifiedUsers} from "../modules/sockets/pow.mjs";
 
 export let clientSocket;
 
 beforeAll(async () => {
+    await initConfig();
     await initSetupWizard(true);
+    await installWebLibs();
 
     const { server } = starter.getServerInfo();
 

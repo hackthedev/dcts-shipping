@@ -2,10 +2,10 @@ services:
   dcts-app:
     container_name: dcts
     #For local development
-    #build:
-    #  context: ../
-    #  dockerfile: ./Docker/Dockerfile
-    image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:${VERSION:-latest}}
+    build:
+      context: ../
+      dockerfile: ./Docker/Dockerfile
+    #image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:${VERSION:-latest}}
     environment:
       - DEBUG=${DEBUG:-false}
     ports:
@@ -24,4 +24,3 @@ services:
       - ../dcts/plugins:/app/plugins
       - ../dcts/public/css/themes:/app/themes 
       - ../livekit:/app/livekit
-

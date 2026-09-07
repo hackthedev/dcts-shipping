@@ -7,7 +7,7 @@ import {
 import Logger from "@hackthedev/terminal-logger";
 import JSONTools from "@hackthedev/json-tools";
 import { processMessageObject } from "../../resolveMessage.mjs";
-import { io } from "../../../../index.mjs";
+import { io } from "../../../functions/init/sockets.mjs";
 import {serverconfig} from "../../../functions/init/config.mjs";
 
 export async function getMemberDmRooms(memberId) {

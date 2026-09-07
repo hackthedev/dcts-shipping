@@ -225,7 +225,7 @@ async function getUserMentions(text) {
 async function getRoleMentions(text) {
     try {
         const roleIds = [];
-        const matches = [...text.matchAll(/&lt;@([^&]+)&gt;/g)];
+        const matches = [...text.matchAll(/&lt;!@([^&]+)&gt;/g)];
 
         for (const match of matches) {
             const id = match[1];

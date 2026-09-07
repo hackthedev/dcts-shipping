@@ -191,10 +191,6 @@ async function initSocketHandlers(){
     Logger.info("Done!")
 }
 
-if (import.meta.main) {
-    await initSetupWizard();
-}
-
 async function initIPSec(){
     ipsec = new dSyncIPSec({
         checkCache: async (ip) => {
@@ -419,7 +415,7 @@ export async function initDCTSServer(){
     } catch (e) {
             Logger.error("Error while trying to connect to database!")
             Logger.error(e)
-            process.exit(0)
+            process.exit(1)
     }
 
     let magentaBlinkColor = Logger.colors.blink + Logger.colors.bright + Logger.colors.fgMagenta
@@ -464,7 +460,7 @@ export async function initDCTSServer(){
     });
 
 
-    initIPSec();
+    await initIPSec();
 
     app.use(
         "/docs",
@@ -931,7 +927,7 @@ function closeConfigFile() {
         }
     }
 
-    process.exit();
+    process.exit(0);
 }
 
 // Automatically close the file on process exit
@@ -962,4 +958,16 @@ export function isPtero(){
 
 export function skipSetup(){
     return nodeArgs?.includes("--skip-setup")
+}
+
+// something something deadlock
+if (import.meta.main) {
+    setImmediate(async () => {
+        try {
+            await initSetupWizard();
+        } catch (err) {
+            Logger.error(err);
+            process.exit(1);
+        }
+    });
 }

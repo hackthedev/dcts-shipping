@@ -275,7 +275,7 @@ export async function initPluginSystem() {
     };
 
     // Process plugins at server start
-    processPlugins().catch((err) => console.error(err));
+    await processPlugins().catch((err) => console.error(err));
     await initPluginRoutes();
 }
 

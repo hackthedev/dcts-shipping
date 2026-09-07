@@ -2,7 +2,7 @@
     The functions here are basically the "core" of the chat app on the server side.
  */
 import {xssFilters, ipsec} from "../../../index.mjs"
-import {io} from "../../functions/init/sockets.mjs"
+import {io} from "../init/sockets.mjs"
 import {getChannelMessageCount, getMemberHighestRole} from "./helper.mjs";
 import {
     copyObject,

@@ -27,6 +27,18 @@ export const __dirname = path.dirname(__filename);
 export const socketHandlers = [];
 const activeSockets = new Map();
 
+const withTimeout = (promise, description, timeout = 10000) => {
+    let timer;
+
+    const timeoutPromise = new Promise((_, reject) => {
+        timer = setTimeout(() => {
+            reject(new Error(`Socket handler step timed out after ${timeout}ms: ${description}`));
+        }, timeout);
+    });
+
+    return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timer));
+};
+
 export const loadSocketHandlers = async (mainHandlersDir, io) => {
     const fileList = [];
 
@@ -45,20 +57,16 @@ export const loadSocketHandlers = async (mainHandlersDir, io) => {
     };
 
     scanDir(mainHandlersDir);
+    fileList.sort();
 
     for (const filePath of fileList) {
         const fileUrl = pathToFileURL(filePath).href;
 
         try {
-            const module = await Promise.race([
+            const module = await withTimeout(
                 import(fileUrl),
-
-                new Promise((_, reject) => {
-                    setTimeout(() => {
-                        reject(new Error(`Socket handler import timed out after 10 seconds: ${filePath}`));
-                    }, 10000);
-                })
-            ]);
+                `import ${filePath}`,
+            );
 
             const {default: handlerFactory} = module;
 
@@ -67,7 +75,10 @@ export const loadSocketHandlers = async (mainHandlersDir, io) => {
                 continue;
             }
 
-            const handler = await handlerFactory(io);
+            const handler = await withTimeout(
+                Promise.resolve().then(() => handlerFactory(io)),
+                `factory ${filePath}`,
+            );
 
             if (typeof handler === "function") {
                 socketHandlers.push(handler);

@@ -33,7 +33,7 @@
     "js-yaml": "^4.3.2",
     "jsonwebtoken": "^9.0.3",
     "livekit-server-sdk": "^2.18.0",
-    "multer": "^2.2.0",
+    "multer": "^2.3.0",
     "mysql2": "^3.24.2",
     "node-fetch": "^3.3.2",
     "sanitize-html": "^2.17.7",

@@ -1,11 +1,11 @@
 #change this to your domain for where livekit is going to live
-{$LIVEKIT_URL} {
+livekit.your-domain.com {
     #For setting your own cert
     tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem
 
     encode gzip zstd
 
-    reverse_proxy dcts-livekit:7880 {
+    reverse_proxy 127.0.0.1:7880 {
         transport http {
             versions 1.1
         }
@@ -21,13 +21,13 @@
 }
 
 #change this to your domain for the webui to live
-{$APP_URL} {
+chat.your-domain.com {
     #For setting your own cert
     tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem
 
     encode gzip zstd
 
-    reverse_proxy dcts-app:2052
+    reverse_proxy 127.0.0.1:2052
 
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"

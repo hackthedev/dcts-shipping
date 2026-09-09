@@ -5,7 +5,7 @@
 
     encode gzip zstd
 
-    reverse_proxy dcts-livekit:7880 {
+    reverse_proxy 127.0.0.1:7880 {
         transport http {
             versions 1.1
         }
@@ -27,7 +27,7 @@
 
     encode gzip zstd
 
-    reverse_proxy dcts-app:2052
+    reverse_proxy 127.0.0.1:2052
 
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"

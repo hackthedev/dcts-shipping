@@ -14,6 +14,7 @@ services:
       - 7880:7880
       - 7881:7881
       - 7882:7882/udp
+      - 50000-60000:50000-60000/udp
       - 3478:3478/udp
       - 5349:5349/tcp
     restart: unless-stopped
@@ -24,3 +25,4 @@ services:
       - ../dcts/plugins:/app/plugins
       - ../dcts/public/css/themes:/app/themes 
       - ../livekit:/app/livekit
+      - /etc/caddy:/app/caddy

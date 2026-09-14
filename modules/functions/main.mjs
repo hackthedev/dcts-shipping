@@ -1,5 +1,4 @@
 import {
-    debugmode,
     colors,
     versionCode,
     flipDebug,
@@ -28,6 +27,7 @@ import {sanitizeHTML} from "./sanitizing/functions.mjs";
 
 import dSyncAuth from "@hackthedev/dsync-auth";
 import {reloadConfig, saveConfig, serverconfig} from "./init/config.mjs";
+import {debugmode} from "./init/general.mjs";
 
 var serverconfigEditable;
 
@@ -275,12 +275,6 @@ export async function handleTerminalCommands(command, args) {
                     return -1;
                 }
             });
-
-            serverRolesSorted.forEach(role => {
-                console.log(colors.yellow("- Role ID: " + role.info.id));
-                console.log("   - Role Name: " + role.info.name);
-                console.log("");
-            })
         } else if (command == "token") {
 
             if (args.length == 2) {

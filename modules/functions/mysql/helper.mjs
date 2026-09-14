@@ -1,5 +1,4 @@
 import {queryDatabase} from "./mysql.mjs";
-import {inbox} from "../../../index.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import fs from "fs";
 import {spawn} from "child_process";
@@ -201,12 +200,16 @@ export async function markInboxMessageAsRead(memberId, inboxId) {
 
 
 export async function addInboxMessage(memberId, data = {}, type = "general", customId = null) {
+    return null
+    /*
     return await inbox.setInboxEntry({
         targetId: memberId,
         type,
         customId,
         data,
     })
+
+     */
 }
 
 export async function getInboxMessages({

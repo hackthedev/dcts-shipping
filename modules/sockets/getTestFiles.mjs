@@ -1,5 +1,5 @@
-import {debugmode} from "../../index.mjs";
 import fs from "fs";
+import {debugmode} from "../functions/init/general.mjs";
 
 
 export default (io) => (socket) => {

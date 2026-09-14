@@ -1,0 +1,1 @@
+export let debugmode = process.env.DEBUG === true || false;

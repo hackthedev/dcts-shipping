@@ -4,7 +4,6 @@
  */
 import {
     colors,
-    debugmode,
     allowLogging,
 } from "../../index.mjs"
 import Logger from "@hackthedev/terminal-logger"
@@ -36,6 +35,7 @@ import {Clock} from "./clock.mjs";
 import {configPath, serverconfig} from "./init/config.mjs";
 import path from "path";
 import fs from "fs";
+import {debugmode} from "./init/general.mjs";
 
 
 var serverconfigEditable = serverconfig;

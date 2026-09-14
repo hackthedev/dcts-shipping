@@ -7,7 +7,7 @@ import path from "path";
 import sanitizeHtml from "sanitize-html";
 import bcrypt from "bcrypt";
 
-import {io, loadSocketHandlers, registerSocketEvents, listenToIO} from "./modules/functions/init/sockets.mjs";
+import {io, listenToIO, loadSocketHandlers} from "./modules/functions/init/sockets.mjs";
 
 // dSync Libs
 import dSyncAuth from "@hackthedev/dsync-auth";
@@ -17,7 +17,6 @@ import {dSyncSign} from "@hackthedev/dsync-sign";
 //import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
 import dSyncInbox from "@hackthedev/dsync-inbox"
 //import dSyncInbox from "/run/media/marcel/SSD/network-z-dev/dSyncInbox/index.mjs"
-
 import dSyncFiles from "@hackthedev/dsync-files";
 
 import Logger from "@hackthedev/terminal-logger"
@@ -43,7 +42,6 @@ import {
     checkVersionUpdate,
     generateId,
     handleTerminalCommands,
-    removeFromArray,
     sendMessageToUser,
     validateMemberId,
 } from "./modules/functions/main.mjs";
@@ -52,11 +50,7 @@ import {
 import {checkFile, checkServerDirectories,} from "./modules/functions/io.mjs";
 
 // Chat functions
-import {
-    changeKeyVerification,
-    getMemberFromKey,
-    hasPermission,
-} from "./modules/functions/chat/main.mjs";
+import {changeKeyVerification, getMemberFromKey, hasPermission,} from "./modules/functions/chat/main.mjs";
 
 import {powVerifiedUsers,} from "./modules/sockets/pow.mjs";
 
@@ -65,7 +59,7 @@ import {checkMigrations} from "./modules/functions/migrations/helper.mjs";
 import JSONTools from "@hackthedev/json-tools";
 import {getCache, setCache} from "./modules/functions/ip-cache.mjs";
 import {emitErrorToTestingClient} from "./modules/sockets/onErrorTesting.mjs";
-import {checkAndUnbanPublicKey, unbanIp} from "./modules/functions/ban-system/helpers.mjs";
+import {checkAndUnbanPublicKey} from "./modules/functions/ban-system/helpers.mjs";
 import {getMessageObjectById} from "./modules/sockets/resolveMessage.mjs";
 import {getMemberHighestUploadLimit} from "./modules/functions/chat/helper.mjs";
 import {initPluginSystem} from "./modules/sockets/routes/plugins.mjs";
@@ -75,9 +69,10 @@ import SetupWizard from "@hackthedev/setup-wizard";
 import express from "express";
 import {initLivekitEndpoints} from "./modules/sockets/routes/livekit.mjs";
 import {db, processDbEnvData, setupDbConnection} from "./modules/functions/init/database.mjs";
-import {configPath, saveConfig, serverconfig, initConfig} from "./modules/functions/init/config.mjs";
+import {configPath, initConfig, saveConfig, serverconfig} from "./modules/functions/init/config.mjs";
 import dSyncWeb from "@hackthedev/dsync-web";
-import {app, initWebserver, starter, getWebPort, installWebLibs} from "./modules/functions/init/web.mjs";
+import {app, getWebPort, initWebserver, installWebLibs, starter} from "./modules/functions/init/web.mjs";
+import {debugmode} from "./modules/functions/init/general.mjs";
 
 
 // improved now
@@ -103,7 +98,6 @@ export let typingMembers = [];
 export let ratelimit = [];
 
 export let allowLogging = false;
-export let debugmode = process.env.DEBUG === true || false;
 
 export let ipsec;
 

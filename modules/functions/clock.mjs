@@ -1,4 +1,4 @@
-import {debugmode} from "../../index.mjs";
+import {debugmode} from "./init/general.mjs";
 
 export class Clock {
     static timers = new Map();

@@ -8,7 +8,6 @@ import fs from "fs";
 import {checkObjectKeys} from "../main.mjs";
 import {queryDatabase} from "../mysql/mysql.mjs";
 import {saveMemberToDB} from "../mysql/helper.mjs";
-import {completeMigrationTask, getMigrationTask} from "../migrations/helper.mjs";
 
 export let configPath = "./configs/config.json";
 export let serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, {encoding: "utf-8"})) : {};

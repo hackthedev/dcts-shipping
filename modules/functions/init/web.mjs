@@ -19,13 +19,14 @@ export function getWebPort(){
 }
 
 export async function setupCaddy(){
-    const caddy = new CaddySdk("dcts");
-    let livekitConfig = await caddy.getConfig("livekit");
-    let dctsConfig = await caddy.getConfig("dcts");
+    try{
+        const caddy = new CaddySdk("dcts");
+        let livekitConfig = await caddy.getConfig("livekit");
+        let dctsConfig = await caddy.getConfig("dcts");
 
-    if(!livekitConfig && serverconfig.serverinfo.livekit.url !== "localhost:7880"){
-        await caddy.setConfig("livekit",
-            `${serverconfig.serverinfo.livekit.url} {
+        if(!livekitConfig && serverconfig.serverinfo.livekit.url !== "localhost:7880"){
+            await caddy.setConfig("livekit",
+                `${serverconfig.serverinfo.livekit.url} {
     reverse_proxy localhost:7880 {
         transport http {
             versions 1.1
@@ -40,16 +41,21 @@ export async function setupCaddy(){
     }
 }
         `)
-    }
-    if(!dctsConfig){
-        await caddy.setConfig("dcts",
-            `${serverconfig.serverinfo.app.url.dcts} {
+        }
+        if(!dctsConfig && serverconfig?.serverinfo?.app?.url?.dcts !== "chat.example.com"){
+            await caddy.setConfig("dcts",
+                `${serverconfig.serverinfo.app.url.dcts} {
     reverse_proxy 127.0.0.1:2052
 }
         `)
-    }
+        }
 
-    execSync("caddy reload --config=/etc/caddy/Caddyfile");
+        execSync("caddy reload --config=/etc/caddy/Caddyfile");
+    }
+    catch(caddyEx){
+        Logger.error("Error while trying to setup caddy")
+        Logger.error(caddyEx);
+    }
 }
 
 export async function initWebserver(onStarted = null){

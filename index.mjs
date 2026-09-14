@@ -819,7 +819,7 @@ export async function initSetupWizard(bypass = false){
                 {
                     id: "dcts_url",
                     text: "DCTS Domain",
-                    placeholder: "chat.example.com",
+                    placeholder: null,
                     type: "text",
                     value: serverconfig?.serverinfo?.app?.url?.dcts ?? null,
                     test: async (value) => {
@@ -829,7 +829,7 @@ export async function initSetupWizard(bypass = false){
                 {
                     id: "livekit_url",
                     text: "Livekit Domain",
-                    placeholder: "livekit.example.com",
+                    placeholder: null,
                     type: "text",
                     value: serverconfig?.serverinfo?.livekit?.url ?? null,
                     test: async (value) => {

@@ -2,13 +2,15 @@ services:
   dcts-app:
     container_name: dcts
     #For local development
-    build:
-      context: ../
-      dockerfile: ./Docker/Dockerfile
-    #image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:${VERSION:-latest}}
+    #build:
+    #  context: ../
+    #  dockerfile: ./Docker/Dockerfile
+    image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:${VERSION:-latest}}
     environment:
       - DEBUG=${DEBUG:-false}
     ports:
+      - 80:80
+      - 443:443
       - 2052:2052
       - 5000:5000
       - 7880:7880

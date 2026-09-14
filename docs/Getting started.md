@@ -15,13 +15,14 @@ This document explains how to get started with the chat application and explain 
 
 The software was designed to be setup and run as simple as possible. Using the *`config.json`* file you can manage additional settings that may not be present in the web client. 
 
-| Feature        | Description                                                                                                                            |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| NodeJS / Bun   | Bun is the preferred runtime. Alternatively NodeJS can be used as well.                                                                |
-| MariaDB        | ***Required***. **<u>MySQL IS NOT COMPATIBLE</u>**                                                                                     |
-| SSL / TLS Cert | You will need a certificate if you try to access it from another machine/internet due to security reasons! Its fine for localhost only |
-| Caddy / nginx  | Used for reverse proxies to make life easier and when you want your instance to be accessable from other computers.                    |
-| Docker         | Required.                                                                                                                              |
+| Feature        | Description                                                                                                                                                |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NodeJS / Bun   | Bun is the preferred runtime. Alternatively NodeJS can be used as well.                                                                                    |
+| MariaDB        | ***Required***. **<u>MySQL IS NOT COMPATIBLE</u>**                                                                                                         |
+| SSL / TLS Cert | You will need a certificate if you try to access it from another machine/internet due to security reasons! Its fine for localhost only                     |
+| Caddy / nginx  | Used for reverse proxies to make life easier and when you want your instance to be accessable from other computers.                                        |
+| Docker         | Required.                                                                                                                                                  |
+| vCPU           | If you plan to run DCTS on a VPS, make sure the VPS provider supports `host` as cpu type. Need a vps still? [Checkout our partner](https://vultris.cloud/) |
 
 Additionally, the following ports are being used and should be accessable if you dont use a [Reverse Proxy Setup](network/Reverse%20Proxy%20Setup.md) .
 - 2052:2052

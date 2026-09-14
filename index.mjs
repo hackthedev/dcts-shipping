@@ -72,7 +72,7 @@ import {db, processDbEnvData, setupDbConnection} from "./modules/functions/init/
 import {configPath, initConfig, saveConfig, serverconfig} from "./modules/functions/init/config.mjs";
 import dSyncWeb from "@hackthedev/dsync-web";
 import {app, getWebPort, initWebserver, installWebLibs, starter} from "./modules/functions/init/web.mjs";
-import {debugmode, flipDebug} from "./modules/functions/init/general.mjs";
+import {debugmode, flipDebug, versionCode, versionPath} from "./modules/functions/init/general.mjs";
 
 
 // improved now
@@ -126,13 +126,10 @@ else{
     console.log("Starting...");
 }
 
-// check version file for update check
-let versionPath = path.join(path.resolve(), "version");
 if(!fs.existsSync(versionPath)) {
     Logger.error("Version path not found!!")
     process.exit(1);
 }
-export let versionCode = fs.readFileSync(versionPath).toString();
 
 // config file saving
 let fileHandle = null; // File handle for the config file

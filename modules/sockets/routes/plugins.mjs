@@ -241,10 +241,9 @@ export async function initPluginSystem() {
 
             // skip disabled plugin
             if (pluginEnabled !== true) {
-                Logger.warn(
-                    `Skipped loading plugin ${pluginTitle} (${pluginName}) because its not enabled`,
-                );
-                Logger.warn("This was temporarily bypassed due to testing!")
+                //Logger.warn(
+                //    `Skipped loading plugin ${pluginTitle} (${pluginName}) because its not enabled`,
+                //);
                 //continue;
             }
 

@@ -6,6 +6,8 @@ import {resolveCategoryByChannelId, resolveGroupByChannelId} from "../chat/main.
 import ExpressStarter from "@hackthedev/express-starter";
 import Logger from "@hackthedev/terminal-logger";
 import FrontendLibs from "@hackthedev/frontend-libs";
+import CaddySdk from "@hackthedev/caddy-sdk";
+import {execSync} from "node:child_process";
 
 export let starter = null;
 export let app = null;
@@ -16,7 +18,43 @@ export function getWebPort(){
     return process.env.PORT ?? serverconfig?.serverinfo?.port;
 }
 
+export async function setupCaddy(){
+    const caddy = new CaddySdk("dcts");
+    let livekitConfig = await caddy.getConfig("livekit");
+    let dctsConfig = await caddy.getConfig("dcts");
+
+    if(!livekitConfig && serverconfig.serverinfo.livekit.url !== "localhost:7880"){
+        await caddy.setConfig("livekit",
+            `${serverconfig.serverinfo.livekit.url} {
+    reverse_proxy localhost:7880 {
+        transport http {
+            versions 1.1
+        }
+    }
+
+    header {
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods "GET, POST, OPTIONS"
+        Access-Control-Allow-Headers *
+        Access-Control-Allow-Credentials true
+    }
+}
+        `)
+    }
+    if(!dctsConfig){
+        await caddy.setConfig("dcts",
+            `${serverconfig.serverinfo.app.url.dcts} {
+    reverse_proxy 127.0.0.1:2052
+}
+        `)
+    }
+
+    execSync("caddy reload --config=/etc/caddy/Caddyfile");
+}
+
 export async function initWebserver(onStarted = null){
+    await setupCaddy();
+
     starter = new ExpressStarter()
     starter.registerErrorHandlers(); // avoid crashing and enable error logging
 

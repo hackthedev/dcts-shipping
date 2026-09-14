@@ -17,6 +17,7 @@ import {dSyncSign} from "@hackthedev/dsync-sign";
 //import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
 import dSyncInbox from "@hackthedev/dsync-inbox"
 //import dSyncInbox from "/run/media/marcel/SSD/network-z-dev/dSyncInbox/index.mjs"
+
 import dSyncFiles from "@hackthedev/dsync-files";
 
 import Logger from "@hackthedev/terminal-logger"
@@ -102,7 +103,7 @@ export let typingMembers = [];
 export let ratelimit = [];
 
 export let allowLogging = false;
-export let debugmode = process.env.DEBUG || false;
+export let debugmode = process.env.DEBUG === true || false;
 
 export let ipsec;
 
@@ -259,7 +260,7 @@ export async function initDCTSServer(){
             prefix: "dcts",
             app,
             dSyncWeb: dsw,
-            host: serverconfig.serverinfo.app.url?.length >= 7 ? serverconfig.serverinfo.app.url : null
+            host: serverconfig.serverinfo.app.url?.dcts?.length >= 7 ? serverconfig.serverinfo.app.url.dcts : null
         });
 
         // upload handler
@@ -595,6 +596,18 @@ export async function initSetupWizard(bypass = false){
                     execute: []
                 },
                 {
+                    title: "Caddy",
+                    check: [
+                        ["caddy --version", "v"] // v1.x.x
+                    ],
+                    install: [
+                        "DEBIAN_FRONTEND=noninteractive apt-get install -y caddy"
+                    ],
+                    execute: [
+                        "caddy start --config /etc/caddy/Caddyfile >/dev/null 2>&1 </dev/null"
+                    ]
+                },
+                {
                     title: "cURL",
                     check: [
                         ["curl --version", "curl "]
@@ -795,6 +808,40 @@ export async function initSetupWizard(bypass = false){
                 };
             },
         })
+
+        setupWizard.addStep({
+            id: "caddy",
+            title: "SSL/TLS Setup",
+            description:
+                `Lets setup some certificates using caddy!
+                <a href="https://docs.dcts.community/network/DNS%20Setup" target="_blank_">Make sure your domain is setup!</a>`,
+            fields: [
+                {
+                    id: "dcts_url",
+                    text: "DCTS Domain",
+                    placeholder: "chat.example.com",
+                    type: "text",
+                    value: serverconfig?.serverinfo?.app?.url?.dcts ?? null,
+                    test: async (value) => {
+                        return !!value?.trim() && typeof value === "string" && !value.includes("http");
+                    }
+                },
+                {
+                    id: "livekit_url",
+                    text: "Livekit Domain",
+                    placeholder: "livekit.example.com",
+                    type: "text",
+                    value: serverconfig?.serverinfo?.livekit?.url ?? null,
+                    test: async (value) => {
+                        return !!value?.trim() && typeof value === "string" && !value.includes("http");
+                    }
+                }
+            ],
+            test: async(data) => {
+                if(data?.dcts_url) serverconfig.serverinfo.app.url.dcts = data?.dcts_url;
+                if(data?.livekit_url) serverconfig.serverinfo.livekit.url = data?.livekit_url;
+            },
+        })
     }
 
     async function finishSetup(){
@@ -823,7 +870,7 @@ export async function initSetupWizard(bypass = false){
     }
 
     async function checkPrerequisites(){
-        Logger.info("Checking prerequisites...")
+        Logger.debug("Checking prerequisites...")
         let result = await doForEachSetupPrerequisite(async (prerequisite) => {
             // if there are startup commands after install etc
             let hadErrors = false;
@@ -835,9 +882,9 @@ export async function initSetupWizard(bypass = false){
                     // wether or not something is an error
                     if(!runResult.success && (!prerequisite?.canFail && !prerequisite?.canMiss)){
                         hadErrors = true;
-                        Logger.warn(`Prerequisite "${prerequisite.title}" seemed to have failed with the following error:`)
-                        Logger.warn(`Command: ${command}`)
-                        Logger.warn(runResult?.error ?? runResult?.stdout + runResult?.stderr)
+                        Logger.debug(`Prerequisite "${prerequisite.title}" seemed to have failed with the following error:`)
+                        Logger.debug(`Command: ${command}`)
+                        Logger.debug(runResult?.error ?? runResult?.stdout + runResult?.stderr)
                     }   
                 }
             }
@@ -964,7 +1011,7 @@ export function skipSetup(){
 if (import.meta.main) {
     setImmediate(async () => {
         try {
-            await initSetupWizard();
+            await initSetupWizard(!!skipSetup());
         } catch (err) {
             Logger.error(err);
             process.exit(1);

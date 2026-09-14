@@ -1,13 +1,16 @@
 # DCTS - Direct Communication Through Sockets
-[Reddit](https://www.reddit.com/r/dcts/) •  [Discord](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [Tutorial Playlist](https://www.youtube.com/watch?v=b1RXJ-ykdgc&list=PL2xF-BCo1FWav36ktSvBG4nDsbhfLkFR-&index=1) • [Website](https://dcts.community/) • [Documentation](https://docs.dcts.community/) • [Desktop Client](https://desktop.dcts.community) • [Android app](https://android.dcts.community) • [Distribution](https://dist.dcts.community/)
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
+## Made in 🇦🇹 / 🇪🇺  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
+
+---
+
+[Reddit](https://www.reddit.com/r/dcts/) •  [Discord](https://discord.gg/AYq8hbRHNR) • [Public Instance](https://chat.network-z.com/) • [Tutorial Playlist](https://www.youtube.com/watch?v=b1RXJ-ykdgc&list=PL2xF-BCo1FWav36ktSvBG4nDsbhfLkFR-&index=1) • [Website](https://dcts.community/) • [Documentation](https://docs.dcts.community/) • [Desktop Client](https://desktop.dcts.community) • [Android app](https://android.dcts.community) • [Distribution](https://dist.dcts.community/)
 
 DCTS was originally just a test about CSS and learning web sockets which was eventually turned into a serious project in 2023. Ever since then we ended up with a very broad and reusable software landscape that allows us to work efficiently and create new projects with ease, since we want to be as independent as possible and strive for long-term stability. All of these are open source and can be found [here](https://github.com/NETWORK-Z-Dev).
 
-Our goal is not to be yet another discord alternative. We made DCTS with the intent to make a communication platform for the future, meaning it needs to be independent, reliable, self-hosted and easy to use and setup all while being completely free which is why we're also working on other projects, like [our gif](https://github.com/GiFz-Project/gifz) solution in response to the tenor api shutdown.
+Our goal is not to be yet another discord alternative. We made DCTS with the intent to make a **communication platform** for the future, meaning it needs to be independent, reliable, self-hosted and easy to use and setup all while being completely free which is why we're also working on other projects, like [our gif](https://github.com/GiFz-Project/gifz) solution in response to the tenor api shutdown.
 
-You can find more infos about us [here](https://docs.dcts.community/Lore/About%20DCTS)
+You can find more infos about us [here](https://docs.dcts.community/Lore/About%20DCTS), but the general goal is to make a better web.
 
 ---
 

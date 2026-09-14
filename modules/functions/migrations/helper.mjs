@@ -27,37 +27,14 @@ export async function checkMigrations(){
     let didBackup = false;
 
     // migrate all channels and messages
-    let uploadTypeFix = await getMigrationTask(`uploadTypeFix`, true);
-    if(uploadTypeFix && uploadTypeFix?.done === 0){
-
-        serverconfig.serverinfo.uploadFileTypes = {
-            allowed: [
-                "image/png",
-                "image/jpeg",
-                "application/pdf",
-                "application/json",
-                "text/plain",
-                "text/markdown",
-                "image/png",
-                "image/jpeg",
-                "image/gif",
-                "image/webp",
-                "audio/mpeg",
-                "video/mp4",
-                "audio/vnd.wave"
-            ],
-
-            fallback: {
-                ".json": "application/json",
-                ".md": "text/markdown",
-                ".txt": "text/plain",
-            }
-        }
-
+    /*
+    let configUrlFix = await getMigrationTask(`config_url_fix`, true);
+    if(configUrlFix && configUrlFix?.done === 0){
         await saveConfig(serverconfig)
-        await completeMigrationTask(`uploadTypeFix`)
-        Logger.success("Channel ID Migration done!")
+        await completeMigrationTask(`config_url_fix`)
     }
+
+     */
 
     async function doBackup(){
         if(didBackup) return;

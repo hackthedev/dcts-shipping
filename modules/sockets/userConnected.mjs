@@ -1,6 +1,5 @@
 import {
     checkPow,
-    signer,
     usersocket,
 } from "../../index.mjs";
 import {
@@ -29,7 +28,7 @@ import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
 import {cleanMemberData, createMember, updateMember} from "../functions/member.mjs";
 import dSyncAuth from "@hackthedev/dsync-auth";
 import {saveConfig, serverconfig} from "../functions/init/config.mjs";
-import {auther} from "../functions/init/general.mjs";
+import {auther, signer} from "../functions/init/general.mjs";
 
 export function normalizeVar(v) {
     if (v === null || v === undefined) return "";

@@ -1,4 +1,4 @@
-import {signer} from "../../index.mjs";
+
 import {getOnlineMemberCount, hasPermission, resolveGroupByChannelId} from "../functions/chat/main.mjs";
 import Logger from "../functions/logger.mjs";
 import {
@@ -7,7 +7,7 @@ import {
 import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
 import {normalizeVar} from "./userConnected.mjs";
 import {saveConfig, serverconfig} from "../functions/init/config.mjs";
-import {versionCode} from "../functions/init/general.mjs";
+import {signer, versionCode} from "../functions/init/general.mjs";
 
 export async function getPublicServerInfoObject(){
     let groupId = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);

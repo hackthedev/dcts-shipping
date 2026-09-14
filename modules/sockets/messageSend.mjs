@@ -19,12 +19,12 @@ import {
     validateMemberId
 } from "../functions/main.mjs";
 import {decodeFromBase64, getChatMessagesFromDb} from "../functions/mysql/helper.mjs";
-import {signer} from "../../index.mjs"
 import {decodeAndParseJSON, getMessageObjectById} from "./resolveMessage.mjs";
 import {getChannelRateLimit} from "../functions/anti-spam/messages.mjs";
 import {getMemberLatestMessage} from "../functions/chat/helper.mjs";
 import DateTools from "@hackthedev/datetools";
 import {serverconfig} from "../functions/init/config.mjs";
+import {signer} from "../functions/init/general.mjs";
 
 export function getMentionIdsFromText(text) {
     return {

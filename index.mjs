@@ -11,7 +11,6 @@ import {io, listenToIO, loadSocketHandlers} from "./modules/functions/init/socke
 // dSync Libs
 import dSyncAuth from "@hackthedev/dsync-auth";
 //import dSyncAuth from "E:\\network-z-dev\\dSyncAuth\\index.mjs";
-import {dSyncSign} from "@hackthedev/dsync-sign";
 //import dSyncWeb from "E:\\network-z-dev\\dsync-web\\index.mjs";
 //import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
 import dSyncInbox from "@hackthedev/dsync-inbox"
@@ -47,7 +46,7 @@ import {
 import {checkFile, checkServerDirectories,} from "./modules/functions/io.mjs";
 
 // Chat functions
-import {changeKeyVerification, getMemberFromKey, hasPermission,} from "./modules/functions/chat/main.mjs";
+import {getMemberFromKey, hasPermission,} from "./modules/functions/chat/main.mjs";
 
 import {powVerifiedUsers,} from "./modules/sockets/pow.mjs";
 
@@ -69,7 +68,15 @@ import {db, processDbEnvData, setupDbConnection} from "./modules/functions/init/
 import {initConfig, saveConfig, serverconfig} from "./modules/functions/init/config.mjs";
 import dSyncWeb from "@hackthedev/dsync-web";
 import {app, getWebPort, initWebserver, installWebLibs, starter} from "./modules/functions/init/web.mjs";
-import {auther, debugmode, flipDebug, versionCode, versionPath} from "./modules/functions/init/general.mjs";
+import {
+    auther,
+    debugmode,
+    flipDebug,
+    initAuther,
+    signer,
+    versionCode,
+    versionPath
+} from "./modules/functions/init/general.mjs";
 
 
 // improved now
@@ -145,7 +152,6 @@ processDbEnvData();
 export let dsw = null;
 
 export let syncer = null;
-export let signer = null;
 export let inbox = null;
 export let files = new dSyncFiles();
 
@@ -164,8 +170,6 @@ process.on("unhandledRejection", (reason) => {
     Logger.error(reason?.stack || reason);
     emitErrorToTestingClient(reason)
 });
-
-signer = new dSyncSign("./configs/privatekey.json");
 
 async function initSocketHandlers(){
     Logger.info("Loading socket handlers...");
@@ -214,11 +218,7 @@ export async function initDCTSServer(){
         await loadMembersFromDB();
         await checkMigrations();
 
-        auther = new dSyncAuth(app, signer, async function (data) {
-            if (data.valid === true) {
-                changeKeyVerification(data.publicKey, data.valid);
-            }
-        });
+        initAuther();
 
         dsw = new dSyncWeb({
             express,

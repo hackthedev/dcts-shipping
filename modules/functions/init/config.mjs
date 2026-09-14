@@ -20,7 +20,7 @@ export async function initConfig(){
 
 export async function checkConfigAdditions() {
     // small migration
-    if(!serverconfig.serverinfo.app.url?.dcts){
+    if(!serverconfig?.serverinfo?.app?.url?.dcts && serverconfig?.serverinfo && !serverconfig?.serverinfo?.app?.url?.dcts){
         serverconfig.serverinfo.app.url = {
             dcts: "chat.example.com",
             livekit: "livekit.example.com",

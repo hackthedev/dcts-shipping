@@ -10,3 +10,4 @@ export function flipDebug() {
 // check version file for update check
 export let versionPath = path.join(path.resolve(), "version");
 export let versionCode = fs.readFileSync(versionPath).toString();
+export let ratelimit = [];

@@ -1,7 +1,6 @@
 import {
     colors,
     versionCode,
-    flipDebug,
     ratelimit,
     setRatelimit,
     bcrypt,
@@ -27,7 +26,7 @@ import {sanitizeHTML} from "./sanitizing/functions.mjs";
 
 import dSyncAuth from "@hackthedev/dsync-auth";
 import {reloadConfig, saveConfig, serverconfig} from "./init/config.mjs";
-import {debugmode} from "./init/general.mjs";
+import {debugmode, flipDebug} from "./init/general.mjs";
 
 var serverconfigEditable;
 

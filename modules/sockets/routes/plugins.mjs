@@ -10,8 +10,6 @@ import FrontendLibs from "@hackthedev/frontend-libs";
 import Logger from "../../functions/logger.mjs";
 import fse from "fs-extra";
 import {pathToFileURL} from "url";
-import {consolas} from "../../functions/io.mjs";
-import colors from "colors";
 import {rateLimit} from "../../functions/ratelimit.mjs";
 import {app} from "../../functions/init/web.mjs";
 
@@ -269,7 +267,7 @@ export async function initPluginSystem() {
                 await moveWebFolders(pluginWebDir, pluginName);
             }
 
-            consolas(colors.yellow(`Loaded plugin ${colors.white(pluginName)}`));
+            Logger.info(`Loaded plugin ${Logger.colors.white(pluginName)}`);
         }
     };
 

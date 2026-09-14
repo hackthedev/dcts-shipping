@@ -1,15 +1,10 @@
-import {
-    colors,
-    setRatelimit,
-    auther
-} from "../../index.mjs"
+
 import {io} from "./init/sockets.mjs"
 import {
     generateGid,
     getNewDate,
     hasPermission, resolveGroupByChannelId,
 } from "./chat/main.mjs";
-import {consolas} from "./io.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import path from "path";
 import {powVerifiedUsers} from "../sockets/pow.mjs";
@@ -23,7 +18,7 @@ import {sanitizeHTML} from "./sanitizing/functions.mjs";
 
 import dSyncAuth from "@hackthedev/dsync-auth";
 import {reloadConfig, saveConfig, serverconfig} from "./init/config.mjs";
-import {debugmode, flipDebug, ratelimit, versionCode} from "./init/general.mjs";
+import {auther, debugmode, flipDebug, ratelimit, setRatelimit, versionCode} from "./init/general.mjs";
 
 var serverconfigEditable;
 
@@ -236,7 +231,7 @@ export async function handleTerminalCommands(command, args) {
         }
         if (command == 'reload') {
             await reloadConfig();
-            consolas("Reloaded config".cyan);
+            Logger.info("Reloaded config");
         }
         if (command == 'debug') {
 
@@ -246,19 +241,19 @@ export async function handleTerminalCommands(command, args) {
             ]
 
             if (args[1] == null) {
-                consolas(`No Event Specified. Allowed Events:`.yellow);
+                Logger.info(`No Event Specified. Allowed Events:`);
                 console.log(allowedDebugEvents);
                 return;
             }
 
             flipDebug();
-            consolas(`Debug Mode set to ${debugmode} with event ${args[1]}`.cyan);
+            Logger.info(`Debug Mode set to ${debugmode} with event ${args[1]}`);
         } else if (command == 'roles') {
             var serverroles = serverconfig.serverroles;
             var serverRolesSorted = []
 
             console.log("");
-            console.log("Server Roles:".cyan);
+            console.log("Server Roles:");
 
             // Add them to array for sorting
             Object.keys(serverroles).forEach(function (role) {
@@ -283,15 +278,15 @@ export async function handleTerminalCommands(command, args) {
                         serverconfigEditable.serverroles[roleIdArg].token.push(roleToken);
                         saveConfig(serverconfigEditable);
 
-                        consolas(colors.cyan(`Redeem key generated for role ${serverconfigEditable.serverroles[roleIdArg].info.name}`));
-                        consolas(colors.cyan(roleToken))
+                        Logger.info(`Redeem key generated for role ${serverconfigEditable.serverroles[roleIdArg].info.name}`);
+                        Logger.info(roleToken)
                     } catch (Err) {
-                        consolas("Couldnt save or generate key".yellow);
-                        consolas(colors.red(Err));
+                        Logger.info("Couldnt save or generate key");
+                        Logger.info(Err);
                     }
                 }
             } else {
-                consolas(colors.yellow(`Missing Argument: Role ID`));
+                Logger.warn(`Missing Argument: Role ID`);
             }
 
         } else if (command == 'delete') {
@@ -300,17 +295,17 @@ export async function handleTerminalCommands(command, args) {
                     if (args[2].length == 12) {
                         if (serverconfig.servermembers[args[2]] != null) {
                             delete serverconfigEditable.servermembers[args[2]];
-                            consolas(`Deleting user ${args[2]}`.cyan);
+                            coLogger.infonsolas(`Deleting user ${args[2]}`);
                             saveConfig(serverconfigEditable);
                         } else {
-                            consolas(`Couldnt find user ${args[2]}`.yellow);
+                            Logger.info(`Couldnt find user ${args[2]}`);
                         }
                     } else {
-                        consolas(`${args[2]} seems to be a invalid id`.yellow);
+                        Logger.info(`${args[2]} seems to be a invalid id`);
                     }
                 }
             } else {
-                consolas("Syntax error: delete <option> <value> ".cyan + command);
+                Logger.info("Syntax error: delete <option> <value> " + command);
             }
         } else if (command == 'passwd') {
             if (args.length == 3) {
@@ -373,11 +368,11 @@ export async function handleTerminalCommands(command, args) {
             }
         }
         else {
-            consolas("Unkown command: ".cyan + command);
+            Logger.info("Unkown command: " + command);
         }
     } catch (e) {
-        consolas("Couldnt handle command input".red)
-        consolas(colors.red(e))
+        Logger.error("Couldnt handle command input")
+        Logger.error(e)
     }
 }
 
@@ -645,10 +640,8 @@ export function checkRateLimit(socket) {
         setRatelimit(ip, ratelimit[ip] + 1)
     }
 
-    //consolas(`${ip} Rate Limit: ${ratelimit[ip]}`)
-
     if (ratelimit[ip] > serverconfig.serverinfo.rateLimit) {
-        consolas("Limit exceeded".red);
+        Logger.error("Limit exceeded");
 
         sendMessageToUser(socket.id, JSON.parse(
             `{
@@ -667,7 +660,7 @@ export function checkRateLimit(socket) {
         socket.disconnect();
 
         banIp(socket, getNewDate(serverconfig.serverinfo.moderation.bans.ipBanDuration))
-        consolas(`IP ${ip} was added to the blacklist for rate limit spam`);
+        Logger.info(`IP ${ip} was added to the blacklist for rate limit spam`);
 
         return;
     }
@@ -843,8 +836,6 @@ export function checkMemberMute(socket, member) {
             serverconfig.servermembers[member.id].isMuted = 0;
             delete serverconfig.mutelist[member.id];
             saveConfig(serverconfig);
-
-            consolas(colors.yellow("Automatically unmuted user " + member.name + ` (${member.id})`));
         } else {
             return {result: true, timestamp: durationStamp, reason: muteReason};
         }

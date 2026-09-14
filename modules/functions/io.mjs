@@ -2,18 +2,12 @@
     io in terms of input/output not socket.io
     everything that will handle stuff being read or written to the disk is here
  */
-import {
-    colors,
-    allowLogging,
-} from "../../index.mjs"
 import Logger from "@hackthedev/terminal-logger"
 import {
     saveChatMessageInDb,
     getChatMessagesFromDb,
-    decodeFromBase64,
     logEditedChatMessageInDb,
     getMessageLogsFromDb,
-    getChatMessageById,
     addInboxMessage
 } from "./mysql/helper.mjs"
 import {getMentionIdsFromText} from "../sockets/messageSend.mjs";
@@ -39,31 +33,6 @@ import {debugmode} from "./init/general.mjs";
 
 
 var serverconfigEditable = serverconfig;
-
-export function logFile(filePath, text, callback = () => {
-}) {
-    if (!allowLogging) return;
-
-    const dir = path.dirname(filePath);
-
-    // Ensure the directory exists
-    fs.mkdir(dir, {recursive: true}, (err) => {
-        if (err) {
-            callback(err);
-            return;
-        }
-
-        // Append to the file, creating it if it does not exist
-        fs.appendFile(filePath, text + "\n", (err) => {
-            if (err) {
-                callback(err);
-                return;
-            }
-
-            callback(null);
-        });
-    });
-}
 
 export async function consolas(text, event = null) {
     return new Promise((resolve, reject) => {
@@ -205,7 +174,8 @@ export function checkConfigFile() {
                     fs.copyFileSync("./config.example.json", configPath);
                     Logger.success("Successfully copied config.example.json to config.json".green, "Debug");
                 } catch (error) {
-                    Logger.error("Coudlnt copy template file ".red + colors.red(error), "Debug");
+                    Logger.error("Coudlnt copy template file ");
+                    Logger.error(error)
                     process.exit();
                 }
             } else {

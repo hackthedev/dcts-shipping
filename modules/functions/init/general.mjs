@@ -11,3 +11,8 @@ export function flipDebug() {
 export let versionPath = path.join(path.resolve(), "version");
 export let versionCode = fs.readFileSync(versionPath).toString();
 export let ratelimit = [];
+export let auther = null;
+
+export function setRatelimit(ip, value) {
+    ratelimit[ip] = value;
+}

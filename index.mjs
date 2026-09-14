@@ -28,8 +28,6 @@ import {Server} from "socket.io";
 import getSize from "get-folder-size";
 
 import {fileTypeFromBuffer} from "file-type";
-
-import colors from "colors";
 import xssFilters from "xss-filters";
 
 
@@ -68,10 +66,10 @@ import SetupWizard from "@hackthedev/setup-wizard";
 import express from "express";
 import {initLivekitEndpoints} from "./modules/sockets/routes/livekit.mjs";
 import {db, processDbEnvData, setupDbConnection} from "./modules/functions/init/database.mjs";
-import {configPath, initConfig, saveConfig, serverconfig} from "./modules/functions/init/config.mjs";
+import {initConfig, saveConfig, serverconfig} from "./modules/functions/init/config.mjs";
 import dSyncWeb from "@hackthedev/dsync-web";
 import {app, getWebPort, initWebserver, installWebLibs, starter} from "./modules/functions/init/web.mjs";
-import {debugmode, flipDebug, ratelimit, versionCode, versionPath} from "./modules/functions/init/general.mjs";
+import {auther, debugmode, flipDebug, versionCode, versionPath} from "./modules/functions/init/general.mjs";
 
 
 // improved now
@@ -83,7 +81,6 @@ export {
     sanitizeHtml,
     getSize,
     fileTypeFromBuffer,
-    colors,
 };
 
 export let checkedMediaCacheUrls = {};
@@ -92,8 +89,6 @@ export let loginAttempts = [];
 export let useridFromSocket = [];
 
 export let typingMembers = [];
-
-export let allowLogging = false;
 
 export let ipsec;
 
@@ -151,7 +146,6 @@ export let dsw = null;
 
 export let syncer = null;
 export let signer = null;
-export let auther = null;
 export let inbox = null;
 export let files = new dSyncFiles();
 
@@ -483,12 +477,11 @@ export async function initDCTSServer(){
             `You can use it if prompted or if you right click on the server icon and press "Redeem Key"`,
         );
 
-        Logger.info(colors.cyan(`Available Server Admin Token(s):`));
+        Logger.info(`Available Server Admin Token(s):`);
 
         serverconfig.serverroles["1111"].token.forEach((token) => {
             if (token) Logger.info(token);
         });
-        allowLogging = true;
     }
 
     //initPaymentSystem(app)
@@ -968,10 +961,6 @@ function closeConfigFile() {
 process.on("exit", closeConfigFile);
 process.on("SIGINT", closeConfigFile); // Handle Ctrl+C
 process.on("SIGTERM", closeConfigFile); // Handle termination
-
-export function setRatelimit(ip, value) {
-    ratelimit[ip] = value;
-}
 
 export function isPtero(){
     return nodeArgs?.includes("--ptero")

@@ -21,7 +21,6 @@
     "bcrypt": "^6.0.0",
     "canvas": "^3.2.3",
     "chartjs-node-canvas": "^5.0.0",
-    "colors": "^1.4.0",
     "cookie-parser": "^1.4.7",
     "discord.js": "^14.27.0",
     "express": "^5.2.1",

@@ -1,7 +1,6 @@
 import {
     colors,
     setRatelimit,
-    bcrypt,
     auther
 } from "../../index.mjs"
 import {io} from "./init/sockets.mjs"

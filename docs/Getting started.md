@@ -42,6 +42,14 @@ Additionally, the following ports are being used and should be accessable if you
 > Docker install instructions can be found on their website: 
 > https://docs.docker.com/engine/install/
 
+> [!WARNING]
+> If you run DCTS using docker on a VPS system make sure it supports certain CPU features, otherwise you will run into compatibility issues! You can check if your system is compatible using the following command:
+> ```bash
+> grep -qw sse4_2 /proc/cpuinfo && echo true || echo false
+> ```
+> 
+> At a minimum you will need `sse4_2`, idealy `avx` and `avx2`. If you use a modern system you should be fine.  **VPS Systems from out partner**  [vultris](https://vultris.cloud/) offer such systems.
+
 ------
 
 ## Running DCTS

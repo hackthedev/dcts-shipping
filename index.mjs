@@ -5,7 +5,6 @@ import http from "http";
 import fs from "fs";
 import path from "path";
 import sanitizeHtml from "sanitize-html";
-import bcrypt from "bcrypt";
 
 import {io, listenToIO, loadSocketHandlers} from "./modules/functions/init/sockets.mjs";
 
@@ -82,7 +81,6 @@ export {
     xssFilters,
     http,
     sanitizeHtml,
-    bcrypt,
     getSize,
     fileTypeFromBuffer,
     colors,
@@ -970,15 +968,6 @@ function closeConfigFile() {
 process.on("exit", closeConfigFile);
 process.on("SIGINT", closeConfigFile); // Handle Ctrl+C
 process.on("SIGTERM", closeConfigFile); // Handle termination
-
-export function getFreshConfig() {
-    // used for edge cases
-    return JSON.parse(fs.readFileSync(configPath, {encoding: "utf-8"}));
-}
-
-export function setServer(content) {
-    server = content;
-}
 
 export function setRatelimit(ip, value) {
     ratelimit[ip] = value;

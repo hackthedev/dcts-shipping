@@ -15,7 +15,6 @@ export default defineConfig({
       { text: 'Home', link: '/' },
       { text: 'Documents', link: '/Getting started' }
     ],
-
     sidebar: generateSidebar({
       documentRootPath: '/docs',
       useTitleFromFileHeading: true,

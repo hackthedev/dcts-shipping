@@ -1,10 +1,6 @@
 services:
   dcts-app:
     container_name: dcts
-    #For local development
-    #build:
-    #  context: ../
-    #  dockerfile: ./Docker/Dockerfile
     image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:${VERSION:-latest}}
     environment:
       - DEBUG=${DEBUG:-false}
@@ -20,10 +16,19 @@ services:
       - 5349:5349/tcp
     restart: unless-stopped
     volumes:
-      - ../dcts/configs:/app/configs
-      - ../dcts/uploads:/app/public/uploads
-      - ../dcts/emojis:/app/public/emojis
-      - ../dcts/plugins:/app/plugins
-      - ../dcts/public/css/themes:/app/themes 
-      - ../dcts/livekit:/app/livekit
-      - /etc/caddy:/app/caddy
+      - configs:/app/configs
+      - uploads:/app/public/uploads
+      - emojis:/app/public/emojis
+      - plugins:/app/plugins
+      - themes:/app/themes
+      - livekit:/app/livekit
+      - caddy:/app/caddy
+
+volumes:
+  configs:
+  uploads:
+  emojis:
+  plugins:
+  themes:
+  livekit:
+  caddy:

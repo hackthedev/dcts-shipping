@@ -790,7 +790,7 @@ class UserManager {
             let stopEffect;
             let musicToken = 0;
 
-            const txtUrl = `${urlBase}/donators.txt?v=${this.generateId(5)}`;
+            const txtUrl = `${urlBase}donators.txt?v=${this.generateId(5)}`;
             let mp3Url;
             let songName;
 

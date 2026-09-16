@@ -1,14 +1,14 @@
 # DNS Setup
 
-Its recommended to create two subdomains for the VoIP system to make things easier. The subdomains are used for the reverse proxies and they should point to the server where you run DCTS and livekit. 
+If you want your DCTS instance to be publicly available you will need to own a domain and add at least two A records. In the setup wizard you will need to specify these sub domains for the automatic SSL / TLS creation.
 
-> [!TIP]
-> Example proxies for caddy and nginx can be found in [Reverse Proxy Setup](Reverse%20Proxy%20Setup.md). How to setup caddy can be found in [Caddy Setup](Caddy%20Setup.md).
+We recommend you setting up your domain with these records:
 
-| Type | Name | Content         | Proxy needed? |
-| ---- | ---- | --------------- | ------------- |
-| A    | chat | your.ip.address | Yes           |
-| A    | lk   | your.ip.address | Yes           |
+| Type | Name | Content         |
+| ---- | ---- | --------------- |
+| A    | chat | your.ip.address |
+| A    | lk   | your.ip.address |
 
 > [!WARNING]
-> Please note that you will need to have valid TLS certificates for your subdomains and access to the cert files as they will be needed later for the configuration of livekit. You can install caddy to handle the TLS certs automatically. More on that can be found in [Caddy Setup](Caddy%20Setup.md) and [Reverse Proxy Setup](Reverse%20Proxy%20Setup.md).
+> Valid SSL/TLS certificates are needed for going public!
+> Without a domain the setup wizard cannot generate valid SSL/TLS certificates which will show security errors in all clients and will refuse to work properly!

@@ -25,5 +25,5 @@ services:
       - ../dcts/emojis:/app/public/emojis
       - ../dcts/plugins:/app/plugins
       - ../dcts/public/css/themes:/app/themes 
-      - ../livekit:/app/livekit
+      - ../dcts/livekit:/app/livekit
       - /etc/caddy:/app/caddy

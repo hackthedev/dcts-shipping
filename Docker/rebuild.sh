@@ -11,4 +11,9 @@ sudo docker compose logs -f
 # sudo docker exec -it dcts bash
 # sudo docker restart dcts
 # sudo docker stop dcts
+
 # sudo docker logs -f dcts
+# sudo docker logs --tail 100 dcts
+
+# sudo VERSION=dev docker compose up -d --pull always
+# sudo VERSION=dev docker compose config | grep image

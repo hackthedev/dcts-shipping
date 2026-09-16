@@ -17,3 +17,5 @@ sudo docker compose logs -f
 
 # sudo VERSION=dev docker compose up -d --pull always
 # sudo VERSION=dev docker compose config | grep image
+# sudo docker compose down -v --remove-orphans
+# sudo docker system prune -a

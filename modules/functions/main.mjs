@@ -19,6 +19,7 @@ import {sanitizeHTML} from "./sanitizing/functions.mjs";
 import dSyncAuth from "@hackthedev/dsync-auth";
 import {reloadConfig, saveConfig, serverconfig} from "./init/config.mjs";
 import {auther, debugmode, flipDebug, ratelimit, setRatelimit, versionCode} from "./init/general.mjs";
+import bcrypt from "bcrypt";
 
 var serverconfigEditable;
 

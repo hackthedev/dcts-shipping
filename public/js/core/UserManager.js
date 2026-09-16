@@ -789,6 +789,8 @@ class UserManager {
             let effect = null;
             let stopEffect;
             let musicToken = 0;
+            let totalDonations = 0;
+            let totalDonationsAmount = 0;
 
             const txtUrl = `${urlBase}donators.txt?v=${this.generateId(5)}`;
             let mp3Url;
@@ -827,6 +829,8 @@ class UserManager {
                     }
 
                     totals[user] = (totals[user] || 0) + amount;
+                    totalDonations++;
+                    totalDonationsAmount += Number(amount);
                 }
             }
 
@@ -877,6 +881,8 @@ class UserManager {
             // final final stuff
             const finalHTML = `
                 ${audioHTML}
+                
+                <hr>
                 <a href="http://ko-fi.com/shydevil/tip/" target="_blank"
                 style="                
                     display: flex;
@@ -888,8 +894,21 @@ class UserManager {
                     color: #ffe6eb;
                     text-decoration: none;"
                 >
-                    » Become a Donator ! «
+                    <p>» Support the project! «</p>   
                 </a>
+                
+                <p style="
+                line-height: 150%;
+                margin-top: -20px;
+                margin-bottom: 40px;
+                width: 100%;
+                font-size: 16px;
+                text-align: center;">
+                    ${totalDonations} donations, totaling in ${Number(totalDonationsAmount).toLocaleString()} €<br>
+                    <b>Thank you so much! 🤍</b>
+                </p>
+                <hr>
+                
                 <div style="
                     max-height: 300px; 
                     max-width: 800px;
@@ -926,7 +945,7 @@ class UserManager {
             `;
 
             customPrompts.showPrompt(
-                "Thanks to our Donators ",
+                "Donators making DCTS possible!",
                 finalHTML,
                 () => {
                     manageMusic("fadeOut")

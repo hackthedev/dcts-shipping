@@ -57,7 +57,6 @@ Ko-fi Supporter,5
 Ko-fi Supporter,3
 Ko-fi Supporter,5
 Ko-fi Supporter,3
-Marcel,0
 Derrick,50
 Ko-fi Supporter,3
 Ko-fi Supporter,5

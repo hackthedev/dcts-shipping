@@ -84,6 +84,16 @@ sudo docker logs -f dcts
 > You may need to replace the `localhost` part with an actual ip address or domain depending on your setup. Also make sure to not connect using https://, only with http://
 
 ---
+## Accessing
+
+After you have successfully finished the setup using the new setup wizard you should be automatically redirected. If you have used a valid domain it should be accessable via the address you provided.
+
+If you are running DCTS locally on your system without public access and a domain you may need to enter http://localhost:2052 in your browser.
+
+![](assets/Pasted%20image%2020260916214934.png)
+
+
+---
 ### Running the dev version
 
 Alternatively, you can also run the dev version which has experimental features and possible bug fixes. Usually you dont need to use it unless you want to help test things.

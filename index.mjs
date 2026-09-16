@@ -500,9 +500,12 @@ export async function initDCTSServer(){
 export async function initSetupWizard(bypass = false){
     serverconfig.serverinfo.sql.enabled = true;
 
+    let dctsDomain = serverconfig?.serverinfo?.app?.url?.dcts;
+    let isDefaultDctsDomain = dctsDomain === "chat.example.com";
+
     let setupWizard = new SetupWizard({
         debug: debugmode,
-        redirectUrl: `http://localhost:${getWebPort()}`,
+        redirectUrl: isDefaultDctsDomain === true ? `http://localhost:${getWebPort()}` : `http://${dctsDomain}`,
         onCompleted: async () => {
             await finishSetup();
         }

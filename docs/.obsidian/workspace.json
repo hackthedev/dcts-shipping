@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "network/DNS Setup.md",
+                "file": "Getting started.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "DNS Setup"
+              "title": "Getting started"
             }
           }
         ],
@@ -203,6 +203,9 @@
   },
   "active": "2f55efc8bd1fc479",
   "lastOpenFiles": [
+    "assets/Pasted image 20260916214934.png",
+    "network/DNS Setup.md",
+    "assets/Pasted image 20260916214731.png",
     "Getting started.md",
     "DCTS Docs Base.base",
     "Performance.md",
@@ -236,7 +239,6 @@
     "Graphs/Images/dSync Explaination (1).png",
     "Graphs/Images",
     "Graphs",
-    "install NodeJS.md",
     "Managed Hosting",
     "sql/errors",
     "Unbenannt.base",

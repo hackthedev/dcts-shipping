@@ -12,3 +12,5 @@ We recommend you setting up your domain with these records:
 > [!WARNING]
 > Valid SSL/TLS certificates are needed for going public!
 > Without a domain the setup wizard cannot generate valid SSL/TLS certificates which will show security errors in all clients and will refuse to work properly!
+
+![](../assets/Pasted%20image%2020260916214731.png)

@@ -1,28 +1,34 @@
 services:
   dcts-app:
     container_name: dcts
-    #For local development
-    build:
-      context: ../
-      dockerfile: ./Docker/Dockerfile
-    #image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:${VERSION:-latest}}
+    image: ${DCTS_IMAGE:-ghcr.io/hackthedev/dcts-shipping:${VERSION:-latest}}
     environment:
       - DEBUG=${DEBUG:-false}
     ports:
+      - 80:80
+      - 443:443
       - 2052:2052
       - 5000:5000
       - 7880:7880
       - 7881:7881
       - 7882:7882/udp
-      - 50000-60000:50000-60000/udp
       - 3478:3478/udp
       - 5349:5349/tcp
     restart: unless-stopped
     volumes:
-      - ../dcts/configs:/app/configs
-      - ../dcts/uploads:/app/public/uploads
-      - ../dcts/emojis:/app/public/emojis
-      - ../dcts/plugins:/app/plugins
-      - ../dcts/public/css/themes:/app/themes 
-      - ../livekit:/app/livekit
-      - /etc/caddy:/app/caddy
+      - configs:/app/configs
+      - uploads:/app/public/uploads
+      - emojis:/app/public/emojis
+      - plugins:/app/plugins
+      - themes:/app/themes
+      - livekit:/app/livekit
+      - caddy:/app/caddy
+
+volumes:
+  configs:
+  uploads:
+  emojis:
+  plugins:
+  themes:
+  livekit:
+  caddy:

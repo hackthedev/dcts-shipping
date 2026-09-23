@@ -1,5 +1,5 @@
-import {debugmode} from "../../index.mjs";
 import {io} from "../functions/init/sockets.mjs";
+import {debugmode} from "../functions/init/general.mjs";
 
 export function emitErrorToTestingClient(err){
     if(!debugmode) return;

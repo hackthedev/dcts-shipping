@@ -1,22 +1,74 @@
 import path from "path";
-import {serverconfig} from "./config.mjs";
+import {projectConfig, serverconfig} from "./config.mjs";
 //import {versionCode} from "../../../index.mjs";
 import {generateId} from "../main.mjs";
 import {resolveCategoryByChannelId, resolveGroupByChannelId} from "../chat/main.mjs";
 import ExpressStarter from "@hackthedev/express-starter";
 import Logger from "@hackthedev/terminal-logger";
 import FrontendLibs from "@hackthedev/frontend-libs";
+import CaddySdk from "@hackthedev/caddy-sdk";
+import {execSync} from "node:child_process";
 
 export let starter = null;
 export let app = null;
 export let express = null;
 export let server = null;
+let nodeArgs = process.argv;
 
 export function getWebPort(){
     return process.env.PORT ?? serverconfig?.serverinfo?.port;
 }
 
+export function skipCaddy(){
+    return nodeArgs?.includes("--skip-caddy")
+}
+
+export async function setupCaddy(){
+    if(skipCaddy()) return;
+
+    try{
+        const caddy = new CaddySdk("dcts");
+        let livekitConfig = await caddy.getConfig("livekit");
+        let dctsConfig = await caddy.getConfig("dcts");
+
+        if(!livekitConfig && serverconfig.serverinfo.livekit.url !== "localhost:7880"){
+            await caddy.setConfig("livekit",
+                `${serverconfig.serverinfo.livekit.url} {
+    reverse_proxy localhost:7880 {
+        transport http {
+            versions 1.1
+        }
+    }
+
+     header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+}
+        `)
+        }
+        if(!dctsConfig && serverconfig?.serverinfo?.app?.url?.dcts !== "chat.example.com"){
+            await caddy.setConfig("dcts",
+                `${serverconfig.serverinfo.app.url.dcts} {
+    reverse_proxy 127.0.0.1:2052
+}
+        `)
+        }
+
+        execSync("caddy reload --config=/etc/caddy/Caddyfile");
+    }
+    catch(caddyEx){
+        Logger.error("Error while trying to setup caddy")
+        Logger.error(caddyEx);
+    }
+}
+
 export async function initWebserver(onStarted = null){
+    await setupCaddy();
+
     starter = new ExpressStarter()
     starter.registerErrorHandlers(); // avoid crashing and enable error logging
 

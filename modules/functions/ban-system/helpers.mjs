@@ -1,10 +1,10 @@
 import {checkRateLimit, isLocalhostIp} from "../main.mjs";
 import Logger from "@hackthedev/terminal-logger";
-import {signer} from "../../../index.mjs";
 import {formatDateTime, getSocketIp} from "../chat/main.mjs";
 import {queryDatabase} from "../mysql/mysql.mjs";
 import DateTools from "@hackthedev/datetools";
 import {serverconfig} from "../init/config.mjs";
+import {signer} from "../init/general.mjs";
 
 export async function banIp(socket, durationTimestamp = -1) {
     let ip = getSocketIp(socket);

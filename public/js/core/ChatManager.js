@@ -795,7 +795,7 @@ class ChatManager {
                     <div id="badges"></div>          
                     <div id="headerRight">
                         <div class="headerIcon help" onclick="ChatManager.showInstanceInfo()"></div>
-                        <div class="headerIcon donators" onclick="UserManager.showDonatorList('https://shy-devil.me/app/dcts/');"></div>
+                        <div class="headerIcon donators" onclick="UserManager.showDonatorList('https://dcts.community/donations/');"></div>
                         <div class="headerIcon inbox">
                             <span id="inbox-indicator"></span>
         

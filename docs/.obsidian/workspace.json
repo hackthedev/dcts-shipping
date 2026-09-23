@@ -4,11 +4,25 @@
     "type": "split",
     "children": [
       {
-        "id": "2576326bea037671",
+        "id": "393af1df10e8a290",
         "type": "tabs",
         "children": [
           {
-            "id": "3a0469dcedf99830",
+            "id": "c88339154dc9efa6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Getting started.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Getting started"
+            }
+          },
+          {
+            "id": "e35c79e64588e59c",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -21,7 +35,8 @@
               "title": "Getting started"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -186,12 +201,18 @@
       "bases:Neue Base erstellen": false
     }
   },
-  "active": "37a4cdff02af2a98",
+  "active": "e35c79e64588e59c",
   "lastOpenFiles": [
+    "network/DNS Setup.md",
+    "Getting started.md",
+    "network/Port forwarding.md",
     "DCTS Docs Base.base",
     "Performance.md",
+    "List of Ports used.md",
+    "network/Reverse Proxy Setup.md",
+    "assets/Pasted image 20260916214934.png",
+    "assets/Pasted image 20260916214731.png",
     "Running DCTS.md",
-    "Getting started.md",
     "Installation/VoIP Setup.md",
     "Installation/Docker Setup.md",
     "Managed Hosting/Ptero Host Server Setup Notes.md",
@@ -214,14 +235,10 @@
     "Lore/Principles.md",
     "Lore/Moderation.md",
     "Lore/Threat model.md",
-    "Lore/Terminology.md",
-    "Lore/Technical overview.md",
     "Graphs/Images/dSync Explaination.png",
-    "Graphs/dSync Explaination.md",
     "Graphs/Images/dSync Explaination (1).png",
     "Graphs/Images",
     "Graphs",
-    "install NodeJS.md",
     "Managed Hosting",
     "sql/errors",
     "Unbenannt.base",

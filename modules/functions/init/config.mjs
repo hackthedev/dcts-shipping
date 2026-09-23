@@ -8,6 +8,12 @@ import fs from "fs";
 import {checkObjectKeys} from "../main.mjs";
 import {queryDatabase} from "../mysql/mysql.mjs";
 import {saveMemberToDB} from "../mysql/helper.mjs";
+import path from "path";
+
+export let projectConfig = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json")).toString())
+
+// check version file for update check
+export let versionCode = projectConfig?.version ?? null
 
 export let configPath = "./configs/config.json";
 export let serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, {encoding: "utf-8"})) : {};
@@ -15,11 +21,17 @@ export let serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.read
 
 export async function initConfig(){
     serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, {encoding: "utf-8"})) : {};
-    checkConfigAdditions();
+    await checkConfigAdditions();
 }
 
-export function checkConfigAdditions() {
-
+export async function checkConfigAdditions() {
+    // small migration
+    if(!serverconfig?.serverinfo?.app?.url?.dcts && serverconfig?.serverinfo && !serverconfig?.serverinfo?.app?.url?.dcts){
+        serverconfig.serverinfo.app.url = {
+            dcts: "chat.example.com",
+            livekit: "livekit.example.com",
+        }
+    }
 
     checkObjectKeys(serverconfig, "serverinfo.messenger.defaultFileUploadLimit", 10)
     checkObjectKeys(serverconfig, "serverinfo.dms.maxParticipants", 10)
@@ -229,8 +241,8 @@ export function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.home.about", "This is the <i>default server</i> about me")
     checkObjectKeys(serverconfig, "serverinfo.reports.enabled", true)
 
-    // TURN SERVER SETTINGS
-    checkObjectKeys(serverconfig, "serverinfo.app.url", "http://your-ip-or-domain:port")    // without slash at end!
+    // caddy settings
+    checkObjectKeys(serverconfig, "serverinfo.app.url.dcts", "chat.example.com")    // without slash at end!
 
 
     checkObjectKeys(serverconfig, "groups.*.channels.categories.*.channel.*.msgCount", 0)

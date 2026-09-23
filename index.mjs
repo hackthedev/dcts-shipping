@@ -5,14 +5,12 @@ import http from "http";
 import fs from "fs";
 import path from "path";
 import sanitizeHtml from "sanitize-html";
-import bcrypt from "bcrypt";
 
-import {io, loadSocketHandlers, registerSocketEvents, listenToIO} from "./modules/functions/init/sockets.mjs";
+import {io, listenToIO, loadSocketHandlers} from "./modules/functions/init/sockets.mjs";
 
 // dSync Libs
 import dSyncAuth from "@hackthedev/dsync-auth";
 //import dSyncAuth from "E:\\network-z-dev\\dSyncAuth\\index.mjs";
-import {dSyncSign} from "@hackthedev/dsync-sign";
 //import dSyncWeb from "E:\\network-z-dev\\dsync-web\\index.mjs";
 //import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
 import dSyncInbox from "@hackthedev/dsync-inbox"
@@ -29,8 +27,6 @@ import {Server} from "socket.io";
 import getSize from "get-folder-size";
 
 import {fileTypeFromBuffer} from "file-type";
-
-import colors from "colors";
 import xssFilters from "xss-filters";
 
 
@@ -42,7 +38,6 @@ import {
     checkVersionUpdate,
     generateId,
     handleTerminalCommands,
-    removeFromArray,
     sendMessageToUser,
     validateMemberId,
 } from "./modules/functions/main.mjs";
@@ -51,11 +46,7 @@ import {
 import {checkFile, checkServerDirectories,} from "./modules/functions/io.mjs";
 
 // Chat functions
-import {
-    changeKeyVerification,
-    getMemberFromKey,
-    hasPermission,
-} from "./modules/functions/chat/main.mjs";
+import {getMemberFromKey, hasPermission,} from "./modules/functions/chat/main.mjs";
 
 import {powVerifiedUsers,} from "./modules/sockets/pow.mjs";
 
@@ -64,7 +55,7 @@ import {checkMigrations} from "./modules/functions/migrations/helper.mjs";
 import JSONTools from "@hackthedev/json-tools";
 import {getCache, setCache} from "./modules/functions/ip-cache.mjs";
 import {emitErrorToTestingClient} from "./modules/sockets/onErrorTesting.mjs";
-import {checkAndUnbanPublicKey, unbanIp} from "./modules/functions/ban-system/helpers.mjs";
+import {checkAndUnbanPublicKey} from "./modules/functions/ban-system/helpers.mjs";
 import {getMessageObjectById} from "./modules/sockets/resolveMessage.mjs";
 import {getMemberHighestUploadLimit} from "./modules/functions/chat/helper.mjs";
 import {initPluginSystem} from "./modules/sockets/routes/plugins.mjs";
@@ -74,9 +65,17 @@ import SetupWizard from "@hackthedev/setup-wizard";
 import express from "express";
 import {initLivekitEndpoints} from "./modules/sockets/routes/livekit.mjs";
 import {db, processDbEnvData, setupDbConnection} from "./modules/functions/init/database.mjs";
-import {configPath, saveConfig, serverconfig, initConfig} from "./modules/functions/init/config.mjs";
+import {initConfig, saveConfig, serverconfig, versionCode} from "./modules/functions/init/config.mjs";
 import dSyncWeb from "@hackthedev/dsync-web";
-import {app, initWebserver, starter, getWebPort, installWebLibs} from "./modules/functions/init/web.mjs";
+import {app, getWebPort, initWebserver, installWebLibs, skipCaddy, starter} from "./modules/functions/init/web.mjs";
+import {
+    auther,
+    debugmode,
+    flipDebug,
+    initAuther,
+    signer,
+
+} from "./modules/functions/init/general.mjs";
 
 
 // improved now
@@ -86,10 +85,8 @@ export {
     xssFilters,
     http,
     sanitizeHtml,
-    bcrypt,
     getSize,
     fileTypeFromBuffer,
-    colors,
 };
 
 export let checkedMediaCacheUrls = {};
@@ -98,11 +95,6 @@ export let loginAttempts = [];
 export let useridFromSocket = [];
 
 export let typingMembers = [];
-
-export let ratelimit = [];
-
-export let allowLogging = false;
-export let debugmode = process.env.DEBUG || false;
 
 export let ipsec;
 
@@ -131,14 +123,6 @@ else{
     console.log("Starting...");
 }
 
-// check version file for update check
-let versionPath = path.join(path.resolve(), "version");
-if(!fs.existsSync(versionPath)) {
-    Logger.error("Version path not found!!")
-    process.exit(1);
-}
-export let versionCode = fs.readFileSync(versionPath).toString();
-
 // config file saving
 let fileHandle = null; // File handle for the config file
 let isClosing = false; // Flag to prevent multiple close attempts
@@ -162,8 +146,6 @@ processDbEnvData();
 export let dsw = null;
 
 export let syncer = null;
-export let signer = null;
-export let auther = null;
 export let inbox = null;
 export let files = new dSyncFiles();
 
@@ -183,10 +165,8 @@ process.on("unhandledRejection", (reason) => {
     emitErrorToTestingClient(reason)
 });
 
-signer = new dSyncSign("./configs/privatekey.json");
-
 async function initSocketHandlers(){
-    Logger.info("Loading socket handlers...");
+    Logger.debug("Loading socket handlers...");
     await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
     Logger.info("Done!")
 }
@@ -232,11 +212,7 @@ export async function initDCTSServer(){
         await loadMembersFromDB();
         await checkMigrations();
 
-        auther = new dSyncAuth(app, signer, async function (data) {
-            if (data.valid === true) {
-                changeKeyVerification(data.publicKey, data.valid);
-            }
-        });
+        initAuther();
 
         dsw = new dSyncWeb({
             express,
@@ -259,7 +235,7 @@ export async function initDCTSServer(){
             prefix: "dcts",
             app,
             dSyncWeb: dsw,
-            host: serverconfig.serverinfo.app.url?.length >= 7 ? serverconfig.serverinfo.app.url : null
+            host: serverconfig.serverinfo.app.url?.dcts?.length >= 7 ? serverconfig.serverinfo.app.url.dcts : null
         });
 
         // upload handler
@@ -435,13 +411,13 @@ export async function initDCTSServer(){
     var checkVer = await checkVersionUpdate();
     if (checkVer != null) {
         Logger.space();
-        Logger.info(
+        Logger.warn(
             `New version ${checkVer} is available!`,
-            Logger.colors.blink + Logger.colors.fgCyan + Logger.colors.bright,
+            Logger.colors.blink + Logger.colors.bright,
         );
-        Logger.info(
+        Logger.warn(
             `Download » https://github.com/hackthedev/dcts-shipping/releases`,
-            Logger.colors.blink + Logger.colors.fgCyan + Logger.colors.bright,
+            Logger.colors.blink + Logger.colors.bright,
         );
         Logger.space();
     }
@@ -495,12 +471,11 @@ export async function initDCTSServer(){
             `You can use it if prompted or if you right click on the server icon and press "Redeem Key"`,
         );
 
-        Logger.info(colors.cyan(`Available Server Admin Token(s):`));
+        Logger.info(`Available Server Admin Token(s):`);
 
         serverconfig.serverroles["1111"].token.forEach((token) => {
             if (token) Logger.info(token);
         });
-        allowLogging = true;
     }
 
     //initPaymentSystem(app)
@@ -519,9 +494,12 @@ export async function initDCTSServer(){
 export async function initSetupWizard(bypass = false){
     serverconfig.serverinfo.sql.enabled = true;
 
+    let dctsDomain = serverconfig?.serverinfo?.app?.url?.dcts;
+    let isDefaultDctsDomain = dctsDomain === "chat.example.com";
+
     let setupWizard = new SetupWizard({
         debug: debugmode,
-        redirectUrl: `http://localhost:${getWebPort()}`,
+        redirectUrl: isDefaultDctsDomain === true ? `http://localhost:${getWebPort()}` : `http://${dctsDomain}`,
         onCompleted: async () => {
             await finishSetup();
         }
@@ -571,6 +549,24 @@ export async function initSetupWizard(bypass = false){
     }
 
     function registerSetupPrerequisites(){
+
+        // this is defined here so it can be toggled
+        let caddyPrerequisite = {
+            title: "Caddy",
+            check: [
+                ["caddy --version", "v"] // v1.x.x
+            ],
+            install: [
+                "DEBIAN_FRONTEND=noninteractive apt-get install -y caddy"
+            ],
+            execute: [
+                "caddy start --config /etc/caddy/Caddyfile >/dev/null 2>&1 </dev/null"
+            ]
+        };
+
+        // remove caddy prerequisite if not needed
+        if(skipCaddy()) caddyPrerequisite = {};
+
         setupWizard.addPrerequisites({
             "linux": [
                 {
@@ -594,6 +590,7 @@ export async function initSetupWizard(bypass = false){
                     ],
                     execute: []
                 },
+                caddyPrerequisite,
                 {
                     title: "cURL",
                     check: [
@@ -795,12 +792,51 @@ export async function initSetupWizard(bypass = false){
                 };
             },
         })
+
+        // only show this stuff if the installer will handle caddy
+        if(!skipCaddy()){
+            setupWizard.addStep({
+                id: "caddy",
+                title: "SSL/TLS Setup",
+                description:
+                    `Lets setup some certificates using caddy!
+                <a href="https://docs.dcts.community/network/DNS%20Setup" target="_blank_">Make sure your domain is setup!</a>`,
+                fields: [
+                    {
+                        id: "dcts_url",
+                        text: "DCTS Domain",
+                        placeholder: null,
+                        type: "text",
+                        value: serverconfig?.serverinfo?.app?.url?.dcts ?? null,
+                        test: async (value) => {
+                            return !!value?.trim() && typeof value === "string" && !value.includes("http");
+                        }
+                    },
+                    {
+                        id: "livekit_url",
+                        text: "Livekit Domain",
+                        placeholder: null,
+                        type: "text",
+                        value: serverconfig?.serverinfo?.livekit?.url ?? null,
+                        test: async (value) => {
+                            return !!value?.trim() && typeof value === "string" && !value.includes("http");
+                        }
+                    }
+                ],
+                test: async(data) => {
+                    if(data?.dcts_url) serverconfig.serverinfo.app.url.dcts = data?.dcts_url;
+                    if(data?.livekit_url) serverconfig.serverinfo.livekit.url = data?.livekit_url;
+                },
+            })
+        }
     }
 
     async function finishSetup(){
         serverconfig.serverinfo.setup = 1
         await saveConfig(serverconfig);
         await executePrerequisites();
+
+        if(!isPtero() && debugmode === false) console.clear();
         await initWebserver()
         await initDCTSServer();
     }
@@ -823,7 +859,7 @@ export async function initSetupWizard(bypass = false){
     }
 
     async function checkPrerequisites(){
-        Logger.info("Checking prerequisites...")
+        Logger.debug("Checking prerequisites...")
         let result = await doForEachSetupPrerequisite(async (prerequisite) => {
             // if there are startup commands after install etc
             let hadErrors = false;
@@ -835,9 +871,9 @@ export async function initSetupWizard(bypass = false){
                     // wether or not something is an error
                     if(!runResult.success && (!prerequisite?.canFail && !prerequisite?.canMiss)){
                         hadErrors = true;
-                        Logger.warn(`Prerequisite "${prerequisite.title}" seemed to have failed with the following error:`)
-                        Logger.warn(`Command: ${command}`)
-                        Logger.warn(runResult?.error ?? runResult?.stdout + runResult?.stderr)
+                        Logger.debug(`Prerequisite "${prerequisite.title}" seemed to have failed with the following error:`)
+                        Logger.debug(`Command: ${command}`)
+                        Logger.debug(runResult?.error ?? runResult?.stdout + runResult?.stderr)
                     }   
                 }
             }
@@ -935,23 +971,6 @@ process.on("exit", closeConfigFile);
 process.on("SIGINT", closeConfigFile); // Handle Ctrl+C
 process.on("SIGTERM", closeConfigFile); // Handle termination
 
-export function getFreshConfig() {
-    // used for edge cases
-    return JSON.parse(fs.readFileSync(configPath, {encoding: "utf-8"}));
-}
-
-export function setServer(content) {
-    server = content;
-}
-
-export function setRatelimit(ip, value) {
-    ratelimit[ip] = value;
-}
-
-export function flipDebug() {
-    debugmode = !debugmode;
-}
-
 export function isPtero(){
     return nodeArgs?.includes("--ptero")
 }
@@ -964,7 +983,7 @@ export function skipSetup(){
 if (import.meta.main) {
     setImmediate(async () => {
         try {
-            await initSetupWizard();
+            await initSetupWizard(!!skipSetup());
         } catch (err) {
             Logger.error(err);
             process.exit(1);

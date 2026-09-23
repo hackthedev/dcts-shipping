@@ -90,11 +90,11 @@ export async function setupDbConnection(){
 
     await db.ready;
 
-    Logger.info("Checking and waiting for database connection...");
-    Logger.info("If it takes too long check the data inside the config.json file");
-    Logger.info("and make sure the database is running and accessible.");
+    Logger.debug("Checking and waiting for database connection...");
+    Logger.debug("If it takes too long check the data inside the config.json file");
+    Logger.debug("and make sure the database is running and accessible.");
     await db.waitForConnection();
-    Logger.success("Connection established!");
+    Logger.debug("Database connection established!");
     Logger.space();
 
     // Create a connection pool if sql is enabled

@@ -10,8 +10,6 @@ import FrontendLibs from "@hackthedev/frontend-libs";
 import Logger from "../../functions/logger.mjs";
 import fse from "fs-extra";
 import {pathToFileURL} from "url";
-import {consolas} from "../../functions/io.mjs";
-import colors from "colors";
 import {rateLimit} from "../../functions/ratelimit.mjs";
 import {app} from "../../functions/init/web.mjs";
 
@@ -145,7 +143,7 @@ async function handlePluginEndpointAuth(req, res, next) {
 }
 
 export async function initPluginSystem() {
-    Logger.info("Initializing plugin system...");
+    Logger.debug("Initializing plugin system...");
 
     // Directories where plugin files are located
     const pluginsDir = path.join(path.resolve(), "plugins");
@@ -241,10 +239,9 @@ export async function initPluginSystem() {
 
             // skip disabled plugin
             if (pluginEnabled !== true) {
-                Logger.warn(
-                    `Skipped loading plugin ${pluginTitle} (${pluginName}) because its not enabled`,
-                );
-                Logger.warn("This was temporarily bypassed due to testing!")
+                //Logger.warn(
+                //    `Skipped loading plugin ${pluginTitle} (${pluginName}) because its not enabled`,
+                //);
                 //continue;
             }
 
@@ -270,7 +267,7 @@ export async function initPluginSystem() {
                 await moveWebFolders(pluginWebDir, pluginName);
             }
 
-            consolas(colors.yellow(`Loaded plugin ${colors.white(pluginName)}`));
+            Logger.info(`Loaded plugin ${Logger.colors.fgWhite + (pluginName)}`);
         }
     };
 
@@ -407,6 +404,7 @@ export async function installPluginDependencies(pluginName) {
             if(installResult?.success === false) {
                 failedDependencies.push(dependency);
                 Logger.error(installResult?.message);
+                Logger.error(installResult);
             }
             else{
                 Logger.success(installResult?.message);

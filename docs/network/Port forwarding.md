@@ -18,3 +18,19 @@ From that point on you will need to do a bit of research on how to forward ports
 
 > [!TIP]
 > Depending on your router you may need to enable something similar to an "advanced mode".
+
+---
+
+## List of Ports used
+
+On default the following ports will be used inside docker and need to be available on your machine. You may need to edit the docker-compose file if you already use caddy on your host system!
+
+- 80
+- 443
+- 2052
+- 5000
+- 7880
+- 7881
+- 7882
+- 3478
+- 5349

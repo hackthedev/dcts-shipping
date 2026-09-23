@@ -10,10 +10,10 @@ import {
     sendMessageToUser
 } from "../main.mjs";
 import {encodeToBase64} from "../mysql/helper.mjs";
-import {signer} from "../../../index.mjs"
 import {queryDatabase} from "../mysql/mysql.mjs";
 import {getBan} from "../ban-system/helpers.mjs";
 import {saveConfig, serverconfig} from "../init/config.mjs";
+import {signer} from "../init/general.mjs";
 
 export async function getMemberLastOnline(memberId) {
     if (!memberId || !serverconfig.servermembers[memberId]) {

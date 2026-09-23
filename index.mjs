@@ -835,6 +835,8 @@ export async function initSetupWizard(bypass = false){
         serverconfig.serverinfo.setup = 1
         await saveConfig(serverconfig);
         await executePrerequisites();
+
+        if(!isPtero() && debugmode === false) console.clear();
         await initWebserver()
         await initDCTSServer();
     }

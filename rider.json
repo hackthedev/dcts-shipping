@@ -15,7 +15,7 @@
         "@hackthedev/icons": "2.0.1",
         "@hackthedev/express-starter": "1.1.2",
         "@hackthedev/terminal-logger": "latest",
-        "@hackthedev/setup-wizard": "1.2.1",
+        "@hackthedev/setup-wizard": "1.2.2",
         "@hackthedev/caddy-sdk": "1.0.0"
     }
 }

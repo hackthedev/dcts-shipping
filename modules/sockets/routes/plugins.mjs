@@ -267,7 +267,7 @@ export async function initPluginSystem() {
                 await moveWebFolders(pluginWebDir, pluginName);
             }
 
-            Logger.info(`Loaded plugin ${Logger.colors.white(pluginName)}`);
+            Logger.info(`Loaded plugin ${Logger.colors.fgWhite + (pluginName)}`);
         }
     };
 
@@ -404,6 +404,7 @@ export async function installPluginDependencies(pluginName) {
             if(installResult?.success === false) {
                 failedDependencies.push(dependency);
                 Logger.error(installResult?.message);
+                Logger.error(installResult);
             }
             else{
                 Logger.success(installResult?.message);

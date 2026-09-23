@@ -65,17 +65,16 @@ import SetupWizard from "@hackthedev/setup-wizard";
 import express from "express";
 import {initLivekitEndpoints} from "./modules/sockets/routes/livekit.mjs";
 import {db, processDbEnvData, setupDbConnection} from "./modules/functions/init/database.mjs";
-import {initConfig, saveConfig, serverconfig} from "./modules/functions/init/config.mjs";
+import {initConfig, saveConfig, serverconfig, versionCode} from "./modules/functions/init/config.mjs";
 import dSyncWeb from "@hackthedev/dsync-web";
-import {app, getWebPort, initWebserver, installWebLibs, starter} from "./modules/functions/init/web.mjs";
+import {app, getWebPort, initWebserver, installWebLibs, skipCaddy, starter} from "./modules/functions/init/web.mjs";
 import {
     auther,
     debugmode,
     flipDebug,
     initAuther,
     signer,
-    versionCode,
-    versionPath
+
 } from "./modules/functions/init/general.mjs";
 
 
@@ -124,11 +123,6 @@ else{
     console.log("Starting...");
 }
 
-if(!fs.existsSync(versionPath)) {
-    Logger.error("Version path not found!!")
-    process.exit(1);
-}
-
 // config file saving
 let fileHandle = null; // File handle for the config file
 let isClosing = false; // Flag to prevent multiple close attempts
@@ -172,7 +166,7 @@ process.on("unhandledRejection", (reason) => {
 });
 
 async function initSocketHandlers(){
-    Logger.info("Loading socket handlers...");
+    Logger.debug("Loading socket handlers...");
     await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
     Logger.info("Done!")
 }
@@ -417,13 +411,13 @@ export async function initDCTSServer(){
     var checkVer = await checkVersionUpdate();
     if (checkVer != null) {
         Logger.space();
-        Logger.info(
+        Logger.warn(
             `New version ${checkVer} is available!`,
-            Logger.colors.blink + Logger.colors.fgCyan + Logger.colors.bright,
+            Logger.colors.blink + Logger.colors.bright,
         );
-        Logger.info(
+        Logger.warn(
             `Download » https://github.com/hackthedev/dcts-shipping/releases`,
-            Logger.colors.blink + Logger.colors.fgCyan + Logger.colors.bright,
+            Logger.colors.blink + Logger.colors.bright,
         );
         Logger.space();
     }
@@ -555,6 +549,24 @@ export async function initSetupWizard(bypass = false){
     }
 
     function registerSetupPrerequisites(){
+
+        // this is defined here so it can be toggled
+        let caddyPrerequisite = {
+            title: "Caddy",
+            check: [
+                ["caddy --version", "v"] // v1.x.x
+            ],
+            install: [
+                "DEBIAN_FRONTEND=noninteractive apt-get install -y caddy"
+            ],
+            execute: [
+                "caddy start --config /etc/caddy/Caddyfile >/dev/null 2>&1 </dev/null"
+            ]
+        };
+
+        // remove caddy prerequisite if not needed
+        if(skipCaddy()) caddyPrerequisite = {};
+
         setupWizard.addPrerequisites({
             "linux": [
                 {
@@ -578,18 +590,7 @@ export async function initSetupWizard(bypass = false){
                     ],
                     execute: []
                 },
-                {
-                    title: "Caddy",
-                    check: [
-                        ["caddy --version", "v"] // v1.x.x
-                    ],
-                    install: [
-                        "DEBIAN_FRONTEND=noninteractive apt-get install -y caddy"
-                    ],
-                    execute: [
-                        "caddy start --config /etc/caddy/Caddyfile >/dev/null 2>&1 </dev/null"
-                    ]
-                },
+                caddyPrerequisite,
                 {
                     title: "cURL",
                     check: [
@@ -792,39 +793,42 @@ export async function initSetupWizard(bypass = false){
             },
         })
 
-        setupWizard.addStep({
-            id: "caddy",
-            title: "SSL/TLS Setup",
-            description:
-                `Lets setup some certificates using caddy!
+        // only show this stuff if the installer will handle caddy
+        if(!skipCaddy()){
+            setupWizard.addStep({
+                id: "caddy",
+                title: "SSL/TLS Setup",
+                description:
+                    `Lets setup some certificates using caddy!
                 <a href="https://docs.dcts.community/network/DNS%20Setup" target="_blank_">Make sure your domain is setup!</a>`,
-            fields: [
-                {
-                    id: "dcts_url",
-                    text: "DCTS Domain",
-                    placeholder: null,
-                    type: "text",
-                    value: serverconfig?.serverinfo?.app?.url?.dcts ?? null,
-                    test: async (value) => {
-                        return !!value?.trim() && typeof value === "string" && !value.includes("http");
+                fields: [
+                    {
+                        id: "dcts_url",
+                        text: "DCTS Domain",
+                        placeholder: null,
+                        type: "text",
+                        value: serverconfig?.serverinfo?.app?.url?.dcts ?? null,
+                        test: async (value) => {
+                            return !!value?.trim() && typeof value === "string" && !value.includes("http");
+                        }
+                    },
+                    {
+                        id: "livekit_url",
+                        text: "Livekit Domain",
+                        placeholder: null,
+                        type: "text",
+                        value: serverconfig?.serverinfo?.livekit?.url ?? null,
+                        test: async (value) => {
+                            return !!value?.trim() && typeof value === "string" && !value.includes("http");
+                        }
                     }
+                ],
+                test: async(data) => {
+                    if(data?.dcts_url) serverconfig.serverinfo.app.url.dcts = data?.dcts_url;
+                    if(data?.livekit_url) serverconfig.serverinfo.livekit.url = data?.livekit_url;
                 },
-                {
-                    id: "livekit_url",
-                    text: "Livekit Domain",
-                    placeholder: null,
-                    type: "text",
-                    value: serverconfig?.serverinfo?.livekit?.url ?? null,
-                    test: async (value) => {
-                        return !!value?.trim() && typeof value === "string" && !value.includes("http");
-                    }
-                }
-            ],
-            test: async(data) => {
-                if(data?.dcts_url) serverconfig.serverinfo.app.url.dcts = data?.dcts_url;
-                if(data?.livekit_url) serverconfig.serverinfo.livekit.url = data?.livekit_url;
-            },
-        })
+            })
+        }
     }
 
     async function finishSetup(){

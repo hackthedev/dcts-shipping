@@ -6,8 +6,8 @@ import {
 } from "../functions/main.mjs";
 import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
 import {normalizeVar} from "./userConnected.mjs";
-import {saveConfig, serverconfig} from "../functions/init/config.mjs";
-import {signer, versionCode} from "../functions/init/general.mjs";
+import {saveConfig, serverconfig, versionCode} from "../functions/init/config.mjs";
+import {signer} from "../functions/init/general.mjs";
 
 export async function getPublicServerInfoObject(){
     let groupId = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);

@@ -17,8 +17,8 @@ import {banIp, checkMemberBan, getBan, isIdentifierBanned, removeBan} from "./ba
 import {sanitizeHTML} from "./sanitizing/functions.mjs";
 
 import dSyncAuth from "@hackthedev/dsync-auth";
-import {reloadConfig, saveConfig, serverconfig} from "./init/config.mjs";
-import {auther, debugmode, flipDebug, ratelimit, setRatelimit, versionCode} from "./init/general.mjs";
+import {reloadConfig, saveConfig, serverconfig, versionCode} from "./init/config.mjs";
+import {auther, debugmode, flipDebug, ratelimit, setRatelimit} from "./init/general.mjs";
 import bcrypt from "bcrypt";
 
 var serverconfigEditable;
@@ -161,7 +161,7 @@ export async function checkVersionUpdate() {
                 var onlineVersionCode = await res.text();
                 onlineVersionCode = onlineVersionCode.replaceAll("\n\r", "").replaceAll("\n", "");
 
-                if (onlineVersionCode > versionCode) {
+                if (Number(onlineVersionCode) > Number(versionCode.replaceAll(".", ""))) {
                     resolve(onlineVersionCode);
                 } else {
                     resolve(null);

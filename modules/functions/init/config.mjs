@@ -8,6 +8,12 @@ import fs from "fs";
 import {checkObjectKeys} from "../main.mjs";
 import {queryDatabase} from "../mysql/mysql.mjs";
 import {saveMemberToDB} from "../mysql/helper.mjs";
+import path from "path";
+
+export let projectConfig = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json")).toString())
+
+// check version file for update check
+export let versionCode = projectConfig?.version ?? null
 
 export let configPath = "./configs/config.json";
 export let serverconfig = fs.existsSync(configPath) ? JSONTools.tryParse(fs.readFileSync(configPath, {encoding: "utf-8"})) : {};

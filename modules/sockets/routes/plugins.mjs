@@ -143,7 +143,7 @@ async function handlePluginEndpointAuth(req, res, next) {
 }
 
 export async function initPluginSystem() {
-    Logger.info("Initializing plugin system...");
+    Logger.debug("Initializing plugin system...");
 
     // Directories where plugin files are located
     const pluginsDir = path.join(path.resolve(), "plugins");

@@ -1,5 +1,5 @@
 import path from "path";
-import {serverconfig} from "./config.mjs";
+import {projectConfig, serverconfig} from "./config.mjs";
 //import {versionCode} from "../../../index.mjs";
 import {generateId} from "../main.mjs";
 import {resolveCategoryByChannelId, resolveGroupByChannelId} from "../chat/main.mjs";
@@ -13,12 +13,19 @@ export let starter = null;
 export let app = null;
 export let express = null;
 export let server = null;
+let nodeArgs = process.argv;
 
 export function getWebPort(){
     return process.env.PORT ?? serverconfig?.serverinfo?.port;
 }
 
+export function skipCaddy(){
+    return nodeArgs?.includes("--skip-caddy")
+}
+
 export async function setupCaddy(){
+    if(skipCaddy()) return;
+
     try{
         const caddy = new CaddySdk("dcts");
         let livekitConfig = await caddy.getConfig("livekit");

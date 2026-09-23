@@ -50,7 +50,7 @@ Additionally, the following ports are being used and should be accessable if you
 > grep -qw sse4_2 /proc/cpuinfo && echo true || echo false
 > ```
 > 
-> At a minimum you will need `sse4_2`, idealy `avx` and `avx2`. If you use a modern system you should be fine.  **VPS Systems from out partner**  [vultris](https://vultris.cloud/) offer such systems.
+> At a minimum you will need `sse4_2`, idealy `avx` and `avx2`. If you use a modern system you should be fine.  **VPS Systems from our partner**  [vultris](https://vultris.cloud/) offer such systems.
 
 ------
 

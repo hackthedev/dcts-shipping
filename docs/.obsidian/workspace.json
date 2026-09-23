@@ -11,13 +11,32 @@
             "id": "c88339154dc9efa6",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Getting started.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "Neuer Tab"
+              "title": "Getting started"
+            }
+          },
+          {
+            "id": "e35c79e64588e59c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Getting started.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Getting started"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -182,14 +201,17 @@
       "bases:Neue Base erstellen": false
     }
   },
-  "active": "c88339154dc9efa6",
+  "active": "e35c79e64588e59c",
   "lastOpenFiles": [
-    "Getting started.md",
-    "assets/Pasted image 20260916214934.png",
     "network/DNS Setup.md",
-    "assets/Pasted image 20260916214731.png",
+    "Getting started.md",
+    "network/Port forwarding.md",
     "DCTS Docs Base.base",
     "Performance.md",
+    "List of Ports used.md",
+    "network/Reverse Proxy Setup.md",
+    "assets/Pasted image 20260916214934.png",
+    "assets/Pasted image 20260916214731.png",
     "Running DCTS.md",
     "Installation/VoIP Setup.md",
     "Installation/Docker Setup.md",
@@ -213,10 +235,7 @@
     "Lore/Principles.md",
     "Lore/Moderation.md",
     "Lore/Threat model.md",
-    "Lore/Terminology.md",
-    "Lore/Technical overview.md",
     "Graphs/Images/dSync Explaination.png",
-    "Graphs/dSync Explaination.md",
     "Graphs/Images/dSync Explaination (1).png",
     "Graphs/Images",
     "Graphs",

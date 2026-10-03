@@ -10,6 +10,7 @@ import {io, listenToIO, loadSocketHandlers} from "./modules/functions/init/socke
 
 // dSync Libs
 import dSyncAuth from "@hackthedev/dsync-auth";
+import FrontendLibs from "@hackthedev/frontend-libs";
 //import dSyncAuth from "E:\\network-z-dev\\dSyncAuth\\index.mjs";
 //import dSyncWeb from "E:\\network-z-dev\\dsync-web\\index.mjs";
 //import dSync from "E:\\network-z-dev\\dSync\\index.mjs";
@@ -38,7 +39,7 @@ import {
     checkVersionUpdate,
     generateId,
     handleTerminalCommands,
-    sendMessageToUser,
+    sendMessageToUser, sleep,
     validateMemberId,
 } from "./modules/functions/main.mjs";
 
@@ -105,8 +106,10 @@ let nodeArgs = process.argv;
 
 // make it so that tests cant clear console
 if (process.env.NODE_ENV === "test") {
-    console.clear = () => {};
-    Logger.log = () => {};
+    console.clear = () => {
+    };
+    Logger.log = () => {
+    };
 }
 
 // remove the first few arguments because fuck that lol
@@ -115,10 +118,9 @@ nodeArgs.shift();
 
 // if we use pterodactyl we dont wanna clear the console
 // because otherwise debugging will be hell
-if(!isPtero()){
+if (!isPtero()) {
     console.clear();
-}
-else{
+} else {
     // this log is used for pterodactyl!
     console.log("Starting...");
 }
@@ -165,17 +167,17 @@ process.on("unhandledRejection", (reason) => {
     emitErrorToTestingClient(reason)
 });
 
-async function initSocketHandlers(){
+async function initSocketHandlers() {
     Logger.debug("Loading socket handlers...");
     await loadSocketHandlers(path.join(__dirname, "modules/sockets"), io);
     Logger.info("Done!")
 }
 
-async function initIPSec(){
+async function initIPSec() {
     ipsec = new dSyncIPSec({
         checkCache: async (ip) => {
             let ipInfoRow = await getCache(ip, "ip_cache");
-            if(ipInfoRow?.length === 0){
+            if (ipInfoRow?.length === 0) {
                 await setCache(ip, "ip_cache");
             }
         },
@@ -201,7 +203,7 @@ async function initIPSec(){
     await ipsec.filterExpressTraffic(app)
 }
 
-export async function initDCTSServer(){
+export async function initDCTSServer() {
     await initLivekitEndpoints();
     await listenToIO()
 
@@ -220,10 +222,10 @@ export async function initDCTSServer(){
             db,
             dsa: dSyncAuth,
             canAccess: async (req) => {
-                const { id, token } = req.body || {};
+                const {id, token} = req.body || {};
                 if (!id || !token) return false;
 
-                if(!await validateMemberId(id, null, token)) return false;
+                if (!await validateMemberId(id, null, token)) return false;
                 return await hasPermission(id, "administrator");
             }
         });
@@ -267,20 +269,19 @@ export async function initDCTSServer(){
                     let isDCTSUser = memberId && memberToken;
                     let isRemote = sessionId && publicKey && !isDCTSUser;
 
-                    if(isDCTSUser && await validateMemberId(memberId, null, memberToken)){
+                    if (isDCTSUser && await validateMemberId(memberId, null, memberToken)) {
                         return getMemberHighestUploadLimit(memberId);
-                    }
-                    else if(isRemote){
+                    } else if (isRemote) {
                         // validate session etc
                         let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
 
                         // if session is true we can try and see if the person connected to the server while using a client/app.
                         // this way the account becomes automatically linked, allowing for possibly bigger, individual limits.
-                        if(sessionResult?.valid === true){
+                        if (sessionResult?.valid === true) {
 
                             // check n see if a member exists
                             let memberObj = getMemberFromKey(publicKey);
-                            if(memberObj?.id){
+                            if (memberObj?.id) {
                                 return getMemberHighestUploadLimit(memberObj.id);
                             }
                         }
@@ -339,17 +340,17 @@ export async function initDCTSServer(){
             dSyncAuth: auther,
             isValidated: async (req, res) => {
                 const {inboxId, timestamp, customId} = req?.params;
-                const { id, token, sessionId, publicKey } = req.body;
+                const {id, token, sessionId, publicKey} = req.body;
 
                 // if public key is banned
-                if(publicKey){
+                if (publicKey) {
                     let publicKeyCheckResult = await checkAndUnbanPublicKey(publicKey);
-                    if(publicKeyCheckResult?.result === true) return false;
+                    if (publicKeyCheckResult?.result === true) return false;
                 }
 
-                if(serverconfig.servermembers[id]?.token === token && !sessionId) return true;
+                if (serverconfig.servermembers[id]?.token === token && !sessionId) return true;
 
-                if(sessionId){
+                if (sessionId) {
                     let sessionResult = dSyncAuth.verifySession(auther.authSessions, sessionId, publicKey);
                     return sessionResult?.valid ?? false;
                 }
@@ -358,11 +359,11 @@ export async function initDCTSServer(){
             },
             getIdentifier: async (req, res) => {
                 const {inboxId, timestamp, customId} = req?.params;
-                let { id, token, sessionId, publicKey } = req.body;
+                let {id, token, sessionId, publicKey} = req.body;
 
-                if(!id && !token && publicKey){
+                if (!id && !token && publicKey) {
                     let member = await getMemberFromKey(publicKey);
-                    if (member){
+                    if (member) {
                         id = member.id;
                         token = member.token;
                     }
@@ -371,14 +372,14 @@ export async function initDCTSServer(){
                 return id ?? null;
             },
             beforeReturn: async (req, res, inbox) => {
-                if(Array.isArray(inbox) && inbox.length > 0){
-                    for(let item of inbox){
+                if (Array.isArray(inbox) && inbox.length > 0) {
+                    for (let item of inbox) {
                         let itemType = item?.type;
 
                         // chat mentions
-                        if(itemType === "mention"){
+                        if (itemType === "mention") {
                             let messageId = item?.data?.messageId;
-                            if(!messageId || messageId?.length !== 12) continue;
+                            if (!messageId || messageId?.length !== 12) continue;
 
                             item.data = await getMessageObjectById(messageId);
                         }
@@ -389,16 +390,16 @@ export async function initDCTSServer(){
 
         await inbox.init();
     } catch (e) {
-            Logger.error("Error while trying to connect to database!")
-            Logger.error(e)
-            process.exit(1)
+        Logger.error("Error while trying to connect to database!")
+        Logger.error(e)
+        process.exit(1)
     }
 
     let magentaBlinkColor = Logger.colors.blink + Logger.colors.bright + Logger.colors.fgMagenta
 
     Logger.success(`Welcome to DCTS`);
     Logger.success(`Checkout our subreddit at https://www.reddit.com/r/dcts/`);
-    Logger.success( `The Official Github Repo: https://github.com/hackthedev/dcts-shipping/`);
+    Logger.success(`The Official Github Repo: https://github.com/hackthedev/dcts-shipping/`);
 
     Logger.space();
     Logger.info(`♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥`, magentaBlinkColor);
@@ -491,7 +492,7 @@ export async function initDCTSServer(){
     }
 }
 
-export async function initSetupWizard(bypass = false){
+export async function initSetupWizard(bypass = false) {
     serverconfig.serverinfo.sql.enabled = true;
 
     let dctsDomain = serverconfig?.serverinfo?.app?.url?.dcts;
@@ -504,6 +505,8 @@ export async function initSetupWizard(bypass = false){
             await finishSetup();
         }
     });
+
+    await copySetupWizardCustoms();
 
     // sql setup
     let setupDbPass = generateId(64);
@@ -520,13 +523,13 @@ export async function initSetupWizard(bypass = false){
     registerSetupPrerequisites();
 
     // first time setup
-    if( (serverconfig.serverinfo.setup === 0 || await checkPrerequisites() === false) && !skipSetup() && bypass === false){
+    if ((serverconfig.serverinfo.setup === 0 || await checkPrerequisites() === false) && !skipSetup() && bypass === false) {
         serverconfig.serverinfo.sql.password = setupDbPass;
         serverconfig.serverinfo.sql.username = setupDbUser;
         serverconfig.serverinfo.sql.database = setupDbName;
 
         // manipulate the livekit yaml file
-        if(fs.existsSync(livekitConfigFilePath)){
+        if (fs.existsSync(livekitConfigFilePath)) {
             livekitConfig = JSONTools.parseYaml(fs.readFileSync(livekitConfigFilePath, "utf8"));
             // reset keys
             livekitConfig.keys = {};
@@ -540,15 +543,14 @@ export async function initSetupWizard(bypass = false){
         serverconfig.serverinfo.livekit.secret = setupLivekitSecret;
 
         registerSetupSteps();
-    }
-    else{
+    } else {
         setupWizard.exitSetup();
         registerSetupPrerequisites();
         registerSetupSteps();
         await finishSetup();
     }
 
-    function registerSetupPrerequisites(){
+    function registerSetupPrerequisites() {
 
         // this is defined here so it can be toggled
         let caddyPrerequisite = {
@@ -565,7 +567,7 @@ export async function initSetupWizard(bypass = false){
         };
 
         // remove caddy prerequisite if not needed
-        if(skipCaddy()) caddyPrerequisite = {};
+        if (skipCaddy()) caddyPrerequisite = {};
 
         setupWizard.addPrerequisites({
             "linux": [
@@ -655,7 +657,7 @@ export async function initSetupWizard(bypass = false){
         })
     }
 
-    function registerSetupSteps(){
+    function registerSetupSteps() {
         // add the setup steps here
         setupWizard.addStep({
             id: "welcome",
@@ -722,10 +724,10 @@ export async function initSetupWizard(bypass = false){
                     }
                 }
             ],
-            test: async(data) => {
+            test: async (data) => {
                 let dbTest = await dSyncSql.testConnection({...data})
 
-                if(dbTest === true){
+                if (dbTest === true) {
                     serverconfig.serverinfo.sql.host = data?.host;
                     serverconfig.serverinfo.sql.username = data?.username;
                     serverconfig.serverinfo.sql.password = data?.password;
@@ -778,14 +780,14 @@ export async function initSetupWizard(bypass = false){
                     }
                 }
             ],
-            test: async(data) => {
+            test: async (data) => {
                 let livekitResponse = await fetch(data.url, {
                     signal: AbortSignal.timeout(2500)
                 });
 
-               if(livekitResponse.status === 200) return {
-                   error: null
-               }
+                if (livekitResponse.status === 200) return {
+                    error: null
+                }
 
                 return {
                     error: livekitResponse.status
@@ -794,13 +796,84 @@ export async function initSetupWizard(bypass = false){
         })
 
         // only show this stuff if the installer will handle caddy
-        if(!skipCaddy()){
+        if (!skipCaddy()) {
             setupWizard.addStep({
                 id: "caddy",
                 title: "SSL/TLS Setup",
                 description:
-                    `Lets setup some certificates using caddy!
-                <a href="https://docs.dcts.community/network/DNS%20Setup" target="_blank_">Make sure your domain is setup!</a>`,
+                    `
+                        <style>
+                            @keyframes rainbow{
+                                100%,0%{
+                                    color: rgb(255,0,0);
+                                }
+                                8%{
+                                    color: rgb(255,127,0);
+                                }
+                                16%{
+                                    color: rgb(255,255,0);
+                                }
+                                25%{
+                                    color: rgb(127,255,0);
+                                }
+                                33%{
+                                    color: rgb(0,255,0);
+                                }
+                                41%{
+                                    color: rgb(0,255,127);
+                                }
+                                50%{
+                                    color: rgb(0,255,255);
+                                }
+                                58%{
+                                    color: rgb(0,127,255);
+                                }
+                                66%{
+                                    color: rgb(0,0,255);
+                                }
+                                75%{
+                                    color: rgb(127,0,255);
+                                }
+                                83%{
+                                    color: rgb(255,0,255);
+                                }
+                                91%{
+                                    color: rgb(255,0,127);
+                                }
+                            }
+                            
+                            details.rainbow summary {
+                                animation: rainbow 8s linear;
+                                animation-iteration-count: infinite;
+                            }
+                            details.rainbow {
+                                color: gray;
+                                padding: 0.5rem;
+                            }
+
+                        </style>
+                        Lets setup some certificates using caddy!<br>
+                        <a href="https://docs.dcts.community/network/DNS%20Setup" target="_blank_">Make sure your domain is setup!</a><br><br>
+                        
+                        <details class="rainbow">
+                            <summary>In need of a free domain?</summary>
+                            
+                            <ul>
+                                <li>Simply register an account <a href="http://localhost:5001" target="_blank_">here</a>.</li>
+                                <li>Login</li>
+                                <li>Click "API" on the top right corner</li>
+                                <li>Generate a key and enter it below</li>
+                            </ul>
+                            
+                            <p>The Setup Wizard will automatically setup the dns records for you</p><br>
+                            
+                            <div class="field">
+                                <label>API Key:</label>
+                                <input type="password" name="api_key" oninput="testDnsApiKey(this)">
+                            </div>
+                            
+                        </details>
+                    `,
                 fields: [
                     {
                         id: "dcts_url",
@@ -823,34 +896,34 @@ export async function initSetupWizard(bypass = false){
                         }
                     }
                 ],
-                test: async(data) => {
-                    if(data?.dcts_url) serverconfig.serverinfo.app.url.dcts = data?.dcts_url;
-                    if(data?.livekit_url) serverconfig.serverinfo.livekit.url = data?.livekit_url;
+                test: async (data) => {
+                    console.log(data)
+                    if (data?.dcts_url) serverconfig.serverinfo.app.url.dcts = data?.dcts_url;
+                    if (data?.livekit_url) serverconfig.serverinfo.livekit.url = data?.livekit_url;
                 },
             })
         }
     }
 
-    async function finishSetup(){
+    async function finishSetup() {
         serverconfig.serverinfo.setup = 1
         await saveConfig(serverconfig);
         await executePrerequisites();
 
-        if(!isPtero() && debugmode === false) console.clear();
+        if (!isPtero() && debugmode === false) console.clear();
         await initWebserver()
         await initDCTSServer();
     }
 
-    async function executePrerequisites(){
-        Logger.info("Launching prerequisites...")
+    async function executePrerequisites() {
+        Logger.debug("Launching prerequisites...")
         await doForEachSetupPrerequisite(async (prerequisite) => {
             // if there are startup commands after install etc
-            if(prerequisite?.execute) {
-                for(const command of prerequisite.execute){
-                    try{
+            if (prerequisite?.execute) {
+                for (const command of prerequisite.execute) {
+                    try {
                         await setupWizard.runCommand(command)
-                    }
-                    catch (err){
+                    } catch (err) {
                         Logger.error(err);
                     }
                 }
@@ -858,23 +931,23 @@ export async function initSetupWizard(bypass = false){
         })
     }
 
-    async function checkPrerequisites(){
+    async function checkPrerequisites() {
         Logger.debug("Checking prerequisites...")
         let result = await doForEachSetupPrerequisite(async (prerequisite) => {
             // if there are startup commands after install etc
             let hadErrors = false;
-            if(prerequisite?.check) {
-                for(const check of prerequisite.check){
+            if (prerequisite?.check) {
+                for (const check of prerequisite.check) {
                     let command = check[0];
-                    let runResult = await setupWizard.runCommand(command)      
-                    
+                    let runResult = await setupWizard.runCommand(command)
+
                     // wether or not something is an error
-                    if(!runResult.success && (!prerequisite?.canFail && !prerequisite?.canMiss)){
+                    if (!runResult.success && (!prerequisite?.canFail && !prerequisite?.canMiss)) {
                         hadErrors = true;
                         Logger.debug(`Prerequisite "${prerequisite.title}" seemed to have failed with the following error:`)
                         Logger.debug(`Command: ${command}`)
                         Logger.debug(runResult?.error ?? runResult?.stdout + runResult?.stderr)
-                    }   
+                    }
                 }
             }
 
@@ -882,8 +955,8 @@ export async function initSetupWizard(bypass = false){
         })
 
         let hadError = false;
-        for(let res of result.values()){
-            if(res === true) hadError = true;
+        for (let res of result.values()) {
+            if (res === true) hadError = true;
         }
 
         // invert it so it makes more sense to use.
@@ -892,8 +965,8 @@ export async function initSetupWizard(bypass = false){
     }
 
 
-    async function doForEachSetupPrerequisite(callback){
-        if(!callback ||typeof callback !== "function") throw new Error("Missing setup callback");
+    async function doForEachSetupPrerequisite(callback) {
+        if (!callback || typeof callback !== "function") throw new Error("Missing setup callback");
         let prerequisites = setupWizard.prerequisites?.[setupWizard.getOSName()];
         let prereqLength = Object.keys(prerequisites).length;
 
@@ -915,11 +988,11 @@ export async function checkPow(socket) {
     }
 
     let difficulty = serverconfig.serverinfo.pow.difficulty
-    let { challenge } = auther.createPowChallenge(difficulty)
-    let { estimatedSeconds } = dSyncAuth.estimatePoWDuration(difficulty)
+    let {challenge} = auther.createPowChallenge(difficulty)
+    let {estimatedSeconds} = dSyncAuth.estimatePoWDuration(difficulty)
     let timeout = (estimatedSeconds * 2) + 600
 
-    socket.emit("powChallenge", { challenge, difficulty })
+    socket.emit("powChallenge", {challenge, difficulty})
 
     let pow = auther.waitForPow(challenge, difficulty, timeout)
 
@@ -971,12 +1044,32 @@ process.on("exit", closeConfigFile);
 process.on("SIGINT", closeConfigFile); // Handle Ctrl+C
 process.on("SIGTERM", closeConfigFile); // Handle termination
 
-export function isPtero(){
+export function isPtero() {
     return nodeArgs?.includes("--ptero")
 }
 
-export function skipSetup(){
+export function skipSetup() {
     return nodeArgs?.includes("--skip-setup")
+}
+
+async function copySetupWizardCustoms() {
+    let copyPath = path.join(path.resolve(), "assets", "setup-wizard");
+    let destinationPath = path.join(path.resolve(), "node_modules", "@hackthedev", "setup-wizard", "public", "js", "custom");
+    let files = fs.readdirSync(copyPath, {withFileTypes: true, recursive: true});
+    await FrontendLibs.install("@hackthedev/prompts@latest", copyPath)
+
+    if (!fs.existsSync(path.join(copyPath, "prompts"))) {
+        await sleep(1000)
+        copySetupWizardCustoms()
+    }
+
+    files = files.filter(file => file.name.endsWith(".js"))
+    if (files?.length === 0) return;
+
+    for (let file of files) {
+        let filePath = path.join(file.path ?? file.parentPath, file.name)
+        fs.copyFileSync(filePath, path.join(destinationPath, file.name));
+    }
 }
 
 // something something deadlock

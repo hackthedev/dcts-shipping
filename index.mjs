@@ -849,6 +849,13 @@ export async function initSetupWizard(bypass = false) {
                             details.rainbow {
                                 color: gray;
                                 padding: 0.5rem;
+                                cursor: pointer;
+                            }
+                            
+                            details .dns-content{
+                                background-color: rgb(128 128 128 / 0.1);
+                                border-radius: 1rem;
+                                padding: 0.5rem;
                             }
 
                         </style>
@@ -858,20 +865,25 @@ export async function initSetupWizard(bypass = false) {
                         <details class="rainbow">
                             <summary>In need of a free domain?</summary>
                             
-                            <ul>
-                                <li>Simply register an account <a href="http://localhost:5001" target="_blank_">here</a>.</li>
-                                <li>Login</li>
-                                <li>Click "API" on the top right corner</li>
-                                <li>Generate a key and enter it below</li>
-                            </ul>
-                            
-                            <p>The Setup Wizard will automatically setup the dns records for you</p><br>
-                            
-                            <div class="field">
-                                <label>API Key:</label>
-                                <input type="password" name="api_key" oninput="testDnsApiKey(this)">
-                            </div>
-                            
+                            <div class="dns-content">
+                                <ul>
+                                    <li>Simply register an account <a href="https://dns.dcts.community" target="_blank_">here</a>.</li>
+                                    <li>Login</li>
+                                    <li>Click "API" on the top right corner</li>
+                                    <li>Generate a key and enter it below</li>
+                                </ul>
+                                
+                                <p>The Setup Wizard will automatically setup the dns records for you</p><br>
+                                
+                                 <div class="field">
+                                    <label>API Key:</label>
+                                    <input type="password" name="api_key" class="api_key" oninput="testDnsApiKey(this.value)">
+                                </div><br>  
+                                
+                                 <div class="field">
+                                    <input style="background-color: rgb(135 206 235 / 0.7); cursor: pointer" type="button" name="submit" value="Go!" onclick="testDnsApiKey(this)">
+                                </div>                 
+                            </div>                            
                         </details>
                     `,
                 fields: [
@@ -897,7 +909,6 @@ export async function initSetupWizard(bypass = false) {
                     }
                 ],
                 test: async (data) => {
-                    console.log(data)
                     if (data?.dcts_url) serverconfig.serverinfo.app.url.dcts = data?.dcts_url;
                     if (data?.livekit_url) serverconfig.serverinfo.livekit.url = data?.livekit_url;
                 },

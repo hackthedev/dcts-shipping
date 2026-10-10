@@ -399,7 +399,7 @@ export async function installPluginDependencies(pluginName) {
     // check and install all dependencies
     if (pluginConfig?.dependencies?.length > 0) {
         for (let dependency of pluginConfig.dependencies) {
-            let installResult = await FrontendLibs.install(dependency, path.join(path.resolve(), "node_modules"));
+            let installResult = await FrontendLibs.install(dependency, path.join(path.resolve(), "node_modules"), true);
 
             if(installResult?.success === false) {
                 failedDependencies.push(dependency);

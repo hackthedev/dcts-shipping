@@ -263,11 +263,11 @@ async function showDnsValueSetupPopup(domain, name, error = null) {
             let livekitCreateResult = await createRecord(domain, `livekit.${name}`, record_value);
             if(livekitCreateResult?.error) return await showDnsAvailabilityPopup(livekitCreateResult.error);
 
-            let dctsUrlElement = document.querySelector("input #dcts_url");
-            let livekitUrlElement = document.querySelector("input #livekit_url");
+            let dctsUrlElement = document.querySelector("input#dcts_url");
+            let livekitUrlElement = document.querySelector("input#livekit_url");
 
             if(dctsUrlElement) dctsUrlElement.value = `${name}.${domain}`;
-            if(livekitUrlElement) dctsUrlElement.value = `livekit.${name}.${domain}`;
+            if(livekitUrlElement) livekitUrlElement.value = `livekit.${name}.${domain}`;
 
             await setModalMessage("DNS records set!", "success")
         },

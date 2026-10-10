@@ -5,7 +5,7 @@ import dSyncAuth from "@hackthedev/dsync-auth";
 //import dSyncAuth from "E:\\network-z-dev\\dSyncAuth\\index.mjs";
 import {dSyncSign} from "@hackthedev/dsync-sign";
 
-export let debugmode = process.env.DEBUG === true || false;
+export let debugmode = process.env.DEBUG === "true";
 
 export function flipDebug() {
     debugmode = !debugmode;

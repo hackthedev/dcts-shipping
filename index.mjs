@@ -556,7 +556,7 @@ export async function initSetupWizard(bypass = false) {
         let caddyPrerequisite = {
             title: "Caddy",
             check: [
-                ["caddy --version", "v"] // v1.x.x
+                ["caddy help", "Caddy"] // v1.x.x
             ],
             install: [
                 "DEBIAN_FRONTEND=noninteractive apt-get install -y caddy"
@@ -726,6 +726,7 @@ export async function initSetupWizard(bypass = false) {
             ],
             test: async (data) => {
                 let dbTest = await dSyncSql.testConnection({...data})
+                Logger.debug(dbTest);
 
                 if (dbTest === true) {
                     serverconfig.serverinfo.sql.host = data?.host;

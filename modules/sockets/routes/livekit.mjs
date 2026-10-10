@@ -1,5 +1,5 @@
 import Logger from "@hackthedev/terminal-logger";
-import yaml from "js-yaml";
+import * as yaml from "js-yaml";
 import {AccessToken, WebhookReceiver} from "livekit-server-sdk";
 import {hasPermission} from "../../functions/chat/main.mjs";
 import express from "express";

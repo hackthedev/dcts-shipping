@@ -1,0 +1,14 @@
+{
+  "name": "@hackthedev/prompts",
+  "version": "1.0.1",
+  "description": "Helpful prompts library that renders HTML and has a callback system as well as confirm dialog.",
+  "keywords": [
+    "frontend"
+  ],
+  "license": "ISC",
+  "author": "",
+  "main": "prompts.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

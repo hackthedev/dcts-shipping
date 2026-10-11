@@ -203,7 +203,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     deleteMessageFromChat(messageId, messageType);
                 },
                 condition: async (data) => {
-                    console.log(data)
                     let element = data.element;
                     let memberId = getMemberIdFromElement(element);
                     return ((memberId === UserManager.getID()) || await UserManager.checkPermission("manageMessages") === true)
@@ -227,6 +226,38 @@ document.addEventListener("DOMContentLoaded", function () {
                     return (memberId !== UserManager.getID())
                 },
                 type: "warning"
+            }
+        ])
+
+    ContextMenu.registerContextMenu(
+        "urlembed",
+        [
+            ".markdown-urlEmbed-container > *",
+        ],
+        [
+            {
+                icon: "&#9998;",
+                text: "Copy URL",
+                callback: async (data) => {
+                    let element = data.element;
+                    if(!element) return false;
+
+                    let containerElement = element.closest(".markdown-urlEmbed-container");
+                    let linkElement = containerElement.querySelector("a");
+
+                    let url = linkElement.getAttribute("data-original-url");
+                    await navigator.clipboard.writeText(url);
+                },
+                condition: async (data) => {
+                    let element = data.element;
+                    if(!element) return false;
+
+                    let containerElement = element.closest(".markdown-urlEmbed-container");
+                    let linkElement = containerElement.querySelector("a");
+
+                    let url = linkElement.getAttribute("data-original-url");
+                    return !!url;
+                }
             }
         ])
 
@@ -902,8 +933,9 @@ async function showMessageInChat({
                                      waitWithDisplay = false,
                                      messageType = null,
                                  } = {}) {
-    let markdownResult = await markdown(message.message, message.messageId);
-    if (markdownResult.isMarkdown) message.message = markdownResult.message;
+    // lets do it here cauz it slows down chat loading times
+    //let markdownResult = await markdown(message.message, message.messageId);
+    //if (markdownResult.isMarkdown) message.message = markdownResult.message;
 
     // convert mentions and check if own userid is in it
     let convertedMentions = await convertMention(message);
@@ -1537,7 +1569,7 @@ async function getChatlog(container, index = -1, appendTop = false, preventDispa
         Clock.stop("load_messages_request")
 
         // reset chat
-        if (response?.error === "denied") container.innerHTML = ""; // fuck em
+        if (response?.error === "denied") container.innerHTML = ""; // nuhuh
         if (response.data == null) {
             console.log("Data was null - history");
             Clock.stop("load_messages_total")
@@ -1546,7 +1578,6 @@ async function getChatlog(container, index = -1, appendTop = false, preventDispa
         }
         if (response.type === "voice") {
             Clock.stop("load_messages_total")
-
             ElementLoader.stop(channelbar);
             return;
         }

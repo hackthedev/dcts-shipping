@@ -198,7 +198,6 @@ async function markdown(msg, msgid) {
         }
 
         if (urlMeta?.meta?.title || urlMeta?.meta?.description) {
-            console.log(urlMeta)
 
             let embed = `
             <div class="markdown-urlEmbed-container">
@@ -221,7 +220,7 @@ async function markdown(msg, msgid) {
         }
 
         msg = msg.replace(url,
-            `<a draggable="false" data-media-type="link" data-message-id="${msgid.replace("msg-", "")}" href="${url}" ${url.startsWith(location.origin) ? "" : "target=\"_blank\""}> ${unescapeHtmlEntities(sanitizeHtmlForRender(url))} </a>`
+            `<a draggable="false" data-media-type="link" data-message-id="${msgid.replace("msg-", "")}" href="${url}" ${url.startsWith(location.origin) ? "" : "target=\"_blank\""}> ${unescapeHtmlEntities(stripHTML(url))} </a>`
         );
         changed = true;
     }

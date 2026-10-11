@@ -225,8 +225,6 @@ function getMemberList() {
                     }
                 }
 
-
-
                 if(memberName && memberName.innerText !== memberObject.name){
                     memberName.innerText = unescapeHtmlEntities(sanitizeHtmlForRender(memberObject.name, false));
                 }

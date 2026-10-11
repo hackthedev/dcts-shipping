@@ -54,6 +54,7 @@ To stay independent DCTS will only accept donations and no investors or alike. U
 
 ### Bun:
 
+- ✔️ 1.4.3
 - ✔️ 1.3.14
 - ✔️ 1.3.11
 - ✔️ 1.3.5

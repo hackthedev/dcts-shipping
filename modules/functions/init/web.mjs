@@ -28,6 +28,7 @@ export async function setupCaddy(){
 
     try{
         const caddy = new CaddySdk("dcts");
+        await caddy.resetConfig();
         let livekitConfig = await caddy.getConfig("livekit");
         let dctsConfig = await caddy.getConfig("dcts");
 

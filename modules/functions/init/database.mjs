@@ -71,8 +71,8 @@ export async function setupDbConnection(){
 
     // if connection is invalid show it
     if(!dbConnectionTest){
-        Logger.error("Database credentials are wrong!")
-        Logger.error(serverconfig.serverinfo.sql)
+        Logger.error("Database credentials are wrong or connoection failed!!")
+        Logger.error( {...serverconfig.serverinfo.sql, password: "REDACTED"})
         return;
     }
 

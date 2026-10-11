@@ -4,11 +4,13 @@ import {changeKeyVerification} from "../chat/main.mjs";
 import dSyncAuth from "@hackthedev/dsync-auth";
 //import dSyncAuth from "E:\\network-z-dev\\dSyncAuth\\index.mjs";
 import {dSyncSign} from "@hackthedev/dsync-sign";
+import Logger from "../logger.mjs";
 
 export let debugmode = process.env.DEBUG === "true";
 
 export function flipDebug() {
     debugmode = !debugmode;
+    Logger.info(`Flipped debug mode to ${debugmode}`);
 }
 
 export let ratelimit = [];

@@ -130,7 +130,7 @@ let fileHandle = null; // File handle for the config file
 let isClosing = false; // Flag to prevent multiple close attempts
 
 // toggle debug mode
-if (nodeArgs.includes("--debug") || debugmode === true) {
+if (nodeArgs.includes("--debug") || debugmode === true || fs.existsSync("./.debug")) {
     // enable debug logging
     Logger.logDebug = true;
     flipDebug();

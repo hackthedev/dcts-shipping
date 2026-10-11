@@ -36,6 +36,7 @@
     columns: 2;
     column-gap: 6px;
     width: 100%;
+    column-fill: balance;
 }
 
 #gif-entry-container .gif-entries img {
@@ -51,6 +52,9 @@
 
 /* flag filters */
 #gif-entry-container .gif-entries .gif-entry-wrapper {
+    display: inline-block;
+    vertical-align: top;
+    width: 100%;
     position: relative;
     overflow: hidden;
     break-inside: avoid;
@@ -58,9 +62,10 @@
     margin-bottom: 6px;
 }
 
-#gif-entry-container .gif-entries .gif-entry-wrapper img {
-    transition: filter 4000ms ease;
-    cursor: pointer;
+#gif-entry-container .gif-entries img {
+    display: block;
+    width: 100%;
+    height: auto;
 }
 
 #gif-entry-container .gif-entries .gif-entry-wrapper.sensitive img,

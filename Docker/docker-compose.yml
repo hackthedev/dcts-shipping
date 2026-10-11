@@ -22,7 +22,9 @@ services:
       - plugins:/app/plugins
       - themes:/app/themes
       - livekit:/app/livekit
-      - caddy:/app/caddy
+      - caddy:/etc/caddy
+      - mariadb:/var/lib/mysql
+      - livekit-server:/usr/local/bin/livekit-server
 
 volumes:
   configs:
@@ -31,4 +33,6 @@ volumes:
   plugins:
   themes:
   livekit:
+  livekit-server:
   caddy:
+  mariadb:

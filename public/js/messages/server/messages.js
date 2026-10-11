@@ -1190,6 +1190,11 @@ async function createMsgHTML({
     let isThirdPartyMessageType = messageType != null && messageType !== "dm" && messageType !== "text";
     let sanitized = ChatTools.Sanitize.forRender(message.message, isThirdPartyMessageType) ?? null;
 
+    // bug fix
+    if (!/<p\b[^>]*>/i.test(sanitized)) {
+        sanitized = `<p>${sanitized}</p>`;
+    }
+
     if(sanitized.trim().length === 0) sanitized = "<span style='color: orange;font-size: 10px;'>[ UNSUPPORTED CONTENT ]</span>";
 
     let messageRow =

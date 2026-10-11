@@ -27,6 +27,7 @@ async function url_meta(url) {
     }
 
     const res = await fetch(url, {
+        redirect: "error",
         headers: { "user-agent": "Mozilla/5.0 (compatible; bot/1.0)" },
         signal: AbortSignal.timeout(10000),
     });

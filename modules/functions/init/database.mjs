@@ -155,6 +155,7 @@ export async function setupDbConnection(){
         {
             name: "messages",
             columns: [
+                {name: "id", type: "int NOT NULL PRIMARY KEY AUTO_INCREMENT"},
                 {name: "authorId", type: "varchar(100) NOT NULL"},
                 {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
                 {name: "room", type: "varchar(200) NOT NULL"},

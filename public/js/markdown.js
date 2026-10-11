@@ -67,7 +67,7 @@ async function updateMarkdownLinks(delay) {
         let el = elements[i]
         if (!el) continue
         if (el.className.includes("hljs")) continue
-        if (el.hasAttribute("data-markdown-done")) continue
+        if (el.hasAttribute("data-markdown-done") && el.getAttribute("data-media-type") !== "link") continue
         if (!isElementVisible(el)) continue
         if (el.querySelector(".markdown-urlEmbed-container")) continue
         if (el.closest(".markdown-urlEmbed-container")) continue
@@ -198,7 +198,6 @@ async function markdown(msg, msgid) {
         }
 
         if (urlMeta?.meta?.title || urlMeta?.meta?.description) {
-
             let embed = `
             <div class="markdown-urlEmbed-container">
                 <a class="markdown-urlEmbed"

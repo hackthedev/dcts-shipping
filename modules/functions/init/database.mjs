@@ -254,7 +254,6 @@ export async function setupDbConnection(){
                 {name: "onboarding", type: "BOOLEAN DEFAULT FALSE"},
                 {name: "loginName", type: "varchar(100)"},
                 {name: "name", type: "varchar(100) NOT NULL DEFAULT 'User'"},
-                {name: "nickname", type: "varchar(100) DEFAULT NULL"},
                 {name: "country_code", type: "varchar(50) DEFAULT NULL"},
                 {name: "status", type: "text DEFAULT ''"},
                 {name: "aboutme", type: "text DEFAULT ''"},

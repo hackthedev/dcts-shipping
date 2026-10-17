@@ -111,7 +111,6 @@ export async function updateMember(member) {
     if (member?.icon !== undefined) serverconfig.servermembers[member?.id].icon = stripHTML(normalizeVar(member?.icon));
     if (member?.banner !== undefined) serverconfig.servermembers[member?.id].banner = stripHTML(normalizeVar(member?.banner));
     if (member?.aboutme !== undefined) serverconfig.servermembers[member?.id].aboutme = sanitizeHTML(normalizeVar(member?.aboutme), false);
-    if (member?.nickname !== undefined) serverconfig.servermembers[member?.id].nickname = stripHTML(member?.nickname);
     if (member?.status !== undefined) serverconfig.servermembers[member?.id].status = stripHTML(normalizeVar(member?.status));
     if (member?.country_code !== undefined) serverconfig.servermembers[member?.id].country_code = stripHTML(member?.country_code, false);
     if (member?.publicKey !== undefined) serverconfig.servermembers[member?.id].publicKey = stripHTML(member?.publicKey);

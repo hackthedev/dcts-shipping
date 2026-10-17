@@ -958,7 +958,6 @@ export async function anonymizeMember(member, shouldHide, isAdmin) {
         member.isOnline = false;
         member.lastOnline = 0;
         member.publicKey = "";
-        member.nickname = "";
         member.color = "white";
     }
 

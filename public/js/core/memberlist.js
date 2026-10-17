@@ -1,4 +1,10 @@
 
+EventDispatcher.on("getMemberList", async function(members, channelId){
+    for(let member of Object.keys(members)){
+        console.log(members[member]);
+    }
+})
+
 function getMemberList() {
     if(!UserManager.getChannel()) return;
 
@@ -26,6 +32,11 @@ function getMemberList() {
             let members = response?.members;
             let memberRole = await ChatManager.resolveRole("1")
             let offlineRole = await ChatManager.resolveRole("0")
+
+            EventDispatcher.send("getMemberList", {
+                members,
+                channelId: UserManager.getChannel()
+            });
 
             let rolesMap = {};
 

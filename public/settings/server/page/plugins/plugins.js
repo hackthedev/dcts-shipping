@@ -306,24 +306,60 @@ async function showPluginAbout(pluginObj){
         `
 }
 
+
 async function showPluginSettings(pluginObj) {
-    console.log(pluginObj)
     if (!pluginObj?.settings) return console.warn("Plugin has no settings specified - ignored")
 
     // some funky shit ngl
-    let settings = (Object.values(pluginObj.settings))[0]
     getPluginPanelContentElement().innerHTML = "";
 
-    for (let setting in settings) {
-        console.log(setting)
-        console.log(settings[setting])
-        getPluginPanelContentElement().insertAdjacentElement("beforeend", JsonEditor.getSettingElement(
-            settings[setting],
-            String(setting.toUpperCase()),
-            null,
-            async(val) => {
-                console.log(val)
+    function renderSettings(settings, path = "") {
+        for (let setting in settings) {
+            if (settings[setting] !== null && typeof settings[setting] === "object" && !Array.isArray(settings[setting])) {
+                renderSettings(settings[setting], `${path}${setting}.`);
+                continue;
             }
-        ))
+
+            getPluginPanelContentElement().insertAdjacentElement("beforeend", JsonEditor.getSettingElement(
+                settings[setting],
+                String(setting.toUpperCase()),
+                null,
+                async(val) => {
+                    if (JSON.stringify(settings[setting]) !== JSON.stringify(val)) {
+                        JsonEditor.showSaveButton(`${path}${setting}`, async () => {
+                            settings[setting] = val;
+                            await savePluginSettings(pluginObj.name, pluginObj.settings);
+                        })
+                    }
+                }
+            ))
+        }
     }
+
+    renderSettings(pluginObj.settings);
+}
+
+
+async function savePluginSettings(pluginName, pluginSettings){
+    let res = await fetch(`/plugin/${pluginName}/save`, {
+        headers: {
+            "x-member-id": UserManager.getID(),
+            "x-member-token": UserManager.getToken(),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            settings: pluginSettings
+        }),
+        method: "POST",
+    })
+
+    if (res.status !== 200) {
+        showSystemMessage({
+            title: "Error saving settings"
+        });
+
+        return console.error("Unable to get local plugins! ", res.status, res.statusText)
+    }
+
+    return (await res.json()) ?? null
 }

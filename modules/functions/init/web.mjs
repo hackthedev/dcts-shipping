@@ -146,6 +146,7 @@ export async function installWebLibs(){
             { package: '@hackthedev/autocomplete@latest', path: libDir },
             { package: '@hackthedev/prompts@latest', path: libDir },
             { package: '@hackthedev/event-dispatcher@latest', path: libDir },
+            { package: '@hackthedev/json-editor@latest', path: libDir },
         ]);
 
         results.forEach((r) => {

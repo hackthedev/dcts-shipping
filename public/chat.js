@@ -1027,6 +1027,8 @@ async function sendMessageToServer(authorId = UserManager.getID(),
         return;
     }
 
+    console.log("sending anyway")
+
     return new Promise((resolve, reject) => {
         socket.emit("messageSend", msgPayload, async function (response) {
             Clock.stop("send_message");

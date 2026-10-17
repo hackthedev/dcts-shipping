@@ -195,7 +195,6 @@
     align-items: start;
     justify-content: start;
     text-align: start;
-    gap: 1rem;
 
     width: 100vw;
     max-width: 800px !important;

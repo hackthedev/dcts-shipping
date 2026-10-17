@@ -45,7 +45,7 @@ export default (io) => (socket) => {
             if (!String(member?.channel)) return response({error: "No channel provided"})
 
             // non-dcts message. some plugin using this event maybe?
-            if(member?.type && member?.type !== null) return;
+            if(member?.type) return;
 
             // anti spam check
             let rateLimitResult = await getChannelRateLimit({

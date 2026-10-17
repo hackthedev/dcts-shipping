@@ -121,8 +121,8 @@ From there you can do pretty much anything, like loading additional files, injec
 
 ```js
 // Example code
-injectCss("/plugins/discord-bridge/messages.css")
-loadScript("/plugins/discord-bridge/web/stuff.js")
+injectCss("/plugins/dcts-discord-bridge/messages.css")
+loadScript("/plugins/dcts-discord-bridge/web/stuff.js")
 
 // on message SEND event
 EventDispatcher.on("messageSend", async(payload) => {

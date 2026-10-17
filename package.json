@@ -5,7 +5,7 @@
   "main": "index.mjs",
   "type": "module",
   "scripts": {
-    "test": "bun test tests/backend && bun test tests/frontend",
+    "test": "bun test tests/backend && bun test tests/frontend && bun test tests/sdk",
     "postinstall": "bun postinstall.mjs",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",

@@ -59,135 +59,117 @@ export default class DCTS {
                 }
             }
 
+            static validators = {
+                name: [value => typeof value === "string" && value.trim().length > 0 && value.length <= 20, "Name must be a string and max 20 char. long"]
+            }
+
+            #check(key, value) {
+                const validator = this.constructor.validators[key];
+                if (!validator) throw new Error(`Unknown key: ${key}`);
+
+                const [check, error] = validator;
+                if (!check(value)) throw new Error(error ?? `Invalid value for ${key}`);
+            }
+
+            setValue(key, value, allowHTML = false) {
+                this.#check(key, value);
+                this.data[key] = allowHTML ? sanitizeHTML(value) : stripHTML(value);
+                return this;
+            }
+
+            validate() {
+                const errors = [];
+
+                for (const [key, [check, error]] of Object.entries(this.constructor.validators)) {
+                    if (!check(this.data[key])) {
+                        errors.push(error ?? `Invalid value for ${key}`);
+                    }
+                }
+
+                return {
+                    valid: errors.length === 0,
+                    errors
+                };
+            }
+
             setOnboarding(boolean){
-                if(!boolean) throw new Error("Missing boolean");
-                if(typeof boolean !== "boolean") throw new Error("Only boolean is supported");
-                this.data.onboarding = !!boolean;
+                return this.setValue("onboarding", !!boolean);
             }
 
             setVerifiedKey(boolean){
-                if(!boolean) throw new Error("Missing boolean");
-                if(typeof boolean !== "boolean") throw new Error("Only boolean is supported");
-                this.data.isVerifiedKey = !!boolean;
+                return this.setValue("isVerifiedKey", !!boolean);
             }
 
             setMuted(boolean){
-                if(!boolean) throw new Error("Missing boolean");
-                if(typeof boolean !== "boolean") throw new Error("Only boolean is supported");
-                this.data.isMuted = !!boolean;
+                return this.setValue("isMuted", !!boolean);
             }
 
             setBanned(boolean){
-                if(!boolean) throw new Error("Missing boolean");
-                if(typeof boolean !== "boolean") throw new Error("Only boolean is supported");
-                this.data.isBanned = !!boolean;
+                return this.setValue("isBanned", !!boolean);
             }
 
             setLastOnline(timestamp){
-                if(!timestamp) throw new Error("Missing timestamp");
-                if(typeof timestamp !== "number") throw new Error("Timestamp must be a number!");
-                this.data.lastOnline = Number(stripHTML(timestamp));
-                return this;
+                return this.setValue("lastOnline", timestamp);
             }
 
             setJoined(timestamp){
-                if(!timestamp) throw new Error("Missing timestamp");
-                if(typeof timestamp !== "number") throw new Error("Timestamp must be a number!");
-                this.data.joined = Number(stripHTML(timestamp));
-                return this;
+                return this.setValue("joined", timestamp);
             }
 
             setCountryCode(code){
-                if(code && typeof code !== "string") throw new Error("Country code needs to be a string!")
-                if(code && code.trim().length !== 2) throw new Error("Country code needs to be 2 letters")
-                this.data.country_code = stripHTML(code);
-                return this;
+                return this.setValue("country_code", code);
             }
 
             setLoginName(content){
-                if(!content) throw new Error("Missing Login name!");
-                if(typeof content !== "string") throw new Error("Login name must be string!");
-                if(content.trim().length === 0) throw new Error("Login name is empty!");
-                this.data.loginName = stripHTML(content);
-                return this;
+                return this.setValue("loginName", content);
             }
 
             setId(id){
-                if(!id) throw new Error("Missing ID!");
-                if(typeof id !== "string") throw new Error("ID must be a string!");
-                if(id.trim().length !== 12) throw new Error("Invalid ID length (12)!");
-                this.data.id = stripHTML(id);
-                return this;
+                return this.setValue("id", id);
             }
 
             setToken(token){
-                if(!token) throw new Error("Invalid token!");
-                if(typeof token !== "string") throw new Error("Token must be a string!")
-                if(token && token.trim().length === 0) throw new Error("Token cannot be empty!")
-                if(token.length !== 64) throw new Error("Invalid token length! (64)");
-                this.data.token = stripHTML(token);
-                return this;
+                return this.setValue("token", token);
             }
 
             setPublicKey(publicKey) {
-                if(publicKey && publicKey.trim().length === 0) throw new Error("Invalid publicKey!");
-                this.data.publicKey = stripHTML(publicKey);
-                return this;
+                return this.setValue("publicKey", publicKey);
             }
 
             setStatus(content) {
-                if(content && typeof content !== "string") throw new Error("Status needs to be a string!");
-                if(content && content?.trim()?.length === 0) throw new Error("Status cannot be empty! Use null to unset.");
-                this.data.status = sanitizeHTML(content);
-                return this;
+                return this.setValue("status", content);
             }
 
             setAbout(content) {
-                if(content && typeof content !== "string") throw new Error("About needs to be a string!");
-                if(content && content?.trim()?.length === 0) throw new Error("About cannot be empty! Use null to unset.");
-                this.data.aboutme = sanitizeHTML(content);
-                return this;
+                return this.setValue("aboutme", content);
             }
 
-            async setPassword(password){
-                if(password && typeof password !== "string") throw new Error("Password needs to be a string!");
-                if(!password) throw new Error("Password cannot be null");
-                if(password?.trim()?.length === 0) throw new Error("Password cannot be empty");
-
-                let hash = await DCTS.Tools.Cryptography.hashPassword(password);
-                this.data.password = stripHTML(hash);
+            async setPassword(password) {
+                this.#check("password", password);
+                this.data.password = await DCTS.Tools.Cryptography.hashPassword(password);
                 return this;
             }
 
             setCard(url = null) {
-                if(url && typeof url !== "string") throw new Error("URL needs to be a string!");
-                if(url && url?.trim()?.length === 0) throw new Error("Url cannot be empty!");
-                this.data.card = stripHTML(url);
-                return this;
+                return this.setValue("card", url);
             }
 
             setBanner(url = null) {
-                if(url && typeof url !== "string") throw new Error("URL needs to be a string!");
-                if(url && url?.trim()?.length === 0) throw new Error("Url cannot be empty!");
-                this.data.banner = stripHTML(url);
-                return this;
+                return this.setValue("banner", url);
             }
 
             setIcon(url = "/img/default_pfp.png") {
-                if(!url) throw new Error("Missing URL!");
-                if(url && typeof url !== "string") throw new Error("URL needs to be a string!");
-                if(url?.trim()?.length === 0) throw new Error("Url cannot be empty!");
-                this.data.icon = stripHTML(url);
-                return this;
+                return this.setValue("icon", url);
             }
 
-            setName(name){
-                if(!name) throw new Error("Missing name!");
-                if(name && typeof name !== "string") throw new Error("Name needs to be a string!");
-                if(name?.tim()?.length === 0) throw new Error("Name cant be empty!");
-                if(name.length > 20) throw new Error("Name cant be longer than 20 characters!");
-                this.data.name = stripHTML(name);
-                return this;
+            setName(content){
+                return this.setValue("name", content);
+            }
+
+            toJSON(){
+                return {
+                    ...structuredClone(this.data)
+                };
             }
         }
     }
@@ -220,7 +202,7 @@ export default class DCTS {
 
             setEditedTimestamp(timestamp = null){
                 if(typeof timestamp  !== "number" && timestamp) throw new Error("Timestamp must be a number (unix timestamp)!")
-                this.data.editedAt = Number(stripHTML(timestamp));
+                this.data.editedAt = timestamp === null ? null : Number(stripHTML(timestamp));
                 return this;
             }
 

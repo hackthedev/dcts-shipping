@@ -32,7 +32,7 @@ E:\dcts\plugins:
     │       plugin_onLoad.mjs
     │
     ├─── sockets
-    │       MessageBuilder.test.mjs
+    │       Messages.test.mjs
     │
     └─── web
             main.js
@@ -69,7 +69,7 @@ export function exampleAdd(a, b){
 
 You can add custom socket events and even remove or redefine existing socket events. All socket events have to be inside the *`sockets`* folder of your plugin folder. As long as it has the *`.mjs`* file extension it will be automatically imported when the server starts.
 
-The /sockets/MessageBuilder.test.mjs file could look like the following:
+The /sockets/Messages.test.mjs file could look like the following:
 
 ```js
 import { validateMemberId } from "../../../modules/functions/main.mjs";

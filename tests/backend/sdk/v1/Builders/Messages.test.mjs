@@ -1,5 +1,4 @@
-import DCTS from "../../../../sdk/v1/backend/dcts_sdk.mjs"
-import {getLocalPlugins} from "../../../../modules/sockets/routes/plugins.mjs";
+import DCTS from "../../../../../sdk/v1/backend/dcts_sdk.mjs"
 
 async function tryError(callback){
     if(typeof callback == "function"){

@@ -34,7 +34,7 @@ describe("[SDK V1] Message Builder", () => {
 
     test("Set Message Author (invalid length)", async () => {
         let response = await tryError(() => messageBuilder.setAuthor("sdfdfsdf").toJSON() );
-        expect(response.error).toBe("Author id length is invalid");
+        expect(response.error).toBe("Author id must be a string with 12 characters");
         expect(response?.data?.author?.id).toBe(undefined);
     });
 
@@ -46,13 +46,13 @@ describe("[SDK V1] Message Builder", () => {
 
     test("Set Message Content (whitespaces)", async () => {
         let response = await tryError(() => messageBuilder.setContent(" ").toJSON() );
-        expect(response.error).toBe("Message cant be empty!");
+        expect(response.error).toBe("Message must be a non empty string");
         expect(response?.data?.message).toBe(undefined);
     });
 
     test("Set Message Content (empty)", async () => {
         let response = await tryError(() => messageBuilder.setContent("").toJSON() );
-        expect(response.error).toBe("Missing message content!");
+        expect(response.error).toBe("Message must be a non empty string");
         expect(response?.data?.message).toBe(undefined);
     });
 

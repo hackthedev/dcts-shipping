@@ -2,7 +2,7 @@ import {sanitizeHTML, stripHTML} from "../../../modules/functions/sanitizing/fun
 import argon2 from "argon2";
 
 export default class DCTS {
-    static Tools = new class{
+    static Tools = new class {
         Cryptography = new class {
             async hashPassword(password) {
                 if (typeof password !== "string" || !password) throw new Error("Invalid password!");
@@ -25,11 +25,92 @@ export default class DCTS {
                 }
             }
         }
+
+        get(obj, path) {
+            let current = obj;
+
+            for (const part of path.split(".")) {
+                current = current?.[part];
+            }
+
+            return current;
+        }
+
+        set(obj, path, value) {
+            const parts = path.split(".");
+            const last = parts.pop();
+            let target = obj;
+
+            for (const part of parts) {
+                if (typeof target[part] !== "object" || target[part] === null) target[part] = {};
+                target = target[part];
+            }
+
+            target[last] = value;
+        }
     }
 
-    static Members = new class{
-        Builder = class {
+    static BaseBuilder = class {
+        check(key, value) {
+            const validator = this.constructor.validators[key];
+            if (!validator) throw new Error(`Unknown key: ${key}`);
+
+            const [check, error] = validator;
+            if (!check(value)) throw new Error(error ?? `Invalid value for ${key}`);
+        }
+
+        setValue(key, value, allowHTML = false) {
+            this.check(key, value);
+
+            const clean = typeof value === "string"
+                ? (allowHTML ? sanitizeHTML(value) : stripHTML(value))
+                : value;
+
+            DCTS.Tools.set(this.data, key, clean);
+            return this;
+        }
+
+        validate() {
+            const errors = [];
+
+            for (const [key, [check, error]] of Object.entries(this.constructor.validators)) {
+                if (!check(DCTS.Tools.get(this.data, key))) errors.push(error ?? `Invalid value for ${key}`);
+            }
+
+            return {valid: errors.length === 0, errors};
+        }
+
+        toJSON() {
+            return structuredClone(this.data);
+        }
+    }
+
+    static Members = new class {
+        Builder = class extends DCTS.BaseBuilder {
+            static validators = {
+                name: [value => typeof value === "string" && value.trim().length > 0 && value.length <= 20, "Name must be a string and max 20 char. long"],
+                id: [value => typeof value === "string" && value.trim().length > 0, "Id must be a string"],
+                token: [value => typeof value === "string" && value.trim().length === 64, "token must be a 64 character long string"],
+                loginName: [value => typeof value === "string" && value.trim().length > 0, "login name must be a string and non empty"],
+                icon: [value => (value && typeof value === "string" && value.trim().length > 0) || value === null, "Icon url must be a string or null"],
+                banner: [value => (value && typeof value === "string" && value.trim().length > 0) || value === null, "Banner url must be a string or null"],
+                card: [value => (value && typeof value === "string" && value.trim().length > 0) || value === null, "Card url must be a string or null"],
+                aboutme: [value => (value && typeof value === "string" && value.trim().length > 0) || value === null, "Aboutme must be a string or null"],
+                status: [value => (value && typeof value === "string" && value.trim().length > 0) || value === null, "Status must be a string or null"],
+                country_code: [value => (value && typeof value === "string" && value.trim().length <= 3) || value === null, "Country code must be a string or null and 2 characters long"],
+                publicKey: [value => (value && typeof value === "string" && value.trim().length > 0) || value === null, "Public key must be a string or null"],
+                joined: [value => (value && typeof value === "number") || value === null, "Timestamp must be a unix timestamp number"],
+                lastOnline: [value => (value && typeof value === "number") || value === null, "Timestamp must be a unix timestamp number"],
+                isBanned: [value => typeof value === "boolean", "Value must be a boolean"],
+                isMuted: [value => typeof value === "boolean", "Value must be a boolean"],
+                isVerifiedKey: [value => typeof value === "boolean", "Value must be a boolean"],
+                onboarding: [value => typeof value === "boolean", "Value must be a boolean"],
+                password: [value => typeof value === "string", "Password must be a string"],
+                type: [value => (value && typeof value === "string") || value === null, "Type must be a string"],
+            }
+
             constructor(customData = {}) {
+                super();
                 this.data = {
                     id: null,
                     token: null,
@@ -59,76 +140,43 @@ export default class DCTS {
                 }
             }
 
-            static validators = {
-                name: [value => typeof value === "string" && value.trim().length > 0 && value.length <= 20, "Name must be a string and max 20 char. long"]
-            }
-
-            #check(key, value) {
-                const validator = this.constructor.validators[key];
-                if (!validator) throw new Error(`Unknown key: ${key}`);
-
-                const [check, error] = validator;
-                if (!check(value)) throw new Error(error ?? `Invalid value for ${key}`);
-            }
-
-            setValue(key, value, allowHTML = false) {
-                this.#check(key, value);
-                this.data[key] = allowHTML ? sanitizeHTML(value) : stripHTML(value);
-                return this;
-            }
-
-            validate() {
-                const errors = [];
-
-                for (const [key, [check, error]] of Object.entries(this.constructor.validators)) {
-                    if (!check(this.data[key])) {
-                        errors.push(error ?? `Invalid value for ${key}`);
-                    }
-                }
-
-                return {
-                    valid: errors.length === 0,
-                    errors
-                };
-            }
-
-            setOnboarding(boolean){
+            setOnboarding(boolean) {
                 return this.setValue("onboarding", !!boolean);
             }
 
-            setVerifiedKey(boolean){
+            setVerifiedKey(boolean) {
                 return this.setValue("isVerifiedKey", !!boolean);
             }
 
-            setMuted(boolean){
+            setMuted(boolean) {
                 return this.setValue("isMuted", !!boolean);
             }
 
-            setBanned(boolean){
+            setBanned(boolean) {
                 return this.setValue("isBanned", !!boolean);
             }
 
-            setLastOnline(timestamp){
+            setLastOnline(timestamp) {
                 return this.setValue("lastOnline", timestamp);
             }
 
-            setJoined(timestamp){
+            setJoined(timestamp) {
                 return this.setValue("joined", timestamp);
             }
 
-            setCountryCode(code){
+            setCountryCode(code) {
                 return this.setValue("country_code", code);
             }
 
-            setLoginName(content){
+            setLoginName(content) {
                 return this.setValue("loginName", content);
             }
 
-            setId(id){
+            setId(id) {
                 return this.setValue("id", id);
             }
 
-            setToken(token){
+            setToken(token) {
                 return this.setValue("token", token);
             }
 
@@ -141,11 +189,11 @@ export default class DCTS {
             }
 
             setAbout(content) {
-                return this.setValue("aboutme", content);
+                return this.setValue("aboutme", content, true);
             }
 
             async setPassword(password) {
-                this.#check("password", password);
+                this.check("password", password);
                 this.data.password = await DCTS.Tools.Cryptography.hashPassword(password);
                 return this;
             }
@@ -162,21 +210,27 @@ export default class DCTS {
                 return this.setValue("icon", url);
             }
 
-            setName(content){
+            setName(content) {
                 return this.setValue("name", content);
-            }
-
-            toJSON(){
-                return {
-                    ...structuredClone(this.data)
-                };
             }
         }
     }
 
     static Messages = new class {
-        Builder = class {
-            constructor(customData = {}){
+        Builder = class extends DCTS.BaseBuilder {
+            static validators = {
+                messageId: [value => (typeof value === "string" && value.trim().length > 0) || value === null, "Message id must be a string or null"],
+                channel: [value => typeof value === "string" && value.trim().length > 0, "Channel id must be a non empty string"],
+                room: [value => typeof value === "string" && value.trim().length > 0, "Room id must be a non empty string"],
+                message: [value => typeof value === "string" && value.trim().length > 0, "Message must be a non empty string"],
+                type: [value => (typeof value === "string" && value.trim().length > 0) || value === null, "Message type must be a string or null"],
+                timestamp: [value => typeof value === "number", "Timestamp must be a unix timestamp number"],
+                editedAt: [value => typeof value === "number" || value === null, "Timestamp must be a unix timestamp number or null"],
+                "author.id": [value => typeof value === "string" && value.length === 12, "Author id must be a string with 12 characters"],
+            }
+
+            constructor(customData = {}) {
+                super();
                 this.data = {
                     messageId: null,
                     channel: null,
@@ -192,52 +246,29 @@ export default class DCTS {
                 }
             }
 
-            setAuthor(authorId){
-                if(!authorId) throw new Error("Author id is required!");
-                if(String(authorId)?.length !== 12) throw new Error("Author id length is invalid")
-                if(typeof authorId !== "string" && authorId) throw new Error("Author id needs to be a string!");
-                this.data.author.id = stripHTML(authorId);
-                return this;
+            setAuthor(authorId) {
+                return this.setValue("author.id", authorId);
             }
 
-            setEditedTimestamp(timestamp = null){
-                if(typeof timestamp  !== "number" && timestamp) throw new Error("Timestamp must be a number (unix timestamp)!")
-                this.data.editedAt = timestamp === null ? null : Number(stripHTML(timestamp));
-                return this;
+            setEditedTimestamp(timestamp = null) {
+                return this.setValue("editedAt", timestamp);
             }
 
-            setCreatedTimestamp(timestamp = new Date().getTime()){
-                if(typeof timestamp  !== "number" && timestamp) throw new Error("Timestamp must be a number (unix timestamp)!")
-                this.data.timestamp = Number(stripHTML(timestamp));
-                return this;
+            setCreatedTimestamp(timestamp = Date.now()) {
+                return this.setValue("timestamp", timestamp);
             }
 
-            setType(type = null){
-                if(typeof type !== "string" && type) throw new Error("Message type must be a string!")
-                this.data.type = stripHTML(type);
-                return this;
+            setType(type = null) {
+                return this.setValue("type", type);
             }
 
-            setContent(content){
-                if(!content) throw new Error("Missing message content!")
-                if(content?.trim()?.length === 0) throw new Error("Message cant be empty!")
-                this.data.message = sanitizeHTML(content);
-                return this;
+            setContent(content) {
+                return this.setValue("message", content, true);
             }
 
-            setChannel(channelId){
-                if(!channelId) throw new Error("Missing channel id!");
-                if(typeof channelId !== "string") throw new Error("Channel id must be a string");
-
-                this.data.channel = stripHTML(channelId);
-                this.data.room = stripHTML(channelId);
-                return this;
-            }
-
-            toJSON(){
-                return {
-                    ...structuredClone(this.data)
-                };
+            setChannel(channelId) {
+                this.setValue("channel", channelId);
+                return this.setValue("room", channelId);
             }
         }
     }

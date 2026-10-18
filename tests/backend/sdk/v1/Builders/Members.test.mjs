@@ -26,9 +26,39 @@ describe("[SDK V1] Member Builder", () => {
         memberBuilder = new DCTS.Members.Builder();
     });
 
-    test("Set Message Author", async () => {
+    test("Set Member Name", async () => {
         let response = await tryError(() => memberBuilder.setName("hehe").toJSON() );
         expect(response.error).toBe(null);
         expect(response?.data?.name).toBe("hehe");
+    });
+
+    test("Set Member Status", async () => {
+        let response = await tryError(() => memberBuilder.setStatus("Wassup").toJSON() );
+        expect(response.error).toBe(null);
+        expect(response?.data?.status).toBe("Wassup");
+    });
+
+    test("Set Member About", async () => {
+        let response = await tryError(() => memberBuilder.setAbout("<p>funny guy</p>").toJSON() );
+        expect(response.error).toBe(null);
+        expect(response?.data?.aboutme).toBe("<p>funny guy</p>");
+    });
+
+    test("Set Member Card", async () => {
+        let response = await tryError(() => memberBuilder.setCard("http://").toJSON() );
+        expect(response.error).toBe(null);
+        expect(response?.data?.card).toBe("http://");
+    });
+
+    test("Set Member Icon", async () => {
+        let response = await tryError(() => memberBuilder.setIcon("http://").toJSON() );
+        expect(response.error).toBe(null);
+        expect(response?.data?.icon).toBe("http://");
+    });
+
+    test("Set Member Banner", async () => {
+        let response = await tryError(() => memberBuilder.setBanner("http://").toJSON() );
+        expect(response.error).toBe(null);
+        expect(response?.data?.banner).toBe("http://");
     });
 });

@@ -20,8 +20,8 @@ import dSyncAuth from "@hackthedev/dsync-auth";
 import {reloadConfig, saveConfig, serverconfig, versionCode} from "./init/config.mjs";
 import {auther, debugmode, flipDebug, ratelimit, setRatelimit} from "./init/general.mjs";
 import bcrypt from "bcrypt";
-
-var serverconfigEditable;
+import {getMemberAccountById} from "./member.mjs";
+import DCTS from "../../sdk/v1/backend/dcts_sdk.mjs";
 
 
 /*
@@ -76,18 +76,6 @@ export function emitBasedOnPermission(perms, event, payload) {
     }
 
     return sent;
-}
-
-
-export function checkEmptyConfigVar(conf, value) {
-    if (conf == null) return value;
-    else return conf;
-}
-
-export function removeFileExtension(filename) {
-    const lastDotIndex = filename.lastIndexOf('.');
-    if (lastDotIndex === -1) return filename; // No extension found, return original filename
-    return filename.slice(0, lastDotIndex);
 }
 
 export function sanitizeInput(input) {
@@ -174,7 +162,6 @@ export async function checkVersionUpdate() {
 }
 
 export async function handleTerminalCommands(command, args) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     try {
         if(command === "unban"){
@@ -276,10 +263,10 @@ export async function handleTerminalCommands(command, args) {
                 if (isNaN(roleIdArg) == false) {
                     try {
                         var roleToken = generateId(64);
-                        serverconfigEditable.serverroles[roleIdArg].token.push(roleToken);
-                        saveConfig(serverconfigEditable);
+                        serverconfig.serverroles[roleIdArg].token.push(roleToken);
+                        saveConfig(serverconfig);
 
-                        Logger.info(`Redeem key generated for role ${serverconfigEditable.serverroles[roleIdArg].info.name}`);
+                        Logger.info(`Redeem key generated for role ${serverconfig.serverroles[roleIdArg].info.name}`);
                         Logger.info(roleToken)
                     } catch (Err) {
                         Logger.info("Couldnt save or generate key");
@@ -295,9 +282,9 @@ export async function handleTerminalCommands(command, args) {
                 if (args[1] == "user") {
                     if (args[2].length == 12) {
                         if (serverconfig.servermembers[args[2]] != null) {
-                            delete serverconfigEditable.servermembers[args[2]];
+                            delete serverconfig.servermembers[args[2]];
                             coLogger.infonsolas(`Deleting user ${args[2]}`);
-                            saveConfig(serverconfigEditable);
+                            saveConfig(serverconfig);
                         } else {
                             Logger.info(`Couldnt find user ${args[2]}`);
                         }
@@ -313,7 +300,7 @@ export async function handleTerminalCommands(command, args) {
                 if (args[1].length == 12) {
                     if (args[2]) {
                         serverconfig.servermembers[args[1]].password = await hashPassword(args[2])
-                        saveConfig(serverconfigEditable);
+                        saveConfig(serverconfig);
                         Logger.success(`Password for user ${serverconfig.servermembers[args[1]].name} (${args[1]}) was changed`);
                     } else {
                         Logger.warn("Missing User. passwd <user id> <new password>")
@@ -624,8 +611,6 @@ export function checkObjectKeys(obj, path, defaultValue) {
 
 
 export function checkRateLimit(socket) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
-
     var ip = socket.handshake.address;
 
     //console.log("IP RATE LIMIT")
@@ -821,7 +806,6 @@ export function sendMessageToUser(socketId, data) {
 }
 
 export function checkMemberMute(socket, member) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfig);
     let ip = socket.handshake.address;
 
     checkRateLimit(socket);
@@ -1090,25 +1074,20 @@ export async function getCastingMemberObject(member) {
 }
 
 export async function findAndVerifyUser(loginName, password) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
-    let serverMembers = serverconfigEditable.servermembers;
 
-    for (const memberId in serverMembers) {
-        const member = serverMembers[memberId];
+    let memberObj = await getMemberAccountById(loginName);
+    if(!memberObj) return {result: null, member: null};
 
-        // Check loginName matches either 'name'
-        if (member.loginName === loginName) {
-            // Verify the password hash
-            const isPasswordValid = await bcrypt.compare(password, member.password);
-            if (isPasswordValid) {
-                return {result: true, member: copyObject(member)}; // Return the matched user
-            } else {
-                return {result: false, member: null};
-            }
+    if (memberObj.loginName === loginName) {
+        // Verify the password hash
+        const isPasswordValid = await DCTS.Tools.Cryptography.verifyPassword(password, memberObj.password);
+        if (isPasswordValid) {
+            return {result: true, member: copyObject(memberObj)}; // Return the matched user
+        } else {
+            return {result: false, member: null};
         }
     }
 
-    console.log("User not found for loginName:", loginName);
     return {result: null, member: null}; // Return null if no user matches
 }
 

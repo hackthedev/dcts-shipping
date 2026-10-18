@@ -4,6 +4,7 @@ import Logger from "../functions/logger.mjs";
 import { escapeHtml, sendMessageToUser, validateMemberId } from "../functions/main.mjs";
 import { leaveAllRooms } from "../functions/mysql/helper.mjs";
 import {serverconfig} from "../functions/init/config.mjs";
+import {powVerifiedUsers} from "./pow.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
@@ -103,12 +104,13 @@ export default (io) => (socket) => {
             Logger.error(`User's User Id ${member.id}`);
             Logger.error(`Server's User Token ${serverconfig.servermembers[member.id].token}`);
             Logger.error(`User's User Token ${member.token}`);
+            Logger.error(`Server pow include list ${powVerifiedUsers.includes(socket?.id)}`);
 
 
             sendMessageToUser(usersocket[member.id], JSON.parse(
                 `{
                     "title": "Couldnt process channel join request",
-                    "message": "User ID or Token does not match. Known issue, will be fixed.",
+                    "message": "User ID or Token does not match.",
                     "buttons": {
                         "0": {
                             "text": "Ok",

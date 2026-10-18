@@ -32,7 +32,7 @@ export async function createMember({
     if (!password) throw new Error("Member password is missing when creating member.")
     if (!loginName) throw new Error("Member loginName is missing when creating member.")
 
-    new DCTS.Members.Builder()
+    let newMember = new DCTS.Members.Builder()
         .setId(id)
         .setToken(token)
         .setName(name)
@@ -47,11 +47,12 @@ export async function createMember({
         .setLastOnline(lastOnline)
         .setBanner(false)
         .setMuted(false)
-        .setPassword(password)
         .setVerifiedKey(isVerifiedKey)
         .setOnboarding(onboarding)
         .setType(type)
-        .save();
+
+    await newMember.setPassword(password);
+    await newMember.save();
 }
 
 export async function cleanMemberData(member) {
@@ -87,7 +88,7 @@ export async function cleanMemberData(member) {
         if (tag === "script") await autobanXSS(member.id);
     });
 
-    member.onboarding = stripHTML(normalizeVar(member.onboarding)) === true;
+    member.onboarding = stripHTML(normalizeVar(member.onboarding)) === "true";
     member.password = stripHTML(normalizeVar(member.password)) || null;
 }
 
@@ -125,7 +126,7 @@ export async function getMemberAccountById(identifier, issuerId = null){
     if(accountObj) return await autoAnonymizeMember(issuerId, accountObj);
 
     // if not in ram check database
-    let accountRow = await queryDatabase(`SELECT * FROM members WHERE id = ? OR publicKey = ?`, [identifier, identifier]);
+    let accountRow = await queryDatabase(`SELECT * FROM members WHERE id = ? OR publicKey = ? OR loginName = ?`, [identifier, identifier, identifier]);
     if(accountRow?.length === 0) return null;
     return accountRow[0];
 }

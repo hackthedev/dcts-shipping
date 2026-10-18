@@ -193,9 +193,6 @@ export default (io) => (socket) => {
             return socket.disconnect();
         }
 
-
-        await cleanMemberData(member);
-
         checkRateLimit(socket);
 
         // get ip info
@@ -241,7 +238,7 @@ export default (io) => (socket) => {
             Logger.debug("New member connected");
 
             // handle onboarding
-            if (member?.onboarding === false) {
+            if (member?.onboarding === false || member.onboarding == null) {
                 // cant proceed as the user needs to setup their account with a password
                 io.to(socket.id).emit("doAccountOnboarding");
                 return response({
@@ -253,9 +250,6 @@ export default (io) => (socket) => {
 
             // error if no password passed
             if(!member?.password) return response({error: "Missing password field in plaintext<br><a onclick='UserManager.resetAccount();'>Reset Session</a>"})
-
-            var userToken = generateId(48);
-            member.token = userToken;
 
             // if the user login name already exists we just append an id to the login name.
             // we then emit it to the user so they can save it.
@@ -276,9 +270,9 @@ export default (io) => (socket) => {
             // setup member
             const now = new Date().getTime();
 
-            new DCTS.Members.Builder()
+            let newMember = new DCTS.Members.Builder()
                 .setId(member.id)
-                .setToken(member.token)
+                .setToken(generateId(48))
                 .setName(member.name)
                 .setLoginName(member.loginName)
                 .setIcon(member.icon)
@@ -289,10 +283,11 @@ export default (io) => (socket) => {
                 .setPublicKey(member.publicKey)
                 .setJoined(now)
                 .setLastOnline(now)
-                .setPassword(member.password)
                 .setVerifiedKey(false)
                 .setOnboarding(true)
-                .save();
+
+            await newMember.setPassword(member.password);
+            await newMember.save();
 
             try {
                 // if a new member joins lets send a system welcome DM.
@@ -472,7 +467,7 @@ export default (io) => (socket) => {
                     saveConfig(serverconfig);
                 }
 
-                new DCTS.Members.Builder()
+                let newMember = new DCTS.Members.Builder()
                     .setId(memberId)
                     .setToken(memberToken)
                     .setName("Member")
@@ -485,10 +480,11 @@ export default (io) => (socket) => {
                     .setPublicKey(member.publicKey)
                     .setJoined(now)
                     .setLastOnline(now)
-                    .setPassword(generatedPassword)
                     .setVerifiedKey(true)
                     .setOnboarding(true)
-                    .save();
+
+                await newMember.setPassword(generatedPassword);
+                await newMember.save();
 
                 return { keepExecution: false };
             }

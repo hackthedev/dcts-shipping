@@ -1,10 +1,3 @@
-
-EventDispatcher.on("getMemberList", async function(members, channelId){
-    for(let member of Object.keys(members)){
-        console.log(members[member]);
-    }
-})
-
 function getMemberList() {
     if(!UserManager.getChannel()) return;
 
@@ -33,7 +26,8 @@ function getMemberList() {
             let memberRole = await ChatManager.resolveRole("1")
             let offlineRole = await ChatManager.resolveRole("0")
 
-            EventDispatcher.send("getMemberList", {
+            // api event
+            await EventDispatcher.send("getMemberList", {
                 members,
                 channelId: UserManager.getChannel()
             });
@@ -222,7 +216,7 @@ function getMemberList() {
 
                     let newSrc = ChatManager.proxyUrl(memberObject.icon);
                     if(memberIcon.src !== newSrc){
-                        memberIcon.src = sanitizeHtmlForRender(newSrc, false);
+                        memberIcon.src = stripHTML(newSrc);
                     }
                 }
 
@@ -261,7 +255,7 @@ function getMemberList() {
     function getMemberHTML(member, role){
         let memberCardInlineHTML = member?.card?.length > 0 ? `style="background-image: url('${ChatManager.proxyUrl(member.card)}"` : "";
 
-        return `<div class="memberlist-container" data-member-id="${member.id}">
+        return `<div class="memberlist-container" data-member-id="${member.id}" data-member-type="${member?.type}">
                         ${member?.card ? `
                             <div class="card" ${memberCardInlineHTML} data-src="${ChatManager.proxyUrl(stripHTML(member?.card))}"></div>` 
                         : ""}

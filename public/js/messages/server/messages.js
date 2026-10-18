@@ -568,8 +568,8 @@ function registerMessageCreateEvent() {
     socket.on('messageCreate', async function (message) {
         await addNewMessageToChatLog(message)
 
-        requestAnimationFrame(() => {
-            EventDispatcher.send("messageCreate", {
+        requestAnimationFrame(async () => {
+            await EventDispatcher.send("messageCreate", {
                 message
             });
         })
@@ -1549,7 +1549,7 @@ async function getChatlog(container, index = -1, appendTop = false, preventDispa
     let channelbar = document.querySelector("#channelname-bar");
 
     if(preventDispatch === false){
-        EventDispatcher.send("getChatLog", {
+        await EventDispatcher.send("getChatLog", {
             container, index, appendTop, channelId, channelType: await getCurrentChannelType(channelId), firstElement: refElement, preventDispatch
         });
     }
@@ -1647,7 +1647,7 @@ async function getChatlog(container, index = -1, appendTop = false, preventDispa
 
         Inbox.updateInboxMessageEntries();
 
-        EventDispatcher.send("getChatLog_finish", {
+        await EventDispatcher.send("getChatLog_finish", {
             container, index, appendTop, channelId, channelType: await getCurrentChannelType(channelId), firstElement: refElement, preventDispatch
         });
     });

@@ -56,9 +56,10 @@ export async function createMember({
 }
 
 export async function cleanMemberData(member) {
-    // base 64 too bad
-    if (member?.icon?.includes("data:image")) member.icon = null;
-    if (member?.banner?.includes("data:image")) member.banner = null;
+    Object.entries(member).forEach(([key, value]) => { if (value === undefined) member[key] = null; });
+    Object.entries(member).forEach(([key, value]) => { if (value === "undefined") member[key] = null; });
+    Object.entries(member).forEach(([key, value]) => { if (value === "null") member[key] = null; });
+    Object.entries(member).forEach(([key, value]) => { if (typeof value === "string" && value?.includes("data:image")) member[key] = null; });
 
     if (member?.icon) member.icon = normalizeVar(member.icon);
     if (member?.banner) member.banner = normalizeVar(member.banner);
@@ -90,6 +91,7 @@ export async function cleanMemberData(member) {
 
     member.onboarding = stripHTML(normalizeVar(member.onboarding)) === "true";
     member.password = stripHTML(normalizeVar(member.password)) || null;
+    return member;
 }
 
 export async function updateMember(member) {
@@ -100,7 +102,6 @@ export async function updateMember(member) {
         throw "Member does not exist and therefore it cannot be updates."
     }
 
-    await cleanMemberData(member)
     if (member?.token !== undefined) serverconfig.servermembers[member?.id].token = stripHTML(member?.token);
     if (member?.name !== undefined && normalizeVar(member?.name)?.length > 0) serverconfig.servermembers[member?.id].name = stripHTML(normalizeVar(member?.name));
     if (member?.loginName !== undefined && normalizeVar(member?.name)?.length > 0) serverconfig.servermembers[member?.id].loginName = stripHTML(member?.loginName);
@@ -114,19 +115,32 @@ export async function updateMember(member) {
     if (member?.lastOnline !== undefined) serverconfig.servermembers[member?.id].lastOnline = Number(stripHTML(member?.lastOnline))
     if (member?.onboarding !== undefined) serverconfig.servermembers[member?.id].onboarding = Boolean(stripHTML(member?.onboarding))
     if (member?.card !== undefined) serverconfig.servermembers[member?.id].card = stripHTML(normalizeVar(member?.card))
+    serverconfig.servermembers[member?.id] = await cleanMemberData(serverconfig.servermembers[member?.id])
     saveMemberToDB(member?.id, serverconfig.servermembers[member?.id]);
 }
 
+export async function getFullMemberObject(member, issuerId = null){
+    member = await autoAnonymizeMember(issuerId, member);
+    member = await cleanMemberData(member);
+
+    let memberObj = new DCTS.Members.Builder(member);
+    console.log(memberObj.toJSON())
+
+    return member;
+}
 
 export async function getMemberAccountById(identifier, issuerId = null){
     if(!identifier) throw new Error("Missing identifier!");
 
     // look in ram
     let accountObj = Object.values(serverconfig.servermembers).find(member => member.id === identifier || member.publicKey === identifier);
-    if(accountObj) return await autoAnonymizeMember(issuerId, accountObj);
+    if(accountObj) return await getFullMemberObject(accountObj, issuerId);
 
     // if not in ram check database
     let accountRow = await queryDatabase(`SELECT * FROM members WHERE id = ? OR publicKey = ? OR loginName = ?`, [identifier, identifier, identifier]);
     if(accountRow?.length === 0) return null;
-    return accountRow[0];
+
+    accountObj = await getFullMemberObject(accountRow[0], issuerId);
+
+    return accountObj;
 }

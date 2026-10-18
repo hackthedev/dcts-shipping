@@ -724,6 +724,7 @@ export async function validateMemberId(id, socket, token, bypass = false) {
     }
 
     if (socket && !powVerifiedUsers.includes(socket?.id)) {
+        Logger.debug("Member is not part of powVerifiedUsers")
         return false;
     }
 
@@ -735,25 +736,32 @@ export async function validateMemberId(id, socket, token, bypass = false) {
         if(memberObject && socket){
             let banResult =  await checkMemberBan(socket, memberObject);
             if(banResult?.result === true){
+                Logger.debug("Member is banned")
                 return false;
             }
         }
 
         if(serverconfig.servermembers[id]?.token !== token){
+            Logger.debug("Token doesnt match with account")
             return false;
         }
 
         // if is banned deny all connections
         if(serverconfig.servermembers[id]?.onboarding === false){
+            Logger.debug("Account onboarding not done")
             return false;
         }
     }
 
     if(id){
-        if(!serverconfig.servermembers[id]) return false;
+        if(!serverconfig.servermembers[id]) {
+            Logger.debug("Account doesnt exist")
+            return false;
+        }
         // update last online
         serverconfig.servermembers[id].lastOnline = new Date().getTime();
         if(serverconfig.servermembers[id]?.onboarding === false){
+            Logger.debug("Onboarding not done")
             return false;
         }
     }

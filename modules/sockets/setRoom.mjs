@@ -105,7 +105,7 @@ export default (io) => (socket) => {
             Logger.error(`Server's User Token ${serverconfig.servermembers[member.id].token}`);
             Logger.error(`User's User Token ${member.token}`);
             Logger.error(`Server pow include list ${powVerifiedUsers.includes(socket?.id)}`);
-
+            Logger.error(member)
 
             sendMessageToUser(usersocket[member.id], JSON.parse(
                 `{

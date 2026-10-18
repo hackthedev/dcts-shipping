@@ -155,13 +155,13 @@ export default class DCTS {
                 if(!this.data.token) throw new Error("missing member token!")
                 if(!this.data.loginName) throw new Error("missing login name!")
 
+                await saveMemberToDB(this.data.id, this.data);
+
                 serverconfig.servermembers[this.data.id] ??= {};
                 serverconfig.servermembers[this.data.id] = {
                     ...serverconfig.servermembers[this.data.id],
                     ...this.data
                 }
-
-                await saveMemberToDB(this.data.id, this.data);
             }
 
             setOnboarding(boolean) {

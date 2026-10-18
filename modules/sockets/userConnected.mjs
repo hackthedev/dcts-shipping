@@ -25,7 +25,7 @@ import {discoverHosts} from "../functions/discovery.mjs";
 import {powVerifiedUsers} from "./pow.mjs";
 import {checkMemberBan} from "../functions/ban-system/helpers.mjs";
 import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
-import {cleanMemberData, createMember, getMemberAccountById, updateMember} from "../functions/member.mjs";
+import {getMemberAccountById, updateMember} from "../functions/member.mjs";
 import dSyncAuth from "@hackthedev/dsync-auth";
 import {saveConfig, serverconfig} from "../functions/init/config.mjs";
 import {auther, signer} from "../functions/init/general.mjs";
@@ -170,14 +170,25 @@ export default (io) => (socket) => {
 
     // socket.on code here
     socket.on("userConnected", async function (member, response) {
-        if(!member?.id) return response({error: "No Account id provided"})
-        if(member?.id?.length !== 12) return response({error: "Account id length not 12"})
+        checkRateLimit(socket);
 
+        // get ip info
+        let ipInfo = await getMemberIpInfo(socket);
+        if (ipInfo?.error) Logger.debug(ipInfo.error);
+        if (ipInfo?.location?.country_code) member.country_code = ipInfo.location.country_code;
+
+        // for existing member
         if (member?.id) member.id = normalizeVar(stripHTML(member.id));
         if (member?.loginName) member.loginName = normalizeVar(stripHTML(member.loginName));
         if (member?.token) member.token = normalizeVar(stripHTML(member.token));
         if (member?.pow?.challenge) member.pow.challenge = String(stripHTML(member?.pow?.challenge));
         if (member?.pow?.solution) member.pow.solution = String(stripHTML(member?.pow?.solution));
+
+        // if pow has been passed. used for quicker
+        // initial connection to skip pow challenge
+        await handlePowOnConnection(member, socket)
+        let authResult = await handlePublicKeyAuthOnConnection(member);
+        if(authResult?.keepExecution === false) return;
 
         // check member ban and disconnect if needed.
         // will also auto remove the ban again
@@ -192,19 +203,6 @@ export default (io) => (socket) => {
 
             return socket.disconnect();
         }
-
-        checkRateLimit(socket);
-
-        // get ip info
-        let ipInfo = await getMemberIpInfo(socket);
-        if (ipInfo?.error) Logger.debug(ipInfo.error);
-        if (ipInfo?.location?.country_code) member.country_code = ipInfo.location.country_code;
-
-        // if pow has been passed. used for quicker
-        // initial connection to skip pow challenge
-        await handlePowOnConnection(member, socket)
-        let authResult = await handlePublicKeyAuthOnConnection(member);
-        if(authResult?.keepExecution === false) return;
 
         // check if knownServers was supplied for discovery
         if (member?.knownServers && member?.knownServers?.length > 1) {
@@ -231,8 +229,8 @@ export default (io) => (socket) => {
 
         // if new member
         if (
-            !serverconfig.servermembers[member.id] ||
-            serverconfig.servermembers[member.id]?.onboarding === false
+            !serverconfig.servermembers[member?.id] ||
+            serverconfig.servermembers[member?.id]?.onboarding === false
         ) {
             // New Member joined the server
             Logger.debug("New member connected");
@@ -289,34 +287,14 @@ export default (io) => (socket) => {
             await newMember.setPassword(member.password);
             await newMember.save();
 
-            try {
-                // if a new member joins lets send a system welcome DM.
-                // can be edited in config and is enabled on default.
-                if (
-                    serverconfig.serverinfo.system.welcome.enabled &&
-                    serverconfig.serverinfo.system.welcome.message.length > 0
-                )
-                    sendSystemMessage(
-                        member.id,
-                        serverconfig.serverinfo.system.welcome.message,
-                    );
-                //
-                // you can broadcast messages via the console with the following syntax
-                // msg < userid | * > <Message>
-                //msg * <h3>Welcome to the server!</h3><p>We hope you'll like it here!<br>If you ever need help press the <b>Support</b> button on the top!</p>
-            } catch (e) {
-                Logger.error("Error while sending system message");
-                Logger.error(e);
-            }
+            sendSystemWelcomeMessage(member);
 
             // create copy of server member without token etc
             var castingMember = await getCastingMemberObject(
-                serverconfig.servermembers[member.id],
+                await DCTS.Members.load(member.id).toJSON()
             );
 
             // Save system message to the default channel
-            castingMember.group = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);
-            castingMember.category = resolveCategoryByChannelId(serverconfig.serverinfo.defaultChannel);
             castingMember.channel = serverconfig.serverinfo.defaultChannel;
             castingMember.room = `${serverconfig.serverinfo.defaultChannel}`;
 
@@ -368,6 +346,7 @@ export default (io) => (socket) => {
             // login was successful
             socket.join(member.id);
 
+            Logger.debug(`Member id is ${member.id}`);
             updateMember({
                 id: member.id,
                 lastOnline: new Date().getTime()
@@ -386,12 +365,35 @@ export default (io) => (socket) => {
             io.emit("updateMemberList");
         }
 
+        function sendSystemWelcomeMessage(member){
+            try {
+                // if a new member joins lets send a system welcome DM.
+                // can be edited in config and is enabled on default.
+                if (
+                    serverconfig.serverinfo.system.welcome.enabled &&
+                    serverconfig.serverinfo.system.welcome.message.length > 0
+                )
+                    sendSystemMessage(
+                        member.id,
+                        serverconfig.serverinfo.system.welcome.message,
+                    );
+                //
+                // you can broadcast messages via the console with the following syntax
+                // msg < userid | * > <Message>
+                //msg * <h3>Welcome to the server!</h3><p>We hope you'll like it here!<br>If you ever need help press the <b>Support</b> button on the top!</p>
+            } catch (e) {
+                Logger.error("Error while sending system message");
+                Logger.error(e);
+            }
+        }
+
         async function handlePublicKeyAuthOnConnection(member){
             if (member?.sessionId && member?.publicKey) {
                 let session = await dSyncAuth.verifySession(auther.authSessions, member.sessionId, member.publicKey);
 
                 if (session.valid) {
-                    let serverMemberObj = await getMemberAccountById(session.publicKey);
+                    Logger.debug("Key auth used. Is valid")
+                    let serverMemberObj = await DCTS.Members.load(session.publicKey).toJSON();
 
                     // if a member with that key already exists
                     if (serverMemberObj) {
@@ -403,8 +405,8 @@ export default (io) => (socket) => {
                     else if(!serverMemberObj){
                         Logger.debug("Creating member joined via key auth")
                         await createKeyAuthedMember()
-                        let newMember = await getMemberAccountById(member?.publicKey)
-                        await successfulAuthResponse(newMember);
+                        serverMemberObj = await DCTS.Members.load(member?.publicKey).toJSON();
+                        await successfulAuthResponse(serverMemberObj);
                         return { keepExecution: false };
                     }
                 }
@@ -412,7 +414,9 @@ export default (io) => (socket) => {
 
             if(member?.publicKey && !await validateMemberId(member?.id, socket, member?.token)){
                 // if didnt supply a solution, create a challenge
+                Logger.debug("Member is trying to auth using public key")
                 if(!member?.keySolution){
+                    Logger.debug("Member didnt have solution, requesting it now..")
                     const keyChallengeResult = await dSyncAuth.createChallenge(signer, member.publicKey);
 
                     // prepair the socket a bit for easier handling n shit
@@ -429,14 +433,23 @@ export default (io) => (socket) => {
                 }
                 // if there is a solution supplied and the socket still has the identifier set
                 else if(member?.keySolution && socket?.keyAuthIdentifier && socket.keyAuthSolution){
+                    Logger.debug("Member provided key auth solution")
                     // if the user successfully authenticated let them know it all worked
                     if(socket.keyAuthSolution === member.keySolution){
-                        let serverMemberObj = await getMemberAccountById(member?.publicKey)
+                        Logger.debug("Solution is valid")
+                        let serverMemberObj = await DCTS.Members.load(member?.publicKey).toJSON()
                         if(!serverMemberObj){
-                            await createKeyAuthedMember()
-                            let newMember = await getMemberAccountById(member?.publicKey)
-                            await successfulAuthResponse(newMember);
+                            Logger.debug("Account didnt exist yet, creating it now")
+                            await createKeyAuthedMember(member)
+                            serverMemberObj = await DCTS.Members.load(member?.publicKey).toJSON()
+                            await successfulAuthResponse(serverMemberObj);
                             return { keepExecution: false };
+                        }
+
+                        // if still false make it true
+                        if(serverMemberObj?.onboarding !== true){
+                            serverMemberObj.setOnboarding(true);
+                            await serverMemberObj.save();
                         }
 
                         await successfulAuthResponse(serverMemberObj)
@@ -452,7 +465,7 @@ export default (io) => (socket) => {
                 keepExecution: true,
             }
 
-            async function createKeyAuthedMember(){
+            async function createKeyAuthedMember(member){
                 // setup member
                 let memberId = generateId(12) ?? null;
                 let memberToken = generateId(48) ?? null;

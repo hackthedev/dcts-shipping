@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // infinite scroll for chat when scrolling all the way up
     await ChatTools.Scroll.registerMessageInfiniteLoad(getContentMainContainer(), async (element) => {
-        EventDispatcher.send("infiniteScroll", {
+        await EventDispatcher.send("infiniteScroll", {
             element,
             channelType: await getCurrentChannelType(),
             channelId: UserManager.getChannel()
@@ -464,8 +464,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             ) {
                 //focusEditor(); // causes too many dumb bugs as of rn
             }
-
-
         }
     )
 })
@@ -1016,7 +1014,7 @@ async function sendMessageToServer(authorId = UserManager.getID(),
     // only send dcts messages and dispatch
     let channelType = await getCurrentChannelType(UserManager.getChannel());
 
-    EventDispatcher.send("messageSend", {
+    await EventDispatcher.send("messageSend", {
         message: msgPayload,
         channelType,
     })

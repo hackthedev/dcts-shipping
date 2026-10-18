@@ -47,7 +47,7 @@ import {
 import {checkFile, checkServerDirectories,} from "./modules/functions/io.mjs";
 
 // Chat functions
-import {hasPermission,} from "./modules/functions/chat/main.mjs";
+import {hasPermission} from "./modules/functions/chat/main.mjs";
 
 import {powVerifiedUsers,} from "./modules/sockets/pow.mjs";
 

@@ -9,12 +9,17 @@ import {normalizeVar} from "./userConnected.mjs";
 import {saveConfig, serverconfig, versionCode} from "../functions/init/config.mjs";
 import {signer} from "../functions/init/general.mjs";
 
-export async function getPublicServerInfoObject(){
+export function getDefaultGroupIcon(){
     let groupId = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);
     let group = null;
     if(groupId !== null){
         group = serverconfig?.groups[groupId];
     }
+
+    return group?.info?.icon || null;
+}
+
+export async function getPublicServerInfoObject(){
 
     return {
         serverinfo: {
@@ -22,7 +27,7 @@ export async function getPublicServerInfoObject(){
             home: serverconfig.serverinfo.home,
             description: serverconfig.serverinfo.description,
             countryCode: serverconfig.serverinfo.countryCode,
-            icon: group?.info?.icon || null,
+            icon: getDefaultGroupIcon(),
             slots: {
                 online: await getOnlineMemberCount(),
                 limit: serverconfig.serverinfo.slots.limit,

@@ -291,7 +291,7 @@ export default (io) => (socket) => {
 
             // create copy of server member without token etc
             var castingMember = await getCastingMemberObject(
-                await DCTS.Members.load(member.id).toJSON()
+                (await DCTS.Members.load(member.id)).toJSON()
             );
 
             // Save system message to the default channel
@@ -393,7 +393,7 @@ export default (io) => (socket) => {
 
                 if (session.valid) {
                     Logger.debug("Key auth used. Is valid")
-                    let serverMemberObj = await DCTS.Members.load(session.publicKey).toJSON();
+                    let serverMemberObj = (await DCTS.Members.load(session.publicKey)).toJSON();
 
                     // if a member with that key already exists
                     if (serverMemberObj) {
@@ -405,7 +405,7 @@ export default (io) => (socket) => {
                     else if(!serverMemberObj){
                         Logger.debug("Creating member joined via key auth")
                         await createKeyAuthedMember()
-                        serverMemberObj = await DCTS.Members.load(member?.publicKey).toJSON();
+                        serverMemberObj = (await DCTS.Members.load(member?.publicKey)).toJSON();
                         await successfulAuthResponse(serverMemberObj);
                         return { keepExecution: false };
                     }
@@ -437,11 +437,11 @@ export default (io) => (socket) => {
                     // if the user successfully authenticated let them know it all worked
                     if(socket.keyAuthSolution === member.keySolution){
                         Logger.debug("Solution is valid")
-                        let serverMemberObj = await DCTS.Members.load(member?.publicKey).toJSON()
+                        let serverMemberObj = (await DCTS.Members.load(member?.publicKey)).toJSON()
                         if(!serverMemberObj){
                             Logger.debug("Account didnt exist yet, creating it now")
                             await createKeyAuthedMember(member)
-                            serverMemberObj = await DCTS.Members.load(member?.publicKey).toJSON()
+                            serverMemberObj = (await DCTS.Members.load(member?.publicKey)).toJSON()
                             await successfulAuthResponse(serverMemberObj);
                             return { keepExecution: false };
                         }

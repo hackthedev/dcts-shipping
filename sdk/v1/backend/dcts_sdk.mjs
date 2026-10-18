@@ -100,7 +100,7 @@ export default class DCTS {
             static validators = {
                 name: [value => typeof value === "string" && value.trim().length > 0 && value.length <= 20, "Name must be a string and max 20 char. long"],
                 id: [value => typeof value === "string" && value.trim().length > 0, "Id must be a string"],
-                token: [value => typeof value === "string" && value.trim().length === 48, "token must be a 64 character long string"],
+                token: [value => typeof value === "string" && value.trim().length === 48, "token must be a 48 character long string"],
                 loginName: [value => typeof value === "string" && value.trim().length > 0, "login name must be a string and non empty"],
                 icon: [value => (typeof value === "string" && value.trim().length > 0) || value == null, "Icon url must be a string or null"],
                 banner: [value => (typeof value === "string" && value.trim().length > 0) || value == null, "Banner url must be a string or null"],
@@ -236,6 +236,10 @@ export default class DCTS {
 
             setName(content) {
                 return this.setValue("name", content);
+            }
+
+            setType(content) {
+                return this.setValue("type", content);
             }
         }
     }

@@ -122,10 +122,6 @@ export async function updateMember(member) {
 export async function getFullMemberObject(member, issuerId = null){
     member = await autoAnonymizeMember(issuerId, member);
     member = await cleanMemberData(member);
-
-    let memberObj = new DCTS.Members.Builder(member);
-    console.log(memberObj.toJSON())
-
     return member;
 }
 

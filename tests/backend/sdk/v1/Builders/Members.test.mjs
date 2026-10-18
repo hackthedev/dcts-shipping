@@ -61,4 +61,10 @@ describe("[SDK V1] Member Builder", () => {
         expect(response.error).toBe(null);
         expect(response?.data?.banner).toBe("http://");
     });
+
+    test("Set Member Password", async () => {
+        let response = await tryError(async () => (await memberBuilder.setPassword("test")).toJSON());
+        expect(response.error).toBe(null);
+        expect(response?.data?.password).not.toBe(null);
+    });
 });

@@ -47,7 +47,7 @@ import {
 import {checkFile, checkServerDirectories,} from "./modules/functions/io.mjs";
 
 // Chat functions
-import {getMemberFromKey, hasPermission,} from "./modules/functions/chat/main.mjs";
+import {hasPermission,} from "./modules/functions/chat/main.mjs";
 
 import {powVerifiedUsers,} from "./modules/sockets/pow.mjs";
 
@@ -77,6 +77,7 @@ import {
     signer,
 
 } from "./modules/functions/init/general.mjs";
+import {getMemberAccountById} from "./modules/functions/member.mjs";
 
 
 // improved now
@@ -280,7 +281,7 @@ export async function initDCTSServer() {
                         if (sessionResult?.valid === true) {
 
                             // check n see if a member exists
-                            let memberObj = getMemberFromKey(publicKey);
+                            let memberObj = await getMemberAccountById(publicKey);
                             if (memberObj?.id) {
                                 return getMemberHighestUploadLimit(memberObj.id);
                             }
@@ -362,7 +363,7 @@ export async function initDCTSServer() {
                 let {id, token, sessionId, publicKey} = req.body;
 
                 if (!id && !token && publicKey) {
-                    let member = await getMemberFromKey(publicKey);
+                    let member = await getMemberAccountById(publicKey);
                     if (member) {
                         id = member.id;
                         token = member.token;

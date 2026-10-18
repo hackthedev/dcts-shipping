@@ -7,6 +7,7 @@ import {autobanXSS} from "./sanitizing/actions.mjs";
 import {truncateText} from "../sockets/userConnected.mjs";
 import {serverconfig} from "./init/config.mjs";
 import {queryDatabase} from "./mysql/mysql.mjs";
+import DCTS from "../../sdk/v1/backend/dcts_sdk.mjs";
 
 export async function createMember({
                                        id,
@@ -31,30 +32,26 @@ export async function createMember({
     if (!password) throw new Error("Member password is missing when creating member.")
     if (!loginName) throw new Error("Member loginName is missing when creating member.")
 
-    serverconfig.servermembers[id] = {
-        id: normalizeVar(stripHTML(id)),
-        token: normalizeVar(stripHTML(token)) ?? null,
-        name: normalizeVar(stripHTML(name)) ?? null,
-        loginName: normalizeVar(stripHTML(loginName)) ?? null,
-        nickname: null,
-        icon: normalizeVar(stripHTML(icon)) != null ? icon : null,
-        banner: normalizeVar(stripHTML(banner)) != null ? banner : null,
-        aboutme: normalizeVar(stripHTML(aboutme)) !== undefined ? aboutme : null,
-        status: normalizeVar(stripHTML(status)) !== undefined ? status : null,
-        country_code: normalizeVar(stripHTML(country_code)) ?? null,
-        publicKey: normalizeVar(stripHTML(publicKey)) ?? null,
-        joined: joined ?? null,
-        isOnline: 1,
-        lastOnline: lastOnline ?? null,
-        isBanned: 0,
-        isMuted: 0,
-        password: normalizeVar(stripHTML(password)) ?? null,
-        isVerifiedKey: isVerifiedKey ?? false,
-        onboarding: onboarding ?? null,
-        type: type ?? null,
-    }
-
-    saveMemberToDB(id, serverconfig.servermembers[id]);
+    new DCTS.Members.Builder()
+        .setId(id)
+        .setToken(token)
+        .setName(name)
+        .setLoginName(loginName)
+        .setIcon(icon)
+        .setBanner(banner)
+        .setAbout(aboutme)
+        .setStatus(status)
+        .setCountryCode(country_code)
+        .setPublicKey(publicKey)
+        .setJoined(joined)
+        .setLastOnline(lastOnline)
+        .setBanner(false)
+        .setMuted(false)
+        .setPassword(password)
+        .setVerifiedKey(isVerifiedKey)
+        .setOnboarding(onboarding)
+        .setType(type)
+        .save();
 }
 
 export async function cleanMemberData(member) {

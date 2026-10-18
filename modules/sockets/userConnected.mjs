@@ -3,7 +3,7 @@ import {
     usersocket,
 } from "../../index.mjs";
 import {
-    getJson, getMemberFromKey,
+    getJson,
     getMemberIpInfo,
     getMemberLastOnline,
     resolveCategoryByChannelId,
@@ -25,10 +25,11 @@ import {discoverHosts} from "../functions/discovery.mjs";
 import {powVerifiedUsers} from "./pow.mjs";
 import {checkMemberBan} from "../functions/ban-system/helpers.mjs";
 import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
-import {cleanMemberData, createMember, updateMember} from "../functions/member.mjs";
+import {cleanMemberData, createMember, getMemberAccountById, updateMember} from "../functions/member.mjs";
 import dSyncAuth from "@hackthedev/dsync-auth";
 import {saveConfig, serverconfig} from "../functions/init/config.mjs";
 import {auther, signer} from "../functions/init/general.mjs";
+import DCTS from "../../sdk/v1/backend/dcts_sdk.mjs";
 
 export function normalizeVar(v) {
     if (v === null || v === undefined) return "";
@@ -274,25 +275,24 @@ export default (io) => (socket) => {
 
             // setup member
             const now = new Date().getTime();
-            const hashedPassword = await hashPassword(member.password);
 
-            await createMember(                    {
-                id: member.id,
-                token: member.token,
-                name: member?.name ? stripHTML(member.name || "Member") : "",
-                loginName: member.loginName,
-                icon: member?.icon ? stripHTML(member.icon) : "",
-                banner: member?.banner ? stripHTML(member.banner) : "",
-                aboutme: member?.aboutme ? sanitizeHTML(member.aboutme) : "",
-                status: member?.status ? stripHTML(member.status) : "",
-                country_code: member?.country_code ? stripHTML(member.country_code) : "",
-                publicKey: member?.publicKey ? stripHTML(member.publicKey) : "",
-                joined: now,
-                lastOnline: now,
-                password: hashedPassword,
-                isVerifiedKey: false,
-                onboarding: true
-            })
+            new DCTS.Members.Builder()
+                .setId(member.id)
+                .setToken(member.token)
+                .setName(member.name)
+                .setLoginName(member.loginName)
+                .setIcon(member.icon)
+                .setBanner(member.banner)
+                .setAbout(member.aboutme)
+                .setStatus(member.status)
+                .setCountryCode(member.country_code)
+                .setPublicKey(member.publicKey)
+                .setJoined(now)
+                .setLastOnline(now)
+                .setPassword(member.password)
+                .setVerifiedKey(false)
+                .setOnboarding(true)
+                .save();
 
             try {
                 // if a new member joins lets send a system welcome DM.
@@ -396,7 +396,7 @@ export default (io) => (socket) => {
                 let session = await dSyncAuth.verifySession(auther.authSessions, member.sessionId, member.publicKey);
 
                 if (session.valid) {
-                    let serverMemberObj = await getMemberFromKey(session.publicKey);
+                    let serverMemberObj = await getMemberAccountById(session.publicKey);
 
                     // if a member with that key already exists
                     if (serverMemberObj) {
@@ -408,7 +408,7 @@ export default (io) => (socket) => {
                     else if(!serverMemberObj){
                         Logger.debug("Creating member joined via key auth")
                         await createKeyAuthedMember()
-                        let newMember = await getMemberFromKey(member?.publicKey)
+                        let newMember = await getMemberAccountById(member?.publicKey)
                         await successfulAuthResponse(newMember);
                         return { keepExecution: false };
                     }
@@ -436,10 +436,10 @@ export default (io) => (socket) => {
                 else if(member?.keySolution && socket?.keyAuthIdentifier && socket.keyAuthSolution){
                     // if the user successfully authenticated let them know it all worked
                     if(socket.keyAuthSolution === member.keySolution){
-                        let serverMemberObj = await getMemberFromKey(member?.publicKey)
+                        let serverMemberObj = await getMemberAccountById(member?.publicKey)
                         if(!serverMemberObj){
                             await createKeyAuthedMember()
-                            let newMember = await getMemberFromKey(member?.publicKey)
+                            let newMember = await getMemberAccountById(member?.publicKey)
                             await successfulAuthResponse(newMember);
                             return { keepExecution: false };
                         }
@@ -465,7 +465,6 @@ export default (io) => (socket) => {
                 let generatedLoginName = crypto.randomUUID();
 
                 const now = new Date().getTime();
-                const hashedPassword = await hashPassword(generatedPassword);
 
                 // Check if member is in default role
                 if (serverconfig.serverroles["0"].members.includes(memberId) === false) {
@@ -473,23 +472,23 @@ export default (io) => (socket) => {
                     saveConfig(serverconfig);
                 }
 
-                await createMember(                    {
-                    id: memberId,
-                    token: memberToken,
-                    name: "Member",
-                    loginName: generatedLoginName,
-                    icon: null,
-                    banner: null,
-                    aboutme: null,
-                    status: null,
-                    country_code: null,
-                    publicKey: member?.publicKey ? stripHTML(member.publicKey) : "",
-                    joined: now,
-                    lastOnline: now,
-                    password: hashedPassword,
-                    isVerifiedKey: true,
-                    onboarding: true
-                })
+                new DCTS.Members.Builder()
+                    .setId(memberId)
+                    .setToken(memberToken)
+                    .setName("Member")
+                    .setLoginName(generatedLoginName)
+                    .setIcon(member.icon)
+                    .setBanner(member.banner)
+                    .setAbout(member.aboutme)
+                    .setStatus(member.status)
+                    .setCountryCode(member.country_code)
+                    .setPublicKey(member.publicKey)
+                    .setJoined(now)
+                    .setLastOnline(now)
+                    .setPassword(generatedPassword)
+                    .setVerifiedKey(true)
+                    .setOnboarding(true)
+                    .save();
 
                 return { keepExecution: false };
             }

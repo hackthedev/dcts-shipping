@@ -14,6 +14,7 @@ import {queryDatabase} from "../mysql/mysql.mjs";
 import {getBan} from "../ban-system/helpers.mjs";
 import {saveConfig, serverconfig} from "../init/config.mjs";
 import {signer} from "../init/general.mjs";
+import {getMemberAccountById} from "../member.mjs";
 
 export async function getMemberLastOnline(memberId) {
     if (!memberId || !serverconfig.servermembers[memberId]) {
@@ -248,24 +249,12 @@ export function generateGid(id) {
     return (encodeToBase64(signer.canonicalize(serverconfig.servermembers[id]?.publicKey))).substring(0, 20);
 }
 
-export function getMemberFromKey(publicKey){
-    const members = Object.values(serverconfig.servermembers);
-    let found = members.filter(m => m.publicKey === publicKey);
-
-    if(Array.isArray(found)){
-        return found[0];
-    }
-    else{
-        return found;
-    }
-}
-
 export async function changeKeyVerification(publicKey, value){
     if(value !== true && value !== false){
         return;
     }
 
-    let member = getMemberFromKey(publicKey);
+    let member = await getMemberAccountById(publicKey);
     if(!member) return;
 
     let gid = generateGid(member.id)

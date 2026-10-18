@@ -2,10 +2,11 @@ import {saveMemberToDB} from "./mysql/helper.mjs";
 import {sanitizeHTML, stripHTML} from "./sanitizing/functions.mjs";
 import {normalizeVar} from "../sockets/userConnected.mjs";
 import {hasVerifiedKey} from "./chat/main.mjs";
-import {emitBasedOnMemberId} from "./main.mjs";
+import {autoAnonymizeMember, emitBasedOnMemberId} from "./main.mjs";
 import {autobanXSS} from "./sanitizing/actions.mjs";
 import {truncateText} from "../sockets/userConnected.mjs";
 import {serverconfig} from "./init/config.mjs";
+import {queryDatabase} from "./mysql/mysql.mjs";
 
 export async function createMember({
                                        id,
@@ -53,7 +54,6 @@ export async function createMember({
         type: type ?? null,
     }
 
-    await cleanMemberData(serverconfig.servermembers[id])
     saveMemberToDB(id, serverconfig.servermembers[id]);
 }
 
@@ -75,13 +75,11 @@ export async function cleanMemberData(member) {
             // otherwise make the client verify their ownership of the key.
             // key wont be used until its verified
             emitBasedOnMemberId(member.id, "verifyPublicKey");
-        } else {
-            member.isVerifiedKey = true
         }
     }
 
     // some other sanitizing
-    if (member?.name) member.name = stripHTML(truncateText(normalizeVar(member.name), 25), async (tag, node, data) => {
+    if (member?.name) member.name = stripHTML(truncateText(normalizeVar(member.name), 20), async (tag, node, data) => {
         if (tag === "script") await autobanXSS(member.id);
     });
     if (member?.status) member.status = stripHTML(truncateText(normalizeVar(member.status), 50), async (tag, node, data) => {
@@ -92,7 +90,7 @@ export async function cleanMemberData(member) {
         if (tag === "script") await autobanXSS(member.id);
     });
 
-    member.onboarding = stripHTML(normalizeVar(member.onboarding)) === "true";
+    member.onboarding = stripHTML(normalizeVar(member.onboarding)) === true;
     member.password = stripHTML(normalizeVar(member.password)) || null;
 }
 
@@ -117,6 +115,20 @@ export async function updateMember(member) {
     if (member?.isVerifiedKey !== undefined) serverconfig.servermembers[member?.id].isVerifiedKey = member?.isVerifiedKey
     if (member?.lastOnline !== undefined) serverconfig.servermembers[member?.id].lastOnline = Number(stripHTML(member?.lastOnline))
     if (member?.onboarding !== undefined) serverconfig.servermembers[member?.id].onboarding = Boolean(stripHTML(member?.onboarding))
-    if (member?.card !== undefined) serverconfig.servermembers[member?.id].card = stripHTML(member?.card)
+    if (member?.card !== undefined) serverconfig.servermembers[member?.id].card = stripHTML(normalizeVar(member?.card))
     saveMemberToDB(member?.id, serverconfig.servermembers[member?.id]);
+}
+
+
+export async function getMemberAccountById(identifier, issuerId = null){
+    if(!identifier) throw new Error("Missing identifier!");
+
+    // look in ram
+    let accountObj = Object.values(serverconfig.servermembers).find(member => member.id === identifier || member.publicKey === identifier);
+    if(accountObj) return await autoAnonymizeMember(issuerId, accountObj);
+
+    // if not in ram check database
+    let accountRow = await queryDatabase(`SELECT * FROM members WHERE id = ? OR publicKey = ?`, [identifier, identifier]);
+    if(accountRow?.length === 0) return null;
+    return accountRow[0];
 }

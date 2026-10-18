@@ -964,12 +964,12 @@ export async function anonymizeMember(member, shouldHide, isAdmin) {
     return member;
 }
 
-export async function autoAnonymizeMember(issuerMemberId, member){
+export async function autoAnonymizeMember(issuerMemberId = null, member){
     if(!member?.id) member = getUnkownMember()
     let shouldAnonymize = await isIdentifierBanned(member?.id);
 
     if(shouldAnonymize){
-        return await anonymizeMember(member, shouldAnonymize, hasPermission(issuerMemberId, "viewAnonymizedMessages"));
+        return await anonymizeMember(member, shouldAnonymize, hasPermission(issuerMemberId, "viewAnonymizedMessages") || issuerMemberId === "system");
     }
 
     return member;

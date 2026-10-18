@@ -1,5 +1,8 @@
 import {sanitizeHTML, stripHTML} from "../../../modules/functions/sanitizing/functions.mjs";
 import argon2 from "argon2";
+import {getMemberAccountById} from "../../../modules/functions/member.mjs";
+import {saveMemberToDB} from "../../../modules/functions/mysql/helper.mjs";
+import {serverconfig} from "../../../modules/functions/init/config.mjs";
 
 export default class DCTS {
     static Tools = new class {
@@ -86,6 +89,13 @@ export default class DCTS {
     }
 
     static Members = new class {
+        async load(identifier, issuerId = null){
+            if(!identifier) throw new Error("Missing identifier!");
+            let account = await getMemberAccountById(identifier, issuerId)
+            if(account) this.data = {...account}
+            return new this.Builder(account);
+        }
+
         Builder = class extends DCTS.BaseBuilder {
             static validators = {
                 name: [value => typeof value === "string" && value.trim().length > 0 && value.length <= 20, "Name must be a string and max 20 char. long"],
@@ -138,6 +148,20 @@ export default class DCTS {
                     type: null,
                     ...customData
                 }
+            }
+
+            async save(){
+                if(!this.data.id) throw new Error("missing member id!")
+                if(!this.data.token) throw new Error("missing member token!")
+                if(!this.data.loginName) throw new Error("missing login name!")
+
+                serverconfig.servermembers[this.data.id] ??= {};
+                serverconfig.servermembers[this.data.id] = {
+                    ...serverconfig.servermembers[this.data.id],
+                    ...this.data
+                }
+
+                await saveMemberToDB(this.data.id, this.data);
             }
 
             setOnboarding(boolean) {

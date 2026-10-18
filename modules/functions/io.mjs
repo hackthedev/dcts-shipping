@@ -18,7 +18,7 @@ import {
     resolveGroupByChannelId,
     shouldIgnoreMember
 } from "./chat/main.mjs";
-import {copyObject, generateId, getCastingMemberObject} from "./main.mjs";
+import {copyObject, getCastingMemberObject} from "./main.mjs";
 import {
     checkMessageObjAuthor,
     checkMessageObjReactions,
@@ -30,9 +30,6 @@ import {configPath, serverconfig} from "./init/config.mjs";
 import path from "path";
 import fs from "fs";
 import {debugmode} from "./init/general.mjs";
-
-
-var serverconfigEditable = serverconfig;
 
 export async function consolas(text, event = null) {
     return new Promise((resolve, reject) => {

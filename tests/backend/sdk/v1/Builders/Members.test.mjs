@@ -67,4 +67,11 @@ describe("[SDK V1] Member Builder", () => {
         expect(response.error).toBe(null);
         expect(response?.data?.password).not.toBe(null);
     });
+
+    test("Load Account", async () => {
+        let response = await tryError(async () => (await DCTS.Members.load("system")).toJSON());
+        expect(response.error).toBe(null);
+        expect(response.data.id).toBe("system");
+        expect(response.data.name).toBe("System");
+    });
 });

@@ -38,7 +38,7 @@ export function normalizeVar(v) {
 
         if (val === "true") return true;
         if (val === "false") return false;
-        if (val === "null" || val === "undefined" || val === "") return null;
+        if (val === "null" || val === "undefined" || val.trim() === "") return null;
 
         if (/^-?\d+(\.\d+)?$/.test(val)) {
             if (val.length < 10) {

@@ -6,6 +6,7 @@ import JSONTools from "@hackthedev/json-tools";
 import {getMessageObjectById} from "../../sockets/resolveMessage.mjs";
 import {autoAnonymizeMessage} from "../main.mjs";
 import {serverconfig} from "../init/config.mjs";
+import {cleanMemberData} from "../member.mjs";
 
 
 export async function exportDatabaseFromPool(pool, outFile) {
@@ -37,6 +38,8 @@ export async function saveMemberToDB(id, data) {
     const cleaned = Object.fromEntries(
         Object.entries(data).map(([key, value]) => [key, value === undefined ? null : value])
     );
+
+    await cleanMemberData(data)
 
     const cols = Object.keys(cleaned);
     const vals = Object.values(cleaned);

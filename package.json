@@ -27,7 +27,7 @@
     "get-folder-size": "^2.0.1",
     "htmlparser2": "^10.1.0",
     "isomorphic-dompurify": "^3.23.0",
-    "js-yaml": "^5.4.3",
+    "js-yaml": "^5.5.0",
     "jsonwebtoken": "^9.0.3",
     "livekit-server-sdk": "^2.19.1",
     "multer": "^2.4.0",

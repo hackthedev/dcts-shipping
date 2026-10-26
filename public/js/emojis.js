@@ -605,6 +605,8 @@ async function getGifs() {
 }
 
 async function waitForGifs(container) {
+    // pretty fine shit
+    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/decode
     const images = [...container.querySelectorAll("img")];
 
     await Promise.all(images.map(async img => {
@@ -642,21 +644,20 @@ async function displayGifsInPicker(gifs){
             let isNSFW = gif.isNSFW;
             let isSensitive = gif.isSensitive;
 
-            gifEntryListElement.insertAdjacentHTML("beforeend", `
-                    
-                    <div class="gif-entry-wrapper ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}">
-                        <img class="gif-entry ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}"
-                        onclick="sendGif('${cleanUrl}')" src="${cleanUrl}"
-                        data-src="${cleanUrl}"
-                        >
-                         ${(isNSFW || isSensitive) ? `
-                            <span class="notice ${isNSFW ? "nsfw" : "sensitive"}">
-                                ${isNSFW ? "NSFW" : "Sensitive"}
-                            </span>
-                        ` : ""}
-                    </div>
-                    
-                    `);
+            gifEntryListElement.insertAdjacentHTML("beforeend", `                    
+                <div class="gif-entry-wrapper ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}">
+                    <img class="gif-entry ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}"
+                    onclick="sendGif('${cleanUrl}')" src="${cleanUrl}"
+                    data-src="${cleanUrl}"
+                    >
+                     ${(isNSFW || isSensitive) ? `
+                        <span class="notice ${isNSFW ? "nsfw" : "sensitive"}">
+                            ${isNSFW ? "NSFW" : "Sensitive"}
+                        </span>
+                    ` : ""}
+                </div>                    
+            `);
+
             await waitForGifs(gifEntryListElement);
         }
 

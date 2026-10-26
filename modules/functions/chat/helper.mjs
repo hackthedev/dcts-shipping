@@ -90,23 +90,6 @@ export function getMemberHighestRole(id) {
     return returnRole;
 }
 
-export function getFixedUrl(url) {
-    let host = serverconfig.serverinfo.app.url.dcts;
-    if (!url) return null;
-
-    const base = `http://${host}`;
-    const cleanUrl = String(url).trim();
-
-    if (cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://")) {
-        return cleanUrl;
-    }
-
-    return cleanUrl.startsWith("/")
-        ? `${base}${cleanUrl}`
-        : `${base}/${cleanUrl}`;
-}
-
-
 export async function getMemberLatestMessage(memberId, issuerMemberId) {
     if (!memberId) throw new Error("Member id not specified");
 

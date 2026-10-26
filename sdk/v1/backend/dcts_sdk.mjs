@@ -6,6 +6,42 @@ import {serverconfig} from "../../../modules/functions/init/config.mjs";
 
 export default class DCTS {
     static Tools = new class {
+        Media = new class {
+            getInternalUrl(url){
+                if(!url) throw new Error("Missing url parameter");
+
+                const host = serverconfig?.serverinfo?.app?.url?.dcts;
+                if(!host) throw new Error("Missing host parameter in config! (serverinfo.app.url.dcts)");
+
+                const cleanUrl = String(url).trim();
+                const base = host.includes("://") ? host : `http://${host}`;
+
+                if(!cleanUrl.includes("://")){
+                    return cleanUrl.startsWith("/") ? cleanUrl : `/${cleanUrl}`;
+                }
+
+                const parsed = new URL(cleanUrl);
+                const allowed = new URL(base);
+
+                if(parsed.host !== allowed.host) return cleanUrl;
+
+                return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+            }
+
+            getExternalUrl(url){
+                if(!url) throw new Error("Missing url parameter");
+
+                const host = serverconfig?.serverinfo?.app?.url?.dcts;
+                if(!host) throw new Error("Missing host parameter in config! (serverinfo.app.url.dcts)");
+
+                const cleanUrl = String(url).trim();
+                if(cleanUrl.includes("://")) return cleanUrl;
+
+                const base = host.includes("://") ? host : `http://${host}`;
+                return new URL(this.getInternalUrl(cleanUrl), base).href;
+            }
+        }
+
         Cryptography = new class {
             async hashPassword(password) {
                 if (typeof password !== "string" || !password) throw new Error("Invalid password!");

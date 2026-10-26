@@ -285,6 +285,19 @@ export async function setupDbConnection(){
                 {name: "until", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
             ]
         },
+        {
+            name: "mutes",
+            columns: [
+                {name: "rowId", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+                {name: "memberId", type: "varchar(100) NOT NULL UNIQUE"},
+                {name: "publicKey", type: "text NULL UNIQUE"},
+                {name: "issuerId", type: "varchar(100) NOT NULL"},
+                {name: "ip", type: "varchar(100) DEFAULT NULL"},
+                {name: "reason", type: "varchar(500) DEFAULT NULL"},
+                {name: "created", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+                {name: "until", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+            ]
+        },
     ];
 
     const dbTasks = [

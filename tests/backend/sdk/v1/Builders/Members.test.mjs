@@ -1,4 +1,5 @@
 import DCTS from "../../../../../sdk/v1/backend/dcts_sdk.mjs"
+import {generateId} from "../../../../../modules/functions/main.mjs";
 
 async function tryError(callback){
     if(typeof callback == "function"){
@@ -22,8 +23,26 @@ describe("[SDK V1] Member Builder", () => {
     // will be the message instance
     let memberBuilder = null;
 
-    beforeEach(() => {
+    beforeAll(() => {
         memberBuilder = new DCTS.Members.Builder();
+    });
+
+    test("Set Member id", async () => {
+        let response = await tryError(() => memberBuilder.setId(generateId(12)).toJSON() );
+        expect(response.error).toBe(null);
+        expect(response?.data?.id?.length).toBe(12);
+    });
+
+    test("Set Member token", async () => {
+        let response = await tryError(() => memberBuilder.setToken(generateId(48)).toJSON() );
+        expect(response.error).toBe(null);
+        expect(response?.data?.token?.length).toBe(48);
+    });
+
+    test("Set Member Login Name", async () => {
+        let response = await tryError(() => memberBuilder.setLoginName("angel").toJSON() );
+        expect(response.error).toBe(null);
+        expect(response?.data?.loginName).toBe("angel");
     });
 
     test("Set Member Name", async () => {
@@ -74,4 +93,8 @@ describe("[SDK V1] Member Builder", () => {
         expect(response.data.id).toBe("system");
         expect(response.data.name).toBe("System");
     });
+
+    afterAll(async() => {
+        await memberBuilder.save();
+    })
 });

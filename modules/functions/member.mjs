@@ -7,53 +7,7 @@ import {autobanXSS} from "./sanitizing/actions.mjs";
 import {truncateText} from "../sockets/userConnected.mjs";
 import {serverconfig} from "./init/config.mjs";
 import {queryDatabase} from "./mysql/mysql.mjs";
-import DCTS from "../../sdk/v1/backend/dcts_sdk.mjs";
 
-export async function createMember({
-                                       id,
-                                       token,
-                                       name,
-                                       loginName,
-                                       icon,
-                                       banner,
-                                       aboutme,
-                                       status,
-                                       country_code,
-                                       publicKey,
-                                       joined,
-                                       lastOnline,
-                                       password,
-                                       isVerifiedKey,
-                                       onboarding,
-                                        type
-                                   } = {}) {
-    if (!id) throw new Error("Member id is missing when creating member.")
-    if (!token) throw new Error("Member token is missing when creating member.")
-    if (!password) throw new Error("Member password is missing when creating member.")
-    if (!loginName) throw new Error("Member loginName is missing when creating member.")
-
-    let newMember = new DCTS.Members.Builder()
-        .setId(id)
-        .setToken(token)
-        .setName(name)
-        .setLoginName(loginName)
-        .setIcon(icon)
-        .setBanner(banner)
-        .setAbout(aboutme)
-        .setStatus(status)
-        .setCountryCode(country_code)
-        .setPublicKey(publicKey)
-        .setJoined(joined)
-        .setLastOnline(lastOnline)
-        .setBanner(false)
-        .setMuted(false)
-        .setVerifiedKey(isVerifiedKey)
-        .setOnboarding(onboarding)
-        .setType(type)
-
-    await newMember.setPassword(password);
-    await newMember.save();
-}
 
 export async function cleanMemberData(member) {
     Object.entries(member).forEach(([key, value]) => { if (value === undefined) member[key] = null; });

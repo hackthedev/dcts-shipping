@@ -1,4 +1,4 @@
-# DCTS - Made in 🇦🇹 / 🇪🇺
+# DCTS - Made in 🇦🇹
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M719FPNG) 
 
@@ -18,6 +18,7 @@ You can find more infos about us [here](https://docs.dcts.community/Lore/About%2
 
 DCTS is not just a project. Its  a vision about an independent, reliable, decentralized communication **platform**. Some of the features we are really proud of are:
 
+- not vibe coded,
 - encrypted server direct messages (DMs),
 - dedicated desktop client with enhanced client functionality,
 - a **fully featured** mobile app (android and on google play!) with the same client enhancements,

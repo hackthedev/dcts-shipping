@@ -254,6 +254,10 @@ export async function handleTerminalCommands(command, args) {
                     return -1;
                 }
             });
+
+            serverRolesSorted.forEach((role) => {
+                Logger.info(`- ${role.info.name} - ${role.info.id}`)
+            })
         } else if (command == "token") {
 
             if (args.length == 2) {

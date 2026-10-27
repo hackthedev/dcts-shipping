@@ -140,7 +140,7 @@ export async function installWebLibs(){
         let libDir = path.join(path.resolve(), "public", "js", "libs");
         const results = await FrontendLibs.installMultiple([
             { package: '@hackthedev/file-manager@1.0.0', path: libDir },
-            { package: '@hackthedev/element-loader@1.0.0', path: libDir },
+            { package: '@hackthedev/element-loader@latest', path: libDir },
             { package: '@hackthedev/rich-editor@latest', path: libDir },
             { package: '@hackthedev/chat-tools@1.0.1', path: libDir },
             { package: '@hackthedev/autocomplete@latest', path: libDir },

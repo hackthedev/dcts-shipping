@@ -168,7 +168,7 @@ p.note{
 }
 
 .message-container .meta .timestamp{
-    color: hsl(from var(--main) h s calc(l * 12));
+    color: hsl(from var(--main) h s calc(l * 8));
 }
 
 /* msg replies */

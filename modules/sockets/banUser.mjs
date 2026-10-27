@@ -3,6 +3,7 @@ import { getMemberHighestRole } from "../functions/chat/helper.mjs";
 import { getNewDate, hasPermission } from "../functions/chat/main.mjs";;
 import {escapeHtml, findSocketByMemberId, sendMessageToUser, validateMemberId} from "../functions/main.mjs";
 import {banUser} from "../functions/ban-system/helpers.mjs";
+import DCTS from "../../sdk/v1/backend/dcts_sdk.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
@@ -29,8 +30,15 @@ export default (io) => (socket) => {
                         });
                     }
 
-                    let targetSocket = findSocketByMemberId(io, member.target);
-                    await banUser(targetSocket, member);
+                    let banResult = (await DCTS.Members.load(member.target)).ban({
+                        bannedBy: banner.id,
+                        reason: banner.reason,
+                        until: banner.duration
+                    });
+
+                    if(!banResult) return response({
+                        error: "Unable to ban member"
+                    })
 
                     // Notify Admins
                     response({
@@ -40,8 +48,6 @@ export default (io) => (socket) => {
                     });
 
                     io.sockets.sockets.forEach((target) => {
-
-                        
                         // Check if the target's socket ID matches the user's socket ID
                         if (target.id === usersocket[member.target]) {
                             // Escape and process the reason text

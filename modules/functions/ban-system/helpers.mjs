@@ -99,7 +99,11 @@ export async function removeBan(identifier){
         if(result?.affectedRows >= 0){
             Logger.warn(`User/IP ${identifier} has been unbanned`);
         }
+
+        return result;
     }
+
+    return null;
 }
 
 export async function banUser(socket, member) {

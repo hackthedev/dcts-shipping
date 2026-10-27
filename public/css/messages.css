@@ -111,12 +111,30 @@
 
 .message-container .row .meta {
     display: flex;
-    gap: 10px;
+    flex-direction: row !important;
+    gap: 0.2rem;
 
     justify-content: flex-start;
     align-content: center;
     align-items: center;
-    margin-bottom: 4px;
+    color: inherit;
+}
+
+.message-container .row .meta .meta-icon{
+    display: none;
+    align-items: center;
+    color: inherit;
+}
+.message-container .row .meta .meta-icon.visible{
+    display: flex;
+}
+
+.message-container .row .meta svg {
+    display: flex;
+    margin: auto;
+    width: 14px;
+    height: 14px;
+    color: inherit;
 }
 
 .message-container .contentRows {
@@ -172,6 +190,11 @@
 }
 
 .message-container .timestamp {
+    display: flex;
+    align-items: center;
+    flex-direction: row !important;
+    gap: 0.4rem;
+
     color: hsl(from var(--main) h s calc(l * 8));
     font-size: 10px;
 }

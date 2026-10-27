@@ -94,16 +94,20 @@ class UserManager {
         let isMuted = memberObj?.isMuted;
         let isBanned = memberObj?.isBanned;
 
+        // todo: add isreported flag eventually
+        let isReported = memberObj?.isReported;
+
         if(memberObj?.status === "null") memberObj.status = null;
 
         return `
             <div id="profile_banner" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.banner)}')"></div>
         
             <div id="profile_pfp_container">
-                <div id="profile_icon" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.icon)}');"></div>                
+                <div id="profile_icon" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.icon ?? "/img/default_pfp.png")}');"></div>                
                 <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(sanitizeHtmlForRender(memberObj?.publicKey)) : ""}">
-                    ${isMuted === true ? `<span style="color: indianred" title="Muted">${Icon.display("mic")}</span>` : ""}
-                    ${isBanned === true ? `<span style="color: indianred" title="Banned">${Icon.display("x")}</span>` : ""}
+                    ${isMuted === true ? `<span style="color: indianred" title="Muted">${Icon.display("muted")}</span>` : ""}
+                    ${isBanned === true ? `<span style="color: indianred" title="Banned">${Icon.display("ban")}</span>` : ""}
+                    ${isReported === true ? `<span style="color: indianred" title="Reported">${Icon.display("flag")}</span>` : ""}
                 </div>                
             </div>
             
@@ -114,10 +118,10 @@ class UserManager {
                      
                 ${memberObj?.aboutme?.trim()?.length > 0 ?
                 `         
-                <hr>
-                <div class="profile_aboutme">       
-                     <h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(limitString(memberObj.aboutme, 1000))}    
-                </div>
+                    <hr>
+                    <div class="profile_aboutme">       
+                         <h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(limitString(memberObj.aboutme, 1000))}    
+                    </div>
                 `: ""}   
             <hr>
                        

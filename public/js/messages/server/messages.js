@@ -1184,8 +1184,12 @@ async function createMsgHTML({
         message.author = await ChatManager.resolveMember(message?.author?.id) || message.author;
     }
 
+    let isMuted = message?.author?.isMuted;
     let isBanned = message?.author?.isBanned;
     let isAdmin = message?.isAdmin
+
+    // todo: requires the report feature to be overhauled
+    let isReported = message?.isReported === true
 
     let messageReactionsRow = await getMessageReactionsHTML(message);
     let isThirdPartyMessageType = messageType != null && messageType !== "dm" && messageType !== "text";
@@ -1267,37 +1271,49 @@ async function createMsgHTML({
                 </div>` : ""}
                 
                <div class="content-container" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}"> <!-- for the flex layout -->
-                 <div class="meta">
-                 
-                    ${isSystem !== true ?
-                        `<label class="username" 
-                        data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}" 
-                        style="${colorStyle}">
-                            ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(truncateText(message?.author?.name, 30), true))
-                        }</label>` : ""}
-                    
-                    <div class="badge-${message?.type}"></div>
-                    
-                    
-                    <label class="timestamp" data-timestamp="${message.timestamp}">
-                        ${new Date(message.timestamp).toLocaleString("narrow")}
+                     <div class="meta">                     
+                        ${isSystem !== true ?
+                            `<label class="username" 
+                            data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}" 
+                            style="${colorStyle}">
+                                ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(truncateText(message?.author?.name, 30), true))
+                            }</label>` : ""}
                         
-                        <!-- fuck i love programming -->
-                        <label style="filter: grayscale(75%);" title="Signed Message">
-                            ${isSigned ? `&bull; &#128272;` : ""}
-                        </label>
+                        <div class="badge-${message?.type}"></div>                    
                         
-                        <!-- banned indicator -->
-                        <label style="filter: grayscale(75%);" title="Banned member">
-                            ${isBanned ? `&bull; &#9940;` : ""}
-                        </label>
-                    </label>
-                 </div>
-                
-                 <div class="contentRows" data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}">
-                    ${messageRow}
-                 </div>
-                
+                        <div class="timestamp" data-timestamp="${message.timestamp}">
+                            ${new Date(message.timestamp).toLocaleString("narrow")}
+                            
+                            <!-- fuck i love programming -->
+                            ${isSigned === true ? "<span>&bull;</span>" : ""}
+                            <span class="meta-icon ${isSigned ? "visible": ""}" style="filter: grayscale(75%);" title="Signed Message">
+                                ${isSigned ? `&#128272;` : ""}
+                            </span> 
+                            
+                            <!-- fuck i love programming -->
+                            ${isReported === true && isBanned === false ? "<span>&bull;</span>" : ""}
+                            <span class="meta-icon ${isReported ? "visible": ""}" style="filter: grayscale(0%);color: indianred;" title="Reported Message">
+                                ${isReported && isBanned === false ? `${Icon.display("flag")}` : ""}
+                            </span>
+                            
+                            <!-- banned indicator -->
+                            ${isBanned === true ? "<span>&bull;</span>" : ""}
+                            <span class="meta-icon ${isBanned ? "visible": ""}" style="filter: grayscale(100%);color: indianred;" title="Banned member">
+                                ${isBanned ? `${Icon.display("ban")}` : ""}
+                            </span>
+                            
+                            <!-- muted (L) indicator -->
+                            ${isMuted === true && isBanned === false ? "<span>&bull;</span>" : ""}
+                            <span class="meta-icon ${isMuted ? "visible": ""}" style="filter: grayscale(20%);color: indianred;" title="Muted member">
+                                ${isMuted && isBanned === false ? `${Icon.display("muted")}` : ""}
+                            </span>
+                        </div>
+                     </div>
+                    
+                     <div class="contentRows" data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}">
+                        ${messageRow}
+                     </div>
+                    
                </div>
             </div>
         </div>`

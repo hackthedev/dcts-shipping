@@ -478,13 +478,9 @@ class ChatManager {
             socket.emit("userConnected", {
                 id: UserManager.getID(),
                 name: username,
-                icon: UserManager.getPFP(),
-                status: UserManager.getStatus(),
                 token: UserManager.getToken(),
                 password: passwordFlag,
                 onboarding: onboardingFlag,
-                aboutme: UserManager.getAboutme(),
-                banner: UserManager.getBanner(),
                 loginName: loginNameFlag,
                 publicKey: await UserManager.getPublicKey(),
                 knownServers,

@@ -633,7 +633,8 @@ async function displayGifsInPicker(gifs){
         if(!gifEntryListElement) throw new Error("No gif container element found!");
         await ChatTools.Dom.hideElement(gifEntryListElement);
         ElementLoader.start(getEmojiPickerHeaderElement(), {
-            speed: 10
+            speed: 10,
+            barWidth: 20
         })
 
         for (let gif of gifs) {

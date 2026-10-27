@@ -12,7 +12,6 @@ import {
 import {saveChatMessage} from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
 import {
-    checkMemberMute,
     checkRateLimit,
     generateId,
     getCastingMemberObject,
@@ -213,9 +212,6 @@ export default (io) => (socket) => {
         // handle invites
         let inviteResult = handleInviteCode(member, socket, response);
         if (!inviteResult) return;
-
-        // call checkMemberMute so it unmutes automatically
-        checkMemberMute(socket, member);
 
         // Check if member is in default role
         if (serverconfig.serverroles["0"].members.includes(member.id) === false) {

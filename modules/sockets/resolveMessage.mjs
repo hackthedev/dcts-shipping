@@ -10,6 +10,7 @@ import {decodeFromBase64, getChatMessageById} from "../functions/mysql/helper.mj
 import {getMessageReactionsById} from "./messageReactions.mjs";
 import JSONTools from "@hackthedev/json-tools";
 import {serverconfig} from "../functions/init/config.mjs";
+import DCTS from "../../sdk/v1/backend/dcts_sdk.mjs";
 
 export function decodeString(string){
     try{
@@ -67,7 +68,7 @@ export async function checkMessageObjAuthor(message){
     if(!message?.author) throw new Error("No message author object found");
 
     if(!message?.author?.name){
-        message.author = await getCastingMemberObject(serverconfig.servermembers[message.author.id]);
+        message.author = await getCastingMemberObject((await DCTS.Members.load(message.author.id)).toJSON());
     }
     return message;
 }

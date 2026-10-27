@@ -68,6 +68,8 @@ class UserManager {
     }
 
     static async getMemberProfileHTML(memberObj) {
+        // todo: Make sure when badges load they dont remove existing pics like muted and banned
+
         let roleCode = "";
         for (let i = 0; i < memberObj?.roles.length; i++) {
             var role = memberObj?.roles[i];
@@ -92,22 +94,6 @@ class UserManager {
         let isMuted = memberObj?.isMuted;
         let isBanned = memberObj?.isBanned;
 
-
-        // if someone is muted etc
-        let mutedCode = "";
-        let bannedCode = "";
-
-        if (isMuted) {
-            mutedCode = `<div style="color: indianred; border: 1px solid indianred;" class="info mutedMember">
-                            <h1>Muted</h1>
-                        </div>`
-        }
-        if (isBanned) {
-            bannedCode = `<div style="color: indianred; border: 1px solid indianred;" class="info">
-                            <h1>Banned</h1>
-                        </div>`
-        }
-
         if(memberObj?.status === "null") memberObj.status = null;
 
         return `
@@ -115,32 +101,24 @@ class UserManager {
         
             <div id="profile_pfp_container">
                 <div id="profile_icon" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.icon)}');"></div>                
-                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(sanitizeHtmlForRender(memberObj?.publicKey)) : ""}"></div>                
+                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(sanitizeHtmlForRender(memberObj?.publicKey)) : ""}">
+                    ${isMuted === true ? `<span style="color: indianred" title="Muted">${Icon.display("mic")}</span>` : ""}
+                    ${isBanned === true ? `<span style="color: indianred" title="Banned">${Icon.display("x")}</span>` : ""}
+                </div>                
             </div>
             
         
             <div id="profile_content">       
                 <div id="profile_username"><h2 style="margin: 0 !important;">${unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.name))}</h2></div>                
                 <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.status), false) : ""}</i></div>  
-                
-                ${memberObj?.aboutme?.trim()?.length > 0 ?                
-               `
+                     
+                ${memberObj?.aboutme?.trim()?.length > 0 ?
+                `         
                 <hr>
                 <div class="profile_aboutme">       
-                    <h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(limitString(memberObj.aboutme, 1000))}
-                    
-                    
-                    <div class="profile_meta_container">
-                        ${
-                   mutedCode || bannedCode ?
-                       `<div class="profile_meta">
-                                    ${mutedCode}
-                                    ${bannedCode}   
-                                </div>` : ""
-               }   
-                    </div>        
+                     <h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(limitString(memberObj.aboutme, 1000))}    
                 </div>
-               ` : ""}
+                `: ""}   
             <hr>
                        
             <a id="dm_action" onclick="ChatManager.openPagePopup('homeScreen', '/home/?dm=${sanitizeHtmlForRender(memberObj?.id, false)}')">&#10149; Send Message</a>

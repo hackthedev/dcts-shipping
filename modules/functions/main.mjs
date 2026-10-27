@@ -1,10 +1,5 @@
-
 import {io} from "./init/sockets.mjs"
-import {
-    generateGid,
-    getNewDate,
-    hasPermission, resolveGroupByChannelId,
-} from "./chat/main.mjs";
+import {generateGid, getNewDate, hasPermission, resolveGroupByChannelId,} from "./chat/main.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import path from "path";
 import {powVerifiedUsers} from "../sockets/pow.mjs";
@@ -815,30 +810,6 @@ export function addMinutesToDate(date, minutes) {
 
 export function sendMessageToUser(socketId, data) {
     io.to(socketId).emit("modalMessage", data);
-}
-
-export function checkMemberMute(socket, member) {
-    let ip = socket.handshake.address;
-
-    checkRateLimit(socket);
-
-    // check mutelist
-    if (serverconfig?.mutelist && serverconfig?.mutelist?.hasOwnProperty(member.id)) {
-        var durationStamp = serverconfig.mutelist[member.id].duration;
-        var muteReason = serverconfig.mutelist[member.id].reason;
-
-
-        if (Date.now() >= durationStamp) {
-            // unmute user
-            serverconfig.servermembers[member.id].isMuted = 0;
-            delete serverconfig.mutelist[member.id];
-            saveConfig(serverconfig);
-        } else {
-            return {result: true, timestamp: durationStamp, reason: muteReason};
-        }
-    }
-
-    return {result: false};
 }
 
 export function sleep(ms) {

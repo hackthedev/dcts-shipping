@@ -8,7 +8,6 @@ import {
 import {saveChatMessage} from "../functions/io.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import {
-    checkMemberMute,
     checkRateLimit,
     copyObject,
     escapeHtml,
@@ -25,6 +24,7 @@ import {getMemberLatestMessage} from "../functions/chat/helper.mjs";
 import DateTools from "@hackthedev/datetools";
 import {serverconfig} from "../functions/init/config.mjs";
 import {signer} from "../functions/init/general.mjs";
+import {isMemberMuted} from "../functions/mute-system/helpers.mjs";
 
 export function getMentionIdsFromText(text) {
     return {
@@ -82,7 +82,7 @@ export default (io) => (socket) => {
             }
 
             // check member mute
-            let muteResult = checkMemberMute(socket, member);
+            let muteResult = await isMemberMuted(member?.author?.id);
             let muteText = "";
 
             if (muteResult?.timestamp) {

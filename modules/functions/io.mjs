@@ -30,6 +30,7 @@ import {configPath, serverconfig} from "./init/config.mjs";
 import path from "path";
 import fs from "fs";
 import {debugmode} from "./init/general.mjs";
+import DCTS from "../../sdk/v1/backend/dcts_sdk.mjs";
 
 export async function consolas(text, event = null) {
     return new Promise((resolve, reject) => {
@@ -200,44 +201,42 @@ export async function getSavedChatMessage(channelId, index = -1) {
     let channel = resolveChannelById(channelId)
 
     var sortedMessages = [];
-    if (serverconfig.serverinfo.sql.enabled === true) {
 
-        await Clock.start("Chatlog Processing", async () => {
-            let loadedMessages = null;
-            await Clock.start("Chatlog Processing Load", async () => {
-                loadedMessages = await getChatMessagesFromDb(`${channelId}`, index);
-            });
+    await Clock.start("Chatlog Processing", async () => {
+        let loadedMessages = null;
+        await Clock.start("Chatlog Processing Load", async () => {
+            loadedMessages = await getChatMessagesFromDb(`${channelId}`, index);
+        });
 
-            for (let i = 0; i < loadedMessages.length; i++) {
+        for (let i = 0; i < loadedMessages.length; i++) {
 
-                let message = decodeAndParseJSON(loadedMessages[i].message);
+            let message = decodeAndParseJSON(loadedMessages[i].message);
 
-                // restore deleted room key in saveChatMessageInDb.
-                if(!message?.room) message.room = loadedMessages[i].room;
-                if(!message?.editedAt) message.editedAt = loadedMessages[i].editedAt;
+            // restore deleted room key in saveChatMessageInDb.
+            if(!message?.room) message.room = loadedMessages[i].room;
+            if(!message?.editedAt) message.editedAt = loadedMessages[i].editedAt;
 
-                if (message?.message) {
-                    // new, enhanced message system
-                    if (message?.author?.id) {
-                        message.author = await getCastingMemberObject(serverconfig.servermembers[message?.author?.id || message?.id]);
-                    }
-
-                    // resolve the reply too
-                    if (message?.reply?.messageId) {
-                        let messageObjResult = await getMessageObjectById(message.reply?.messageId)
-                        message.reply = messageObjResult?.message;
-
-                    }
-
-                    message = await checkMessageObjAuthor(message);
-                    message = await checkMessageObjReactions(message);
-
-
-                    sortedMessages.push(message)
+            if (message?.message) {
+                // new, enhanced message system
+                if (message?.author?.id) {
+                    message.author = await getCastingMemberObject( (await DCTS.Members.load(message.author.id)).toJSON() );
                 }
+
+                // resolve the reply too
+                if (message?.reply?.messageId) {
+                    let messageObjResult = await getMessageObjectById(message.reply?.messageId)
+                    message.reply = messageObjResult?.message;
+
+                }
+
+                message = await checkMessageObjAuthor(message);
+                message = await checkMessageObjReactions(message);
+
+
+                sortedMessages.push(message)
             }
-        })
-    }
+        }
+    })
 
     await Clock.start("Chatlog Sorting", async () => {
         sortedMessages = sortedMessages.sort((a, b) => {

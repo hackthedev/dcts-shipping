@@ -603,7 +603,7 @@ function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
         let result = await UserManager.displayUserBadges(true)
         if (!result) {
             let profileBadgeContainer = profileContent.querySelector("#profile_badge_container");
-            if (profileBadgeContainer) profileBadgeContainer.style.display = "none"
+            if (profileBadgeContainer && profileBadgeContainer.querySelectorAll("svg")?.length === 0) profileBadgeContainer.style.display = "none"
         }
 
         profileContent.style.display = "block";

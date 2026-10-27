@@ -7,6 +7,7 @@ import {autobanXSS} from "./sanitizing/actions.mjs";
 import {truncateText} from "../sockets/userConnected.mjs";
 import {serverconfig} from "./init/config.mjs";
 import {queryDatabase} from "./mysql/mysql.mjs";
+import {isMemberMuted} from "./mute-system/helpers.mjs";
 
 
 export async function cleanMemberData(member) {
@@ -76,6 +77,7 @@ export async function updateMember(member) {
 export async function getFullMemberObject(member, issuerId = null){
     member = await autoAnonymizeMember(issuerId, member);
     member = await cleanMemberData(member);
+    member.isMuted = (await isMemberMuted(member?.id, member?.publicKey, member?.loginName))?.result ?? false;
     return member;
 }
 
@@ -91,6 +93,5 @@ export async function getMemberAccountById(identifier, issuerId = null){
     if(accountRow?.length === 0) return null;
 
     accountObj = await getFullMemberObject(accountRow[0], issuerId);
-
     return accountObj;
 }

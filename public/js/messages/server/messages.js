@@ -103,6 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 condition: async (data) => {
                     let memberId = data.element.getAttribute("data-member-id");
                     if(!memberId) return false;
+
                     return await UserManager.checkPermission("muteUsers") === true &&
                         (memberId !== UserManager.getID()) &&
                         data.element.querySelectorAll(".mutedMember").length !== 0

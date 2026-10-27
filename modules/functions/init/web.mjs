@@ -147,6 +147,7 @@ export async function installWebLibs(){
             { package: '@hackthedev/prompts@latest', path: libDir },
             { package: '@hackthedev/event-dispatcher@latest', path: libDir },
             { package: '@hackthedev/json-editor@latest', path: libDir },
+            { package: '@hackthedev/icons@latest', path: libDir },
         ]);
 
         results.forEach((r) => {

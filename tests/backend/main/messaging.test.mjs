@@ -69,8 +69,8 @@ mock.module("../../../modules/functions/chat/helper.mjs", () => ({
 }));
 
 let checkMemberMuteResult = false;
-mock.module("../../../modules/functions/main.mjs", () => ({
-    checkMemberMute: mock((socket, memberId) => {
+mock.module("../../../modules/functions/mute-system/helpers.mjs", () => ({
+    isMemberMuted: mock((socket, memberId) => {
         if(checkMemberMuteResult){
             return {
                 result: true,

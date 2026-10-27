@@ -1,7 +1,8 @@
 import { usersocket, xssFilters } from "../../index.mjs";
 import { getMemberHighestRole } from "../functions/chat/helper.mjs";
-import { hasPermission, muteUser } from "../functions/chat/main.mjs";
+import { hasPermission } from "../functions/chat/main.mjs";
 import { sendMessageToUser, validateMemberId } from "../functions/main.mjs";
+import DCTS from "../../sdk/v1/backend/dcts_sdk.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
@@ -27,7 +28,13 @@ export default (io) => (socket) => {
                         return response({ error: "Cant mute user with higher or equal role", msg: "Cant mute user with higher or equal role", type: "error" })
                     }
 
-                    var muteResult = muteUser(member);
+                    let targetMemberObj = await DCTS.Members.load(member.target).ToJSON();
+                    let muteResult = await targetMemberObj.mute({
+                        issuerMemberId: member.id,
+                        reason: member.reason,
+                        until: member.time
+                    });
+
                     if (muteResult?.error) {
                         response({ error: "Error muting user", msg: "Unable to mute user", type: "error" })
                         console.log(muteResult.error)

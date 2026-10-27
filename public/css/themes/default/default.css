@@ -340,7 +340,7 @@ img {
 }
  */
 
-.svg-icon,
+/*.svg-icon,*/
 .edit-icon .svg-icon{
     display: flex;
     background-color: hsl(from var(--main) h s calc(l * 1) / 40%);
@@ -354,8 +354,8 @@ img {
     transition: all 0.2s ease-in-out;
 }
 
-.edit-icon .svg-icon:hover,
-.svg-icon:hover{
+/*.svg-icon:hover,*/
+.edit-icon .svg-icon:hover{
     background-color: hsl(from var(--main) h s calc(l * 1) / 80%);
     border: 2px solid var(--border-color-bright);
 }

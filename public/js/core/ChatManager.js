@@ -129,6 +129,19 @@ class ChatManager {
         }
     }
 
+    static async getDefaultChannelObj(){
+        let serverinfo = (await this.getServerInfo(true))?.serverinfo;
+        if(!serverinfo) throw new Error("Unable to get server info. Cant open default channel")
+        let defaultChannelId = serverinfo?.defaultChannel;
+        let response = await this.resolveChannel(defaultChannelId);
+        return response?.channel ?? null;
+    }
+
+    static async openDefaultChannel(){
+        let defaultChannelObj = await this.getDefaultChannelObj();
+        if(defaultChannelObj.hasOwnProperty("id")) setUrl(`?group=${defaultChannelObj.group.info.id}&channel=${defaultChannelObj.id}`)
+    }
+
     static openPagePopup(elementId, url) {
         if (!url) throw new Error("No url supplied bitch", url); // lol
         MobilePanel.close()
@@ -833,7 +846,7 @@ class ChatManager {
         var url = window.location.search;
         var urlParams = new URLSearchParams(url);
         var value = urlParams.get(param);
-        return value;
+        return value ?? null;
     }
 
 

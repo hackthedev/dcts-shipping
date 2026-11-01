@@ -1413,15 +1413,14 @@ async function setUrl(param, isVC = false) {
         saveChannelMessageDraft(UserManager.getID());
     }
 
-
-    let urlData = param.split("&")
-    let groupId = urlData[0]?.replace("?group=", "")
-    let categoryId = urlData[1]?.replace("category=", "")
-    let channelId = urlData[2]?.replace("channel=", "")
+    let urlData = new URLSearchParams(param);
+    let groupId = urlData.get("group");
+    let categoryId = urlData.get("category");
+    let channelId = urlData.get("channel");
     focusEditor()
 
     // channel already open, dont reload it
-    if (UserManager.getChannel() === channelId && channelId && UserManager.getChannel() && isVC === false) return;
+    if (UserManager.getChannel() === channelId && channelId && UserManager.getChannel() && isVC === false) return 
     window.history.replaceState(null, null, param); // or pushState
 
     if (isVC === true) {
@@ -1467,7 +1466,7 @@ async function setUrl(param, isVC = false) {
 
             if (channelId) ChatManager.setChannelMarker(channelId, false)
             showGroupStats();
-
+            console.log(response)
             if (response.permission !== "granted") {
                 toggleEditor(false);
             } else {
@@ -1551,7 +1550,7 @@ function showGroupStats() {
                     <div class="card-container" style="display: flex; gap: 0.5rem">
                         <div class="mini-card">
                             ${Icon.display("message")}
-                            <p>Start<br>Chatting!</p>
+                            <p onclick="ChatManager.openDefaultChannel()" style="cursor: pointer">Start<br>Chatting!</p>
                         </div>
                     </div>
                 </p>

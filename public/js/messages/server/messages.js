@@ -1555,10 +1555,7 @@ async function displayMessagesInElement({
 }
 
 async function getChatlog(container, index = -1, appendTop = false, preventDispatch = false) {
-
     if (UserManager.getChannel() === null) return
-    if (UserManager.getCategory() === null) return
-    if (UserManager.getGroup() === null) return
     if (!container) throw new Error("Container wasnt supplied for chatlog");
 
     let channelId = UserManager.getChannel();
@@ -1583,8 +1580,6 @@ async function getChatlog(container, index = -1, appendTop = false, preventDispa
     socket.emit("getChatlog", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
-        groupId: UserManager.getGroup(),
-        categoryId: UserManager.getCategory(),
         channelId: UserManager.getChannel(),
         index
     }, async (response) => {

@@ -322,29 +322,11 @@ class UserManager {
     }
 
     static getCategory() {
-
-        var url = window.location.search;
-        var urlParams = new URLSearchParams(url);
-        var urlChannel = urlParams.get("category");
-
-        if (urlChannel == null) {
-            return null;
-        } else {
-            return urlChannel;
-        }
+        return ChatManager.getUrlParams("category");
     }
 
     static getChannel() {
-
-        var url = window.location.search;
-        var urlParams = new URLSearchParams(url);
-        var urlChannel = urlParams.get("channel");
-
-        if (urlChannel == null) {
-            return null;
-        } else {
-            return urlChannel;
-        }
+        return ChatManager.getUrlParams("channel");
     }
 
     static getPassword() {

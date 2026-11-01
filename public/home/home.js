@@ -250,9 +250,7 @@ function editHeroAbout() {
             socket.emit("saveServerInfo", {
                 token: UserManager.getToken(), id: UserManager.getID(),
                 serverinfo: {
-                    home: {
-                        about: homeAbout
-                    }
+                    about: homeAbout
                 }
             }, (response) => {
                 if (response?.error) {

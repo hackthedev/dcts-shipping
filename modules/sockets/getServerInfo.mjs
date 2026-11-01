@@ -27,8 +27,8 @@ export async function getPublicServerInfoObject(){
             name: serverconfig.serverinfo.name,
             description: serverconfig.serverinfo.description,
             about: serverconfig.serverinfo.about,
-            banner: DCTS.Tools.Media.getInternalUrl(serverconfig.serverinfo.banner),
-            icon: DCTS.Tools.Media.getInternalUrl(serverconfig.serverinfo.icon ?? getDefaultGroupIcon()),
+            banner: DCTS.Tools.Media.getInternalUrl(serverconfig.serverinfo.banner ?? ""),
+            icon: DCTS.Tools.Media.getInternalUrl(serverconfig.serverinfo.icon ?? getDefaultGroupIcon() ?? ""),
             countryCode: serverconfig.serverinfo.countryCode,
             slots: {
                 online: await getOnlineMemberCount(),

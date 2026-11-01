@@ -1420,7 +1420,7 @@ async function setUrl(param, isVC = false) {
     focusEditor()
 
     // channel already open, dont reload it
-    if (UserManager.getChannel() === channelId && channelId && UserManager.getChannel() && isVC === false) return 
+    if (UserManager.getChannel() === channelId && channelId && UserManager.getChannel() && isVC === false) return
     window.history.replaceState(null, null, param); // or pushState
 
     if (isVC === true) {

@@ -142,7 +142,7 @@ export async function installWebLibs(){
             { package: '@hackthedev/file-manager@1.0.0', path: libDir },
             { package: '@hackthedev/element-loader@latest', path: libDir },
             { package: '@hackthedev/rich-editor@latest', path: libDir },
-            { package: '@hackthedev/chat-tools@1.0.1', path: libDir },
+            { package: '@hackthedev/chat-tools@1.0.2', path: libDir },
             { package: '@hackthedev/autocomplete@latest', path: libDir },
             { package: '@hackthedev/prompts@latest', path: libDir },
             { package: '@hackthedev/event-dispatcher@latest', path: libDir },

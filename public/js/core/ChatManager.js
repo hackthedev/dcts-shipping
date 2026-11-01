@@ -855,9 +855,24 @@ class ChatManager {
     }
 
     static registerImageErrorListener(){
+        document.addEventListener("load", (e) => {
+            if (e.target.tagName !== "IMG") return;
+            e.target.style.visibility = "visible";
+        }, true);
+
         document.addEventListener("error", (e) => {
             const el = e.target;
-            if (el.tagName === "IMG" && el.hasAttribute("data-ignore-img-error") === false) {
+
+            if (el.tagName === "IMG") {
+
+                // remove error image from broken images
+                if(el.hasAttribute("data-ignore-img-error") === true){
+                    el.removeAttribute("src");
+                    el.style.visibility = "hidden";
+                    return;
+                }
+
+
                 el.setAttribute("data-src", el.src)
 
                 if (ChatManager.chance(20)) {

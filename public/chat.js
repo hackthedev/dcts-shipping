@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (UserManager.getChannel()) handleChannelMessageDrafting(UserManager.getChannel());
 
     // manual click event listener because its too general
-    document.body.addEventListener("click", (event) => {
+    document.body.addEventListener("click", async (event) => {
         const { clientX: mouseX, clientY: mouseY } = event;
         var clickedElement = event.target
 
@@ -178,6 +178,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
 
         // otherwise on default close it
+        await ChatTools.Dom.hideElement(profileContent);
         profileContent.style.display = "none";
         profileContent.innerHTML = "";
         ModActions.hideRoleMenu()
@@ -200,7 +201,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
 
-    window.addEventListener('resize', function (event) {
+    window.addEventListener('resize', async function (event) {
         // do stuff here
 
         let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(document.getElementById("content"));
@@ -208,27 +209,28 @@ document.addEventListener("DOMContentLoaded", async function () {
         var emojiContainer = document.getElementById("emoji-box-container");
         var profileContainer = document.getElementById("profile_container");
 
-        if (emojiContainer.style.display == "flex" && !MobilePanel.isMobile()) {
+        if (emojiContainer.style.display === "flex" && !MobilePanel.isMobile()) {
             //emojiContainer.style.display = "none";
             closeEmojiBox()
         }
-        if (profileContainer.style.display == "flex") {
+        if (profileContainer.style.display === "block") {
+            await ChatTools.Dom.hideElement(profileContainer);
             profileContainer.style.display = "none";
         }
 
         if (isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer());
     });
 
-    document.addEventListener("keydown", (event) => {
+    document.addEventListener("keydown", async (event) => {
         var emojiContainer = document.getElementById("emoji-box-container");
         var profileContainer = document.getElementById("profile_container");
 
         if (event.key === "Escape") {
             if (emojiContainer.style.display === "block") {
-                //emojiContainer.style.display = "none";
                 closeEmojiBox();
             }
             if (profileContainer.style.display === "block") {
+                await ChatTools.Dom.hideElement(profileContainer);
                 profileContainer.style.display = "none";
             }
         }
@@ -581,6 +583,9 @@ function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
         posY: y
     }, async function (response) {
         var profileContent = document.getElementById("profile_container");
+
+        await ChatTools.Dom.hideElement(profileContent);
+
         profileContent.innerHTML = await UserManager.getMemberProfileHTML(response.member);
 
         // if no badges found remove it
@@ -621,6 +626,7 @@ function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
         // Apply safe position
         profileContent.style.top = `${top}px`;
         profileContent.style.left = `${left}px`;
+        await ChatTools.Dom.showElement(profileContent);
     });
 }
 

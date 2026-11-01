@@ -100,7 +100,9 @@ class UserManager {
         if(memberObj?.status === "null") memberObj.status = null;
 
         return `
-            <div id="profile_banner" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.banner)}')"></div>
+            <div id="profile_banner" draggable="false">
+                <img data-ignore-img-error="true" src="${ChatManager.proxyUrl(memberObj?.banner)}">
+            </div>
         
             <div id="profile_pfp_container">
                 <div id="profile_icon" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.icon ?? "/img/default_pfp.png")}');"></div>                

@@ -71,12 +71,12 @@ function setPreview() {
     preview_status = document.getElementById("profile_status");
     preview_aboutme = document.getElementById("profile_aboutme");
     preview_icon = document.getElementById("profile_icon");
-    preview_banner = document.getElementById("profile_banner");
+    preview_banner = document.getElementById("profile_banner").querySelector("img");
     saveButton = document.getElementById("settings_profile_save");
 
 
     preview_icon.style.backgroundImage = `url("${UserManager.getPFP()}")`;
-    preview_banner.style.backgroundImage = `url("${UserManager.getBanner()}")`;
+    preview_banner.src = `${UserManager.getBanner()}`;
 
     settings_username.value = `${limitString(UserManager.getUsername(), 30)}`;
     settings_status.value = `${limitString(UserManager.getStatus(), 100)}`;
@@ -214,7 +214,7 @@ function updatePreview(id) {
 
         // Banner
         if (id == "settings_profile_banner") {
-            preview_banner.style.backgroundImage = `url("${newSetting}")`;
+            preview_banner.style.src = `${newSetting}`;
         }
 
         // Username

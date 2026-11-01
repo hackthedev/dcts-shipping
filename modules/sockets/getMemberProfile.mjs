@@ -12,6 +12,7 @@ export default (io) => (socket) => {
         ) {
 
             try {
+                // todo
                 // bug: being online on two devices with the same account 
                 // will show the profile on both devices in the same position
                 response({

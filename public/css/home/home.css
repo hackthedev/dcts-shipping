@@ -44,7 +44,7 @@
 
     margin-top: calc(-2rem - 60px);
     z-index: 2;
-    outline: 12px solid hsl(from var(--main) h s calc(l * 1.25) / 100%);
+    outline: 12px solid hsl(from var(--main) h s calc(l * 1.25));
 }
 
 .layout.home .content .home-container .info{

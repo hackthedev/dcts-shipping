@@ -4,6 +4,81 @@ class ChatManager {
     static connectionLost = false;
     static wasConnected = false;
 
+    static navigateUrl(url){
+        if(!url) throw new Error("Missing url or data!");
+        window.location.href = url;
+    }
+
+    static openNewTab(url){
+        if(!url) throw new Error("Missing url or data!");
+
+        if (url.startsWith("data:")) {
+            const blob = dataURLtoBlob(url);
+            const blobUrl = URL.createObjectURL(blob);
+            window.open(blobUrl, "_blank");
+        } else {
+            window.open(url, "_blank");
+        }
+    }
+
+    static normalizeVar(v) {
+        if (v === null || v === undefined) return null;
+
+        if (typeof v === "string") {
+            const val = v.trim().toLowerCase();
+
+            if (val === "true") return true;
+            if (val === "false") return false;
+            if (val === "null" || val === "undefined" || val.trim() === "") return null;
+
+            if (/^-?\d+(\.\d+)?$/.test(val)) {
+                if (val.length < 10) {
+                    return Number(val);
+                }
+            }
+        }
+
+        return String(v);
+    }
+
+    static Settings = class {
+        static options = {
+            "openMenuNavigationInNewTab": {
+                title: "Open menus in new tab?",
+                description: `Open navigations like 'Manage Server' in a new tab instead as popup. Will override 'Open menus in current tab?'`,
+                default: false,
+            },
+            "openMenuNavigationInSameTab": {
+                title: "Open menus in current tab?",
+                description: "Open navigations in the current tab. Will disconnect you from a voice call.",
+                default: false
+            }
+        }
+
+        static getOptions(){
+            let optionsObj = {}
+
+            for(let optionKey of Object.keys(this.options)){
+                optionsObj[optionKey] = {
+                    value: ChatManager.normalizeVar(localStorage.getItem(optionKey)) ?? this.options[optionKey].default,
+                    ...this.options[optionKey]
+                }
+            }
+
+            return optionsObj
+        }
+
+        static get(name){
+            if(!this.getOptions().hasOwnProperty(name)) throw new Error("Unkown client setting!")
+            return this.getOptions()[name];
+        }
+
+        static set(name, value){
+            if(!this.getOptions().hasOwnProperty(name)) throw new Error("Unkown client setting!")
+            localStorage.setItem(name, value);
+        }
+    }
+
     static chance(percent) {
         return Math.random() < percent / 100;
     }
@@ -57,6 +132,10 @@ class ChatManager {
     static openPagePopup(elementId, url) {
         if (!url) throw new Error("No url supplied bitch", url); // lol
         MobilePanel.close()
+
+        // sometimes annoying
+        if(this.Settings.get("openMenuNavigationInNewTab").value === true) return this.openNewTab(url);
+        if(this.Settings.get("openMenuNavigationInSameTab").value === true) return this.navigateUrl(url);
 
         let pagePopup = document.querySelector('#' + elementId);
         let iframe = pagePopup?.querySelector('iframe');

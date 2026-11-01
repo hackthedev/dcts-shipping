@@ -230,7 +230,8 @@ export async function checkConfigAdditions() {
     `)
 
     // home settings
-    checkObjectKeys(serverconfig, "serverinfo.banner", "")
+    checkObjectKeys(serverconfig, "serverinfo.banner", null)
+    checkObjectKeys(serverconfig, "serverinfo.icon", null)
     checkObjectKeys(serverconfig, "serverinfo.about", "This is the <i>default server</i> about me")
     checkObjectKeys(serverconfig, "serverinfo.reports.enabled", true)
 

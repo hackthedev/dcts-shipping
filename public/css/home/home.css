@@ -1,11 +1,14 @@
-.layout .content .site-banner .content .title{
+.layout .content .site-banner > .content .title{
     font-weight: bold;
     font-size: 40px;
 }
 
-.layout .content .site-banner .content{
+.layout .content .site-banner > .content{
+    display: flex;
     align-content: center;
     align-self: center;
+    justify-content: center;
+    margin: auto;
     margin-left: 4rem;
     background-color: transparent;
 
@@ -29,6 +32,19 @@
     border-radius: 1rem;
     backdrop-filter: blur(6px);
     word-break: keep-all;
+}
+.layout.home .content .home-container .home-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-size: cover;
+    object-fit: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    margin-top: calc(-2rem - 60px);
+    z-index: 2;
+    outline: 12px solid hsl(from var(--main) h s calc(l * 1.25) / 100%);
 }
 
 .layout.home .content .home-container .info{

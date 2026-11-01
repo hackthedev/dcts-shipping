@@ -256,6 +256,10 @@ p.note{
     cursor: pointer;
 }
 
+.json-editor-image-preview{
+    border-radius: 0.5rem;
+}
+
 
 /* settings popup helper */
 .settings-save-container.shown {

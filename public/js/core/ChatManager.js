@@ -762,6 +762,26 @@ class ChatManager {
         return this.getUrlParams("dm") || null;
     }
 
+    static registerImageErrorListener(){
+        document.addEventListener("error", (e) => {
+            const el = e.target;
+            if (el.tagName === "IMG" && el.hasAttribute("data-ignore-img-error") === false) {
+                el.setAttribute("data-src", el.src)
+
+                if (ChatManager.chance(20)) {
+                    el.src = "/img/worker.png";
+                }
+                else {
+                    el.src = "/img/error.png";
+                }
+
+                // lets see if this will break something
+                el.style.maxHeight = "50px"
+                el.style.maxWidth = "50px"
+            }
+        }, true);
+    }
+
     static async getServerInfo(returnData = false) {
         return new Promise((resolve, reject) => {
 

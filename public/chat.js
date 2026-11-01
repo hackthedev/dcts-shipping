@@ -1,23 +1,7 @@
 console.log("%c" + "WAIT!", "color: #FF0000; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold;");
 console.log("%c" + "People can use the console to steal your account xo !", "color: #FF0000; -webkit-text-stroke: 0px black; font-size: 20px; font-weight: bold;");
 
-document.addEventListener("error", (e) => {
-    const el = e.target;
-    if (el.tagName === "IMG") {
-        el.setAttribute("data-src", el.src)
-
-        if (ChatManager.chance(20)) {
-            el.src = "/img/worker.png";
-        }
-        else {
-            el.src = "/img/error.png";
-        }
-
-        // lets see if this will break something
-        el.style.maxHeight = "50px"
-        el.style.maxWidth = "50px"
-    }
-}, true);
+ChatManager.registerImageErrorListener()
 
 function rewriteImg(img) {
     if (!img || !img.src) return;
@@ -1534,7 +1518,27 @@ function showGroupStats() {
     if (UserManager.getGroup() !== null && UserManager.getCategory() === null && UserManager.getChannel() === null) {
         messageInputBox.parentNode.parentNode.style.visibility = "hidden";
         document.getElementById("content").innerHTML =
-            `<div
+            `
+            <style>
+                .mini-card {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 1rem;
+                    border: 1.5px solid hsl(from var(--main) h s calc(l * 8) / 20%);
+                    color: hsl(from var(--main) h s calc(l * 8) / 80%);
+                    border-radius: 0.5rem;
+                    gap: 1rem;
+                    cursor: pointer;
+                }
+                
+                .mini-card p{
+                    margin: 0;
+                }
+            </style>
+
+            <div
                 style="display: flex;
                 flex-direction: column;
                 justify-content: center;
@@ -1544,7 +1548,12 @@ function showGroupStats() {
                 ">
                 <h1 style="margin-bottom: 0;">Welcome to the server!</h1>
                 <p>
-                    ${MobilePanel.isMobile() ? `Swipe right to select a channel and begin chatting!` : `Select a channel to begin chatting`}
+                    <div class="card-container" style="display: flex; gap: 0.5rem">
+                        <div class="mini-card">
+                            ${Icon.display("message")}
+                            <p>Start<br>Chatting!</p>
+                        </div>
+                    </div>
                 </p>
             </div>
             `;

@@ -43,12 +43,7 @@ export async function checkConfigAdditions() {
     checkObjectKeys(serverconfig, "serverinfo.setup", 0)
     checkObjectKeys(serverconfig, "serverinfo.maxUploadStorage", 1024)
     checkObjectKeys(serverconfig, "serverinfo.rateLimit", 512)
-    checkObjectKeys(serverconfig, "serverinfo.dropInterval", 5)
-    //
-    checkObjectKeys(serverconfig, "serverinfo.useCloudflareImageCDN", "")
-    checkObjectKeys(serverconfig, "serverinfo.cfAccountId", "")
-    checkObjectKeys(serverconfig, "serverinfo.cfAccountToken", "")
-    checkObjectKeys(serverconfig, "serverinfo.cfHash", "")
+    checkObjectKeys(serverconfig, "serverinfo.dropInterval", 5);
     //
     checkObjectKeys(serverconfig, "ipblacklist", [])
     checkObjectKeys(serverconfig, "banlist", {})
@@ -235,10 +230,8 @@ export async function checkConfigAdditions() {
     `)
 
     // home settings
-    checkObjectKeys(serverconfig, "serverinfo.home.banner_url", "")
-    checkObjectKeys(serverconfig, "serverinfo.home.title", "Default Server Title")
-    checkObjectKeys(serverconfig, "serverinfo.home.subtitle", "Default Server Sub-Title")
-    checkObjectKeys(serverconfig, "serverinfo.home.about", "This is the <i>default server</i> about me")
+    checkObjectKeys(serverconfig, "serverinfo.banner", "")
+    checkObjectKeys(serverconfig, "serverinfo.about", "This is the <i>default server</i> about me")
     checkObjectKeys(serverconfig, "serverinfo.reports.enabled", true)
 
     // caddy settings

@@ -36,6 +36,18 @@ function initServerInfo(){
     });
 }
 
+async function handleImageSettingsUpload(file){
+    let result = await ChatManager.uploadFile(file);
+    if(result?.error){
+        showSystemMessage({
+            title: "Error uploading icon :/"
+        })
+    }
+    else{
+        return result.path;
+    }
+}
+
 function displayServerInfoSettings(response){
     let mainSettings = document.getElementById("main_settings");
     let contact_settings = document.getElementById("contact_settings");
@@ -69,6 +81,46 @@ function displayServerInfoSettings(response){
                         saveServerInfoSettings(response);
                     })
                 }
+            }
+        )
+    );
+
+    mainSettings.insertAdjacentElement("beforeend",
+        JsonEditor.getSettingElement(
+            response.serverinfo.icon,
+            "Icon",
+            "",
+            v => {
+                response.serverinfo.icon = v;
+                if (checkJsonChanges(response, originalnfo)) {
+                    showSaveSettings(async () => {
+                        saveServerInfoSettings(response);
+                    })
+                }
+            },
+            {
+                onImgChange: async(file, info) => { return await handleImageSettingsUpload(file) },
+                type: "image",
+            }
+        )
+    );
+
+    mainSettings.insertAdjacentElement("beforeend",
+        JsonEditor.getSettingElement(
+            response.serverinfo.banner,
+            "Server Banner",
+            "",
+            v => {
+                response.serverinfo.banner = v;
+                if (checkJsonChanges(response, originalnfo)) {
+                    showSaveSettings(async () => {
+                        saveServerInfoSettings(response);
+                    })
+                }
+            },
+            {
+                onImgChange: async(file, info) => { return await handleImageSettingsUpload(file) },
+                type: "image",
             }
         )
     );

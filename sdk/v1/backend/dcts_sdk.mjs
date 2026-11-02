@@ -111,6 +111,7 @@ export default class DCTS {
         }
 
         setValue(key, value, allowHTML = false) {
+            if (value === undefined) value = null;
             this.check(key, value);
 
             const clean = typeof value === "string"
@@ -146,8 +147,8 @@ export default class DCTS {
                 icon: [value => (typeof value === "string" && value.trim().length > 0) || value == null, "Icon url must be a string or null"],
                 banner: [value => (typeof value === "string" && value.trim().length > 0) || value == null, "Banner url must be a string or null"],
                 card: [value => (typeof value === "string" && value.trim().length > 0) || value == null, "Card url must be a string or null"],
-                aboutme: [value => (typeof value === "string") || value === null, "Aboutme must be a string or null"],
-                status: [value => (typeof value === "string") || value === null, "Status must be a string or null"],
+                aboutme: [value => (typeof value === "string") || value == null , "Aboutme must be a string or null"],
+                status: [value => (typeof value === "string") || value == null, "Status must be a string or null"],
                 country_code: [value => (typeof value === "string" && value.trim().length <= 3) || value == null, "Country code must be a string or null and 2 characters long"],
                 publicKey: [value => (typeof value === "string" && value.trim().length > 0) || value == null, "Public key must be a string or null"],
                 joined: [value => (typeof value === "number") || value == null, "Timestamp must be a unix timestamp number"],

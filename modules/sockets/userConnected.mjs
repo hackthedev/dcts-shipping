@@ -264,6 +264,7 @@ export default (io) => (socket) => {
             // setup member
             const now = new Date().getTime();
 
+            console.log(member)
             let newMember = new DCTS.Members.Builder()
                 .setId(member.id)
                 .setToken(generateId(48))

@@ -32,8 +32,8 @@ export default (io) => (socket) => {
                                 let msg = await autoAnonymizeMessage(member.id, structuredClone(m));
                                 if (msg?.reply?.messageId) msg.reply = await autoAnonymizeMessage(member.id, structuredClone(msg.reply));
 
-                                if (msg?.author?.icon?.startsWith("data:image")) msg.author.icon = "";
-                                if (msg?.author?.banner?.startsWith("data:image")) msg.author.banner = "";
+                                if (msg?.author?.icon && msg?.author?.icon?.startsWith("data:image")) msg.author.icon = "";
+                                if (msg?.author?.banner && msg?.author?.banner?.startsWith("data:image")) msg.author.banner = "";
                                 return msg;
                             })
                         );

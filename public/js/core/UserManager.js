@@ -36,24 +36,24 @@ class UserManager {
                         if(typeof await Client().SetUserBanner === "function" && typeof await Client().GetUserBanner === "function"){
                             let clientBanner = await Client().GetUserBanner();
                             if(!clientBanner || clientBanner?.trim()?.length === 0 || (clientBanner && clientBanner !== response?.banner)) {
-                                await Client().SetUserBanner(response.banner);
-                                UserManager.setBanner(response.banner)
+                                await Client().SetUserBanner(clientBanner ?? response?.banner);
+                                UserManager.setBanner(clientBanner ?? response?.banner)
                             }
                         }
 
                         if(typeof await Client().SetUserIcon === "function" && typeof await Client().GetUserIcon === "function"){
                             let clientIcon = await Client().GetUserIcon();
                             if(!clientIcon || clientIcon?.trim()?.length === 0 || (clientIcon && clientIcon !== response?.icon)) {
-                                await Client().SetUserIcon(response.icon);
-                                UserManager.setPFP(response.icon)
+                                await Client().SetUserIcon(clientIcon ?? response?.icon);
+                                UserManager.setPFP(clientIcon ?? response?.icon)
                             }
                         }
 
                         if(typeof await Client().GetNickname === "function" && typeof await Client().SetNickname === "function"){
                             let clientName = await Client().GetNickname();
                             if(!clientName || clientName?.trim()?.length === 0 || (clientName && clientName !== response?.name)) {
-                                await Client().SetNickname(response.name);
-                                UserManager.setUsername(response.name)
+                                await Client().SetNickname(clientName ?? response?.name);
+                                UserManager.setUsername(clientName ?? response?.name)
                             }
                         }
                     }

@@ -37,6 +37,7 @@ class UserManager {
                             let clientBanner = await Client().GetUserBanner();
                             if(!clientBanner || clientBanner?.trim()?.length === 0 || (clientBanner && clientBanner !== response?.banner)) {
                                 await Client().SetUserBanner(response.banner);
+                                UserManager.setBanner(response.banner)
                             }
                         }
 
@@ -44,6 +45,7 @@ class UserManager {
                             let clientIcon = await Client().GetUserIcon();
                             if(!clientIcon || clientIcon?.trim()?.length === 0 || (clientIcon && clientIcon !== response?.icon)) {
                                 await Client().SetUserIcon(response.icon);
+                                UserManager.setPFP(response.icon)
                             }
                         }
 
@@ -51,6 +53,7 @@ class UserManager {
                             let clientName = await Client().GetNickname();
                             if(!clientName || clientName?.trim()?.length === 0 || (clientName && clientName !== response?.name)) {
                                 await Client().SetNickname(response.name);
+                                UserManager.setUsername(response.name)
                             }
                         }
                     }

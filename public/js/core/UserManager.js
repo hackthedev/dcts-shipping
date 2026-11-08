@@ -19,6 +19,9 @@ class UserManager {
                     resolve({error: response?.error, member: null} )
                 }
 
+                console.log("Current user icon: ", await Client().GetUserIcon(), UserManager.getPFP())
+                console.log("New Icon: ", response.icon)
+
                 UserManager.setPFP(response.icon);
                 UserManager.setBanner(response.banner);
                 UserManager.setAboutme(response.aboutme);
@@ -26,16 +29,29 @@ class UserManager {
                 UserManager.setStatus(response.status);
                 UserManager.setCard(response.card);
 
+                console.log("Client Stored: ", await Client().GetUserIcon())
+
                 try{
                     if(await isLauncher() && await Client().GetUserConsistentSettings() === true){
+                        if(typeof await Client().SetUserBanner === "function" && typeof await Client().GetUserBanner === "function"){
+                            let clientBanner = await Client().GetUserBanner();
+                            if(!clientBanner || clientBanner?.trim()?.length === 0 || (clientBanner && clientBanner !== response?.banner)) {
+                                await Client().SetUserBanner(response.banner);
+                            }
+                        }
+
                         if(typeof await Client().SetUserIcon === "function" && typeof await Client().GetUserIcon === "function"){
                             let clientIcon = await Client().GetUserIcon();
-                            if(!clientIcon || clientIcon?.trim()?.length === 0) await Client().SetUserIcon(response.icon);
+                            if(!clientIcon || clientIcon?.trim()?.length === 0 || (clientIcon && clientIcon !== response?.icon)) {
+                                await Client().SetUserIcon(response.icon);
+                            }
                         }
 
                         if(typeof await Client().GetNickname === "function" && typeof await Client().SetNickname === "function"){
                             let clientName = await Client().GetNickname();
-                            if(!clientName || clientName?.trim()?.length === 0) await Client().SetNickname(response.name);
+                            if(!clientName || clientName?.trim()?.length === 0 || (clientName && clientName !== response?.name)) {
+                                await Client().SetNickname(response.name);
+                            }
                         }
                     }
                 }

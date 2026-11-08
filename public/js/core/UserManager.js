@@ -1,3 +1,5 @@
+import {client} from "../../../plugins/dcts-discord-bridge/functions/plugin_onLoad.mjs";
+
 class UserManager {
 
     static isLoadingDonators = false;
@@ -12,6 +14,38 @@ class UserManager {
 
     static async updateMember(member){
         if(typeof member !== "object") throw new Error("passed object is not a member object");
+
+        try{
+            if(await isLauncher() && await Client().GetUserConsistentSettings() === true){
+                if(typeof await Client().SetUserBanner === "function" && typeof await Client().GetUserBanner === "function"){
+                    let clientBanner = await Client().GetUserBanner();
+                    if(clientBanner && clientBanner?.trim()?.length === 0) {
+                        member.banner = clientBanner;
+                        await Client().SetUserBanner(clientBanner);
+                    }
+                }
+
+                if(typeof await Client().SetUserIcon === "function" && typeof await Client().GetUserIcon === "function"){
+                    let clientIcon = await Client().GetUserIcon();
+                    if(clientIcon || clientIcon?.trim()?.length === 0) {
+                        member.icon = clientIcon;
+                        await Client().SetUserIcon(clientIcon);
+                    }
+                }
+
+                if(typeof await Client().GetNickname === "function" && typeof await Client().SetNickname === "function"){
+                    let clientName = await Client().GetNickname();
+                    if(clientName || clientName?.trim()?.length === 0) {
+                        member.name = clientName;
+                        await Client().SetNickname(clientName);
+                    }
+                }
+            }
+        }
+        catch(syncError){
+            console.error("Cant Sync with Client")
+            console.error(syncError)
+        }
 
         return new Promise((resolve, reject) => {
             socket.emit("updateMember", {token: UserManager.getToken(), id: UserManager.getID(), ...member,}, async function (response) {
@@ -28,41 +62,6 @@ class UserManager {
                 UserManager.setUsername(response.name);
                 UserManager.setStatus(response.status);
                 UserManager.setCard(response.card);
-
-                console.log("Client Stored: ", await Client().GetUserIcon())
-
-                try{
-                    if(await isLauncher() && await Client().GetUserConsistentSettings() === true){
-                        if(typeof await Client().SetUserBanner === "function" && typeof await Client().GetUserBanner === "function"){
-                            let clientBanner = await Client().GetUserBanner();
-                            if(!clientBanner || clientBanner?.trim()?.length === 0 || (clientBanner && clientBanner !== response?.banner)) {
-                                await Client().SetUserBanner(clientBanner ?? response?.banner);
-                                UserManager.setBanner(clientBanner ?? response?.banner)
-                            }
-                        }
-
-                        if(typeof await Client().SetUserIcon === "function" && typeof await Client().GetUserIcon === "function"){
-                            let clientIcon = await Client().GetUserIcon();
-                            if(!clientIcon || clientIcon?.trim()?.length === 0 || (clientIcon && clientIcon !== response?.icon)) {
-                                await Client().SetUserIcon(clientIcon ?? response?.icon);
-                                UserManager.setPFP(clientIcon ?? response?.icon)
-                            }
-                        }
-
-                        if(typeof await Client().GetNickname === "function" && typeof await Client().SetNickname === "function"){
-                            let clientName = await Client().GetNickname();
-                            if(!clientName || clientName?.trim()?.length === 0 || (clientName && clientName !== response?.name)) {
-                                await Client().SetNickname(clientName ?? response?.name);
-                                UserManager.setUsername(clientName ?? response?.name)
-                            }
-                        }
-                    }
-                }
-                catch(syncError){
-                    console.error("Cant Sync with Client")
-                    console.error(syncError)
-                }
-
 
                 resolve( {error: null, member: response} );
             });

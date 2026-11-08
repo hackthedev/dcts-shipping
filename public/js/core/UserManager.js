@@ -89,12 +89,12 @@ class UserManager {
         let roleCode = "";
         for (let i = 0; i < memberObj?.roles.length; i++) {
             var role = memberObj?.roles[i];
-            var roleColor = role.color ?? "white";
-            var roleBackground = role?.background?.replace("text", "");
-            var roleBackgroundClip = role.backgroundClip;
-            var roleName = role.name;
+            var roleColor = stripHTML(role.color ?? "white");
+            var roleBackground = stripHTML(role?.background?.replace("text", ""));
+            var roleBackgroundClip = stripHTML(role.backgroundClip);
+            var roleName = stripHTML(role.name);
 
-            let actualRoleColor = roleColor === "#000000" && !roleBackground ? "white" : roleColor;
+            let actualRoleColor = stripHTML(roleColor === "#000000" && !roleBackground ? "white" : roleColor);
 
             let colorStyle = `color: ${actualRoleColor}; 
                             background: ${roleBackground ?? "transparent"}; 
@@ -107,8 +107,8 @@ class UserManager {
             </code>`;
         }
 
-        let isMuted = memberObj?.isMuted;
-        let isBanned = memberObj?.isBanned;
+        let isMuted = memberObj?.isMuted === true;
+        let isBanned = memberObj?.isBanned === true;
 
         // todo: add isreported flag eventually
         let isReported = memberObj?.isReported;
@@ -122,7 +122,7 @@ class UserManager {
         
             <div id="profile_pfp_container">
                 <div id="profile_icon" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.icon ?? "/img/default_pfp.png")}');"></div>                
-                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(sanitizeHtmlForRender(memberObj?.publicKey)) : ""}">
+                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(stripHTML(memberObj?.publicKey)) : ""}">
                     ${isMuted === true ? `<span style="color: indianred" title="Muted">${Icon.display("muted")}</span>` : ""}
                     ${isBanned === true ? `<span style="color: indianred" title="Banned">${Icon.display("ban")}</span>` : ""}
                     ${isReported === true ? `<span style="color: indianred" title="Reported">${Icon.display("flag")}</span>` : ""}
@@ -131,14 +131,15 @@ class UserManager {
             
         
             <div id="profile_content">       
-                <div id="profile_username"><h2 style="margin: 0 !important;">${unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.name))}</h2></div>                
-                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.status), false) : ""}</i></div>  
+                <div id="profile_username"><h2 style="margin: 0 !important;">${stripHTML(memberObj?.name)}</h2></div>                
+                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? stripHTML(memberObj?.status) : ""}</i></div>  
                      
                 ${memberObj?.aboutme?.trim()?.length > 0 ?
                 `         
                     <hr>
                     <div class="profile_aboutme">       
-                         <h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(limitString(memberObj.aboutme, 1000))}    
+                        <h2 class="profile_headline">About Me</h2>
+                        ${sanitizeHtmlForRender(memberObj.aboutme)}    
                     </div>
                 `: ""}   
             <hr>

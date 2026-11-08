@@ -1,5 +1,3 @@
-import {client} from "../../../plugins/dcts-discord-bridge/functions/plugin_onLoad.mjs";
-
 class UserManager {
 
     static isLoadingDonators = false;

@@ -111,7 +111,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "network/Reverse Proxy Setup.md",
+                "file": "Legal/Moderation.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -121,7 +121,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Rückverweise auf Reverse Proxy Setup"
+              "title": "Rückverweise"
             }
           },
           {
@@ -186,7 +186,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
+    "width": 200,
     "collapsed": true
   },
   "left-ribbon": {
@@ -203,8 +203,11 @@
   },
   "active": "e35c79e64588e59c",
   "lastOpenFiles": [
-    "Lore/Terminology.md",
+    "index.md~",
+    "index.md.md",
+    "index.md",
     "Legal/Moderation.md",
+    "Lore/Terminology.md",
     "Getting started.md",
     "Lore/Vision.md",
     "Lore/Threat model.md",
@@ -232,9 +235,6 @@
     "network/Reverse Proxy Setup.md",
     "assets/Pasted image 20260916214934.png",
     "assets/Pasted image 20260916214731.png",
-    "Running DCTS.md",
-    "Installation/VoIP Setup.md",
-    "Installation/Docker Setup.md",
     "Installation",
     "Setup",
     "Legal",

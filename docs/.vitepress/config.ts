@@ -13,7 +13,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Documents', link: '/Getting started' }
+      { text: 'Documentation', link: '/Getting started' }
     ],
     sidebar: generateSidebar({
       documentRootPath: '/docs',

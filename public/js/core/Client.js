@@ -59,11 +59,5 @@ function downloadClient(){
 }
 
 function openNewTab(url) {
-    if (url.startsWith("data:")) {
-        const blob = dataURLtoBlob(url);
-        const blobUrl = URL.createObjectURL(blob);
-        window.open(blobUrl, "_blank");
-    } else {
-        window.open(url, "_blank");
-    }
+    ChatManager.openNewTab(url);
 }

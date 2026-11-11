@@ -17,7 +17,7 @@ function setUrl(param) {
 }
 
 function getUrlParams(param) {
-    ChatManager.getUrlParams(param);
+    return ChatManager.getUrlParams(param);
 }
 
 function closeSettings(){

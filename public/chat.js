@@ -1,23 +1,7 @@
 console.log("%c" + "WAIT!", "color: #FF0000; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold;");
 console.log("%c" + "People can use the console to steal your account xo !", "color: #FF0000; -webkit-text-stroke: 0px black; font-size: 20px; font-weight: bold;");
 
-document.addEventListener("error", (e) => {
-    const el = e.target;
-    if (el.tagName === "IMG") {
-        el.setAttribute("data-src", el.src)
-
-        if (ChatManager.chance(20)) {
-            el.src = "/img/worker.png";
-        }
-        else {
-            el.src = "/img/error.png";
-        }
-
-        // lets see if this will break something
-        el.style.maxHeight = "50px"
-        el.style.maxWidth = "50px"
-    }
-}, true);
+ChatManager.registerImageErrorListener()
 
 function rewriteImg(img) {
     if (!img || !img.src) return;
@@ -117,7 +101,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // infinite scroll for chat when scrolling all the way up
     await ChatTools.Scroll.registerMessageInfiniteLoad(getContentMainContainer(), async (element) => {
-        EventDispatcher.send("infiniteScroll", {
+        await EventDispatcher.send("infiniteScroll", {
             element,
             channelType: await getCurrentChannelType(),
             channelId: UserManager.getChannel()
@@ -175,7 +159,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (UserManager.getChannel()) handleChannelMessageDrafting(UserManager.getChannel());
 
     // manual click event listener because its too general
-    document.body.addEventListener("click", (event) => {
+    document.body.addEventListener("click", async (event) => {
         const { clientX: mouseX, clientY: mouseY } = event;
         var clickedElement = event.target
 
@@ -194,6 +178,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
 
         // otherwise on default close it
+        await ChatTools.Dom.hideElement(profileContent);
         profileContent.style.display = "none";
         profileContent.innerHTML = "";
         ModActions.hideRoleMenu()
@@ -216,7 +201,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
 
-    window.addEventListener('resize', function (event) {
+    window.addEventListener('resize', async function (event) {
         // do stuff here
 
         let isScrolledDown = ChatTools.Scroll.isScrolledToBottom(document.getElementById("content"));
@@ -224,34 +209,34 @@ document.addEventListener("DOMContentLoaded", async function () {
         var emojiContainer = document.getElementById("emoji-box-container");
         var profileContainer = document.getElementById("profile_container");
 
-        if (emojiContainer.style.display == "flex" && !MobilePanel.isMobile()) {
+        if (emojiContainer.style.display === "flex" && !MobilePanel.isMobile()) {
             //emojiContainer.style.display = "none";
             closeEmojiBox()
         }
-        if (profileContainer.style.display == "flex") {
+        if (profileContainer.style.display === "block") {
+            await ChatTools.Dom.hideElement(profileContainer);
             profileContainer.style.display = "none";
         }
 
         if (isScrolledDown) ChatTools.Scroll.scrollDown(getContentMainContainer());
     });
 
-    document.addEventListener("keydown", (event) => {
+    document.addEventListener("keydown", async (event) => {
         var emojiContainer = document.getElementById("emoji-box-container");
         var profileContainer = document.getElementById("profile_container");
 
         if (event.key === "Escape") {
             if (emojiContainer.style.display === "block") {
-                //emojiContainer.style.display = "none";
                 closeEmojiBox();
             }
             if (profileContainer.style.display === "block") {
+                await ChatTools.Dom.hideElement(profileContainer);
                 profileContainer.style.display = "none";
             }
         }
     });
 
     initUploadDragAndDrop()
-    initUploadFileDialog()
 
     socket.on("connect", async () => {
         // sick af in my opinion
@@ -464,8 +449,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             ) {
                 //focusEditor(); // causes too many dumb bugs as of rn
             }
-
-
         }
     )
 })
@@ -600,13 +583,16 @@ function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
         posY: y
     }, async function (response) {
         var profileContent = document.getElementById("profile_container");
+
+        await ChatTools.Dom.hideElement(profileContent);
+
         profileContent.innerHTML = await UserManager.getMemberProfileHTML(response.member);
 
         // if no badges found remove it
         let result = await UserManager.displayUserBadges(true)
         if (!result) {
             let profileBadgeContainer = profileContent.querySelector("#profile_badge_container");
-            if (profileBadgeContainer) profileBadgeContainer.style.display = "none"
+            if (profileBadgeContainer && profileBadgeContainer.querySelectorAll("svg")?.length === 0) profileBadgeContainer.style.display = "none"
         }
 
         profileContent.style.display = "block";
@@ -640,6 +626,7 @@ function getMemberProfile(id, x, y, event = null, bypassEventCheck = false) {
         // Apply safe position
         profileContent.style.top = `${top}px`;
         profileContent.style.left = `${left}px`;
+        await ChatTools.Dom.showElement(profileContent);
     });
 }
 
@@ -1016,7 +1003,7 @@ async function sendMessageToServer(authorId = UserManager.getID(),
     // only send dcts messages and dispatch
     let channelType = await getCurrentChannelType(UserManager.getChannel());
 
-    EventDispatcher.send("messageSend", {
+    await EventDispatcher.send("messageSend", {
         message: msgPayload,
         channelType,
     })
@@ -1026,6 +1013,8 @@ async function sendMessageToServer(authorId = UserManager.getID(),
         resetEditorStates();
         return;
     }
+
+    console.log("sending anyway")
 
     return new Promise((resolve, reject) => {
         socket.emit("messageSend", msgPayload, async function (response) {
@@ -1430,15 +1419,14 @@ async function setUrl(param, isVC = false) {
         saveChannelMessageDraft(UserManager.getID());
     }
 
-
-    let urlData = param.split("&")
-    let groupId = urlData[0]?.replace("?group=", "")
-    let categoryId = urlData[1]?.replace("category=", "")
-    let channelId = urlData[2]?.replace("channel=", "")
+    let urlData = new URLSearchParams(param);
+    let groupId = urlData.get("group");
+    let categoryId = urlData.get("category");
+    let channelId = urlData.get("channel");
     focusEditor()
 
     // channel already open, dont reload it
-    if (UserManager.getChannel() === channelId && channelId && UserManager.getChannel() && isVC === false) return;
+    if (UserManager.getChannel() === channelId && channelId && UserManager.getChannel() && isVC === false) return
     window.history.replaceState(null, null, param); // or pushState
 
     if (isVC === true) {
@@ -1484,7 +1472,7 @@ async function setUrl(param, isVC = false) {
 
             if (channelId) ChatManager.setChannelMarker(channelId, false)
             showGroupStats();
-
+            console.log(response)
             if (response.permission !== "granted") {
                 toggleEditor(false);
             } else {
@@ -1535,7 +1523,27 @@ function showGroupStats() {
     if (UserManager.getGroup() !== null && UserManager.getCategory() === null && UserManager.getChannel() === null) {
         messageInputBox.parentNode.parentNode.style.visibility = "hidden";
         document.getElementById("content").innerHTML =
-            `<div
+            `
+            <style>
+                .mini-card {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 1rem;
+                    border: 1.5px solid hsl(from var(--main) h s calc(l * 8) / 20%);
+                    color: hsl(from var(--main) h s calc(l * 8) / 80%);
+                    border-radius: 0.5rem;
+                    gap: 1rem;
+                    cursor: pointer;
+                }
+                
+                .mini-card p{
+                    margin: 0;
+                }
+            </style>
+
+            <div
                 style="display: flex;
                 flex-direction: column;
                 justify-content: center;
@@ -1545,7 +1553,12 @@ function showGroupStats() {
                 ">
                 <h1 style="margin-bottom: 0;">Welcome to the server!</h1>
                 <p>
-                    ${MobilePanel.isMobile() ? `Swipe right to select a channel and begin chatting!` : `Select a channel to begin chatting`}
+                    <div class="card-container" style="display: flex; gap: 0.5rem">
+                        <div class="mini-card">
+                            ${Icon.display("message")}
+                            <p onclick="ChatManager.openDefaultChannel()" style="cursor: pointer">Start<br>Chatting!</p>
+                        </div>
+                    </div>
                 </p>
             </div>
             `;
@@ -1599,39 +1612,6 @@ socket.on("uploadProgress", async ({ filename, bytes, total }) => {
         duration: 2000
     });
 });
-
-function initUploadFileDialog() {
-    //Setting up to trigger once Input-Dialog element receives a new file
-    const fileInput = document.getElementById('uploadCaller');
-    fileInput.addEventListener('change', async function () {
-        if (fileInput.files.length > 0) {
-            //Code borrowed from initUploadDragAndDrop.
-            try {
-                let result = await ChatManager.uploadFile(fileInput.files);
-                console.log("upload result: ", result);
-                if (result.ok === true) {
-                    console.log("All files uploaded successfully. URLs:", result.path);
-                    // Process the URLs array
-                    sendMessageToServer(UserManager.getID(), UserManager.getUsername(), UserManager.getPFP(), `${window.location.origin}${result.path}`, true); // Sending all URLs at once
-                } else {
-                    console.error("Upload encountered an error:", result.error);
-                    showSystemMessage({
-                        title: `Error uploading file`,
-                        text: `${result.error}`,
-                        icon: "error",
-                        type: "error",
-                        duration: 1500
-                    });
-                }
-            } catch (error) {
-                console.error("An error occurred during the upload process:", error);
-            }
-            //End of borrowed code
-        } else {
-            console.log('No file selected from dialog.')
-        }
-    })
-}
 
 function initUploadDragAndDrop() {
 

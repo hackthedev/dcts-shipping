@@ -8,21 +8,28 @@ import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
 import {normalizeVar} from "./userConnected.mjs";
 import {saveConfig, serverconfig, versionCode} from "../functions/init/config.mjs";
 import {signer} from "../functions/init/general.mjs";
+import DCTS from "../../sdk/v1/backend/dcts_sdk.mjs";
 
-export async function getPublicServerInfoObject(){
+export function getDefaultGroupIcon(){
     let groupId = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);
     let group = null;
     if(groupId !== null){
         group = serverconfig?.groups[groupId];
     }
 
+    return group?.info?.icon || null;
+}
+
+export async function getPublicServerInfoObject(){
+
     return {
         serverinfo: {
             name: serverconfig.serverinfo.name,
-            home: serverconfig.serverinfo.home,
             description: serverconfig.serverinfo.description,
+            about: serverconfig.serverinfo.about,
+            banner: serverconfig.serverinfo.banner ? DCTS.Tools.Media.getInternalUrl(serverconfig.serverinfo.banner) : null,
+            icon: DCTS.Tools.Media.getInternalUrl(serverconfig.serverinfo.icon ?? getDefaultGroupIcon()),
             countryCode: serverconfig.serverinfo.countryCode,
-            icon: group?.info?.icon || null,
             slots: {
                 online: await getOnlineMemberCount(),
                 limit: serverconfig.serverinfo.slots.limit,
@@ -32,19 +39,19 @@ export async function getPublicServerInfoObject(){
             uploadFileTypes: serverconfig.serverinfo.uploadFileTypes,
             messageLoadLimit: serverconfig.serverinfo.messageLoadLimit,
             voip: serverconfig.serverinfo.livekit.enabled,
-            messenger: 1,
             registration: serverconfig.serverinfo.registration.enabled,
             instance: {
                 contact: serverconfig.serverinfo.instance.contact
             },
+            features: [
+                "messenger",
+                "sdk_v1"
+            ],
+            address: serverconfig.serverinfo.app.url.dcts,
             version: versionCode,
             public_key: await signer.getPublicKey()
         }
     };
-}
-
-function updateServerInfoProperty(property){
-    if(property !== undefined) serverconfig.serverinfo.name = property
 }
 
 export default (io) => (socket) => {
@@ -56,10 +63,6 @@ export default (io) => (socket) => {
 
             if (await hasPermission(member.id, "manageServer")) {
                 // add more objects here
-                serverInfoObj.serverinfo.useCloudflareImageCDN = serverconfig.serverinfo.useCloudflareImageCDN
-                serverInfoObj.serverinfo.cfAccountId = serverconfig.serverinfo.cfAccountId
-                serverInfoObj.serverinfo.cfAccountToken = serverconfig.serverinfo.cfAccountToken
-                serverInfoObj.serverinfo.cfHash = serverconfig.serverinfo.cfHash
                 serverInfoObj.serverinfo.maxUploadStorage = serverconfig.serverinfo.maxUploadStorage
                 serverInfoObj.serverinfo.rateLimit = serverconfig.serverinfo.rateLimit
                 serverInfoObj.serverinfo.dropInterval = serverconfig.serverinfo.dropInterval
@@ -117,10 +120,9 @@ export default (io) => (socket) => {
                 if(member?.serverinfo?.moderation?.bans?.ipBanDuration !== undefined) serverconfig.serverinfo.moderation.bans.ipBanDuration = stripHTML(member.serverinfo.moderation.bans.ipBanDuration);
 
                 // server home
-                if (member?.serverinfo?.home?.banner_url) serverconfig.serverinfo.home.banner_url = stripHTML(member.serverinfo.home.banner_url);
-                if (member?.serverinfo?.home?.title) serverconfig.serverinfo.home.title = sanitizeHTML(member.serverinfo.home.title);
-                if (member?.serverinfo?.home?.subtitle) serverconfig.serverinfo.home.subtitle = sanitizeHTML(member.serverinfo.home.subtitle);
-                if (member?.serverinfo?.home?.about) serverconfig.serverinfo.home.about = sanitizeHTML(member.serverinfo.home.about);
+                if (member?.serverinfo?.banner) serverconfig.serverinfo.banner = DCTS.Tools.Media.getInternalUrl(stripHTML(member.serverinfo.banner));
+                if (member?.serverinfo?.icon) serverconfig.serverinfo.icon = DCTS.Tools.Media.getInternalUrl(stripHTML(member.serverinfo.icon));
+                if (member?.serverinfo?.about) serverconfig.serverinfo.about = sanitizeHTML(member.serverinfo.about);
 
 
                 saveConfig(serverconfig);

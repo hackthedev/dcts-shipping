@@ -4,6 +4,81 @@ class ChatManager {
     static connectionLost = false;
     static wasConnected = false;
 
+    static navigateUrl(url){
+        if(!url) throw new Error("Missing url or data!");
+        window.location.href = url;
+    }
+
+    static openNewTab(url){
+        if(!url) throw new Error("Missing url or data!");
+
+        if (url.startsWith("data:")) {
+            const blob = dataURLtoBlob(url);
+            const blobUrl = URL.createObjectURL(blob);
+            window.open(blobUrl, "_blank");
+        } else {
+            window.open(url, "_blank");
+        }
+    }
+
+    static normalizeVar(v) {
+        if (v === null || v === undefined) return null;
+
+        if (typeof v === "string") {
+            const val = v.trim().toLowerCase();
+
+            if (val === "true") return true;
+            if (val === "false") return false;
+            if (val === "null" || val === "undefined" || val.trim() === "") return null;
+
+            if (/^-?\d+(\.\d+)?$/.test(val)) {
+                if (val.length < 10) {
+                    return Number(val);
+                }
+            }
+        }
+
+        return String(v);
+    }
+
+    static Settings = class {
+        static options = {
+            "openMenuNavigationInNewTab": {
+                title: "Open menus in new tab?",
+                description: `Open navigations like 'Manage Server' in a new tab instead as popup. Will override 'Open menus in current tab?'`,
+                default: false,
+            },
+            "openMenuNavigationInSameTab": {
+                title: "Open menus in current tab?",
+                description: "Open navigations in the current tab. Will disconnect you from a voice call.",
+                default: false
+            }
+        }
+
+        static getOptions(){
+            let optionsObj = {}
+
+            for(let optionKey of Object.keys(this.options)){
+                optionsObj[optionKey] = {
+                    value: ChatManager.normalizeVar(localStorage.getItem(optionKey)) ?? this.options[optionKey].default,
+                    ...this.options[optionKey]
+                }
+            }
+
+            return optionsObj
+        }
+
+        static get(name){
+            if(!this.getOptions().hasOwnProperty(name)) throw new Error("Unkown client setting!")
+            return this.getOptions()[name];
+        }
+
+        static set(name, value){
+            if(!this.getOptions().hasOwnProperty(name)) throw new Error("Unkown client setting!")
+            localStorage.setItem(name, value);
+        }
+    }
+
     static chance(percent) {
         return Math.random() < percent / 100;
     }
@@ -54,9 +129,26 @@ class ChatManager {
         }
     }
 
+    static async getDefaultChannelObj(){
+        let serverinfo = (await this.getServerInfo(true))?.serverinfo;
+        if(!serverinfo) throw new Error("Unable to get server info. Cant open default channel")
+        let defaultChannelId = serverinfo?.defaultChannel;
+        let response = await this.resolveChannel(defaultChannelId);
+        return response?.channel ?? null;
+    }
+
+    static async openDefaultChannel(){
+        let defaultChannelObj = await this.getDefaultChannelObj();
+        if(defaultChannelObj.hasOwnProperty("id")) setUrl(`?group=${defaultChannelObj.group.info.id}&channel=${defaultChannelObj.id}`)
+    }
+
     static openPagePopup(elementId, url) {
         if (!url) throw new Error("No url supplied bitch", url); // lol
         MobilePanel.close()
+
+        // sometimes annoying
+        if(this.Settings.get("openMenuNavigationInNewTab").value === true) return this.openNewTab(url);
+        if(this.Settings.get("openMenuNavigationInSameTab").value === true) return this.navigateUrl(url);
 
         let pagePopup = document.querySelector('#' + elementId);
         let iframe = pagePopup?.querySelector('iframe');
@@ -109,12 +201,12 @@ class ChatManager {
     }
 
     static async registerMessageInfiniteLoad(element, callback = null) {
-        if(!element) throw new Error("Element for infinite scroll not found");
+        if (!element) throw new Error("Element for infinite scroll not found");
 
-        if(!element.getAttribute("data-scroll-init")){
+        if (!element.getAttribute("data-scroll-init")) {
             element.addEventListener("scroll", async function () {
                 if (element.scrollTop === 0) {
-                    if(callback && typeof callback === "function") await callback(element);
+                    if (callback && typeof callback === "function") await callback(element);
                 }
             });
 
@@ -122,13 +214,12 @@ class ChatManager {
         }
     }
 
-    static goBackToChatWindowFromPopup(popupId){
-        if(!popupId) throw new Error("No popup id specified")
+    static goBackToChatWindowFromPopup(popupId) {
+        if (!popupId) throw new Error("No popup id specified")
 
-        if(ChatManager.isIframe()){
+        if (ChatManager.isIframe()) {
             ChatManager.closePagePopup(popupId);
-        }
-        else{
+        } else {
             window.location.href = "/"
         }
     }
@@ -149,7 +240,8 @@ class ChatManager {
 
         const playPromise = audio.play();
         if (playPromise !== undefined) {
-            playPromise.catch(() => {});
+            playPromise.catch(() => {
+            });
         }
     }
 
@@ -423,15 +515,14 @@ class ChatManager {
                                 text,
                                 icon
                             }) {
-        if(isLauncher()){
-            if(typeof Client().ShowNotification === "function"){
+        if (isLauncher()) {
+            if (typeof Client().ShowNotification === "function") {
                 Client().ShowNotification({
                     title,
                     text,
                     icon
                 })
-            }
-            else{
+            } else {
                 console.warn("ShowNotification is not supported yet")
             }
         }
@@ -467,7 +558,7 @@ class ChatManager {
     }
 
     static async userJoined(onboardingFlag = false, passwordFlag = null, loginNameFlag = null, accessCode = null, initial = false, callback = null, keySolution = null) {
-        if (UserManager.getUsername() != null) {
+        if (UserManager.getUsername() != null && UserManager.getID !== null && UserManager.getToken() !== null) {
             var username = UserManager.getUsername();
 
             let knownServers = "";
@@ -479,13 +570,9 @@ class ChatManager {
             socket.emit("userConnected", {
                 id: UserManager.getID(),
                 name: username,
-                icon: UserManager.getPFP(),
-                status: UserManager.getStatus(),
                 token: UserManager.getToken(),
                 password: passwordFlag,
                 onboarding: onboardingFlag,
-                aboutme: UserManager.getAboutme(),
-                banner: UserManager.getBanner(),
                 loginName: loginNameFlag,
                 publicKey: await UserManager.getPublicKey(),
                 knownServers,
@@ -496,11 +583,10 @@ class ChatManager {
                     solution: localStorage.getItem("pow_solution")
                 }
             }, async function (response) {
-
                 // automatic client auth using public key challenge
-                try{
-                    if(response?.keyAuth === true && response?.challenge && isLauncher() && await Crypto.getPublicKey() && !keySolution){
-                        if(typeof Client().DecryptData !== "function") throw new Error("Public Key Auth is not supported")
+                try {
+                    if (response?.keyAuth === true && response?.challenge && isLauncher() && await Crypto.getPublicKey() && !keySolution) {
+                        if (typeof Client().DecryptData !== "function") throw new Error("Public Key Auth is not supported")
                         let decrypted = await Client().DecryptData(
                             response?.challenge.method,
                             response?.challenge.encKey,
@@ -509,12 +595,11 @@ class ChatManager {
                             response?.challenge.ciphertext
                         );
 
-                        if(decrypted){
+                        if (decrypted) {
                             return ChatManager.userJoined(true, null, null, null, true, null, decrypted);
                         }
                     }
-                }
-                catch(publicKeyAuthError){
+                } catch (publicKeyAuthError) {
                     console.error(publicKeyAuthError)
                 }
 
@@ -542,23 +627,23 @@ class ChatManager {
                     }
 
                     // check for client nickname
-                    if(typeof await Client().GetNickname === "function" && await Client().GetUserConsistentSettings() === true){
+                    if (typeof await Client().GetNickname === "function" && await Client().GetUserConsistentSettings() === true) {
                         let clientName = await Client().GetNickname();
-                        if(clientName && clientName !== UserManager.getUsername()) await UserManager.updateMember({name: clientName});
+                        if (clientName && clientName !== UserManager.getUsername()) await UserManager.updateMember({name: clientName});
                     }
 
                     // check for client icon
-                    if(typeof await Client().GetUserIcon === "function" && await Client().GetUserConsistentSettings() === true){
+                    if (typeof await Client().GetUserIcon === "function" && await Client().GetUserConsistentSettings() === true) {
                         let clientIcon = await Client().GetUserIcon()
 
-                        if(clientIcon && clientIcon !== UserManager.getPFP()) await UserManager.updateMember({icon: clientIcon});
+                        if (clientIcon && clientIcon !== UserManager.getPFP()) await UserManager.updateMember({icon: clientIcon});
                     }
 
                     // check for client banner
-                    if(typeof await Client().GetUserBanner === "function" && await Client().GetUserConsistentSettings() === true){
+                    if (typeof await Client().GetUserBanner === "function" && await Client().GetUserConsistentSettings() === true) {
                         let clientBanner = await Client().GetUserBanner()
 
-                        if(clientBanner && clientBanner !== UserManager.getBanner()) await UserManager.updateMember({banner: clientBanner});
+                        if (clientBanner && clientBanner !== UserManager.getBanner()) await UserManager.updateMember({banner: clientBanner});
                     }
 
                     UserManager.saveAccount()
@@ -620,29 +705,24 @@ class ChatManager {
                         }
                     });
 
-                } else {
-                    if (response.error) {
-                        splash.hide()
-                        if (response.error.includes("banned")) {
-                            ChatManager.showInstanceInfo(response.error, "indianred");
-                            return;
-                        }
+                }
+                else if (response.error) {
+                    splash.hide()
+                    if (response.error.includes("banned")) {
+                        ChatManager.showInstanceInfo(response.error, "indianred");
+                        return;
+                    }
 
+                    if (response.error.includes("No Account id provided")) {
+                        UserManager.doAccountOnboarding()
+                        return;
+                    }
 
-                        showSystemMessage({
-                            title: response.title || "",
-                            text: response.msg || response.error || "",
-                            icon: "error",
-                            img: null,
-                            type: "error",
-                            duration: response.displayTime || 3000
-                        });
-
-                        if (response?.registration === false) {
-                            // show registration prompt
-                            customPrompts.showPrompt(
-                                `Invite Code`,
-                                `
+                    if (response?.registration === false) {
+                        // show registration prompt
+                        customPrompts.showPrompt(
+                            `Invite Code`,
+                            `
                              <div class="prompt-form-group">
                                  <p>
                                     This server is an invite-only server. <br>
@@ -658,22 +738,31 @@ class ChatManager {
                                 <label style="color: indianred;" class="prompt-label error-text"></label>
                              </div>
                             `,
-                                async function (values) {
-                                    let inviteCode = values?.inviteCode;
+                            async function (values) {
+                                let inviteCode = values?.inviteCode;
 
-                                    if (inviteCode && inviteCode.length > 0) {
-                                        requestAnimationFrame(function () {
-                                            UserManager.doAccountOnboarding(null, inviteCode)
-                                        })
-                                        //userJoined(false, null, null, inviteCode);
-                                    }
-
-                                    if (!inviteCode) {
-                                        ChatManager.userJoined();
-                                    }
+                                if (inviteCode && inviteCode.length > 0) {
+                                    requestAnimationFrame(function () {
+                                        UserManager.doAccountOnboarding(null, inviteCode)
+                                    })
+                                    //userJoined(false, null, null, inviteCode);
                                 }
-                            )
-                        }
+
+                                if (!inviteCode) {
+                                    ChatManager.userJoined();
+                                }
+                            }
+                        )
+                    }
+                    else{
+                        showSystemMessage({
+                            title: response.title || "",
+                            text: response.msg || response.error || "",
+                            icon: "error",
+                            img: null,
+                            type: "error",
+                            duration: response.displayTime || 3000
+                        });
                     }
                 }
             });
@@ -757,12 +846,47 @@ class ChatManager {
         var url = window.location.search;
         var urlParams = new URLSearchParams(url);
         var value = urlParams.get(param);
-        return value;
+        return value ?? null;
     }
 
 
     static getDMFromUrl() {
         return this.getUrlParams("dm") || null;
+    }
+
+    static registerImageErrorListener(){
+        document.addEventListener("load", (e) => {
+            if (e.target.tagName !== "IMG") return;
+            e.target.style.visibility = "visible";
+        }, true);
+
+        document.addEventListener("error", (e) => {
+            const el = e.target;
+
+            if (el.tagName === "IMG") {
+
+                // remove error image from broken images
+                if(el.hasAttribute("data-ignore-img-error") === true){
+                    el.removeAttribute("src");
+                    el.style.visibility = "hidden";
+                    return;
+                }
+
+
+                el.setAttribute("data-src", el.src)
+
+                if (ChatManager.chance(20)) {
+                    el.src = "/img/worker.png";
+                }
+                else {
+                    el.src = "/img/error.png";
+                }
+
+                // lets see if this will break something
+                el.style.maxHeight = "50px"
+                el.style.maxWidth = "50px"
+            }
+        }, true);
     }
 
     static async getServerInfo(returnData = false) {

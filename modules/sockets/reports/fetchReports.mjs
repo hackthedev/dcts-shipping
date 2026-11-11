@@ -6,6 +6,8 @@ import {decodeAndParseJSON,} from "../resolveMessage.mjs";
 import JSONTools from "@hackthedev/json-tools";
 
 export default (io) => (socket) => {
+    // todo: refactor report system and use http etc
+    // todo: important: only do it once the multi instance stuff works!
 
     // socket.on code here
     socket.on('fetchReports', async function (member, response) {

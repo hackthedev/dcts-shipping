@@ -14,6 +14,7 @@ import {queryDatabase} from "../mysql/mysql.mjs";
 import {getBan} from "../ban-system/helpers.mjs";
 import {saveConfig, serverconfig} from "../init/config.mjs";
 import {signer} from "../init/general.mjs";
+import {getMemberAccountById} from "../member.mjs";
 
 export async function getMemberLastOnline(memberId) {
     if (!memberId || !serverconfig.servermembers[memberId]) {
@@ -248,24 +249,12 @@ export function generateGid(id) {
     return (encodeToBase64(signer.canonicalize(serverconfig.servermembers[id]?.publicKey))).substring(0, 20);
 }
 
-export function getMemberFromKey(publicKey){
-    const members = Object.values(serverconfig.servermembers);
-    let found = members.filter(m => m.publicKey === publicKey);
-
-    if(Array.isArray(found)){
-        return found[0];
-    }
-    else{
-        return found;
-    }
-}
-
 export async function changeKeyVerification(publicKey, value){
     if(value !== true && value !== false){
         return;
     }
 
-    let member = getMemberFromKey(publicKey);
+    let member = await getMemberAccountById(publicKey);
     if(!member) return;
 
     let gid = generateGid(member.id)
@@ -805,63 +794,4 @@ export function getNewDate(offset) {
     }
 
     return now;
-}
-
-export function disconnectUser(socketId, reason = null) {
-
-    try {
-        sendMessageToUser(socketId, {
-            title: "You've been disconnected",
-            message: reason ? `Reason:<br>${reason}` : "",
-            buttons: {
-                "0": {
-                    text: "Ok",
-                    events: "onclick='closeModal()'"
-                }
-            },
-            type: "error",
-            displayTime: 600000,
-            wasDisconnected: true
-        });
-
-        io.sockets.sockets.get(socketId).disconnect();
-    } catch (ex) {
-        return {error: ex}
-    }
-
-    return {error: null};
-}
-
-export function muteUser(member) {
-    let muteDate;
-    let jsonObj;
-    try {
-        muteDate = getNewDate(member.time).getTime();
-        jsonObj = {
-            mutedBy: member.id,
-            reason: member.reason,
-            duration: muteDate
-        };
-    } catch (err) {
-        return {error: err}
-    }
-
-    if (!serverconfig.mutelist.hasOwnProperty(member.target)) {
-        // used for checks
-        serverconfig.servermembers[member.target].isMuted = 1;
-
-        // Add member to mutelist
-        serverconfig.mutelist[member.target] = jsonObj;
-
-        saveConfig(serverconfig);
-        return {duration: muteDate};
-    } else {
-        serverconfig.servermembers[member.target].isMuted = 1;
-        serverconfig.mutelist[member.target].duration = muteDate;
-        saveConfig(serverconfig);
-
-        io.emit("updateMemberList");
-
-        return {duration: muteDate};
-    }
 }

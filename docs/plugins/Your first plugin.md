@@ -5,6 +5,9 @@ In order to create your first plugin lets navigate into the plugins directory fo
 > [!NOTE]
 > The plugin name needs to be url friendly! You can set the proper display title in the config.json file.
 
+> [!IMPORTANT]
+> A proper SDK is currently being developed! Once done it will be easier to make plugins!
+
 Okay now that we are in your plugin folder (e.g. `/home/name/dcts/plugins`) we will need to create some basic structure.
 
 ---
@@ -121,8 +124,8 @@ From there you can do pretty much anything, like loading additional files, injec
 
 ```js
 // Example code
-injectCss("/plugins/discord-bridge/messages.css")
-loadScript("/plugins/discord-bridge/web/stuff.js")
+injectCss("/plugins/dcts-discord-bridge/messages.css")
+loadScript("/plugins/dcts-discord-bridge/web/stuff.js")
 
 // on message SEND event
 EventDispatcher.on("messageSend", async(payload) => {

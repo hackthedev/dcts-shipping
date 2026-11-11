@@ -55,14 +55,14 @@ Its important to prioritize features and improvements in the code base. For exam
 **Most prioritizing is done based on the following:**
 
 - Are there community feature requests?
-  - Would it makes sense to implement now?
-  - Would it be easy to implement?
+	- Would it makes sense to implement now?
+	- Would it be easy to implement?
 - Can the feature be implement cleanly?
-  - Would refactoring the affected part of the code base first make more sense?
+	  - Would refactoring the affected part of the code base first make more sense?
 - Is the feature important?
-  - For example bugged bans, ip bans not working, security related features
+	  - For example bugged bans, ip bans not working, security related features
 - Is the feature/bug small enough to right away?
-  - Small bugs **should** be fixed quickly and immediately if it breaks the feature or results in a visual glitch as long as refactoring of the underlying system first is not beneficial.
+	  - Small bugs **should** be fixed quickly and immediately if it breaks the feature or results in a visual glitch as long as refactoring of the underlying system first is not beneficial.
 - When to refactor code?
-  - Does a feature depend on it?
-  - Nothing better to do or overly motivated?
+	  - Does a feature depend on it?
+	  - Nothing better to do or overly motivated?

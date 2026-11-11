@@ -4,7 +4,7 @@
 import fs from "fs";
 import {queryDatabase} from "../mysql/mysql.mjs";
 import {checkMessageObjAuthor, checkMessageObjReactions} from "../../sockets/resolveMessage.mjs";
-import {autoAnonymizeMessage} from "../main.mjs";
+import {autoAnonymizeMember, autoAnonymizeMessage} from "../main.mjs";
 import JSONTools from "@hackthedev/json-tools";
 import {serverconfig} from "../init/config.mjs";
 

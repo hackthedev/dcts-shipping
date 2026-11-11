@@ -13,11 +13,46 @@ class UserManager {
     static async updateMember(member){
         if(typeof member !== "object") throw new Error("passed object is not a member object");
 
+        try{
+            if(await isLauncher() && await Client().GetUserConsistentSettings() === true){
+                if(typeof await Client().SetUserBanner === "function" && typeof await Client().GetUserBanner === "function"){
+                    let clientBanner = await Client().GetUserBanner();
+                    if(clientBanner && clientBanner?.trim()?.length === 0) {
+                        member.banner = clientBanner;
+                        await Client().SetUserBanner(clientBanner);
+                    }
+                }
+
+                if(typeof await Client().SetUserIcon === "function" && typeof await Client().GetUserIcon === "function"){
+                    let clientIcon = await Client().GetUserIcon();
+                    if(clientIcon || clientIcon?.trim()?.length === 0) {
+                        member.icon = clientIcon;
+                        await Client().SetUserIcon(clientIcon);
+                    }
+                }
+
+                if(typeof await Client().GetNickname === "function" && typeof await Client().SetNickname === "function"){
+                    let clientName = await Client().GetNickname();
+                    if(clientName || clientName?.trim()?.length === 0) {
+                        member.name = clientName;
+                        await Client().SetNickname(clientName);
+                    }
+                }
+            }
+        }
+        catch(syncError){
+            console.error("Cant Sync with Client")
+            console.error(syncError)
+        }
+
         return new Promise((resolve, reject) => {
             socket.emit("updateMember", {token: UserManager.getToken(), id: UserManager.getID(), ...member,}, async function (response) {
                 if(response?.error) {
                     resolve({error: response?.error, member: null} )
                 }
+
+                console.log("Current user icon: ", await Client().GetUserIcon(), UserManager.getPFP())
+                console.log("New Icon: ", response.icon)
 
                 UserManager.setPFP(response.icon);
                 UserManager.setBanner(response.banner);
@@ -25,25 +60,6 @@ class UserManager {
                 UserManager.setUsername(response.name);
                 UserManager.setStatus(response.status);
                 UserManager.setCard(response.card);
-
-                try{
-                    if(await isLauncher() && await Client().GetUserConsistentSettings() === true){
-                        if(typeof await Client().SetUserIcon === "function" && typeof await Client().GetUserIcon === "function"){
-                            let clientIcon = await Client().GetUserIcon();
-                            if(!clientIcon || clientIcon?.trim()?.length === 0) await Client().SetUserIcon(response.icon);
-                        }
-
-                        if(typeof await Client().GetNickname === "function" && typeof await Client().SetNickname === "function"){
-                            let clientName = await Client().GetNickname();
-                            if(!clientName || clientName?.trim()?.length === 0) await Client().SetNickname(response.name);
-                        }
-                    }
-                }
-                catch(syncError){
-                    console.error("Cant Sync with Client")
-                    console.error(syncError)
-                }
-
 
                 resolve( {error: null, member: response} );
             });
@@ -68,15 +84,17 @@ class UserManager {
     }
 
     static async getMemberProfileHTML(memberObj) {
+        // todo: Make sure when badges load they dont remove existing pics like muted and banned
+
         let roleCode = "";
         for (let i = 0; i < memberObj?.roles.length; i++) {
             var role = memberObj?.roles[i];
-            var roleColor = role.color ?? "white";
-            var roleBackground = role?.background?.replace("text", "");
-            var roleBackgroundClip = role.backgroundClip;
-            var roleName = role.name;
+            var roleColor = stripHTML(role.color ?? "white");
+            var roleBackground = stripHTML(role?.background?.replace("text", ""));
+            var roleBackgroundClip = stripHTML(role.backgroundClip);
+            var roleName = stripHTML(role.name);
 
-            let actualRoleColor = roleColor === "#000000" && !roleBackground ? "white" : roleColor;
+            let actualRoleColor = stripHTML(roleColor === "#000000" && !roleBackground ? "white" : roleColor);
 
             let colorStyle = `color: ${actualRoleColor}; 
                             background: ${roleBackground ?? "transparent"}; 
@@ -89,58 +107,41 @@ class UserManager {
             </code>`;
         }
 
-        let isMuted = memberObj?.isMuted;
-        let isBanned = memberObj?.isBanned;
+        let isMuted = memberObj?.isMuted === true;
+        let isBanned = memberObj?.isBanned === true;
 
-
-        // if someone is muted etc
-        let mutedCode = "";
-        let bannedCode = "";
-
-        if (isMuted) {
-            mutedCode = `<div style="color: indianred; border: 1px solid indianred;" class="info mutedMember">
-                            <h1>Muted</h1>
-                        </div>`
-        }
-        if (isBanned) {
-            bannedCode = `<div style="color: indianred; border: 1px solid indianred;" class="info">
-                            <h1>Banned</h1>
-                        </div>`
-        }
+        // todo: add isreported flag eventually
+        let isReported = memberObj?.isReported;
 
         if(memberObj?.status === "null") memberObj.status = null;
 
         return `
-            <div id="profile_banner" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.banner)}')"></div>
+            <div id="profile_banner" draggable="false">
+                <img data-ignore-img-error="true" src="${ChatManager.proxyUrl(memberObj?.banner)}">
+            </div>
         
             <div id="profile_pfp_container">
-                <div id="profile_icon" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.icon)}');"></div>                
-                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(sanitizeHtmlForRender(memberObj?.publicKey)) : ""}"></div>                
+                <div id="profile_icon" draggable="false" style="background-image: url('${ChatManager.proxyUrl(memberObj?.icon ?? "/img/default_pfp.png")}');"></div>                
+                <div id="profile_badge_container" data-gid="${isLauncher() ? await Crypto.GenerateGid(stripHTML(memberObj?.publicKey)) : ""}">
+                    ${isMuted === true ? `<span style="color: indianred" title="Muted">${Icon.display("muted")}</span>` : ""}
+                    ${isBanned === true ? `<span style="color: indianred" title="Banned">${Icon.display("ban")}</span>` : ""}
+                    ${isReported === true ? `<span style="color: indianred" title="Reported">${Icon.display("flag")}</span>` : ""}
+                </div>                
             </div>
             
         
             <div id="profile_content">       
-                <div id="profile_username"><h2 style="margin: 0 !important;">${unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.name))}</h2></div>                
-                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? unescapeHtmlEntities(sanitizeHtmlForRender(memberObj?.status), false) : ""}</i></div>  
-                
-                ${memberObj?.aboutme?.trim()?.length > 0 ?                
-               `
-                <hr>
-                <div class="profile_aboutme">       
-                    <h2 class="profile_headline">About Me</h2>${sanitizeHtmlForRender(limitString(memberObj.aboutme, 1000))}
-                    
-                    
-                    <div class="profile_meta_container">
-                        ${
-                   mutedCode || bannedCode ?
-                       `<div class="profile_meta">
-                                    ${mutedCode}
-                                    ${bannedCode}   
-                                </div>` : ""
-               }   
-                    </div>        
-                </div>
-               ` : ""}
+                <div id="profile_username"><h2 style="margin: 0 !important;">${stripHTML(memberObj?.name)}</h2></div>                
+                <div id="profile_status">${ChatManager.countryCodeToEmoji(memberObj?.country_code)} <i>${memberObj?.status ? stripHTML(memberObj?.status) : ""}</i></div>  
+                     
+                ${memberObj?.aboutme?.trim()?.length > 0 ?
+                `         
+                    <hr>
+                    <div class="profile_aboutme">       
+                        <h2 class="profile_headline">About Me</h2>
+                        ${sanitizeHtmlForRender(memberObj.aboutme)}    
+                    </div>
+                `: ""}   
             <hr>
                        
             <a id="dm_action" onclick="ChatManager.openPagePopup('homeScreen', '/home/?dm=${sanitizeHtmlForRender(memberObj?.id, false)}')">&#10149; Send Message</a>
@@ -340,29 +341,11 @@ class UserManager {
     }
 
     static getCategory() {
-
-        var url = window.location.search;
-        var urlParams = new URLSearchParams(url);
-        var urlChannel = urlParams.get("category");
-
-        if (urlChannel == null) {
-            return null;
-        } else {
-            return urlChannel;
-        }
+        return ChatManager.getUrlParams("category");
     }
 
     static getChannel() {
-
-        var url = window.location.search;
-        var urlParams = new URLSearchParams(url);
-        var urlChannel = urlParams.get("channel");
-
-        if (urlChannel == null) {
-            return null;
-        } else {
-            return urlChannel;
-        }
+        return ChatManager.getUrlParams("channel");
     }
 
     static getPassword() {

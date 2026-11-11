@@ -1,7 +1,8 @@
 import { usersocket, xssFilters } from "../../index.mjs";
 import { getMemberHighestRole } from "../functions/chat/helper.mjs";
-import { disconnectUser, hasPermission, } from "../functions/chat/main.mjs";
+import { hasPermission, } from "../functions/chat/main.mjs";
 import { validateMemberId } from "../functions/main.mjs";
+import DCTS from "../../sdk/v1/backend/dcts_sdk.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
@@ -26,7 +27,7 @@ export default (io) => (socket) => {
                         return response({ error: "Cant disconnect user with higher or equal role", msg: "Cant disconnect user with higher or equal role", type: "error" })
                     }
 
-                    var disconnectResult = disconnectUser(usersocket[member.target], member.reason);
+                    var disconnectResult = DCTS.Members.disconnectUser(usersocket[member.target], member.reason);
                     if (disconnectResult?.error) {
                         response({ error: "Error disconnecting user", msg: "Unable to disconnect user", type: "error" })
                         console.log(disconnectResult.error)

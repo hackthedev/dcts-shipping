@@ -12,6 +12,7 @@ import fse from "fs-extra";
 import {pathToFileURL} from "url";
 import {rateLimit} from "../../functions/ratelimit.mjs";
 import {app} from "../../functions/init/web.mjs";
+import express from "express";
 
 export let pluginBasePath = path.join(process.cwd(), "plugins");
 
@@ -281,7 +282,7 @@ async function initPluginRoutes(){
         return await handlePluginList(req, res, next);
     });
 
-    app.post("/plugin/:plugin/:action", pluginLimiter, async (req, res, next) => {
+    app.post("/plugin/:plugin/:action", pluginLimiter, express.json(), async (req, res, next) => {
         return await handlePluginAction(req, res, next);
     });
 }
@@ -308,7 +309,35 @@ export async function handlePluginAction(req, res, next){
         return await uninstallPlugin(req, res, next);
     }
 
+    if(action === "save"){
+        return await savePluginSettings(req, res, next);
+    }
+
     return res.status(200).json({error: null});
+}
+
+async function savePluginSettings(req, res, next){
+    let pluginName = req.params.plugin;
+    const {settings} = req.body || {};
+
+    if (!pluginName) return res.status(403).json({error: "missing plugin identifier"});
+
+    // check if the plugin dir exists and if so delete it
+    let pluginDirLocation = path.join(pluginBasePath, pluginName);
+    let pluginConfigFile = path.join(pluginDirLocation, "config.json");
+    if(pluginDirLocation.indexOf("..") !== -1) return res.status(403).json({error: `Malicious uninstall request by '${pluginName}'`});
+    if(!fs.existsSync(pluginDirLocation)) return res.status(403).json({error: `Plugin path not found for plugin '${pluginName}'`});
+    if(!fs.existsSync(pluginConfigFile)) return res.status(403).json({error: `Plugin config not found for plugin '${pluginName}'`});
+
+    let pluginConfigObj = JSON.parse(fs.readFileSync(pluginConfigFile, "utf8").toString() ?? {})
+    let pluginSettings = pluginConfigObj?.settings ?? null;
+
+    if(settings && pluginSettings){
+        pluginConfigObj.settings = settings;
+        fs.writeFileSync(pluginConfigFile, JSON.stringify(pluginConfigObj, null, 2));
+    }
+
+    res.status(200).json({error: null});
 }
 
 async function uninstallPlugin(req, res, next){

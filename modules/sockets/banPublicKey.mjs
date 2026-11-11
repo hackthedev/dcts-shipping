@@ -1,6 +1,6 @@
 
 import { getMemberHighestRole } from "../functions/chat/helper.mjs";
-import {getMemberFromKey, getNewDate, hasPermission} from "../functions/chat/main.mjs";
+import {getNewDate, hasPermission} from "../functions/chat/main.mjs";
 
 import {
     escapeHtml,
@@ -11,6 +11,7 @@ import {
 } from "../functions/main.mjs";
 import {addBan} from "../functions/ban-system/helpers.mjs";
 import DateTools from "@hackthedev/datetools";
+import {getMemberAccountById} from "../functions/member.mjs";
 
 export default (io) => (socket) => {
     // socket.on code here
@@ -26,7 +27,7 @@ export default (io) => (socket) => {
                 }
                 else {
 
-                    let targetMember = await getMemberFromKey(member.targetKey);
+                    let targetMember = await getMemberAccountById(member.targetKey);
                     if(targetMember){
                         var banner = getMemberHighestRole(member.id);
                         var banning = getMemberHighestRole(targetMember.id);

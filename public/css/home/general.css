@@ -51,6 +51,7 @@
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 1;
     background: linear-gradient(
             to right,
             rgba(0,0,0,0.75),

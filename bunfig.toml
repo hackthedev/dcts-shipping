@@ -1,4 +1,5 @@
 [test]
+environment = "jsdom"
 preload = [
     "./tests/frontend/setup.js",
     "./tests/test-client.mjs"

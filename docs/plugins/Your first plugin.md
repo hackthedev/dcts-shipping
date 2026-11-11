@@ -5,6 +5,9 @@ In order to create your first plugin lets navigate into the plugins directory fo
 > [!NOTE]
 > The plugin name needs to be url friendly! You can set the proper display title in the config.json file.
 
+> [!IMPORTANT]
+> A proper SDK is currently being developed! Once done it will be easier to make plugins!
+
 Okay now that we are in your plugin folder (e.g. `/home/name/dcts/plugins`) we will need to create some basic structure.
 
 ---

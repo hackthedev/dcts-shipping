@@ -121,6 +121,31 @@ sudo VERSION=dev docker compose up -d --pull always
 
 ![image-20251108165123275](./assets/image-20251108165123275.png)
 
+---
+
+## Updating DCTS
+
+Inside the docker container is a file called `update.sh` which will update DCTS automatically for you. Database changes are automatically handled by DCTS.
+
+You can update your instance with these commands:
+
+```bash
+# enter docker container
+sudo docker exec -it dcts bash
+
+# select only one of these two commands!
+bash ./update.sh     # will update using main
+bash ./update.sh dev # will use dev version
+
+CTRL+D # exit docker container
+
+sudo docker restart dcts  ## apply update
+```
+
+>[!CAUTION]
+>If you decide to rebuild or recreate the docker container you will loose all your data!
+>The container is running the MariaDB database for DCTS as well as livekit!
+
 ------
 
 ## Getting Administrator permissions

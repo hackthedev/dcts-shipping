@@ -43,3 +43,9 @@ There are no real roadmaps for DCTS in order to keep development as flexible and
 Generally development is based on user feedback and curiosity. DCTS was originally only a community chat solution similar to services like Discord and Guilded, but has introduced a messenger-like system into the desktop client and mobile app. It can be roughly described as "like Signal but self-hosted".
 
 Development can seem pretty random. For example when the DM system was created, it was thought to be cool if it would support end-to-end encryption, so that was implemented as well.
+
+---
+
+## AI
+
+Generally AI is not used in the development (as in writing code) of DCTS itself for a few reasons (maintainability, efficiency, ...), but AI is used for scanning the code base for vulnerabilities and dependency updates via GitHub. DCTS is not some corporate product that needs to grow asap, but more of a passion & community project.

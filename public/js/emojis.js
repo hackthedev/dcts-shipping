@@ -312,10 +312,6 @@ function showEmojiPicker(x, y, callback, reverseHeight = false) {
                         <div class='emoji-box-header' id="emoji-box-gifs" onclick="getGifs(); selectEmojiTab(this);">
                             <h2>GIFs</h2>
                         </div>
-                        <div class='emoji-box-header' id="emoji-box-upload" onclick="document.getElementById('uploadCaller').click();">
-                            <input type="file" id="uploadCaller" style="display:none" accept="image/*,video/*" /> 
-                            <h2>Upload</h2>
-                        </div>
                     </div>
 
                     <div id="emoji-entry-container"></div>
@@ -608,13 +604,41 @@ async function getGifs() {
     await displayGifsInPicker(gifs);
 }
 
+async function waitForGifs(container) {
+    // pretty fine shit
+    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/decode
+    const images = [...container.querySelectorAll("img")];
+
+    await Promise.all(images.map(async img => {
+        if (img.complete) return;
+
+        try {
+            await img.decode();
+        } catch {}
+    }));
+}
+
+function getEmojiPickerHeaderElement(){
+    return document.querySelector("#emoji-box-header-container") ?? null;
+}
+
 async function displayGifsInPicker(gifs){
     if(!gifs) throw new Error("No gifs provided!")
     clearGifContainer()
 
     if(Object.keys(gifs ?? {})?.length > 0){
-        for (let gif of gifs) {
+        // hide shit to prevent the weird loading from happening
+        let gifEntryListElement = getGifEntryListElement();
+        if(!gifEntryListElement) throw new Error("No gif container element found!");
 
+        await ChatTools.Dom.hideElement(gifEntryListElement);
+        ElementLoader.start(getEmojiPickerHeaderElement(), {
+            speed: 10,
+            barWidth: 30,
+            style: "marquee"
+        })
+
+        for (let gif of gifs) {
             let gifHost = gif?.host ?? "gifs.dcts.community";
             let gifUrl = `https://${gifHost}/upload/${gif.fileHash}`;
             let cleanUrl = ChatTools.Sanitize.stripHTML(gifUrl);
@@ -622,24 +646,25 @@ async function displayGifsInPicker(gifs){
             let isNSFW = gif.isNSFW;
             let isSensitive = gif.isSensitive;
 
-            if(!getGifEntryListElement()) throw new Error("No gif container element found!");
+            gifEntryListElement.insertAdjacentHTML("beforeend", `                    
+                <div class="gif-entry-wrapper ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}">
+                    <img class="gif-entry ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}"
+                    onclick="sendGif('${cleanUrl}')" src="${cleanUrl}"
+                    data-src="${cleanUrl}"
+                    >
+                     ${(isNSFW || isSensitive) ? `
+                        <span class="notice ${isNSFW ? "nsfw" : "sensitive"}">
+                            ${isNSFW ? "NSFW" : "Sensitive"}
+                        </span>
+                    ` : ""}
+                </div>                    
+            `);
 
-            getGifEntryListElement()?.insertAdjacentHTML("beforeend", `
-                    
-                    <div class="gif-entry-wrapper ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}">
-                        <img class="gif-entry ${isNSFW ? "nsfw": ""} ${isSensitive ? "sensitive": ""}"
-                        onclick="sendGif('${cleanUrl}')" src="${ChatManager.proxyUrl(cleanUrl)}"
-                        data-src="${cleanUrl}"
-                        >
-                         ${(isNSFW || isSensitive) ? `
-                            <span class="notice ${isNSFW ? "nsfw" : "sensitive"}">
-                                ${isNSFW ? "NSFW" : "Sensitive"}
-                            </span>
-                        ` : ""}
-                    </div>
-                    
-                    `);
+            await waitForGifs(gifEntryListElement);
         }
+
+        ElementLoader.stop(getEmojiPickerHeaderElement())
+        await ChatTools.Dom.showElement(gifEntryListElement)
 
         requestAnimationFrame(() => {
             var gifSearchbarInput = document.getElementById("gif-searchbar-input");
@@ -648,7 +673,6 @@ async function displayGifsInPicker(gifs){
         })
     }
 }
-
 
 async function getEmojis(callback = null) {
     var emojiContainer = getEmojiContainerElement()

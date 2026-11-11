@@ -9,7 +9,7 @@ DCTS is a system made of various sub systems that will be explained in this docu
 
 Here is a short and simplified overview that will be further explained later in the document. To keep things simple for now it comes down to the following:
 
-- Runtime: Bun/NodeJS
+- Runtime: Bun/NodeJS & Docker
 	- Bun is preferred for performance reasons. NodeJS is used for legacy and can be used for bun-incompatible setups and systems like old hardware etc.
 - Data:
 	- Most of the data is stored either in the database or `config.json` file. On launch specific data is pulled into memory and will continue to operate from there.
@@ -35,14 +35,9 @@ Here is a short and simplified overview that will be further explained later in 
 
 A member can register an account on any instance and that account will only be stored on that instance itself. It is possible for a member to export an account to re-import it on another instance to keep the same account, making accounts portable. Auth itself is usually done via a member's account id and token.
 
-While currently not implemented, it is planned that this is automatically done with the desktop client in the future and in the background to keep things seamless. Its also planned to implement an "account picker" and the option to use default accounts.
-
 Its also possible to authenticate using your private/public key by solving a challenge to verify that you actually are the owner of a public key thats linked to your account. While this is already implemented and working, its not being used yet. Accounts can only handle one public key as of right now as there is no update mechanism since its not fully implemented yet and are optional too.
 
-In case you were logged out, you can re-import your account from the exported file to log back in. If you didnt export your account, you can also log-in traditionally by using your chosen login name and password.
-
->[!NOTE]
->It is planned to automate auth with the desktop client soon.
+In case you were logged out, you can re-import your account from the exported file to log back in. If you didnt export your account, you can also log-in traditionally by using your chosen login name and password. If you use your desktop client or android app you will login automatically
 
 > [!WARNING]
 > As of right now its not possible for you to change your password in case you forget it when trying to log-in. You will need to reach out to an instance admin for them to change it for you. This will soon be changed with an update too.

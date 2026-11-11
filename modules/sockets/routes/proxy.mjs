@@ -6,6 +6,7 @@ import net from "net";
 import {rateLimit} from "../../functions/ratelimit.mjs";
 import {app} from "../../functions/init/web.mjs";
 import fs from "fs";
+import Logger from "../../functions/logger.mjs";
 
 const CACHE_DIR = "./cache/proxy";
 const TTL = 1000 * 60 * 60 * 24;
@@ -141,7 +142,10 @@ app.get("/proxy", proxyLimiter, async (req, res) => {
             size: MAX_BYTES
         });
 
-        if (!r.ok) return res.status(500).send("Fetch failed");
+        if (!r.ok) {
+            Logger.debug(`Discord CDN returned ${r.status}: ${r.statusText}`);
+            return res.status(r.status).send("Fetch failed");
+        }
 
         const type = normalizeType(r.headers.get("content-type"));
         if (!isAllowedImageType(type)) {
@@ -161,7 +165,8 @@ app.get("/proxy", proxyLimiter, async (req, res) => {
         res.setHeader("Content-Type", type);
         res.setHeader("X-Content-Type-Options", "nosniff");
         fs.createReadStream(file).pipe(res);
-    } catch {
+    } catch (Err){
+        Logger.debug(Err)
         res.status(500).send("Proxy error");
     }
 });

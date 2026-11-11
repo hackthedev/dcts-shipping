@@ -12,7 +12,7 @@ The vision of DCTS is self-hosting and self-hosting only and will never be inten
 Since its about self hosting, the people running an instance are responsible for what happens in that instance. This means taking care of reports and making sure no laws are being broken. DCTS itself is just the software and will only focus on making the software and will not be responsible for what others do with it.
 
 > [!TIP]
-> If you're not sure what an instance is, check out [Terminology](Terminology.md).
+> If you're not sure what an instance is, check out [Terminology](../Lore/Terminology.md).
 
 
 ---

@@ -3,30 +3,38 @@ async function renderHome() {
     MobilePanel.close()
 
     // get server info and clear the html in case its being re-rendered
-    let server = await getServerInfo();
-    let contactData = server?.serverinfo?.instance?.contact
+    let server = await ChatManager.getServerInfo(true);
+    let serverinfo = server?.serverinfo ?? null;
+    let contactData = serverinfo?.instance?.contact
 
     let shortRedditUrl = `r/${contactData?.reddit?.split("/r/")[1]}`;
     let shortGithubUrl = `${contactData?.github?.split(".com/")[1]}`;
     let shortDiscordUrl = `gg/${contactData?.discord?.split(".gg/")[1]}`;
 
+    let hasAnyContactInfos = Object.values(contactData).filter(value =>
+                                            typeof value === "object" && value !== null
+                                                ? Object.values(value).some(v => String(v ?? "").trim().length > 0)
+                                                : String(value ?? "").trim().length > 0
+                                        ).length;
+
     getContentElement().innerHTML = "";
     getContentElement().insertAdjacentHTML('beforeend',
         `
             <div class="site-banner">            
-                <div class="edit-icon" onclick="editHero()">${ICONS.edit}</div>
+                <div class="edit-icon" data-ignore-img-error="true" onclick="editHero()">${ICONS.edit}</div>
                 <div class="content">
-                    <p class="title" data-text="{{server.home.title}}">${server?.serverinfo?.home?.title ?? ""}</p>
-                    <p class="subtitle" data-text="{{server.home.subtitle}}">${server?.serverinfo?.home?.subtitle ?? ""}</p>  
+                    <p class="title" data-text="{{server.name}}">${serverinfo?.name ?? ""}</p>
+                    <p class="subtitle" data-text="{{server.description}}">${serverinfo?.description ?? ""}</p>  
                 </div>
-                <img src="${server?.serverinfo?.home?.banner_url ?? ""}">
+                <img src="${serverinfo?.banner ?? ""}" data-ignore-img-error="true">
             </div>
-            
-            <div class="home-container">
+           
+            <div class="home-container">            
+                <img class="home-icon" src="${serverinfo?.icon ?? ""}" data-ignore-img-error="true">
                 <div class="about">
                     <div class="edit-icon dark" onclick="editHeroAbout()">${ICONS.edit}</div>
                     <div class="about-content">
-                        ${server?.serverinfo?.home?.about}
+                        ${serverinfo?.about ?? "No About."}
                     </div>
                 </div>
                 
@@ -38,7 +46,7 @@ async function renderHome() {
                             <div class="qr-code"></div>
                             
                             <div class="plain">
-                                <pre>${server.serverinfo.public_key}</pre>
+                                <pre>${serverinfo.public_key}</pre>
                             </div>
                         </div>
                         
@@ -53,6 +61,7 @@ async function renderHome() {
                             ${contactData.github ? `<li>Github: <a href="${contactData.github}" target="_blank">${shortGithubUrl}</a></li>` : ""}
                             ${contactData.discord ? `<li>Discord: <a href="${contactData.discord}" target="_blank">${shortDiscordUrl}</a></li>` : ""}
                             ${contactData.signal ? `<li>Signal: ${contactData.signal}</li>` : ""}
+                            ${hasAnyContactInfos ? "" : "<li>None available</li>"}
                         </ul>    
                     </div>
                 </div>
@@ -62,7 +71,7 @@ async function renderHome() {
 
 
     new QRCode(getContentElement().querySelector(".public-key .qr-code"), {
-        text: server.serverinfo.public_key,
+        text: serverinfo.public_key,
         correctLevel: QRCode.CorrectLevel.L,
         typeNumber: 40,
     })
@@ -125,6 +134,7 @@ function editHero() {
     let currentHeroTitle = getSiteBannerElement().querySelector(".title").innerHTML;
     let currentHeroSubTitle = getSiteBannerElement().querySelector(".subtitle").innerHTML;
     let currentBannerSrc = getSiteBannerElement().querySelector("img").src;
+    let currentIconSrc = getSiteIconElement()?.src;
 
     customPrompts.showPrompt(
         "Edit Home",
@@ -139,6 +149,15 @@ function editHero() {
                 <label class="prompt-label">Subtitle</label>
                 <input type="text" class="prompt-input" name="homeSubtitle" value="${currentHeroSubTitle}">
             </div>
+            
+            <div class="prompt-form-group">
+                  <label class="prompt-label" for="iconImage">Icon Image</label>
+    
+                  <div class="profile-image-container" id="iconImageContainer" onclick="document.getElementById('iconImage').click()" style="width: 120px; height: 120px; !important; border-radius: 50% !important;${currentIconSrc ? `background-image: url('${currentIconSrc}` : ""}'); background-size: cover;">
+                      <img id="iconImagePreview" src="${currentBannerSrc ? `${currentBannerSrc}` : ""}" alt="Icon Image" class="profile-image-preview">
+                  </div>
+                  <input class="prompt-input" type="file" name="iconImage" id="iconImage" accept="image/*" style="display: none;" onchange="customPrompts.previewImage(event)">
+              </div>
 
             <div class="prompt-form-group">
                   <label class="prompt-label" for="bannerImage">Banner Image</label>
@@ -158,6 +177,7 @@ function editHero() {
             let homeTitle = values.homeTitle;
             let homeSubtitle = values.homeSubtitle;
             let homeBannerUrl = "";
+            let homeIconUrl = "";
 
             // check banner and upload new one
             if (values.bannerImage) {
@@ -169,14 +189,23 @@ function editHero() {
                 }
             }
 
+            // check icon and upload new one
+            if (values.iconImage) {
+                const iconUrl = await ChatManager.uploadFile(values.iconImage);
+                console.log(iconUrl)
+                if (!iconUrl.error) {
+                    console.log('Icon Image :', iconUrl.path);
+                    homeIconUrl = iconUrl.path;
+                }
+            }
+
             socket.emit("saveServerInfo", {
                 token: UserManager.getToken(), id: UserManager.getID(),
                 serverinfo: {
-                    home: {
-                        banner_url: homeBannerUrl,
-                        title: values.homeTitle,
-                        subtitle: values.homeSubtitle
-                    }
+                    banner: homeBannerUrl,
+                    name: values.homeTitle,
+                    description: values.homeSubtitle,
+                    icon: homeIconUrl
                 }
             }, async (response) => {
                 if (response?.error) {
@@ -221,9 +250,7 @@ function editHeroAbout() {
             socket.emit("saveServerInfo", {
                 token: UserManager.getToken(), id: UserManager.getID(),
                 serverinfo: {
-                    home: {
-                        about: homeAbout
-                    }
+                    about: homeAbout
                 }
             }, (response) => {
                 if (response?.error) {

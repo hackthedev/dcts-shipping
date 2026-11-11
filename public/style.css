@@ -19,6 +19,10 @@
     --input-border: 1px solid rgb(98, 98, 98);
 }
 
+*[title]{
+    cursor: pointer;
+}
+
 .homeDivider {
     width: 80%;
     margin: 10px !important;

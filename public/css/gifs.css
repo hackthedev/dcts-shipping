@@ -35,32 +35,28 @@
 #gif-entry-container .gif-entries {
     columns: 2;
     column-gap: 6px;
+    column-fill: balance;
     width: 100%;
+}
+
+#gif-entry-container .gif-entries .gif-entry-wrapper {
+    display: inline-block;
+    vertical-align: top;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    break-inside: avoid;
+    border-radius: 8px;
+    margin-bottom: 6px;
 }
 
 #gif-entry-container .gif-entries img {
     display: block;
     width: 100%;
     height: auto;
-
-    margin-bottom: 6px;
-    break-inside: avoid;
     box-sizing: border-box;
     border-radius: 8px;
-}
-
-/* flag filters */
-#gif-entry-container .gif-entries .gif-entry-wrapper {
-    position: relative;
-    overflow: hidden;
-    break-inside: avoid;
-    border-radius: 8px;
-    margin-bottom: 6px;
-}
-
-#gif-entry-container .gif-entries .gif-entry-wrapper img {
-    transition: filter 4000ms ease;
-    cursor: pointer;
+    transition: filter 4s ease;
 }
 
 #gif-entry-container .gif-entries .gif-entry-wrapper.sensitive img,
@@ -79,7 +75,7 @@
     font-weight: bold;
     text-transform: uppercase;
     pointer-events: none;
-    transition: opacity 4000ms ease;
+    transition: opacity 4s ease;
 }
 
 #gif-entry-container .gif-entries .gif-entry-wrapper .notice::before {

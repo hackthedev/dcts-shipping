@@ -155,6 +155,7 @@ export async function setupDbConnection(){
         {
             name: "messages",
             columns: [
+                {name: "id", type: "int NOT NULL PRIMARY KEY AUTO_INCREMENT"},
                 {name: "authorId", type: "varchar(100) NOT NULL"},
                 {name: "messageId", type: "varchar(100) NOT NULL UNIQUE KEY"},
                 {name: "room", type: "varchar(200) NOT NULL"},
@@ -253,7 +254,6 @@ export async function setupDbConnection(){
                 {name: "onboarding", type: "BOOLEAN DEFAULT FALSE"},
                 {name: "loginName", type: "varchar(100)"},
                 {name: "name", type: "varchar(100) NOT NULL DEFAULT 'User'"},
-                {name: "nickname", type: "varchar(100) DEFAULT NULL"},
                 {name: "country_code", type: "varchar(50) DEFAULT NULL"},
                 {name: "status", type: "text DEFAULT ''"},
                 {name: "aboutme", type: "text DEFAULT ''"},
@@ -280,6 +280,17 @@ export async function setupDbConnection(){
                 {name: "publicKey", type: "text NULL UNIQUE"},
                 {name: "issuerId", type: "varchar(100) NOT NULL"},
                 {name: "ip", type: "varchar(100) DEFAULT NULL"},
+                {name: "reason", type: "varchar(500) DEFAULT NULL"},
+                {name: "created", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+                {name: "until", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
+            ]
+        },
+        {
+            name: "mutes",
+            columns: [
+                {name: "rowId", type: "int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT" },
+                {name: "identifier", type: "text NOT NULL UNIQUE"},
+                {name: "issuerId", type: "varchar(100) NOT NULL"},
                 {name: "reason", type: "varchar(500) DEFAULT NULL"},
                 {name: "created", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},
                 {name: "until", type: "bigint NOT NULL DEFAULT (UNIX_TIMESTAMP() * 1000)"},

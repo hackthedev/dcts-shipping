@@ -25,16 +25,27 @@
 }
 
 #profile_banner{
-    background-size: cover;
+    width: calc(100% + 8px);
+    margin: -4px;
 
+
+    height: fit-content;
+    min-height: 60px;
+    max-height: calc(120px + 4px);
+
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    overflow: hidden;
+}
+
+#profile_banner img{
+    background-size: cover;
     object-fit: cover;
-    background-color: black;
+    background-color: transparent;
     background-position: center center;
 
     width: 100%;
-    height: 120px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
+    height: 100%;
 }
 
 #profile_pfp_container {
@@ -83,14 +94,15 @@
     border-radius: 4px;
 }
 
-.profile_badge {
+.profile_badge,
+#profile_badge_container svg{
     display: flex;
+    align-self: start;
 
-    width: 20px;
-    height: 20px;
+    width: 20px !important;
+    height: 20px !important;
 
     border-radius: 50%;
-    margin: auto;
 
     background-size: cover;
     object-fit: cover;
@@ -101,7 +113,7 @@
 #profile_content{
     display: flex;
     flex-direction: column;
-    padding: 0 24px 24px 24px;
+    padding: 12px 24px 24px 24px;
 }
 
 #profile_content #dm_action{
@@ -266,7 +278,7 @@
 
 
 .profile_meta .info h1{
-    font-size: 14px;
+    font-size: 12px;
     margin: 0;
 }
 
@@ -282,11 +294,10 @@
     margin: 6px 6px auto auto;
     background-color: hsl(from var(--main) h s calc(l * 3));
 
-
     font-size: 12px;
     border: 2px solid hsl(from var(--main) h s calc(l * 4));
     border-radius: 6px;
-    padding: 6px;
+    padding: 3px;
     cursor: pointer;
     user-select: none;
 }

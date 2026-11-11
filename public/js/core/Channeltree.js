@@ -18,7 +18,7 @@ class ChannelTree {
             username: UserManager.getUsername(),
             icon: UserManager.getPFP(),
             group: UserManager.getGroup()
-        }, function (response) {
+        }, async function (response) {
             let group = UserManager.getGroup();
 
             if(!response?.data?.groups) return console.error("No group data found!");
@@ -143,7 +143,7 @@ class ChannelTree {
             markCurrentChannelStyle(UserManager.getChannel())
             localStorage.setItem("channeltree_html_cache", channeltree.innerHTML);
 
-            EventDispatcher.send("getChannelTree_finish");
+            await EventDispatcher.send("getChannelTree_finish");
         });
     }
 

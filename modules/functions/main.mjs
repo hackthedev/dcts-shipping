@@ -1,10 +1,5 @@
-
 import {io} from "./init/sockets.mjs"
-import {
-    generateGid,
-    getNewDate,
-    hasPermission, resolveGroupByChannelId,
-} from "./chat/main.mjs";
+import {generateGid, getNewDate, hasPermission, resolveGroupByChannelId,} from "./chat/main.mjs";
 import Logger from "@hackthedev/terminal-logger"
 import path from "path";
 import {powVerifiedUsers} from "../sockets/pow.mjs";
@@ -20,8 +15,8 @@ import dSyncAuth from "@hackthedev/dsync-auth";
 import {reloadConfig, saveConfig, serverconfig, versionCode} from "./init/config.mjs";
 import {auther, debugmode, flipDebug, ratelimit, setRatelimit} from "./init/general.mjs";
 import bcrypt from "bcrypt";
-
-var serverconfigEditable;
+import {getMemberAccountById} from "./member.mjs";
+import DCTS from "../../sdk/v1/backend/dcts_sdk.mjs";
 
 
 /*
@@ -76,18 +71,6 @@ export function emitBasedOnPermission(perms, event, payload) {
     }
 
     return sent;
-}
-
-
-export function checkEmptyConfigVar(conf, value) {
-    if (conf == null) return value;
-    else return conf;
-}
-
-export function removeFileExtension(filename) {
-    const lastDotIndex = filename.lastIndexOf('.');
-    if (lastDotIndex === -1) return filename; // No extension found, return original filename
-    return filename.slice(0, lastDotIndex);
 }
 
 export function sanitizeInput(input) {
@@ -174,7 +157,6 @@ export async function checkVersionUpdate() {
 }
 
 export async function handleTerminalCommands(command, args) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
 
     try {
         if(command === "unban"){
@@ -267,6 +249,10 @@ export async function handleTerminalCommands(command, args) {
                     return -1;
                 }
             });
+
+            serverRolesSorted.forEach((role) => {
+                Logger.info(`- ${role.info.name} - ${role.info.id}`)
+            })
         } else if (command == "token") {
 
             if (args.length == 2) {
@@ -276,10 +262,10 @@ export async function handleTerminalCommands(command, args) {
                 if (isNaN(roleIdArg) == false) {
                     try {
                         var roleToken = generateId(64);
-                        serverconfigEditable.serverroles[roleIdArg].token.push(roleToken);
-                        saveConfig(serverconfigEditable);
+                        serverconfig.serverroles[roleIdArg].token.push(roleToken);
+                        saveConfig(serverconfig);
 
-                        Logger.info(`Redeem key generated for role ${serverconfigEditable.serverroles[roleIdArg].info.name}`);
+                        Logger.info(`Redeem key generated for role ${serverconfig.serverroles[roleIdArg].info.name}`);
                         Logger.info(roleToken)
                     } catch (Err) {
                         Logger.info("Couldnt save or generate key");
@@ -295,9 +281,9 @@ export async function handleTerminalCommands(command, args) {
                 if (args[1] == "user") {
                     if (args[2].length == 12) {
                         if (serverconfig.servermembers[args[2]] != null) {
-                            delete serverconfigEditable.servermembers[args[2]];
+                            delete serverconfig.servermembers[args[2]];
                             coLogger.infonsolas(`Deleting user ${args[2]}`);
-                            saveConfig(serverconfigEditable);
+                            saveConfig(serverconfig);
                         } else {
                             Logger.info(`Couldnt find user ${args[2]}`);
                         }
@@ -313,7 +299,7 @@ export async function handleTerminalCommands(command, args) {
                 if (args[1].length == 12) {
                     if (args[2]) {
                         serverconfig.servermembers[args[1]].password = await hashPassword(args[2])
-                        saveConfig(serverconfigEditable);
+                        saveConfig(serverconfig);
                         Logger.success(`Password for user ${serverconfig.servermembers[args[1]].name} (${args[1]}) was changed`);
                     } else {
                         Logger.warn("Missing User. passwd <user id> <new password>")
@@ -624,8 +610,6 @@ export function checkObjectKeys(obj, path, defaultValue) {
 
 
 export function checkRateLimit(socket) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
-
     var ip = socket.handshake.address;
 
     //console.log("IP RATE LIMIT")
@@ -739,6 +723,7 @@ export async function validateMemberId(id, socket, token, bypass = false) {
     }
 
     if (socket && !powVerifiedUsers.includes(socket?.id)) {
+        Logger.debug("Member is not part of powVerifiedUsers")
         return false;
     }
 
@@ -750,25 +735,32 @@ export async function validateMemberId(id, socket, token, bypass = false) {
         if(memberObject && socket){
             let banResult =  await checkMemberBan(socket, memberObject);
             if(banResult?.result === true){
+                Logger.debug("Member is banned")
                 return false;
             }
         }
 
         if(serverconfig.servermembers[id]?.token !== token){
+            Logger.debug("Token doesnt match with account")
             return false;
         }
 
         // if is banned deny all connections
         if(serverconfig.servermembers[id]?.onboarding === false){
+            Logger.debug("Account onboarding not done")
             return false;
         }
     }
 
     if(id){
-        if(!serverconfig.servermembers[id]) return false;
+        if(!serverconfig.servermembers[id]) {
+            Logger.debug("Account doesnt exist")
+            return false;
+        }
         // update last online
         serverconfig.servermembers[id].lastOnline = new Date().getTime();
         if(serverconfig.servermembers[id]?.onboarding === false){
+            Logger.debug("Onboarding not done")
             return false;
         }
     }
@@ -818,31 +810,6 @@ export function addMinutesToDate(date, minutes) {
 
 export function sendMessageToUser(socketId, data) {
     io.to(socketId).emit("modalMessage", data);
-}
-
-export function checkMemberMute(socket, member) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfig);
-    let ip = socket.handshake.address;
-
-    checkRateLimit(socket);
-
-    // check mutelist
-    if (serverconfig?.mutelist && serverconfig?.mutelist?.hasOwnProperty(member.id)) {
-        var durationStamp = serverconfig.mutelist[member.id].duration;
-        var muteReason = serverconfig.mutelist[member.id].reason;
-
-
-        if (Date.now() >= durationStamp) {
-            // unmute user
-            serverconfig.servermembers[member.id].isMuted = 0;
-            delete serverconfig.mutelist[member.id];
-            saveConfig(serverconfig);
-        } else {
-            return {result: true, timestamp: durationStamp, reason: muteReason};
-        }
-    }
-
-    return {result: false};
 }
 
 export function sleep(ms) {
@@ -958,19 +925,18 @@ export async function anonymizeMember(member, shouldHide, isAdmin) {
         member.isOnline = false;
         member.lastOnline = 0;
         member.publicKey = "";
-        member.nickname = "";
         member.color = "white";
     }
 
     return member;
 }
 
-export async function autoAnonymizeMember(issuerMemberId, member){
+export async function autoAnonymizeMember(issuerMemberId = null, member){
     if(!member?.id) member = getUnkownMember()
     let shouldAnonymize = await isIdentifierBanned(member?.id);
 
     if(shouldAnonymize){
-        return await anonymizeMember(member, shouldAnonymize, hasPermission(issuerMemberId, "viewAnonymizedMessages"));
+        return await anonymizeMember(member, shouldAnonymize, hasPermission(issuerMemberId, "viewAnonymizedMessages") || issuerMemberId === "system");
     }
 
     return member;
@@ -1091,25 +1057,20 @@ export async function getCastingMemberObject(member) {
 }
 
 export async function findAndVerifyUser(loginName, password) {
-    serverconfigEditable = checkEmptyConfigVar(serverconfigEditable, serverconfig);
-    let serverMembers = serverconfigEditable.servermembers;
 
-    for (const memberId in serverMembers) {
-        const member = serverMembers[memberId];
+    let memberObj = await getMemberAccountById(loginName);
+    if(!memberObj) return {result: null, member: null};
 
-        // Check loginName matches either 'name'
-        if (member.loginName === loginName) {
-            // Verify the password hash
-            const isPasswordValid = await bcrypt.compare(password, member.password);
-            if (isPasswordValid) {
-                return {result: true, member: copyObject(member)}; // Return the matched user
-            } else {
-                return {result: false, member: null};
-            }
+    if (memberObj.loginName === loginName) {
+        // Verify the password hash
+        const isPasswordValid = await DCTS.Tools.Cryptography.verifyPassword(password, memberObj.password);
+        if (isPasswordValid) {
+            return {result: true, member: copyObject(memberObj)}; // Return the matched user
+        } else {
+            return {result: false, member: null};
         }
     }
 
-    console.log("User not found for loginName:", loginName);
     return {result: null, member: null}; // Return null if no user matches
 }
 

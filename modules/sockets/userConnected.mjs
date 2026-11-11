@@ -3,7 +3,7 @@ import {
     usersocket,
 } from "../../index.mjs";
 import {
-    getJson, getMemberFromKey,
+    getJson,
     getMemberIpInfo,
     getMemberLastOnline,
     resolveCategoryByChannelId,
@@ -12,7 +12,6 @@ import {
 import {saveChatMessage} from "../functions/io.mjs";
 import Logger from "../functions/logger.mjs";
 import {
-    checkMemberMute,
     checkRateLimit,
     generateId,
     getCastingMemberObject,
@@ -25,10 +24,11 @@ import {discoverHosts} from "../functions/discovery.mjs";
 import {powVerifiedUsers} from "./pow.mjs";
 import {checkMemberBan} from "../functions/ban-system/helpers.mjs";
 import {sanitizeHTML, stripHTML} from "../functions/sanitizing/functions.mjs";
-import {cleanMemberData, createMember, updateMember} from "../functions/member.mjs";
+import {getMemberAccountById, updateMember} from "../functions/member.mjs";
 import dSyncAuth from "@hackthedev/dsync-auth";
 import {saveConfig, serverconfig} from "../functions/init/config.mjs";
 import {auther, signer} from "../functions/init/general.mjs";
+import DCTS from "../../sdk/v1/backend/dcts_sdk.mjs";
 
 export function normalizeVar(v) {
     if (v === null || v === undefined) return "";
@@ -38,7 +38,7 @@ export function normalizeVar(v) {
 
         if (val === "true") return true;
         if (val === "false") return false;
-        if (val === "null" || val === "undefined" || val === "") return null;
+        if (val === "null" || val === "undefined" || val.trim() === "") return null;
 
         if (/^-?\d+(\.\d+)?$/.test(val)) {
             if (val.length < 10) {
@@ -169,14 +169,25 @@ export default (io) => (socket) => {
 
     // socket.on code here
     socket.on("userConnected", async function (member, response) {
-        if(!member?.id) return response({error: "No Account id provided"})
-        if(member?.id?.length !== 12) return response({error: "Account id length not 12"})
+        checkRateLimit(socket);
 
+        // get ip info
+        let ipInfo = await getMemberIpInfo(socket);
+        if (ipInfo?.error) Logger.debug(ipInfo.error);
+        if (ipInfo?.location?.country_code) member.country_code = ipInfo.location.country_code;
+
+        // for existing member
         if (member?.id) member.id = normalizeVar(stripHTML(member.id));
         if (member?.loginName) member.loginName = normalizeVar(stripHTML(member.loginName));
         if (member?.token) member.token = normalizeVar(stripHTML(member.token));
         if (member?.pow?.challenge) member.pow.challenge = String(stripHTML(member?.pow?.challenge));
         if (member?.pow?.solution) member.pow.solution = String(stripHTML(member?.pow?.solution));
+
+        // if pow has been passed. used for quicker
+        // initial connection to skip pow challenge
+        await handlePowOnConnection(member, socket)
+        let authResult = await handlePublicKeyAuthOnConnection(member);
+        if(authResult?.keepExecution === false) return;
 
         // check member ban and disconnect if needed.
         // will also auto remove the ban again
@@ -192,22 +203,6 @@ export default (io) => (socket) => {
             return socket.disconnect();
         }
 
-
-        await cleanMemberData(member);
-
-        checkRateLimit(socket);
-
-        // get ip info
-        let ipInfo = await getMemberIpInfo(socket);
-        if (ipInfo?.error) Logger.debug(ipInfo.error);
-        if (ipInfo?.location?.country_code) member.country_code = ipInfo.location.country_code;
-
-        // if pow has been passed. used for quicker
-        // initial connection to skip pow challenge
-        await handlePowOnConnection(member, socket)
-        let authResult = await handlePublicKeyAuthOnConnection(member);
-        if(authResult?.keepExecution === false) return;
-
         // check if knownServers was supplied for discovery
         if (member?.knownServers && member?.knownServers?.length > 1) {
             member.knownServers = stripHTML(member?.knownServers);
@@ -217,9 +212,6 @@ export default (io) => (socket) => {
         // handle invites
         let inviteResult = handleInviteCode(member, socket, response);
         if (!inviteResult) return;
-
-        // call checkMemberMute so it unmutes automatically
-        checkMemberMute(socket, member);
 
         // Check if member is in default role
         if (serverconfig.serverroles["0"].members.includes(member.id) === false) {
@@ -233,14 +225,14 @@ export default (io) => (socket) => {
 
         // if new member
         if (
-            !serverconfig.servermembers[member.id] ||
-            serverconfig.servermembers[member.id]?.onboarding === false
+            !serverconfig.servermembers[member?.id] ||
+            serverconfig.servermembers[member?.id]?.onboarding === false
         ) {
             // New Member joined the server
             Logger.debug("New member connected");
 
             // handle onboarding
-            if (member?.onboarding === false) {
+            if (member?.onboarding === false || member.onboarding == null) {
                 // cant proceed as the user needs to setup their account with a password
                 io.to(socket.id).emit("doAccountOnboarding");
                 return response({
@@ -252,9 +244,6 @@ export default (io) => (socket) => {
 
             // error if no password passed
             if(!member?.password) return response({error: "Missing password field in plaintext<br><a onclick='UserManager.resetAccount();'>Reset Session</a>"})
-
-            var userToken = generateId(48);
-            member.token = userToken;
 
             // if the user login name already exists we just append an id to the login name.
             // we then emit it to the user so they can save it.
@@ -274,54 +263,35 @@ export default (io) => (socket) => {
 
             // setup member
             const now = new Date().getTime();
-            const hashedPassword = await hashPassword(member.password);
 
-            await createMember(                    {
-                id: member.id,
-                token: member.token,
-                name: member?.name ? stripHTML(member.name || "Member") : "",
-                loginName: member.loginName,
-                icon: member?.icon ? stripHTML(member.icon) : "",
-                banner: member?.banner ? stripHTML(member.banner) : "",
-                aboutme: member?.aboutme ? sanitizeHTML(member.aboutme) : "",
-                status: member?.status ? stripHTML(member.status) : "",
-                country_code: member?.country_code ? stripHTML(member.country_code) : "",
-                publicKey: member?.publicKey ? stripHTML(member.publicKey) : "",
-                joined: now,
-                lastOnline: now,
-                password: hashedPassword,
-                isVerifiedKey: false,
-                onboarding: true
-            })
+            console.log(member)
+            let newMember = new DCTS.Members.Builder()
+                .setId(member.id)
+                .setToken(generateId(48))
+                .setName(member.name)
+                .setLoginName(member.loginName)
+                .setIcon(member.icon)
+                .setBanner(member.banner)
+                .setAbout(member.aboutme)
+                .setStatus(member.status)
+                .setCountryCode(member.country_code)
+                .setPublicKey(member.publicKey)
+                .setJoined(now)
+                .setLastOnline(now)
+                .setVerifiedKey(false)
+                .setOnboarding(true)
 
-            try {
-                // if a new member joins lets send a system welcome DM.
-                // can be edited in config and is enabled on default.
-                if (
-                    serverconfig.serverinfo.system.welcome.enabled &&
-                    serverconfig.serverinfo.system.welcome.message.length > 0
-                )
-                    sendSystemMessage(
-                        member.id,
-                        serverconfig.serverinfo.system.welcome.message,
-                    );
-                //
-                // you can broadcast messages via the console with the following syntax
-                // msg < userid | * > <Message>
-                //msg * <h3>Welcome to the server!</h3><p>We hope you'll like it here!<br>If you ever need help press the <b>Support</b> button on the top!</p>
-            } catch (e) {
-                Logger.error("Error while sending system message");
-                Logger.error(e);
-            }
+            await newMember.setPassword(member.password);
+            await newMember.save();
+
+            sendSystemWelcomeMessage(member);
 
             // create copy of server member without token etc
             var castingMember = await getCastingMemberObject(
-                serverconfig.servermembers[member.id],
+                (await DCTS.Members.load(member.id)).toJSON()
             );
 
             // Save system message to the default channel
-            castingMember.group = resolveGroupByChannelId(serverconfig.serverinfo.defaultChannel);
-            castingMember.category = resolveCategoryByChannelId(serverconfig.serverinfo.defaultChannel);
             castingMember.channel = serverconfig.serverinfo.defaultChannel;
             castingMember.room = `${serverconfig.serverinfo.defaultChannel}`;
 
@@ -373,6 +343,7 @@ export default (io) => (socket) => {
             // login was successful
             socket.join(member.id);
 
+            Logger.debug(`Member id is ${member.id}`);
             updateMember({
                 id: member.id,
                 lastOnline: new Date().getTime()
@@ -391,12 +362,35 @@ export default (io) => (socket) => {
             io.emit("updateMemberList");
         }
 
+        function sendSystemWelcomeMessage(member){
+            try {
+                // if a new member joins lets send a system welcome DM.
+                // can be edited in config and is enabled on default.
+                if (
+                    serverconfig.serverinfo.system.welcome.enabled &&
+                    serverconfig.serverinfo.system.welcome.message.length > 0
+                )
+                    sendSystemMessage(
+                        member.id,
+                        serverconfig.serverinfo.system.welcome.message,
+                    );
+                //
+                // you can broadcast messages via the console with the following syntax
+                // msg < userid | * > <Message>
+                //msg * <h3>Welcome to the server!</h3><p>We hope you'll like it here!<br>If you ever need help press the <b>Support</b> button on the top!</p>
+            } catch (e) {
+                Logger.error("Error while sending system message");
+                Logger.error(e);
+            }
+        }
+
         async function handlePublicKeyAuthOnConnection(member){
             if (member?.sessionId && member?.publicKey) {
                 let session = await dSyncAuth.verifySession(auther.authSessions, member.sessionId, member.publicKey);
 
                 if (session.valid) {
-                    let serverMemberObj = await getMemberFromKey(session.publicKey);
+                    Logger.debug("Key auth used. Is valid")
+                    let serverMemberObj = (await DCTS.Members.load(session.publicKey)).toJSON();
 
                     // if a member with that key already exists
                     if (serverMemberObj) {
@@ -408,8 +402,8 @@ export default (io) => (socket) => {
                     else if(!serverMemberObj){
                         Logger.debug("Creating member joined via key auth")
                         await createKeyAuthedMember()
-                        let newMember = await getMemberFromKey(member?.publicKey)
-                        await successfulAuthResponse(newMember);
+                        serverMemberObj = (await DCTS.Members.load(member?.publicKey)).toJSON();
+                        await successfulAuthResponse(serverMemberObj);
                         return { keepExecution: false };
                     }
                 }
@@ -417,7 +411,9 @@ export default (io) => (socket) => {
 
             if(member?.publicKey && !await validateMemberId(member?.id, socket, member?.token)){
                 // if didnt supply a solution, create a challenge
+                Logger.debug("Member is trying to auth using public key")
                 if(!member?.keySolution){
+                    Logger.debug("Member didnt have solution, requesting it now..")
                     const keyChallengeResult = await dSyncAuth.createChallenge(signer, member.publicKey);
 
                     // prepair the socket a bit for easier handling n shit
@@ -434,14 +430,23 @@ export default (io) => (socket) => {
                 }
                 // if there is a solution supplied and the socket still has the identifier set
                 else if(member?.keySolution && socket?.keyAuthIdentifier && socket.keyAuthSolution){
+                    Logger.debug("Member provided key auth solution")
                     // if the user successfully authenticated let them know it all worked
                     if(socket.keyAuthSolution === member.keySolution){
-                        let serverMemberObj = await getMemberFromKey(member?.publicKey)
+                        Logger.debug("Solution is valid")
+                        let serverMemberObj = (await DCTS.Members.load(member?.publicKey)).toJSON()
                         if(!serverMemberObj){
-                            await createKeyAuthedMember()
-                            let newMember = await getMemberFromKey(member?.publicKey)
-                            await successfulAuthResponse(newMember);
+                            Logger.debug("Account didnt exist yet, creating it now")
+                            await createKeyAuthedMember(member)
+                            serverMemberObj = (await DCTS.Members.load(member?.publicKey)).toJSON()
+                            await successfulAuthResponse(serverMemberObj);
                             return { keepExecution: false };
+                        }
+
+                        // if still false make it true
+                        if(serverMemberObj?.onboarding !== true){
+                            serverMemberObj.setOnboarding(true);
+                            await serverMemberObj.save();
                         }
 
                         await successfulAuthResponse(serverMemberObj)
@@ -457,7 +462,7 @@ export default (io) => (socket) => {
                 keepExecution: true,
             }
 
-            async function createKeyAuthedMember(){
+            async function createKeyAuthedMember(member){
                 // setup member
                 let memberId = generateId(12) ?? null;
                 let memberToken = generateId(48) ?? null;
@@ -465,7 +470,6 @@ export default (io) => (socket) => {
                 let generatedLoginName = crypto.randomUUID();
 
                 const now = new Date().getTime();
-                const hashedPassword = await hashPassword(generatedPassword);
 
                 // Check if member is in default role
                 if (serverconfig.serverroles["0"].members.includes(memberId) === false) {
@@ -473,23 +477,24 @@ export default (io) => (socket) => {
                     saveConfig(serverconfig);
                 }
 
-                await createMember(                    {
-                    id: memberId,
-                    token: memberToken,
-                    name: "Member",
-                    loginName: generatedLoginName,
-                    icon: null,
-                    banner: null,
-                    aboutme: null,
-                    status: null,
-                    country_code: null,
-                    publicKey: member?.publicKey ? stripHTML(member.publicKey) : "",
-                    joined: now,
-                    lastOnline: now,
-                    password: hashedPassword,
-                    isVerifiedKey: true,
-                    onboarding: true
-                })
+                let newMember = new DCTS.Members.Builder()
+                    .setId(memberId)
+                    .setToken(memberToken)
+                    .setName("Member")
+                    .setLoginName(generatedLoginName)
+                    .setIcon(member.icon)
+                    .setBanner(member.banner)
+                    .setAbout(member.aboutme)
+                    .setStatus(member.status)
+                    .setCountryCode(member.country_code)
+                    .setPublicKey(member.publicKey)
+                    .setJoined(now)
+                    .setLastOnline(now)
+                    .setVerifiedKey(true)
+                    .setOnboarding(true)
+
+                await newMember.setPassword(generatedPassword);
+                await newMember.save();
 
                 return { keepExecution: false };
             }

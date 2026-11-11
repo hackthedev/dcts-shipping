@@ -103,6 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 condition: async (data) => {
                     let memberId = data.element.getAttribute("data-member-id");
                     if(!memberId) return false;
+
                     return await UserManager.checkPermission("muteUsers") === true &&
                         (memberId !== UserManager.getID()) &&
                         data.element.querySelectorAll(".mutedMember").length !== 0
@@ -203,7 +204,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     deleteMessageFromChat(messageId, messageType);
                 },
                 condition: async (data) => {
-                    console.log(data)
                     let element = data.element;
                     let memberId = getMemberIdFromElement(element);
                     return ((memberId === UserManager.getID()) || await UserManager.checkPermission("manageMessages") === true)
@@ -227,6 +227,38 @@ document.addEventListener("DOMContentLoaded", function () {
                     return (memberId !== UserManager.getID())
                 },
                 type: "warning"
+            }
+        ])
+
+    ContextMenu.registerContextMenu(
+        "urlembed",
+        [
+            ".markdown-urlEmbed-container > *",
+        ],
+        [
+            {
+                icon: "&#9998;",
+                text: "Copy URL",
+                callback: async (data) => {
+                    let element = data.element;
+                    if(!element) return false;
+
+                    let containerElement = element.closest(".markdown-urlEmbed-container");
+                    let linkElement = containerElement.querySelector("a");
+
+                    let url = linkElement.getAttribute("data-original-url");
+                    await navigator.clipboard.writeText(url);
+                },
+                condition: async (data) => {
+                    let element = data.element;
+                    if(!element) return false;
+
+                    let containerElement = element.closest(".markdown-urlEmbed-container");
+                    let linkElement = containerElement.querySelector("a");
+
+                    let url = linkElement.getAttribute("data-original-url");
+                    return !!url;
+                }
             }
         ])
 
@@ -537,8 +569,8 @@ function registerMessageCreateEvent() {
     socket.on('messageCreate', async function (message) {
         await addNewMessageToChatLog(message)
 
-        requestAnimationFrame(() => {
-            EventDispatcher.send("messageCreate", {
+        requestAnimationFrame(async () => {
+            await EventDispatcher.send("messageCreate", {
                 message
             });
         })
@@ -902,8 +934,9 @@ async function showMessageInChat({
                                      waitWithDisplay = false,
                                      messageType = null,
                                  } = {}) {
-    let markdownResult = await markdown(message.message, message.messageId);
-    if (markdownResult.isMarkdown) message.message = markdownResult.message;
+    // lets do it here cauz it slows down chat loading times
+    //let markdownResult = await markdown(message.message, message.messageId);
+    //if (markdownResult.isMarkdown) message.message = markdownResult.message;
 
     // convert mentions and check if own userid is in it
     let convertedMentions = await convertMention(message);
@@ -1151,12 +1184,21 @@ async function createMsgHTML({
         message.author = await ChatManager.resolveMember(message?.author?.id) || message.author;
     }
 
+    let isMuted = message?.author?.isMuted;
     let isBanned = message?.author?.isBanned;
     let isAdmin = message?.isAdmin
+
+    // todo: requires the report feature to be overhauled
+    let isReported = message?.isReported === true
 
     let messageReactionsRow = await getMessageReactionsHTML(message);
     let isThirdPartyMessageType = messageType != null && messageType !== "dm" && messageType !== "text";
     let sanitized = ChatTools.Sanitize.forRender(message.message, isThirdPartyMessageType) ?? null;
+
+    // bug fix
+    if (!/<p\b[^>]*>/i.test(sanitized)) {
+        sanitized = `<p>${sanitized}</p>`;
+    }
 
     if(sanitized.trim().length === 0) sanitized = "<span style='color: orange;font-size: 10px;'>[ UNSUPPORTED CONTENT ]</span>";
 
@@ -1229,37 +1271,49 @@ async function createMsgHTML({
                 </div>` : ""}
                 
                <div class="content-container" data-message-id="${message?.messageId}" data-member-id="${message?.author?.id}"> <!-- for the flex layout -->
-                 <div class="meta">
-                 
-                    ${isSystem !== true ?
-                        `<label class="username" 
-                        data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}" 
-                        style="${colorStyle}">
-                            ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(truncateText(message?.author?.name, 30), true))
-                        }</label>` : ""}
-                    
-                    <div class="badge-${message?.type}"></div>
-                    
-                    
-                    <label class="timestamp" data-timestamp="${message.timestamp}">
-                        ${new Date(message.timestamp).toLocaleString("narrow")}
+                     <div class="meta">                     
+                        ${isSystem !== true ?
+                            `<label class="username" 
+                            data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}" 
+                            style="${colorStyle}">
+                                ${ChatTools.Sanitize.unescapeHtmlEntities(ChatTools.Sanitize.forRender(truncateText(message?.author?.name, 30), true))
+                            }</label>` : ""}
                         
-                        <!-- fuck i love programming -->
-                        <label style="filter: grayscale(75%);" title="Signed Message">
-                            ${isSigned ? `&bull; &#128272;` : ""}
-                        </label>
+                        <div class="badge-${message?.type}"></div>                    
                         
-                        <!-- banned indicator -->
-                        <label style="filter: grayscale(75%);" title="Banned member">
-                            ${isBanned ? `&bull; &#9940;` : ""}
-                        </label>
-                    </label>
-                 </div>
-                
-                 <div class="contentRows" data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}">
-                    ${messageRow}
-                 </div>
-                
+                        <div class="timestamp" data-timestamp="${message.timestamp}">
+                            ${new Date(message.timestamp).toLocaleString("narrow")}
+                            
+                            <!-- fuck i love programming -->
+                            ${isSigned === true ? "<span>&bull;</span>" : ""}
+                            <span class="meta-icon ${isSigned ? "visible": ""}" style="filter: grayscale(75%);" title="Signed Message">
+                                ${isSigned ? `&#128272;` : ""}
+                            </span> 
+                            
+                            <!-- fuck i love programming -->
+                            ${isReported === true && isBanned === false ? "<span>&bull;</span>" : ""}
+                            <span class="meta-icon ${isReported ? "visible": ""}" style="filter: grayscale(0%);color: indianred;" title="Reported Message">
+                                ${isReported && isBanned === false ? `${Icon.display("flag")}` : ""}
+                            </span>
+                            
+                            <!-- banned indicator -->
+                            ${isBanned === true ? "<span>&bull;</span>" : ""}
+                            <span class="meta-icon ${isBanned ? "visible": ""}" style="filter: grayscale(100%);color: indianred;" title="Banned member">
+                                ${isBanned ? `${Icon.display("ban")}` : ""}
+                            </span>
+                            
+                            <!-- muted (L) indicator -->
+                            ${isMuted === true && isBanned === false ? "<span>&bull;</span>" : ""}
+                            <span class="meta-icon ${isMuted ? "visible": ""}" style="filter: grayscale(20%);color: indianred;" title="Muted member">
+                                ${isMuted && isBanned === false ? `${Icon.display("muted")}` : ""}
+                            </span>
+                        </div>
+                     </div>
+                    
+                     <div class="contentRows" data-member-id="${ChatTools.Sanitize.forRender(message?.author?.id, false)}">
+                        ${messageRow}
+                     </div>
+                    
                </div>
             </div>
         </div>`
@@ -1501,10 +1555,7 @@ async function displayMessagesInElement({
 }
 
 async function getChatlog(container, index = -1, appendTop = false, preventDispatch = false) {
-
     if (UserManager.getChannel() === null) return
-    if (UserManager.getCategory() === null) return
-    if (UserManager.getGroup() === null) return
     if (!container) throw new Error("Container wasnt supplied for chatlog");
 
     let channelId = UserManager.getChannel();
@@ -1512,7 +1563,7 @@ async function getChatlog(container, index = -1, appendTop = false, preventDispa
     let channelbar = document.querySelector("#channelname-bar");
 
     if(preventDispatch === false){
-        EventDispatcher.send("getChatLog", {
+        await EventDispatcher.send("getChatLog", {
             container, index, appendTop, channelId, channelType: await getCurrentChannelType(channelId), firstElement: refElement, preventDispatch
         });
     }
@@ -1529,15 +1580,13 @@ async function getChatlog(container, index = -1, appendTop = false, preventDispa
     socket.emit("getChatlog", {
         id: UserManager.getID(),
         token: UserManager.getToken(),
-        groupId: UserManager.getGroup(),
-        categoryId: UserManager.getCategory(),
         channelId: UserManager.getChannel(),
         index
     }, async (response) => {
         Clock.stop("load_messages_request")
 
         // reset chat
-        if (response?.error === "denied") container.innerHTML = ""; // fuck em
+        if (response?.error === "denied") container.innerHTML = ""; // nuhuh
         if (response.data == null) {
             console.log("Data was null - history");
             Clock.stop("load_messages_total")
@@ -1546,7 +1595,6 @@ async function getChatlog(container, index = -1, appendTop = false, preventDispa
         }
         if (response.type === "voice") {
             Clock.stop("load_messages_total")
-
             ElementLoader.stop(channelbar);
             return;
         }
@@ -1611,7 +1659,7 @@ async function getChatlog(container, index = -1, appendTop = false, preventDispa
 
         Inbox.updateInboxMessageEntries();
 
-        EventDispatcher.send("getChatLog_finish", {
+        await EventDispatcher.send("getChatLog_finish", {
             container, index, appendTop, channelId, channelType: await getCurrentChannelType(channelId), firstElement: refElement, preventDispatch
         });
     });

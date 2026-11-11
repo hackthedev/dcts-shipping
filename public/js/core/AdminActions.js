@@ -13,6 +13,11 @@ class AdminActions {
                         </div>
                         <input class="prompt-input" type="file" name="profileImage" id="profileImage" accept="image/*" style="display: none;" onchange="customPrompts.previewImage(event)">
                     </div>
+                    
+                    <div class="prompt-form-group">
+                        <label class="prompt-label" for="profileImage_text">Image url</label>
+                        <input class="prompt-input" type="text" name="profileImage_text" id="profileImage_text">
+                    </div>
                 </div>
 
                 <li class="prompt-note">Click to choose a image and upload it automatically</li>
@@ -23,7 +28,12 @@ class AdminActions {
                 let homeBannerUrl = "";
 
                 // check banner and upload new one
-                if (values.profileImage) {
+                if (values.profileImage || values.profileImage_text) {
+                    // text input field
+                    const isUrlImage = values.profileImage_text != null;
+                    if(isUrlImage) return socket.emit("updateGroupIcon", { id: UserManager.getID(), value: values.profileImage_text, token: UserManager.getToken(), group: id });
+
+                    // image picker
                     const bannerUrl = await ChatManager.uploadFile(values.profileImage);
 
                     if (!bannerUrl.error) {

@@ -31,6 +31,8 @@ EventDispatcher.on("messageSend", async(payload) => {
 }
 ```
 
+---
+
 **messageSend**
 *Description*: When a user is sending a message, but before it is sent to the server. Channel types other than `text` are not sent to the server.
 *Data*:
@@ -41,9 +43,13 @@ EventDispatcher.on("messageSend", async(payload) => {
 }
 ```
 
+---
+
 **getChannelTree_finish**
 *Description*: After the entire channel tree was rendered.
 *Data*: none
+
+---
 
 **messageCreate**
 *Description*: New incoming message received.
@@ -53,6 +59,8 @@ EventDispatcher.on("messageSend", async(payload) => {
 	message
 }
 ```
+
+---
 
 **getChatLog**
 *Description*: When the chat log requests starts
@@ -69,6 +77,8 @@ EventDispatcher.on("messageSend", async(payload) => {
 }
 ```
 
+---
+
 **getChatLog_finish**
 *Description*: After the chat log was fetched and inserted
 *Data*:
@@ -83,3 +93,30 @@ EventDispatcher.on("messageSend", async(payload) => {
 	preventDispatch
 }
 ```
+
+---
+
+**getMemberList**
+Description: When the member list is being loaded but before its being displayed. Additionally, 
+Data:
+```json
+{
+	members,  // object of all members that will be potentially listed
+	channelId
+}
+```
+
+> [!TIP]
+> You can modify  `members`  and these changes will be reflected in the member list!
+> 
+> Example:
+> ```javascript
+> // only show dcts users in the list and ignore 3rd party integrations
+>EventDispatcher.on("getMemberList", async (data) => {
+   > 	data.members = Object.fromEntries(
+   > 	    Object.entries(data.members).filter(([id, member]) => {
+   > 	        return member?.type === null
+   > 	    })
+   > 	);
+>});
+>```

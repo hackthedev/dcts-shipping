@@ -10,7 +10,6 @@ export default (io) => (socket) => {
         member.password = xssFilters.inHTMLData(member.password)
         member.loginName = xssFilters.inHTMLData(member.loginName)
 
-
         // Handling ip ban
         var ip = getSocketIp(socket);
         if (serverconfig.ipblacklist.hasOwnProperty(ip)) {
@@ -41,6 +40,7 @@ export default (io) => (socket) => {
         }
 
         let loginCheck = await findAndVerifyUser(member.loginName, member.password);
+
         if (loginCheck.result === true) {
             response({ error: null, member: loginCheck.member })
         }

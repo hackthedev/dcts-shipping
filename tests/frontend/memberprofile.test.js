@@ -10,8 +10,9 @@ function getScriptAttackExampleCode(){
 }
 
 describe("[Frontend] Member Profile", () => {
-    loadScript("../../public/js/libs/chat-tools/ChatTools.js", "ChatTools");
+
     loadScript("../../public/js/libs/chat-tools/purify.js", "DOMPurify");
+    loadScript("../../public/js/libs/chat-tools/ChatTools.js", "ChatTools");
     loadScript("../../public/js/escape.js", "unescapeHtmlEntities");
     loadScript("../../public/js/core/Client.js", "isLauncher");
     loadScript("../../public/js/core/UserManager.js", "UserManager");

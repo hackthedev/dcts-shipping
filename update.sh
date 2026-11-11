@@ -43,7 +43,14 @@ if command -v bun >/dev/null 2>&1; then
     fi
 fi
 
-rm -rf "$APP_DIR/public/js/libs"
+# delete this cauz im accidentally shipping these libs
+# even tho they should be downloaded on first launch,
+# but if dist.dcts.community goes down, its not missing (insert thinking emoji).
+# tho if dist.dcts... goes down it means no backend libs! maybe i can do it there
+# too somehow or someone mirrors it..
+if [ -d "$APP_DIR/public/js/libs" ]; then
+    rm -rf "$APP_DIR/public/js/libs"
+fi
 
 echo "DCTS updated to $BRANCH."
 echo "Restart the DCTS application process to load the changes."

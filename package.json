@@ -32,7 +32,7 @@
     "jsdom": "^31.0.0",
     "jsonwebtoken": "^9.0.3",
     "livekit-server-sdk": "^2.19.1",
-    "multer": "^2.4.0",
+    "multer": "^2.5.0",
     "mysql2": "^3.24.5",
     "node-fetch": "^3.3.2",
     "sanitize-html": "^2.18.0",

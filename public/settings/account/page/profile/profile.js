@@ -194,27 +194,27 @@ function updatePreview(id) {
 
         // Username
         if (id == "settings_profile_username") {
-            preview_username.innerHTML = `<h2>${newSetting}</h2>`;
+            preview_username.innerHTML = `<h2>${ChatTools.Sanitize.stripHTML(newSetting)}</h2>`;
         }
 
         // Status
         if (id == "settings_profile_status") {
-            preview_status.innerHTML = `${newSetting}`;
+            preview_status.innerHTML = `${ChatTools.Sanitize.stripHTML(newSetting)}`;
         }
 
         // About me
         if (id == "settings_profile_aboutme") {
-            preview_aboutme.innerHTML = `${sanitizeHtmlForRender(newSetting)}`;
+            preview_aboutme.innerHTML = `${ChatTools.Sanitize.forRender(newSetting, false)}`;
         }
 
         // Icon
         if (id == "settings_profile_icon") {
-            preview_icon.style.backgroundImage = newSetting.length <= 0 ? '/img/default_pfp.png' : `url("${newSetting}")`;
+            preview_icon.style.backgroundImage = newSetting.length <= 0 ? '/img/default_pfp.png' : `url("${ChatTools.Sanitize.stripHTML(newSetting)}")`;
         }
 
         // Banner
         if (id == "settings_profile_banner") {
-            preview_banner.style.src = `${newSetting}`;
+            preview_banner.style.src = `${ChatTools.Sanitize.stripHTML(newSetting)}`;
         }
 
         // Username

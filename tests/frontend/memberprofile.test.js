@@ -22,17 +22,6 @@ describe("[Frontend] Member Profile", () => {
         return string.substring(0, length);
     }
 
-    test("debug", () => {
-        const t = s => console.log(JSON.stringify(s), "->", JSON.stringify(
-            DOMPurify.sanitize(s, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
-        ));
-        t("<script>b</script>");
-        t("a<script>b</script>");
-        t("<p>a</p><script>b</script>");
-        t("<p>a</p>x<script>b</script>");
-        t("<i>a</i><script>b</script>");
-    });
-
     test("General", async () => {
         // dummy container
         const container = document.createElement("div");

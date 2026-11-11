@@ -1,8 +1,13 @@
-import { GlobalWindow } from "happy-dom";
+import { JSDOM } from "jsdom";
 import fs from "fs";
 import path from "path";
 
-const window = new GlobalWindow();
+const dom = new JSDOM("", {
+    url: "http://localhost",
+    runScripts: "outside-only"
+});
+
+const window = dom.window;
 
 globalThis.window = window;
 globalThis.document = window.document;

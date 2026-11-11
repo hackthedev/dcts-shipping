@@ -10,8 +10,9 @@ function getScriptAttackExampleCode(){
 }
 
 describe("[Frontend] Member Profile", () => {
-    loadScript("../../public/js/libs/chat-tools/ChatTools.js", "ChatTools");
+
     loadScript("../../public/js/libs/chat-tools/purify.js", "DOMPurify");
+    loadScript("../../public/js/libs/chat-tools/ChatTools.js", "ChatTools");
     loadScript("../../public/js/escape.js", "unescapeHtmlEntities");
     loadScript("../../public/js/core/Client.js", "isLauncher");
     loadScript("../../public/js/core/UserManager.js", "UserManager");
@@ -20,6 +21,17 @@ describe("[Frontend] Member Profile", () => {
     globalThis.limitString = (string, length) => {
         return string.substring(0, length);
     }
+
+    test("debug", () => {
+        const t = s => console.log(JSON.stringify(s), "->", JSON.stringify(
+            DOMPurify.sanitize(s, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
+        ));
+        t("<script>b</script>");
+        t("a<script>b</script>");
+        t("<p>a</p><script>b</script>");
+        t("<p>a</p>x<script>b</script>");
+        t("<i>a</i><script>b</script>");
+    });
 
     test("General", async () => {
         // dummy container

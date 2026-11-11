@@ -43,5 +43,7 @@ if command -v bun >/dev/null 2>&1; then
     fi
 fi
 
+rm -rf "$APP_DIR/public/js/libs"
+
 echo "DCTS updated to $BRANCH."
 echo "Restart the DCTS application process to load the changes."
